@@ -90,8 +90,8 @@ const {chromium,webkit}=require('playwright');
    const structural=row.fullFrames===37&&!['0084','0085','0086'].includes(id);
    assert.equal(row.attack,structural?'25,31,32,32,25':'25,18,18,25',
     id+' reviewed original source strike sequence with INFERRED WEB timing');
-   assert.equal(row.hurt,'25',id+' unrecovered native hit direction must stay front, not jump to rear');
-   assert.equal(row.victory,'25,30,25');
+   assert.equal(row.hurt,'22',id+' native hurt slot unknown: hold ORIGINAL front idle key 22, not synthetic frame 25');
+   assert.equal(row.victory,'22',id+' native victory slot unknown: hold same body front idle 22');
    assert.ok(row.evidence.includes('WEB-movement-and-FPS-inferred'));
    assert.equal(row.rig,'original-obs-sprite');
    assert.ok(row.image.includes('/OBS/')&&
