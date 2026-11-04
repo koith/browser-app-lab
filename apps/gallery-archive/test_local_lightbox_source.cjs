@@ -26,6 +26,7 @@ async function exercise(model,withLocal) {
    exactSavedViewerCopy:()=>withLocal?local:null,
    $:id=>elements[id],
    registerImageHealth(){},
+   imageFailureText:()=> 'Saved photo unavailable',
    requestAnimationFrame:cb=>cb(),
    MimmiPrivate:{asset:async (p,variant)=>{
      requests.push(variant);
