@@ -60,6 +60,16 @@ class OpticalEvidence(unittest.TestCase):
             new_watermark_status='unknown')
         self.assertFalse(unknown,'Unknown watermark state must not masquerade as clean')
 
+    def test_byte_bound_evidence_rejects_stale_hash(self):
+        evidence=inspect_pair(self.sharp,self.blurred,'0'*64)
+        self.assertFalse(evidence['same_photo_verified'])
+        self.assertEqual(evidence['reason'],'previous_bytes_sha256_mismatch')
+        claimed=inspect_pair(self.sharp,self.sharp,self.oldsha)
+        self.assertEqual(claimed['candidate_sha256'],
+                         hashlib.sha256(self.sharp).hexdigest())
+        winner,_=preferred_pair(self.sharp,self.blurred,'0'*64)
+        self.assertFalse(winner)
+
     def test_unrelated_photo_rejected(self):
         replacement=encoded(Image.new('RGB',(900,1350),'#eecc00'),quality=95)
         result=inspect_pair(self.sharp,replacement,self.oldsha)
