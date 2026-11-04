@@ -1746,6 +1746,17 @@
         "M09",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-CHAT-GLOBAL-SEQUENCE-INTEGRITY",
+      "date": "2026-11-04",
+      "origin": "4LEAF 전체 미완료 일감 빠른 순서 실제 개발",
+      "text": "채팅의 전역 시퀀스와 메시지 ID 중복을 서로 다른 방 사이에서도 거부하고, 암호화/로컬 아카이브의 불확실한 복원으로 메시지를 누락하지 않게 한다.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8771,6 +8782,30 @@
         "P0-RELEASE"
       ],
       "details": "Further root cause: backup can succeed while subsequent localStorage.setItem('rog_match') fails, creating an unsaved live new game. Build nextMatch first, synchronously commit serialized bytes to original key, then assign match/change scene. On quota failure restore DMP PATH, preserve previous in-memory and persisted match and show 경기 저장 실패; regression covers existing unfinished game, explicit replacement consent, denied write, recovery and reload. Await CI; no completion status claimed."
+    },
+    {
+      "seq": 406,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-CHAT-GLOBAL-SEQUENCE-INTEGRITY",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Cross-room global archive sequence/message ID integrity regression registered."
+    },
+    {
+      "seq": 407,
+      "date": "2026-11-04",
+      "type": "CHAT_ARCHIVE_GLOBAL_CURSOR_UNIQUENESS_PR_PENDING",
+      "requestId": "REQ-20261104-CHAT-GLOBAL-SEQUENCE-INTEGRITY",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Reject duplicate global seq and server message UUID across rooms; accept legitimate interleaved rooms; server module and Node test changed, real CI and deployment pending."
     }
   ],
   "restorationPriority": {
