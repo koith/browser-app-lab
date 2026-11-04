@@ -6,7 +6,7 @@ import {createRequire} from "node:module";
 import {JSDOM} from "jsdom";
 const DIR=path.dirname(new URL(import.meta.url).pathname);
 const script=fs.readFileSync(path.join(DIR,"public_video_trends.js"),"utf8");
-const {allVideos,derive,months}=createRequire(import.meta.url)("./public_video_trends.js");
+const {allVideos,derive,months,summarizeSources}=createRequire(import.meta.url)("./public_video_trends.js");
 const NOW=Date.parse("2026-11-04T09:00:00Z");
 const h=3600000;
 const mk=(id,ago,platform="bluesky",extra={})=>({
@@ -50,6 +50,14 @@ assert.equal(derive(snap,{mode:"day",nowMs:NOW})[1].score,0,
 const sameId=mk("a",1,"mastodon");
 assert.equal(allVideos({verified:[good1,sameId]}).length,2,
   "different platforms must not collide on post ID");
+const mixedSources={verified:[good1,good2,sameId,old]};
+assert.deepEqual(summarizeSources(derive(mixedSources,{mode:"day",nowMs:NOW})),[
+  {platform:"bluesky",count:2,measured:1},
+  {platform:"mastodon",count:1,measured:1}
+],"per-source number of posts and observed engagement coverage, not download counts");
+assert.deepEqual(derive(mixedSources,{mode:"day",platform:"mastodon",nowMs:NOW}).map(x=>x.id),["a"]);
+assert.deepEqual(derive(mixedSources,{mode:"day",platform:"reddit",nowMs:NOW}),[],
+  "filter absent sources without inventing results");
 const differentProfile=mk("a",1,"bluesky",{profileUrl:"https://bsky.app/profile/other.bsky.social"});
 assert.equal(allVideos({verified:[good1,differentProfile]}).length,2,
   "same provider ID from another account is not a duplicate");
@@ -60,7 +68,7 @@ const html='<!doctype html><html lang="ko"><body><details id="videoTrends"><summ
  '<div><button data-video-mode="hot">3시간</button><button data-video-mode="day">24시간</button>'+
  '<button data-video-mode="week">7일</button><button data-video-mode="month">30일</button>'+
  '<button data-video-mode="latest">최신</button><button data-video-mode="archive">월별</button>'+
- '<select id="videoTrendMonth"></select></div><p id="videoTrendCount"></p>'+
+ '<select id="videoTrendMonth"></select><select id="videoTrendSource"></select></div><p id="videoTrendCount"></p><p id="videoTrendCoverage"></p>'+
  '<div id="videoTrendRows"></div><button id="videoTrendMore" hidden>더 보기</button></details></body></html>';
 const dom=new JSDOM(html,{url:"https://koith.github.io/browser-app-lab/apps/demand-research/",
   runScripts:"outside-only"});
@@ -72,10 +80,26 @@ const doc=dom.window.document,$=id=>doc.getElementById(id);
 assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,12);
 assert.match($("videoTrendCount").textContent,/일부 미완료/);
 assert.equal($("videoTrendMore").hidden,false);
+assert.match($("videoTrendCoverage").textContent,/Bluesky/);
+assert.equal($("videoTrendSource").querySelectorAll("option").length,2,
+  "source dropdown includes all only and observed Bluesky; not absent sources");
+assert.match($("videoTrendCoverage").textContent,/반응 제공/);
 assert.equal($("videoTrendRows").firstChild.target,"_blank");
 assert.equal($("videoTrendRows").firstChild.rel,"noopener noreferrer");
 $("videoTrendMore").click();
 assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,16);
+// The DOM source selector must filter both cards and count, not just a label.
+dom.window.INTERSECTION_publicVideoSnapshot=()=>({verified:[...rows,...many,sameId],partial:true});
+dom.window.dispatchEvent(new dom.window.Event("intersection:feed-updated"));
+await new Promise(resolve=>setTimeout(resolve,0));
+assert.equal($("videoTrendSource").querySelectorAll("option").length,3);
+$("videoTrendSource").value="mastodon";
+$("videoTrendSource").dispatchEvent(new dom.window.Event("change"));
+assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,1);
+assert.match($("videoTrendCount").textContent,/1건/);
+assert.match($("videoTrendCoverage").textContent,/Mastodon 1건/);
+$("videoTrendSource").value="all";
+$("videoTrendSource").dispatchEvent(new dom.window.Event("change"));
 doc.querySelector('[data-video-mode="hot"]').click();
 assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,12,
   "switch mode resets visible count");
@@ -97,6 +121,8 @@ assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,1
 dom.window.close();
 const main=fs.readFileSync(path.join(DIR,"index.html"),"utf8");
 assert.ok(main.includes('id="videoTrends"'));
+assert.ok(main.includes('id="videoTrendCoverage"'));
+assert.ok(main.includes('id="videoTrendSource"'));
 assert.ok(main.includes("window.INTERSECTION_publicVideoSnapshot"));
 assert.ok(main.includes('<script src="public_video_trends.js" defer></script>'));
 assert.ok(main.indexOf('id="videoTrends"')<main.indexOf('id="feed"'));
