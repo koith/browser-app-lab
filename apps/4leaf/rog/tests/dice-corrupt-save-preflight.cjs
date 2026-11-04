@@ -83,3 +83,66 @@ test('real game start fails closed if and only if prior-game archival cannot be 
   });
  }
 });
+
+
+
+test('refused new game write retains the active unfinished game and original saved bytes',async t=>{
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ t.after(()=>browser.close());
+ const context=await browser.newContext({serviceWorkers:'block',viewport:{width:1280,height:900}});
+ t.after(()=>context.close());
+ const page=await context.newPage();
+ await page.addInitScript(()=>{
+  window.LEAF_CENTRAL_API_URL='';
+  const original=Storage.prototype.setItem;
+  Storage.prototype.setItem=function(key,value){
+   if(this===localStorage&&key==='rog_match'&&
+    sessionStorage.getItem('__leaf_primary_write_blocked')==='1')
+    throw new DOMException('Simulated failed primary match write','QuotaExceededError');
+   return original.call(this,key,value);
+  };
+ });
+ await page.goto(BASE);
+ await page.waitForFunction(()=>Boolean(window.__ROG_TEST__));
+ await page.locator('[data-route="lobby"]').first().click();
+ await page.locator('#lobby-create').click();
+ await page.locator('#start-game').click();
+ await page.waitForSelector('#game:not(.hidden)');
+ const first=await page.evaluate(()=>({
+  snapshot:JSON.stringify(window.__ROG_TEST__.getMatch()),
+  raw:localStorage.getItem('rog_match')
+ }));
+ assert.equal(first.snapshot,first.raw);
+ await page.locator('#exit-game').click();
+ await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
+ await page.evaluate(()=>sessionStorage.setItem('__leaf_primary_write_blocked','1'));
+ await page.locator('#lobby-create').click();
+ await page.locator('#map-select').selectOption('악마의 달팽이');
+ await page.locator('#start-game').click();
+ await page.locator('#modal-buttons button').filter({hasText:'새 경기 시작'}).click();
+ await page.locator('#modal:not(.hidden)').waitFor({timeout:8000});
+ assert.equal((await page.locator('#modal-title').textContent()).trim(),'경기 저장 실패');
+ assert.equal(await page.locator('#game').isVisible(),false,
+  'a failed new-match write cannot open the unsaved board');
+ const failed=await page.evaluate(()=>({
+  snapshot:JSON.stringify(window.__ROG_TEST__.getMatch()),
+  raw:localStorage.getItem('rog_match')
+ }));
+ assert.deepEqual(failed,first,'both memory and disk retain the old game after failed replacement');
+ await page.locator('#modal-buttons button').filter({hasText:'확인'}).click();
+ await page.evaluate(()=>sessionStorage.removeItem('__leaf_primary_write_blocked'));
+ await page.locator('#start-game').click();
+ await page.locator('#modal-buttons button').filter({hasText:'새 경기 시작'}).click();
+ await page.waitForSelector('#game:not(.hidden)',{timeout:15000});
+ const recovered=await page.evaluate(()=>({
+  snapshot:JSON.stringify(window.__ROG_TEST__.getMatch()),
+  raw:localStorage.getItem('rog_match')
+ }));
+ assert.equal(recovered.snapshot,recovered.raw,'retry commits complete new game bytes');
+ assert.equal(JSON.parse(recovered.raw).map,'악마의 달팽이');
+ assert.notEqual(recovered.raw,first.raw);
+ await page.reload();
+ await page.waitForFunction(()=>Boolean(window.__ROG_TEST__));
+ assert.equal(await page.evaluate(()=>window.__ROG_TEST__.getMatch()?.map),'악마의 달팽이');
+ console.log('PRIMARY GAME SAVE FAIL-CLOSED PASS');
+});
