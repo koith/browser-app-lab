@@ -576,8 +576,12 @@ def run_registered(*, root=None, api=None, max_accounts=2):
     names=sorted(n for n in root.names("metadata/target-accounts")
                  if REGISTRY_RE.fullmatch(n))
     if not names:
-        print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",json.dumps({"registered":0,"processed":0}),flush=True)
-        return
+        # A scheduled workflow that archives no accounts must not be marked as
+        # successful: operators otherwise mistake a green check for a backup.
+        print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",
+              json.dumps({"registered":0,"processed":0,
+                          "state":"NO_REGISTERED_TARGETS"},sort_keys=True),flush=True)
+        raise RuntimeError("no registered public accounts; no account backup performed")
     # Rotate the bounded slot each UTC cycle to avoid starving older entries.
     slot=int(time.time()//21600)%len(names)
     selected=[names[(slot+i)%len(names)] for i in range(min(max_accounts,len(names)))]
