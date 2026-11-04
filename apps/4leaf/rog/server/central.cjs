@@ -299,16 +299,20 @@ function makeServer(options={}){
     if(!s.roomId||!room(s.roomId))fail(403,'Join a room first');
     const b=await parse(req),message=safe(b.text,250);
     if(!message)fail(400,'Empty message');
-    const clientMessageId=b.clientMessageId;
-    if(clientMessageId!==undefined&&
-      (typeof clientMessageId!=='string'||
-       !/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(clientMessageId)))
+    const rawClientMessageId=b.clientMessageId;
+    if(rawClientMessageId!==undefined&&
+      (typeof rawClientMessageId!=='string'||
+       !/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(rawClientMessageId)))
      fail(400,'Invalid client message identifier');
+    // Mixed-case UUID or hex spellings must never create a second message.
+    // Keep matching legacy archive IDs case-insensitively as well.
+    const clientMessageId=rawClientMessageId?.toLowerCase();
     // A timeout after COMMIT may hide the 201 from the sender. An identical
     // high-entropy id in the same room must return its original authoritative
     // message, never append a second copy or change the global sequence.
     if(clientMessageId){
-     const prior=(history.get(s.roomId)||[]).find(x=>x.clientMessageId===clientMessageId);
+     const prior=(history.get(s.roomId)||[]).find(x=>
+      x.clientMessageId?.toLowerCase()===clientMessageId);
      if(prior){
       // A replay ID is not a bearer credential. Never return a different
       // participant's acknowledgement, even when the text is identical.
