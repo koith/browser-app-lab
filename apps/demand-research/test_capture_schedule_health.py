@@ -76,3 +76,58 @@ def test_catchup_fetches_fresh_first_then_older_public_originals(tmp_path,monkey
     assert starts[:3]==[now-16*60]*3, "recent public posts must be queried first"
     assert starts[3:]==[now-80*60]*3, "missing window is queried second"
     assert len(list(tmp_path.glob("*.enc")))==2, "exact same original not counted twice"
+
+
+def test_capture_soft_budget_reports_partial_aes_before_external_timeout(
+        tmp_path,monkeypatch,capsys):
+    """A 1,080s hard TERM must not erase the aggregate or recovery evidence."""
+    import json
+    from test_degraded_encrypted_capture import (
+        source,install_fake_media_fetch)
+    class Offline(FakeCloud):
+        def preflight(self):
+            raise RuntimeError("synthetic remote outage")
+    install_fake_media_fetch(monkeypatch)
+    ticks=iter([0,1,800])
+    rows=[source(310),source(311)]
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+                cloud=Offline(),clock=lambda:1793667900,run_id="123456949",
+                fast_mode=True,elapsed_clock=lambda:next(ticks),max_fast_seconds=720)
+    lines=capsys.readouterr().out.splitlines()
+    marker="DEMAND_CAPTURE_AGGREGATE_ONLY "
+    summaries=[json.loads(line[len(marker):]) for line in lines
+               if line.startswith(marker)]
+    assert len(summaries)==1,"aggregate must be printed before the hard TERM"
+    result=summaries[0]
+    assert result["soft_time_budget_exhausted"] is True
+    assert result["budget_exhausted"] is True
+    assert result["encrypted_recovery_files"]==1
+    assert result["encrypted_only_originals"]==1
+    assert result["saved_verified"]==0
+    assert result["completeness_guaranteed"] is False
+    assert len(list(tmp_path.glob("*.enc")))==1
+
+
+
+
+def test_time_budget_with_no_cloud_failure_must_not_claim_capture_complete(
+        monkeypatch,capsys):
+    """A healthy backend cannot turn an entirely unscanned interval into PASS."""
+    import json
+    ticks=iter([0,800])
+    with pytest.raises(RuntimeError,match="time budget exceeded"):
+        job.run(fetchers=[lambda *_:[source(400)]],cloud=FakeCloud(),
+                clock=lambda:1793667900,run_id="123456950",fast_mode=True,
+                elapsed_clock=lambda:next(ticks),max_fast_seconds=720)
+    prefix="DEMAND_CAPTURE_AGGREGATE_ONLY "
+    out=[json.loads(line[len(prefix):]) for line in capsys.readouterr().out.splitlines()
+         if line.startswith(prefix)]
+    assert len(out)==1
+    assert out[0]["soft_time_budget_exhausted"] is True
+    assert out[0]["storage_failures"]==0
+    assert out[0]["operational_status"]=="CAPTURE_TIME_BUDGET"
+    assert out[0]["completeness_guaranteed"] is False
+    assert out[0]["saved_verified"]==0
+
+
