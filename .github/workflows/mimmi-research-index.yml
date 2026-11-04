@@ -1,12 +1,6 @@
 name: Mimmi Broad Research Inventory — Five Independent Sources
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '08 10 * * 3,6'
-  push:
-    paths:
-      - apps/mimmi-gallery/discover_source_inventory.py
-      - .github/workflows/mimmi-research-index.yml
 permissions:
   contents: write
 concurrency:
