@@ -189,7 +189,7 @@ def render(repo, run_groups, summaries, issue_body, now):
             for row in controller_rows
         ) or "확인된 실행 없음",
         f"선택 일감: **{controller_task}** · 처리 단계: **{controller_reason}**",
-        "이는 이벤트 기반 진행 상태이며 컨트롤러 실행 성공은 복구 완료를 뜻하지 않음.",
+        "이는 이벤트 기반 진행 상태입니다. 컨트롤러 실행 성공은 저장 장애 해결을 뜻하지 않음.",
         "",
         "### 유지보수 대기열",
         " · ".join(
