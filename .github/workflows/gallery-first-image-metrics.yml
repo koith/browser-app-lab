@@ -13,6 +13,7 @@ on:
       - 'apps/gallery-archive/test_local_saved_detail_previews.cjs'
       - 'apps/gallery-archive/test_progressive_photo_grid.cjs'
       - 'apps/gallery-archive/test_gallery_mobile_route_history.cjs'
+      - 'apps/gallery-archive/test_deployed_pages_sha_gate.py'
       - 'apps/gallery-archive/qa_gallery_first_image_metrics.py'
       - '.github/workflows/gallery-first-image-metrics.yml'
   push:
@@ -25,6 +26,7 @@ on:
       - 'apps/gallery-archive/test_local_saved_detail_previews.cjs'
       - 'apps/gallery-archive/test_progressive_photo_grid.cjs'
       - 'apps/gallery-archive/test_gallery_mobile_route_history.cjs'
+      - 'apps/gallery-archive/test_deployed_pages_sha_gate.py'
       - 'apps/gallery-archive/qa_gallery_first_image_metrics.py'
       - '.github/workflows/gallery-first-image-metrics.yml'
 permissions:
@@ -63,6 +65,7 @@ jobs:
       - run: |
           python -m pip install 'Pillow>=10,<13'
           python -m py_compile apps/gallery-archive/qa_gallery_first_image_metrics.py
+          python apps/gallery-archive/test_deployed_pages_sha_gate.py
           python apps/gallery-archive/test_fast_cover_bootstrap.py
           node apps/gallery-archive/test_reuse_fast_cover_nodes.cjs
           node apps/gallery-archive/test_local_saved_detail_previews.cjs
