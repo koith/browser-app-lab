@@ -60,8 +60,9 @@ const assert=require('node:assert/strict');
   assert.equal(audit.messenger.x-audit.frame.x,16,'original chat overlays x=16');
   assert.equal(audit.messenger.y-audit.frame.y,0,'original chat overlays y=0');
   assert.equal(audit.messenger.w,407,'original chat panel width');
-  assert.equal(audit.userPanel.x-audit.frame.x,623,'original right-hand user list x=623');
-  assert.equal(audit.userPanel.y-audit.frame.y,9,'original right-hand user list y=9');
+  // userlist.png outer corner template-matched at (620,10) in chat.jpg/chat_ref.jpg.
+  assert.equal(audit.userPanel.x-audit.frame.x,620,'original right-hand user list x=620');
+  assert.equal(audit.userPanel.y-audit.frame.y,10,'original right-hand user list y=10 (template-matched)');
   assert.equal(audit.exit.x-audit.frame.x,728,'original EXIT x=728');
   assert.equal(audit.exit.y-audit.frame.y,503,'original EXIT y=503');
   assert.ok(audit.toolbar&&audit.toolbar.display==='flex'&&

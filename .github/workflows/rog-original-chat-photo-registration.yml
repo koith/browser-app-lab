@@ -7,6 +7,8 @@ on:
       - 'apps/4leaf/rog/chatroom-native-panels.css'
       - 'apps/4leaf/rog/chatroom-native-2004-frame.css'
       - 'apps/4leaf/rog/chatroom-native-scrollbar.css'
+      - 'apps/4leaf/rog/chatroom-native-panels.js'
+      - 'apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs'
   pull_request:
     branches: [main]
     paths:
@@ -15,6 +17,8 @@ on:
       - 'apps/4leaf/rog/chatroom-native-panels.css'
       - 'apps/4leaf/rog/chatroom-native-2004-frame.css'
       - 'apps/4leaf/rog/chatroom-native-scrollbar.css'
+      - 'apps/4leaf/rog/chatroom-native-panels.js'
+      - 'apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs'
   workflow_dispatch:
 jobs:
   original-2004-jpg-geometry:
@@ -28,7 +32,7 @@ jobs:
       - name: Install real browser
         run: |
           npm install --no-save playwright
-          npx playwright install chromium --with-deps
+          npx playwright install chromium webkit --with-deps
       - name: Serve authentic original PNGs from stable same origin
         run: |
           nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-original-photo.log 2>&1 &
@@ -42,6 +46,12 @@ jobs:
           if [ "$ready" != true ]; then cat /tmp/leaf-original-photo.log;exit 1;fi
       - name: Register historical photo bright input pixels against actual native room layout and live Korean chat
         run: node apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs
+      - name: Six source rooms - userlist.png / scrollbar.png anchors (Chromium)
+        run: node apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs
+      - name: Six source rooms - userlist.png / scrollbar.png anchors (WebKit)
+        env:
+          FOURLEAF_BROWSER: webkit
+        run: node apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

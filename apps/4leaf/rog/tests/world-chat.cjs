@@ -628,7 +628,7 @@ const path=require('path');
  assert.equal(overlay.state?.rosterParent,'social-image-frame','genuine online participants overlay source art');
  assert.deepEqual([overlay.state?.messageFormCount,overlay.state?.rosterCount],[1,1],'no dummy chat or fake roster layers');
  assert.ok(Math.abs(overlay.message.x-16)<1.5&&Math.abs(overlay.message.y)<1.5,'archival screen: chat at upper-left scene coordinate');
- assert.ok(Math.abs(overlay.roster.x-(794-13-158))<1.5&&Math.abs(overlay.roster.y-9)<1.5,'archival screen: native participant list at upper-right scene coordinate');
+ assert.ok(Math.abs(overlay.roster.x-620)<1.5&&Math.abs(overlay.roster.y-10)<1.5,'archival screen: native participant list at upper-right scene coordinate');
  assert.ok(Math.abs(overlay.input.w-407)<1.5&&overlay.input.y>80,'native source edit frame remains independent from visible scrollable chat lines');
  assert.equal(overlay.peers,1,'only genuine self user appears in overlay, never sample NPCs');
 

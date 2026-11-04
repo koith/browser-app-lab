@@ -11,10 +11,14 @@ const assert=require('node:assert/strict');
  await Promise.all([host.goto(url),guest.goto(url)]);
  for(const p of [host,guest]){await p.waitForFunction(()=>!!window.__LEAF_SOCIAL__&&!!window.__ROG_TEST__);await p.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms')});await p.locator('.social-district-hotspot').nth(3).click()}
  const room=await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('하이아칸 원격 채팅',2));
- // The genuine 2004 room hides the web header; use the actual menu
- // glyph of original ChatRoom/userlist.png (rightmost 22% of 150px).
+ // The genuine 2004 room hides the web header; use the actual '=' menu
+ // button of original ChatRoom/userlist.png, now at its source anchor
+ // (760,16) of the 2004 screenshot. On file:// (no composed frame) the
+ // decoded header canvas keeps its old right-edge hit area.
  // A district-directory guest still has the visible invite command.
- await host.locator('#social-original-userlist').click({position:{x:137,y:15}});
+ if(await host.locator('.leaf-native-userlist-menu').isVisible())
+  await host.locator('.leaf-native-userlist-menu').click();
+ else await host.locator('#social-original-userlist').click({position:{x:137,y:15}});
  await guest.locator('#social-invite').click();
  await host.locator('#social-create-offer').click();
  await host.waitForFunction(()=>document.querySelector('#social-output-offer')?.value.length>150,null,{timeout:17000});
