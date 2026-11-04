@@ -8,18 +8,6 @@ on:
       - "apps/gallery-archive/discover_global_sources.py"
       - "apps/gallery-archive/test_discover_global_sources.py"
       - ".github/workflows/gallery-global-source-discovery.yml"
-  push:
-    branches:
-      - main
-      - feat/gallery-global-discovery-20261030
-    paths:
-      - "apps/gallery-archive/global_source_registry.json"
-      - "apps/gallery-archive/discover_global_sources.py"
-      - "apps/gallery-archive/test_discover_global_sources.py"
-      - ".github/workflows/gallery-global-source-discovery.yml"
-  schedule:
-    - cron: "42 16 * * 1,4"
-
 permissions:
   contents: read
 concurrency:
