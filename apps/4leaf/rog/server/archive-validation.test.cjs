@@ -87,6 +87,19 @@ test('legacy mixed-case duplicate replay IDs cannot silently survive validation'
  assert.throws(()=>validateArchive(s,valid),/Invalid persisted ChatTown state/,
   'same semantic replay ID under a different hex letter case is a collision');
 });
+test('global chat cursor and message IDs cannot collide across different rooms',()=>{
+ const s=fixture(),publicId='leaf-public-north-3-0';
+ s.sequence=10;
+ s.history.push([publicId,[{id:'m2',seq:10,roomId:publicId,
+  sender:'guest',user:'게스트',text:'다른 방의 대화',time:1700000000002}]]);
+ assert.equal(validateArchive(s,valid),s,'interleaved rooms may use distinct global cursors');
+ const sameCursor=clone(s);sameCursor.history[1][1][0].seq=9;
+ assert.throws(()=>validateArchive(sameCursor,valid),/duplicate global message sequence/,
+  'same cursor across rooms would cause a reconnect to miss a real message');
+ const sameId=clone(s);sameId.history[1][1][0].id='m1';
+ assert.throws(()=>validateArchive(sameId,valid),/duplicate message id across rooms/,
+  'one server message UUID must never refer to two separate room messages');
+});
 test('server serves 503 rather than accepting partial encrypted restore and never commits blank state',async t=>{
  const archive=fixture();archive.rooms[0].district='malformed';
  let saves=0;
