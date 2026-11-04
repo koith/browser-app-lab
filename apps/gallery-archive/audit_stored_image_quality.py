@@ -8,6 +8,8 @@ images from this report. TeraBox-only originals are outside this scan.
 import argparse
 import json
 import math
+import hashlib
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -32,6 +34,18 @@ def metric(file: Path):
                 "high_frequency":round(high_frequency,3),
                 "contrast":round(contrast,3)}
 
+def verify_saved_sha(file: Path, expected: str) -> None:
+    """Verify bytes, not only an image header or a claimed 4K pixel size."""
+    if not isinstance(expected, str) or not re.fullmatch(r"[a-f0-9]{64}", expected):
+        raise ValueError("manifest_sha_missing_or_invalid")
+    digest = hashlib.sha256()
+    with file.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    if digest.hexdigest() != expected:
+        raise ValueError("committed_file_sha256_mismatch")
+
+
 def run(out: Path, limit: int):
     results=[];failed=[];total=0
     for model in ("yui","mimmi"):
@@ -46,6 +60,7 @@ def run(out: Path, limit: int):
                 if limit and total>=limit:break
                 total+=1
                 try:
+                    verify_saved_sha(filename, photo.get("sha256"))
                     visual=metric(filename)
                     pixel=visual["decoded_width"]*visual["decoded_height"]
                     byte_density=filename.stat().st_size/max(pixel,1)
@@ -58,7 +73,10 @@ def run(out: Path, limit: int):
                             "from_pixibb": "pixibb" in str(photo.get("source_url","")).lower(),**visual}
                     results.append(result)
                 except Exception as exc:
-                    failed.append({"model":model,"album":album.get("id"),"reason":type(exc).__name__})
+                    reason=str(exc) if isinstance(exc, ValueError) and
+                        str(exc) in {"manifest_sha_missing_or_invalid",
+                                    "committed_file_sha256_mismatch"} else type(exc).__name__
+                    failed.append({"model":model,"album":album.get("id"),"reason":reason})
             if limit and total>=limit:break
         if limit and total>=limit:break
     by_album=defaultdict(list)
@@ -71,12 +89,19 @@ def run(out: Path, limit: int):
             poor_density=row["megapixels"]>=2 and row["bytes_per_pixel"] < (0.028 if row["name"].lower().endswith(".webp") else 0.042)
             weak_vs_neighbors=len(entries)>=6 and median>0.08 and row["center_detail_index"]<median*0.42
             if poor_density or weak_vs_neighbors:
-                suspects.append({**row,"review_flags":(["very_low_encoded_bits_per_pixel"] if poor_density else [])+ (["very_low_relative_center_detail"] if weak_vs_neighbors else [])})
+                suspects.append({**row,
+                    "review_flags":(["very_low_encoded_bits_per_pixel"] if poor_density else [])
+                        + (["very_low_relative_center_detail"] if weak_vs_neighbors else []),
+                    "review_priority":"high" if poor_density and weak_vs_neighbors else "medium",
+                    "verified_high_quality":False})
     counts={}
     for row in results:counts[row["model"]]=counts.get(row["model"],0)+1
     report={
         "scope":"decoded physically committed public gallery bytes; does not access private TeraBox-only originals",
         "limits":"heuristic image-detail evidence, not authoritative optical resolution or watermark recognition; manual review before any replacement",
+        "verified_sha256_file_counts":counts,
+        "integrity_policy":"All decoded public images must match their manifest SHA-256; no image is overwritten or automatically promoted as high quality",
+        "watermark_status":"not_verified_by_this_optical_audit",
         "decoded_file_counts":counts,
         "decode_errors":failed[:100],
         "suspected_for_review":len(suspects),
