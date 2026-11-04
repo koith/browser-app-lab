@@ -177,7 +177,8 @@ async def read_owner_media_via_copyto(path: str, limit: int, client_env: dict,
 
 
 
-async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> bytes:
+async def rclone_bytes(path: str, limit: int, *, remote: str | None = None,
+                       cookie_override: str | None = None) -> bytes:
     """Drain the *entire* remote stream, with size/timeout bounds.
 
     A single StreamReader.read(limit) may return only the first network chunk.
@@ -192,7 +193,13 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
                                      "X-Archive-Read-Cause": "provider_denial"}) from None
     client_env=os.environ.copy()
     try:
-        configured=client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE','')
+        # The two owner accounts have distinct authorized GitHub Secrets.
+        # Never route Yui reads with Mimmi's cookie once a Yui session exists.
+        configured=(cookie_override if cookie_override is not None else
+                    (client_env.get('RCLONE_CONFIG_ARCHIVE_YUI_COOKIE') or
+                     client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+                    if remote_name==YUI_REMOTE else
+                    client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
         client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(configured)
     except ValueError:
         raise HTTPException(status_code=503,detail='Invalid storage session configuration')
@@ -690,55 +697,76 @@ async def signed_gallery_owner_pending(model: str,batch: str,request: Request):
 
 @app.post("/internal/terabox-session-refresh")
 async def sync_archive_session(request: Request):
+    """OIDC-authenticated, model-separated owner session refresh.
+
+    A failed owner must not roll back the other owner's VERIFIED refresh.
+    Never publish cookies, URLs, storage keys, or photo bytes to Pages.
+    """
     authorization = request.headers.get("Authorization", "")
     if not authorization.startswith("Bearer ") or not _verify_sync_identity(
         authorization[len("Bearer "):]
     ):
         raise HTTPException(status_code=403, detail="Invalid workflow identity")
     payload = await request.body()
-    if len(payload) > 18000:
+    if len(payload) > 36000:
         raise HTTPException(status_code=413, detail="Request too large")
     try:
-        cookie = json.loads(payload).get("cookie")
+        values = json.loads(payload)
+        if not isinstance(values, dict):
+            raise ValueError("Expected an object")
+        mimmi_cookie = values.get("cookie")
+        # Backwards compatibility for the existing signed one-cookie caller.
+        yui_cookie = values.get("yui_cookie", mimmi_cookie)
     except (ValueError, TypeError, AttributeError):
         raise HTTPException(status_code=400, detail="Invalid session payload")
-    if (
-        not isinstance(cookie, str) or not (8 <= len(cookie) <= 16000)
-        or any(ord(ch) < 32 or ord(ch) == 127 for ch in cookie)
-    ):
-        raise HTTPException(status_code=400, detail="Invalid storage session")
+    for value in (mimmi_cookie, yui_cookie):
+        if (not isinstance(value, str) or not 8 <= len(value) <= 16000
+                or any(ord(ch) < 32 or ord(ch) == 127 for ch in value)):
+            raise HTTPException(status_code=400, detail="Invalid storage session")
+
+    verified, unavailable = [], []
     async with _sync_lock:
-        old_cookie = os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE", "")
-        os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"] = cookie
-        try:
-            for model, remote in (("mimmi", REMOTE), ("yui", YUI_REMOTE)):
-                catalog_raw = await rclone_bytes(
-                    "metadata/catalog.json", 6_000_000, remote=remote
+        for model, remote, candidate, environment in (
+            ("mimmi", REMOTE, mimmi_cookie, "RCLONE_CONFIG_ARCHIVE_COOKIE"),
+            ("yui", YUI_REMOTE, yui_cookie, "RCLONE_CONFIG_ARCHIVE_YUI_COOKIE"),
+        ):
+            try:
+                raw = await rclone_bytes(
+                    "metadata/catalog.json", 6_000_000,
+                    remote=remote, cookie_override=candidate
                 )
-                catalog_data = json.loads(catalog_raw)
-                if (
-                    catalog_data.get("model") != model
-                    or not isinstance(catalog_data.get("albums"), list)
-                ):
+                catalog_data = json.loads(raw)
+                if (catalog_data.get("schema_version") != 1
+                        or catalog_data.get("model") != model
+                        or not isinstance(catalog_data.get("albums"), list)
+                        or not catalog_data["albums"]):
                     raise ValueError("Incompatible archive")
-        except Exception as error:
-            # Do not log any cookie, access token, or remote error message.
-            # Error class and model identify temporary read failure vs. schema.
-            print("TERABOX_SYNC_ERROR", model, type(error).__name__,
-                  getattr(error, "status_code", "-"), flush=True)
-            os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"] = old_cookie
-            raise HTTPException(
-                status_code=503 if isinstance(error, (HTTPException, OSError, asyncio.TimeoutError)) else 422,
-                detail="TeraBox session validation failed"
-            )
-        global COOKIE
-        COOKIE = cookie
-        _cache.update(catalog=None, time=0.0)
-        _yui_cache.update(catalog=None, time=0.0)
-    return JSONResponse(
-        {"synced": True, "models": ["yui", "mimmi"]},
-        headers={"Cache-Control": "no-store"},
-    )
+            except (HTTPException, OSError, asyncio.TimeoutError,
+                    ValueError, TypeError) as error:
+                # Never log the cookie, a provider response body or URL.
+                print("TERABOX_SYNC_ERROR", model, type(error).__name__,
+                      getattr(error, "status_code", "-"), flush=True)
+                unavailable.append(model)
+                continue
+            os.environ[environment] = candidate
+            if model == "mimmi":
+                global COOKIE
+                COOKIE = candidate
+                _cache.update(catalog=None, time=0.0)
+            else:
+                _yui_cache.update(catalog=None, time=0.0)
+            _provider_denial_gate.success(remote)
+            verified.append(model)
+            print("OWNER_SESSION_VERIFIED", model, flush=True)
+    if not verified:
+        raise HTTPException(status_code=503,
+                            detail="Neither owner storage session verified")
+    return JSONResponse({
+        "synced": len(verified) == 2,
+        "models": verified,
+        "unavailable_models": unavailable
+    }, headers={"Cache-Control": "no-store"})
+
 
 # Owner-only mobile gallery. It preserves all prior /api/* bearer clients and
 # adds an HttpOnly, same-origin session for Safari, not public photo URLs.
@@ -771,7 +799,9 @@ async def _individual_put(model,local,key,overwrite):
     if not (media_key_valid(key) or re.fullmatch(r'metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\.json',key)):
         raise HTTPException(400,'Invalid individual transfer destination')
     child=os.environ.copy()
-    child['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(child.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+    selected=(child.get('RCLONE_CONFIG_ARCHIVE_YUI_COOKIE') or
+              child.get('RCLONE_CONFIG_ARCHIVE_COOKIE','')) if model=='yui' else child.get('RCLONE_CONFIG_ARCHIVE_COOKIE','')
+    child['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(selected)
     try:
         child['RCLONE_CONFIG_ARCHIVE_JSTOKEN']=await owner_upload_state.get(
             child['RCLONE_CONFIG_ARCHIVE_COOKIE'],child.get('RCLONE_CONFIG_ARCHIVE_DOMAIN','https://www.terabox.com'))
