@@ -24,6 +24,7 @@ function render(owner,local){
  const env={
   stored:owner?[{...album,images:[owner]}]:[{...album,images:[local]}],
   localStored:local?[{...album,images:[local]}]:[],
+  localPreviewIndex:new Map(),
   catalog:[album],albumCovers:{},
   validImages:a=>a.images||[],
   getName:a=>a.title||a.id,
@@ -32,7 +33,7 @@ function render(owner,local){
   esc:s=>String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;')
  };
  vm.createContext(env);
- vm.runInContext(source+';globalThis.cardForTest=card;',env,{filename:'mimmi-real-card.js'});
+ vm.runInContext(source+';rebuildLocalPreviewIndex();globalThis.cardForTest=card;',env,{filename:'mimmi-real-card.js'});
  return env.cardForTest(album,true);
 }
 const exact=render(ownerPhoto,pagesPhoto);
