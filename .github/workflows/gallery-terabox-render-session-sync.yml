@@ -7,13 +7,16 @@ on:
       - 'apps/gallery-archive/verify_render_gallery_read.py'
       - 'apps/gallery-archive/test_verify_render_gallery_read.py'
       - 'apps/gallery-archive/restore_known_owner_cache.py'
+      - 'apps/gallery-archive/probe_both_owner_runtime_ready.py'
+      - 'apps/gallery-archive/test_probe_both_owner_runtime_ready.py'
   push:
     branches: [main]
     paths:
       - '.github/workflows/gallery-terabox-render-session-sync.yml'
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
   schedule:
-    - cron: '*/15 * * * *'
+    # Offset quarter-hour Actions contention, below Render Free's 15-minute sleep limit.
+    - cron: '7,17,27,37,47,57 * * * *'
   workflow_run:
     workflows: ["Deploy static content to Pages"]
     types: [completed]
@@ -36,7 +39,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: |
-          python -m py_compile apps/gallery-archive/verify_render_gallery_read.py apps/gallery-archive/restore_known_owner_cache.py
+          python -m py_compile apps/gallery-archive/verify_render_gallery_read.py apps/gallery-archive/restore_known_owner_cache.py apps/gallery-archive/probe_both_owner_runtime_ready.py
+          python apps/gallery-archive/test_probe_both_owner_runtime_ready.py
           python apps/gallery-archive/test_verify_render_gallery_read.py
   synchronize:
     if: >-
@@ -61,7 +65,20 @@ jobs:
           sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
+      - name: Verify existing private owner media can be served before invoking TeraBox
+        id: readiness
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          if python apps/gallery-archive/probe_both_owner_runtime_ready.py; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+            echo 'Both owner albums already serve verified covers; skip costlier session reads.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'Cold owner gallery: read-only same-owner recovery required.' >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Securely refresh Render storage session without exposing cookies or viewer passwords
+        if: steps.readiness.outputs.ready != 'true'
         id: direct_owner_session
         continue-on-error: true
         shell: bash
@@ -123,7 +140,7 @@ jobs:
           echo 'Both passwordless galleries are connected to verified TeraBox albums.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Install the existing checksum-pinned owner storage client for read-only rescue
-        if: steps.direct_owner_session.outcome == 'failure'
+        if: steps.readiness.outputs.ready != 'true' && steps.direct_owner_session.outcome == 'failure'
         shell: bash
         run: |
           set -euo pipefail
@@ -137,7 +154,7 @@ jobs:
           install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - name: Recover existing same-owner SHA images without any new collection or storage writes
-        if: steps.direct_owner_session.outcome == 'failure'
+        if: steps.readiness.outputs.ready != 'true' && steps.direct_owner_session.outcome == 'failure'
         shell: bash
         run: |
           set -euo pipefail
