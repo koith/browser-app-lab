@@ -162,6 +162,25 @@ class StatusBoardTests(unittest.TestCase):
         self.assertIn("INT01_OPERATIONAL_PROOF_PENDING", board)
         self.assertNotIn("NEVER_DISCLOSE_PERSONAL_DATA", board)
 
+    def test_direct_stage_outputs_after_controller_job_are_strictly_validated(self):
+        groups = {ops.CONTROLLER: [run(123, "success")]}
+        saved = {}
+        ok = ops.apply_current_stage_output(
+            groups, saved, run_id="123", task="INT-01",
+            stage_action="NONE", reason="INT01_OPERATIONAL_PROOF_PENDING",
+        )
+        self.assertTrue(ok)
+        self.assertEqual(saved[123]["reason"], "INT01_OPERATIONAL_PROOF_PENDING")
+        self.assertFalse(ops.apply_current_stage_output(
+            groups, saved, run_id="999", task="INT-01",
+            stage_action="NONE", reason="RECOVERY_FAILED_REQUIRES_CODE_REPAIR",
+        ))
+        self.assertFalse(ops.apply_current_stage_output(
+            groups, saved, run_id="123", task="INT-01",
+            stage_action="NONE", reason="SECRET_LEAKED_FROM_UNTRUSTED_EVENT",
+        ))
+        self.assertEqual(saved[123]["reason"], "INT01_OPERATIONAL_PROOF_PENDING")
+
     def test_non_user_input_workflow_urls_are_canonical(self):
         self.assertEqual(
             ops.run_url(run(42), REPO),
