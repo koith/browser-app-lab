@@ -75,11 +75,17 @@ const html='<!doctype html><html lang="ko"><body><details id="videoTrends"><summ
  '<div><button data-video-mode="hot">3시간</button><button data-video-mode="day">24시간</button>'+
  '<button data-video-mode="week">7일</button><button data-video-mode="month">30일</button>'+
  '<button data-video-mode="latest">최신</button><button data-video-mode="archive">월별</button>'+
- '<select id="videoTrendMonth"></select><select id="videoTrendSource"></select></div><p id="videoTrendCount"></p><p id="videoTrendCoverage"></p>'+
- '<div id="videoTrendRows"></div><button id="videoTrendMore" hidden>더 보기</button></details></body></html>';
+ '<select id="videoTrendMonth"></select><select id="videoTrendSource"></select><button id="videoTrendReviewStart" disabled>검토</button></div><p id="videoTrendCount"></p><p id="videoTrendCoverage"></p>'+
+ '<div id="videoTrendRows"></div><button id="videoTrendMore" hidden>더 보기</button>'+
+ '<dialog id="videoTrendReviewDialog"><p id="videoTrendReviewStatus"></p><div id="videoTrendReviewContent"></div>'+
+ '<button id="videoTrendReviewPrev">이전</button><button id="videoTrendReviewNext">다음</button>'+
+ '<button id="videoTrendReviewClose">닫기</button></dialog></details></body></html>';
 const dom=new JSDOM(html,{url:"https://koith.github.io/browser-app-lab/apps/demand-research/",
   runScripts:"outside-only"});
 dom.window.Date.now=()=>NOW;
+const fakeDialog=dom.window.document.getElementById("videoTrendReviewDialog");
+fakeDialog.showModal=()=>fakeDialog.setAttribute("open","");
+fakeDialog.close=()=>fakeDialog.removeAttribute("open");
 const many=Array.from({length:14},(_,i)=>mk("item"+i,1+i/10));
 dom.window.INTERSECTION_publicVideoSnapshot=()=>({verified:[...rows,...many],partial:true});
 dom.window.eval(script);
@@ -91,6 +97,22 @@ assert.match($("videoTrendCoverage").textContent,/Bluesky/);
 assert.equal($("videoTrendSource").querySelectorAll("option").length,2,
   "source dropdown includes all only and observed Bluesky; not absent sources");
 assert.match($("videoTrendCoverage").textContent,/반응 제공/);
+assert.equal($("videoTrendReviewStart").disabled,false);
+$("videoTrendReviewStart").click();
+assert.equal(fakeDialog.open,true);
+assert.match($("videoTrendReviewStatus").textContent,/1 \/ 16/);
+assert.equal($("videoTrendReviewPrev").disabled,true);
+const firstReviewLink=$("videoTrendReviewContent").querySelector("a");
+assert.equal(firstReviewLink.target,"_blank");
+assert.equal(firstReviewLink.rel,"noopener noreferrer");
+assert.equal(firstReviewLink.href,"https://bsky.app/profile/qa.bsky.social/post/a");
+$("videoTrendReviewNext").click();
+assert.match($("videoTrendReviewStatus").textContent,/2 \/ 16/);
+assert.equal($("videoTrendReviewPrev").disabled,false);
+assert.equal($("videoTrendReviewContent").querySelector("a").href,
+  "https://bsky.app/profile/qa.bsky.social/post/b");
+$("videoTrendReviewClose").click();
+assert.equal(fakeDialog.open,false);
 assert.equal($("videoTrendRows").firstChild.target,"_blank");
 assert.equal($("videoTrendRows").firstChild.rel,"noopener noreferrer");
 assert.match($("videoTrendRows").firstChild.textContent,/KST/,
@@ -105,6 +127,11 @@ assert.equal($("videoTrendSource").querySelectorAll("option").length,3);
 $("videoTrendSource").value="mastodon";
 $("videoTrendSource").dispatchEvent(new dom.window.Event("change"));
 assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,1);
+$("videoTrendReviewStart").click();
+assert.equal($("videoTrendReviewContent").querySelector("a").href,
+  "https://mastodon.social/@qa/a");
+assert.equal($("videoTrendReviewNext").disabled,true);
+$("videoTrendReviewClose").click();
 assert.match($("videoTrendCount").textContent,/1건/);
 assert.match($("videoTrendCoverage").textContent,/Mastodon 1건/);
 $("videoTrendSource").value="all";
@@ -132,6 +159,8 @@ const main=fs.readFileSync(path.join(DIR,"index.html"),"utf8");
 assert.ok(main.includes('id="videoTrends"'));
 assert.ok(main.includes('id="videoTrendCoverage"'));
 assert.ok(main.includes('id="videoTrendSource"'));
+assert.ok(main.includes('id="videoTrendReviewDialog"'));
+assert.ok(main.includes('id="videoTrendReviewStart"'));
 assert.ok(main.includes("window.INTERSECTION_publicVideoSnapshot"));
 assert.ok(main.includes('<script src="public_video_trends.js" defer></script>'));
 assert.ok(main.indexOf('id="videoTrends"')<main.indexOf('id="feed"'));
