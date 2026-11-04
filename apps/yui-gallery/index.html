@@ -286,6 +286,11 @@ function card(a,hasImages){
 // Exact, same-album local archive bytes can paint detail tiles without waking
 // the remote TeraBox gateway. Every fallback keeps the owner media key.
 function localPhotoKey(id,p){return [id,p.sha256,p.bytes,p.width,p.height].join('|')}
+// The full-screen viewer may read committed photo bytes immediately only
+// when the same album, SHA-256, byte length and dimensions all match.
+function exactSavedViewerCopy(p){
+ return p?.ownerAlbum?localPreviewIndex.get(localPhotoKey(p.albumId,p))||null:null;
+}
 function rebuildLocalPreviewIndex(){
  const next=new Map();
  for(const album of localStored){
@@ -432,12 +437,22 @@ function showViewer(){
  const generation=++viewerGeneration;
  layoutViewer();
  const image=$('full'),status=$('media-status'),frame=image.parentElement;
+ const localCopy=exactSavedViewerCopy(p);
  delete frame.dataset.imageState;
  status.textContent='불러오는 중';
  image.removeAttribute('src');image.hidden=true;image.referrerPolicy='no-referrer';
- let variant='original';
+ let variant=localCopy?'local':'original';
  function fail(){
   if(generation!==viewerGeneration)return;
+  if(p.ownerAlbum&&variant==='local'){
+   variant='original';
+   status.textContent='기존 보관 원본 연결 확인 중';
+   YuiPrivate.asset(p,'original').then(url=>{
+    if(generation!==viewerGeneration)return;
+    image.removeAttribute('src');image.src=url;$('original').href=url;
+   }).catch(error=>{if(generation===viewerGeneration){frame.dataset.imageState='failed';status.textContent=error.message}});
+   return;
+  }
   if(p.ownerAlbum&&p.preview&&variant==='original'){
    variant='preview';
    status.textContent='원본 연결 오류 · 보관 미리보기 확인 중';
@@ -456,7 +471,9 @@ function showViewer(){
   image.hidden=false;delete frame.dataset.imageState;status.textContent='';
  };
  image.onerror=fail;
- if(p.ownerAlbum||p.vaultAlbum){
+ if(localCopy){
+  image.src=localCopy.url;$('original').href=localCopy.url;
+ }else if(p.ownerAlbum||p.vaultAlbum){
   (p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p,'original')).then(url=>{
    if(generation===viewerGeneration){image.src=url;$('original').href=url}
   }).catch(error=>{if(generation===viewerGeneration){frame.dataset.imageState='failed';status.textContent=error.message}});
@@ -465,7 +482,7 @@ function showViewer(){
  }else{image.src=p.url;$('original').href=p.url}
  image.alt=p.name+' · '+p.number;
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
- if(p.ownerAlbum||p.vaultAlbum)$('original').removeAttribute('href');
+ if((p.ownerAlbum||p.vaultAlbum)&&!localCopy)$('original').removeAttribute('href');
 }
 function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
 function closeViewer(){if(history.state?.yui&&history.state.photo)goBack();else hideViewer()}

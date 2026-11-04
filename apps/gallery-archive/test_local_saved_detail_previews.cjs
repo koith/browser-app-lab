@@ -21,11 +21,18 @@ for(const model of ['mimmi','yui']){
    rotationAttributes:()=>''};
  vm.createContext(ctx);
  vm.runInContext(source+
-   ';globalThis.testApi={rebuildLocalPreviewIndex,photoHTML,localPhotoKey}',ctx);
+   ';globalThis.testApi={rebuildLocalPreviewIndex,photoHTML,localPhotoKey,exactSavedViewerCopy}',ctx);
  const api=ctx.testApi;
  api.rebuildLocalPreviewIndex();
  const owner={...local,albumId:'safe',ownerAlbum:'safe',
    url:'owner:safe:1',name:'saved',number:1};
+ assert.equal(api.exactSavedViewerCopy(owner).url,local.url,
+   model+' lightbox must use exact same-SHA saved bytes');
+ assert.equal(api.exactSavedViewerCopy({...owner,albumId:'other'}),null);
+ assert.equal(api.exactSavedViewerCopy({...owner,sha256:'b'.repeat(64)}),null);
+ assert.equal(api.exactSavedViewerCopy({...owner,bytes:120001}),null);
+ assert.equal(api.exactSavedViewerCopy({...owner,width:801}),null);
+ assert.equal(api.exactSavedViewerCopy({...owner,ownerAlbum:undefined}),null);
  const fast=api.photoHTML(owner,0);
  assert.ok(fast.includes('src="stored-albums/safe/local.webp"'),model);
  assert.ok(fast.includes('data-owner="owner:safe:1"'),model);
@@ -44,6 +51,8 @@ for(const model of ['mimmi','yui']){
  api.rebuildLocalPreviewIndex();
  const large=api.photoHTML({...owner,bytes:700001},0);
  assert.ok(!large.includes('src="stored-albums/'),model+' large originals lazy gateway');
+ assert.equal(api.exactSavedViewerCopy({...owner,bytes:700001}).url,massive.url,
+   model+' full-screen lightbox may use large SHA-identical committed originals');
  const direct=api.photoHTML({...owner,ownerAlbum:undefined,
    url:'stored-albums/safe/local.webp'},0);
  assert.ok(direct.includes('src="stored-albums/safe/local.webp"'),model);
