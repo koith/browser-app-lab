@@ -63,8 +63,9 @@ const {readFileSync}=require('node:fs'),{chromium}=require('playwright');
    const p=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
    return {source:p.dataset.actorSource,rig:p.dataset.actorRig};
   });
-  assert.equal(bad.rig,'original-card-portrait-fallback',
-   'original body 1025 not published: do not substitute 1040');
+  // #579 published 1025 itself: 0040 shows its own body, never 1040.
+  assert.equal(bad.rig,'original-obs-sprite','0040 renders its own recovered body');
+  assert.match(bad.source,/OBS\.pak\/1025\.obs$/,'do not substitute 1040');
   const original='data:image/jpeg;base64,'+
    readFileSync(path.resolve(__dirname,'../../assets/battle.jpg')).toString('base64');
   await page.evaluate(reference=>{
