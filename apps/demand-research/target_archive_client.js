@@ -60,7 +60,9 @@
     return false;
   }
   function refreshButton(){
-    submit.disabled=submitting||!validSelection();
+    // Keep the button operable so an empty/invalid account explains what is
+    // missing instead of looking broken on touch devices.
+    submit.disabled=submitting;
     submit.textContent=gatewayReady?"테라박스 백업 시작":"GitHub에서 백업 실행";
     workflow.hidden=gatewayReady;
   }
@@ -82,7 +84,11 @@
       if(copy&&typeof copy.then==="function")
         copy.then(()=>manualInstructions(true)).catch(()=>manualInstructions(false));
     }catch{/* Manual paste remains available. */}
-    window.open(workflow.href,"_blank","noopener,noreferrer");
+    // In-app iPhone WebViews commonly block window.open(). Same-tab
+    // navigation is a real user-gesture route and works without popups.
+    // The chosen public account is also copied when the browser permits it;
+    // the Back action retains this form for manual retry.
+    window.location.assign(workflow.href);
   }
   async function check(){
     try{
@@ -103,11 +109,25 @@
       refreshButton();
     }
   }
-  account.addEventListener("input",refreshButton);
-  platform.addEventListener("change",refreshButton);
+  account.addEventListener("input",()=>{
+    account.removeAttribute("aria-invalid");
+    refreshButton();
+  });
+  platform.addEventListener("change",()=>{
+    account.removeAttribute("aria-invalid");
+    refreshButton();
+  });
   form.addEventListener("submit",async event=>{
     event.preventDefault();
-    if(submitting||!validSelection())return;
+    if(submitting)return;
+    if(!validSelection()){
+      account.setAttribute("aria-invalid","true");
+      message.textContent="먼저 공개 SNS 계정 주소 또는 핸들을 입력하세요. "+
+        "예: https://bsky.app/profile/example.bsky.social / @user@example.social";
+      account.focus();
+      return;
+    }
+    account.removeAttribute("aria-invalid");
     if(!gatewayReady){openManualWorkflow();return;}
     const value=account.value.trim();
     submitting=true;
