@@ -196,7 +196,28 @@ function validImages(a){
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return YuiPublishers.groups(entries,publisherRegistry,YuiLabels.describe,validImages)}
 function setMode(m,publisher=null){detailRenderGeneration++;mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;const isPublisher=mode==='publishers';$('browse-mode').textContent=isPublisher?'발행처':'화보';$('browse-toggle').dataset.mode=isPublisher?'publishers':'albums';$('browse-toggle').setAttribute('aria-pressed',String(isPublisher));$('browse-toggle').setAttribute('aria-label',isPublisher?'발행처 목록 · 화보 목록으로 전환':'화보 목록 · 발행처 목록으로 전환');render()}
-function publisherCard(group){const asset=YuiPublishers.logo(group),assetLabel=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고',image=asset?'<img src="'+esc(asset)+'" alt="'+esc(group.name)+assetLabel+'">':'<span class="publisher-wordmark" role="img" aria-label="'+esc(group.name)+' — 로고 미확인">'+esc(group.name)+'</span>';return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+esc(group.name)+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+esc(group.name)+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>'}
+function publisherCard(group){
+ const asset=YuiPublishers.logo(group);
+ const label=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고';
+ const name=esc(group.name);
+ const wordmark='<span class="publisher-wordmark" role="img" aria-label="'+name+' — 로고 미확인">'+name+'</span>';
+ // Even a file that was verified when committed may fail a browser request.
+ // Never expose a broken-logo icon or substitute an unrelated brand image.
+ const image=asset?'<img src="'+esc(asset)+'" alt="'+name+label+'"><span class="publisher-wordmark" hidden role="img" aria-label="'+name+' — 로고 로딩 실패">'+name+'</span>':wordmark;
+ return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+name+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+name+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>';
+}
+// Publisher logo errors must fall back to verified text, not to an unverified
+// photo or an unrelated company logo. Keep other image error handling intact.
+document.addEventListener('error',event=>{
+ const img=event.target;
+ if(!(img instanceof HTMLImageElement))return;
+ const card=img.closest('.publisher');
+ if(!card)return;
+ const wordmark=card.querySelector('.publisher-wordmark');
+ if(!wordmark)return;
+ wordmark.hidden=false;
+ img.remove();
+},true);
 function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
 // Gallery image failures now refer to stored local/private bytes, not source hosts.
