@@ -21,6 +21,13 @@ has a SHA-256 integrity checksum and optimistic revision lock.
 At startup, remote state MUST be read and authenticated before requests
 are served. A missing/bad key, unavailable database, corrupt archive, or
 revision conflict fails closed with HTTP 503 and never resets the archive.
+A structurally malformed room, orphaned history, repeated room ID, inconsistent
+message sequence, or history exceeding the 200-entry retention limit makes the
+entire archive fail closed: the server does not silently filter records and
+later erase the rejected subset. A lost optimistic revision race also sets
+`/api/health` to HTTP 503 until the server restarts against the authoritative
+archive. Both conditions need operator recovery, not an empty-state reset.
+
 Room create/close, ownership transfer and each chat message wait for a
 successful remote commit before sending HTTP success. Errors roll back
 the in-process mutation.

@@ -4,6 +4,7 @@ WORKDIR /app
 COPY apps/4leaf/rog/server/central.cjs ./central.cjs
 COPY apps/4leaf/rog/server/persistence-supabase.cjs ./persistence-supabase.cjs
 COPY apps/4leaf/rog/server/abuse-guard.cjs ./abuse-guard.cjs
+COPY apps/4leaf/rog/server/archive-validation.cjs ./archive-validation.cjs
 ENV NODE_ENV=production PORT=10000 HOST=0.0.0.0 \
     LEAF_CENTRAL_ORIGINS=https://koith.github.io \
     LEAF_CENTRAL_STORAGE=/var/lib/4leaf/chat-state.json
