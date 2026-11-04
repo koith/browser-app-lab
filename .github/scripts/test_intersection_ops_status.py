@@ -119,6 +119,21 @@ class StatusBoardTests(unittest.TestCase):
         self.assertIn("--repo", cli.call_args.args[0])
         self.assertTrue(cli.call_args.kwargs["capture_output"])
 
+    def test_controller_is_visible_without_claiming_successful_recovery(self):
+        rows = {
+            ops.CAPTURE: [run(20, "failure")],
+            ops.REPLAY: [run(21, status="pending", conclusion=None)],
+            ops.REPAIR: [],
+            ops.CONTROLLER: [run(22, "success")],
+        }
+        body = "- [ ] **INT-01** outstanding"
+        rendered = ops.render(REPO, rows, {}, body,
+                              datetime(2026, 11, 4, tzinfo=timezone.utc))
+        self.assertIn("자율 복구·작업 선택 컨트롤러", rendered)
+        self.assertIn("actions/runs/22", rendered)
+        self.assertIn("P0 / INT-01: FAILED", rendered)
+        self.assertIn("컨트롤러 실행 성공은 저장 장애 해결을 뜻하지 않음", rendered)
+
     def test_non_user_input_workflow_urls_are_canonical(self):
         self.assertEqual(
             ops.run_url(run(42), REPO),
