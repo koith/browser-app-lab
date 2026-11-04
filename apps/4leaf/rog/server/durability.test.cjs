@@ -9,7 +9,7 @@ const {makeServer}=require('./central.cjs');
 const KEY='ab'.repeat(32),SECRET='fake-backend-only-key',PROJECT_URL='https://fourleaf-qa.supabase.co';
 function database(){
  const rows=new Map();
- let failWrites=false,delayMs=0;
+ let failWrites=false,delayMs=0,dropAfterCommit=false;
  const respond=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json'}});
  const fetch=async (url,opt)=>{
   try{
@@ -25,17 +25,22 @@ function database(){
   const body=JSON.parse(opt.body);
   if(method==='POST'){
    if(rows.has(body.slot))return respond([]);
-   rows.set(body.slot,{...body});return respond([{...body}],201);
+   rows.set(body.slot,{...body});
+   if(dropAfterCommit)throw Error('Simulated transport lost ACK after database POST committed');
+   return respond([{...body}],201);
   }
   if(method==='PATCH'){
    const row=rows.get(slot);
    if(!row||u.searchParams.get('revision')!=='eq.'+row.revision)return respond([]);
-   rows.set(slot,{...row,...body});return respond([{...row,...body}]);
+   rows.set(slot,{...row,...body});
+   if(dropAfterCommit)throw Error('Simulated transport lost ACK after database PATCH committed');
+   return respond([{...row,...body}]);
   }
   throw Error('Unknown mock REST call '+method);
   }catch(error){console.error('Mock storage transport failure:',error.stack);throw error}
  };
- return {fetch,rows,setFailed:b=>{failWrites=b},setDelay:n=>{delayMs=n}};
+ return {fetch,rows,setFailed:b=>{failWrites=b},setDelay:n=>{delayMs=n},
+  setDropAfterCommit:b=>{dropAfterCommit=b}};
 }
 async function appFor(db,archiveKey=KEY){
  const persistence=createSupabasePersistence({url:PROJECT_URL,secret:SECRET,archiveKey,fetch:db.fetch});
@@ -85,19 +90,27 @@ test('encrypted real room/message snapshot survives full Node service restart wi
  assert.ok(next.data.entry.seq>history.data.entries[0].seq);
  assert.equal(db.rows.get('production').revision,3);
 });
-test('network commit failure sends 503 and cannot expose a phantom accepted message',async t=>{
+test('failed remote write is quarantined until a verified cold restore, without phantom messages',async t=>{
  const db=database(),f=await appFor(db);t.after(()=>f.close());
  const a=await f.session('A'),id='leaf-public-north-3-0';
  assert.equal((await f.call('POST','/api/rooms/'+id+'/join',a.token,{})).status,200);
  db.setFailed(true);
  const denied=await f.call('POST','/api/chat',a.token,{text:'절대로 저장되지 않아야 할 기록'});
  assert.equal(denied.status,503);
- const unseen=await f.call('GET','/api/snapshot?after=0',a.token);
- assert.deepEqual(unseen.data.entries,[],'failed remote commit is rolled back before peer reads');
+ assert.equal(db.rows.size,0,'the simulated failure happened before any remote commit');
+ // A 503 response from a remote proxy is NOT a transaction rollback proof:
+ // keep all local reads and writes closed until reloading the real archive.
+ assert.equal((await f.call('GET','/api/health')).status,503);
+ assert.equal((await f.call('GET','/api/snapshot?after=0',a.token)).status,503);
  db.setFailed(false);
- const accepted=await f.call('POST','/api/chat',a.token,{text:'복구 후 진짜 채팅'});
+ assert.equal((await f.call('POST','/api/chat',a.token,{text:'unsafe reuse'})).status,503);
+ const second=await appFor(db);t.after(()=>second.close());
+ const recovered=await second.session('A again');
+ assert.equal((await second.call('POST','/api/rooms/'+id+'/join',recovered.token,{})).status,200);
+ assert.deepEqual((await second.call('GET','/api/snapshot?after=0',recovered.token)).data.entries,[]);
+ const accepted=await second.call('POST','/api/chat',recovered.token,{text:'복구 후 진짜 채팅'});
  assert.equal(accepted.status,201);
- assert.deepEqual((await f.call('GET','/api/snapshot?after=0',a.token)).data.entries.map(x=>x.text),
+ assert.deepEqual((await second.call('GET','/api/snapshot?after=0',recovered.token)).data.entries.map(x=>x.text),
   ['복구 후 진짜 채팅']);
 });
 test('corrupt archive or wrong encryption key cannot boot empty and overwrite existing state',async t=>{
@@ -245,4 +258,49 @@ test('public ChatRoom lost-ACK replay recovers the original sender after full en
  assert.deepEqual(history.data.entries.map(e=>e.text),
   ['상설방 재시작 전 실제 한 번 보낸 메시지']);
  assert.equal(Object.hasOwn(history.data.entries[0],'senderTokenHash'),false);
+});
+
+
+test('lost ACK after actual DB COMMIT prevents stale reads; restart recovers one original message',async t=>{
+ const db=database(),first=await appFor(db);t.after(()=>first.close());
+ const sender=await first.session('원본 전송자'),room='leaf-public-north-3-1';
+ assert.equal((await first.call('POST','/api/rooms/'+room+'/join',sender.token,{})).status,200);
+ const key='26dc9264-ab37-43e3-a903-a4cfabff9b33';
+ const message='원격 DB에 실제 저장되었지만 응답이 끊긴 채팅';
+ db.setDropAfterCommit(true);
+ const uncertain=await first.call('POST','/api/chat',sender.token,
+  {text:message,clientMessageId:key});
+ assert.equal(uncertain.status,503,'an unknown HTTP ACK must never pretend success');
+ assert.equal(db.rows.get('production')?.revision,1,'the DB DID commit before its ACK was dropped');
+ assert.ok(!JSON.stringify(db.rows.get('production')).includes(message),
+  'the original message remains encrypted');
+ assert.equal(first.persistence.broken,true,'an ambiguous write response quarantines this server');
+ db.setDropAfterCommit(false);
+ for(const [method,url,token,body] of [
+  ['GET','/api/health',null,null],
+  ['GET','/api/snapshot?after=0',sender.token,null],
+  ['GET','/api/rooms?region=north&district='+encodeURIComponent('샤이닝 브리즈'),sender.token,null],
+  ['POST','/api/session',null,{nick:'new peer'}],
+  ['POST','/api/chat',sender.token,{text:'must not overwrite winning revision'}]
+ ]){
+  assert.equal((await first.call(method,url,token,body)).status,503,
+   'ambiguous COMMIT must fail closed on '+method+' '+url);
+ }
+ assert.equal(db.rows.get('production').revision,1,'stale authority never advances remote revision');
+ // A completely new Node process reloads the encrypted winning revision.
+ const recovered=await appFor(db);t.after(()=>recovered.close());
+ const auth=await recovered.call('POST','/api/session',null,
+  {nick:'원본 전송자',resume:sender.token});
+ assert.equal(auth.status,201);
+ assert.equal(auth.data.id,sender.id,'archived sender token fingerprint proves original sender');
+ assert.equal((await recovered.call('POST','/api/rooms/'+room+'/join',sender.token,{})).status,200);
+ const snapshot=await recovered.call('GET','/api/snapshot?after=0',sender.token);
+ assert.deepEqual(snapshot.data.entries.map(x=>x.text),[message]);
+ const replay=await recovered.call('POST','/api/chat',sender.token,
+  {text:message,clientMessageId:key});
+ assert.equal(replay.status,200);
+ assert.equal(replay.data.replayed,true);
+ assert.equal(replay.data.entry.id,snapshot.data.entries[0].id);
+ assert.equal(db.rows.get('production').revision,1,
+  'after restart, an ACK retry does not create a duplicate durable message');
 });
