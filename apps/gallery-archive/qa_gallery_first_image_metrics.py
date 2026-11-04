@@ -15,7 +15,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as BrowserTimeout
 BASE = "https://koith.github.io/browser-app-lab/apps"
 
 
-def audit(browser, model: str, timeout_ms: int) -> dict:
+def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False) -> dict:
     context = browser.new_context(
         viewport={"width": 390, "height": 844}, is_mobile=True,
         has_touch=True, device_scale_factor=2, locale="ko-KR",
@@ -90,6 +90,29 @@ def audit(browser, model: str, timeout_ms: int) -> dict:
             duplicate_sha_within_owner_work:repeatedInOwner};
         }""".replace("MODEL", model))
         result["coverage_verified_s"] = round(time.monotonic() - start, 2)
+        if verify_progressive:
+            # Verify the deployed full-photo view actually paginates thousands
+            # of saved photos instead of inserting every <img> on mobile load.
+            page.evaluate("setMode('photos')")
+            page.wait_for_function(
+                "() => document.querySelectorAll('#photogrid .photo').length >= 64",
+                timeout=12000)
+            first_batch = page.locator("#photogrid .photo").count()
+            if first_batch != 64:
+                raise AssertionError((model, "unbounded first photo batch", first_batch))
+            page.locator("#photogrid .photo").last.scroll_into_view_if_needed(
+                timeout=12000)
+            page.wait_for_function(
+                "() => document.querySelectorAll('#photogrid .photo').length > 64",
+                timeout=12000)
+            second_batch = page.locator("#photogrid .photo").count()
+            result["photo_grid_progressive"] = {
+                "first_batch": first_batch,
+                "after_scroll": second_batch,
+                "viewer_total": result["coverage"]["rendered_rows"],
+                "full_inventory_assembled_immediately": False,
+            }
+            page.evaluate("setMode('albums')")
         result["script_errors"] = errors
         result["status"] = (
             "FAIL" if result["coverage"]["owner_sha_absent_from_rendered_gallery"]
@@ -105,6 +128,8 @@ def main() -> None:
     parser.add_argument("--browser", choices=("chromium", "webkit"),
                         default="chromium")
     parser.add_argument("--image-timeout-ms", type=int, default=110000)
+    parser.add_argument("--verify-progressive", action="store_true",
+                        help="Run only after the new HTML is deployed by Pages")
     args = parser.parse_args()
     if args.image_timeout_ms < 1000:
         parser.error("--image-timeout-ms must be >= 1000")
@@ -119,7 +144,8 @@ def main() -> None:
             browser = getattr(playwright, args.browser).launch(headless=True)
             try:
                 for position, model in enumerate(order):
-                    measured = audit(browser, model, args.image_timeout_ms)
+                    measured = audit(browser, model, args.image_timeout_ms,
+                                 args.verify_progressive)
                     measured["order"] = " -> ".join(order)
                     measured["position_in_order"] = position + 1
                     results.append(measured)

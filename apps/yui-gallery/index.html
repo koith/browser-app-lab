@@ -307,15 +307,49 @@ function adoptFastCoverImages(grid,oldCards){
   next.replaceWith(old);
  }
 }
+let photoGridObserver=null,photoGridGeneration=0;
+// Render only the first screen of the potentially thousands-of-photos view.
+// Extend on proximity to the bottom, without detaching already decoded tiles.
+function renderPhotoGridProgressively(visible){
+ const grid=$('photogrid'),generation=photoGridGeneration;
+ grid.replaceChildren();
+ function append(offset){
+  if(generation!==photoGridGeneration||mode!=='photos')return;
+  const batch=visible.slice(offset,offset+64);
+  const from=grid.children.length;
+  grid.insertAdjacentHTML('beforeend',batch.map((p,i)=>photoHTML(p,offset+i)).join(''));
+  for(let i=from;i<grid.children.length;i++){
+   const button=grid.children[i];
+   button.onclick=()=>openViewer(visible,Number(button.dataset.i));
+  }
+  observeOwner();
+  if(offset+batch.length>=visible.length)return;
+  const sentinel=document.createElement('div');
+  sentinel.className='photo-grid-sentinel';
+  sentinel.setAttribute('aria-hidden','true');
+  sentinel.style.cssText='grid-column:1/-1;height:1px;pointer-events:none';
+  grid.appendChild(sentinel);
+  const observer=new IntersectionObserver(entries=>{
+   if(!entries.some(entry=>entry.isIntersecting))return;
+   observer.disconnect();
+   if(generation!==photoGridGeneration)return;
+   sentinel.remove();
+   append(offset+batch.length);
+  },{rootMargin:'700px'});
+  photoGridObserver=observer;
+  observer.observe(sentinel);
+ }
+ append(0);
+}
 function render(){
+ photoGridGeneration++;photoGridObserver?.disconnect();photoGridObserver=null;
  const q=$('search').value.toLocaleLowerCase().trim();
  const items=available(),all=mode==='photos'?items.flatMap(photosFor):[],match=s=>String(s).toLocaleLowerCase().includes(q);
  const publisherIndex=mode==='publishers'&&!activePublisher;
  $('publishergrid').hidden=!publisherIndex;$('albumgrid').hidden=mode==='photos'||publisherIndex;$('photogrid').hidden=mode!=='photos';$('nothing').hidden=true;
  if(publisherIndex){const groups=publisherGroups().filter(g=>match(g.name)||g.albums.some(a=>match(getName(a))));$('publishergrid').innerHTML=groups.map(publisherCard).join('');$('publishergrid').querySelectorAll('[data-publisher]').forEach(b=>b.onclick=()=>openPublisher(b.dataset.publisher));$('total').textContent=groups.length+' publishers';$('nothing').hidden=groups.length>0;
  }else if(mode==='photos'){
-  const visible=all.filter(p=>match(p.name));$('photogrid').innerHTML=visible.map(photoHTML).join('');
-  $('photogrid').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(visible,Number(b.dataset.i)));
+  const visible=all.filter(p=>match(p.name));renderPhotoGridProgressively(visible);
   $('total').textContent=visible.length+' photos';
   $('nothing').hidden=visible.length>0;
  }else{
@@ -333,6 +367,7 @@ function render(){
  observeOwner();
 }
 function openAlbum(id,record=true){
+ photoGridObserver?.disconnect();photoGridObserver=null;
  id=canonicalId(id);
  const a=stored.find(x=>x.id===id);
  if(!a||!validImages(a).length)return;
