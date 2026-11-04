@@ -57,7 +57,7 @@
         290.474
       ],
       "position": [
-        100.0,
+        100,
         50
       ],
       "fit": "cover",
@@ -114,7 +114,7 @@
         225.1
       ],
       "position": [
-        100.0,
+        100,
         50
       ],
       "fit": "cover",
@@ -135,7 +135,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
@@ -173,7 +173,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
@@ -192,7 +192,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
@@ -211,7 +211,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
@@ -230,7 +230,7 @@
       ],
       "position": [
         50,
-        31.0
+        31
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
@@ -287,7 +287,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "same_frame_scaled_reviewed_region_display_rotation",
@@ -306,7 +306,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
@@ -325,7 +325,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "same_frame_scaled_reviewed_region_display_rotation",
@@ -402,7 +402,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
@@ -421,7 +421,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
@@ -458,7 +458,7 @@
         222
       ],
       "position": [
-        0.0,
+        0,
         50
       ],
       "fit": "cover",
@@ -485,23 +485,16 @@
       "confidence": 3.639
     },
     "inven-public-photos": {
-      "sha256": "960c509eb2c0af92b14391612883112ac44db660625e7f488055d9f2c9d937ed",
+      "sha256": "5cdb6fae464aa46812f0ba0bb134cbf4ac0e91f1938d2cec48a490ba15670b16",
       "number": 1,
-      "width": 800,
-      "height": 1067,
-      "face": [
-        310,
-        186,
-        168,
-        168
-      ],
+      "width": 1365,
+      "height": 1820,
       "position": [
         50,
-        3.623
+        20
       ],
       "fit": "cover",
-      "method": "local_face_region_and_eye_detection",
-      "confidence": 6.171
+      "method": "same_album_saved_sha_verified_no_identity_inference"
     },
     "cn-huantuji": {
       "sha256": "d1e18de42a52f4406cb95bd80e82e74b50c51df0efd8fbc53d5dfe2d4978c095",
@@ -516,7 +509,7 @@
       ],
       "position": [
         50,
-        0.0
+        0
       ],
       "fit": "cover",
       "method": "manual_face_region_review"
@@ -570,7 +563,7 @@
       ],
       "position": [
         50,
-        100.0
+        100
       ],
       "fit": "cover",
       "method": "local_face_region_and_eye_detection",
