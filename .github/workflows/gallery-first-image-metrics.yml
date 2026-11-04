@@ -28,7 +28,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: gallery-first-image-metrics-${{ github.ref }}
+  group: gallery-first-image-metrics-${{ github.event_name }}-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
 jobs:
   first-image-audit:
