@@ -64,7 +64,7 @@ async function verifiedPhotoResponse(event) {
     const digest = await self.crypto.subtle.digest('SHA-256', bytes);
     const exact = Array.from(new Uint8Array(digest),
       x => x.toString(16).padStart(2, '0')).join('');
-    if (exact !== version) return fetched;
+    if (exact !== version) return new Response('', {status: 502, statusText: 'Stored photo SHA mismatch'});
     const saved = new Response(bytes, {
       status: 200,
       headers: {'Content-Type': mime, 'Content-Length': String(bytes.byteLength),
