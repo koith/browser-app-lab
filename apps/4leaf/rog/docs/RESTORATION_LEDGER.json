@@ -1746,6 +1746,17 @@
         "M09",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-CARDSHOP-TRANSACTION-DURABILITY",
+      "date": "2026-11-04",
+      "origin": "user: finish fastest remaining items while Claude restores original assets",
+      "text": "CardShop source purchase/sale must update user GP and owned cards only after the new profile is truly persisted; simulated browser quota failure must roll back in-memory transaction and show an error without phantom GP/cards; successful retry after recovery retains exact inventory on reload. Do not claim inferred 50% resale policy is original.",
+      "taskIds": [
+        "SHOP-02",
+        "M02",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8771,6 +8782,30 @@
         "P0-RELEASE"
       ],
       "details": "Further root cause: backup can succeed while subsequent localStorage.setItem('rog_match') fails, creating an unsaved live new game. Build nextMatch first, synchronously commit serialized bytes to original key, then assign match/change scene. On quota failure restore DMP PATH, preserve previous in-memory and persisted match and show 경기 저장 실패; regression covers existing unfinished game, explicit replacement consent, denied write, recovery and reload. Await CI; no completion status claimed."
+    },
+    {
+      "seq": 406,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-CARDSHOP-TRANSACTION-DURABILITY",
+      "taskIds": [
+        "SHOP-02",
+        "M02",
+        "P0-RELEASE"
+      ],
+      "details": "GPT independent quick follow-on after beta.59 save protection; Claude original asset paths excluded."
+    },
+    {
+      "seq": 407,
+      "date": "2026-11-04",
+      "type": "CARD_SHOP_DURABLE_PURCHASE_SALE_QA_PENDING",
+      "requestId": "REQ-20261104-CARDSHOP-TRANSACTION-DURABILITY",
+      "taskIds": [
+        "SHOP-02",
+        "M02",
+        "P0-RELEASE"
+      ],
+      "details": "Buy/sell callbacks now revalidate ownership and GP and persist profile once before changing UI/issuing event or GP credit. Failed localStorage commit reverts previous in-memory owned array and GP and displays error; both transactions get a real Chromium quota failure/retry test in cardshop-native-sale.cjs and rog-test CI. beta.60/PWA v147. 50% WEB-inferred resale remains UNVERIFIED. Not marked complete until source rules and real deploy verified."
     }
   ],
   "restorationPriority": {
