@@ -73,9 +73,10 @@ def run(out: Path, limit: int):
                             "from_pixibb": "pixibb" in str(photo.get("source_url","")).lower(),**visual}
                     results.append(result)
                 except Exception as exc:
-                    reason=str(exc) if isinstance(exc, ValueError) and
-                        str(exc) in {"manifest_sha_missing_or_invalid",
-                                    "committed_file_sha256_mismatch"} else type(exc).__name__
+                    reason = (str(exc) if isinstance(exc, ValueError) and
+                              str(exc) in {"manifest_sha_missing_or_invalid",
+                                           "committed_file_sha256_mismatch"}
+                              else type(exc).__name__)
                     failed.append({"model":model,"album":album.get("id"),"reason":reason})
             if limit and total>=limit:break
         if limit and total>=limit:break
