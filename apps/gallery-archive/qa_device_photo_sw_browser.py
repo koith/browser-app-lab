@@ -126,6 +126,26 @@ def main():
                 page.wait_for_function("() => !!navigator.serviceWorker.controller",
                                        timeout=40000)
                 second = decode()
+                if second != {"loaded": True, "width": 48}:
+                    info=page.evaluate("""async (url) => {
+                        const c=await caches.open('"""
+                        + args.model + """-owner-verified-photos-v1');
+                        const keys=await c.keys();
+                        const cached=await c.match(url);
+                        const bytes=cached?await cached.clone().arrayBuffer():null;
+                        return {
+                            controller:navigator.serviceWorker.controller?.scriptURL,
+                            keys:keys.map(x=>x.url),
+                            cached:cached?{type:cached.type,status:cached.status,
+                                length:bytes.byteLength,mime:cached.headers.get('content-type'),
+                                prefix:[...new Uint8Array(bytes.slice(0,8))]}:null
+                        };
+                    }""",image_url)
+                    print("OFFLINE_IMAGE_CACHE_DIAGNOSTIC",json.dumps({
+                        "model":args.model,"browser":args.browser,
+                        "server_requests":state["requests"],"second":second,
+                        "cache":info,"errors":console_errors
+                    }),flush=True)
                 assert second == {"loaded": True, "width": 48}, second
                 assert state["requests"] == 1, (
                     "Browser unexpectedly attempted failed provider after exact SHA cache warm",
