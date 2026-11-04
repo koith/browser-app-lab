@@ -1,0 +1,80 @@
+name: Yui Saved Cover Cache Safety and Live Pages QA
+on:
+  pull_request:
+    paths:
+      - 'apps/yui-gallery/index.html'
+      - 'apps/yui-gallery/gallery-cover-sw.js'
+      - 'apps/yui-gallery/test_cover_sw.cjs'
+      - 'apps/gallery-archive/qa_yui_cover_sw_live.py'
+      - '.github/workflows/yui-cover-cache-qa.yml'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  safe-cover-cache:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Reject original media, auth headers, 503 and unversioned covers
+        run: |
+          node --check apps/yui-gallery/gallery-cover-sw.js
+          node apps/yui-gallery/test_cover_sw.cjs
+          python -m py_compile apps/gallery-archive/qa_yui_cover_sw_live.py
+      - name: Keep exactly one executable inline script and Pages scope
+        run: |
+          python - <<'PY'
+          import re,subprocess,tempfile
+          from pathlib import Path
+          page=Path('apps/yui-gallery/index.html').read_text()
+          scripts=re.findall(r'<script>(.*?)</script>',page,re.S)
+          assert len(scripts)==1,len(scripts)
+          with tempfile.NamedTemporaryFile(suffix='.js',mode='w') as f:
+              f.write(scripts[0]);f.flush()
+              subprocess.run(['node','--check',f.name],check=True)
+          assert "location.hostname==='koith.github.io'" in page
+          assert "register('./gallery-cover-sw.js',{scope:'./'})" in page
+          print('YUI_SINGLE_INLINE_SCRIPT_COVER_SCOPE_PASS')
+          PY
+
+  deployed-cache-registration:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - id: fixture
+        name: Verify exact deploy source or historic NOT_VERIFIED
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+          if [[ -f apps/gallery-archive/qa_yui_cover_sw_live.py ]]; then
+            echo 'ok=true' >> "$GITHUB_OUTPUT"
+            echo "YUI_COVER_CACHE_DEPLOY_SHA=$(git rev-parse HEAD)"
+          else
+            echo 'ok=false' >> "$GITHUB_OUTPUT"
+            echo 'YUI_COVER_CACHE_HISTORIC_NOT_VERIFIED'
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.fixture.outputs.ok == 'true'
+        with: {python-version: '3.12'}
+      - name: Verify real Pages scope and reload control
+        if: steps.fixture.outputs.ok == 'true'
+        run: |
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+          python apps/gallery-archive/qa_yui_cover_sw_live.py --browser ${{ matrix.browser }}
