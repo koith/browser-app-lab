@@ -1,10 +1,8 @@
 name: INTERSECTION — Evidence-Based Operations Board
 
 on:
-  # A single bot comment is UPDATED, not a new ChatGPT conversation or
-  # another discussion thread. Schedule jitter does not imply strict timing.
-  schedule:
-    - cron: "17 */2 * * *"
+  # The event-driven controller updates the same issue comment immediately
+  # after source/repair/QA/deploy events. No 2-hour report timer.
   workflow_dispatch:
   push:
     branches: [main]
