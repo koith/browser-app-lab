@@ -5,6 +5,9 @@ const {startGameWithConfirmation}=require('./game-start-confirmation.cjs');
 async function run(){
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+ // Smoke validates the standalone game; never contact the live ChatTown
+ // backend while testing local maps, sprites, saves, or new-game dialogs.
+ await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('4LEAF PAGEERROR:',e.stack||e)});page.on('console',m=>{if(m.type()==='error')console.error('4LEAF CONSOLE:',m.text())});
  const url=process.env.FOURLEAF_SMOKE_URL||'file://'+path.resolve(__dirname,'../index.html');
  await page.goto(url);await page.waitForFunction(()=>!!window.__ROG_TEST__,null,{timeout:6000});
