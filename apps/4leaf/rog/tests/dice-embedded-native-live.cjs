@@ -63,10 +63,11 @@ const assert=require('node:assert/strict');
    });
    assert.ok(during.visible,'previously verified UI OBS image must render in the die');
    assert.equal(during.chains,'','miscoloured additional source chains must not be live');
-   assert.match(during.status,/index-ordered-INFERRED|partial-/);
+   assert.match(during.status,/index-ordered-INFERRED|partial-|slot20-fall\+slot12-impact/,'native own-palette roll slot 20/12 is permitted');
    assert.match(during.role,/landing-faces-VERIFIED/);
-   assert.ok(during.url?.startsWith('./original/OBS/ui/'),
-    'only verified original UI dice frames are allowed, not embedded: '+during.url);
+   assert.ok(during.url?.startsWith('./original/OBS/ui/')||
+    during.url?.startsWith('./original/OBS/dice-blocks/'),
+    'only source-confirmed original OBS UI and SHA-pinned own-palette dice blocks are allowed: '+during.url);
    assert.ok(['original-UI-OBS','OBS-1171-b0','OBS-1223-b0'].includes(during.source),during.source);
    assert.deepEqual(await promise,[result],'fall presentation may not alter input gameplay eyes');
    const state=await page.evaluate(()=>window.__LEAF_DICE_FALL__.getState());
