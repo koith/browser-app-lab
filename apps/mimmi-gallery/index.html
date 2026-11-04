@@ -253,15 +253,11 @@ document.addEventListener('error',e=>{
   }
  }
  if(recoverSavedCover(img))return;
- const url=img.getAttribute('src')||'',n=Number(img.dataset.sourceRetry||0);
- const policies=['strict-origin-when-cross-origin','origin'];
- if(url.startsWith('https://')&&n<policies.length){
-  img.dataset.sourceRetry=String(n+1);
-  img.referrerPolicy=policies[n];
-  img.removeAttribute('src');
-  requestAnimationFrame(()=>{if(img.isConnected)img.src=url});
-  return;
- }
+ // A denied stored owner URL does not become available when the browser
+ // replays it with a different referrer policy. Local same-SHA fallback and
+ // owner-preview -> original escalation have already been attempted above.
+ // Fail this tile once; keep every other photo independent.
+ const url=img.getAttribute('src')||'';
  registerImageHealth(url,false);
  img.hidden=true;container.classList.add('broken-source');
 },true);
