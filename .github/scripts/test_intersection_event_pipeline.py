@@ -69,9 +69,10 @@ class EventDrivenTests(unittest.TestCase):
         })
         self.assertEqual(attempted["reason"], "REPAIR_ALREADY_ATTEMPTED_AFTER_REPLAY")
         failed = p.decide("INT-01", trigger(t["name"],
-                          conclusion="failure"), SHA, {p.REPAIR: []})
+                          conclusion="failure"), SHA,
+                          {p.REPAIR: [], p.DIAG: [row(125)]})
         self.assertEqual(failed["action"], "NONE")
-        self.assertEqual(failed["reason"], "RECOVERY_FAILED_REQUIRES_CODE_REPAIR")
+        self.assertEqual(failed["reason"], "DIAGNOSTIC_ALREADY_TRIED_ON_SAME_CODE")
 
     def test_failed_replay_triggers_one_synthetic_probe_per_code_revision(self):
         failed = trigger("INTERSECTION — Immediate Encrypted TeraBox Recovery",
