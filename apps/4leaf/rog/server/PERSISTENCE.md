@@ -32,6 +32,23 @@ Room create/close, ownership transfer and each chat message wait for a
 successful remote commit before sending HTTP success. Errors roll back
 the in-process mutation.
 
+Public ChatRoom participant recovery: when the Node service restarts, its
+in-memory guest sessions disappear. A guest who committed a chat message may
+recover their original sender ID using their existing 256-bit bearer token and
+the SHA-256 token fingerprint preserved **inside the encrypted archive**.
+This allows a lost HTTP chat acknowledgement to be retried with the original
+`clientMessageId` exactly once. Both the ID and token fingerprint are
+stripped from public messages and other participants' snapshots. A different
+sender who reuses the same message ID receives HTTP 409, even with identical
+text; an unknown resume token never claims an archived participant identity.
+
+This is **not** permanent account login: a guest with no retained archived
+messages and no owned room may receive a new ID after restart, and histories
+are intentionally limited to 200 retained messages per room. Legacy encrypted
+archives without message sender fingerprints remain readable, but cannot
+retroactively prove a public guest's identity. Backend-only keys and ciphertext
+remain necessary; this does not make ephemeral Render storage durable.
+
 The old LEAF_CENTRAL_STORAGE local file remains available for isolated
 tests or hosting with an actually persistent mounted volume. The free
 Render instance's local directory is not a durable substitute.
