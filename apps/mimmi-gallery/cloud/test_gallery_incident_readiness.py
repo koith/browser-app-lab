@@ -27,7 +27,7 @@ try:
         cold=c.get("/api/gallery-media-readiness")
         assert cold.status_code==200
         assert cold.json()["ready"] is False
-        assert cold.json()["expected"]==49
+        assert cold.json()["expected"]==56
         catalog_by_model={}
         for model,works in gateway._INCIDENT_MEDIA.items():
             albums=[]
@@ -45,14 +45,14 @@ try:
         gateway._owner_rescue_until.update(mimmi=time.time()+5400,yui=time.time()+5400)
         ready=c.get("/api/gallery-media-readiness")
         assert ready.status_code==200,ready.text
-        assert ready.json()=={"ready":True,"available":49,"expected":49},ready.text
+        assert ready.json()=={"ready":True,"available":56,"expected":56},ready.text
         assert ready.headers["cache-control"]=="no-store"
-        # Even with 48 intact exact originals, one missing image fails the
+        # Even with 55 intact exact originals, one missing image fails the
         # whole gallery guarantee; check must never be misreported green.
         victim=gateway._media_cache.values.popitem()
         incomplete=c.get("/api/gallery-media-readiness")
         assert incomplete.json()["ready"] is False,incomplete.text
-        assert incomplete.json()["available"]<49
+        assert incomplete.json()["available"]<56
         gateway._media_cache.values[victim[0]]=victim[1]
         gateway._owner_rescue_until["yui"]=time.time()+20
         expired=c.get("/api/gallery-media-readiness")
@@ -61,7 +61,7 @@ try:
         assert "sha256" not in ready.text
         assert "key" not in ready.text
         assert "cookie" not in ready.text
-        print("GALLERY_BOTH_OWNER_ALL_49_ORIGINALS_READINESS_FAIL_CLOSED_PASS")
+        print("GALLERY_BOTH_OWNER_ALL_56_ORIGINALS_READINESS_FAIL_CLOSED_PASS")
 finally:
     gateway._cache.update(prior_mimmi)
     gateway._yui_cache.update(prior_yui)
