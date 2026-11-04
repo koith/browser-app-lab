@@ -25,7 +25,7 @@ const assert=require('node:assert/strict'),{chromium}=require('playwright');
     mapped:m.getState()};
   });
   assert.equal(Object.keys(roles.effects).length,38);
-  assert.equal(roles.mapped.resolvedSourceCards,78);
+  assert.equal(roles.mapped.resolvedSourceCards,97,'78 archived + 19 recovered (#579)');
   for(const id of Object.keys(roles.effects)){
    const member='1'+id.slice(1);
    assert.ok(!Object.values(roles.cards).some(card=>card.pak==='OBS'&&card.member===member),
@@ -58,7 +58,7 @@ const assert=require('node:assert/strict'),{chromium}=require('playwright');
   await page.screenshot({path:'leaf-chr-correct-original-actors-and-unassigned-effect-sprites.png'});
   assert.deepEqual(errors,[]);
   console.log('4LEAF ORIGINAL OBS NONACTOR ROLES AND TRUE CHR CARD SOURCES PASS',
-   JSON.stringify({effectMembers:38,realCards:97,published:78,
+   JSON.stringify({effectMembers:38,realCards:97,published:97,
     unassignedEffectsPreserved:true}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('CHR OBS NON-ACTOR ROLE QA FAILED',e.stack||e);process.exit(1)});

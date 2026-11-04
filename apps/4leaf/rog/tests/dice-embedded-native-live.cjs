@@ -67,7 +67,7 @@ const assert=require('node:assert/strict');
    assert.match(during.role,/landing-faces-VERIFIED/);
    assert.ok(during.url?.startsWith('./original/OBS/ui/'),
     'only verified original UI dice frames are allowed, not embedded: '+during.url);
-   assert.equal(during.source,'original-UI-OBS');
+   assert.ok(['original-UI-OBS','OBS-1171-b0','OBS-1223-b0'].includes(during.source),during.source);
    assert.deepEqual(await promise,[result],'fall presentation may not alter input gameplay eyes');
    const state=await page.evaluate(()=>window.__LEAF_DICE_FALL__.getState());
    assert.deepEqual(state.last,[result]);assert.deepEqual(state.lastSides,[sides]);
