@@ -51,11 +51,14 @@ function preferred(previous,candidate){
  // Absolute, calibrated decoded-pixel measurements are usable only in
  // matched methods. No megapixel, bytes or watermark scoring here.
  const a=score(previous),b=score(candidate);
- if(a!==null&&b!==null){
+ // A numerical quality score is not proof of photo identity. Compare
+ // independent scores only after a measured pair confirms the same scene.
+ // Otherwise a different image could displace the original in a reused slot.
+ if(verifiedTie&&a!==null&&b!==null){
   if(b-a>=8)return candidate;
   if(a-b>=8)return previous;
  }
- const qualityTie=verifiedTie||(a!==null&&b!==null&&Math.abs(a-b)<8);
+ const qualityTie=verifiedTie;
  // A clean blurry edit NEVER beats a visibly better watermarked edition.
  // When quality has not been evaluated, keep the known variant for review.
  if(qualityTie){
