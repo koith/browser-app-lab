@@ -216,3 +216,28 @@ test('owner transfers private ChatRoom to actual joined peer; kicked former owne
   'authoritative native seats remain distinct after owner transfer/kick/rejoin');
  assert.equal((await call('POST','/api/rooms/'+id+'/close',guest.token,{})).code,200);
 });
+
+
+test('unknown chat ACK replays one persisted message id, never inserts a duplicate or changes text',async t=>{
+ const {app,call,auth}=await open();t.after(()=>app.close());
+ const author=await auth('ReplayTester'),id='leaf-public-north-3-0';
+ assert.equal((await call('POST','/api/rooms/'+id+'/join',author.token,{})).code,200);
+ const clientMessageId='8db1ea48-7b71-4555-8e71-b0d6bdbd921d';
+ const initial=await call('POST','/api/chat',author.token,{text:'응답이 사라진 메시지',clientMessageId});
+ assert.equal(initial.code,201);
+ const again=await call('POST','/api/chat',author.token,{text:'응답이 사라진 메시지',clientMessageId});
+ assert.equal(again.code,200);
+ assert.equal(again.data.replayed,true);
+ assert.equal(again.data.entry.id,initial.data.entry.id);
+ assert.equal(again.data.entry.seq,initial.data.entry.seq);
+ assert.ok(!Object.hasOwn(initial.data.entry,'clientMessageId'),
+  'private idempotency key is not leaked to other room participants');
+ assert.equal((await call('POST','/api/chat',author.token,{text:'변조된 다른 대화',clientMessageId})).code,409);
+ assert.equal((await call('POST','/api/chat',author.token,{text:'메시지',clientMessageId:'bogus'})).code,400);
+ const history=await call('GET','/api/snapshot?after=0',author.token);
+ assert.deepEqual(history.data.entries.map(e=>e.text),['응답이 사라진 메시지']);
+ const second=await call('POST','/api/chat',author.token,
+  {text:'응답이 사라진 메시지',clientMessageId:'1'.repeat(32)});
+ assert.equal(second.code,201,'two deliberate identical messages with different IDs are allowed');
+ assert.equal((await call('GET','/api/snapshot?after=0',author.token)).data.entries.length,2);
+});

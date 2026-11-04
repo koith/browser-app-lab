@@ -120,6 +120,10 @@ function makeServer(options={}){
    preset:true,background:[2,3,5,4,0,1][slot%6],capacity:12,created:0};
  };
  const room=id=>rooms.get(id)||sourceRoom(id);
+ const messageDto=entry=>{
+  const {clientMessageId,...publicEntry}=entry;
+  return publicEntry;
+ };
  const dto=(r,user)=>({id:r.id,name:r.name,region:r.region,district:r.district,
   background:r.background,capacity:r.capacity,preset:!!r.preset,
   created:r.created,locked:!!r.passwordHash,occupants:count(r.id),
@@ -271,18 +275,34 @@ function makeServer(options={}){
     if(!s.roomId||!room(s.roomId))fail(403,'Join a room first');
     const b=await parse(req),message=safe(b.text,250);
     if(!message)fail(400,'Empty message');
+    const clientMessageId=b.clientMessageId;
+    if(clientMessageId!==undefined&&
+      (typeof clientMessageId!=='string'||
+       !/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(clientMessageId)))
+     fail(400,'Invalid client message identifier');
+    // A timeout after COMMIT may hide the 201 from the sender. An identical
+    // high-entropy id in the same room must return its original authoritative
+    // message, never append a second copy or change the global sequence.
+    if(clientMessageId){
+     const prior=(history.get(s.roomId)||[]).find(x=>x.clientMessageId===clientMessageId);
+     if(prior){
+      if(prior.text!==message)fail(409,'Message identifier reused with different content');
+      return send(res,200,{entry:messageDto(prior),replayed:true},origin);
+     }
+    }
     s.recent=s.recent.filter(t=>clock()-t<5000);
     if(s.recent.length>=12)fail(429,'Rate limit');
     guard.chat();
     const item=await transactional(()=>{
      const entry={id:randomUUID(),seq:++sequence,roomId:s.roomId,sender:s.id,
-      user:s.nick,text:message,time:clock()};
+      user:s.nick,text:message,time:clock(),
+      ...(clientMessageId?{clientMessageId}: {})};
      const lines=history.get(s.roomId)||[];
      lines.push(entry);history.set(s.roomId,lines.slice(-200));
      return entry;
     });
     s.recent.push(clock());
-    return send(res,201,{entry:item},origin);
+    return send(res,201,{entry:messageDto(item)},origin);
    }
    if(req.method==='GET'&&route==='/api/snapshot'){
     const roomId=s.roomId&&room(s.roomId)?s.roomId:null;
@@ -290,7 +310,7 @@ function makeServer(options={}){
      id:x.id,nick:x.nick,avatar:x.avatar,facing:x.facing,position:x.position,roomId:x.roomId
     })):[];
     const after=Math.max(0,Number(u.searchParams.get('after')||0)||0);
-    return send(res,200,{roomId,peers,entries:(history.get(roomId)||[]).filter(x=>x.seq>after),
+    return send(res,200,{roomId,peers,entries:(history.get(roomId)||[]).filter(x=>x.seq>after).map(messageDto),
      room:roomId?dto(room(roomId),s):null,
      nextSequence:sequence,serverTime:clock()},origin);
    }

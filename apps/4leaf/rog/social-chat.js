@@ -68,6 +68,15 @@
  const allowedBackground=n=>Number.isInteger(Number(n))&&Number(n)>=0&&Number(n)<=5?Number(n):2;
  const avatars=['sava00','sava82','sava06','sava01','sava85','sava02','sava84','sava04','sava03','sava83','sava05','sava86'];
  const now=()=>Date.now(),uuid=()=>crypto.randomUUID?.()||Math.random().toString(36).slice(2)+String(Date.now());
+ // A real cryptographic ID binds one human-composed draft to its server ACK.
+ // Retrying after an unknown HTTP response must reuse it, not create a second
+ // independent chat message. The server never treats this as user identity.
+ const messageId=()=>{
+  if(typeof crypto.randomUUID==='function')return crypto.randomUUID();
+  const bytes=crypto.getRandomValues(new Uint8Array(16));
+  return [...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');
+ };
+ let pendingChatDelivery=null;
  const safe=(s,max=100)=>String(s??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max);
  // A previous reconstruction mistranscribed the third North Haiacan sign.
  // Preserve rooms already saved under that misspelling when loading storage.
@@ -370,7 +379,7 @@
   }
   return ({'/묵':'✊ 묵','/찌':'✌ 찌','/빠':'✋ 빠'})[command]||null;
  }
- function publishText(text){
+ function publishText(text,clientMessageId){
   const v=safe(text,250);if(!v)return Promise.resolve(false);
   if(v==='/help'){systemLine('/주사위 · /묵 · /찌 · /빠 · /nick 별명 · /me 행동');return Promise.resolve(true)}
   if(v.startsWith('/nick ')){$('rename')?.click();return Promise.resolve(true)}
@@ -383,7 +392,7 @@
   if(central.enabled&&state.view==='room'){
    // Only a 201 from the actual central authority counts as delivery.
    // A failed HTTP call cannot erase an unsent draft or invent local history.
-   return central.chat(content).then(result=>{
+   return central.chat(content,clientMessageId).then(result=>{
     const entry=result.entry;if(!entry)return false;
     const confirmed={id:entry.id,scope:'room:'+entry.roomId,user:entry.user,
      text:entry.text,sender:tabId,time:entry.time};
@@ -1617,11 +1626,17 @@
       // the very same message is still waiting on server confirmation.
       if(form.dataset.centralSending==='true')return;
       const submitted=input.value;
+      const draftId=pendingChatDelivery?.roomId===state.roomId&&
+       pendingChatDelivery?.raw===v?pendingChatDelivery.id:messageId();
+      pendingChatDelivery={id:draftId,roomId:state.roomId,raw:v};
       const submit=form.querySelector('button[type="submit"]');
       form.dataset.centralSending='true';
       if(submit)submit.disabled=true;
-      void Promise.resolve(publishText(v)).then(delivered=>{
-       if(delivered&&input.value===submitted)input.value='';
+      void Promise.resolve(publishText(v,draftId)).then(delivered=>{
+       if(delivered){
+        if(pendingChatDelivery?.id===draftId)pendingChatDelivery=null;
+        if(input.value===submitted)input.value='';
+       }
       }).finally(()=>{
        delete form.dataset.centralSending;
        if(submit)submit.disabled=false;

@@ -121,7 +121,42 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
    null,{timeout:15000});
   assert.equal(duplicateCount,1,'multiple Enter while awaiting server 201 sends exactly one POST');
   await host.unroute('**/api/chat');
-    await host.locator('#message').fill('멀티기기 중앙 서버 메시지');
+    // The authority commits chat, but the browser sees a lost HTTP ACK. A
+   // retry must reuse the original high-entropy ID and not duplicate history.
+   let lostAckCount=0;
+   const receivedIds=[];
+   await host.route('**/api/chat',async route=>{
+    receivedIds.push(route.request().postDataJSON().clientMessageId);
+    if(lostAckCount++===0){
+     const actual=await route.fetch();
+     assert.equal(actual.status(),201,'first request really commits on the server');
+     await route.fulfill({status:503,contentType:'application/json',
+      body:JSON.stringify({error:'Acknowledgement lost after commit'})});
+    }else await route.continue();
+   });
+   const unknownAck='서버 저장 후 ACK 손실 정밀 검증';
+   await host.locator('#message').fill(unknownAck);
+   await host.locator('#message').press('Enter');
+   await host.waitForFunction(text=>
+    document.querySelector('#chat-form')?.dataset.centralSending!=='true'&&
+    document.querySelector('#message')?.value===text,unknownAck,{timeout:15000});
+   await guest.waitForFunction(text=>
+    document.querySelector('#chat-log')?.textContent.includes(text),unknownAck,{timeout:15000});
+   await host.locator('#message').press('Enter');
+   await host.waitForFunction(()=>
+    document.querySelector('#message')?.value===''&&
+    document.querySelector('#chat-form')?.dataset.centralSending!=='true',
+    null,{timeout:15000});
+   assert.equal(receivedIds.length,2);
+   assert.match(receivedIds[0],/^[0-9a-f-]{32,36}$/i);
+   assert.equal(receivedIds[0],receivedIds[1],
+    'human retry reuses original cryptographic message ID');
+   await guest.waitForTimeout(2100);
+   const copies=await guest.locator('#chat-log .social-chat-message').evaluateAll(
+    (nodes,text)=>nodes.filter(el=>el.textContent.includes(text)).length,unknownAck);
+   assert.equal(copies,1,'receiver sees exactly one message after ACK loss and retry');
+   await host.unroute('**/api/chat');
+   await host.locator('#message').fill('멀티기기 중앙 서버 메시지');
   await host.locator('#message').press('Enter');
   await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('멀티기기 중앙 서버 메시지'),{timeout:15000});
   const before=await guest.locator('.social-avatar:not(.self) img').evaluate(el=>el.style.transform);
