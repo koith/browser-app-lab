@@ -264,6 +264,8 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None,
 
 
 async def get_catalog():
+    if _cache["catalog"] and _owner_rescue_until["mimmi"] > time.time():
+        return _cache["catalog"]
     if _cache["catalog"] and (time.time()-_cache["time"]) < 180:
         return _cache["catalog"]
     async with _cache_lock:
@@ -379,9 +381,13 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
 YUI_REMOTE = "archive:YuiArchive"
 _yui_cache = {"catalog": None, "time": 0.0}
 _yui_cache_lock = asyncio.Lock()
+# Signed existing-owner snapshots remain private and expire automatically.
+_owner_rescue_until = {"mimmi": 0.0, "yui": 0.0}
 
 
 async def yui_catalog_bytes():
+    if _yui_cache["catalog"] and _owner_rescue_until["yui"] > time.time():
+        return _yui_cache["catalog"]
     if _yui_cache["catalog"] and time.time() - _yui_cache["time"] < 180:
         return _yui_cache["catalog"]
     async with _yui_cache_lock:
