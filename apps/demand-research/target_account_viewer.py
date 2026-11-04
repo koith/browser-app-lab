@@ -14,7 +14,7 @@ from urllib.parse import urlsplit
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, FileResponse, Response
 from demand_archive import CloudArchive, sha256
-from target_account_archive import REGISTRY_RE, archive_key
+from target_account_archive import REGISTRY_RE, archive_key, account_cloud
 from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
 
 HEX40=re.compile(r"^[a-f0-9]{40}$")
@@ -63,9 +63,7 @@ def open_account(account):
         if (not isinstance(meta,dict) or meta.get("platform")!=match.group(1)
                 or archive_key(meta)!=match.group(2)):
             raise HTTPException(404,"Archive identity mismatch")
-        return root,meta,CloudArchive(
-            root.remote+"/account-archives/"+meta["platform"]+"/"+match.group(2),
-            runner=root.runner)
+        return root,meta,account_cloud(root,meta)
     except (RuntimeError,TypeError,ValueError,KeyError) as error:
         raise HTTPException(502,"Private account archive read unavailable") from None
 
