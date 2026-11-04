@@ -205,11 +205,43 @@ def exercise(browser, model: str, rule: dict, engine: str):
             # First-party owner preview must decode; not just a URL or placeholder.
             img = album.locator("img")
             assert img.count() >= 1, (model, album_id, "missing cover")
-            page.wait_for_function("""(id) => {
-              const album=document.querySelector('#albumgrid .album[data-id="'+id+'"]');
-              const img=album?.querySelector('img');
-              return !!img && img.complete && img.naturalWidth>=160;
-            }""", arg=album_id, timeout=105000)
+            try:
+                page.wait_for_function("""(id) => {
+                  const album=document.querySelector('#albumgrid .album[data-id="'+id+'"]');
+                  const img=album?.querySelector('img');
+                  return !!img && img.complete && img.naturalWidth>=160;
+                }""", arg=album_id, timeout=30000)
+            except PlaywrightTimeoutError as exc:
+                # Make the actual stuck album / gateway error observable rather
+                # than spending 105 seconds and reporting an anonymous timeout.
+                # No media URL query or private token is ever logged.
+                state = page.evaluate("""id => {
+                  const card=[...document.querySelectorAll('#albumgrid .album')]
+                    .find(x=>x.dataset.id===id);
+                  const image=card?.querySelector('img');
+                  let host=null, path=null;
+                  try {
+                    const u=new URL(image?.currentSrc||image?.src||'',location.href);
+                    host=u.hostname;
+                    path=u.pathname;
+                  } catch {}
+                  return {album:id,hasCard:!!card,imagePresent:!!image,
+                    complete:image?.complete??null,decodedWidth:image?.naturalWidth??0,
+                    currentHost:host,currentPath:path,
+                    ownerVariant:image?.dataset.ownerVariant||null,
+                    sourceRetry:image?.dataset.sourceRetry||null,
+                    imageState:card?.dataset.imageState||null,
+                    imageError:card?.dataset.imageError||null,
+                    initialCover:!!card?.dataset.fastCover};
+                }""", album_id)
+                diagnostic = {"model":model,"browser":engine,"cover":state,
+                              "recent_http_errors":page_resources[-12:],
+                              "js_errors":failures[-5:],
+                              "elapsed_seconds":round(time.monotonic()-start,2)}
+                print("DEPLOYED_GALLERY_COVER_TIMEOUT",
+                      json.dumps(diagnostic,ensure_ascii=False),flush=True)
+                raise AssertionError(("real saved cover did not decode within 30 seconds",
+                                      diagnostic)) from exc
             click_current(page, f'#albumgrid .album[data-id="{album_id}"]')
             assert page.locator("#detail").is_visible(), (model, album_id, "detail hidden")
             photo = page.locator("#detailphotos .photo").first
