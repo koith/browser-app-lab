@@ -306,7 +306,7 @@ def test_shallow_private_media_recovers_when_nested_copyto_is_missing():
     def reject_nested_upload(args,data=None,timeout=150,allow_missing=False):
         if (args[0] in ("copyto","rcat")
                 and any("/account-archives/" in str(x) and
-                        "/posts/" in str(x) for x in args)):
+                        "/media/" in str(x) for x in args)):
             attempted.append(args[0])
             raise RuntimeError("private cloud copyto failed (missing)")
         return base_runner(args,data=data,timeout=timeout,allow_missing=allow_missing)
