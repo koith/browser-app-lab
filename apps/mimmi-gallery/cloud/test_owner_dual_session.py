@@ -81,7 +81,7 @@ try:
         with TestClient(gateway.app) as client:
             endpoint="/internal/terabox-session-refresh"
             header={"Authorization":"Bearer offline-OIDC-valid"}
-            assert client.post(endpoint,json={
+            assert client.post(endpoint,headers=header,json={
                 "cookie":"mimmi-cookie-fixture","yui_cookie":"yui-cookie-fixture"
             }).json()=={"synced":True,"models":["mimmi","yui"],"unavailable_models":[]}
             assert os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"]=="mimmi-cookie-fixture"
