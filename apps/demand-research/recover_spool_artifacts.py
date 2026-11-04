@@ -151,7 +151,9 @@ def preserve_encrypted_batch(cloud,spool,paths):
         if safe_failure_category(error)!="missing_remote_path":
             raise
         key="recovery-pack-"+digest+".zip"
-        cloud.write_immutable(key,blob)
+        # Do not let the generic canonical->flat metadata fallback silently
+        # acknowledge bytes that a root listing cannot rediscover later.
+        cloud._write_immutable_direct(key,blob)
     observed=cloud.read_verified(key,digest,cap=len(blob)+1)
     if observed!=blob:
         raise RuntimeError("encrypted recovery batch TeraBox checksum unverified")
