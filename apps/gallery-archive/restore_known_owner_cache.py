@@ -32,7 +32,7 @@ COOKIE={"mimmi":"MIMMI_COOKIE","yui":"YUI_COOKIE"}
 # Snapshot of the exact owner works visible in the user's incident screenshots.
 # The counts are intentionally strict: never accept an incomplete model index.
 TARGET={
-    "mimmi":( ("djawa-janus-scary-lantern-night",8),
+    "mimmi":( ("djawa-janus-scary-lantern-night",15),
               ("mimmi-indie-sana-sopmod2-2019",7) ),
     "yui":( ("djawa-privaty-public-samples",30),
             ("yui-chinokun-illustar-2026-public",4) ),
@@ -252,7 +252,7 @@ def run(model,token):
     if receipt.get("verified") is not True:
         raise OwnerReadUnavailable("Signed catalog not acknowledged")
     chosen,full=select_rows(model,data)
-    # First restore all currently user-reported 30+8 and original 4+7 photos.
+    # First restore all recorded 30+15 and former 4+7 incident originals.
     # Optional covers must never delay the user's photo-detail albums.
     priority=full+chosen
     # Keep first occurrence: an optional cover must not delay urgent photos.
