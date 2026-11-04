@@ -1,0 +1,3800 @@
+{
+ "cards": {
+  "0040": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1025",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "2ce62ad8fe3910fd07ca82dc188ae272061a6e2bc0fd0f460e1d1c269a821b36",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "마르자나",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0040.chr",
+    "chrRecordSHA256": "0e344ee81923f9edc135097684d4884cd16a421599dbc7b2d0c408a740f7ba89",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0042": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1026",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "e96c6b7359add4d0d2415010ebb9b670ebafcfd639902258d3ad723c71302a5f",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "무카파",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0042.chr",
+    "chrRecordSHA256": "69883943aaf94d459f86f41e07c04459fcfc1ed8b576b93201e7522c32dd2071",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0043": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1027",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "548c65b7909507ce2a4b86f2be2614396ddbb2338c8fbff31184c839691e3dba",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "플랑드르",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0043.chr",
+    "chrRecordSHA256": "114bda2a152937fb065dc6866d791ca09f9f55351f6622d9c29ee8786ba82253",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0044": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1028",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "803a3b9cc7f7890ae4f1383642fb24bff43f5a0323aa138c7b7e86c9add04a08",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "발라",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0044.chr",
+    "chrRecordSHA256": "496301b464b82e87be57cb100e7bff9672134ff1cc9111961fefe90e55466658",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0045": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1029",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "7367ba2086c51593e0a0fe9facbbecd8019880616782e906df1f6129ebe99a37",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "닐라",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0045.chr",
+    "chrRecordSHA256": "7c64c1b918d15e69107630f6f45d5faba8e2f75779b2024654f885987d6cc3c1",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0046": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1030",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "4c11c0e85cb5fe1d48a0c0c8fa230d6db6cb95fc726dbcff0b54bee0b7110b26",
+   "constellation": "양자리",
+   "isCard": true,
+   "name": "이븐사이드",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0046.chr",
+    "chrRecordSHA256": "474f90fbcc90386c24b338a571ec671ea0238aa81805e9e7ba02b77457768731",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0047": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1031",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "1d5bfb71988fb0f0e1430bbdd8ac77aad17e0cc80104f7e9af7569672e5869a1",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "사피알딘",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0047.chr",
+    "chrRecordSHA256": "8fd44b9c83e319fe64cd8f6441e2e25059cdabaafb5cb871d51b43cd7ed8f70f",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0048": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1032",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "26924fbb1b49d90553c4c1f85b616a8b638e7f9ff187a2f6c85d6a72639ffa03",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "이븐시나",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0048.chr",
+    "chrRecordSHA256": "0bee3492c66b98cc06217677a320968d12088244716efa433a93a73e3d937cb9",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0049": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1033",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "3a6081f94a18620ec7228c1992b2d34bbc0140b5833fec76eaca96dd76a85e19",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "샤프리아르",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0049.chr",
+    "chrRecordSHA256": "9bbff714330e56738f1ec4b2070a1f969697e203c4d669cb8357b49827c32e51",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0050": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1034",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "aae8ac3beb40fa96ff6556252c3817726a3c9257c29e090813a73ae14b3f83e8",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "알무파샤",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0050.chr",
+    "chrRecordSHA256": "678a9d876229aabc15e94aed07f4edf41b5967044a51d5842405ff6baad7f951",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0051": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1035",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "2c0fa23c0e7a6baa3388da2598550639ddc3e4600948a5eaec5ef0f95ba646a8",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "얀지슈카",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0051.chr",
+    "chrRecordSHA256": "84f6e7294fdcfe04ca73f3758b4ed97d906f5d366b7bdf7fae990388de0d20eb",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0052": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1036",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "c7f72211de39120b241ea078dd332341bb638474b5f3ebcf9b05b26839f37204",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "아두스베이",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0052.chr",
+    "chrRecordSHA256": "9a76bc49b85825950978ce67bcc6681d8e5e24a7d34ca2cfa200f879722d9c1a",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0053": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1037",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "19021dcb595bd0dc20ad49317d6c361d1d0fee3769f68b93f20399bf05d1c017",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "알이스파니히",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0053.chr",
+    "chrRecordSHA256": "c80debd9191eda4c42a39cae57f192714bd4b6e992dfba9d8de2bbd2a7fef184",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0054": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1038",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "e6213cd6c146dad44b8193d2e9ab4b139e66db40367cc8a2d076df53f6a182a7",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "알파라비",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0054.chr",
+    "chrRecordSHA256": "d74a7fbfdb9b98cb83cb615a9dd6cdb753c8c641493d13b0abac3c97579c2556",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0055": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1039",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "874aa9c3782400de7556b7e52d8c16b1edfdd098827347b6dd7e09c1adda5f22",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "알아샤",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0055.chr",
+    "chrRecordSHA256": "73731b90406a5e4cdbdaa1682b27b129cbdc49692fc64689de9c50011ce58221",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0056": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1040",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "ac954b320e56b8c34ffbf1249a9905a4a53e9ac1e91c291cc398216cd8db0734",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "이슈탈",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0056.chr",
+    "chrRecordSHA256": "33a7831d073c688f301cb03136c5c25f8f9ad252288b3c698736c2007a279702",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0040"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0058": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1041",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "729a45d2e12c9e3a8c3e9327e441335dbe93ec05783bd45a162a5f6ae8811aa2",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "오스만누리파사",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0058.chr",
+    "chrRecordSHA256": "b8f50181a799a8258569ffebaa13adf3bd71a4531aec947b5ebd91cbade4bb5a",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0059": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1042",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "0e9ef292918f2efaa901b853c29cd4eee6a8da4fbcb9dd168aa8b4af7fe61614",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "라쉬카",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0059.chr",
+    "chrRecordSHA256": "b7e99f8c549f1c78722300da7a800539adf42c8e2cb31b9a7d634c7a8c835b4e",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full-ext",
+    "frames": 37,
+    "key": "0042"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0060": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1043",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "47637f8b5cbb525d761472a69bc10aaa66ba7c08ccf88fef7ae3f917a97d4852",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "바이올라",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0060.chr",
+    "chrRecordSHA256": "0b1c63db0a8dd8ebe58f1bdcfc2d507b013ab074322dbfe0c60905692d348ccf",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0043"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0061": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1044",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "6a6d7f024c20e18dcb0f572bba2113cae3e2fba2d9faf694a8e9419fb839f796",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "록슬리",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0061.chr",
+    "chrRecordSHA256": "1998eb535f61ea1ac86c2434a786ae2f01497e09ec195ef324bf06c6e3c5b7b7",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0044"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0062": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1045",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "9640a974149342f1fa262217f60a6a74a7a598e1e923aa71057f44ab32b621d2",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "죠엘",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0062.chr",
+    "chrRecordSHA256": "5e41af11f102fcacd4fc28cb3f837094d8b18e492cad688844b868d930a87c3b",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full-ext",
+    "frames": 37,
+    "key": "0045"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0063": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1046",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "dbc29b323135c119d5d44bdf77064d4cfc5b1d262669bd947e7f7bad9e9682e1",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "헤이스팅스",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0063.chr",
+    "chrRecordSHA256": "713c539aa21fe336e19d178aaf27233134dcd999ea0f75663d98ec00f9df2637",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0046"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0064": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1047",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "fcd05bc06d54865e3cc592ffc6d74a38eab233d275b49e5a3fd65ea066c0bdd3",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "아델라이데",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0064.chr",
+    "chrRecordSHA256": "d22b0f3e9267b52a2a57ed632cdea297864f783b48309b4c5615adf8e52bcc50",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0047"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0065": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1048",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "b0d9d4995c8278bdae042752c042e8eaf8984d108514c71c0a6e0ccd9321c64e",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "해럴드깁슨",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0065.chr",
+    "chrRecordSHA256": "847a245aae67abb0a472a5ed7a377cdcf0fab86735fe03995066b050d4f479b4",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0048"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0066": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1049",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "23eee0e6f6335d7ed69caaeb19fa016c1f164263f7597492cb68f2c54466d381",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "엘핀스톤",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0066.chr",
+    "chrRecordSHA256": "d822bfeda16a24487c32b8be91fdbe0e7bb5a0ab37eb7e8151815d5acd824a35",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0049"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0067": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1050",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "2f98625c04d18079fbfd3f7d373d9ab1d83c26fa0283b6b4cda479058e4ec79b",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "롤랑",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0067.chr",
+    "chrRecordSHA256": "6d13487a989d86d32e3f2584a4e3808172f8c6f93c0c8ea3c1343789204c7c3c",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0050"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0068": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1051",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "34d67c4d029bfad0326788b22b65e1d55b9e655cf5269d3598c8217202dd1a31",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "마리아애슬린",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0068.chr",
+    "chrRecordSHA256": "f8c3474dede48c77da9672d601c7c8ffda1da3b73187ba9b5be2e03a6f86e325",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0051"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0069": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1052",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "e14fe89614f5b563cabe8ae959fbd9792f8ca1fba59e25498e0c0ca3691b6c4d",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "노포크",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0069.chr",
+    "chrRecordSHA256": "915cc635a593c5615dddbc93cf8bb5c626125228a8ed3b753a513d96800ef3ca",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0052"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0070": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1053",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "cc5586497f50663c04c6d6501e9719ef36ace625e3ca178d764387ba822575fe",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "케이트호크",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0070.chr",
+    "chrRecordSHA256": "f0d429f8a475ed7a5b30cd454bda84b7b2d0323f3645e48bf2b93074cabed695",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0053"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0071": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1054",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "42c4ba6b976929720a84175a230b1323332d07580b4915288c6313a205fee236",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "지그문트",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0071.chr",
+    "chrRecordSHA256": "140512b0c0d65d057d589569a554c6dc06e8c0e6fdfeb8a792687040881f0df9",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0054"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0072": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1055",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "414e0f087fe598aff57d39502d962fbeac98a3882521702ef3acfc4efdcd6618",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "올리비에",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0072.chr",
+    "chrRecordSHA256": "13e881b0eb68987c3d7d57abea9433957319d9bc36bb15eba18b75ca54e8f651",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0055"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0073": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1056",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "e56658101a91e9d8eb8e9182b2353c19882f4d343ddc08fe055f56805146ce6d",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "자바카스",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0073.chr",
+    "chrRecordSHA256": "148aff3840476a602153b1650e3174dd88dd91d9041a8bf81de6f4a1a9838ba9",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0056"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0074": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1057",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "1c81dd49e43e4f5a0a34b5c4bdaf63038966430781cb216b792c4566fd218fea",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "말콤",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0074.chr",
+    "chrRecordSHA256": "04eda47c0396295eea2604e320f7e410cdcdb55fdd98fa74517fed91783803b5",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0075": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1058",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "65ea0f8b4719e60db938aab0eaf3c4a2d72eac26f44173b92fe5f9471b5d4efb",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "심넬램버트",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0075.chr",
+    "chrRecordSHA256": "5c1ac503453a739bcac769580c9c1b1102b47d521f4f51b4d1539804e34fbd8d",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0058"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0076": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1059",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "6094f708e693f5cef9131e766700d6cf6ae7c19da0f4708ce47dfadf9a5a1467",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "크리스티나",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0076.chr",
+    "chrRecordSHA256": "5a058610ee2a6f4cea82e6072562a512df5aec335703afbc4e90da1845000321",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0059"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0077": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1060",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "ec0c76ce9a6dac060098cc1b1ee8e03704e7edb3495aef2901b05dbc92e5e12e",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "리슐리외",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0077.chr",
+    "chrRecordSHA256": "06aff6df8ab97fed5f6f320bd629a9b8c74b430ab27fa548e3bd3e7843b4ea8a",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0060"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0078": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1061",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "656ceca8bd851e6568de3770e481f59c08943b1ef1da54c1e3909a16ee0d6bd7",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "죠안",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0078.chr",
+    "chrRecordSHA256": "497f60a24c4016449a1099d633b4f1ac86a59d4735bfd4a8de08b15c5d8a945b",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0061"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0079": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1062",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "4a6b47e3ae45a29e4048c5a4ec2e0e5cda92ee7e9fa3ad9e0cd56b4875ac9205",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "보르스",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0079.chr",
+    "chrRecordSHA256": "81372b7300ef04f87fe19424d19c668e7500b9515f785cb2e4ffdec5c4314996",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0062"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0080": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1063",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "bacc3842d039158680d1f5bdd80aa1c245f95f09b59d39836ebf92fc18a0a28e",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "시안",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0080.chr",
+    "chrRecordSHA256": "44d10b9121a55634de21130eb653558a01e980923394a7455992c4acd8ddf3fd",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0063"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0081": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1064",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "73f28ff5a5594521beb0293406f77d72c46a3a37fea2d192e127910b582238e9",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "세시",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0081.chr",
+    "chrRecordSHA256": "84fad7fe2e6703efcbb99c37b62e85a1f4b7a16f1f0d0b6a26e210a3dc4c19a4",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0064"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0082": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1065",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "4901695a7ecc2c36d1ef5586a76ac880a2e41a35d63e8b60dc29a1a605f7e1ea",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "기파랑",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0082.chr",
+    "chrRecordSHA256": "d6beef13ae1122c0fe21d6ab1f95b3ffa3c8235b4739d5e720f2867ad8499079",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0065"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0083": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1066",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "1fce493bae40f09481d9e4d81b0c9b0fcd533599340b8694098b78b22dd6cc01",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "알바티니",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0083.chr",
+    "chrRecordSHA256": "02738c61ef16dc05b07fcff060e7683ab708a1df3e8c2b2424c765a81f8e5b6c",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0066"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0084": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1067",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "50fd972f807c1f33d56ed203c689b1fec854af1c39c3e0a07e1bac008e19b7e0",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "벨제부르",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0084.chr",
+    "chrRecordSHA256": "d48266dbc70076278f06da0da59efd8bd6664e3c17edbdc677c89be3db4c468a",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0067"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0085": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1068",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "2d912261195c9da549350177c196edb579bd7b155691ca700bb6b140aa6826d0",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "시즈",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0085.chr",
+    "chrRecordSHA256": "2cc5c860c525ae26119f12bde174fe3605045740005ff91ddf0f20ff4533fe71",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0068"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0086": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1069",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "8898df4dfe731d0127f25ccf51099da12ae91f8cb0181aee2c3f8aae5eada068",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "바자",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0086.chr",
+    "chrRecordSHA256": "964cdf313abf6d46a421f23d4128e972f4dc8a93147dcf48bd68abf6c2a57d92",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0069"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0087": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1070",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "da68ee3d6302dcf94b78b108af57889f200c7979e6b284a9435c309857d9576a",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "살라딘",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0087.chr",
+    "chrRecordSHA256": "f9736da540e811722c6802fa7b85c4dd12f5d85fa94c735dac80f424ab007752",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0070"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0088": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1071",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "9bfa980afc6ab3e8e6552b7fb231f359f1b5a939d1ca0cdff1fe93de2594ed82",
+   "constellation": "처녀자리",
+   "isCard": true,
+   "name": "셰라자드",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0088.chr",
+    "chrRecordSHA256": "9fd340caa6d450923935bfd0a0c962498f7d885b07fcdc78c813535e7ac0c325",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0071"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0089": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1072",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "0253a62013a1ab7960cc880a61efacb081b36306c3790ef7937ff9a36c222bb0",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "버몬트",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0089.chr",
+    "chrRecordSHA256": "7941728fdbccbb8e137317a777b08de8f39a9c7d2e98c808a20c411f7ed26194",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0072"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0090": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1073",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "49c9107b905ba1c7c4106e4e3a860e9afac7832624c1892aede732ac07d80c2f",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "크리스티앙",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0090.chr",
+    "chrRecordSHA256": "2485de66547577084ad2b693b36c37db621e37534ce42d91f937548d81766f28",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0073"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0091": {
+   "animationCount": 17,
+   "bodyFrames": 37,
+   "bodyMember": "1074",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "cf8d56b4d415931fdf582ede9d55b89e6f67e4ac062f7394b4a7820c1acc7cbc",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "철가면",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0091.chr",
+    "chrRecordSHA256": "b6fd97b25fed6773ac0c0f3f52420343cb5d09bf931cda0932e94048f02997b2",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0074"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0092": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1075",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "13e0a6499f7c8c52b945e9b1091f284dabff6e8fb95ac8e1b1ed96f8d4168c05",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "바시바조크",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0092.chr",
+    "chrRecordSHA256": "8a1f04c287178f79abdaff2adce5551250eda82c5eb00a372477d9bf1f9661e0",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0075"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0093": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1076",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "af48bdf392446d73f9987ee025542ac3629805df9a47f764fdebfec8292e30a8",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "무슬림",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0093.chr",
+    "chrRecordSHA256": "1c13ba56154c2dc039ee72980b301158e4d6be0a512d151d875a9148b4883425",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0076"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0094": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1077",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "19fc1f2b3e91e16d4f1f0b4e791813b3991fa41fc8a137b4a2e2a1bcb57d8124",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "알가지",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0094.chr",
+    "chrRecordSHA256": "418459196ebb442fd50af125eae6daeba759fc97f3bbd2b2fed68b8a094cb6cc",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0077"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0095": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1078",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "4218c5b6d60905f02e793feb2533ecc8658195e4619017f3cfea1a461a844bfe",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "팬드래건나이트",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0095.chr",
+    "chrRecordSHA256": "4a5d27d3a21be69c2de07aeb13bdc1da7c488526fcf95fdcbc94554ac1b115a3",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0078"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0096": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1079",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "47f8efb191148fa4218a73a7654b07b0c63f451cf7ee17956b6d6339bf9ce55c",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "솔져",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0096.chr",
+    "chrRecordSHA256": "b6e04e6acbf1ff627dcf9ce2a989b9f9eeee038e6c1ee8479e726d32d0b399e3",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0079"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0097": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1080",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "43875a884cfdf32cf01f6536ee116502c875d0cac78b48c16a49b5a1e36adcd6",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "마법사",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0097.chr",
+    "chrRecordSHA256": "972d9463525965012de51875173aee940f88650a0898404b5e11b0dd83355b3b",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0080"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0098": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1081",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "e81fea5dca522c6d834f62805c4e6aa67b86d9bef1841aee7fa5aa1d91d92316",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "제국나이트",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0098.chr",
+    "chrRecordSHA256": "18076a931155da4b2c8a56c1185c6eed9e796db43a6e25ca7adaf3536e4b5318",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0081"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0099": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1082",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "48cb3e88cf9e254966683813f9d9c09b7efccb11d820d7330c30acece08d4bfd",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "워락",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0099.chr",
+    "chrRecordSHA256": "66d071a58e6ac5cf6b3b00f9e63274d0ec21d8913bca0e7a1ac94fe53979f723",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0082"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0100": {
+   "animationCount": 15,
+   "bodyFrames": 37,
+   "bodyMember": "1083",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "92dc63b8159b37e54451e65b302d8ca7d0e192667c0640574dd0dd25aa95561f",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "파일럿",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0100.chr",
+    "chrRecordSHA256": "4689ae647c9232ee63aafd05cc87c68cf1a1e3f5e8eae9634048d1d3ca6af456",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0083"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0125": {
+   "animationCount": 17,
+   "bodyFrames": 36,
+   "bodyMember": "1199",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "11445223744a95af5eb8d269fe10f79c83774a65102946d071c9b2071049f18b",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "나탈리",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0125.chr",
+    "chrRecordSHA256": "6adc572970144bf7f1092b901efc483ee52e391da57429bf8a14d41c79104610",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 36,
+    "key": "obs2/1199"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0126": {
+   "animationCount": 17,
+   "bodyFrames": 36,
+   "bodyMember": "1200",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "d981218dfdddcecd9d3be835fd54ee63a8c8b648df1f4f5f9fd6c61a671b870c",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "네리샤",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0126.chr",
+    "chrRecordSHA256": "3f5c4dfbd5eb43343f0b7a294923e5cdbec4f4971f91d4d7bd1fdb86ebb38609",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 36,
+    "key": "obs2/1200"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0127": {
+   "animationCount": 17,
+   "bodyFrames": 46,
+   "bodyMember": "1201",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "f3502df8b7cf9fea2f879ea349da8b785cf6d05959549e724c0464e81ca15047",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "데미안",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0127.chr",
+    "chrRecordSHA256": "bb232b5dba3e5ef9e5a72a3d850df3e0828969acd311b54eabedff043e45629c",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 46,
+    "key": "obs2/1201"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0128": {
+   "animationCount": 17,
+   "bodyFrames": 42,
+   "bodyMember": "1202",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "dce6ffe237dff19636064816f303deab3d73e705feb03354931cd3204c712678",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "디에네",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0128.chr",
+    "chrRecordSHA256": "883d5d6ee694c32556b8b922cf68e373ed8212c3a7b262d31990c90596663374",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 42,
+    "key": "obs2/1202"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0129": {
+   "animationCount": 17,
+   "bodyFrames": 41,
+   "bodyMember": "1203",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "05905a28885daaa2ebcb65be4e03ce5b4ea0fc4d17d43ad386c2463729e611a8",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "란",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0129.chr",
+    "chrRecordSHA256": "079db93638cbe2e5357a04c16837e3510610a53f0a9580a8a2f5d32200a7d60f",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 41,
+    "key": "obs2/1203"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0130": {
+   "animationCount": 17,
+   "bodyFrames": 57,
+   "bodyMember": "1204",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "f657e691c49b4726568078a3044df2c311628d23d9e8842d223948fe52a2289a",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "레드헤드",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0130.chr",
+    "chrRecordSHA256": "616758b011d88db2953941dcb9f3b87f7611983ee8a88ef14fb29c9e714a6d72",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 57,
+    "key": "obs2/1204"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0131": {
+   "animationCount": 17,
+   "bodyFrames": 47,
+   "bodyMember": "1205",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "dc4d699545c5c6d9d6b673833306f2617ac93a6916d8d4b818c68f3c58ca291a",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "루시엔",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0131.chr",
+    "chrRecordSHA256": "12ed0c40edfe18ffd84988581927bcc42e8dd8bce6c8df36a0c52c6eb13b4be3",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 47,
+    "key": "obs2/1205"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0132": {
+   "animationCount": 17,
+   "bodyFrames": 42,
+   "bodyMember": "1206",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "d44d08a4aa2e65ce63f44e7c1b6adf4ec9ca181f1fc6fc6dc098f78f6cb3e8fb",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "루크",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0132.chr",
+    "chrRecordSHA256": "ec6e3816b8a4cf1c4d1b30b1f5a734e205126bab445f3785dabdc1b4cf421bb5",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 42,
+    "key": "obs2/1206"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0133": {
+   "animationCount": 17,
+   "bodyFrames": 49,
+   "bodyMember": "1207",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "cd1d5ca7ee99a41df2706900e94934a4739d379a8eb3ee7f6514971358da9f0f",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "리엔",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0133.chr",
+    "chrRecordSHA256": "b6267270db84e94c9a212c5ab0cbed72eeb25c13a3c5bd25b970a47d06d995d5",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 49,
+    "key": "obs2/1207"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0134": {
+   "animationCount": 17,
+   "bodyFrames": 47,
+   "bodyMember": "1208",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "6fb6edfd55679af72d75b6c71857725f1e31c8b212b57c2734f85fa9fbd13da4",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "리차드",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0134.chr",
+    "chrRecordSHA256": "be8edb6a6d19722f02470a7aa060fea06dfbc7a9808e584861e4e3287951cc72",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 47,
+    "key": "obs2/1208"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0135": {
+   "animationCount": 17,
+   "bodyFrames": 31,
+   "bodyMember": "1209",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "e12428d9116c000ae122f6d869261ef24dc520e1e4be93ce1b88c31eb0cf506b",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "마리아",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0135.chr",
+    "chrRecordSHA256": "9c3492716ff0e0fb50a974cbe8994f570c570930f007368c20e6b64a95f6e3c7",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 31,
+    "key": "obs2/1209"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0136": {
+   "animationCount": 17,
+   "bodyFrames": 57,
+   "bodyMember": "1210",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "809250592ec01ba4c614123bdff0f6e0a9f027555fca3f8ee4d940997440b73d",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "베라모드",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0136.chr",
+    "chrRecordSHA256": "4624c36b3ee52c1fc47d2dfabe35fe47c2ad939a38b63d8e0c21ca23e3d0cf46",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 57,
+    "key": "obs2/1210"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0137": {
+   "animationCount": 17,
+   "bodyFrames": 45,
+   "bodyMember": "1211",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "cd5ac2110e451128dcd19425025711250c588fe6ad5ff2cfb12ae8fe7ff26904",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "살라딘2",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0137.chr",
+    "chrRecordSHA256": "b8076eb0a2c76536797d9572ab5766d7f8b46c53887afa020d9524f0ee797f16",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 45,
+    "key": "obs2/1211"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0138": {
+   "animationCount": 17,
+   "bodyFrames": 17,
+   "bodyMember": "1212",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "cbe7c1211f0ec70aa2a84f4d86753fe194dce722b4c5efac8c76c9a30394184b",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "손나딘",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0138.chr",
+    "chrRecordSHA256": "9dd00064e48e9b7df015546248365da4c5c2ee8470316ef4f4aeaa51bea39490",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0139": {
+   "animationCount": 17,
+   "bodyFrames": 42,
+   "bodyMember": "1213",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "914b3a87d7a85cafcf4688a875684854a2e78e9182dce65c2d94793a383db604",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "아마딘",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0139.chr",
+    "chrRecordSHA256": "0d9b6259429be4e7fda50e867b11b4f1b05379096bed101d009a7f3e4cd4f996",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 42,
+    "key": "obs2/1213"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0140": {
+   "animationCount": 17,
+   "bodyFrames": 44,
+   "bodyMember": "1214",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "c4c3afb99761d459c78bcbd95bf050d3fc05ce94515bd75d6a25121af260ffee",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "아셀라스",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0140.chr",
+    "chrRecordSHA256": "883ffe2477fe854056a71f2b758481acb8fc0f7691935df018089850aa80c6f1",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 44,
+    "key": "obs2/1214"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0141": {
+   "animationCount": 17,
+   "bodyFrames": 48,
+   "bodyMember": "1215",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "ae7081c6100d8bc63e67404097c4b9ada56c8332441fc9e5ee878d7578ee158d",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "아슈레이",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0141.chr",
+    "chrRecordSHA256": "907517ee579d3441e38f891871e24f0a2c9b3c85d547b4cd0d1c556e35947f5f",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 48,
+    "key": "obs2/1215"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0142": {
+   "animationCount": 17,
+   "bodyFrames": 42,
+   "bodyMember": "1216",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "84b1bd0578766c1000be82e6f9a4a56d105487ea3dc34861d7c4599605bb3fdf",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "엠블라",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0142.chr",
+    "chrRecordSHA256": "217e1cbaaeb86171f290f2dec4b8c386ee5651420de268db1edf6288054cd81c",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 42,
+    "key": "obs2/1216"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0143": {
+   "animationCount": 17,
+   "bodyFrames": 42,
+   "bodyMember": "1217",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "6c244175de953b786ca088ba5c89bd28ac4848baa8f30051dd1fa1e27eb0a7e1",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "죠안2",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0143.chr",
+    "chrRecordSHA256": "21d5a14557879e3b406db58e436f54507b4ce0ac0303d65559e436587681d9b0",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 42,
+    "key": "obs2/1217"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0144": {
+   "animationCount": 17,
+   "bodyFrames": 47,
+   "bodyMember": "1218",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "d2f6d618e291b7dd499a566002f1a76e2fdc9532dbfdc56059b483b0da4745ea",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "쥬디",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0144.chr",
+    "chrRecordSHA256": "b42f68ed147591019d736e07ebf194c8dfc727f5b30fab9cdd2df68b5a132abd",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 47,
+    "key": "obs2/1218"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0145": {
+   "animationCount": 17,
+   "bodyFrames": 27,
+   "bodyMember": "1219",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "1b7564e1629679b503859a12d2b064b38a4012da13d39c30e3ee5d1757576fed",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "슈",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0145.chr",
+    "chrRecordSHA256": "f17ca64bd9db6ad22329d8badf93f9accfc1761b37c17c24890e5c095b82a71a",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 27,
+    "key": "obs2/1219"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0146": {
+   "animationCount": 17,
+   "bodyFrames": 44,
+   "bodyMember": "1220",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "a6eb28db12edf5bfd74bdd528653277ba59880a40b3cf459c71e3f9e3ef6fbe4",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "카를로스",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0146.chr",
+    "chrRecordSHA256": "abcca74ed601b8e84ee1902548fdf2c1782db7028e7d927265f752069cddb622",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 44,
+    "key": "obs2/1220"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0147": {
+   "animationCount": 17,
+   "bodyFrames": 45,
+   "bodyMember": "1221",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "c83683ed616640028f6efb5eb1f33178b4a0608bf53a22cdcebdce3200e14eac",
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "크리스티앙2",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0147.chr",
+    "chrRecordSHA256": "8423bddec5bd33832a209f2ee4b5f40e5c40bce05e582cecb6a6bee58326a01a",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 45,
+    "key": "obs2/1221"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0156": {
+   "animationCount": null,
+   "bodyFrames": null,
+   "bodyMember": "1222",
+   "bodyPak": null,
+   "bodyPaks": [],
+   "bodySHA256": null,
+   "constellation": "NULL",
+   "isCard": true,
+   "name": "프라이오스_슈퍼슬라임_",
+   "provenance": {
+    "bodyPakSHA256": null,
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0156.chr",
+    "chrRecordSHA256": "dc0c1f24a15e97e0013c4396dfb3a369497cf33a68d4d712121fd8599d615890",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED-ABSENT",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "CHR-names-member-absent-from-all-packs"
+  },
+  "0157": {
+   "animationCount": 17,
+   "bodyFrames": 34,
+   "bodyMember": "1254",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "0551a0f8b7b42ff2baa39d53e608474b73351c6236335fe702fbbe832cf0cf2c",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "강화병",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0157.chr",
+    "chrRecordSHA256": "859c299e262d5eca4e4a3a47ebeaaca34e77c61345c730e249ed083dca5a6075",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 34,
+    "key": "obs3/1254"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0158": {
+   "animationCount": 15,
+   "bodyFrames": 38,
+   "bodyMember": "1255",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "af613c838de5ec7aa2e0d7a3a10c8b535ba48b342e87aaaa0c3f4e5769d5b396",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "고렘",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0158.chr",
+    "chrRecordSHA256": "a738fe29271f2efaf99caa853623e571535d7fba0a22f0fbbef25e6b9c89ef81",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 38,
+    "key": "obs3/1255"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0159": {
+   "animationCount": 17,
+   "bodyFrames": 16,
+   "bodyMember": "1256",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "9e45ea44404724acd3e2128ed6e10b8560564f7befcf1efa8e154ec909fa031c",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "루칼드",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0159.chr",
+    "chrRecordSHA256": "81eddf7e3ee290c023bbe07c1b8735bad50f8e0007034e547f6284277788362c",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0160": {
+   "animationCount": 17,
+   "bodyFrames": 46,
+   "bodyMember": "1257",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "969d2fcf12a0a4b8cae7c6c767109a52fc2320661749564208d1cdbbc0b06734",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "바룬",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0160.chr",
+    "chrRecordSHA256": "a3579aed8eafc6dd6cae86a27ba59ae5d82254df17ec02ba7900f0c4662e9b96",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 46,
+    "key": "obs3/1257"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0161": {
+   "animationCount": 15,
+   "bodyFrames": 52,
+   "bodyMember": "1258",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "b3e718c5c1ddc71740a8aa7307e08474aa98605dcc195d375862ce7fc4b7fd1f",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "아지다하카",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0161.chr",
+    "chrRecordSHA256": "608d2b57491757764f5e013fc6412739828ecd2a2fe7e546043a380be814872a",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 52,
+    "key": "obs3/1258"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0162": {
+   "animationCount": 17,
+   "bodyFrames": 24,
+   "bodyMember": "1259",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "8702452efc4b9f06c1f73ee0b2886ceea4bcf6152862894af702df6e54eeff6e",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "엘더마스터",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0162.chr",
+    "chrRecordSHA256": "553fc22549c6b9eeb50d2598022032a0dd0261e7ff4c4e42f86ca97266a067ad",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 24,
+    "key": "obs3/1259"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0163": {
+   "animationCount": 17,
+   "bodyFrames": 51,
+   "bodyMember": "1260",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "7a7ed2e136122a30291bad0c70606f97616a32418edd175807d3fbac9651ffc6",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "제이슨",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0163.chr",
+    "chrRecordSHA256": "b3f05233e8a32e9eecec4d86b850f15084bb4549fcc65825ff5d875a744f1447",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 51,
+    "key": "obs3/1260"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0164": {
+   "animationCount": 15,
+   "bodyFrames": 38,
+   "bodyMember": "1261",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "b017630355224fac81cea8d672c794b7863642a3ee96a5516a85611a162380f1",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "좀비",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0164.chr",
+    "chrRecordSHA256": "e0d512cd61e28bdd308512c75fd44df3f0ac75d8b209d112968bc5088d66f946",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 38,
+    "key": "obs3/1261"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0165": {
+   "animationCount": 17,
+   "bodyFrames": 48,
+   "bodyMember": "1262",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "69426203abd726f9bca6937ce18345f9e7281a9c093c2fd6f9baf307fba06540",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "켄",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0165.chr",
+    "chrRecordSHA256": "7caadab5dae64445a9f85a9eb0e27e6d6a4d80a657dd6f3f6e02f247a545ee21",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 48,
+    "key": "obs3/1262"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0166": {
+   "animationCount": 17,
+   "bodyFrames": 45,
+   "bodyMember": "1263",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "c56f781bdc8f5f9e7efce5b621c36eb718cabd976d27d501844ec7c1b556ad0a",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "팬텀 데미안",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0166.chr",
+    "chrRecordSHA256": "75eabd04496bd91c4fc42bc9486f6ae06b8c2fa107e3b165de2165f1c083c275",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 45,
+    "key": "obs3/1263"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0167": {
+   "animationCount": 17,
+   "bodyFrames": 39,
+   "bodyMember": "1264",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "e4bfc89f7682603c6bbed352a178cdb14b4cba1bda17c2e507332d8da704a76d",
+   "constellation": "물고기자리",
+   "isCard": true,
+   "name": "펜텀 마리아",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0167.chr",
+    "chrRecordSHA256": "a3017b6e62360bbd6d170133fd4f95975ae008d83732792516fb56a1acc35d43",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 39,
+    "key": "obs3/1264"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0168": {
+   "animationCount": 17,
+   "bodyFrames": 41,
+   "bodyMember": "1265",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "65622c92c3c4e57de74a4c2a51e3714edd051ffb7d511da16baac673f0d93d18",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "펜텀 유진",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0168.chr",
+    "chrRecordSHA256": "3479a2677b610fff318afd4512e5c1a95593ea32690f42b8314fb67f1fe80cfb",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 41,
+    "key": "obs3/1265"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0169": {
+   "animationCount": 17,
+   "bodyFrames": 32,
+   "bodyMember": "1266",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "651eb86c806bdf86f4227d50bad60fc5da8b08def100bcca24b7b320cab1e843",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "해골병사",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0169.chr",
+    "chrRecordSHA256": "99dc38a10770aacc0b2ed9514335eeb8d962a84fb7621952ba8aad4e4f76a074",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 32,
+    "key": "obs3/1266"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0170": {
+   "animationCount": 17,
+   "bodyFrames": 55,
+   "bodyMember": "1267",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "0fe4a319410b3c5942758ca3ab387ec40a2147a8e052d496dd6b51ab09001915",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "흑태자",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0170.chr",
+    "chrRecordSHA256": "93a7c98fbbc0f9d11d05ed1249ff8b401bbec7cb62a56b57314b28fefa77a74b",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 55,
+    "key": "obs3/1267"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0171": {
+   "animationCount": 17,
+   "bodyFrames": 44,
+   "bodyMember": "1276",
+   "bodyPak": "OBS3.pak",
+   "bodyPaks": [
+    "OBS3.pak"
+   ],
+   "bodySHA256": "d0919f9407edb68b15910ccd7b8216da2fa3d93534c40d4ef17c48de36fff139",
+   "constellation": "물병자리",
+   "isCard": true,
+   "name": "하이델룬",
+   "provenance": {
+    "bodyPakSHA256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0171.chr",
+    "chrRecordSHA256": "1acbb79d69bcb9f23d35be3ed42759b905a23a5e200dd1d6729da4407cd2deac",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 44,
+    "key": "obs3/1276"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  }
+ },
+ "evidence": "VERIFIED: original record field; all values are OBS member numbers; names match bodies (e.g. 0091 Iron Mask -> 1074 masked knight, 0170 Black Prince -> 1267 dark knight)",
+ "nonCardRecords": {
+  "0103": {
+   "animationCount": 14,
+   "bodyFrames": 13,
+   "bodyMember": "1242",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "04143d0a770814bd3a912816a1634e69aee3c9bff6820c46f5dcf694e6d6ca92",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "근육이",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0103.chr",
+    "chrRecordSHA256": "feb44bddde1b14c96958b93c377489ba205cdbf81e38524315a489e10d0ba4b1",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0105": {
+   "animationCount": 14,
+   "bodyFrames": 37,
+   "bodyMember": "1084",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "7826f72a1a59dde94c41452317e7f75a63ad27c4bee6a92ceb65944a60a865ae",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "슬라임",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0105.chr",
+    "chrRecordSHA256": "f7a4b1f280d2a0fbba18a4044ff24d2262fddd0b34ea1a71e142e24d5ae4baed",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0084"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0106": {
+   "animationCount": 14,
+   "bodyFrames": 37,
+   "bodyMember": "1240",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "77d9a34d0a8189a42dfd483dcec9c64d67ab90c892bef0bba893f0f2aa339c73",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "박쥐",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0106.chr",
+    "chrRecordSHA256": "623b0dd181094299b7c6d242dd51d782f991f41619c94321d769055b87e2c2ea",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "obs23-actors",
+    "frames": 37,
+    "key": "obs2/1240"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0107": {
+   "animationCount": 14,
+   "bodyFrames": 37,
+   "bodyMember": "1086",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "ab72bd843aadeda3349ca4dbfce7b4660fe9809977c26aab4cfce0b177b7e8bb",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "좀비",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0107.chr",
+    "chrRecordSHA256": "d56af44dcedbf4c2dfc45e485248295dd7d50587cc042abc7504fdad46cba69b",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0086"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0108": {
+   "animationCount": 14,
+   "bodyFrames": 13,
+   "bodyMember": "1087",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "3ae4a09e8eec07257fcf5e7e34a6c9873e1bc5208de2dc1fc1048a2d3a9f3edd",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "해골병사",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0108.chr",
+    "chrRecordSHA256": "6fdb3b96e247a1edb5a09d80200c0c21259d3fed86e8a7f060bfaaf372f8a445",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full-ext",
+    "frames": 13,
+    "key": "0087"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0109": {
+   "animationCount": 14,
+   "bodyFrames": 37,
+   "bodyMember": "1088",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "40cc720306610aea156d68afda4f3cbd500f2dfa1c4fc4929cdf452d83537976",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "고렘",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0109.chr",
+    "chrRecordSHA256": "af16edf01cd00bc599f1da361537d0f8be6d6833dea7786ce4f739afe4d1e1b3",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full",
+    "frames": 37,
+    "key": "0088"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0110": {
+   "animationCount": 14,
+   "bodyFrames": 13,
+   "bodyMember": "1089",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "eb94ea1834f1957b20146344fb617454ab5faab4abc0f78a47cbd80313941fd9",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "리치",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0110.chr",
+    "chrRecordSHA256": "70b9d40cce2dd2a4ab4b29048704830adc493f66a52d916f658a9382e4ffd0f9",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full-ext",
+    "frames": 13,
+    "key": "0089"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0111": {
+   "animationCount": 14,
+   "bodyFrames": 7,
+   "bodyMember": "1092",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "ef0e497070b3ca93a3fde7c6fc9934a637ed65a39602a836dfd6d8229b16220f",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "마장기 test",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0111.chr",
+    "chrRecordSHA256": "a0215cc88886f794a14cf25a9294b9c22e7fae5ed031caf55928f97ded219461",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full-ext",
+    "frames": 7,
+    "key": "0092"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0113": {
+   "animationCount": null,
+   "bodyFrames": null,
+   "bodyMember": "1168",
+   "bodyPak": null,
+   "bodyPaks": [],
+   "bodySHA256": null,
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "고르곤",
+   "provenance": {
+    "bodyPakSHA256": null,
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0113.chr",
+    "chrRecordSHA256": "51188d8ffe921c5f732033ee695e5059c0a158c67c58d74fe6f14277feaf0ff5",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED-ABSENT",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "CHR-names-member-absent-from-all-packs"
+  },
+  "0114": {
+   "animationCount": 14,
+   "bodyFrames": 51,
+   "bodyMember": "1090",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "dd8945b85fd09fc6d5cfc89f16cfb912cbbc9e9be4e7cfdb9bee1e3f779e0c43",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "아지다하카",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0114.chr",
+    "chrRecordSHA256": "974f5106e5a5f10b380ae702e92bd8b085f16344953350fd60b206ab0495ac7b",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": {
+    "folder": "action-full-ext",
+    "frames": 51,
+    "key": "0090"
+   },
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0115": {
+   "animationCount": 1,
+   "bodyFrames": 31,
+   "bodyMember": "1162",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "c50d8e352c69dd87091e974a81f2cbb00057bd6d02abd097c08c7f8446d6115b",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "게이트웨이",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0115.chr",
+    "chrRecordSHA256": "c75dc55bae1e0ac651b58af20f9c3200b2b90a1955a1af58eee8eaf633f0182f",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0120": {
+   "animationCount": 1,
+   "bodyFrames": 1,
+   "bodyMember": "1184",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "10aa67fe052c898aed77c946655eb4830819c8ebe1e0fedc2191732b3f566243",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "나무",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0120.chr",
+    "chrRecordSHA256": "74ff4bc5d122c630896b2f4367df0b2739855ca74b7c7db0946212916412eda5",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0121": {
+   "animationCount": 1,
+   "bodyFrames": 1,
+   "bodyMember": "1185",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "a51c110bcbe96551193e7b8592bc9deb2fe22a169d2c50c78fb6a0520f8dc8fe",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "푸딩산",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0121.chr",
+    "chrRecordSHA256": "fa6ba6ddc3a35f03d1224b0c31d74bca7f279638e3998c0e53350cfa61b966af",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0122": {
+   "animationCount": 14,
+   "bodyFrames": 15,
+   "bodyMember": "1191",
+   "bodyPak": "OBS.pak",
+   "bodyPaks": [
+    "OBS.pak"
+   ],
+   "bodySHA256": "02eb9c645929145833d64b7269c71df936b33b61ddc9290978d29ae598288e83",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "해골 선장",
+   "provenance": {
+    "bodyPakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0122.chr",
+    "chrRecordSHA256": "bd7578ef3ba67189f1fe675c3d30e2b2685f8d59e29e1a6c3a110d17f1928221",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0149": {
+   "animationCount": 14,
+   "bodyFrames": 13,
+   "bodyMember": "1242",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "04143d0a770814bd3a912816a1634e69aee3c9bff6820c46f5dcf694e6d6ca92",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "근육이",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0149.chr",
+    "chrRecordSHA256": "feb44bddde1b14c96958b93c377489ba205cdbf81e38524315a489e10d0ba4b1",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0150": {
+   "animationCount": 14,
+   "bodyFrames": 15,
+   "bodyMember": "1243",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "cc48f023135b8003541f274346de51da2c19c8eadb6cc2c12664f95b7d8456f3",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "가이아버그",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0150.chr",
+    "chrRecordSHA256": "3c17f7d653323e1119da044bc831782afe52c132724240ae9d238fb37e009681",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0151": {
+   "animationCount": 14,
+   "bodyFrames": 10,
+   "bodyMember": "1244",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "3668c930af2c78ccc505af91bf313d2d3f81082c50e6647c8fba11eaec8fe221",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "노동자스켈톤",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0151.chr",
+    "chrRecordSHA256": "db44418d67cca9635d0df11c7d3246f5a6c946dd1239d1104cd3dde4efa7ced9",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0152": {
+   "animationCount": 14,
+   "bodyFrames": 10,
+   "bodyMember": "1245",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "9a6865fa96da3afce0785feabc35d2a7c367b9f39fd455fa08101a24932507a2",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "바루스",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0152.chr",
+    "chrRecordSHA256": "93db2e60b047773ade8985aff47e418fe023201c14adac5718088ae2f3edd5af",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0153": {
+   "animationCount": 14,
+   "bodyFrames": 12,
+   "bodyMember": "1246",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "2fe46f73e7437d3371c65e5e6eb96385d9d6321bce278731c31bf87d280b173c",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "우주말벌",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0153.chr",
+    "chrRecordSHA256": "7a788695b048f513f199cfd3f35a3c4c8b9e0395037b4169ef4a9f88fd7098c8",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0154": {
+   "animationCount": 14,
+   "bodyFrames": 18,
+   "bodyMember": "1247",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "3ec13151a2dcca0fd2b7ef91aae2fdc35176a6e7e94c09b25531844386cd9073",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "쿠루거_리벤져",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0154.chr",
+    "chrRecordSHA256": "daf7c1b79abd60d579b77c7b36b48a3e2ef36bf05769652238c962c2817b77d3",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  },
+  "0155": {
+   "animationCount": 14,
+   "bodyFrames": 14,
+   "bodyMember": "1250",
+   "bodyPak": "OBS2.pak",
+   "bodyPaks": [
+    "OBS2.pak"
+   ],
+   "bodySHA256": "9c01bd6df34499dcec732816cd8f5fa13a187fb25f8bcaf53e3b2a2fe8ebc146",
+   "constellation": "NULL",
+   "isCard": false,
+   "name": "띰띰해_지연_",
+   "provenance": {
+    "bodyPakSHA256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466",
+    "chrPak": "Dice/CHR.pak",
+    "chrRecord": "0155.chr",
+    "chrRecordSHA256": "b579e1ae62e6d50454404c5952c9f21371e5c36041fee406618538de873322dd",
+    "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+    "level": "VERIFIED",
+    "offsets": {
+     "bodyMember": 260,
+     "constellation": 324,
+     "name": 196,
+     "stats": 452
+    }
+   },
+   "published": null,
+   "status": "VERIFIED-CHR+member-present"
+  }
+ },
+ "source": "Dice/CHR.pak record offset 260 (ASCII OBS member number), SHA1-verified installer",
+ "supersedes": "card 0NNN = OBS.pak member 1NNN convention (wrong for every card)"
+}
