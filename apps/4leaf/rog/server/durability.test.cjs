@@ -183,3 +183,62 @@ test('durable chat retries the same client message ID after full authority resta
   'replaying after a restart must not create another archive revision');
  assert.equal((await second.call('GET','/api/snapshot?after=0',owner.token)).data.entries.length,1);
 });
+
+test('public ChatRoom lost-ACK replay recovers the original sender after full encrypted server restart',async t=>{
+ const db=database();let first=await appFor(db);
+ t.after(async()=>{if(first)await first.close()});
+ const author=await first.session('상설방 사용자');
+ const room='leaf-public-north-3-1';
+ assert.equal((await first.call('POST','/api/rooms/'+room+'/join',author.token,{})).status,200);
+ const key='abdc883a-645f-4ad3-9f2c-415368d06217';
+ const sent=await first.call('POST','/api/chat',author.token,
+  {text:'상설방 재시작 전 실제 한 번 보낸 메시지',clientMessageId:key});
+ assert.equal(sent.status,201);
+ assert.equal(Object.hasOwn(sent.data.entry,'senderTokenHash'),false);
+ assert.equal(Object.hasOwn(sent.data.entry,'clientMessageId'),false);
+ const oldSnapshot=await first.call('GET','/api/snapshot?after=0',author.token);
+ assert.equal(Object.hasOwn(oldSnapshot.data.entries[0],'senderTokenHash'),false);
+ const savedRevision=db.rows.get('production').revision;
+ assert.equal(savedRevision,1,'one real public chat mutation means one durable revision');
+ assert.ok(!JSON.stringify(db.rows.get('production')).includes(author.token),
+  'the bearer token is never written to remote storage in plaintext');
+ await first.close();first=null;
+
+ // Simulate a cold free-tier process restart that lost all in-memory sessions.
+ const second=await appFor(db);t.after(()=>second.close());
+ const recovered=await second.call('POST','/api/session',null,
+  {nick:'상설방 사용자',resume:author.token});
+ assert.equal(recovered.status,201);
+ assert.equal(recovered.data.id,author.id,
+  'encrypted message sender fingerprint proves previously issued guest identity');
+ assert.equal(recovered.data.token,author.token,
+  'a valid resumed public user keeps the same bearer token');
+ assert.equal(recovered.data.room,null,
+  'do not fabricate an occupied room after a cold restart');
+ assert.equal((await second.call('POST','/api/rooms/'+room+'/join',author.token,{})).status,200);
+ const replay=await second.call('POST','/api/chat',author.token,
+  {text:'상설방 재시작 전 실제 한 번 보낸 메시지',clientMessageId:key});
+ assert.equal(replay.status,200);
+ assert.equal(replay.data.replayed,true);
+ assert.equal(replay.data.entry.id,sent.data.entry.id);
+ assert.equal(replay.data.entry.seq,sent.data.entry.seq);
+ assert.equal(db.rows.get('production').revision,savedRevision,
+  'lost-ACK retry cannot create a second room message or archive revision');
+
+ // Guessing/choosing arbitrary 64-hex resume tokens must NOT claim a sender.
+ const forged=await second.call('POST','/api/session',null,
+  {nick:'타인',resume:'f'.repeat(64)});
+ assert.equal(forged.status,201);
+ assert.notEqual(forged.data.id,author.id);
+ assert.notEqual(forged.data.token,'f'.repeat(64));
+ assert.equal((await second.call('POST','/api/rooms/'+room+'/join',forged.data.token,{})).status,200);
+ const stolenAck=await second.call('POST','/api/chat',forged.data.token,
+  {text:'상설방 재시작 전 실제 한 번 보낸 메시지',clientMessageId:key});
+ assert.equal(stolenAck.status,409,
+  'a stolen/guessed ACK ID alone does not reveal another sender acknowledgement');
+ assert.equal(db.rows.get('production').revision,savedRevision);
+ const history=await second.call('GET','/api/snapshot?after=0',author.token);
+ assert.deepEqual(history.data.entries.map(e=>e.text),
+  ['상설방 재시작 전 실제 한 번 보낸 메시지']);
+ assert.equal(Object.hasOwn(history.data.entries[0],'senderTokenHash'),false);
+});
