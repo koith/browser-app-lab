@@ -22,6 +22,17 @@ CAPTURE = "demand-fast-capture.yml"
 TASKS = tuple(f"INT-{i:02d}" for i in range(1, 13))
 COOLDOWN = timedelta(hours=6)
 RECENT_CAPTURE = timedelta(hours=6)
+QA_COOLDOWN = timedelta(hours=24)
+# Only workflows that already exist and expose a safe workflow_dispatch event.
+# Missing mappings are blocked, not fabricated as "done".
+FOLLOWUP_QA = {
+    "INT-02": "demand-public-sources-probe.yml",
+    "INT-04": "demand-repair-archive.yml",
+    "INT-07": "intersection-deployed-pages-qa.yml",
+    "INT-08": "intersection-deployed-pages-qa.yml",
+    "INT-09": "demand-public-sources-probe.yml",
+    "INT-10": "intersection-activity-ranking-qa.yml",
+}
 ACTIVE = {"queued", "pending", "in_progress", "waiting", "requested"}
 
 
@@ -55,13 +66,32 @@ def parse_date(value):
         return None
 
 
-def decide(issue_body, captures, replays, now):
+def decide(issue_body, captures, replays, now, qa_runs=None):
     """Fail closed: no duplicate replay; no cross-task promotion."""
     task, reason = first_incomplete(issue_body)
     base = {"task": task, "task_state": reason, "action": "NONE",
             "reason": "NO_VERIFIED_GATE", "source_run_id": None}
     if task != "INT-01":
-        base["reason"] = "NEXT_TASK_REQUIRES_ITS_OWN_VERIFIED_ACCEPTANCE_GATE"
+        workflow = FOLLOWUP_QA.get(task)
+        if not workflow:
+            base["reason"] = "NO_SAFE_EXISTING_QA_WORKFLOW"
+            return base
+        if qa_runs is None:
+            base["reason"] = "QA_RUN_EVIDENCE_MISSING"
+            return base
+        if any(row.get("status") in ACTIVE for row in qa_runs):
+            base["reason"] = "QA_ALREADY_QUEUED_OR_RUNNING"
+            return base
+        for row in qa_runs:
+            started = parse_date(row.get("created_at"))
+            if started is None or started > now:
+                base["reason"] = "QA_TIMESTAMP_UNVERIFIED"
+                return base
+            if now - started < QA_COOLDOWN:
+                base["reason"] = "QA_COOLDOWN"
+                return base
+        base.update({"action": "DISPATCH_QA", "reason": "FIRST_INCOMPLETE_TASK_SAFE_QA",
+                     "workflow": workflow})
         return base
     if any(row.get("status") in ACTIVE for row in replays):
         base["reason"] = "RECOVERY_ALREADY_QUEUED_OR_RUNNING"
@@ -152,6 +182,14 @@ class GitHub:
                     by_id[row["id"]] = row
         return sorted(by_id.values(), key=lambda row: row["id"], reverse=True)
 
+    def dispatch_qa(self, workflow):
+        if workflow not in FOLLOWUP_QA.values():
+            raise ValueError("not an allowlisted QA workflow")
+        return self.request(
+            f"/repos/{self.repo}/actions/workflows/{workflow}/dispatches",
+            method="POST", data={"ref": "main"},
+        )
+
     def dispatch_replay(self, source_id):
         return self.request(
             f"/repos/{self.repo}/actions/workflows/{RECOVERY}/dispatches",
@@ -166,14 +204,21 @@ def main():
     issue = gh.request(f"/repos/{gh.repo}/issues/{ISSUE}")
     captures = gh.runs(CAPTURE)
     replays = gh.runs(RECOVERY)
+    issue_body = issue.get("body") or ""
+    next_task, _ = first_incomplete(issue_body)
+    qa_runs = (gh.runs(FOLLOWUP_QA[next_task])
+               if next_task in FOLLOWUP_QA else None)
     decision = decide(
-        issue.get("body") or "", captures, replays,
-        datetime.now(timezone.utc),
+        issue_body, captures, replays,
+        datetime.now(timezone.utc), qa_runs=qa_runs,
     )
     # No private source text, credentials, archive paths or raw API errors.
     if decision["action"] == "DISPATCH_RECOVERY":
         gh.dispatch_replay(decision["source_run_id"])
         decision["action"] = "RECOVERY_DISPATCHED"
+    elif decision["action"] == "DISPATCH_QA":
+        gh.dispatch_qa(decision["workflow"])
+        decision["action"] = "QA_DISPATCHED"
     print("INTERSECTION_AUTONOMOUS_CONTROLLER",
           json.dumps(decision, sort_keys=True), flush=True)
     summary = os.getenv("GITHUB_STEP_SUMMARY")
