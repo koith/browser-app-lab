@@ -1393,7 +1393,9 @@ function draw(){
   updateServiceCounts();
   let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x;
   let candidates=cloudMode?0:indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)).length;
-  $("count").textContent=(rows.length-candidates).toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고·자동 생성글 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
+  // Verified posts and unverified discovery leads are disjoint lists.
+  // Never subtract search leads from real post counts (can become negative).
+  $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고·자동 생성글 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
   window.dispatchEvent(new Event("intersection:feed-updated"));
 }
