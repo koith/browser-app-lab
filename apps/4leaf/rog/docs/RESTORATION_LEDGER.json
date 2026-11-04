@@ -1801,6 +1801,17 @@
         "RULE-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-WEBRTC-GUEST-STATE-RECEIPT",
+      "date": "2026-11-04",
+      "origin": "GPT independent 4LEAF development while Claude restores source visuals",
+      "text": "WebRTC 게스트가 호스트 경기 상태 저장·검증을 거부해도 호스트 화면에는 연결 완료만 표시되던 문제를 개선한다. 게스트의 수락/거부 응답을 DataChannel로 전달하고 호스트가 동기화 실패 또는 저장 확인을 알 수 있도록 한다.",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8946,6 +8957,30 @@
         "P0-RELEASE"
       ],
       "details": "Validate battle packet bid, names, score fields, source-D6 value arrays and bounded options before touching guest dialog; reset stale bridge.onState and guestName. Added real 2-peer Chromium offer/answer test for malformed inputs, valid battle choice, and reoffer cleanup; CI/merge/Pages still pending."
+    },
+    {
+      "seq": 416,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-WEBRTC-GUEST-STATE-RECEIPT",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ],
+      "details": "Report guest remote-game acceptance/rejection to connected host, not just transport connectivity."
+    },
+    {
+      "seq": 417,
+      "date": "2026-11-04",
+      "type": "WEBRTC_GUEST_STATE_RECEIPT_QA_PENDING",
+      "requestId": "REQ-20261104-WEBRTC-GUEST-STATE-RECEIPT",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ],
+      "details": "State receiving guest sends state-accepted or state-rejected based on existing durable-save gate return value. Host shows distinct synchronization notices; real two-peer Chromium test covers rejected invalid snapshot and synthetic accepted-return ack transport. Existing separate actual guest storage retry QA retained. PR/CI/Pages verification pending."
     }
   ],
   "restorationPriority": {
