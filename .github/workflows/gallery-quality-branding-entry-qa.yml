@@ -12,6 +12,9 @@ on:
       - 'apps/mimmi-gallery/publishers.json'
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
       - 'apps/gallery-archive/test_publisher_logo_fallback.cjs'
+      - 'apps/gallery-archive/test_curated_cover_manifest.cjs'
+      - 'apps/yui-gallery/album-covers.json'
+      - 'apps/mimmi-gallery/album-covers.json'
       - 'apps/mimmi-gallery/cloud/gateway/portal.py'
       - '.github/workflows/gallery-quality-branding-entry-qa.yml'
   push:
@@ -27,6 +30,9 @@ on:
       - 'apps/mimmi-gallery/publishers.json'
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
       - 'apps/gallery-archive/test_publisher_logo_fallback.cjs'
+      - 'apps/gallery-archive/test_curated_cover_manifest.cjs'
+      - 'apps/yui-gallery/album-covers.json'
+      - 'apps/mimmi-gallery/album-covers.json'
       - 'apps/mimmi-gallery/cloud/gateway/portal.py'
       - '.github/workflows/gallery-quality-branding-entry-qa.yml'
   workflow_dispatch:
@@ -44,6 +50,7 @@ jobs:
           node --check apps/mimmi-gallery/image-quality.js
           node apps/gallery-archive/test_gallery_visual_quality.cjs
           node apps/gallery-archive/test_publisher_logo_fallback.cjs
+          node apps/gallery-archive/test_curated_cover_manifest.cjs
       - name: Verify both embedded gallery scripts parse
         run: |
           python - <<'PY'
