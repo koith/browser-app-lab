@@ -63,6 +63,12 @@ on:
       - 'apps/4leaf/rog/**'
       - '.github/workflows/rog-board-layout.yml'
   workflow_dispatch:
+# Cancel stale checks when a developer pushes another commit to the same PR.
+# Production/main checks remain pinned to their unique SHA and are NEVER cancelled.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   board-layout:
     runs-on: ubuntu-latest
