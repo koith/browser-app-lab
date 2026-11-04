@@ -90,6 +90,28 @@ def audit(browser, model: str, timeout_ms: int) -> dict:
             duplicate_sha_within_owner_work:repeatedInOwner};
         }""".replace("MODEL", model))
         result["coverage_verified_s"] = round(time.monotonic() - start, 2)
+        # Verify the deployed full-photo view actually paginates thousands
+        # of saved photos instead of inserting every <img> on mobile load.
+        page.evaluate("setMode('photos')")
+        page.wait_for_function(
+            "() => document.querySelectorAll('#photogrid .photo').length >= 64",
+            timeout=12000)
+        first_batch = page.locator("#photogrid .photo").count()
+        if first_batch != 64:
+            raise AssertionError((model, "unbounded first photo batch", first_batch))
+        page.locator("#photogrid .photo").last.scroll_into_view_if_needed(
+            timeout=12000)
+        page.wait_for_function(
+            "() => document.querySelectorAll('#photogrid .photo').length > 64",
+            timeout=12000)
+        second_batch = page.locator("#photogrid .photo").count()
+        result["photo_grid_progressive"] = {
+            "first_batch": first_batch,
+            "after_scroll": second_batch,
+            "viewer_total": result["coverage"]["rendered_rows"],
+            "full_inventory_assembled_immediately": False,
+        }
+        page.evaluate("setMode('albums')")
         result["script_errors"] = errors
         result["status"] = (
             "FAIL" if result["coverage"]["owner_sha_absent_from_rendered_gallery"]
