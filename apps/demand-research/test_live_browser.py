@@ -85,10 +85,10 @@ def assert_provider_totals_match_visible_feed(page):
     # The per-provider counts must reconcile to the filtered verified posts,
     # not the raw SNS candidates or hidden advertising rows.
     text=page.locator("#count").text_content()
-    match=re.match(r"^([\\d,]+)건",text)
+    match=re.match(r"^([\d,]+)건",text)
     assert match,("missing verified-feed count",text)
     total=int(match.group(1).replace(",",""))
-    pairs=re.findall(r"\\b([BMLKRXTI])(\\d+)\\b",text)
+    pairs=re.findall(r"\b([BMLKRXTI])(\d+)\b",text)
     counts=dict(pairs)
     assert set(counts)==set("BMLKRXTI"),("missing SNS source subtotal",text)
     assert sum(int(value) for value in counts.values())==total,(
