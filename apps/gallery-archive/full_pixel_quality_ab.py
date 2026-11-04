@@ -13,8 +13,6 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
-from PIL import Image,ImageOps
-import imagehash
 
 ROOT=Path(__file__).resolve().parents[2]
 
@@ -50,6 +48,10 @@ def choose_shard(row,shards):
 
 
 def scan_photo(row):
+    # The aggregator imports entries/choose_shard but never opens pixels.
+    # Pillow/imagehash are needed only in shard scan workers.
+    from PIL import Image, ImageOps
+    import imagehash
     path=row['path'];root=ROOT.resolve()
     if not path.resolve().is_relative_to(root) or not path.is_file() or path.is_symlink():
         return {'status':'missing_file','path':row['path_relative']}
