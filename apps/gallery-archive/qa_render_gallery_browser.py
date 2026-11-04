@@ -3,7 +3,7 @@
 import argparse
 import json
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 ROOT="https://mimmi-private-gallery-free.onrender.com/gallery"
 WORKS={"yui":["yuis-present33","athletic-club104","teddy-bear97"],"mimmi":["mimmi-indie-sana-sopmod2-2019","djawa-rei-beyond-the-heart"]}
@@ -51,15 +51,22 @@ def exercise(browser,model,branch_html=False):
         # The *actual loaded* priority must rank optical quality FIRST.
         # A clean but blurred copy must never win solely due to its watermark.
         assert page.evaluate("""()=>{
-          const quality=s=>({method:'decoded-pixel-v1',confidence:'measured',score:s});
+          const quality=(s,sha)=>({method:'decoded-pixel-v1',
+            confidence:'measured',score:s,photo_sha256:sha});
           const sharp={sha256:'a'.repeat(64),width:900,height:1200,bytes:120000,
-                       watermark_status:'present_verified',visual_quality:quality(90)};
+                       watermark_status:'present_verified',
+                       visual_quality:quality(90,'a'.repeat(64))};
           const blurry={sha256:'b'.repeat(64),width:4000,height:6000,bytes:5000000,
-                        watermark_status:'absent_verified',visual_quality:quality(30)};
-          const near={...blurry,sha256:'c'.repeat(64),visual_quality:quality(87)};
+                        watermark_status:'absent_verified',
+                        visual_quality:quality(30,'b'.repeat(64))};
+          const near={...blurry,sha256:'c'.repeat(64),
+                      visual_quality:quality(87,'c'.repeat(64))};
+          const forged={...near,visual_quality:quality(100,'b'.repeat(64))};
           return GalleryPhotoQuality.preferred(sharp,blurry)===sharp &&
                  GalleryPhotoQuality.preferred(sharp,near)===near &&
-                 GalleryPhotoQuality.preferred(sharp,{...near,visual_quality:null})===sharp;
+                 GalleryPhotoQuality.preferred(sharp,{...near,visual_quality:null})===sharp &&
+                 GalleryPhotoQuality.score(forged)===null &&
+                 GalleryPhotoQuality.preferred(sharp,forged)===sharp;
         }"""),"LIVE_RENDER_OPTICAL_QUALITY_PRIORITY_VIOLATED"
         page.wait_for_function("""limit=>typeof stored!=='undefined'&&stored.reduce((n,a)=>n+a.images.length,0)>=limit&&document.querySelectorAll('#albumgrid .album').length>0&&document.querySelector('#inventory')?.textContent.includes('실제 저장본')""",arg=MIN[model],timeout=90000)
         if model=="yui":
@@ -87,7 +94,28 @@ def exercise(browser,model,branch_html=False):
             selector=f'#albumgrid .album[data-id="{album_id}"]'
             assert page.locator(selector).count()==1,(model,album_id,"missing")
             page.locator(selector).scroll_into_view_if_needed(timeout=20000)
-            page.wait_for_function("""id=>{const im=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');return im?.complete&&im.naturalWidth>=160}""",arg=album_id,timeout=90000)
+            try:
+                page.wait_for_function("""id=>{
+                  const im=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');
+                  return im?.complete&&im.naturalWidth>=160
+                }""",arg=album_id,timeout=30000)
+            except PlaywrightTimeoutError as exc:
+                # A provider 403/503 cannot be repaired by waiting 90s in
+                # both browsers. Report exactly which stored cover failed;
+                # strip query strings and never leak any session credentials.
+                state=page.evaluate("""id=>{
+                  const card=document.querySelector('#albumgrid .album[data-id="'+id+'"]');
+                  const im=card?.querySelector('img');
+                  let host=null,route=null;
+                  try{const u=new URL(im?.currentSrc||im?.src||'',location.href);
+                    host=u.hostname;route=u.pathname;}catch{}
+                  return {cardPresent:!!card,imagePresent:!!im,
+                    imageComplete:im?.complete??null,
+                    decodedWidth:im?.naturalWidth??0,host,route,
+                    failedState:card?.dataset.imageState||null};
+                }""",album_id)
+                raise AssertionError(("LIVE_RENDER_STORED_COVER_UNAVAILABLE",
+                   model,album_id,state)) from exc
             page.locator(selector).click()
             assert page.locator("#detail").is_visible()
             page.locator("#detailphotos .photo").first.scroll_into_view_if_needed()
