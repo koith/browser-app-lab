@@ -43,8 +43,27 @@ def read_existing(remote: str, key: str, destination: Path, env: dict) -> tuple[
                 )
         except subprocess.TimeoutExpired:
             result = None
-        if result and result.returncode == 0 and destination.is_file() and destination.stat().st_size:
-            return True, method
+        if result is None or result.returncode != 0:
+            # A rejected provider read is not authorization to try another
+            # transfer mode. Preserve access-control denial as a failed read.
+            return False, "remote_read_rejected"
+        if not destination.is_file() or not destination.stat().st_size:
+            return False, "remote_read_empty"
+        if destination.stat().st_size <= 512:
+            try:
+                provider = json.loads(destination.read_bytes())
+            except (ValueError, UnicodeError):
+                provider = {}
+            if isinstance(provider, dict):
+                if provider.get("error_code") == 31326:
+                    return False, "provider_access_denied"
+                if provider.get("errno") == 400141 and method == "cat":
+                    # Only the existing same-account 400141 fallback is tried;
+                    # explicit anti-hotlinking denial is never bypassed.
+                    continue
+                if type(provider.get("errno")) is int and provider["errno"] != 0:
+                    return False, "provider_access_rejected"
+        return True, method
     return False, "provider_unavailable"
 
 
