@@ -70,8 +70,9 @@ async function verifiedPhotoResponse(event) {
       headers: {'Content-Type': mime, 'Content-Length': String(bytes.byteLength),
         'Cache-Control': 'private, max-age=31536000, immutable'}
     });
-    event.waitUntil((async () => {
-      try {
+    // Finish the disk write before the image load completes. Async
+    // waitUntil writes can race with Safari document navigation/reload.
+    try {
         await cache.put(request, saved.clone());
         const entries = await cache.keys();
         let size = 0, count = 0;
@@ -89,10 +90,9 @@ async function verifiedPhotoResponse(event) {
             count--; size -= item.length;
           }
         }
-      } catch {
-        // Quota eviction or Safari private mode never breaks photo viewing.
-      }
-    })());
+    } catch {
+      // Quota eviction or Safari private mode never breaks photo viewing.
+    }
     return saved;
   } catch {
     // An uncached request must still behave like the existing gallery.
