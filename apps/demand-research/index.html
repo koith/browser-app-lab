@@ -1103,8 +1103,10 @@ async function fetchFederated(start,end,epoch){
   draw();
 }
 function updateServiceCounts(){
-  serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0,x:0};
-  for(let p of posts)if(p.platform in serviceCounts)serviceCounts[p.platform]++;
+  serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0,x:0,threads:0,instagram:0};
+  // Source subtotals must match actual filtered verified posts. Counting raw
+  // fetched rows incorrectly includes filtered ads and unrelated search terms.
+  for(const p of filtered())if(p.platform in serviceCounts)serviceCounts[p.platform]++;
 }
 
 /*
@@ -1438,7 +1440,7 @@ function draw(){
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
 
   updateServiceCounts();
-  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x;
+  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x+" T"+serviceCounts.threads+" I"+serviceCounts.instagram;
   let candidates=cloudMode?0:indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)).length;
   // Verified posts and unverified discovery leads are disjoint lists.
   // Never subtract search leads from real post counts (can become negative).

@@ -5,6 +5,7 @@ No real user post content is saved or printed.
 import argparse
 import base64
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -79,6 +80,20 @@ def assert_rank_rows_centered(page, width):
     assert max(measured["tileWidths"])-min(measured["tileWidths"])<1.1,measured
     assert abs(measured["leftGap"]-measured["rightGap"])<3,measured
     assert not measured["overflow"],measured
+
+def assert_provider_totals_match_visible_feed(page):
+    # The per-provider counts must reconcile to the filtered verified posts,
+    # not the raw SNS candidates or hidden advertising rows.
+    text=page.locator("#count").text_content()
+    match=re.match(r"^([\d,]+)건",text)
+    assert match,("missing verified-feed count",text)
+    total=int(match.group(1).replace(",",""))
+    pairs=re.findall(r"\b([BMLKRXTI])(\d+)\b",text)
+    counts=dict(pairs)
+    assert set(counts)==set("BMLKRXTI"),("missing SNS source subtotal",text)
+    assert sum(int(value) for value in counts.values())==total,(
+        "source subtotals include filtered ads or unverified links",text)
+
 
 def run(live=False):
     errors=[];api_calls=[];provider_http=[];provider_failed=[];provider_on={"enabled":False}
@@ -221,6 +236,7 @@ def run(live=False):
             n=page.locator("article.post").count()
             thumbnails=page.locator("article.post .post-thumb > img").count()
             assert n>0
+            assert_provider_totals_match_visible_feed(page)
             assert page.locator("article.post .source-badge").count()==n
             assert page.locator("article.post .post-thumb > .source-badge--icon-only").count()==n
             assert page.locator("article.post .post-thumb > .source-badge--icon-only").evaluate_all(
@@ -285,7 +301,10 @@ def run(live=False):
             if not live:
                 assert_rank_rows_centered(page,1200)
                 assert n==270,f"Expected initial 270 visible card limit, got {n}"
-                assert "B315" in page.locator("#count").text_content()
+                assert_provider_totals_match_visible_feed(page)
+                # Initial Bluesky fetched records include hidden advertising,
+                # which must not inflate the visible public-source subtotal.
+                assert "B315" not in page.locator("#count").text_content()
                 assert page.locator("#more").is_visible()
                 page.locator("#more").click()
                 assert page.locator("article.post").count()==294, "Ads must be hidden without UI controls"
@@ -325,6 +344,7 @@ def run(live=False):
                 page.wait_for_function("document.getElementById('applyDate').disabled === false",timeout=120000)
                 for provider in ("M3","L3","K3","R3"):
                     assert provider in page.locator("#count").text_content()
+                assert_provider_totals_match_visible_feed(page)
                 while page.locator('.source-badge[aria-label="출처: Mastodon"]').count()==0:
                     assert page.locator("#more").is_visible()
                     page.locator("#more").click()
@@ -360,6 +380,7 @@ def run(live=False):
                 assert n>=1,"No real public posts"
                 assert thumbnails>0,"No public thumbnails"
                 assert "B" in page.locator("#count").text_content()
+                assert_provider_totals_match_visible_feed(page)
                 # An <img> element is not proof its bytes loaded. Decode
                 # a bounded visible sample and report only aggregate counts.
                 integrity=page.evaluate("""async () => {
