@@ -1,0 +1,72 @@
+name: Gallery Emergency Owner Rescue Pre-Release Gate
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/restore_known_owner_cache.py'
+      - 'apps/gallery-archive/test_owner_read_integrity_retry.py'
+      - '.github/workflows/gallery-owner-rescue-prerelease-gate.yml'
+permissions:
+  contents: read
+jobs:
+  offline-recovery-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: |
+          python -m pip install 'Pillow==11.3.0'
+          python -m py_compile apps/gallery-archive/restore_known_owner_cache.py
+          python apps/gallery-archive/test_owner_read_integrity_retry.py
+  stage-existing-owner-albums:
+    needs: offline-recovery-contract
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 19
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi, yui]
+    env:
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install signed origin's existing read-only client
+        run: |
+          set -euo pipefail
+          python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          test -n "$binary"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Stage exact original pixels and failed-preview behavior without Render deployment
+        env:
+          MODEL: ${{ matrix.model }}
+        run: |
+          set -euo pipefail
+          test -n "$MIMMI_COOKIE" && test -n "$YUI_COOKIE"
+          echo "::add-mask::$MIMMI_COOKIE"
+          echo "::add-mask::$YUI_COOKIE"
+          python apps/gallery-archive/qa_prerelease_real_owner_gateway.py --model "$MODEL"
+  release-gate:
+    needs: [offline-recovery-contract, stage-existing-owner-albums]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Refuse release on any partial or skipped owner byte test
+        env:
+          OFFLINE: ${{ needs.offline-recovery-contract.result }}
+          STAGE: ${{ needs.stage-existing-owner-albums.result }}
+        run: |
+          test "$OFFLINE" = success
+          test "$STAGE" = success
+          echo "GALLERY_PREDEPLOY_BOTH_MODELS_REAL_ORIGINALS_PASS"
+          echo 'Do not claim production/iPhone verification until LIVE post-deploy SHA readback also passes.' >> "$GITHUB_STEP_SUMMARY"
