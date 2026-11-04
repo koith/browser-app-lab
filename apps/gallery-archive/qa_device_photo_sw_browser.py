@@ -12,6 +12,7 @@ import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
+from tempfile import TemporaryDirectory
 
 from PIL import Image
 from playwright.sync_api import sync_playwright
@@ -82,13 +83,17 @@ def main():
         thread.start()
     try:
         with sync_playwright() as p:
-            browser = getattr(p, args.browser).launch(headless=True)
+            # Real Safari keeps an on-device browser profile. Playwright's
+            # default ephemeral/incognito profile can clear CacheStorage
+            # between reloads, causing a false negative for persistence.
+            profile = TemporaryDirectory(prefix="gallery-persistent-sw-")
+            context = getattr(p, args.browser).launch_persistent_context(
+                profile.name, headless=True,
+                viewport={"width": 390, "height": 844},
+                is_mobile=True, has_touch=True, service_workers="allow"
+            )
             try:
-                context = browser.new_context(
-                    viewport={"width": 390, "height": 844},
-                    is_mobile=True, has_touch=True, service_workers="allow"
-                )
-                page = context.new_page()
+                page = context.pages[0] if context.pages else context.new_page()
                 console_errors = []
                 page.on("pageerror", lambda e: console_errors.append(str(e)))
                 page.goto(GALLERY + "/apps/" + args.model + "-gallery/",
@@ -175,7 +180,8 @@ def main():
                     "real_owner_bytes": False
                 }), flush=True)
             finally:
-                browser.close()
+                context.close()
+                profile.cleanup()
     finally:
         for server in servers:
             server.shutdown()
