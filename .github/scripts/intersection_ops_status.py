@@ -347,6 +347,26 @@ class GitHub:
         return "created"
 
 
+def apply_current_stage_output(groups, summaries, *, run_id, task, stage_action, reason):
+    """Use only same-run, allowlisted controller outputs while logs lag.
+
+    GITHUB_OUTPUT is produced by checked-in main code in the previous job,
+    not by PR or public SNS data. Unknown/foreign values remain unverified.
+    """
+    controller_runs = groups.get(CONTROLLER, [])
+    if (not controller_runs
+            or str(controller_runs[0].get("id", "")) != str(run_id)
+            or not isinstance(task, str)
+            or not re.fullmatch(r"INT-(?:0[1-9]|1[0-2])", task)
+            or stage_action not in ALLOWED_STAGE_ACTIONS
+            or reason not in ALLOWED_STAGE_REASONS):
+        return False
+    summaries[controller_runs[0]["id"]] = {
+        "task": task, "action": stage_action, "reason": reason,
+    }
+    return True
+
+
 def main():
     gh = GitHub(
         os.getenv("GITHUB_REPOSITORY", ""),
@@ -368,6 +388,13 @@ def main():
                 data = gh.metrics_for_run(run, marker, job)
                 if data is not None:
                     summaries[run["id"]] = data
+    apply_current_stage_output(
+        groups, summaries,
+        run_id=os.getenv("GITHUB_RUN_ID", ""),
+        task=os.getenv("INTERSECTION_STAGE_TASK", ""),
+        stage_action=os.getenv("INTERSECTION_STAGE_ACTION", ""),
+        reason=os.getenv("INTERSECTION_STAGE_REASON", ""),
+    )
     board = render(
         gh.repo, groups, summaries, issue.get("body") or "",
         datetime.now(timezone.utc),
