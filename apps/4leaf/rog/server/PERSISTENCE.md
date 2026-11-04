@@ -26,7 +26,15 @@ message sequence, or history exceeding the 200-entry retention limit makes the
 entire archive fail closed: the server does not silently filter records and
 later erase the rejected subset. A lost optimistic revision race also sets
 `/api/health` to HTTP 503 until the server restarts against the authoritative
-archive. Both conditions need operator recovery, not an empty-state reset.
+archive.
+A **timeout, HTTP 5xx, or broken response after a mutating request** has an
+unknown commit outcome: the database might already have committed the encrypted
+revision even though the Node server did not receive its ACK. Such errors now
+quarantine the local authority immediately (HTTP 503 for all endpoints) until
+a fresh process reloads the winning archive. It must not show a stale room
+history or retry a new write against the unverified old revision. After restart,
+clients can retry a saved `clientMessageId` to receive the original ACK without
+storing a second message. This is fail-closed safety, not automatic recovery. Both conditions need operator recovery, not an empty-state reset.
 
 Room create/close, ownership transfer and each chat message wait for a
 successful remote commit before sending HTTP success. Errors roll back
