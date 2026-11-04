@@ -28,7 +28,7 @@ def response_fixture(path):
                 "captured_at":"2026-11-04T00:00:00Z",
                 "profile_url":"https://bsky.app/profile/qa.bsky.social"}
     if "/feed" in path:
-        return {"total":1,"offset":0,"more":False,"posts":[{
+        return {"total":2,"offset":0,"more":False,"posts":[{
             "id":POST,"kind":"post","posted_at":"2026-11-03T00:00:00Z",
             "text":"Synthetic posted image and comment history",
             "source_url":"https://bsky.app/profile/qa.bsky.social/post/abc",
