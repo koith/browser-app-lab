@@ -230,18 +230,26 @@ async function nextPage(){
     if(state.account!==selectedAccount||state.section!==selected||
        state.viewVersion!==requestVersion)return;
     const records=selected==="posts"?data.posts:data.accounts;
+    if(!Array.isArray(records))throw Error("보관본 페이지 형식이 올바르지 않습니다.");
     if(offset===0)results.replaceChildren();
     for(const item of records)results.append(selected==="posts"?postCard(item):personCard(item));
     if(!records.length&&offset===0)
       showMessage(selected==="posts"?"보관된 게시글이 없습니다. 백업 실행·완료 여부를 확인하세요.":"조회 가능한 공개 "+sectionLabels[selected]+" 목록이 없습니다.");
     state.offset+=records.length;
-    state.more=Boolean(data.more);$("more").hidden=!state.more;
+    // An empty page cannot advance an offset-based cursor; stop repeat loops.
+    state.more=Boolean(data.more)&&records.length>0;
+    $("more").hidden=!state.more;$("more").textContent="더 보기";
     setStatus(selected==="posts"?"게시글 "+fmt(data.total)+"건 중 "+fmt(state.offset)+"건 표시":
        "공개 관계 계정 "+fmt(data.captured_unique)+"명 보관 · "+fmt(state.offset)+"명 표시 (전체 명단 보장 안 됨)");
   }catch(error){
     if(state.account===selectedAccount&&state.section===selected&&
-       state.viewVersion===requestVersion)
-       showMessage(String(error.message||"보관 자료 불러오기 실패"));
+       state.viewVersion===requestVersion){
+      const message=String(error.message||"보관 자료 불러오기 실패");
+      // Preserve already verified cards; retry exactly the failed offset.
+      if(offset===0)showMessage(message);
+      else setStatus("추가 페이지 조회 실패 · 기존 보관본은 그대로 표시합니다. "+message);
+      state.more=true;$("more").hidden=false;$("more").textContent="다시 시도";
+    }
   }finally{
     if(state.viewVersion===requestVersion){state.loading=false;$("more").disabled=false;}
   }

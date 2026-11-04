@@ -15,7 +15,7 @@ POST="b"*40
 POST2="f"*40
 
 
-def response_fixture(path):
+def response_fixture(path,query=""):
     if path=="/api/account-archives":
         return {"accounts":[{"key":ACCOUNT,"platform":"bluesky",
                 "profile_url":"https://bsky.app/profile/qa.bsky.social"}]}
@@ -28,7 +28,12 @@ def response_fixture(path):
                 "captured_at":"2026-11-04T00:00:00Z",
                 "profile_url":"https://bsky.app/profile/qa.bsky.social"}
     if "/feed" in path:
-        return {"total":2,"offset":0,"more":False,"posts":[{
+        if "offset=2" in query:
+            return {"total":3,"offset":2,"more":False,"posts":[{
+                "id":"e"*40,"kind":"post","posted_at":"2026-11-03T02:00:00Z",
+                "text":"Synthetic retry-only third post","media_expected":0,
+                "media_saved":0,"archive_complete":True,"media":[]}]}
+        return {"total":3,"offset":0,"more":True,"posts":[{
             "id":POST,"kind":"post","posted_at":"2026-11-03T00:00:00Z",
             "text":"Synthetic posted image and comment history",
             "source_url":"https://bsky.app/profile/qa.bsky.social/post/abc",
@@ -67,6 +72,7 @@ def run(browser_type,name,width,height):
         page=browser.new_page(viewport={"width":width,"height":height},
                               color_scheme="light")
         errors=[]
+        retry_requests={"count":0}
         page.on("pageerror",lambda error:errors.append(str(error)[:160]))
         def route_it(route):
             url=route.request.url
@@ -82,13 +88,18 @@ def run(browser_type,name,width,height):
                 route.fulfill(status=200,content_type="text/javascript",
                               body=(ROOT/"account_archive_view.js").read_text("utf-8"))
             elif path.startswith("/api/account-archives"):
+                if "/feed" in path and "offset=2" in urlsplit(url).query:
+                    retry_requests["count"]+=1
+                    if retry_requests["count"]==1:
+                        route.fulfill(status=503,content_type="application/json",body='{"error":"test transient"}')
+                        return
                 if "/media/" in path:
                     route.fulfill(status=200,content_type="image/png",
                         body=bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b49444154789c636000020000050001a5f645400000000049454e44ae426082"))
                 else:
                     import json
                     route.fulfill(status=200,content_type="application/json",
-                                  body=json.dumps(response_fixture(path),ensure_ascii=False))
+                                  body=json.dumps(response_fixture(path,urlsplit(url).query),ensure_ascii=False))
             else:
                 route.abort()
         page.route("**/*",route_it)
@@ -112,6 +123,17 @@ def run(browser_type,name,width,height):
         assert page.locator("#followerCount").inner_text()=="13"
         page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for(timeout=10000)
         assert page.locator(".post-media img").count()==1
+        # A transient 503 on page 2 must leave page 1 visible, and retry from offset=2.
+        assert page.locator("#results article.post").count()==2
+        page.locator("#more").click()
+        page.get_by_text("추가 페이지 조회 실패",exact=False).wait_for(timeout=12000)
+        assert page.locator("#results article.post").count()==2,"failed more must preserve earlier posts"
+        assert page.locator("#more").inner_text()=="다시 시도"
+        page.locator("#more").click()
+        page.locator("#results").get_by_text("Synthetic retry-only third post").wait_for(timeout=12000)
+        assert page.locator("#results article.post").count()==3
+        assert retry_requests["count"]==2,"retry must use the same offset"
+        assert page.locator("#more").is_hidden()
         page.locator("#results article.post").first.get_by_role("button",name="댓글·상세 보기").click()
         assert page.locator("#postDetail[open]").count()==1
         page.get_by_text("Synthetic comment in private view").wait_for(timeout=5000)
