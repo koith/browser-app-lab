@@ -40,3 +40,4 @@ jobs:
           python apps/gallery-archive/test_photo_quality_evidence.py
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/photo_quality_evidence.py apps/mimmi-gallery/cloud/gateway/catalog_view.py
           node apps/gallery-archive/test_gallery_visual_quality.cjs
+          node apps/gallery-archive/test_quality_same_photo.cjs
