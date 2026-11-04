@@ -53,7 +53,7 @@ function makeHarness(gatewayReply=response()) {
   assert.equal(h.observed.length,1,'second request must be served from private browser cache');
 
   for(const bad of [
-    gateway+'/api/media/safe-album/1/original?v='+('a'.repeat(64)),
+    gateway+'/api/media/safe-album/1/original?v='+('a'.repeat(63)),
     cover('a').replace('v='+('a'.repeat(24)),'v=wrong'),
     'https://other.example/api/cover/mimmi/safe-album/1?v='+('a'.repeat(24)),
     cover('a').replace('/mimmi/','/yui/'),
