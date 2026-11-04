@@ -1,13 +1,6 @@
 name: Mimmi Secondary CreamSoda Public Gallery Crawl
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '10 2,14 * * 1,4'
-  push:
-    paths:
-      - 'apps/mimmi-gallery/collect_xiutu_public.py'
-      - 'apps/mimmi-gallery/test_xiutu_public.py'
-      - '.github/workflows/mimmi-xiutu-cream-soda-public.yml'
 permissions:
   contents: write
 concurrency:

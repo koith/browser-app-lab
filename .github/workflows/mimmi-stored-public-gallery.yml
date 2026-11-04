@@ -2,13 +2,6 @@ name: Mimmi Yui-Style Physically Stored Gallery
 on:
   workflow_dispatch:
   # Fast catch-up with small durable commits instead of one enormous push.
-  schedule:
-    - cron: '25 0,3,6,9,12,15,18,21 * * *'
-  push:
-    paths:
-      - 'apps/mimmi-gallery/publish_stored_public.py'
-      - 'apps/mimmi-gallery/test_xiutu_physical_store.py'
-      - '.github/workflows/mimmi-stored-public-gallery.yml'
 permissions:
   contents: write
   actions: write
