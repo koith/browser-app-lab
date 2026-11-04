@@ -85,3 +85,95 @@ def test_public_source_retry_cannot_substitute_another_media_url():
     assert retry["media_saved"]==1 and not retry["archive_complete"]
     assert retry["media"][0]["key"].endswith("/0001.jpg")
     assert "metadata/entries/"+pid+".json" not in cloud.objects
+
+
+def test_public_bluesky_video_view_is_not_false_100_percent_archive(monkeypatch):
+    import demand_capture_job as capture
+    from datetime import datetime,timezone
+    now=int(datetime(2026,11,4,5,0,tzinfo=timezone.utc).timestamp())
+    did="did:plc:syntheticvideoblobrecord"
+    cid="bafk"+"a"*45
+    url="https://video.bsky.app/watch/"+did+"/"+cid+"/playlist.m3u8"
+    original={
+        "uri":"at://"+did+"/app.bsky.feed.post/3kltest1234",
+        "author":{"did":did,"handle":"qa.bsky.social"},
+        "record":{"text":"섹트 video synthetic only",
+                  "createdAt":datetime.fromtimestamp(now-30,timezone.utc).isoformat()},
+        "embed":{"$type":"app.bsky.embed.video#view","playlist":url,"cid":cid}
+    }
+    monkeypatch.setattr(capture,"bluesky_public_search",lambda *args:{"posts":[original]})
+    rows=list(capture.bluesky("섹트",now-3600,now))
+    assert len(rows)==1
+    assert rows[0]["media_expected"]==1
+    assert rows[0]["media_urls"]==[url]
+    assert capture.download_media(url) is None,"HLS manifest is not original MP4"
+    post,blobs=capture.make_post(rows[0],now,get_media=lambda _:None)
+    assert post["media_expected"]==1
+    assert post["media_saved"]==0
+    assert post["archive_complete"] is False
+    assert blobs==[]
+    assert not post["media"]
+
+
+def test_video_blob_cid_fallback_uses_exact_verified_public_post_did(monkeypatch):
+    import demand_capture_job as capture
+    from datetime import datetime,timezone
+    now=int(datetime(2026,11,4,5,0,tzinfo=timezone.utc).timestamp())
+    did="did:plc:syntheticvideoblobrecord"
+    cid="bafk"+"a"*45
+    original={
+        "uri":"at://"+did+"/app.bsky.feed.post/3kltest1234",
+        "author":{"did":did,"handle":"qa.bsky.social"},
+        "record":{"text":"섹트 second video synthetic",
+                  "createdAt":datetime.fromtimestamp(now-30,timezone.utc).isoformat(),
+                  "embed":{"$type":"app.bsky.embed.video",
+                           "video":{"ref":{"$link":cid},"mimeType":"video/mp4"}}},
+        "embed":{"$type":"app.bsky.embed.video#view","playlist":"https://evil.example/irrelevant.m3u8"}
+    }
+    monkeypatch.setattr(capture,"bluesky_public_search",lambda *args:{"posts":[original]})
+    rows=list(capture.bluesky("섹트",now-3600,now))
+    assert len(rows)==1
+    assert rows[0]["media_urls"]==[
+        "https://video.bsky.app/watch/"+did+"/"+cid+"/playlist.m3u8"]
+    assert rows[0]["media_expected"]==1
+
+    # An AppView playlist bound to a DIFFERENT actor is not an original
+    # belonging to this captured author, even on the trusted video domain.
+    original["embed"]["playlist"]=(
+        "https://video.bsky.app/watch/did:plc:someotheractor/"+cid+
+        "/playlist.m3u8")
+    other=list(capture.bluesky("섹트",now-3600,now))
+    assert len(other)==1
+    assert other[0]["media_urls"]==rows[0]["media_urls"]
+
+    # A valid view CID can independently provide the account-bound playlist
+    # if a source record embed is not returned by a partial public API.
+    del original["record"]["embed"]
+    original["embed"]["cid"]=cid
+    view_only=list(capture.bluesky("섹트",now-3600,now))
+    assert len(view_only)==1
+    assert view_only[0]["media_urls"]==rows[0]["media_urls"]
+
+
+def test_up_to_sixteen_original_attachments_keep_exact_order_and_extra_remain_missing():
+    import demand_capture_job as capture
+    media=["https://cdn.bsky.app/img/synthetic"+str(i)+".jpg" for i in range(17)]
+    row=capture.normalized("bluesky","at://did:plc:synthetic/app.bsky.feed.post/post16",
+        "https://bsky.app/profile/qa.bsky.social/post/post16",
+        "섹트 synthetic 17 attachments", "2026-11-04T05:00:00Z", media)
+    assert row["media_expected"]==17
+    assert row["media_urls"]==media[:16]
+    post,blobs=capture.make_post(row,1793768400,
+        get_media=lambda url:("image/jpeg",url.encode()))
+    assert len(blobs)==16
+    assert post["media_saved"]==16
+    assert post["archive_complete"] is False,"truncated source must remain incomplete"
+    assert [m["key"].split("/")[-1] for m in post["media"]]==[
+        f"{n:04d}.jpg" for n in range(1,17)]
+    row16=dict(row,media_urls=row["media_urls"],media_expected=16)
+    complete,_=capture.make_post(row16,1793768400,
+        get_media=lambda url:("image/jpeg",url.encode()))
+    assert complete["archive_complete"] is True
+    assert [m["source_url"] for m in complete["media"]]==media[:16]
+
+

@@ -25,7 +25,7 @@ TERMS = ("뒷계", "섹트", "일탈계")
 WINDOW_MINUTES = 16
 MAX_CATCHUP_MINUTES = 360  # bounded missed-schedule window; current 16m always comes first
 MAX_PER_RUN = 90
-MAX_MEDIA_PER_POST = 6
+MAX_MEDIA_PER_POST = 16  # matches validated post and AES recovery slot limits
 MAX_IMAGE = 24_000_000
 MAX_VIDEO = 80_000_000
 ALLOWED_MEDIA = (
@@ -103,8 +103,50 @@ def bluesky(term, start, end):
             if not posted:
                 continue
             embed = item.get("embed") or {}
-            images = [m.get("fullsize") for m in embed.get("images", [])
-                      if isinstance(m, dict)] if isinstance(embed, dict) else []
+            # Images and video use different AppView embed shapes. Do not mark a
+            # video-only original as media_expected=0 / archive_complete=True:
+            # the HLS manifest is an *evidence URL*, not the original MP4 blob.
+            # Until the author PDS blob is downloaded and SHA-verified the
+            # video remains explicitly incomplete in the private archive.
+            view = embed.get("media",embed) if isinstance(embed,dict) else {}
+            view = view if isinstance(view,dict) else {}
+            images = [m.get("fullsize") for m in view.get("images", [])
+                      if isinstance(m,dict)]
+            typ = str(view.get("$type") or "")
+            video = typ in ("app.bsky.embed.video#view","app.bsky.embed.video")
+            if video:
+                playlist = view.get("playlist")
+                claimed_cid=str(view.get("cid") or "")
+                cid_valid=bool(re.fullmatch(r"baf[a-z2-7]{25,120}",claimed_cid))
+                if not (isinstance(playlist,str) and public_url(playlist)
+                        and urlsplit(playlist).hostname=="video.bsky.app"):
+                    playlist=None
+                if playlist:
+                    # Strict actor and CID binding prevents another public
+                    # account's video from being labelled as this post's.
+                    parts=urlsplit(playlist).path.split("/")
+                    if (len(parts)!=5 or parts[1]!="watch" or
+                            parts[2]!=match.group(1) or
+                            parts[4]!="playlist.m3u8" or
+                            not re.fullmatch(r"baf[a-z2-7]{25,120}",parts[3]) or
+                            (cid_valid and parts[3]!=claimed_cid)):
+                        playlist=None
+                if not playlist:
+                    record_embed=rec.get("embed") or {}
+                    if record_embed.get("$type")=="app.bsky.embed.video":
+                        ref=((record_embed.get("video") or {}).get("ref") or {})
+                        cid=ref.get("$link") if isinstance(ref,dict) else ""
+                    else:
+                        cid=claimed_cid
+                    if isinstance(cid,str) and re.fullmatch(r"baf[a-z2-7]{25,120}",cid):
+                        playlist=("https://video.bsky.app/watch/"+
+                                  match.group(1)+"/"+cid+"/playlist.m3u8")
+                if playlist:
+                    images.append(playlist)
+                else:
+                    # There is no trustworthy attachment link to preserve.
+                    # Do not declare this public video fully backed up.
+                    continue
             link = "https://bsky.app/profile/" + match.group(1) + "/post/" + match.group(2)
             row = normalized("bluesky", uri, link, rec.get("text", ""), posted, images,
                              "https://bsky.app/profile/" + match.group(1))
@@ -224,6 +266,12 @@ def media_allowed(url):
 
 def download_media(url):
     if not media_allowed(url):
+        return None
+    # HLS playlists are streams of transcoded chunks, never the authored
+    # original file. Preserve the verified public reference but do not save
+    # the playlist bytes as the original video or count it as restored media.
+    if ((urlsplit(url).hostname or "").lower()=="video.bsky.app"
+            and urlsplit(url).path.endswith("/playlist.m3u8")):
         return None
     try:
         request = Request(url, headers={"Accept": "image/*,video/*",
