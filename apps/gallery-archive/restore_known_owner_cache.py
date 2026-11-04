@@ -113,7 +113,7 @@ def photo_ok(photo,data,variant):
 
 
 def select_rows(model,catalog):
-    covers_path=ROOT/model+"-gallery"/"album-covers.json"
+    covers_path=ROOT / (model+"-gallery") / "album-covers.json"
     # The pinned cover manifest is only an advisory selector; never a
     # source for unverified bytes, which still come from the owner catalog.
     covers=json.loads(covers_path.read_text()).get("covers",{})
@@ -180,7 +180,10 @@ def run(model,token):
             unique[key]=(album,photo,variant)
     fullset={(a["id"],p["number"],variant) for a,p,variant in full}
     count=0;urgent=0;used=0;skipped=0
+    token_timestamp=time.monotonic()
     for album,photo,variant in unique.values():
+        if time.monotonic()-token_timestamp>120:
+            token=identity();token_timestamp=time.monotonic()
         key=photo["key" if variant=="original" else "preview"]
         expected=int(photo["bytes" if variant=="original" else "preview_bytes"])
         if used+expected>MAX_SHARD_BYTES and (
@@ -203,6 +206,15 @@ def run(model,token):
             raise OwnerReadUnavailable("Render rejected the verified original")
         count+=1;used+=len(content)
         if (album["id"],photo["number"],variant) in fullset:
+            sha=photo["sha256"]
+            prefix="/api/yui" if model=="yui" else "/api"
+            address=ORIGIN+prefix+"/media/"+album["id"]+"/"+str(photo["number"])+"/original?v="+sha
+            with urlopen(address,timeout=65) as proof:
+                live=proof.read(MAX_FILE+1)
+                if (proof.status!=200 or len(live)!=len(content)
+                    or hashlib.sha256(live).hexdigest()!=sha
+                    or not proof.headers.get("Content-Type","").startswith("image/")):
+                    raise OwnerReadUnavailable("Actual live Render original SHA readback failed")
             urgent+=1
     print("OWNER_RESCUE_EXISTING_READBACK",json.dumps({
         "model":model,"albums":len(data["albums"]),
