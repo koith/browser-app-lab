@@ -163,42 +163,63 @@ def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False
               "viewer_back_returns_to_album":True,
               "backend_auth_required":False,
             }
-            # G-11-B: historic links used a bare "#work-id" fragment.
-            # Test the actual deployed page on Chromium and WebKit rather
-            # than treating a JavaScript unit mock as a public-site PASS.
+            # G-11-B: a pasted historic URL opens a FRESH document. A
+            # fragment-only navigation on the same document is not a new
+            # direct visit and does not execute gallery bootstrap again.
             from urllib.parse import quote
             old_url = f"{BASE}/{model}-gallery/#" + quote(target["album"], safe="")
-            page.goto(old_url, wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_function("""wanted => {
-              const state=history.state;
-              return state && state.depth===0 &&
-                state.album===wanted &&
-                document.querySelector('#detail')?.hidden===false;
-            }""", arg=target["album"], timeout=20000)
-            page.reload(wait_until="domcontentloaded", timeout=60000)
-            page.wait_for_function("""wanted =>
-              history.state?.album===wanted &&
-              document.querySelector('#detail')?.hidden===false
-            """, arg=target["album"], timeout=20000)
-            # Safari may emit popstate without the gallery's typed state.
-            # Explicitly clear only this test page's history.state and
-            # emit a real browser event from the historic URL.
-            page.evaluate("""album => {
-              history.replaceState(null, '', '#'+encodeURIComponent(album));
-              setMode('albums');
-              window.dispatchEvent(new PopStateEvent('popstate', {state:null}));
-            }""", target["album"])
-            page.wait_for_function("""wanted =>
-              document.querySelector('#detail')?.hidden===false &&
-              detailAlbum?.id===wanted
-            """, arg=target["album"], timeout=15000)
-            result["legacy_bare_hash_route"] = {
-              "album":target["album"],
-              "opens_on_direct_navigation":True,
-              "survives_reload":True,
-              "restores_on_untyped_popstate":True,
-              "physical_iphone_tested":False,
-            }
+            legacy_page = context.new_page()
+            legacy_page.on("pageerror", lambda error: errors.append(str(error)[:180]))
+            try:
+                response = legacy_page.goto(
+                    old_url, wait_until="domcontentloaded", timeout=60000)
+                assert response and response.status == 200, (
+                    model, "historic direct link HTML not 200")
+                legacy_page.wait_for_function("""wanted => {
+                  const state=history.state;
+                  return state && state.depth===0 &&
+                    state.album===wanted &&
+                    document.querySelector('#detail')?.hidden===false;
+                }""", arg=target["album"], timeout=20000)
+                legacy_page.reload(
+                    wait_until="domcontentloaded", timeout=60000)
+                legacy_page.wait_for_function("""wanted =>
+                  history.state?.album===wanted &&
+                  document.querySelector('#detail')?.hidden===false
+                """, arg=target["album"], timeout=20000)
+                legacy_page.evaluate("""album => {
+                  history.replaceState(
+                    null, '', '#'+encodeURIComponent(album));
+                  setMode('albums');
+                  window.dispatchEvent(
+                    new PopStateEvent('popstate',{state:null}));
+                }""", target["album"])
+                legacy_page.wait_for_function("""wanted =>
+                  document.querySelector('#detail')?.hidden===false &&
+                  detailAlbum?.id===wanted
+                """, arg=target["album"], timeout=15000)
+                result["legacy_bare_hash_route"] = {
+                    "album":target["album"],
+                    "fresh_document_direct_navigation":True,
+                    "survives_reload":True,
+                    "restores_on_untyped_popstate":True,
+                    "physical_iphone_tested":False,
+                }
+            except BrowserTimeout as exc:
+                safe_state=legacy_page.evaluate("""() => ({
+                  hash:location.hash.slice(0,120),
+                  galleryReady:typeof stored!=='undefined' &&
+                    stored.length>0,
+                  album:history.state?.album||null,
+                  detailVisible:document.querySelector('#detail')?.hidden===false,
+                  selectedAlbum:typeof detailAlbum==='undefined'
+                    ?null:detailAlbum?.id||null
+                })""")
+                raise AssertionError((
+                    model, "historic URL failed on fresh document",
+                    safe_state)) from exc
+            finally:
+                legacy_page.close()
         result["script_errors"] = errors
         result["status"] = (
             "FAIL" if result["coverage"]["owner_sha_absent_from_rendered_gallery"]
