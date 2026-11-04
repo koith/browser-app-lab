@@ -113,6 +113,56 @@ def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False
                 "full_inventory_assembled_immediately": False,
             }
             page.evaluate("setMode('albums')")
+            # G-11: the real deployed page must restore an exact saved-photo
+            # deep link after reload without pushing a phantom history entry.
+            # No TeraBox access is required merely to show the lightbox route.
+            target = page.evaluate("""() => {
+              const album=available().find(a=>photosFor(a).length>=2);
+              if(!album)throw Error('No saved album with two photos');
+              const first=photosFor(album)[0];
+              return {album:album.id,photo:first.number};
+            }""")
+            from urllib.parse import urlencode
+            direct = f"{BASE}/{model}-gallery/#"+urlencode(target)
+            page.goto(direct,wait_until="domcontentloaded",timeout=60000)
+            page.reload(wait_until="domcontentloaded",timeout=60000)
+            page.wait_for_function("""wanted => {
+              const state=history.state;
+              return state && state.depth===0 &&
+                state.album===wanted.album &&
+                Number(state.photo)===Number(wanted.photo) &&
+                document.querySelector('#lightbox.open')!==null;
+            }""",arg=target,timeout=20000)
+            page.evaluate("closeViewer()")
+            page.wait_for_function("""() =>
+              !document.querySelector('#lightbox.open') &&
+              history.state?.depth===0 &&
+              !history.state?.photo
+            """,timeout=10000)
+            page.evaluate("""album => openAlbum(album)""",target["album"])
+            page.wait_for_function("""() =>
+              !document.querySelector('#detail').hidden &&
+              history.state?.depth===1
+            """,timeout=10000)
+            page.evaluate("""album => openViewer(photosFor(stored.find(
+              a=>a.id===album)),0)""",target["album"])
+            page.wait_for_function("""() =>
+              !!document.querySelector('#lightbox.open') &&
+              history.state?.depth===2
+            """,timeout=10000)
+            page.go_back(wait_until="domcontentloaded",timeout=20000)
+            page.wait_for_function("""() =>
+              !document.querySelector('#lightbox.open') &&
+              !document.querySelector('#detail').hidden &&
+              history.state?.depth===1
+            """,timeout=15000)
+            result["mobile_route_history"] = {
+              "saved_album":target["album"],
+              "direct_photo_reload":True,
+              "no_duplicate_deep_link_entry":True,
+              "viewer_back_returns_to_album":True,
+              "backend_auth_required":False,
+            }
         result["script_errors"] = errors
         result["status"] = (
             "FAIL" if result["coverage"]["owner_sha_absent_from_rendered_gallery"]
