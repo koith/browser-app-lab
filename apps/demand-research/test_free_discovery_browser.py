@@ -187,6 +187,30 @@ def run():
                     "document.getElementById('applyDate').disabled===false",timeout=30000)
                 assert page.locator(
                     'article.post .source-badge[aria-label="출처: X"]').count()==1
+                # Different SNS are allowed to reuse the same opaque post ID.
+                # A verified X original must only suppress its *X* search
+                # snippet, never a Threads/Instagram public source lead.
+                cross=page.evaluate("""() => window.INTERSECTION_receiveCandidates([
+                  {platform:"x",
+                   url:"https://x.com/qa/status/1234567890123456789",
+                   title:"섹트 already verified X",provider:"test"},
+                  {platform:"threads",
+                   url:"https://www.threads.com/@qa/post/1234567890123456789",
+                   title:"섹트 independent Threads link",provider:"test"},
+                  {platform:"instagram",
+                   url:"https://www.instagram.com/p/1234567890123456789",
+                   title:"섹트 independent Instagram link",provider:"test"}
+                ])""")
+                assert cross==2,"an X ID collision must not suppress other SNS links"
+                assert discovered.count()==2,"both unrelated SNS index links stay visible"
+                assert page.locator(
+                    '#discoveryCandidateList a[href*="threads.com"]').count()==1
+                assert page.locator(
+                    '#discoveryCandidateList a[href*="instagram.com"]').count()==1
+                assert page.locator(
+                    '#discoveryCandidateList a[href*="x.com"]').count()==0
+                assert page.locator("#count").text_content().startswith("1건")
+
                 print("AUTO_UNIFIED_SNS_FIXTURE",json.dumps({
                     "provider_search_calls":len(calls),
                     "undated_candidate_links":3,
