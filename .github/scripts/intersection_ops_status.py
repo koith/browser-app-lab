@@ -21,6 +21,7 @@ PREFIX = "https://api.github.com"
 CAPTURE = "demand-fast-capture.yml"
 REPLAY = "demand-replay-encrypted.yml"
 REPAIR = "demand-repair-archive.yml"
+CONTROLLER = "intersection-autonomous-controller.yml"
 METRICS = {
     "DEMAND_CAPTURE_AGGREGATE_ONLY": (
         "fetched", "saved_verified", "storage_failures",
@@ -90,6 +91,7 @@ def render(repo, run_groups, summaries, issue_body, now):
     capture_rows = run_groups.get(CAPTURE, [])[:3]
     recovery_rows = run_groups.get(REPLAY, [])[:3]
     repair_rows = run_groups.get(REPAIR, [])[:2]
+    controller_rows = run_groups.get(CONTROLLER, [])[:1]
     statuses = []
     for row in capture_rows:
         data = summaries.get(row["id"])
@@ -164,6 +166,14 @@ def render(repo, run_groups, summaries, issue_body, now):
     if not recovery_rows:
         lines.append("| 기록 없음 | UNVERIFIED | — | — | — | — |")
     lines.extend([
+        "",
+        "### 자율 복구·작업 선택 컨트롤러",
+        " · ".join(
+            f"[#{row['id']}]({run_url(row, repo)}) {safe_run_status(row)}"
+            for row in controller_rows
+        ) or "확인된 실행 없음",
+        "실제 선택된 일감과 재전송 여부는 해당 실행의 집계 로그에서 확인. "
+        "컨트롤러 실행 성공은 저장 장애 해결을 뜻하지 않음.",
         "",
         "### 유지보수 대기열",
         " · ".join(
@@ -333,6 +343,7 @@ def main():
         (CAPTURE, "DEMAND_CAPTURE_AGGREGATE_ONLY", "capture"),
         (REPLAY, "INTERSECTION_ENCRYPTED_RECOVERY_SUMMARY", "replay"),
         (REPAIR, None, None),
+        (CONTROLLER, None, None),
     ):
         runs = gh.workflow_runs(filename, limit=5)
         groups[filename] = runs
