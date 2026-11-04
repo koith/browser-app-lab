@@ -230,6 +230,11 @@ test('unknown chat ACK replays one persisted message id, never inserts a duplica
  assert.equal(again.data.replayed,true);
  assert.equal(again.data.entry.id,initial.data.entry.id);
  assert.equal(again.data.entry.seq,initial.data.entry.seq);
+ const uppercaseRetry=await call('POST','/api/chat',author.token,
+  {text:'응답이 사라진 메시지',clientMessageId:clientMessageId.toUpperCase()});
+ assert.equal(uppercaseRetry.code,200,'hex/UUID case may not create a second accepted message');
+ assert.equal(uppercaseRetry.data.replayed,true);
+ assert.equal(uppercaseRetry.data.entry.id,initial.data.entry.id);
  assert.ok(!Object.hasOwn(initial.data.entry,'clientMessageId'),
   'private idempotency key is not leaked to other room participants');
  assert.equal(Object.hasOwn(initial.data.entry,'senderTokenHash'),false,
