@@ -7,7 +7,8 @@ const $=id=>document.getElementById(id);
 const accountSelect=$("accountSelect"),status=$("loadStatus"),results=$("results");
 const detail=$("postDetail"),detailBody=$("detailBody");
 const state={account:"",section:"posts",offset:0,more:false,loading:false,
-             profile:null,records:[],accounts:[]};
+             profile:null,records:[],accounts:[],viewVersion:0};
+let detailRequestSeq=0;
 const base=()=>"/api/account-archives/"+encodeURIComponent(state.account);
 const sectionLabels={posts:"게시글·답글",followers:"팔로워",following:"팔로잉"};
 function node(tag,className,text){
@@ -177,11 +178,12 @@ function commentCard(item){
   return itemNode;
 }
 async function openDetail(post){
+  const requestSeq=++detailRequestSeq,selectedAccount=state.account;
   detailBody.replaceChildren(postCard(post,true),node("p","notice","공개 대화 기록 불러오는 중…"));
   detail.showModal();
   try{
     const thread=await get(base()+"/threads/"+post.id);
-    if(!detail.open)return;
+    if(!detail.open||requestSeq!==detailRequestSeq||state.account!==selectedAccount)return;
     const container=node("div");
     container.append(postCard(post,true));
     if(!thread.captured){
@@ -197,10 +199,13 @@ async function openDetail(post){
     }
     detailBody.replaceChildren(container);
   }catch{
-    if(detail.open)detailBody.append(node("p","notice","댓글 보관본을 읽지 못했습니다. 저장 완료로 간주하지 않습니다."));
+    if(detail.open&&requestSeq===detailRequestSeq&&state.account===selectedAccount)
+      detailBody.append(node("p","notice","댓글 보관본을 읽지 못했습니다. 저장 완료로 간주하지 않습니다."));
   }
 }
 function setTab(section){
+  // A response for the previous tab must not block or overwrite this tab.
+  state.viewVersion+=1;state.loading=false;
   state.section=section;state.offset=0;state.more=false;
   for(const btn of document.querySelectorAll("[data-section]")){
     const active=btn.dataset.section===section;
@@ -208,20 +213,22 @@ function setTab(section){
       btn.classList.toggle("active",active);btn.setAttribute("aria-selected",String(active));
     }
   }
-  $("more").hidden=true;
+  $("more").hidden=true;$("more").disabled=false;
   showMessage("보관된 "+sectionLabels[section]+" 불러오는 중…");
   if(state.account)void nextPage();
 }
 async function nextPage(){
   if(state.loading||!state.account)return;
   state.loading=true;$("more").disabled=true;
-  const selected=state.section,selectedAccount=state.account,offset=state.offset;
+  const selected=state.section,selectedAccount=state.account,offset=state.offset,
+        requestVersion=state.viewVersion;
   try{
     const endpoint=selected==="posts"
        ?base()+"/feed?offset="+offset+"&limit=20"
        :base()+"/graph/"+selected+"?offset="+offset+"&limit=50";
     const data=await get(endpoint);
-    if(state.account!==selectedAccount||state.section!==selected)return;
+    if(state.account!==selectedAccount||state.section!==selected||
+       state.viewVersion!==requestVersion)return;
     const records=selected==="posts"?data.posts:data.accounts;
     if(offset===0)results.replaceChildren();
     for(const item of records)results.append(selected==="posts"?postCard(item):personCard(item));
@@ -232,13 +239,25 @@ async function nextPage(){
     setStatus(selected==="posts"?"게시글 "+fmt(data.total)+"건 중 "+fmt(state.offset)+"건 표시":
        "공개 관계 계정 "+fmt(data.captured_unique)+"명 보관 · "+fmt(state.offset)+"명 표시 (전체 명단 보장 안 됨)");
   }catch(error){
-    if(state.account===selectedAccount&&state.section===selected)
+    if(state.account===selectedAccount&&state.section===selected&&
+       state.viewVersion===requestVersion)
        showMessage(String(error.message||"보관 자료 불러오기 실패"));
-  }finally{state.loading=false;$("more").disabled=false;}
+  }finally{
+    if(state.viewVersion===requestVersion){state.loading=false;$("more").disabled=false;}
+  }
 }
 async function selectAccount(value){
-  if(!value){showMessage("계정을 선택하세요.");return;}
-  state.account=value;state.profile=null;state.offset=0;state.section="posts";
+  // Cancel stale page and comment renders before changing account.
+  state.viewVersion+=1;state.loading=false;
+  $("more").hidden=true;$("more").disabled=false;
+  detailRequestSeq+=1;
+  if(detail.open)detail.close();
+  state.account=value||"";state.profile=null;state.offset=0;state.section="posts";
+  if(!value){
+    resetProfile();$("displayName").textContent="계정을 선택하세요";
+    showMessage("계정을 선택하세요.");setStatus("보관할 계정을 선택하세요.");
+    return;
+  }
   resetProfile();showMessage("게시글 보관본을 불러오는 중…");
   try{
     const profile=await get(base()+"/profile");
@@ -278,5 +297,6 @@ document.querySelectorAll("[data-section]").forEach(btn=>btn.addEventListener(
 $("more").addEventListener("click",()=>void nextPage());
 $("closeDetail").addEventListener("click",()=>detail.close());
 detail.addEventListener("click",event=>{if(event.target===detail)detail.close();});
+detail.addEventListener("close",()=>{detailRequestSeq+=1;detailBody.replaceChildren();});
 void init();
 })();
