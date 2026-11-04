@@ -74,8 +74,9 @@ Object.defineProperty(navigator,"clipboard",{
             response=page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
             assert response and response.status==200
             page.wait_for_function("""() => {
-              const label=document.getElementById("targetArchiveSubmit").textContent;
-              return label.includes("GitHub에서")||label.includes("테라박스 백업 시작");
+              const status=document.getElementById("targetArchiveStatus").textContent;
+              return status.includes("공개 페이지")||
+                     status.includes("개인용 보관 서버 연결됨");
             }""")
             assert len(status_queries)==1
             button=page.locator("#targetArchiveSubmit")
