@@ -95,3 +95,52 @@
 #rooms.classic-chat-room #social-native-scroll-track:focus-visible{
  outline:1px solid #f7dca6!important;outline-offset:-1px!important;
 }
+
+/* 2026-11-04 layout of the SAME live controls as in the 2004 screenshot.
+   ChatRoom/scrollbar.png pieces template-matched in chat.jpg (VERIFIED):
+   thin track = atlas column x17..21 at screen x410 from y16; 12x21 thumb
+   (atlas 0,19) at x406; up (atlas rows 0..8) and down (rows 9..17) stacked
+   at (406,78) directly above the input row - not up-top / down-bottom over
+   a 13px gradient bar as before. Column origin stays x406 (messenger x16 +
+   390); the 16x97 container and every handler are unchanged. */
+@media(min-width:651px){
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-chat-scroll{
+  display:block!important;
+  /* exact source track pixels (#6676bc + 4x #9fb2ff), y16..78 */
+  background:linear-gradient(90deg,#6676bc 0 1px,#9fb2ff 1px 5px) no-repeat 4px 16px/5px 62px!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-up,
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-down{
+  position:absolute!important;left:0!important;
+  width:13px!important;min-width:13px!important;
+  height:9px!important;min-height:9px!important;flex:none!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-up{
+  top:78px!important;background-position:0 0!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-down{
+  top:87px!important;background-position:0 -9px!important;
+ }
+ /* Interactive track 19..75: the fixed 21px source thumb drawn centred on
+    the live proportional handle then stays inside the painted 16..78 line. */
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-track{
+  position:absolute!important;left:0!important;top:19px!important;
+  width:13px!important;height:56px!important;min-height:0!important;flex:none!important;
+  background:transparent!important;box-shadow:none!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-thumb{
+  width:13px!important;background:transparent!important;box-shadow:none!important;
+  overflow:visible!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-thumb::before{
+  content:'';position:absolute;left:0;top:50%;margin-top:-10px;
+  width:12px;height:21px;pointer-events:none;
+  background:var(--social-scroll-asset) no-repeat 0 -19px;
+ }
+ /* scrollbar.png has no disabled/grey cell (its four 13px columns are
+    blue, white, white, blue); dimming a source arrow is a WEB invention. */
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-up:disabled,
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-down:disabled{
+  opacity:1!important;
+ }
+}
