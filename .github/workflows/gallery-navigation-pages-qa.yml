@@ -20,7 +20,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - run: python -m py_compile apps/gallery-archive/qa_gallery_navigation_routes.py
+      - run: |
+          python -m py_compile apps/gallery-archive/qa_gallery_navigation_routes.py
+          node apps/gallery-archive/test_gallery_mobile_route_history.cjs
 
   live-mobile-navigation:
     if: >-
