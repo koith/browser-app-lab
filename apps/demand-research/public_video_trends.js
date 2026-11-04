@@ -100,6 +100,37 @@
      return el;
    };
    let mode="day",month="",platform="all",visible=12,snapshot=null;
+   let reviewed=[],reviewIndex=0;
+   const reviewDialog=$("videoTrendReviewDialog");
+   function showReview(){
+     const item=reviewed[reviewIndex];
+     if(!item)return;
+     $("videoTrendReviewStatus").textContent=(reviewIndex+1)+" / "+reviewed.length+
+       " · "+LABELS[item.platform]+" · "+koreanTimestamp(item.time)+" KST";
+     const content=$("videoTrendReviewContent");
+     content.replaceChildren();
+     content.append(make("strong","",item.author));
+     if(item.thumb){
+       const picture=make("img","video-trend-review-img");
+       picture.src=item.thumb;picture.alt="원본 영상 미리보기";picture.referrerPolicy="no-referrer";
+       picture.addEventListener("error",()=>picture.remove(),{once:true});
+       content.append(picture);
+     }
+     content.append(make("p","",item.measured?
+       "관측된 공개 반응 합계 "+item.score.toLocaleString("ko-KR")+
+       " · 영상 "+item.videoCount+"개":
+       "공개 반응 수치 미제공 · 영상 "+item.videoCount+"개"));
+     const link=make("a","video-trend-review-link","SNS 원문에서 영상 확인");
+     link.href=item.url;link.target="_blank";link.rel="noopener noreferrer";
+     content.append(link);
+     $("videoTrendReviewPrev").disabled=reviewIndex===0;
+     $("videoTrendReviewNext").disabled=reviewIndex===reviewed.length-1;
+   }
+   function moveReview(delta){
+     reviewIndex=Math.min(reviewed.length-1,Math.max(0,reviewIndex+delta));
+     showReview();
+   }
+
    function read(){
      try{snapshot=win.INTERSECTION_publicVideoSnapshot?.()||null;}catch{snapshot=null;}
    }
@@ -135,6 +166,15 @@
        "SNS별 영상 · "+coverage.map(x=>LABELS[x.platform]+" "+x.count+"건 (반응 제공 "+x.measured+"/"+x.count+")").join(" · "):
        "선택한 기간에 확인된 SNS별 영상이 없습니다.";
      const rows=platform==="all"?scoped:scoped.filter(x=>x.platform===platform);
+     const prior=reviewed[reviewIndex]?.url;
+     reviewed=rows;
+     const matching=reviewed.findIndex(item=>item.url===prior);
+     reviewIndex=matching>=0?matching:0;
+     $("videoTrendReviewStart").disabled=reviewed.length===0;
+     if(reviewDialog.open){
+       if(reviewed.length)showReview();
+       else reviewDialog.close();
+     }
      const shown=rows.slice(0,visible),list=$("videoTrendRows");
      list.replaceChildren();
      for(const [i,r] of shown.entries()){
@@ -173,6 +213,19 @@
      platform=$("videoTrendSource").value;visible=12;draw();
    });
    $("videoTrendMore").addEventListener("click",()=>{visible+=12;draw();});
+   $("videoTrendReviewStart").addEventListener("click",()=>{
+     if(!reviewed.length)return;
+     reviewIndex=0;showReview();
+     if(!reviewDialog.open)reviewDialog.showModal();
+   });
+   $("videoTrendReviewPrev").addEventListener("click",()=>moveReview(-1));
+   $("videoTrendReviewNext").addEventListener("click",()=>moveReview(1));
+   $("videoTrendReviewClose").addEventListener("click",()=>reviewDialog.close());
+   reviewDialog.addEventListener("keydown",event=>{
+     if(event.key==="ArrowLeft"||event.key==="ArrowRight"){
+       event.preventDefault();moveReview(event.key==="ArrowLeft"?-1:1);
+     }
+   });
    let scheduled=false;
    function schedule(){
      if(scheduled)return;scheduled=true;
