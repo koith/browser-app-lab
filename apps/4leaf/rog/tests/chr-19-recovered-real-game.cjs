@@ -73,7 +73,7 @@ assert.equal(validPngs,662,'every recovered original source PNG must be checked'
    await page.waitForFunction(card=>{
     const actor=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
     const img=actor?.querySelector('img.leaf-chess-original-obs');
-    return actor?.dataset.chessmanId==='c_'+card&&
+    return actor?.dataset.chessmanId===card&&
      actor.dataset.actorRig==='original-obs-sprite'&&
      actor.dataset.actorSourceLoad==='ready'&&
      img?.naturalWidth>0&&img?.naturalHeight>0;
