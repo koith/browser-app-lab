@@ -13,6 +13,7 @@ on:
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
       - 'apps/gallery-archive/test_publisher_logo_fallback.cjs'
       - 'apps/gallery-archive/test_curated_cover_manifest.cjs'
+      - 'apps/gallery-archive/test_cross_model_saved_sha.cjs'
       - 'apps/yui-gallery/album-covers.json'
       - 'apps/mimmi-gallery/album-covers.json'
       - 'apps/mimmi-gallery/cloud/gateway/portal.py'
@@ -31,6 +32,7 @@ on:
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
       - 'apps/gallery-archive/test_publisher_logo_fallback.cjs'
       - 'apps/gallery-archive/test_curated_cover_manifest.cjs'
+      - 'apps/gallery-archive/test_cross_model_saved_sha.cjs'
       - 'apps/yui-gallery/album-covers.json'
       - 'apps/mimmi-gallery/album-covers.json'
       - 'apps/mimmi-gallery/cloud/gateway/portal.py'
@@ -51,6 +53,7 @@ jobs:
           node apps/gallery-archive/test_gallery_visual_quality.cjs
           node apps/gallery-archive/test_publisher_logo_fallback.cjs
           node apps/gallery-archive/test_curated_cover_manifest.cjs
+          node apps/gallery-archive/test_cross_model_saved_sha.cjs
       - name: Verify both embedded gallery scripts parse
         run: |
           python - <<'PY'
