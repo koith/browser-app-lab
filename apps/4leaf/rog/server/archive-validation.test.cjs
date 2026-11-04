@@ -78,6 +78,15 @@ test('encrypted sender fingerprints are valid only with consistent identity; old
  assert.throws(()=>validateArchive(mismatch,valid),/Invalid persisted ChatTown state/,
   'one bearer-token fingerprint cannot claim two original sender identities');
 });
+test('legacy mixed-case duplicate replay IDs cannot silently survive validation',()=>{
+ const s=fixture(),id='abcd0123abcd0123abcd0123abcd0123';
+ s.history[0][1][0].clientMessageId=id;
+ s.sequence=10;
+ s.history[0][1].push({...s.history[0][1][0],id:'m2',seq:10,
+  clientMessageId:id.toUpperCase()});
+ assert.throws(()=>validateArchive(s,valid),/Invalid persisted ChatTown state/,
+  'same semantic replay ID under a different hex letter case is a collision');
+});
 test('server serves 503 rather than accepting partial encrypted restore and never commits blank state',async t=>{
  const archive=fixture();archive.rooms[0].district='malformed';
  let saves=0;
