@@ -23,7 +23,7 @@ from account_index_sources import fetch_public as bluesky_public_search
 
 TERMS = ("뒷계", "섹트", "일탈계")
 WINDOW_MINUTES = 16
-MAX_CATCHUP_MINUTES = 180  # bounded missed-schedule window; current 16m always comes first
+MAX_CATCHUP_MINUTES = 360  # bounded missed-schedule window; current 16m always comes first
 MAX_PER_RUN = 90
 MAX_MEDIA_PER_POST = 6
 MAX_IMAGE = 24_000_000
