@@ -168,6 +168,20 @@ function makeSource(p){
  }
  wrap.append(node("span","",SERVICE_LABELS[p.platform]||p.platform));return wrap;
 }
+function prepareBackupSelection(w){
+ if(!w||!["bluesky","mastodon"].includes(w.platform))return;
+ const service=$("targetArchivePlatform"),account=$("targetArchiveAccount");
+ if(!service||!account||!$("targetArchivePanel"))return;
+ // Only reuse the already validated, explicitly selected public profile.
+ // Never dispatch or claim TeraBox storage without a subsequent button press.
+ service.value=w.platform;
+ account.value=w.url;
+ service.dispatchEvent(new Event("change",{bubbles:true}));
+ account.dispatchEvent(new Event("input",{bubbles:true}));
+ $("accountWatchStatus").textContent=SERVICE_LABELS[w.platform]+
+   " 공개 계정을 백업 대상으로 선택했습니다. 위 백업 실행 버튼을 눌러 진행하세요.";
+ $("targetArchivePanel").scrollIntoView({behavior:"smooth",block:"center"});
+}
 function card(w,data){
  const root=node("article","account-watch-card");
  const head=node("div","account-watch-head");head.append(makeSource(w),
@@ -189,6 +203,12 @@ function card(w,data){
  refresh.disabled=!canRefresh||busyKeys.has(w.key);
  refresh.title=canRefresh?"공개 계정 원문에서 최신 글을 확인":"현재 검색 피드에서 확인된 공개 게시글만 집계";
  refresh.addEventListener("click",()=>refreshWatch(w,true));actions.append(refresh);
+ if(w.platform==="bluesky"||w.platform==="mastodon"){
+   const archive=node("button","","백업 대상으로 선택");
+   archive.type="button";
+   archive.addEventListener("click",()=>prepareBackupSelection(w));
+   actions.append(archive);
+ }
  actions.append(link("SNS 프로필",w.url));
  const remove=node("button","danger","추적 해제");remove.type="button";
  remove.addEventListener("click",()=>{
