@@ -156,6 +156,10 @@ def run():
                 assert page.locator("#discoveryCandidates").is_visible()
                 assert verified.count()==1
                 assert "원문 미확인 링크 3건" in page.locator("#count").text_content()
+                # Search leads are NOT dated/verified posts. Previously the
+                # main counter subtracted these separate leads: 1-3=-2 posts.
+                assert page.locator("#count").text_content().startswith("1건"), (
+                    "one verified post must never display as -2 after 3 search leads")
                 xcard=page.locator("article.post").filter(
                     has=page.locator('.source-badge[aria-label="출처: X"]')).first
                 assert xcard.locator(".post-thumb > img").count()==1, "public X image must be shown"
@@ -172,6 +176,8 @@ def run():
                 page.wait_for_function(
                     "document.getElementById('applyDate').disabled===false",timeout=30000)
                 assert discovered.count()==3,"search leads remain without invented dates"
+                assert page.locator("#count").text_content().startswith("0건"), (
+                    "zero verified posts must remain zero, not -3 with candidate links")
                 assert page.locator(
                     'article.post .source-badge[aria-label="출처: X"]').count()==0
                 page.locator("#openDate").click()
