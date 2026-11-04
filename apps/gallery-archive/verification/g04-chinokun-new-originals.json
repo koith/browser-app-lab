@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "source_run_id": 41748693871,
+  "selection": {
+    "yui": [
+      {
+        "id": "yui-chinokun-illustar-2026-public",
+        "new_photo_positions": 3,
+        "higher_resolution_replacements": 0,
+        "images": [
+          {
+            "number": 2,
+            "sha256": "562da0de5c097fe80d6e0a4baf44db97ee269254d85eb32d8999b3ffd2c8b9ca",
+            "width": 1536,
+            "height": 2048,
+            "bytes": 2403786
+          },
+          {
+            "number": 3,
+            "sha256": "abecbd4b00148059ec482b0c80b665733e8a1f9af4c38b3c71706df8967f3161",
+            "width": 1152,
+            "height": 2048,
+            "bytes": 1613888
+          },
+          {
+            "number": 4,
+            "sha256": "aeba26531c6435d62048b964be37291065f5b1dee5f884e8e94bd4a7a3cb7ed3",
+            "width": 1366,
+            "height": 2048,
+            "bytes": 1980516
+          }
+        ]
+      }
+    ],
+    "mimmi": []
+  }
+}
