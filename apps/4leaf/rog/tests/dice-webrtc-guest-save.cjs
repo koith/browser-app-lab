@@ -42,6 +42,7 @@ test('guest accepts only durable remote games, preserves both valid and damaged 
   remote.mode='network';
   remote.players[0].name='원격 호스트 안전검증';
   sessionStorage.setItem('__leaf_test_remote',JSON.stringify(remote));
+  window.__LEAF_NET__.role='guest';
   // A peer-controlled packet must not persist a fabricated or incomplete
   // match even when it supplies a valid original DMP map title.
   const malformed=[
@@ -59,7 +60,6 @@ test('guest accepts only durable remote games, preserves both valid and damaged 
   }
 
   sessionStorage.setItem('__leaf_guest_match_blocked','1');
-  window.__LEAF_NET__.role='guest';
   const accepted=window.__LEAF_BRIDGE__.receiveMatch(remote);
   return {oldRaw,oldName:oldMatch.players[0].name,accepted,
    stored:localStorage.getItem('rog_match'),
