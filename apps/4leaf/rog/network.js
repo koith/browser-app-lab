@@ -93,7 +93,15 @@
        bridge()?.setGuestName?.(net.guestName);
        if(bridge()?.getMatch?.()?.mode==='network')send({type:'state',match:bridge().getMatch()});
      }else if(data.type==='state'&&net.role==='guest'){
-       bridge()?.receiveMatch?.(data.match);
+       // A connected DataChannel does not prove the other device has
+       // accepted a state. Surface the result of the guest's durable-save
+       // gate to the host instead of silently leaving the two games apart.
+       const accepted=bridge()?.receiveMatch?.(data.match)===true;
+       send({type:accepted?'state-accepted':'state-rejected'});
+     }else if(data.type==='state-rejected'&&net.role==='host'){
+       notice('상대 기기에서 경기 상태를 적용하지 못했습니다. 상대방의 저장 공간과 경기 상태를 확인한 후 다시 연결하세요.');
+     }else if(data.type==='state-accepted'&&net.role==='host'){
+       notice('상대 기기에서 전달받은 경기 상태를 저장했습니다.',true);
      }else if(data.type==='command'&&net.role==='host'&&['roll','item','ability'].includes(data.action)){
        bridge()?.remoteCommand?.(data.action,data.index,data.steps);
      }else if(data.type==='battle-request'&&net.role==='guest'){

@@ -69,6 +69,25 @@ test('real WebRTC rejects malformed battle packets and clears old host callbacks
  assert.equal(await guest.locator('#modal:not(.hidden)').count(),0,
   'legitimate battle selection still closes the dialog');
 
+ // A deliberately invalid host snapshot exercises the REAL guest receiver
+ // rejecting the payload. The host must see that refusal over the same
+ // ordered RTCDataChannel, not silently assume the guest is synchronized.
+ assert.equal(await host.evaluate(()=>window.__LEAF_NET__.send({
+  type:'state',match:{map:'4LEAF',mode:'network',players:[]}
+ })),true);
+ await host.waitForFunction(()=>document.querySelector('#net-status')
+  ?.textContent.includes('상대 기기에서 경기 상태를 적용하지 못했습니다'),null,{timeout:10000});
+ // The durable accepted-state branch is already exercised by the separate
+ // actual browser guest-save test. Here stub only its return value to verify
+ // the acknowledgement's transport and host display, without rewriting data.
+ await guest.evaluate(()=>{window.__LEAF_BRIDGE__.receiveMatch=()=>true});
+ assert.equal(await host.evaluate(()=>window.__LEAF_NET__.send({
+  type:'state',match:{map:'4LEAF',mode:'network',players:[]}
+ })),true);
+ await host.waitForFunction(()=>document.querySelector('#net-status')
+  ?.textContent.includes('상대 기기에서 전달받은 경기 상태를 저장했습니다'),null,{timeout:10000});
+ assert.deepEqual(pageErrors,[],'both receipt paths must preserve real WebRTC operation');
+
  // A fresh host offer resets the old connection. The previous connected
  // host onState handler must not survive to any later guest/host session.
  await host.locator('#net-make').click();
