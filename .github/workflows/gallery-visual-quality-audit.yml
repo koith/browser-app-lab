@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'apps/gallery-archive/audit_stored_image_quality.py'
+      - 'apps/gallery-archive/test_stored_image_quality_integrity.py'
       - '.github/workflows/gallery-visual-quality-audit.yml'
   push:
     branches: [main]
     paths:
       - 'apps/gallery-archive/audit_stored_image_quality.py'
+      - 'apps/gallery-archive/test_stored_image_quality_integrity.py'
       - '.github/workflows/gallery-visual-quality-audit.yml'
 permissions:
   contents: read
@@ -19,6 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python -m pip install 'Pillow==11.2.1'
+      - name: Verify SHA-integrity tests and audit syntax
+        run: |
+          python -m py_compile apps/gallery-archive/audit_stored_image_quality.py
+          python apps/gallery-archive/test_stored_image_quality_integrity.py
       - name: Decode actual pixels and emit review-only quality flags
         run: python apps/gallery-archive/audit_stored_image_quality.py --out gallery-visual-quality-audit.json
       - uses: actions/upload-artifact@v4
