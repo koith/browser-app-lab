@@ -80,8 +80,8 @@ const path=require('node:path');
    'attacker walking frontwards uses identical native animation keys');
   assert.equal(synced.duel[1].frames,'11',
    'duel defender holds native side pose while looking at attacker');
-  assert.equal(synced.board[1].frames,'25',
-   'board defender holds genuine front pose from that same CHR member');
+  assert.equal(synced.board[1].frames,'22',
+   'board defender has no identified native hurt slot: hold this CHR body original front idle key 22, never synthetic legacy frame 25');
   assert.ok(synced.duel.every(x=>x.source==='original-obs-sprite'),
    'already recovered true OBS full bodies must be rendered on both podiums');
   // ARCHIVED SOURCE IMAGE anchor regression: validate the physical
