@@ -159,8 +159,13 @@ def test_blue_source_replies_and_video_original_bytes_are_verified_and_resume(ca
     assert all(m["remote_verified"] for m in latest["media"])
     assert any(m["kind"]=="video" for m in latest["media"])
     assert any(p["kind"]=="reply" and p["reply_to"] for p in stored)
-    assert cloud.objects[root+"/"+latest["media"][0]["key"]]==PHOTO
-    assert cloud.objects[root+"/"+latest["media"][1]["key"]]==VIDEO
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
+    assert archive.read_verified(latest["media"][0]["key"],
+                                 latest["media"][0]["sha256"],cap=len(PHOTO)+1)==PHOTO
+    assert archive.read_verified(latest["media"][1]["key"],
+                                 latest["media"][1]["sha256"],cap=len(VIDEO)+1)==VIDEO
+    assert all(archive.shared_media_key(m["key"]) in cloud.objects
+               for m in latest["media"])
     assert len([k for k in cloud.objects if k.startswith(root+"/metadata/source-records/")])==2
     assert len([k for k in cloud.objects if k.startswith(root+"/metadata/checkpoints/")])==2
     profiles=[json.loads(raw) for k,raw in cloud.objects.items()
@@ -287,3 +292,45 @@ def test_reviewed_bootstrap_does_not_accept_unvalidated_config(tmp_path):
                                 "max_pages":2,"surprise":"untrusted"}))
     with pytest.raises(ValueError,match="invalid reviewed target"):
         job.read_bootstrap_request(path)
+
+
+def test_shallow_private_media_recovers_when_nested_copyto_is_missing():
+    """The exact original is SHA-read back, even if nested upload paths fail."""
+    p=blue_row("missingfolder","synthetic exact source",
+               assets=[("image/jpeg",PHOTO)])
+    api=BlueAPI({None:([p],None)})
+    api.blobs={cid(PHOTO):("image/jpeg",PHOTO)}
+    cloud=FakeCloud()
+    base_runner=cloud.runner
+    attempted=[]
+    def reject_nested_upload(args,data=None,timeout=150,allow_missing=False):
+        if (args[0] in ("copyto","rcat")
+                and any("/account-archives/" in str(x) and
+                        "/posts/" in str(x) for x in args)):
+            attempted.append(args[0])
+            raise RuntimeError("private cloud copyto failed (missing)")
+        return base_runner(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud.runner=reject_nested_upload
+    report=job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
+    assert report["posts_verified"]==1
+    assert report["status"]=="COMPLETE_CURRENT_PUBLIC_CURSOR"
+    resolved=job.resolve("bluesky",DID,api)
+    archive=job.account_cloud(cloud,resolved)
+    key="posts/"+job.post_key("bluesky",p["uri"])+"/media/0001.jpg"
+    shallow=archive.shared_media_key(key)
+    assert shallow in cloud.objects
+    assert cloud.objects[shallow]==PHOTO
+    assert archive.read_verified(key,job.sha256(PHOTO),cap=len(PHOTO)+1)==PHOTO
+    assert not attempted,"depth-one media uploads must avoid known broken nested paths"
+
+
+def test_shallow_media_namespace_is_account_and_slot_scoped():
+    root=FakeCloud()
+    p1={"platform":"bluesky","identity":DID}
+    p2={"platform":"bluesky","identity":"did:plc:"+"b"*24}
+    key="posts/"+"a"*40+"/media/0001.jpg"
+    a=job.account_cloud(root,p1)
+    b=job.account_cloud(root,p2)
+    assert a.shared_media_key(key)!=b.shared_media_key(key)
+    assert a.shared_media_key(key)!=a.shared_media_key(key.replace("0001","0002"))
+    assert a.shared_media_key("../../unsafe") is None
