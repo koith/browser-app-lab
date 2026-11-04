@@ -80,8 +80,29 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python .github/scripts/intersection_event_pipeline.py
-      - name: Update only existing issue #607 bot status comment
-        if: always()
+  status-board:
+    # Wait for the stage controller job to FINISH before reading its Actions
+    # summary. Otherwise the live run is still "in_progress" and the issue
+    # comment displays an inaccurate UNVERIFIED stage.
+    needs: [safe-controller]
+    if: >-
+      always() &&
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'issues' || github.event.issue.number == 607)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    permissions:
+      actions: read
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: After completed decision, update the existing issue #607 bot comment
         env:
           GH_TOKEN: ${{ github.token }}
         run: python .github/scripts/intersection_ops_status.py
