@@ -141,7 +141,17 @@ def preserve_encrypted_batch(cloud,spool,paths):
         raise ValueError("encrypted recovery batch exceeds size limit")
     digest=hashlib.sha256(blob).hexdigest()
     key="metadata/recovery-pack-"+digest+".zip"
-    cloud.write_immutable(key,blob)
+    try:
+        cloud.write_immutable(key,blob)
+    except RuntimeError as error:
+        # The nested metadata directory sometimes fails to resolve even when
+        # the archive root remains writable. Only a *missing path* response
+        # permits an immutable root-level fallback; checksum conflicts,
+        # authorization, quota and throttling must still fail closed.
+        if safe_failure_category(error)!="missing_remote_path":
+            raise
+        key="recovery-pack-"+digest+".zip"
+        cloud.write_immutable(key,blob)
     observed=cloud.read_verified(key,digest,cap=len(blob)+1)
     if observed!=blob:
         raise RuntimeError("encrypted recovery batch TeraBox checksum unverified")
@@ -154,11 +164,22 @@ def select_remote_encrypted_packs(cloud):
     Rotate bounded recovery sources so expired Actions artifacts remain
     recoverable without indefinitely starving other encrypted originals.
     """
-    names=cloud.names("metadata")
-    if not isinstance(names,list):
-        raise ValueError("invalid private recovery pack listing")
-    keys=sorted("metadata/"+name for name in names
-                if isinstance(name,str) and CLOUD_PACK_NAME.fullmatch(name))
+    keys=set()
+    listed=False
+    for prefix in ("metadata",""):
+        try:
+            names=cloud.names(prefix)
+            if not isinstance(names,list):
+                raise ValueError("invalid private recovery pack listing")
+            listed=True
+        except (RuntimeError,ValueError):
+            continue
+        for name in names:
+            if isinstance(name,str) and CLOUD_PACK_NAME.fullmatch(name):
+                keys.add((prefix+"/" if prefix else "")+name)
+    if not listed:
+        raise RuntimeError("private recovery pack listings unavailable")
+    keys=sorted(keys)
     if not keys:
         return []
     seed=int(os.environ.get("GITHUB_RUN_ID","0") or "0")
@@ -172,7 +193,7 @@ def extract_verified_remote_pack(cloud,key,directory):
     Reject archive paths, duplicates, invalid names and zip bombs; nothing is
     unzipped as plaintext or outside an isolated temporary directory.
     """
-    match=re.fullmatch(r"metadata/recovery-pack-([a-f0-9]{64})\.zip",key)
+    match=re.fullmatch(r"(?:metadata/)?recovery-pack-([a-f0-9]{64})\.zip",key)
     if not match:
         raise ValueError("untrusted private recovery pack key")
     raw=cloud.read_verified(key,match.group(1),cap=MAX_BUNDLE_BYTES+1)
