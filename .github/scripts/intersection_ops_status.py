@@ -32,7 +32,11 @@ METRICS = {
         "buffer_failures", "deferred_buffers", "deferred_artifacts",
         "batch_sha_verified",
     ),
+    "INTERSECTION_EVENT_PIPELINE": ("task", "action", "reason"),
 }
+# Only fixed known internal stage codes may appear in public issue comments.
+ALLOWED_STAGE_REASONS = frozenset(["INT01_OPERATIONAL_PROOF_PENDING","RECOVERY_FAILED_REQUIRES_CODE_REPAIR","REPAIR_ALREADY_IN_PROGRESS","REPAIR_ALREADY_ATTEMPTED_AFTER_REPLAY","RECOVERY_COMPLETE_START_REMOTE_RECONCILIATION","REBUILD_PASS_FULL_HISTORICAL_GATE_STILL_UNVERIFIED","REBUILD_FAILED_REQUIRES_CODE_REPAIR","CAPTURE_COMPLETED_NATIVE_REPLAY_HANDLES_FAILED_RUNS","NO_TRUSTED_TASK_QA_IMPLEMENTED","TASK_QA_IN_PROGRESS","VERIFIED_PREDECESSOR_START_TASK_QA","QA_FAILED_FIX_CODE_BEFORE_RERUN","TASK_QA_NOT_YET_VERIFIED","TASK_QA_PASS_PRODUCT_ACCEPTANCE_STILL_REQUIRED","WAIT_FOR_PAGES_DEPLOY_ON_SAME_COMMIT","DEPLOYED_BROWSER_QA_PASS_FINAL_PRODUCT_GATE_PENDING","DEPLOYED_BROWSER_QA_IN_PROGRESS","PAGES_PASS_START_DEPLOYED_BROWSER_QA","DEPLOYED_QA_PASS_FINAL_PRODUCT_GATE_PENDING","DEPLOYED_QA_FAILED_REQUIRES_CODE_FIX","ISSUE_TASK_CHECKBOX_MISSING_FAIL_CLOSED","UNTRUSTED_OR_UNRELATED_EVENT","NO_OPEN_TASK_VERIFIED"])
+ALLOWED_STAGE_ACTIONS = frozenset(("NONE", "STAGE_DISPATCHED"))
 VALID_STATUS = {"success", "failure", "cancelled", "timed_out", "skipped", "neutral"}
 
 
@@ -62,6 +66,13 @@ def sanitized_metrics(text, marker):
                 "DEGRADED_INDEX", "DEGRADED_MEDIA",
             ):
                 result[name] = value
+            if marker == "INTERSECTION_EVENT_PIPELINE" and isinstance(value, str):
+                if name == "task" and re.fullmatch(r"INT-(?:0[1-9]|1[0-2])", value):
+                    result[name] = value
+                elif name == "action" and value in ALLOWED_STAGE_ACTIONS:
+                    result[name] = value
+                elif name == "reason" and value in ALLOWED_STAGE_REASONS:
+                    result[name] = value
         found = result
     return found
 
@@ -92,6 +103,11 @@ def render(repo, run_groups, summaries, issue_body, now):
     recovery_rows = run_groups.get(REPLAY, [])[:3]
     repair_rows = run_groups.get(REPAIR, [])[:2]
     controller_rows = run_groups.get(CONTROLLER, [])[:1]
+    controller_metrics = (
+        summaries.get(controller_rows[0]["id"], {}) if controller_rows else {}
+    )
+    controller_task = controller_metrics.get("task", "미검증")
+    controller_reason = controller_metrics.get("reason", "UNVERIFIED")
     statuses = []
     for row in capture_rows:
         data = summaries.get(row["id"])
@@ -172,8 +188,8 @@ def render(repo, run_groups, summaries, issue_body, now):
             f"[#{row['id']}]({run_url(row, repo)}) {safe_run_status(row)}"
             for row in controller_rows
         ) or "확인된 실행 없음",
-        "실제 선택된 일감과 재전송 여부는 해당 실행의 집계 로그에서 확인. "
-        "컨트롤러 실행 성공은 저장 장애 해결을 뜻하지 않음.",
+        f"선택 일감: **{controller_task}** · 처리 단계: **{controller_reason}**",
+        "이는 이벤트 기반 진행 상태입니다. 컨트롤러 실행 성공은 저장 장애 해결을 뜻하지 않음.",
         "",
         "### 유지보수 대기열",
         " · ".join(
@@ -343,7 +359,7 @@ def main():
         (CAPTURE, "DEMAND_CAPTURE_AGGREGATE_ONLY", "capture"),
         (REPLAY, "INTERSECTION_ENCRYPTED_RECOVERY_SUMMARY", "replay"),
         (REPAIR, None, None),
-        (CONTROLLER, None, None),
+        (CONTROLLER, "INTERSECTION_EVENT_PIPELINE", "safe-controller"),
     ):
         runs = gh.workflow_runs(filename, limit=5)
         groups[filename] = runs
