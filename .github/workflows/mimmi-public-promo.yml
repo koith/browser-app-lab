@@ -1,13 +1,6 @@
 name: Mimmi DJAWA Public Promotional Image Search
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '35 7 * * 3,6'
-  push:
-    paths:
-      - 'apps/mimmi-gallery/collect_gumroad_public.py'
-      - 'apps/mimmi-gallery/test_gumroad_public.py'
-      - '.github/workflows/mimmi-public-promo.yml'
 permissions:
   contents: write
 concurrency:
