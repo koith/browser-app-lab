@@ -246,8 +246,25 @@ def lemmy(term, start, end):
             continue
         url = p.get("ap_id") or ""
         source = str(p.get("name") or "") + " " + str(p.get("body") or "")
-        row = normalized("lemmy", str(p.get("id") or url), url, source,
-                         posted, [p.get("thumbnail_url")] if p.get("thumbnail_url") else [])
+        # Lemmy's thumbnail_url is a generated preview, NOT the original
+        # image uploaded or linked by this post. Preserve the exact source
+        # p.url only when it resolves to a public image/video file; media
+        # bytes are accepted later only after MIME/size checks and SHA.
+        original = p.get("url") or ""
+        source_media = []
+        if public_url(original):
+            path = urlsplit(original).path.lower()
+            origin_host=(urlsplit(original).hostname or "").lower()
+            if (re.search(r"\.(?:jpe?g|png|webp|gif|avif|mp4|webm|mov)$",path)
+                    or (origin_host=="pictrs.lemmy.world"
+                        and path.startswith("/image/"))):
+                source_media=[original]
+        local_id=str(p.get("id") or "")
+        # Preserve legacy IDs when valid; a short local ID cannot pass the
+        # immutable key validator, so use the canonical public AP permalink.
+        original_id=local_id if len(local_id)>=4 else url
+        row = normalized("lemmy", original_id, url, source,
+                         posted, source_media)
         if row:
             yield row
 

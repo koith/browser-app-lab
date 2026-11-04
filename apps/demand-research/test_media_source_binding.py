@@ -177,3 +177,51 @@ def test_up_to_sixteen_original_attachments_keep_exact_order_and_extra_remain_mi
     assert [m["source_url"] for m in complete["media"]]==media[:16]
 
 
+
+
+def test_lemmy_capture_uses_actual_source_image_never_generated_thumbnail(monkeypatch):
+    import demand_capture_job as capture
+    from datetime import datetime,timezone
+    now=int(datetime(2026,11,4,6,0,tzinfo=timezone.utc).timestamp())
+    iso=datetime.fromtimestamp(now-60,timezone.utc).isoformat()
+    original="https://pictrs.lemmy.world/image/synthetic-original123.jpg"
+    thumbnail="https://pictrs.lemmy.world/image/synthetic-cropped-preview.jpg"
+    post={
+        "id":911,"ap_id":"https://lemmy.world/post/911","name":"섹트 public example",
+        "published":iso,"url":original,"thumbnail_url":thumbnail
+    }
+    monkeypatch.setattr(capture,"get_json",lambda url,body=None:{"posts":[{"post":post}]})
+    rows=list(capture.lemmy("섹트",now-3600,now))
+    assert len(rows)==1
+    assert rows[0]["media_urls"]==[original]
+    assert rows[0]["media_expected"]==1
+    post["url"]="https://lemmy.world/post/911"
+    rows=list(capture.lemmy("섹트",now-3600,now))
+    assert len(rows)==1
+    assert rows[0]["media_urls"]==[], "never substitute generated thumbnail for source original"
+    assert thumbnail not in rows[0]["media_urls"]
+    post["url"]="https://pictrs.lemmy.world/image/extensionless_original"
+    rows=list(capture.lemmy("섹트",now-3600,now))
+    assert rows[0]["media_urls"]==[post["url"]], "original pictrs link may have no extension"
+
+
+def test_unrelated_lemmy_thumbnail_cannot_become_first_original_attachment(monkeypatch):
+    import demand_capture_job as capture
+    from datetime import datetime,timezone
+    now=int(datetime(2026,11,4,6,0,tzinfo=timezone.utc).timestamp())
+    iso=datetime.fromtimestamp(now-60,timezone.utc).isoformat()
+    record={"id":912,"ap_id":"https://lemmy.world/post/912",
+            "name":"섹트 synthetic external blog",
+            "published":iso,
+            "url":"https://example.org/article/912",
+            "thumbnail_url":"https://pictrs.lemmy.world/image/generated.jpg"}
+    monkeypatch.setattr(capture,"get_json",lambda *a,**kw:{"posts":[{"post":record}]})
+    rows=list(capture.lemmy("섹트",now-3600,now))
+    assert len(rows)==1
+    assert rows[0]["media_urls"]==[]
+    post,blobs=capture.make_post(rows[0],now,get_media=lambda url:
+        (_ for _ in ()).throw(AssertionError("no unrelated thumbnail download")))
+    assert post["media_saved"]==0
+    assert post["media"]==[]
+    assert blobs==[]
+
