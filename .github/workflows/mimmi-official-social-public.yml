@@ -6,13 +6,6 @@ on:
       - '.github/workflows/mimmi-official-social-public.yml'
       - 'apps/gallery-archive/commit_crawler_research.py'
       - 'apps/gallery-archive/test_commit_crawler_research.py'
-  schedule:
-    - cron: '30 14 * * 1,4'
-  push:
-    paths:
-      - 'apps/mimmi-gallery/collect_social_public.py'
-      - 'apps/mimmi-gallery/test_social_public.py'
-      - '.github/workflows/mimmi-official-social-public.yml'
 permissions:
   contents: write
 concurrency:

@@ -1,16 +1,6 @@
 name: Mimmi V2PH Actor Wide Discovery
 on:
   workflow_dispatch:
-  schedule:
-    # Rotate through the 35+ public albums across the week, not 10 teasers.
-    - cron: '25 1,5,9,13,17,21 * * *'
-  push:
-    paths:
-      - apps/mimmi-gallery/discover_v2ph_actor.py
-      - apps/mimmi-gallery/test_v2ph_actor.py
-      - apps/mimmi-gallery/test_multipage_cross_source.py
-      - apps/mimmi-gallery/reveal_v2ph_album.py
-      - .github/workflows/mimmi-v2ph-actor-expansion.yml
 permissions:
   contents: write
 concurrency:

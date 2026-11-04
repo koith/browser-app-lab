@@ -1,15 +1,5 @@
 name: Yui Dynamic Gallery Archiver
 on:
-  schedule:
-    - cron: '45 2 * * *'
-  push:
-    paths:
-      - apps/yui-gallery/archive_engine.py
-      - apps/yui-gallery/archive_selftest.py
-      - apps/yui-gallery/test_archive_individual.py
-      - apps/yui-gallery/source_targets.json
-      - apps/yui-gallery/promote_downloaded_previews.py
-      - .github/workflows/yui-dynamic-archive.yml
   workflow_dispatch:
 permissions:
   contents: write

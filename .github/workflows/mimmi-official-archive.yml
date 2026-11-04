@@ -1,13 +1,7 @@
 name: Mimmi Free Official Portfolio Discovery
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '25 3 * * 2,5'
-  push:
-    paths:
-      - 'apps/mimmi-gallery/collect_official_previews.py'
-      - 'apps/mimmi-gallery/test_official_collector.py'
-      - '.github/workflows/mimmi-official-archive.yml'
+  # Official-image discovery paused; feature development has priority.
 permissions:
   contents: write
 concurrency:
@@ -15,6 +9,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   crawl:
+    if: vars.GALLERY_COLLECTION_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
