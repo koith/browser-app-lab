@@ -21,12 +21,16 @@ function original(p){return p?.publisher_original_verified===true && p?.ai_enhan
 function pixels(p){return Math.max(0,Number(p?.width)||0)*Math.max(0,Number(p?.height)||0)}
 function score(p){
  const q=p?.visual_quality;
+ if(!/^[a-f0-9]{64}$/.test(p?.sha256||'')||q?.photo_sha256!==p.sha256)return null;
  if(!q||q.method!=='decoded-pixel-v1'||q.confidence!=='measured'||
     typeof q.score!=='number'||!Number.isFinite(q.score)||q.score<0||q.score>100)return null;
  return q.score;
 }
 function paired(a,b){
  const qa=a?.visual_quality;
+ if(!/^[a-f0-9]{64}$/.test(a?.sha256||'')||
+    !/^[a-f0-9]{64}$/.test(b?.sha256||'')||
+    qa?.candidate_sha256!==a.sha256)return null;
  if(qa?.method!=='paired-decoded-pixel-v1'||qa.compared_to_sha256!==b?.sha256||
     qa.same_photo_verified!==true||qa.confidence!=='measured')return null;
  return ['higher','lower','comparable'].includes(qa.relation)?qa.relation:null;
