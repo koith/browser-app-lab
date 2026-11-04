@@ -30,24 +30,28 @@ def verify(browser_type,kind,width,height):
             errors=[]
             status_queries=[]
             dispatched=[]
+            clipboard_events=[]
             page.on("pageerror",lambda error:errors.append(str(error)))
+            page.on("console",lambda entry:clipboard_events.append(entry.text) if entry.text.startswith("QA_COPIED:") else None)
             page.add_init_script("""
-window.__qaOpened=[];
 window.__qaCopied=[];
-window.open=(url,target,features)=>{
-  window.__qaOpened.push({url,target,features});
-  return {};
-};
 Object.defineProperty(navigator,"clipboard",{
   configurable:true,value:{writeText:(value)=>{
-    window.__qaCopied.push(value);return Promise.resolve();
+    window.__qaCopied.push(value);
+    console.log("QA_COPIED:"+value);
+    return Promise.resolve();
   }}
 });
 """)
             def route_it(route):
                 from urllib.parse import urlsplit
-                path=urlsplit(route.request.url).path
-                if path=="/browser-app-lab/apps/demand-research/":
+                parsed=urlsplit(route.request.url)
+                path=parsed.path
+                if (parsed.hostname=="github.com" and
+                    path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-archive.yml"):
+                    route.fulfill(status=200,content_type="text/html",
+                                  body='<html><body><p id="workflow-reached">Owner workflow</p></body></html>')
+                elif path=="/browser-app-lab/apps/demand-research/":
                     route.fulfill(status=200,content_type="text/html; charset=utf-8",
                                   body=HTML)
                 elif path.endswith("/target_archive_client.js"):
@@ -80,9 +84,15 @@ Object.defineProperty(navigator,"clipboard",{
             }""")
             assert len(status_queries)==1
             button=page.locator("#targetArchiveSubmit")
-            assert button.is_disabled(),"empty selection must remain invalid"
+            assert button.is_enabled(),"empty account must still allow helpful feedback"
+            button.click()
+            assert "먼저 공개 SNS 계정" in page.locator("#targetArchiveStatus").inner_text()
+            assert page.locator("#targetArchiveAccount").evaluate("(el)=>document.activeElement===el")
+            assert page.locator("#targetArchiveAccount").get_attribute("aria-invalid")=="true"
             page.locator("#targetArchiveAccount").fill("javascript:untrusted")
-            assert button.is_disabled(),"unsafe account URL cannot trigger dispatch"
+            button.click()
+            assert page.locator("#targetArchiveAccount").get_attribute("aria-invalid")=="true"
+            assert not dispatched,"invalid account must never schedule a backup"
             page.locator("#targetArchiveAccount").fill(
                 "https://bsky.app/profile/qa-example.bsky.social")
             assert button.is_enabled(),"valid public account must enable button"
@@ -97,34 +107,31 @@ Object.defineProperty(navigator,"clipboard",{
                     "intent":"selected-public-account-v1"
                 }]
                 assert page.locator("#targetArchiveAccount").input_value()==""
-                assert button.is_disabled(),"cleared account must disable dispatch"
-                assert page.evaluate("window.__qaOpened")==[]
+                assert button.is_enabled(),"cleared account should explain missing input"
+                button.click()
+                assert "먼저 공개 SNS 계정" in page.locator("#targetArchiveStatus").inner_text()
                 assert "원격 저장 성공은 아직 확인되지" in page.locator(
                     "#targetArchiveStatus").inner_text()
             else:
                 assert button.inner_text()=="GitHub에서 백업 실행"
-                button.click()
-                page.wait_for_function("() => window.__qaOpened.length===1")
-                opened=page.evaluate("window.__qaOpened")
-                assert opened[0]["url"]==(
-                    "https://github.com/koith/browser-app-lab/actions/workflows/"
-                    "intersection-target-account-archive.yml")
-                assert opened[0]["target"]=="_blank"
-                assert "noopener" in opened[0]["features"]
-                page.wait_for_function("() => window.__qaCopied.length===1")
-                assert page.evaluate("window.__qaCopied")==[
-                    "https://bsky.app/profile/qa-example.bsky.social"]
-                assert not dispatched,"public Pages must never claim it queued a job"
-                assert "이 버튼만으로" in page.locator(
-                    "#targetArchiveStatus").inner_text()
                 page.locator("#targetArchivePlatform").select_option("mastodon")
                 page.locator("#targetArchiveAccount").fill("qa@example.social")
                 assert button.is_enabled()
-                button.click()
-                page.wait_for_function("() => window.__qaOpened.length===2")
-                assert page.evaluate("window.__qaCopied")[-1]=="qa@example.social"
                 page.locator("#targetArchiveAccount").fill("qa@localhost")
-                assert button.is_disabled(),"private Mastodon host blocked"
+                button.click()
+                assert "먼저 공개 SNS 계정" in page.locator("#targetArchiveStatus").inner_text()
+                assert not dispatched
+                page.locator("#targetArchivePlatform").select_option("bluesky")
+                page.locator("#targetArchiveAccount").fill(
+                    "https://bsky.app/profile/qa-example.bsky.social")
+                button.click()
+                page.wait_for_url(
+                    "https://github.com/koith/browser-app-lab/actions/workflows/"
+                    "intersection-target-account-archive.yml",timeout=12000)
+                assert page.locator("#workflow-reached").is_visible()
+                assert clipboard_events==[
+                    "QA_COPIED:https://bsky.app/profile/qa-example.bsky.social"]
+                assert not dispatched,"public Pages must not falsely claim queued work"
             assert not errors,errors
             assert page.evaluate(
                 "document.documentElement.scrollWidth<=window.innerWidth+2")
