@@ -701,6 +701,121 @@ async def signed_gallery_owner_pending(model: str,batch: str,request: Request):
     })
 
 
+
+async def _signed_rescue_payload(request: Request, maximum: int) -> bytes:
+    """OIDC-authenticated input; bound bytes before allocating a full body."""
+    authorization = request.headers.get("Authorization", "")
+    if not authorization.startswith("Bearer ") or not _verify_sync_identity(
+        authorization[len("Bearer "):], _SYNC_WORKFLOW
+    ):
+        raise HTTPException(403, "Untrusted owner-cache workflow")
+    data = bytearray()
+    async for chunk in request.stream():
+        data.extend(chunk)
+        if len(data) > maximum:
+            raise HTTPException(413, "Owner cache rescue payload too large")
+    if not data:
+        raise HTTPException(400, "Owner rescue payload is empty")
+    return bytes(data)
+
+
+@app.post("/internal/gallery-rescue-catalog/{model}")
+async def restore_authenticated_owner_catalog(model: str, request: Request):
+    """Private catalog already stored in the owner's own TeraBox account."""
+    if model not in ("mimmi", "yui"):
+        raise HTTPException(404, "Unknown model")
+    raw = await _signed_rescue_payload(request, 6_000_000)
+    try:
+        data = json.loads(raw)
+        if (not isinstance(data, dict) or data.get("schema_version") != 1
+                or data.get("model") != model or
+                not isinstance(data.get("albums"), list) or not data["albums"]):
+            raise ValueError("Wrong owner model/schema")
+        for album in data["albums"]:
+            if (not isinstance(album, dict)
+                or not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,99}", str(album.get("id", "")))
+                or not isinstance(album.get("images"), list)):
+                raise ValueError("Invalid owner album")
+            for photo in album["images"]:
+                if (not isinstance(photo, dict)
+                    or type(photo.get("number")) is not int or photo["number"] < 1
+                    or not media_key_valid(photo.get("key"))
+                    or not photo["key"].startswith("originals/" + album["id"] + "/")
+                    or not isinstance(photo.get("sha256"), str)
+                    or not re.fullmatch("[a-f0-9]{64}", photo["sha256"])
+                    or type(photo.get("bytes")) is not int
+                    or not 1 <= photo["bytes"] <= 140_000_000):
+                    raise ValueError("Invalid owner original record")
+    except (ValueError, TypeError, KeyError, AttributeError):
+        raise HTTPException(422, "Owner rescue catalog rejected") from None
+    state = _cache if model == "mimmi" else _yui_cache
+    async with _sync_lock:
+        state.update(catalog=data, time=time.time())
+        # A scheduled signed owner refresh is required before this expires.
+        _owner_rescue_until[model] = time.time() + 5400
+    print("OWNER_RESCUE_VERIFIED_CATALOG", model, len(data["albums"]), flush=True)
+    return JSONResponse({"verified": True, "model": model,
+                         "albums": len(data["albums"])},
+                        headers={"Cache-Control": "no-store"})
+
+
+@app.post("/internal/gallery-rescue-media/{model}")
+async def restore_authenticated_owner_media(model: str, request: Request):
+    """Exact SHA-checked existing file, bounded in RAM, never public storage."""
+    if model not in ("mimmi", "yui"):
+        raise HTTPException(404, "Unknown model")
+    raw = await _signed_rescue_payload(request, _media_cache.max_entry + 1)
+    album_id = request.headers.get("X-Owner-Album", "")
+    number_str = request.headers.get("X-Owner-Number", "")
+    variant = request.headers.get("X-Owner-Variant", "")
+    if (not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,99}", album_id)
+            or not number_str.isdecimal() or not 1 <= int(number_str) <= 99999
+            or variant not in ("original", "preview")):
+        raise HTTPException(400, "Invalid verified photo identifier")
+    state = _cache if model == "mimmi" else _yui_cache
+    if (_owner_rescue_until[model] <= time.time()
+            or not isinstance(state.get("catalog"), dict)):
+        raise HTTPException(409, "Owner catalog is not verified")
+    album = next((a for a in state["catalog"]["albums"] if a["id"] == album_id), None)
+    photo = next((p for p in (album or {}).get("images", [])
+                  if p.get("number") == int(number_str)), None)
+    if not photo:
+        raise HTTPException(404, "Original was not recorded")
+    key_name, sha_name, byte_name = (
+        ("preview", "preview_sha256", "preview_bytes") if variant == "preview"
+        else ("key", "sha256", "bytes")
+    )
+    key, sha, size = photo.get(key_name), photo.get(sha_name), photo.get(byte_name)
+    prefix = "previews" if variant == "preview" else "originals"
+    if (not isinstance(key, str) or not media_key_valid(key)
+            or not key.startswith(prefix + "/" + album_id + "/")
+            or not isinstance(sha, str) or not re.fullmatch("[a-f0-9]{64}", sha)
+            or type(size) is not int or not 1 <= size <= _media_cache.max_entry
+            or hashlib.sha256(raw).hexdigest() != sha or len(raw) != size):
+        raise HTTPException(422, "Owner original SHA/bytes do not match")
+    try:
+        with Image.open(BytesIO(raw)) as decoded:
+            if decoded.width * decoded.height > 40_000_000:
+                raise ValueError("Excessive decoded pixels")
+            if variant == "original" and (
+                (type(photo.get("width")) is int and photo["width"] != decoded.width)
+                or (type(photo.get("height")) is int and photo["height"] != decoded.height)
+            ):
+                raise ValueError("Wrong recorded pixel dimensions")
+            decoded.verify()
+    except (ValueError, UnidentifiedImageError, OSError,
+            Image.DecompressionBombError):
+        raise HTTPException(422, "Original does not decode as image") from None
+    remote = REMOTE if model == "mimmi" else YUI_REMOTE
+    try:
+        stored = _media_cache.insert_verified(remote, key, size, sha, raw)
+    except ValueError:
+        raise HTTPException(422, "Owner media cache refused bytes") from None
+    print("OWNER_RESCUE_SHA_MEDIA_READY", model, variant, flush=True)
+    return JSONResponse({"cached": stored, "model": model, "variant": variant},
+                        headers={"Cache-Control": "no-store"})
+
+
 @app.post("/internal/terabox-session-refresh")
 async def sync_archive_session(request: Request):
     """OIDC-authenticated, model-separated owner session refresh.
