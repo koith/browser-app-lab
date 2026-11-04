@@ -567,6 +567,31 @@ main{padding-top:10px}
 .target-archive button{min-height:41px;white-space:nowrap}
 .target-archive a{font-size:12px;color:inherit;text-decoration:underline;font-weight:700}
 .target-archive [role=status]{display:block;margin-top:9px;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+.video-trends{border:1px solid #151a30;background:#fffdf1;padding:0;margin:0 0 10px;color:#151829}
+.video-trends>summary{list-style:none;cursor:pointer;font-size:13px;font-weight:850;padding:11px 12px;display:flex;align-items:center;gap:8px}
+.video-trends>summary::-webkit-details-marker{display:none}
+.video-trends>summary:before{content:"▶";font-size:10px;color:#e45c32}
+.video-trends[open]>summary:before{content:"▼"}
+.video-trend-note{font-size:11px;line-height:1.55;margin:0;padding:0 12px 9px;color:#5d605c}
+.video-trend-tools{display:flex;flex-wrap:wrap;gap:4px;padding:0 12px 9px;align-items:center}
+.video-trend-tools button{min-height:30px;border-radius:0;padding:5px 8px;font-size:11px;font-weight:750;background:#ece9dd;color:#24232a}
+.video-trend-tools button.active{background:#151829;color:#fff}
+.video-trend-tools select{min-height:30px;font-size:11px;padding:3px;border-radius:0;max-width:130px}
+.video-trend-count{font-size:11px;padding:0 12px 9px;color:#5d605c}
+.video-trend-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 12px 12px}
+.video-trend-card{display:flex;flex-direction:column;min-width:0;text-decoration:none;color:inherit;border:1px solid #c4c1b1;background:#fffef7}
+.video-trend-card:hover,.video-trend-card:focus-visible{border-color:#e45c32;outline:1px solid #e45c32}
+.video-trend-thumb{position:relative;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/9;overflow:hidden;background:#e0ded4}
+.video-trend-thumb img{width:100%;height:100%;object-fit:cover}
+.video-trend-no-thumb{background:repeating-linear-gradient(135deg,#e0ded4,#e0ded4 6px,#d4d1c6 6px,#d4d1c6 12px)}
+.video-trend-play{position:absolute;left:8px;bottom:8px;color:#fff;background:#151829dd;padding:2px 7px;font-size:12px}
+.video-trend-multiple{position:absolute;right:8px;bottom:8px;color:#fff;background:#151829dd;padding:3px 5px;font-size:10px}
+.video-trend-meta{display:grid;gap:4px;padding:8px;min-width:0}
+.video-trend-meta b{font-size:12px;overflow-wrap:anywhere}
+.video-trend-meta small{font-size:10px;color:#5d605c;overflow-wrap:anywhere}
+.video-trend-empty{grid-column:1/-1;padding:8px 0;font-size:12px;color:#5d605c}
+.video-trend-more{display:block;margin:0 12px 12px;padding:6px 10px;border-radius:0;background:#151829;color:white;font-size:11px}
+@media(max-width:720px){.video-trend-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:0 7px 9px}.video-trend-meta{padding:6px}.video-trend-meta b{font-size:11px}.video-trend-tools{padding:0 7px 8px}.video-trend-note{padding:0 7px 8px}}
 </style>
 </head>
 <body>
@@ -598,6 +623,22 @@ main{padding-top:10px}
  <div id="activityRankingRows" class="activity-ranking-grid" aria-label="공개 계정 활동 랭킹"></div>
  <button type="button" id="activityRankingMore" class="activity-ranking-more hidden" aria-expanded="false">더 보기</button>
 </section>
+<details id="videoTrends" class="video-trends">
+ <summary>영상 트렌드 · 기간별 공개 반응 / 최신 영상 / 월별 기록</summary>
+ <p class="video-trend-note">현재 조회에서 확인된 공개 동영상만 분석합니다. 공개 반응 합계는 Twidouga의 저장 횟수나 영상 조회수가 아닙니다. 급상승의 실제 증가율·전체 수집률은 아직 측정되지 않았습니다. 월별 목록도 현재 불러온 게시글 범위에 한정됩니다.</p>
+ <div class="video-trend-tools" aria-label="영상 분석 기간">
+  <button type="button" data-video-mode="hot">최근 3시간</button>
+  <button type="button" data-video-mode="day" class="active">24시간</button>
+  <button type="button" data-video-mode="week">7일</button>
+  <button type="button" data-video-mode="month">30일</button>
+  <button type="button" data-video-mode="latest">최신 게시</button>
+  <button type="button" data-video-mode="archive">월별 기록</button>
+  <select id="videoTrendMonth" aria-label="영상 기록 월 선택" hidden></select>
+ </div>
+ <div id="videoTrendCount" class="video-trend-count" role="status" aria-live="polite">영상 집계 중…</div>
+ <div id="videoTrendRows" class="video-trend-grid"></div>
+ <button type="button" id="videoTrendMore" class="video-trend-more" hidden>더 보기</button>
+</details>
 <div id="archiveControls" class="archive-controls hidden" aria-label="테라박스 저장 게시글 검색"><form id="archiveSearchForm" autocomplete="off"><input id="archiveQuery" type="search" maxlength="100" placeholder="보관된 게시글 본문 검색" aria-label="보관본 본문 검색"><select id="archivePlatform" aria-label="보관 SNS"><option value="">모든 SNS</option><option value="bluesky">Bluesky</option><option value="mastodon">Mastodon</option><option value="misskey">Misskey</option><option value="lemmy">Lemmy</option></select><select id="archiveMediaStatus" aria-label="첨부 보관 상태"><option value="">전체 보관본</option><option value="complete">첨부 보관 완료</option><option value="partial">첨부 일부 누락</option></select><button type="submit">보관본 검색</button><button id="archiveReset" type="button">초기화</button></form><span id="archiveResults" role="status" aria-live="polite"></span></div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
@@ -1414,6 +1455,22 @@ function draw(){
         thumbnailUrl:safePublicLink(p.media?.[0]?.thumb||""),avatarUrl:safePublicLink(p.avatarUrl||"")
      }))};
  };
+/* Video trends reuse only already displayed, verified public source records.
+   Private cloud archives and unverified search leads are deliberately excluded. */
+window.INTERSECTION_publicVideoSnapshot=function(){
+  return {partial:busy||pending.length>0||nextEnd>fromMs||failed>0||incomplete>0,
+    verified:filtered().filter(p=>p.platform!=="cloud"&&!p.restricted&&
+      !p.adultLabeled&&!p.discoveryCandidate&&!hideMedia(p)&&
+      p.id&&p.profileUrl&&p.url&&Array.isArray(p.media)&&
+      p.media.some(m=>m?.type==="video")).map(p=>({
+        id:p.id,platform:p.platform,profileUrl:safePublicLink(p.profileUrl),
+        url:safePublicLink(p.url),author:p.author,posted:p.posted,
+        engagement:p.engagement||null,
+        media:p.media.filter(m=>m?.type==="video").slice(0,30).map(m=>({
+          type:"video",thumb:safePublicLink(m.thumb||"")
+        }))
+    }))};
+};
  /* Read-only account analytics view. No post text, author history or sensitive
    personal information is persisted by the account UI. */
 window.INTERSECTION_publicAccountSnapshot=function(){
@@ -1716,6 +1773,7 @@ if(cloudMode){
 })();
 </script>
 <script src="post_activity_ranking.js" defer></script>
+<script src="public_video_trends.js" defer></script>
 <script src="target_archive_client.js" defer></script>
 <script src="free_discovery.js" defer></script>
 <script src="account_watch.js" defer></script>
