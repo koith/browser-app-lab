@@ -523,15 +523,40 @@ function startGameWithConfirmation(replacementConfirmed){let map=$('map-select')
         }}]);
    }
  }
- // Do not alter the previous match's global DMP coordinates when a new-game
- // validation fails or the user cancels the replacement dialog.
+ // A truncated, completed or schema-invalid previous save must be copied
+ // byte-for-byte BEFORE replacing the live match object and moving the DMP
+ // camera. persist() already refused the disk overwrite when that backup
+ // failed, but the old UI still launched a new, silently unsaved match.
+ // Failing the preflight leaves BOTH the original saved bytes and the
+ // active game untouched. The player can free browser storage and retry.
+ if(!archiveUnreadableSavedMatch()||!archiveNonResumableSavedMatch())
+  return modal('기존 경기 보존 실패',
+   '브라우저 저장 공간 또는 저장 권한 문제로 기존 경기 기록을 백업하지 못했습니다. 기존 데이터는 유지했습니다. 저장 공간을 확인한 후 다시 시작하세요.',
+   [{label:'확인',primary:true}]);
+ // Creating the next board can change shared DMP projection even before
+ // opening it. Retain the previous coordinates until localStorage confirms
+ // that the new match really can survive a reload.
+ const previousPath=PATH;
  chooseSourcePath(map);
  let players=[newPlayer(0,false,profile.name,profile.team.slice())];for(let i=0;i<bots;i++){const weakTeams=CHR_SOURCE.length>50?[
  // Default opponents must have an actual recovered OBS body. In the old
  // sample, c_0096 (no decoded OBS source) displayed a HUGE synthetic mannequin.
  // Existing saved/user-selected teams are never silently replaced.
  ['c_0045','c_0042','c_0040'],['c_0042','c_0045','c_0043'],['c_0043','c_0044','c_0045'],['c_0044','c_0045','c_0042'],['c_0045','c_0043','c_0047'],['c_0047','c_0048','c_0045'],['c_0048','c_0049','c_0040']]:
- [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,!hotseat,selectedMode==='network'?(window.__LEAF_NET__?.guestName||'플레이어 2'):(hotseat?'플레이어 '+(i+2):BOT_NAMES[i]),team))}match={version:5,map,mode:selectedMode,botAutoplay:selectedMode==='ai',diceRegion:window.__LEAF_LOBBY__?.getState?.().region||null,diceChannel:window.__LEAF_LOBBY__?.getState?.().channel||null,startedAt:Date.now(),tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. '+(selectedMode==='network'?'두 기기 온라인 연결':hotseat?'사람 '+(bots+1)+'명이 번갈아 플레이':'컴퓨터 '+bots+'명과 대전')+'.','system');drawGame();persist()}
+ [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,!hotseat,selectedMode==='network'?(window.__LEAF_NET__?.guestName||'플레이어 2'):(hotseat?'플레이어 '+(i+2):BOT_NAMES[i]),team))}const nextMatch={version:5,map,mode:selectedMode,botAutoplay:selectedMode==='ai',diceRegion:window.__LEAF_LOBBY__?.getState?.().region||null,diceChannel:window.__LEAF_LOBBY__?.getState?.().channel||null,startedAt:Date.now(),tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};
+ // A backup may succeed yet writing the new, larger game state can still
+ // fail (quota exceeded / privacy restrictions). Commit BEFORE changing the
+ // visible game or the previous in-memory match; localStorage.setItem is
+ // synchronous and leaves the old key unchanged when it throws.
+ try{localStorage.setItem('rog_match',JSON.stringify(nextMatch))}
+ catch(error){
+  PATH=previousPath;
+  console.warn('4LEAF new game could not be persisted; old match retained',error?.name||'storage-error');
+  return modal('경기 저장 실패',
+   '브라우저에 새 경기 진행 기록을 저장할 수 없습니다. 기존 경기 데이터는 유지했습니다. 저장 공간이나 권한을 확인한 후 다시 시작하세요.',
+   [{label:'확인',primary:true}]);
+ }
+ match=nextMatch;busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. '+(selectedMode==='network'?'두 기기 온라인 연결':hotseat?'사람 '+(bots+1)+'명이 번갈아 플레이':'컴퓨터 '+bots+'명과 대전')+'.','system');drawGame();persist()}
 function appendMove(message){if(!match)return;match.message=message;match.history.push(message);if(match.history.length>90)match.history.shift();toast(message);persist()}
 /* Source-proven historical sprite numbers from original Dice/DMP.pak palette headers:
    Korean event labels map 1-to-1 to separate authentic Dice/TIS.pak images. */
