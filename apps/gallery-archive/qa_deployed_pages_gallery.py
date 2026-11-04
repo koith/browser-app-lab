@@ -214,9 +214,20 @@ def exercise(browser, model: str, rule: dict, engine: str):
             assert page.locator("#detail").is_visible(), (model, album_id, "detail hidden")
             photo = page.locator("#detailphotos .photo").first
             scroll_current(page, "#detailphotos .photo")
-            page.wait_for_function("""() => [...document.querySelectorAll('#detailphotos img')].some(img =>
-              img.complete && img.naturalWidth>=160 && 
-              (img.src.includes('/api/') || img.src.startsWith('blob:')))""", timeout=110000)
+            # A SHA-matched existing Pages copy is the G-09 fast path. The
+            # optimized thumbnail is permitted only from THIS model's saved
+            # static originals; remote API and verified blob routes remain.
+            page.wait_for_function("""(model) => [...document.querySelectorAll('#detailphotos img')].some(img => {
+              let sameModelPagesCopy=false;
+              try {
+                const u=new URL(img.currentSrc||img.src,location.href);
+                sameModelPagesCopy=u.origin===location.origin &&
+                  u.pathname.startsWith('/browser-app-lab/apps/'+model+'-gallery/stored-albums/');
+              } catch {}
+              return img.complete && img.naturalWidth>=160 &&
+                (sameModelPagesCopy || img.src.includes('/api/') ||
+                 img.src.startsWith('blob:'));
+            })""", arg=model, timeout=110000)
             click_current(page, "#detailphotos .photo")
             page.wait_for_function("""() => {
               const img=document.querySelector('#full');
