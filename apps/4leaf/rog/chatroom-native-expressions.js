@@ -26,7 +26,7 @@
   attempts++;setTimeout(load,Math.min(1600,200*2**attempts));
  };
  load();
- function trigger(){return document.querySelector('#rooms .social-exp-trigger')}
+ function trigger(){return document.querySelector('#rooms .social-exp-trigger, #app>.titlebar .leaf-room-mainframe-tools .social-exp-trigger')}
  function close(restore=false){
   const opened=palette;
   palette=null;
