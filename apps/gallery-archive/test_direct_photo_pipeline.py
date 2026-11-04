@@ -16,6 +16,83 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_photographer_original_source_is_scoped_to_exact_yui_post(self):
+        from direct_photo_pipeline import (
+            YUI_PHOTOGRAPHER_ORIGINAL_X, YUI_PHOTOGRAPHER_PUBLIC_VIEW,
+            YUI_PHOTOGRAPHER_ORIGINAL_MEDIA, reviewed_direct_source,
+            reviewed_direct_media, safe_registered_public_page)
+        self.assertEqual(len(YUI_PHOTOGRAPHER_ORIGINAL_MEDIA),4)
+        for source in (YUI_PHOTOGRAPHER_ORIGINAL_X,YUI_PHOTOGRAPHER_PUBLIC_VIEW):
+            self.assertTrue(safe_registered_public_page(source,'yui'))
+            self.assertTrue(reviewed_direct_source(source,'yui'))
+            self.assertFalse(reviewed_direct_source(source,'mimmi'))
+            for asset in YUI_PHOTOGRAPHER_ORIGINAL_MEDIA:
+                self.assertTrue(reviewed_direct_media(asset,source,'yui'))
+            self.assertFalse(reviewed_direct_media(
+                'https://pbs.twimg.com/media/UNRELATED.jpg?name=orig',source,'yui'))
+        self.assertFalse(safe_registered_public_page(
+            'https://teapawt.net/chinokun_photo/media','yui'))
+        source=YUI_PHOTOGRAPHER_PUBLIC_VIEW
+        links=''.join('<a href="'+url+'">photo</a>' for url in sorted(
+            YUI_PHOTOGRAPHER_ORIGINAL_MEDIA))
+        html=('<title>치노쿤 @chinokun_photo</title>'
+              '<article><p>2026 10 10 심유이 @super_yuisan</p>'
+              +links+'<a href="https://pbs.twimg.com/media/UNRELATED.jpg?name=orig">other</a>'
+              +'</article>')
+        urls,more,state=page_images(html.encode(),source,'yui')
+        self.assertEqual(set(urls),YUI_PHOTOGRAPHER_ORIGINAL_MEDIA)
+        self.assertEqual(more,[])
+        self.assertEqual(state,'scoped_public_page')
+        urls,more,state=page_images(
+            html.replace('심유이','다른 모델').encode(),source,'yui')
+        self.assertEqual(urls,[])
+        self.assertEqual(state,'photographer_or_model_identity_unverified')
+
+    def test_photographer_page_produces_actual_staged_image_pair_without_fake_count(self):
+        from direct_photo_pipeline import (YUI_PHOTOGRAPHER_ORIGINAL_X,
+            YUI_PHOTOGRAPHER_PUBLIC_VIEW,YUI_PHOTOGRAPHER_ORIGINAL_MEDIA)
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);base=root/'apps/yui-gallery'
+            base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text(
+                '{"model":"yui","albums":[]}')
+            (base/'public-work-pages.json').write_text(json.dumps(
+                {'model':'yui','albums':[{'id':'yui-chinokun-illustar-2026-public',
+                  'title':'Yui photographer original public',
+                  'priority':0,'source':YUI_PHOTOGRAPHER_ORIGINAL_X,
+                  'source_pages':[YUI_PHOTOGRAPHER_PUBLIC_VIEW]}]}))
+            prior=photo(4);new=photo(99)
+            old={'model':'yui','schema_version':1,'albums':[{
+                'id':'existing','title':'Existing','images':[{
+                    'number':1,'sha256':hashlib.sha256(prior).hexdigest()}]}]}
+            media=sorted(YUI_PHOTOGRAPHER_ORIGINAL_MEDIA)
+            html=('<title>치노쿤 @chinokun_photo</title>'
+                  '<article>2026 10 10 심유이 @super_yuisan'
+                  +''.join('<a href="'+v+'">Photo</a>' for v in media)
+                  +'</article>').encode()
+            class Client:
+                blocked_origins=set()
+                def get(self,url):
+                    if url==YUI_PHOTOGRAPHER_ORIGINAL_X:
+                        raise ValueError('Ordinary X public page unavailable')
+                    if url==YUI_PHOTOGRAPHER_PUBLIC_VIEW:
+                        return type('Response',(),{'content':html})()
+                    if url in media:
+                        return type('Response',(),{'content':new})()
+                    raise ValueError('Unregistered URL')
+            report=collect(root,'yui',old,root/'stage',
+                           max_new=2,max_pages=2,client=Client(),
+                           reviewed_source_only=True,alternative_engines=False)
+            self.assertEqual(report['new_local_individual_files'],1,report)
+            staged=json.loads((root/'stage/metadata/catalog.json').read_text())
+            self.assertEqual(staged['albums'][0]['id'],
+                             'yui-chinokun-illustar-2026-public')
+            row=staged['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/row['key']).read_bytes(),new)
+            self.assertEqual(len((root/'stage'/row['preview']).read_bytes()),
+                             row['preview_bytes'])
+
+
     def test_blocked_source_does_not_consume_page_budget_for_other_registered_host(self):
         from unittest.mock import patch
         with tempfile.TemporaryDirectory() as d:
