@@ -110,7 +110,7 @@ def render(repo, run_groups, summaries, issue_body, now):
     else:
         core = "UNVERIFIED — 연속 정상 수집 및 기존 원본 전수 검증 미충족"
     titles = re.findall(
-        r"(?m)^- \\[([ x])\\] \\*\\*(INT-[0-9]{2})(?:\\s+|[^*])*\\*\\*",
+        r"(?m)^- \[([ x])\] \*\*(INT-[0-9]{2})(?:\s+|[^*])*\*\*",
         issue_body,
     )
     checked = {key for state, key in titles if state == "x"}
