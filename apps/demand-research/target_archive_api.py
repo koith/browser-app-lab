@@ -55,12 +55,31 @@ def dispatch(platform,account):
 
 
 def same_origin_operator(request):
-    # This page is served from the private gateway URL, not public Pages.
-    # Require both same origin and a non-simple header to prevent CSRF.
+    """Require an exact browser Origin host and explicit operator intent.
+
+    Render and other TLS terminators forward HTTPS to the ASGI app over
+    internal HTTP. Comparing the external Origin to request.base_url's
+    *internal scheme* rejects legitimate HTTPS POSTs with a false 403.
+    Match the exact browser-visible Host instead, and require HTTPS except
+    for the explicitly local development test hosts. Never trust arbitrary
+    forwarded headers or a loose suffix/domain match.
+    """
+    if request.headers.get("x-archive-intent","")!="selected-public-account-v1":
+        raise HTTPException(403,"Private origin/intent required")
     origin=request.headers.get("origin","")
-    base=str(request.base_url).rstrip("/")
-    if (origin != base or request.headers.get("x-archive-intent","") !=
-            "selected-public-account-v1"):
+    try:
+        parsed=urlsplit(origin)
+        host=request.headers.get("host","").lower()
+        same_host=(parsed.netloc.lower()==host and
+                   parsed.hostname is not None and not parsed.username and
+                   not parsed.password and
+                   origin==parsed.scheme+"://"+parsed.netloc)
+        secure=(parsed.scheme=="https" or
+                (parsed.scheme=="http" and
+                 parsed.hostname in ("localhost","127.0.0.1","testserver")))
+    except ValueError:
+        same_host=secure=False
+    if not (same_host and secure):
         raise HTTPException(403,"Private origin/intent required")
 
 
