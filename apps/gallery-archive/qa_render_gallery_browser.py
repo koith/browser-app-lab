@@ -3,7 +3,7 @@
 import argparse
 import json
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 ROOT="https://mimmi-private-gallery-free.onrender.com/gallery"
 WORKS={"yui":["yuis-present33","athletic-club104","teddy-bear97"],"mimmi":["mimmi-indie-sana-sopmod2-2019","djawa-rei-beyond-the-heart"]}
@@ -94,7 +94,28 @@ def exercise(browser,model,branch_html=False):
             selector=f'#albumgrid .album[data-id="{album_id}"]'
             assert page.locator(selector).count()==1,(model,album_id,"missing")
             page.locator(selector).scroll_into_view_if_needed(timeout=20000)
-            page.wait_for_function("""id=>{const im=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');return im?.complete&&im.naturalWidth>=160}""",arg=album_id,timeout=90000)
+            try:
+                page.wait_for_function("""id=>{
+                  const im=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');
+                  return im?.complete&&im.naturalWidth>=160
+                }""",arg=album_id,timeout=30000)
+            except PlaywrightTimeoutError as exc:
+                # A provider 403/503 cannot be repaired by waiting 90s in
+                # both browsers. Report exactly which stored cover failed;
+                # strip query strings and never leak any session credentials.
+                state=page.evaluate("""id=>{
+                  const card=document.querySelector('#albumgrid .album[data-id="'+id+'"]');
+                  const im=card?.querySelector('img');
+                  let host=null,route=null;
+                  try{const u=new URL(im?.currentSrc||im?.src||'',location.href);
+                    host=u.hostname;route=u.pathname;}catch{}
+                  return {cardPresent:!!card,imagePresent:!!im,
+                    imageComplete:im?.complete??null,
+                    decodedWidth:im?.naturalWidth??0,host,route,
+                    failedState:card?.dataset.imageState||null};
+                }""",album_id)
+                raise AssertionError(("LIVE_RENDER_STORED_COVER_UNAVAILABLE",
+                   model,album_id,state)) from exc
             page.locator(selector).click()
             assert page.locator("#detail").is_visible()
             page.locator("#detailphotos .photo").first.scroll_into_view_if_needed()
