@@ -67,14 +67,14 @@ jobs:
           sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - name: Lightweight complete-owner readiness check (49 originals, no downloads)
+      - name: Lightweight complete-owner readiness check (56 originals, no downloads)
         id: ready
         if: github.event_name == 'schedule'
         shell: bash
         run: |
           if python apps/gallery-archive/probe_private_owner_runtime.py; then
             echo "healthy=true" >> "$GITHUB_OUTPUT"
-            echo "All 49 user-reported exact originals are still in the private runtime cache." >> "$GITHUB_STEP_SUMMARY"
+            echo "All 56 recorded owner originals are still in the private runtime cache." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "healthy=false" >> "$GITHUB_OUTPUT"
             echo "Cold/incomplete gallery: existing-owner authenticated recovery is required." >> "$GITHUB_STEP_SUMMARY"
