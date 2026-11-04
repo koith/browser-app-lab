@@ -178,8 +178,9 @@ def verified_owner_catalog(model, env, attempts=3):
         except (ValueError,UnicodeError):
             data=None
         if isinstance(data,dict):
-            if data.get("error_code")==31326:
-                raise OwnerReadUnavailable("Owner catalog provider explicitly denied access")
+            if ((type(data.get("error_code")) is int and data["error_code"]!=0)
+                or (type(data.get("errno")) is int and data["errno"]!=0)):
+                raise OwnerReadUnavailable("Owner catalog provider explicitly rejected access")
             if (data.get("schema_version")==1 and data.get("model")==model
                 and isinstance(data.get("albums"),list) and data["albums"]):
                 return raw,data
