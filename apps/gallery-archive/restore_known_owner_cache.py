@@ -230,9 +230,8 @@ def run(model,token):
 
 
 def main():
-    token=identity()
     for model in ("yui","mimmi"):
-        run(model,token)
+        run(model,identity())
     print("BOTH_GALLERIES_EXISTING_OWNER_EMERGENCY_CACHE_REHYDRATED",flush=True)
 
 
