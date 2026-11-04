@@ -3,6 +3,7 @@
  * Default sample every 13th source cell for CI. FULL_SWEEP=1 tests every cell.
  * This is a WEB painter approximation; historical 3D/MVE mesh UNVERIFIED. */
 const assert=require('node:assert/strict');
+const {startGameWithConfirmation}=require('./game-start-confirmation.cjs');
 const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
@@ -25,8 +26,8 @@ const {chromium}=require('playwright');
    await page.locator('#game-mode').selectOption('hotseat');
    await page.locator('#bot-count').selectOption('3');
    await page.locator('#map-select').selectOption(map);
-   await page.locator('#start-game').click();
-   await page.waitForSelector('#game:not(.hidden)');
+   // A reload restores the previous live match. Confirm before replacing it.
+   await startGameWithConfirmation(page);
    const stride=process.env.FOURLEAF_FULL_SWEEP==='1'?1:13;
    const result=await page.evaluate(async stride=>{
     const T=window.__ROG_TEST__,m=T.getMatch();

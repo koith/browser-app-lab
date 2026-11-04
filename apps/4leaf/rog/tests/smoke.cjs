@@ -1,11 +1,15 @@
 const { chromium }=require('playwright');
 const path=require('path');
 const assert=require('node:assert/strict');
+const {startGameWithConfirmation}=require('./game-start-confirmation.cjs');
 async function run(){
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+ // Smoke validates the standalone game; never contact the live ChatTown
+ // backend while testing local maps, sprites, saves, or new-game dialogs.
+ await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('4LEAF PAGEERROR:',e.stack||e)});page.on('console',m=>{if(m.type()==='error')console.error('4LEAF CONSOLE:',m.text())});
- const url='file://'+path.resolve(__dirname,'../index.html');
+ const url=process.env.FOURLEAF_SMOKE_URL||'file://'+path.resolve(__dirname,'../index.html');
  await page.goto(url);await page.waitForFunction(()=>!!window.__ROG_TEST__,null,{timeout:6000});
  assert.equal(await page.title(),'4LEAF Browser · 월드맵과 채팅');
  await page.screenshot({path:'rog-desktop.png'});
@@ -19,8 +23,7 @@ async function run(){
  await page.locator('#modal-buttons button').first().click();
  await page.locator('#lobby-create').click();
  await page.locator('#bot-count').selectOption('1');
- await page.locator('#start-game').click();
- await page.waitForSelector('#game:not(.hidden)');
+ await startGameWithConfirmation(page);
  const nodes=await page.locator('#board-nodes .tile').count();assert.equal(nodes,104,'original 4LEAF MVE path tiles');
  assert.ok((await page.locator('#map-select option').count())>=25,'25 original archive map names');
  assert.ok(await page.evaluate(()=>window.ORIGINAL_LEAF_CHESSMEN.length>=90),'original CHR chessman data loaded');
@@ -57,8 +60,7 @@ async function run(){
  await page.locator('[data-route="lobby"]').first().click();
  await page.locator('#lobby-create').click();
  await page.locator('#map-select').selectOption('악마의 달팽이');
- await page.locator('#start-game').click();
- await page.waitForSelector('#game:not(.hidden)');
+ await startGameWithConfirmation(page,{expectSaved:true,verifyCancel:true});
  assert.equal(await page.locator('#board-nodes .tile').count(),69,'original Devil Snail MVE tile count');
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:'rog-mobile.png'});
@@ -72,7 +74,7 @@ async function run(){
  await page.locator('#game-mode').selectOption('hotseat');
  await page.locator('#bot-count').selectOption('1');
  await page.locator('#map-select').selectOption('4LEAF');
- await page.locator('#start-game').click();
+ await startGameWithConfirmation(page,{expectSaved:true});
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.mode==='hotseat',null,{timeout:6000});
  await page.evaluate(()=>{const m=window.__ROG_TEST__.getMatch();m.players[1].position=50;for(let i=1;i<20;i++)m.tiles[i]='normal';for(let i=51;i<70;i++)m.tiles[i]='normal';window.__ROG_TEST__.drawGame()});
  assert.equal(await page.locator('#board-pawns .board-pawn').count(),2,'persistent independent actors');

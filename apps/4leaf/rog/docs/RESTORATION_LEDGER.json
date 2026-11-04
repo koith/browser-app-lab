@@ -1680,6 +1680,16 @@
         "P0-CHAT",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-JUZAN-SAVED-MATCH-CI-START",
+      "date": "2026-11-04",
+      "origin": "사용자: 클로드 작업 중 GPT 독립 개발 진행",
+      "text": "주잔 게임 시작 실패로 분류되던 CI에서 실제로는 기존 저장 경기 보호 확인창을 테스트가 처리하지 않고 #game을 30초 기다린 문제를 해결한다. 기존 경기 취소 시 불변 검증, 신규 경기 승인, 모든 맵 변경, 실원본 로컬 HTTP 이미지 로드를 검증하고 새 코드의 게임시작 오류와 테스트 오류를 구분한다.",
+      "taskIds": [
+        "M04",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8514,6 +8524,28 @@
         "P0-RELEASE"
       ],
       "details": "Added archive-validation.cjs and explicit restore regression tests, called validator before any room/history state changes, included file in Node Docker image, gated CI; CAS broken state must report health 503. Pending PR CI and deployment evidence. No task status changed."
+    },
+    {
+      "seq": 390,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-JUZAN-SAVED-MATCH-CI-START",
+      "taskIds": [
+        "M04",
+        "P0-RELEASE"
+      ],
+      "details": "Reopen repeated board/game CI failure triage without overwriting other app or Claude ChatRoom work."
+    },
+    {
+      "seq": 391,
+      "date": "2026-11-04",
+      "type": "SAVED_MATCH_REPLACEMENT_GAME_START_CI_REPAIR_PENDING",
+      "requestId": "REQ-20261104-JUZAN-SAVED-MATCH-CI-START",
+      "taskIds": [
+        "M04",
+        "P0-RELEASE"
+      ],
+      "details": "3 prior failing 4LEAF suites reached #start-game after a saved match and waited for #game while real preservation confirmation remained open. Added common test helper to assert protected match, cancel without changing saved state, then explicitly confirm replacement; exercised across smoke.cjs, board-layout.cjs, board-actor-occlusion-all-maps.cjs. Smoke now serves same-origin HTTP assets avoiding file:// tainted canvas, with isolated backend. CI/merge/deploy pending; not proof every user game start works."
     }
   ],
   "restorationPriority": {
