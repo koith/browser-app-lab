@@ -9,16 +9,10 @@ on:
       - "apps/demand-research/inspect_terabox_status.py"
       - "apps/demand-research/test_archive_integrity_status.py"
       - ".github/workflows/demand-repair-archive.yml"
-  push:
-    branches: [main]
-    paths:
-      - "apps/demand-research/rebuild_archive.py"
-      - "apps/demand-research/inspect_terabox_status.py"
-      - "apps/demand-research/test_archive_integrity_status.py"
-      - "apps/demand-research/recover_spool_artifacts.py"
-      - ".github/workflows/demand-replay-encrypted.yml"
-      - "apps/demand-research/demand_archive.py"
-      - ".github/workflows/demand-repair-archive.yml"
+  # Do not enqueue another 20-minute full integrity scan after EVERY
+  # storage source or recovery workflow update. The existing six-hour schedule
+  # and explicit workflow_dispatch remain available. This keeps urgent
+  # encrypted-original recovery from being trapped behind redundant scans.
 permissions:
   contents: read
   actions: read
