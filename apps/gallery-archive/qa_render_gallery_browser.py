@@ -51,15 +51,22 @@ def exercise(browser,model,branch_html=False):
         # The *actual loaded* priority must rank optical quality FIRST.
         # A clean but blurred copy must never win solely due to its watermark.
         assert page.evaluate("""()=>{
-          const quality=s=>({method:'decoded-pixel-v1',confidence:'measured',score:s});
+          const quality=(s,sha)=>({method:'decoded-pixel-v1',
+            confidence:'measured',score:s,photo_sha256:sha});
           const sharp={sha256:'a'.repeat(64),width:900,height:1200,bytes:120000,
-                       watermark_status:'present_verified',visual_quality:quality(90)};
+                       watermark_status:'present_verified',
+                       visual_quality:quality(90,'a'.repeat(64))};
           const blurry={sha256:'b'.repeat(64),width:4000,height:6000,bytes:5000000,
-                        watermark_status:'absent_verified',visual_quality:quality(30)};
-          const near={...blurry,sha256:'c'.repeat(64),visual_quality:quality(87)};
+                        watermark_status:'absent_verified',
+                        visual_quality:quality(30,'b'.repeat(64))};
+          const near={...blurry,sha256:'c'.repeat(64),
+                      visual_quality:quality(87,'c'.repeat(64))};
+          const forged={...near,visual_quality:quality(100,'b'.repeat(64))};
           return GalleryPhotoQuality.preferred(sharp,blurry)===sharp &&
                  GalleryPhotoQuality.preferred(sharp,near)===near &&
-                 GalleryPhotoQuality.preferred(sharp,{...near,visual_quality:null})===sharp;
+                 GalleryPhotoQuality.preferred(sharp,{...near,visual_quality:null})===sharp &&
+                 GalleryPhotoQuality.score(forged)===null &&
+                 GalleryPhotoQuality.preferred(sharp,forged)===sharp;
         }"""),"LIVE_RENDER_OPTICAL_QUALITY_PRIORITY_VIOLATED"
         page.wait_for_function("""limit=>typeof stored!=='undefined'&&stored.reduce((n,a)=>n+a.images.length,0)>=limit&&document.querySelectorAll('#albumgrid .album').length>0&&document.querySelector('#inventory')?.textContent.includes('실제 저장본')""",arg=MIN[model],timeout=90000)
         if model=="yui":
