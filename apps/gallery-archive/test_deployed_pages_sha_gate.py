@@ -11,4 +11,6 @@ assert "workflow_run.head_branch == 'main'" in text
 assert "git rev-parse HEAD" in text
 assert "workflow_run.head_sha" in text
 assert "--verify-progressive" in text
+assert "GALLERY_HISTORIC_PAGES_SHA_GATE_TEST_UNAVAILABLE_NOT_VERIFIED" in text
+assert "if [[ -f apps/gallery-archive/test_deployed_pages_sha_gate.py ]]" in text
 print("GALLERY_POSTDEPLOY_TRUSTED_EXACT_SHA_NO_MONOREPO_RACE_PASS")
