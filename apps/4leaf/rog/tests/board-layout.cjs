@@ -1,5 +1,6 @@
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
+const {startGameWithConfirmation}=require('./game-start-confirmation.cjs');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try{
@@ -10,8 +11,8 @@ const assert=require('node:assert/strict');
    await page.locator('[data-route="lobby"]').first().click();
    await page.locator('#lobby-create').click();
    await page.locator('#map-select').selectOption(name);
-   await page.locator('#start-game').click();
-   await page.waitForSelector('#game:not(.hidden)');
+   // The second map replaces an unfinished match only after user consent.
+   await startGameWithConfirmation(page,{expectSaved:name==='악마의 달팽이'});
    await page.waitForFunction(()=>[...document.querySelectorAll('#board-nodes .tile')]
     .every(el=>el.dataset.tisAlpha==='ready'),null,{timeout:20000});
    const result=await page.evaluate(()=>{
