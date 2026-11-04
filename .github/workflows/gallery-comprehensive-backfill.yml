@@ -8,13 +8,6 @@ on:
       - 'apps/gallery-archive/test_owner_metadata.py'
       - 'apps/gallery-archive/audit_both_models.py'
       - 'apps/gallery-archive/test_audit_both_models_aliases.py'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/gallery-comprehensive-backfill.yml'
-      - 'apps/gallery-archive/audit_both_models.py'
-  schedule:
-    - cron: '8 19 * * *'
 permissions:
   contents: read
   actions: write
