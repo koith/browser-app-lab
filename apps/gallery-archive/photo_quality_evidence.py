@@ -5,6 +5,7 @@ the same displayed scale; suppress single-pixel noise, compare fine detail per
 contrast and never declare improvement on pixel dimensions or JPEG bytes alone.
 A photo with different content/crop must NOT be compared or overwritten.
 """
+import hashlib
 from io import BytesIO
 from PIL import Image, ImageChops, ImageFilter, ImageOps, ImageStat
 
@@ -34,6 +35,13 @@ def _detail(image):
 
 def inspect_pair(previous_raw,candidate_raw,previous_sha):
     """Return visual evidence; only for same source photo proven by caller."""
+    real_previous_sha=hashlib.sha256(previous_raw).hexdigest()
+    real_candidate_sha=hashlib.sha256(candidate_raw).hexdigest()
+    if real_previous_sha!=previous_sha:
+        return {'method':'paired-decoded-pixel-v1',
+                'confidence':'unverified','relation':'uncertain',
+                'same_photo_verified':False,
+                'reason':'previous_bytes_sha256_mismatch'}
     a,b=_decoded(previous_raw),_decoded(candidate_raw)
     if abs(a.width/a.height-b.width/b.height)>0.012:
         return {'method':'paired-decoded-pixel-v1','confidence':'unverified',
@@ -56,6 +64,7 @@ def inspect_pair(previous_raw,candidate_raw,previous_sha):
     else:
         relation='uncertain'
     return {'method':'paired-decoded-pixel-v1','confidence':'measured',
+            'candidate_sha256':real_candidate_sha,
             'same_photo_verified':True,'compared_to_sha256':previous_sha,
             'relation':relation,'previous_detail':before,'candidate_detail':after,
             'comparison':'same_display_scale_center_detail_noise_suppressed_v1',
