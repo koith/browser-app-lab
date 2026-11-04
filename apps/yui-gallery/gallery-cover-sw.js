@@ -101,15 +101,9 @@ async function verifiedPhotoResponse(event) {
 }
 
 self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
-self.addEventListener('activate', event => event.waitUntil((async () => {
-  for (const name of await caches.keys()) {
-    if ((name.startsWith('yui-owner-saved-covers-') && name !== COVER_CACHE) ||
-        (name.startsWith('yui-owner-verified-photos-') && name !== PHOTO_CACHE)) {
-      await caches.delete(name);
-    }
-  }
-  await self.clients.claim();
-})()));
+// Never delete persistent device photo data on worker activation. Safari
+// might finish installation while a first photo is entering CacheStorage.
+self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
 
 self.addEventListener('fetch', event => {
   const request = event.request;
