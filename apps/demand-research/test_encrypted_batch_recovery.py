@@ -124,6 +124,73 @@ def test_recovery_timeout_is_counted_without_disclosing_source_name(tmp_path,mon
     assert "sensitive" not in json.dumps(result)
 
 
+
+
+def test_missing_metadata_directory_falls_back_to_root_ciphertext_pack(
+        tmp_path,monkeypatch):
+    """Only an immutable ciphertext ZIP may land in the root fallback."""
+    class RootOnly(FakeCloud):
+        def write_immutable(self,key,data):
+            if key.startswith("metadata/recovery-pack-"):
+                try:
+                    raise RuntimeError("(missing) nested metadata parent")
+                except RuntimeError as inner:
+                    raise RuntimeError("private cloud write unverified") from inner
+            return super().write_immutable(key,data)
+
+        def names(self,prefix):
+            if prefix=="":
+                return sorted(key for key in self.objects if "/" not in key)
+            return super().names(prefix)
+
+    spool=RecoverySpool(tmp_path)
+    from test_demand_archive import post as synthetic_post
+    from demand_archive import sha256
+    record=synthetic_post()
+    pid=record["id"]
+    observation=first(pid)
+    observation["media_links"]=["https://cdn.bsky.app/img/synthetic-root-original.jpg"]
+    record.update({"text":observation["text"],"source_url":observation["source_url"],
+                   "posted_at":observation["posted_at"],"media_expected":1,
+                   "media_saved":1,"archive_complete":True})
+    original=b"only-verified-synthetic-original-video-data"
+    record["media"]=[{"key":"posts/"+pid+"/media/0001.jpg","mime":"image/jpeg",
+                       "bytes":len(original),"sha256":sha256(original),
+                       "remote_verified":True}]
+    sealed=spool.save(pid,observation,record,[original])
+    cloud=RootOnly()
+    key=replay.preserve_encrypted_batch(cloud,spool,[sealed])
+    assert key.startswith("recovery-pack-") and "/" not in key
+    assert b"PRIVATE TEST BODY" not in cloud.objects[key]
+    assert b"bsky.app" not in cloud.objects[key]
+    assert replay.select_remote_encrypted_packs(cloud)==[key]
+    sealed.unlink()  # Simulate short-lived Actions artifact expiry.
+    monkeypatch.setenv("GH_TOKEN","offline-test-only")
+    monkeypatch.delenv("DEMAND_RECOVERY_SOURCE_RUN_ID",raising=False)
+    monkeypatch.setattr(replay,"list_candidates",lambda:[])
+    done=replay.replay(cloud=cloud)
+    assert done["remote_packs_sha_verified"]==1
+    assert done["post_and_media_verified"]==1
+    assert done["buffer_failures"]==0
+    assert cloud.objects["posts/"+pid+"/media/0001.jpg"]==original
+    assert cloud.objects[key],"encrypted immutable pack was not deleted"
+
+
+def test_integrity_collision_must_not_be_bypassed_by_root_pack_fallback(tmp_path):
+    class CollisionCloud(FakeCloud):
+        def write_immutable(self,key,data):
+            if key.startswith("metadata/recovery-pack-"):
+                raise RuntimeError("immutable archive key collision: checksum conflict")
+            return super().write_immutable(key,data)
+    spool=RecoverySpool(tmp_path)
+    pid="d"*40
+    sealed=spool.save(pid,first(pid))
+    cloud=CollisionCloud()
+    with pytest.raises(RuntimeError,match="collision"):
+        replay.preserve_encrypted_batch(cloud,spool,[sealed])
+    assert not any(key.startswith("recovery-pack-") for key in cloud.objects)
+
+
 def test_backlog_fair_rotation_preserves_oldest_and_changes_other_sources(monkeypatch):
     def fixture_page(args,**kwargs):
         assert args[0]=="api"
