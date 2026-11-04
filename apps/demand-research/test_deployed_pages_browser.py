@@ -21,7 +21,7 @@ URL = os.getenv(
     "INTERSECTION_PAGES_URL",
     "https://koith.github.io/browser-app-lab/apps/demand-research/"
 )
-FILES = ("index.html", "post_activity_ranking.js")
+FILES = ("index.html", "post_activity_ranking.js", "public_video_trends.js")
 EXPECTED = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
             for name in FILES}
 
@@ -47,7 +47,7 @@ def verify_pages_bytes():
             except Exception:
                 failures.append(name + ":unavailable")
         if not failures:
-            print("PAGES_DEPLOYED_MAIN_BYTES_SHA256_PASS: index and ranking JS")
+            print("PAGES_DEPLOYED_MAIN_BYTES_SHA256_PASS: index, ranking JS and video trends JS")
             return
         if attempt < 17:
             time.sleep(12)
@@ -77,6 +77,7 @@ def inspect_browser(browser_type, label, width, height):
         assert page.locator("#feed").count() == 1, "feed missing"
         assert page.locator("#activityRankingRows").count() == 1, "rank UI missing"
         assert page.locator("#activityRankingDialog").count() == 1, "rank dialog missing"
+        assert page.locator("#videoTrends").count() == 1, "video trends UI missing"
         assert_rank_rows_centered(page, width)
 
         # Feed only synthetic source-proof data through the *deployed* ranking
@@ -105,6 +106,61 @@ def inspect_browser(browser_type, label, width, height):
         assert page.locator("#activityRankingDialogContent a[target='_blank']").count() == 1
         page.locator("#activityRankingDialogClose").click()
         assert page.locator("#activityRankingDialog[open]").count() == 0
+        # Video trends must use the exact verified code deployed on Pages,
+        # never real social-media calls. Assert both public providers can be
+        # compared and that changing source filters the actual cards.
+        page.evaluate("""() => {
+          const now=Date.now();
+          window.INTERSECTION_publicVideoSnapshot=()=>({
+            partial:false,verified:[
+              {
+                id:"synthetic-video-blue",platform:"bluesky",
+                profileUrl:"https://bsky.app/profile/qa-only.invalid",
+                url:"https://bsky.app/profile/qa-only.invalid/post/videoqa",
+                author:"영상 QA Bluesky",
+                posted:new Date(now-30*60000).toISOString(),
+                engagement:{likes:4,replies:1},
+                media:[{type:"video",thumb:""}]
+              },
+              {
+                id:"synthetic-video-masto",platform:"mastodon",
+                profileUrl:"https://mastodon.social/@qa-synthetic",
+                url:"https://mastodon.social/@qa-synthetic/123",
+                author:"영상 QA Mastodon",
+                posted:new Date(now-80*60000).toISOString(),
+                engagement:null,
+                media:[{type:"video",thumb:""}]
+              }
+            ]
+          });
+          window.dispatchEvent(new Event("intersection:feed-updated"));
+        }""")
+        page.locator("#videoTrends > summary").click()
+        page.locator("#videoTrendRows a.video-trend-card").first.wait_for(
+            state="visible", timeout=12000)
+        assert page.locator("#videoTrendRows a.video-trend-card").count()==2
+        assert "Bluesky 1건" in page.locator("#videoTrendCoverage").inner_text()
+        assert "Mastodon 1건" in page.locator("#videoTrendCoverage").inner_text()
+        assert "반응 제공 1/1" in page.locator("#videoTrendCoverage").inner_text()
+        assert "반응 제공 0/1" in page.locator("#videoTrendCoverage").inner_text()
+        page.locator("#videoTrendSource").select_option("mastodon")
+        assert page.locator("#videoTrendRows a.video-trend-card").count()==1
+        assert page.locator("#videoTrendRows a.video-trend-card").first.get_attribute(
+            "href")=="https://mastodon.social/@qa-synthetic/123"
+        assert page.locator("#videoTrendRows a.video-trend-card").first.get_attribute(
+            "target")=="_blank"
+        page.locator("#videoTrendSource").select_option("bluesky")
+        assert page.locator("#videoTrendRows a.video-trend-card").count()==1
+        assert page.locator("#videoTrendRows a.video-trend-card").first.get_attribute(
+            "href")=="https://bsky.app/profile/qa-only.invalid/post/videoqa"
+        page.locator('[data-video-mode="archive"]').click()
+        assert page.locator("#videoTrendMonth").is_visible()
+        assert page.locator("#videoTrendRows a.video-trend-card").count()==1
+        page.locator('[data-video-mode="hot"]').click()
+        assert page.locator("#videoTrendMonth").is_hidden()
+        assert page.locator("#videoTrendRows a.video-trend-card").count()==1
+        print("PAGES_PUBLIC_VIDEO_TRENDS_PASS:",label,
+              "sources=2 source_filter=PASS periods=PASS source_links=PASS")
         viewport = page.evaluate("""() => ({
           contentWidth:document.documentElement.scrollWidth,
           windowWidth:window.innerWidth
