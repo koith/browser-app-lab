@@ -8,6 +8,7 @@ on:
     workflows:
       - "INTERSECTION — Fast Private Public-Post Capture"
       - "INTERSECTION — Immediate Encrypted TeraBox Recovery"
+      - "INTERSECTION — Private Synthetic TeraBox Write Diagnostics"
       - "INTERSECTION — Verify and Rebuild Private TeraBox Archive"
       - "Deploy static content to Pages"
       - "INTERSECTION — Deployed Pages Desktop and Mobile QA"
