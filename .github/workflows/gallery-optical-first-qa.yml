@@ -24,10 +24,14 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/catalog_view.py'
       - '.github/workflows/gallery-optical-first-qa.yml'
   workflow_dispatch:
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
 permissions:
   contents: read
 jobs:
   optical-photo-priority:
+    if: github.event_name != 'workflow_run'
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
@@ -41,3 +45,42 @@ jobs:
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/photo_quality_evidence.py apps/mimmi-gallery/cloud/gateway/catalog_view.py
           node apps/gallery-archive/test_gallery_visual_quality.cjs
           node apps/gallery-archive/test_quality_same_photo.cjs
+          python -m py_compile apps/gallery-archive/qa_gallery_quality_selector_live.py
+
+  exact-pages-live-selector:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Check deployed source SHA and historical fixture presence
+        id: fixture
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+          if [[ -f apps/gallery-archive/qa_gallery_quality_selector_live.py ]]; then
+            echo 'available=true' >> "$GITHUB_OUTPUT"
+            echo "GALLERY_QUALITY_SELECTOR_DEPLOY_SHA=$(git rev-parse HEAD)"
+          else
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+            echo 'GALLERY_QUALITY_SELECTOR_HISTORIC_NOT_VERIFIED'
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.fixture.outputs.available == 'true'
+        with: {python-version: '3.12'}
+      - name: Verify real mobile Pages selector for both galleries
+        if: steps.fixture.outputs.available == 'true'
+        run: |
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+          python apps/gallery-archive/qa_gallery_quality_selector_live.py --browser ${{ matrix.browser }}
