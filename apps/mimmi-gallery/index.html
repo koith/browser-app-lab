@@ -535,9 +535,12 @@ function remember(s){history.replaceState({...history.state,scroll:window.scroll
 function goBack(){if(history.state?.mimmi&&history.state.depth>0)history.back();else{const state={mimmi:true,depth:0,mode:activePublisher?'publishers':'albums',publisher:history.state?.album?activePublisher:null,scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
 function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums',s.publisher);if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
 function routeFromLocation(){
- const q=new URLSearchParams(location.hash.replace(/^#/,''));
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);
+ // Old Mimmi links used a bare #album-id without an 'album=' key.
+ // Safari BFCache and untyped popstate must restore these URLs, too.
+ const album=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));
  return {mimmi:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),
-         album:q.get('album'),photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};
+         album,photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};
 }
 window.addEventListener('popstate',()=>{applyRoute(history.state?.mimmi?history.state:routeFromLocation())});
 window.addEventListener('pageshow',event=>{if(event.persisted&&catalog.length)applyRoute(history.state?.mimmi?history.state:routeFromLocation())});

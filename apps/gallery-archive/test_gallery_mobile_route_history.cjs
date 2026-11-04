@@ -43,5 +43,10 @@ for(const model of ['mimmi','yui']){
  context.history.state={[model]:true,album:'other',photo:2,mode:'albums'};
  saved.popstate();
  assert.equal(saved.last.album,'other','typed in-memory state wins over URL fallback');
+ context.history.state=null;
+ context.location.hash='#historical-album-link';
+ saved.popstate();
+ assert.equal(saved.last.album,'historical-album-link',
+   model+' must preserve original bare-hash links during iOS Back');
  console.log('GALLERY_DEEP_LINK_NO_DUPLICATE_BACK_STACK_AND_SAFARI_RESTORE_PASS',model);
 }
