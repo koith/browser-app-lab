@@ -2,11 +2,6 @@ name: Mimmi Free Official Portfolio Discovery
 on:
   workflow_dispatch:
   # Official-image discovery paused; feature development has priority.
-  push:
-    paths:
-      - 'apps/mimmi-gallery/collect_official_previews.py'
-      - 'apps/mimmi-gallery/test_official_collector.py'
-      - '.github/workflows/mimmi-official-archive.yml'
 permissions:
   contents: write
 concurrency:
