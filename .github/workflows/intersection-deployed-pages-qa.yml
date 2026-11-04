@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - "apps/demand-research/test_deployed_pages_browser.py"
+      - "apps/demand-research/public_video_trends.js"
       - ".github/workflows/intersection-deployed-pages-qa.yml"
   push:
     branches: [main]
     paths:
       - "apps/demand-research/index.html"
       - "apps/demand-research/post_activity_ranking.js"
+      - "apps/demand-research/public_video_trends.js"
       - "apps/demand-research/test_deployed_pages_browser.py"
       - ".github/workflows/intersection-deployed-pages-qa.yml"
   workflow_dispatch:
