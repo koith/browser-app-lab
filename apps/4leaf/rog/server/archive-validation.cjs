@@ -27,6 +27,9 @@ function validateArchive(archive,validDistrict){
     typeof r.passwordSalt!=='string'||!/^[0-9a-f]{32}$/i.test(r.passwordSalt)))
    bad('room password verifier');
  }
+ // A token always names one actual guest identity, even when it appears
+ // in multiple public rooms. Legacy archives without fingerprints remain valid.
+ const sendersByToken=new Map();
  const histories=new Set();
  for(const pair of archive.history){
   if(!Array.isArray(pair)||pair.length!==2||
@@ -55,6 +58,14 @@ function validateArchive(archive,validDistrict){
     e.roomId!==roomId||typeof e.text!=='string'||
     typeof e.user!=='string'||typeof e.sender!=='string')
     bad('message record, room binding or sequence');
+   if(e.senderTokenHash!==undefined){
+    if(typeof e.senderTokenHash!=='string'||!/^[a-f0-9]{64}$/.test(e.senderTokenHash))
+     bad('invalid message sender credential fingerprint');
+    const priorSender=sendersByToken.get(e.senderTokenHash);
+    if(priorSender!==undefined&&priorSender!==e.sender)
+     bad('one sender credential maps to multiple identities');
+    sendersByToken.set(e.senderTokenHash,e.sender);
+   }
    if(messageIds.has(e.id))bad('duplicate message id');
    messageIds.add(e.id);
    if(e.clientMessageId!==undefined){
