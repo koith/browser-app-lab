@@ -132,18 +132,25 @@ class GitHub:
             return json.loads(raw) if raw else {}
 
     def runs(self, workflow):
-        # 100 includes all currently queued replay runs; fail closed if
-        # GitHub truncates a larger backlog rather than dispatching duplicates.
-        result = self.request(
-            f"/repos/{self.repo}/actions/workflows/{workflow}/runs"
-            "?branch=main&per_page=100"
-        )
-        if result.get("total_count", 0) > 100:
-            raise ValueError("workflow run history truncated; refuse dispatch")
+        base = f"/repos/{self.repo}/actions/workflows/{workflow}/runs"
+        result = self.request(base + "?branch=main&per_page=100")
         runs = result.get("workflow_runs", [])
         if not isinstance(runs, list):
             raise ValueError("invalid run response")
-        return runs
+        # Old pending work can fall outside the most recent 100 runs. Check
+        # each active state independently, refusing to dispatch on overflow.
+        by_id = {row["id"]: row for row in runs if isinstance(row, dict)
+                 and isinstance(row.get("id"), int)}
+        for status in sorted(ACTIVE):
+            active = self.request(
+                base + f"?branch=main&status={status}&per_page=100"
+            )
+            if active.get("total_count", 0) > 100:
+                raise ValueError("active workflow queue too large; refuse dispatch")
+            for row in active.get("workflow_runs", []):
+                if isinstance(row, dict) and isinstance(row.get("id"), int):
+                    by_id[row["id"]] = row
+        return sorted(by_id.values(), key=lambda row: row["id"], reverse=True)
 
     def dispatch_replay(self, source_id):
         return self.request(
