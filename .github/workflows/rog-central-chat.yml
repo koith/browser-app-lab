@@ -47,6 +47,8 @@ jobs:
         run: node --test apps/4leaf/rog/tests/central-client-recovery.cjs
       - name: Reject partial archive recovery and fail health on CAS conflict
         run: node --test apps/4leaf/rog/server/archive-validation.test.cjs
+      - name: Preserve local file archives through restart and malformed-file recovery
+        run: node --test apps/4leaf/rog/server/local-archive.test.cjs
       - name: Verify encrypted remote state, restart recovery and rollback
         run: node --test apps/4leaf/rog/server/durability.test.cjs
       - name: Verify bounded real guest sessions and password protection

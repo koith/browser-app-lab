@@ -26,7 +26,15 @@ message sequence, or history exceeding the 200-entry retention limit makes the
 entire archive fail closed: the server does not silently filter records and
 later erase the rejected subset. A lost optimistic revision race also sets
 `/api/health` to HTTP 503 until the server restarts against the authoritative
-archive. Both conditions need operator recovery, not an empty-state reset.
+archive.
+A **timeout, HTTP 5xx, or broken response after a mutating request** has an
+unknown commit outcome: the database might already have committed the encrypted
+revision even though the Node server did not receive its ACK. Such errors now
+quarantine the local authority immediately (HTTP 503 for all endpoints) until
+a fresh process reloads the winning archive. It must not show a stale room
+history or retry a new write against the unverified old revision. After restart,
+clients can retry a saved `clientMessageId` to receive the original ACK without
+storing a second message. This is fail-closed safety, not automatic recovery. Both conditions need operator recovery, not an empty-state reset.
 
 Room create/close, ownership transfer and each chat message wait for a
 successful remote commit before sending HTTP success. Errors roll back
@@ -50,7 +58,15 @@ retroactively prove a public guest's identity. Backend-only keys and ciphertext
 remain necessary; this does not make ephemeral Render storage durable.
 
 The old LEAF_CENTRAL_STORAGE local file remains available for isolated
-tests or hosting with an actually persistent mounted volume. The free
+tests or hosting with an actually persistent mounted volume.
+Like remote archives, **local JSON files now undergo complete structural
+validation before the service starts**. Invalid JSON, malformed rooms,
+orphaned or oversized history, and duplicate IDs make startup fail without
+rewriting, dropping, or silently truncating any original data. Preserve the
+corrupt original for recovery; never replace it with a blank archive.
+Local writes use a same-directory temporary file and atomic rename; this is
+not a substitute for a persistent disk, an off-site backup, or crash-proof
+power-loss guarantees. The free
 Render instance's local directory is not a durable substitute.
 
 Free Supabase may pause after inactivity and provides no automatic
