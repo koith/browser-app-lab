@@ -361,8 +361,12 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
         try:
             blob = await verified_remote_media(key, declared_bytes, declared_digest, REMOTE)
         except HTTPException as error:
-            if not has_separate_preview or error.status_code not in (502, 504):
+            provider_denied = (error.status_code == 503 and
+                (error.headers or {}).get("X-Archive-Read-Cause") == "provider_denial")
+            if not has_separate_preview or (error.status_code not in (502, 504) and not provider_denied):
                 raise
+            # Fallback is an independently SHA-verified existing original,
+            # never an unverified preview or a bypass of provider denial.
             fallback = await media(album_id, image_num, 'original', download=download, v="")
             fallback.headers['X-Archive-Variant'] = 'verified-original-fallback'
             return fallback
@@ -430,8 +434,11 @@ async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Q
     try:
         payload = await verified_remote_media(key, size, digest, YUI_REMOTE)
     except HTTPException as error:
-        if kind != 'preview' or error.status_code not in (502, 504):
+        provider_denied = (error.status_code == 503 and
+            (error.headers or {}).get("X-Archive-Read-Cause") == "provider_denial")
+        if kind != 'preview' or (error.status_code not in (502, 504) and not provider_denied):
             raise
+        # Restore a preview only through the SHA-verified existing original.
         fallback = await yui_media(album_id, image_num, 'original', download=download, v="")
         fallback.headers['X-Archive-Variant'] = 'verified-original-fallback'
         return fallback
