@@ -17,6 +17,13 @@ const mk=(id,ago,platform="bluesky",extra={})=>({
  engagement:{likes:5,replies:2},...extra
 });
 const good1=mk("a",1,"bluesky",{engagement:{likes:8,reposts:2}});
+const midnight=mk("month-boundary",90,"bluesky",{
+  posted:"2026-10-31T16:30:00Z"
+});
+assert.equal(allVideos({verified:[midnight]})[0].month,"2026-11",
+  "Nov 1 at 01:30 KST must not be assigned to UTC October");
+assert.deepEqual(months({verified:[midnight]},NOW),["2026-11"],
+  "month picker groups by Korean calendar month");
 const good2=mk("b",2,"bluesky",{engagement:null,
   media:[{type:"video",thumb:"https://cdn.bsky.app/img/b.jpg"},
          {type:"video",thumb:"https://cdn.bsky.app/img/b2.jpg"}]});
@@ -86,6 +93,8 @@ assert.equal($("videoTrendSource").querySelectorAll("option").length,2,
 assert.match($("videoTrendCoverage").textContent,/반응 제공/);
 assert.equal($("videoTrendRows").firstChild.target,"_blank");
 assert.equal($("videoTrendRows").firstChild.rel,"noopener noreferrer");
+assert.match($("videoTrendRows").firstChild.textContent,/KST/,
+  "video list timestamps must explicitly identify Korean local time");
 $("videoTrendMore").click();
 assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,16);
 // The DOM source selector must filter both cards and count, not just a label.

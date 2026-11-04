@@ -12,6 +12,14 @@
  const LABELS={bluesky:"Bluesky",mastodon:"Mastodon",misskey:"Misskey",
    lemmy:"Lemmy",reddit:"Reddit",x:"X",threads:"Threads",instagram:"Instagram"};
  const HOUR=3600000,DAY=24*HOUR;
+ // The app is Korean-localized. Calendar months must use Asia/Seoul rather
+ // than UTC so midnight posts are not assigned to the previous month.
+ const KST_OFFSET=9*HOUR;
+ const koreanMonth=ms=>new Date(ms+KST_OFFSET).toISOString().slice(0,7);
+ const koreanTimestamp=ms=>new Intl.DateTimeFormat("ko-KR",{
+   timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",
+   hour:"2-digit",minute:"2-digit",hourCycle:"h23"
+ }).format(ms);
  const PERIODS={hot:3*HOUR,day:DAY,week:7*DAY,month:30*DAY};
  function safeLink(value){
    if(typeof value!=="string"||value.length>2048)return "";
@@ -47,7 +55,7 @@
      const first=media[0];
      out.push({id:p.id,platform:p.platform,profileUrl:profile,
        url,author:String(p.author||"공개 작성자").slice(0,100),
-       time,posted:new Date(time).toISOString(),month:new Date(time).toISOString().slice(0,7),
+       time,posted:new Date(time).toISOString(),month:koreanMonth(time),
        videoCount:media.length,thumb:safeLink(first.thumb||""),
        measured,score});
    }
@@ -144,7 +152,7 @@
        if(r.videoCount>1)picture.append(make("span","video-trend-multiple","영상 "+r.videoCount+"개"));
        const meta=make("span","video-trend-meta");
        meta.append(make("b","",String(i+1).padStart(2,"0")+" · "+r.author));
-       meta.append(make("small","",LABELS[r.platform]+" · "+r.posted.slice(0,16).replace("T"," ")));
+       meta.append(make("small","",LABELS[r.platform]+" · "+koreanTimestamp(r.time)+" KST"));
        meta.append(make("small","",r.measured?
          "확인된 공개 반응 합계 "+r.score.toLocaleString("ko-KR"):"공개 반응 수치 미제공"));
        card.append(picture,meta);list.append(card);
