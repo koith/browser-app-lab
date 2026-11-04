@@ -7,6 +7,7 @@ const path=require('node:path');
 const {randomUUID,randomBytes,scryptSync,timingSafeEqual,createHash}=require('node:crypto');
 const {createSupabasePersistence}=require('./persistence-supabase.cjs');
 const {createAbuseGuard}=require('./abuse-guard.cjs');
+const {validateArchive}=require('./archive-validation.cjs');
 const REGIONS={
  north:['실버 호라이즌','화이트 크리스탈','퓨어 시티','샤이닝 브리즈','윈트리 아이스','스노우 폴','스위트 자스민','그린 에메랄드'],
  south:['블루 사파이어','헤이즐리 웨이브','미쉘 에메랄드','엘핀 포레스트','아루아 코랄','블랙씨 아린','브라브 지피트','미스틱 머메이드']
@@ -36,15 +37,12 @@ function makeServer(options={}){
  // Once a remote database is configured, never serve a blank chat-world
  // while it is unavailable or while its authenticated archive is corrupt.
  const applyArchive=archive=>{
-  if(!archive||!Array.isArray(archive.rooms)||!Array.isArray(archive.history)||
-   !Number.isSafeInteger(archive.sequence)||archive.sequence<0)
-   throw Error('Invalid persisted ChatTown state');
+  // Validate the whole authenticated snapshot first. Never silently drop a
+  // damaged room or message and permanently erase it on the next write.
+  validateArchive(archive,valid);
   rooms.clear();history.clear();
-  for(const room of archive.rooms)if(room?.id&&valid(room.region,room.district))
-   rooms.set(room.id,room);
-  for(const pair of archive.history)
-   if(Array.isArray(pair)&&typeof pair[0]==='string'&&Array.isArray(pair[1]))
-    history.set(pair[0],pair[1].slice(-200));
+  for(const room of archive.rooms)rooms.set(room.id,room);
+  for(const [id,entries] of archive.history)history.set(id,entries);
   sequence=archive.sequence;
  };
  const ready=persistent?Promise.resolve().then(()=>persistent.load()).then(applyArchive):Promise.resolve();
@@ -157,7 +155,14 @@ function makeServer(options={}){
   }
   try{
    clean();const u=new URL(req.url,'http://localhost'),route=u.pathname;
-   if(req.method==='GET'&&route==='/api/health')return send(res,200,{ok:true,version:1,archive:persistent?'remote-encrypted':store?'local-file':'volatile'},origin);
+   if(req.method==='GET'&&route==='/api/health'){
+    // An optimistic CAS collision means another writer owns a later archive
+    // revision. We cannot safely accept more writes before reloading it.
+    if(persistent?.broken)return send(res,503,{ok:false,version:1,
+     archive:'remote-encrypted',error:'Chat archive revision conflict; restart and recover remote state'},origin);
+    return send(res,200,{ok:true,version:1,
+     archive:persistent?'remote-encrypted':store?'local-file':'volatile'},origin);
+   }
    if(req.method==='POST'&&route==='/api/session'){
     const b=await parse(req);
     // The socket address is the only network peer identity we trust here.
