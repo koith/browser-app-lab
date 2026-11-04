@@ -30,12 +30,14 @@ try:
     from gateway.cookie_format import cookie_header
     from gateway.catalog_view import gallery_catalog
     from gateway.sealed_session import restore as restore_storage_state, seal as seal_storage_state
+    from gateway.provider_denial_gate import ProviderDenialGate, ProviderAccessHeld
 except ModuleNotFoundError:
     from portal import COOKIE_NAME, install_portal, session_valid
     from media_cache import VerifiedMediaCache, read_media_with_transport_recovery
     from cookie_format import cookie_header
     from catalog_view import gallery_catalog
     from sealed_session import restore as restore_storage_state, seal as seal_storage_state
+    from provider_denial_gate import ProviderDenialGate, ProviderAccessHeld
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -70,6 +72,8 @@ if os.environ.get('ARCHIVE_STORAGE_STATE_SEALED'):
         print('OWNER_STORAGE_CONNECTION_STATE_INVALID',flush=True)
 _cache = {"time": 0.0, "catalog": None}
 _cache_lock = asyncio.Lock()
+# Bound repeat 403/31326 access denials per owner remote; verified cache hits stay usable.
+_provider_denial_gate = ProviderDenialGate(seconds=25)
 # Measured usage was about 200 MiB with the 48 MiB cache on the existing
 # 512 MiB free service. Retain exact originals across cover/detail/popup traffic
 # without changing worker count, read deadlines or the service plan.
@@ -179,6 +183,13 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
     A single StreamReader.read(limit) may return only the first network chunk.
     Never treat such a partial read as a successfully fetched photograph.
     """
+    remote_name = remote or REMOTE
+    try:
+        _provider_denial_gate.guard(remote_name)
+    except ProviderAccessHeld as hold:
+        raise HTTPException(status_code=503, detail="Owner storage provider denied access",
+                            headers={"Retry-After": str(hold.retry_seconds),
+                                     "X-Archive-Read-Cause": "provider_denial"}) from None
     client_env=os.environ.copy()
     try:
         configured=client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE','')
@@ -212,11 +223,18 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
             error = await stderr_task
             if rc:
                 print("RCLONE_REMOTE_READ_FAILED", path, safe_remote_diagnostic(error), flush=True)
+                if _provider_denial_gate.record(remote_name, error):
+                    print("OWNER_MEDIA_PROVIDER_ACCESS_DENIED_CIRCUIT_OPEN", flush=True)
+                    raise HTTPException(status_code=503,
+                        detail="Owner storage provider denied access",
+                        headers={"Retry-After": "25",
+                                 "X-Archive-Read-Cause": "provider_denial"})
                 if 'Failed to login' in error:
                     raise HTTPException(status_code=503, detail="Storage session unavailable", headers={"Retry-After":"30"})
                 retryable=bool(re.search(r'i/o timeout|connection reset|unexpected EOF',error,re.I))
                 raise HTTPException(status_code=502, detail="Cloud media unavailable",
                     headers={'X-Archive-Read-Cause':'transport_interruption'} if retryable else None)
+            _provider_denial_gate.success(remote_name)
             raw=bytes(content)
             if (path.startswith(('originals/','previews/'))
                     or re.fullmatch(r"metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\.json",path)) and len(raw)<=512:

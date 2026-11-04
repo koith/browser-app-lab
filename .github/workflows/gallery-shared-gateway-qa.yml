@@ -11,6 +11,8 @@ on:
       - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/mimmi-gallery/cloud/test_cover_cache.py'
       - 'apps/mimmi-gallery/cloud/gateway/media_cache.py'
+      - 'apps/mimmi-gallery/cloud/gateway/provider_denial_gate.py'
+      - 'apps/mimmi-gallery/cloud/test_provider_denial_gate.py'
       - 'apps/mimmi-gallery/cloud/test_media_cache.py'
       - 'apps/mimmi-gallery/cloud/test_cookie_format.py'
       - 'apps/mimmi-gallery/cloud/gateway/cookie_format.py'
@@ -36,6 +38,8 @@ on:
       - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/mimmi-gallery/cloud/test_cover_cache.py'
       - 'apps/mimmi-gallery/cloud/gateway/media_cache.py'
+      - 'apps/mimmi-gallery/cloud/gateway/provider_denial_gate.py'
+      - 'apps/mimmi-gallery/cloud/test_provider_denial_gate.py'
       - 'apps/mimmi-gallery/cloud/test_media_cache.py'
       - 'apps/mimmi-gallery/cloud/test_cookie_format.py'
       - 'apps/mimmi-gallery/cloud/gateway/cookie_format.py'
@@ -67,6 +71,7 @@ jobs:
           python apps/mimmi-gallery/cloud/test_gateway.py
           python apps/mimmi-gallery/cloud/test_cover_cache.py
           python apps/mimmi-gallery/cloud/test_media_cache.py
+          python apps/mimmi-gallery/cloud/test_provider_denial_gate.py
           python apps/mimmi-gallery/cloud/test_media_versions.py
           python apps/mimmi-gallery/cloud/test_cookie_format.py
           python apps/mimmi-gallery/cloud/test_container_import.py
