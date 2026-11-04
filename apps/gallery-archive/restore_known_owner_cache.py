@@ -162,6 +162,33 @@ def verified_same_owner_existing_read(model, key, env, photo, variant, attempts=
     raise OwnerReadUnavailable("Owner media SHA/pixel integrity not verified")
 
 
+
+def verified_owner_catalog(model, env, attempts=3):
+    """Accept a catalog from only its model's existing account.
+
+    A stale/wrong-model body may be retried with the same credentials.
+    Explicit provider access-denial documents must never be retried.
+    """
+    if not 1 <= attempts <= 3:
+        raise ValueError("Invalid owner catalog read budget")
+    for number in range(attempts):
+        raw=verified_file(REMOTE[model],"metadata/catalog.json",env,6_000_000)
+        try:
+            data=json.loads(raw)
+        except (ValueError,UnicodeError):
+            data=None
+        if isinstance(data,dict):
+            if data.get("error_code")==31326:
+                raise OwnerReadUnavailable("Owner catalog provider explicitly denied access")
+            if (data.get("schema_version")==1 and data.get("model")==model
+                and isinstance(data.get("albums"),list) and data["albums"]):
+                return raw,data
+        if number+1 < attempts:
+            print("OWNER_CATALOG_WRONG_OR_INCOMPLETE_RETRY",model,number+1,flush=True)
+            time.sleep(1.0)
+    raise OwnerReadUnavailable("Wrong or incomplete owner catalog metadata")
+
+
 def select_rows(model,catalog):
     covers_path=ROOT / (model+"-gallery") / "album-covers.json"
     # The pinned cover manifest is only an advisory selector; never a
@@ -209,25 +236,21 @@ def run(model,token):
     # Do not copy Render-specific regional experiments into the authorized
     # owner's GitHub Runner, whose direct archive read already passed.
     env.pop("RCLONE_CONFIG_ARCHIVE_DOMAIN",None)
-    raw=verified_file(REMOTE[model],"metadata/catalog.json",env,6_000_000)
-    data=json.loads(raw)
-    if (not isinstance(data,dict) or data.get("schema_version")!=1 or
-        data.get("model")!=model or not isinstance(data.get("albums"),list) or
-        not data["albums"]):
-        raise OwnerReadUnavailable("Wrong owner catalog metadata")
+    raw,data=verified_owner_catalog(model,env,attempts=3)
     receipt=send("/internal/gallery-rescue-catalog/"+model,raw,token)
     if receipt.get("verified") is not True:
         raise OwnerReadUnavailable("Signed catalog not acknowledged")
     chosen,full=select_rows(model,data)
-    priority=chosen+full
-    # Exact duplicate requests are avoided; the incident photo set is last
-    # to be the most recent in the 128 MiB bounded memory LRU.
+    # First serve the actual user-reported 4+7 missing originals, then
+    # optional covers. Long cover batches must never block emergency photos.
+    priority=full+chosen
+    # Keep first occurrence: an optional cover must not delay urgent photos.
     unique={}
     for album,photo,variant in priority:
         if ensure_only_private_original(model,album,photo,variant):
             key=(album["id"],photo["number"],variant)
-            unique.pop(key,None)
-            unique[key]=(album,photo,variant)
+            if key not in unique:
+                unique[key]=(album,photo,variant)
     fullset={(a["id"],p["number"],variant) for a,p,variant in full}
     count=0;urgent=0;used=0;skipped=0
     token_timestamp=time.monotonic()
@@ -300,8 +323,18 @@ def run(model,token):
 
 
 def main():
+    failed=[]
     for model in ("yui","mimmi"):
-        run(model,identity())
+        try:
+            run(model,identity())
+        except (OwnerReadUnavailable, HTTPError, URLError,
+                TimeoutError, ValueError, OSError) as error:
+            # Retain the other owner's verified successes even if this
+            # account has a transient or explicit provider error.
+            print("OWNER_RESCUE_MODEL_NOT_VERIFIED",model,type(error).__name__,flush=True)
+            failed.append(model)
+    if failed:
+        raise OwnerReadUnavailable("Owner restore incomplete for "+",".join(failed))
     print("BOTH_GALLERIES_EXISTING_OWNER_EMERGENCY_CACHE_REHYDRATED",flush=True)
 
 
