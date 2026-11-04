@@ -1656,6 +1656,19 @@
         "P0-RELEASE",
         "FL-MAP-01"
       ]
+    },
+    {
+      "id": "REQ-20261104-C10",
+      "date": "2026-11-04",
+      "origin": "user",
+      "text": "4LEAF 원작 채팅방 정밀 복원 — 클로드 개발 지시: 채팅방 6종 화면(794x528, 가구·전경·대화창·참가자목록·나가기·툴바), 아바타·좌석·깊이·ringbtn, 원본 대비 앵커별 차이 계량화, Chromium·WebKit QA, 원장 기록, PR/CI/배포.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05"
+      ]
     }
   ],
   "tasks": [
@@ -8406,6 +8419,66 @@
         "FL-MAP-01"
       ],
       "details": "New docs/RESTORATION_BATCH_EXECUTION.md; 8 expensive 4LEAF workflows cancel superseded PR revisions only; main SHA checks and Pages remain preserved. Claude/GPT separate owners, batch DoD, no microapproval; no task statuses changed. GitHub Actions workflow validation and PR merge pending."
+    },
+    {
+      "seq": 383,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-C10",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05"
+      ],
+      "details": "User-supplied Claude five-commit chatroom restoration ZIP, SHA256 manifest validated. Import rebased to latest main; do not downgrade beta57 or override backend reliability changes."
+    },
+    {
+      "seq": 384,
+      "date": "2026-11-04",
+      "type": "USERLIST_PANEL_REBUILT_FROM_SOURCE_SLICE_ATLAS",
+      "requestId": "REQ-20261104-C10",
+      "taskIds": [
+        "P0-CHAT",
+        "M03"
+      ],
+      "details": "ChatRoom/userlist.png is a green-separated atlas, not a complete panel bitmap. Imported original 9-slice composition and live roster from Claude package: source panel (620,10), size 163x128, header (627,15), '=' button (760,16), inner box (627,33) 149x97. '=' invokes existing invite action. Unmodified social-chat.js."
+    },
+    {
+      "seq": 385,
+      "date": "2026-11-04",
+      "type": "CHAT_LOG_SCROLLBAR_RELAID_TO_SOURCE_ANCHORS",
+      "requestId": "REQ-20261104-C10",
+      "taskIds": [
+        "CHT-02"
+      ],
+      "details": "Original scrollbar.png fragments moved without changing chatroom-native-scrollbar.js: track x410 from y16, 12x21 source thumb, up/down at (406,78)/(406,87), disabled arrows not dimmed; fallback preserved."
+    },
+    {
+      "seq": 386,
+      "date": "2026-11-04",
+      "type": "CHATROOM_ANCHOR_AUDIT_SIX_ROOMS",
+      "requestId": "REQ-20261104-C10",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-02",
+        "M03"
+      ],
+      "details": "Imported Claude Chromium 6 room live two-peer anchor QA (locally reported PASS), WebKit CI workflow and tools/chatroom-anchor-audit.py. Claude reports 0px error for 8 independent anchors across 24 source comparison captures. New GitHub CI and deployed public Pages acceptance not yet verified."
+    },
+    {
+      "seq": 387,
+      "date": "2026-11-04",
+      "type": "CHATROOM_REMAINING_ORIGINAL_DIFFERENCES",
+      "requestId": "REQ-20261104-C10",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-04",
+        "CHT-05",
+        "M03"
+      ],
+      "details": "Still unresolved: non-original seven-button room toolbar and 방 닫기; seat row spacing 74–79px overlaps 141px actors in rooms 0/1/2/5; name tags 10–35px low; fallback Gulim font and (나) suffix diverge from source. UI patch imported atop beta57 as beta58/PWA v145; core room/game/server files not overwritten. User-facing completion must await CI and public deploy."
     }
   ],
   "restorationPriority": {
