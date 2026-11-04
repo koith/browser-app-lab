@@ -1,0 +1,59 @@
+{
+ "cardBodiesNotSchema17": 12,
+ "cardBodiesNotYetPublished": [
+  "OBS.pak/1025",
+  "OBS.pak/1026",
+  "OBS.pak/1027",
+  "OBS.pak/1028",
+  "OBS.pak/1029",
+  "OBS.pak/1030",
+  "OBS.pak/1031",
+  "OBS.pak/1032",
+  "OBS.pak/1033",
+  "OBS.pak/1034",
+  "OBS.pak/1035",
+  "OBS.pak/1036",
+  "OBS.pak/1037",
+  "OBS.pak/1038",
+  "OBS.pak/1039",
+  "OBS.pak/1041",
+  "OBS.pak/1057",
+  "OBS2.pak/1212",
+  "OBS3.pak/1256"
+ ],
+ "cardBodiesPublishedAsPNG": 78,
+ "cards": 98,
+ "cardsWithBodyMemberPresent": 97,
+ "cardsWithBodyMissing": [
+  "0156"
+ ],
+ "distinctCardBodies": 97,
+ "duplicateCardBodies": [],
+ "old52NewBodies": "superseded: the 86 schema-17 members split as above",
+ "old54": {
+  "actuallyNonCardBodies": [
+   "OBS.pak/1084",
+   "OBS.pak/1086",
+   "OBS.pak/1087",
+   "OBS.pak/1088",
+   "OBS.pak/1089",
+   "OBS.pak/1090",
+   "OBS.pak/1092"
+  ],
+  "members": 54,
+  "neitherCardNorRecord": [
+   "OBS.pak/1085",
+   "OBS.pak/1093",
+   "OBS.pak/1094",
+   "OBS.pak/1095",
+   "OBS.pak/1166"
+  ],
+  "stillACardBody": 42
+ },
+ "schema17Members": 86,
+ "schema17Unreferenced": [
+  "OBS.pak/1166"
+ ],
+ "schema17UsedByCards": 85,
+ "schema17UsedByNonCardRecordsOnly": []
+}
