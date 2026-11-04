@@ -121,6 +121,15 @@ def main():
                     const keys = await cache.keys();
                     return keys.length === 1;
                 }""", timeout=15000)
+                before_cache = page.evaluate("""async () => {
+                    const names=await caches.keys();
+                    const result=[];
+                    for(const name of names){
+                        const storage=await caches.open(name);
+                        result.push({name,urls:(await storage.keys()).map(x=>x.url)});
+                    }
+                    return {origin:location.origin,result};
+                }""")
                 state["offline"] = True
                 page.reload(wait_until="domcontentloaded")
                 page.wait_for_function("() => !!navigator.serviceWorker.controller",
@@ -131,10 +140,13 @@ def main():
                         const c=await caches.open('"""
                         + args.model + """-owner-verified-photos-v1');
                         const keys=await c.keys();
+                        const allNames=await caches.keys();
                         const cached=await c.match(url);
                         const bytes=cached?await cached.clone().arrayBuffer():null;
                         return {
                             controller:navigator.serviceWorker.controller?.scriptURL,
+                            allNames:allNames,
+                            origin:location.origin,
                             keys:keys.map(x=>x.url),
                             cached:cached?{type:cached.type,status:cached.status,
                                 length:bytes.byteLength,mime:cached.headers.get('content-type'),
@@ -144,7 +156,7 @@ def main():
                     print("OFFLINE_IMAGE_CACHE_DIAGNOSTIC",json.dumps({
                         "model":args.model,"browser":args.browser,
                         "server_requests":state["requests"],"second":second,
-                        "cache":info,"errors":console_errors
+                        "before_cache":before_cache,"cache":info,"errors":console_errors
                     }),flush=True)
                 assert second == {"loaded": True, "width": 48}, second
                 assert state["requests"] == 1, (
