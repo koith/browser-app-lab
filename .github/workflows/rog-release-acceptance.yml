@@ -72,6 +72,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-embedded-native-live.cjs
       - name: Actual SHA-pinned original D4/D6 roll from falling through impact to exact final pip
         run: node apps/4leaf/rog/tests/dice-original-roll-tables.cjs
+      - name: All 19 recovered source CHR bodies and 662 exact PNG hashes in real Chromium game
+        run: node apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs
       - name: Complete 25 historically named source maps and preserve unnamed 0170 random route
         run: node apps/4leaf/rog/tests/archive-coverage.cjs
       - name: Recover actual OBS full-body art after temporary HTTP error
@@ -191,6 +193,10 @@ jobs:
         env:
           FOURLEAF_BROWSER: webkit
         run: node apps/4leaf/rog/tests/dice-original-roll-tables.cjs
+      - name: All 19 recovered source CHR bodies and 662 exact PNG hashes in real WebKit game
+        env:
+          FOURLEAF_BROWSER: webkit
+        run: node apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs
       - name: Original ChatRoom live seat teleport stays instant on WebKit and iPhone layout
         env:
           FOURLEAF_BROWSER: webkit
