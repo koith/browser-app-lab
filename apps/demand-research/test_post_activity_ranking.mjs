@@ -49,6 +49,21 @@ assert.equal(rank.find(x=>x.platform==="x").latestThumbnail,"","unsafe thumbnail
 assert.equal(rank.find(x=>x.platform==="x").engagementAvailable,false);
 assert.equal(rank.find(x=>x.platform==="x").reactions,0);
 assert.deepEqual(compute(fixture),compute(fixture),"rank deterministic");
+// Federated Mastodon / Misskey post IDs can be scoped to their instance.
+// Repeated IDs belonging to distinct account profiles must not erase a user.
+const localIdFixture={fromMs:from,toMs:to,verified:[
+ row("local-42","https://mastodon.social/@alice",{likes:4},"mastodon","Alice"),
+ row("local-42","https://fosstodon.org/@bob",{likes:3},"mastodon","Bob"),
+ row("local-42","https://mastodon.social/@alice",{likes:4},"mastodon","Alice"),
+ row("local-42","https://misskey.io/@alice",{likes:1},"misskey","Alice"),
+ row("local-42","https://misskey.design/@bob",{likes:2},"misskey","Bob")
+]};
+const localRanks=compute(localIdFixture);
+assert.equal(localRanks.length,4,"same local ID on different federated profiles remains four accounts");
+assert.equal(localRanks.reduce((sum,p)=>sum+p.posts,0),4,
+ "deduplicate the same account post but never another instance's post");
+assert.equal(localRanks.find(p=>p.profileUrl.includes("mastodon.social")).posts,1);
+
 assert.equal(cohortOf({...b,profileCreatedAt:"2026-01-01T00:00:00Z",posts:1,activeDays:1},
   Date.parse("2026-11-03T00:00:00Z")),"established","one captured post does not mean newcomer");
 assert.equal(cohortOf({...b,profileCreatedAt:"2026-11-01T00:00:00Z"},
