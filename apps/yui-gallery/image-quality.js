@@ -57,7 +57,10 @@ function preferred(previous,candidate){
  const sameScene=verifiedTie||(
   candidate?.visual_quality?.same_photo_verified===true&&
   candidate.visual_quality.compared_to_sha256===previous.sha256&&
-  candidate.visual_quality.photo_sha256===candidate.sha256);
+  candidate.visual_quality.photo_sha256===candidate.sha256)||(
+  previous?.visual_quality?.same_photo_verified===true&&
+  previous.visual_quality.compared_to_sha256===candidate.sha256&&
+  previous.visual_quality.photo_sha256===previous.sha256);
  if(sameScene&&a!==null&&b!==null){
   if(b-a>=8)return candidate;
   if(a-b>=8)return previous;
