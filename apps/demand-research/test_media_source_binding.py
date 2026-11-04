@@ -137,6 +137,23 @@ def test_video_blob_cid_fallback_uses_exact_verified_public_post_did(monkeypatch
         "https://video.bsky.app/watch/"+did+"/"+cid+"/playlist.m3u8"]
     assert rows[0]["media_expected"]==1
 
+    # An AppView playlist bound to a DIFFERENT actor is not an original
+    # belonging to this captured author, even on the trusted video domain.
+    original["embed"]["playlist"]=(
+        "https://video.bsky.app/watch/did:plc:someotheractor/"+cid+
+        "/playlist.m3u8")
+    other=list(capture.bluesky("섹트",now-3600,now))
+    assert len(other)==1
+    assert other[0]["media_urls"]==rows[0]["media_urls"]
+
+    # A valid view CID can independently provide the account-bound playlist
+    # if a source record embed is not returned by a partial public API.
+    del original["record"]["embed"]
+    original["embed"]["cid"]=cid
+    view_only=list(capture.bluesky("섹트",now-3600,now))
+    assert len(view_only)==1
+    assert view_only[0]["media_urls"]==rows[0]["media_urls"]
+
 
 def test_up_to_sixteen_original_attachments_keep_exact_order_and_extra_remain_missing():
     import demand_capture_job as capture
