@@ -1701,6 +1701,18 @@
         "P0-CHAT",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-PUBLIC-CHAT-LOST-ACK-RESTART",
+      "date": "2026-11-04",
+      "origin": "사용자: 클로드 작업 중 GPT가 독립 개발 계속",
+      "text": "실제 중앙 채팅 서버가 재시작한 뒤 상설 공개방 참가자의 이전 메시지 성공 ACK가 유실되면 기존 메시지를 중복 기록하지 않고 재확인해야 한다. 보존된 암호화 기록의 토큰 지문으로 이전 발신자 신원만 복구하고, 다른 사용자의 동일 ID·본문 재사용은 409로 거부하며, 인증 지문·재시도 키를 공개 DTO에서 노출하지 않는다. 기존 원장/서버 기능·클로드 ChatRoom 시각 파일 유지.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8592,6 +8604,56 @@
         "P0-RELEASE"
       ],
       "details": "Stop ALL HTTP endpoints including rooms, snapshot, sessions, and presence when remote CAS detects conflict, not just health or writes. Added same authority HTTP regression tests proving 503, no stale state exposed, a new process reloads remote revision and resumes writes; PR CI and deployment pending. No chat UI/game changes."
+    },
+    {
+      "seq": 395,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-PUBLIC-CHAT-LOST-ACK-RESTART",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "P0-RELEASE"
+      ],
+      "details": "GPT parallel backend reliability: recover public-room sender and exactly-once lost-ACK after remote restart; no original ChatRoom UI edits."
+    },
+    {
+      "seq": 396,
+      "date": "2026-11-04",
+      "type": "PUBLIC_CHAT_SENDER_RECOVERY_AND_ACK_AUTH_IMPLEMENTED_CI_PENDING",
+      "requestId": "REQ-20261104-PUBLIC-CHAT-LOST-ACK-RESTART",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "P0-RELEASE"
+      ],
+      "details": "In central.cjs store SHA256 sender bearer fingerprint inside encrypted remote archive (not public DTO), recover original sender ID only when a retained message proves resume token, refuse replay of another sender's message ID even with same text, preserve old archives without fingerprints. Added durability.test.cjs cold-restart public replay/cross-user checks, central.test.cjs peer replay rejection, archive validator consistency and tests, PERSISTENCE.md limits. CI/PR/merge/public production restart verification pending, statuses unchanged."
+    },
+    {
+      "seq": 397,
+      "date": "2026-11-04",
+      "type": "PUBLIC_GUEST_SESSION_RECOVERY_REGRESSION_UPDATED",
+      "requestId": "REQ-20261104-PUBLIC-CHAT-LOST-ACK-RESTART",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Initial PR #673 CI server-authority failed solely because the previous browser recovery test demanded a NEW anonymous ID after TTL even when a committed message now proves its old token. Updated tests to assert same ID/token for an archived sender and separate token rotation for guests without retained messages. First post-change server-authority CI passed; latest full CI to re-run."
+    },
+    {
+      "seq": 398,
+      "date": "2026-11-04",
+      "type": "CHAT_ACK_ID_CASE_CANONICALIZATION_IMPLEMENTED_CI_PENDING",
+      "requestId": "REQ-20261104-PUBLIC-CHAT-LOST-ACK-RESTART",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Extended same PR: preserve original ACK on uppercase/lowercase variants of a 32-hex/UUID message ID, match legacy archived IDs case-insensitively, reject case-variant duplicate IDs in authenticated archive, add central HTTP + cold restart + strict archive regression tests. PR latest CI/merge/deployment pending; user-facing completion not yet asserted."
     }
   ],
   "restorationPriority": {

@@ -119,7 +119,9 @@ function makeServer(options={}){
  };
  const room=id=>rooms.get(id)||sourceRoom(id);
  const messageDto=entry=>{
-  const {clientMessageId,...publicEntry}=entry;
+  // An encrypted archive may keep authentication metadata, but the
+  // public room snapshot must never reveal it to other participants.
+  const {clientMessageId,senderTokenHash,...publicEntry}=entry;
   return publicEntry;
  };
  const dto=(r,user)=>({id:r.id,name:r.name,region:r.region,district:r.district,
@@ -177,8 +179,19 @@ function makeServer(options={}){
     let token=/^[a-f0-9]{64}$/.test(b.resume||'')?b.resume:'';
     let existing=token&&sessions.get(token);
     if(!existing&&token){
-     const owner=[...rooms.values()].find(r=>r.ownerTokenHash===secretFingerprint(token));
+     const fingerprint=secretFingerprint(token);
+     const owner=[...rooms.values()].find(r=>r.ownerTokenHash===fingerprint);
      if(owner)existing={id:owner.ownerId,nick:safe(b.nick,12)||'Guest'};
+     else{
+      // A guest in a public room has no durable room-owner record.
+      // A retained encrypted message can prove possession of an earlier
+      // server-issued bearer token after a cold restart or TTL expiry.
+      // Unknown or fabricated 64-hex tokens are still replaced.
+      for(const entries of history.values()){
+       const prior=entries.find(e=>e.senderTokenHash===fingerprint);
+       if(prior){existing={id:prior.sender,nick:safe(b.nick,12)||'Guest'};break}
+      }
+     }
     }
     if(!existing){token=randomBytes(32).toString('hex');existing={id:randomUUID()}}
     const id=existing.id;
@@ -286,18 +299,26 @@ function makeServer(options={}){
     if(!s.roomId||!room(s.roomId))fail(403,'Join a room first');
     const b=await parse(req),message=safe(b.text,250);
     if(!message)fail(400,'Empty message');
-    const clientMessageId=b.clientMessageId;
-    if(clientMessageId!==undefined&&
-      (typeof clientMessageId!=='string'||
-       !/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(clientMessageId)))
+    const rawClientMessageId=b.clientMessageId;
+    if(rawClientMessageId!==undefined&&
+      (typeof rawClientMessageId!=='string'||
+       !/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(rawClientMessageId)))
      fail(400,'Invalid client message identifier');
+    // Mixed-case UUID or hex spellings must never create a second message.
+    // Keep matching legacy archive IDs case-insensitively as well.
+    const clientMessageId=rawClientMessageId?.toLowerCase();
     // A timeout after COMMIT may hide the 201 from the sender. An identical
     // high-entropy id in the same room must return its original authoritative
     // message, never append a second copy or change the global sequence.
     if(clientMessageId){
-     const prior=(history.get(s.roomId)||[]).find(x=>x.clientMessageId===clientMessageId);
+     const prior=(history.get(s.roomId)||[]).find(x=>
+      x.clientMessageId?.toLowerCase()===clientMessageId);
      if(prior){
-      if(prior.text!==message)fail(409,'Message identifier reused with different content');
+      // A replay ID is not a bearer credential. Never return a different
+      // participant's acknowledgement, even when the text is identical.
+      if(prior.text!==message||prior.sender!==s.id||
+       (prior.senderTokenHash&&prior.senderTokenHash!==secretFingerprint(token)))
+       fail(409,'Message identifier belongs to another sender or content');
       return send(res,200,{entry:messageDto(prior),replayed:true},origin);
      }
     }
@@ -307,6 +328,9 @@ function makeServer(options={}){
     const item=await transactional(()=>{
      const entry={id:randomUUID(),seq:++sequence,roomId:s.roomId,sender:s.id,
       user:s.nick,text:message,time:clock(),
+      // The SHA-256 fingerprint is only held inside the encrypted server
+      // archive. It never appears in a public message DTO or client ACK.
+      senderTokenHash:secretFingerprint(token),
       ...(clientMessageId?{clientMessageId}: {})};
      const lines=history.get(s.roomId)||[];
      lines.push(entry);history.set(s.roomId,lines.slice(-200));

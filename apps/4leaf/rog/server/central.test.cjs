@@ -230,8 +230,26 @@ test('unknown chat ACK replays one persisted message id, never inserts a duplica
  assert.equal(again.data.replayed,true);
  assert.equal(again.data.entry.id,initial.data.entry.id);
  assert.equal(again.data.entry.seq,initial.data.entry.seq);
+ const uppercaseRetry=await call('POST','/api/chat',author.token,
+  {text:'응답이 사라진 메시지',clientMessageId:clientMessageId.toUpperCase()});
+ assert.equal(uppercaseRetry.code,200,'hex/UUID case may not create a second accepted message');
+ assert.equal(uppercaseRetry.data.replayed,true);
+ assert.equal(uppercaseRetry.data.entry.id,initial.data.entry.id);
  assert.ok(!Object.hasOwn(initial.data.entry,'clientMessageId'),
   'private idempotency key is not leaked to other room participants');
+ assert.equal(Object.hasOwn(initial.data.entry,'senderTokenHash'),false,
+  'the fingerprint of a bearer token must not appear in any user-facing ACK');
+ const eavesdropper=await auth('DifferentGuest');
+ assert.equal((await call('POST','/api/rooms/'+id+'/join',eavesdropper.token,{})).code,200);
+ // If an ID were accidentally exposed or reused, it is still not an
+ // authentication credential: a different sender cannot replay the ACK.
+ const stolen=await call('POST','/api/chat',eavesdropper.token,
+  {text:'응답이 사라진 메시지',clientMessageId});
+ assert.equal(stolen.code,409,'same text + same ID never authorizes another sender');
+ const strangerSnapshot=await call('GET','/api/snapshot?after=0',eavesdropper.token);
+ assert.deepEqual(strangerSnapshot.data.entries.map(e=>e.text),['응답이 사라진 메시지']);
+ assert.equal(Object.hasOwn(strangerSnapshot.data.entries[0],'senderTokenHash'),false,
+  'encrypted sender credential never leaks in snapshots');
  assert.equal((await call('POST','/api/chat',author.token,{text:'변조된 다른 대화',clientMessageId})).code,409);
  assert.equal((await call('POST','/api/chat',author.token,{text:'메시지',clientMessageId:'bogus'})).code,400);
  const history=await call('GET','/api/snapshot?after=0',author.token);
