@@ -1,0 +1,57 @@
+name: INTERSECTION — Autonomous Safe Recovery Controller
+
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/scripts/intersection_autonomous_controller.py"
+      - ".github/scripts/test_intersection_autonomous_controller.py"
+      - ".github/workflows/intersection-autonomous-controller.yml"
+  pull_request:
+    paths:
+      - ".github/scripts/intersection_autonomous_controller.py"
+      - ".github/scripts/test_intersection_autonomous_controller.py"
+      - ".github/workflows/intersection-autonomous-controller.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intersection-autonomous-safe-controller-${{ github.event_name == 'pull_request' && github.head_ref || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  offline-tests:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prove no duplicate recovery or premature next-task promotion
+        run: |
+          python -m py_compile .github/scripts/intersection_autonomous_controller.py .github/scripts/test_intersection_autonomous_controller.py
+          python -m unittest discover -s .github/scripts -p 'test_intersection_autonomous_controller.py' -v
+
+  safe-controller:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    permissions:
+      actions: write
+      issues: read
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Choose first incomplete issue and safely dispatch bounded replay
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .github/scripts/intersection_autonomous_controller.py
