@@ -24,6 +24,9 @@ from account_index_sources import fetch_public as bluesky_public_search
 TERMS = ("뒷계", "섹트", "일탈계")
 WINDOW_MINUTES = 16
 MAX_CATCHUP_MINUTES = 360  # bounded missed-schedule window; current 16m always comes first
+# The outer workflow sends TERM after 1,080s. Stop scheduling new records
+# earlier so encrypted buffers and aggregate SHA counters can be emitted.
+FAST_SOFT_BUDGET_SECONDS = 720
 MAX_PER_RUN = 90
 MAX_MEDIA_PER_POST = 16  # matches validated post and AES recovery slot limits
 MAX_IMAGE = 24_000_000
@@ -361,7 +364,9 @@ def public_error_class(err):
     return "unclassified_failure"
 
 
-def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False):
+def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False,
+        elapsed_clock=time.monotonic, max_fast_seconds=FAST_SOFT_BUDGET_SECONDS):
+    started_at=elapsed_clock()
     from recovery_spool import RecoverySpool
     # Enabled only when the private workflow supplies a spool directory.
     spool=RecoverySpool.from_environment()
@@ -475,6 +480,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         known_ids=set(known)
     seen_this_scan = set()
     budget_exhausted = False
+    soft_time_budget_exhausted = False
     for getter in sources:
         if budget_exhausted or capture_interrupted:
             break
@@ -487,6 +493,12 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                 failures += 1
                 continue
             while True:
+                # Never start another potentially slow private upload when the
+                # 18-minute external timeout could kill summary/reporting.
+                if (fast_mode and elapsed_clock()-started_at>=max_fast_seconds):
+                    soft_time_budget_exhausted=True
+                    budget_exhausted=True
+                    break
                 try:
                     row = next(iterator)
                 except StopIteration:
@@ -643,6 +655,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         "invalid_early_captures":invalid_early_captures,
         "failed_early_recoveries":failed_early_recoveries,
         "capture_interrupted":capture_interrupted,
+        "soft_time_budget_exhausted":soft_time_budget_exhausted,
         "encrypted_recovery_files":(
             len(list(spool.directory.glob("*.enc"))) if spool is not None else 0),
         "encrypted_only_originals":buffered,
@@ -677,6 +690,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "invalid_early_captures":invalid_early_captures,
               "failed_early_recoveries":failed_early_recoveries,
               "budget_exhausted": budget_exhausted,
+              "soft_time_budget_exhausted":soft_time_budget_exhausted,
               "effective_lookback_minutes":lookback_minutes,
               "catchup_search_enabled":lookback_minutes>WINDOW_MINUTES,
               "storage_failures": storage_failures,
@@ -688,6 +702,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "private_cloud_circuit_open":not cloud_available,
               "catalog": catalog,
               "operational_status": ("DEGRADED_STORAGE" if storage_failures else
+                "CAPTURE_TIME_BUDGET" if soft_time_budget_exhausted else
                 "DEGRADED_MEDIA" if partial or failed_early_recoveries else
                 "JOURNAL_ONLY" if fast_mode else
                 "DEGRADED_INDEX" if catalog.get("publication_pending") else "VERIFIED_POSTS"),
@@ -696,6 +711,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     print("DEMAND_CAPTURE_AGGREGATE_ONLY", json.dumps(result, ensure_ascii=False), flush=True)
     if storage_failures:
         raise RuntimeError("some private cloud writes remain unverified")
+    if soft_time_budget_exhausted:
+        raise RuntimeError("public capture time budget exceeded; sources incomplete")
     return result
 
 
