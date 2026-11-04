@@ -148,6 +148,13 @@ def run():
             assert not page.locator("#postsView").is_visible()
             assert page.locator("#accountMetricTracked").text_content()=="1"
             assert page.locator("#accountWatchList article").count()==1
+            page.locator(".account-watch-card").first.get_by_role(
+                "button",name="백업 대상으로 선택").click()
+            assert page.locator("#targetArchivePlatform").input_value()=="bluesky"
+            assert page.locator("#targetArchiveAccount").input_value()==(
+                "https://bsky.app/profile/qa-feed.bsky.social")
+            assert page.locator("#targetArchiveSubmit").is_enabled()
+            assert "백업 대상으로 선택" in page.locator("#accountWatchStatus").inner_text()
             page.wait_for_function("window.localStorage.getItem('intersection:public-account-watch:v1')!==null")
             saved=page.evaluate("JSON.parse(localStorage.getItem('intersection:public-account-watch:v1'))")
             assert saved==["https://bsky.app/profile/qa-feed.bsky.social"],saved
@@ -189,6 +196,12 @@ def run():
             page.wait_for_function("document.querySelector('#accountMetricVerified').textContent==='7'",timeout=20000)
             assert len(mast_calls)>=2
             assert "사적 글" not in page.locator("#accountWatchList").inner_text()
+            page.locator(".account-watch-card").filter(has_text="Mastodon").get_by_role(
+                "button",name="백업 대상으로 선택").click()
+            assert page.locator("#targetArchivePlatform").input_value()=="mastodon"
+            assert page.locator("#targetArchiveAccount").input_value()==(
+                "https://mastodon.social/@qa")
+            assert page.locator("#targetArchiveSubmit").is_enabled()
             # Persistence: only profile URLs survive refresh. No content text.
             page.reload(wait_until="domcontentloaded",timeout=30000)
             page.locator("#viewAccounts").click()
