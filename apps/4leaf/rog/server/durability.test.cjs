@@ -139,3 +139,32 @@ test('optimistic revision conflict never overwrites newer remote data',async t=>
  assert.equal((await f.call('GET','/api/snapshot?after=0',a.token)).data.entries.length,1);
  assert.equal((await f.call('POST','/api/chat',a.token,{text:'재시작 전 추가 쓰기 금지'})).status,503);
 });
+
+
+test('durable chat retries the same client message ID after full authority restart without a second write',async t=>{
+ const db=database();let first=await appFor(db);
+ t.after(async()=>{if(first)await first.close()});
+ const owner=await first.session('ReplayOwner');
+ const created=await first.call('POST','/api/rooms',owner.token,info);
+ assert.equal(created.status,201);
+ const id=created.data.room.id;
+ await first.call('POST','/api/rooms/'+id+'/join',owner.token,{password:info.password});
+ const clientMessageId='44f53b9a-51f1-4001-9abd-16560a3e582f';
+ const before=await first.call('POST','/api/chat',owner.token,
+  {text:'네트워크가 끊긴 직후 기록',clientMessageId});
+ assert.equal(before.status,201);
+ const revision=db.rows.get('production').revision;
+ await first.close();first=null;
+ const second=await appFor(db);t.after(()=>second.close());
+ const recovered=await second.call('POST','/api/session',null,
+  {nick:'ReplayOwner',resume:owner.token});
+ assert.equal(recovered.status,201);
+ await second.call('POST','/api/rooms/'+id+'/join',owner.token,{password:info.password});
+ const replay=await second.call('POST','/api/chat',owner.token,
+  {text:'네트워크가 끊긴 직후 기록',clientMessageId});
+ assert.equal(replay.status,200);
+ assert.equal(replay.data.entry.id,before.data.entry.id);
+ assert.equal(db.rows.get('production').revision,revision,
+  'replaying after a restart must not create another archive revision');
+ assert.equal((await second.call('GET','/api/snapshot?after=0',owner.token)).data.entries.length,1);
+});
