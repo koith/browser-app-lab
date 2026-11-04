@@ -95,3 +95,43 @@ for code,detail in [(409,"Owner SHA mismatch"),(403,"Forbidden"),
             raise AssertionError("Unverified remote conflict retried")
         assert send.call_count==1
 print("GALLERY_OWNER_SHA_RETRY_AND_RENDER_RESTART_FAIL_CLOSED_PASS")
+
+
+# Wrong-model content on the same account can be a transient server response;
+# do NOT publish it or use it across the two owner galleries.
+good_catalog={"schema_version":1,"model":"mimmi","albums":[{"id":"known","images":[]}]}
+with patch.object(recovery,"verified_file",side_effect=[
+        b'{"schema_version":1,"model":"yui","albums":[{"id":"wrong"}]}',
+        json.dumps(good_catalog).encode()
+    ]) as get,patch.object(recovery.time,"sleep"):
+    raw,data=recovery.verified_owner_catalog("mimmi",{},attempts=2)
+    assert data["model"]=="mimmi" and get.call_count==2
+
+for denied in [b'{"error_code":31326}',b'{"errno":400141}']:
+    with patch.object(recovery,"verified_file",side_effect=[
+            denied,json.dumps(good_catalog).encode()
+        ]) as get:
+        try:
+            recovery.verified_owner_catalog("mimmi",{},attempts=3)
+        except recovery.OwnerReadUnavailable:
+            pass
+        else:
+            raise AssertionError("Explicit owner catalog rejection was retried")
+        assert get.call_count==1
+
+# Failed Yui owner authentication must not stop Mimmi's incident photos.
+models=[]
+def one_model(model,token):
+    models.append(model)
+    if model=="yui":
+        raise recovery.OwnerReadUnavailable("First owner temporarily unavailable")
+with patch.object(recovery,"run",side_effect=one_model),patch.object(
+        recovery,"identity",return_value="signed-fixture"):
+    try:
+        recovery.main()
+    except recovery.OwnerReadUnavailable as error:
+        assert "yui" in str(error) and "mimmi" not in str(error)
+    else:
+        raise AssertionError("Partial owner recovery was claimed as full success")
+    assert models==["yui","mimmi"]
+print("GALLERY_FAIL_CLOSED_WRONG_OWNER_CATALOG_AND_INDEPENDENT_MODELS_PASS")
