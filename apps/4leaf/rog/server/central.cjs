@@ -163,6 +163,12 @@ function makeServer(options={}){
     return send(res,200,{ok:true,version:1,
      archive:persistent?'remote-encrypted':store?'local-file':'volatile'},origin);
    }
+   // Once a remote CAS conflict is known, another authority may have
+   // committed newer rooms/messages. Returning this process's old snapshot
+   // (or admitting new room sessions) would misrepresent the real world.
+   // Fail all endpoints, not only writes and the health endpoint, until a
+   // clean restart reloads the authoritative encrypted revision.
+   if(persistent?.broken)fail(503,'Chat archive revision conflict; restart and recover remote state');
    if(req.method==='POST'&&route==='/api/session'){
     const b=await parse(req);
     // The socket address is the only network peer identity we trust here.
