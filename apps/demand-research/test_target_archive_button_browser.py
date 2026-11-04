@@ -106,12 +106,12 @@ Object.defineProperty(navigator,"clipboard",{
                                "https://bsky.app/profile/qa-example.bsky.social"},
                     "intent":"selected-public-account-v1"
                 }]
+                assert "원격 저장 성공은 아직 확인되지" in page.locator(
+                    "#targetArchiveStatus").inner_text()
                 assert page.locator("#targetArchiveAccount").input_value()==""
                 assert button.is_enabled(),"cleared account should explain missing input"
                 button.click()
                 assert "먼저 공개 SNS 계정" in page.locator("#targetArchiveStatus").inner_text()
-                assert "원격 저장 성공은 아직 확인되지" in page.locator(
-                    "#targetArchiveStatus").inner_text()
             else:
                 assert button.inner_text()=="GitHub에서 백업 실행"
                 page.locator("#targetArchivePlatform").select_option("mastodon")

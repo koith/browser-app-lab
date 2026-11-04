@@ -251,3 +251,16 @@ def test_account_cloud_namespace_separates_two_public_profiles():
     p2={"platform":"bluesky","identity":"did:plc:"+"b"*24}
     assert job.account_cloud(root,p1).remote!=job.account_cloud(root,p2).remote
     assert "account-archives" in job.account_cloud(root,p1).remote
+
+
+def test_empty_registered_schedule_is_not_a_successful_backup(capsys):
+    """Green scheduled Actions runs must not claim an archive with zero targets."""
+    cloud=FakeCloud()
+    with pytest.raises(RuntimeError,match="no registered public accounts"):
+        job.run_registered(root=cloud)
+    output=capsys.readouterr().out
+    assert "TARGET_ACCOUNT_ARCHIVE_SCHEDULE" in output
+    assert '"registered": 0' in output
+    assert '"processed": 0' in output
+    assert '"state": "NO_REGISTERED_TARGETS"' in output
+    assert not any("/account-archives/" in path for path in cloud.objects)
