@@ -1,17 +1,6 @@
 name: Yui Mimmi Image-First Reverse Source Search
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "44 1,9,17 * * *"
-  push:
-    branches: [main]
-    paths:
-      - apps/gallery-archive/reverse_image_discovery.py
-      - apps/gallery-archive/test_reverse_image_discovery.py
-      - apps/gallery-archive/visual_work_discovery.py
-      - apps/gallery-archive/visual-work-leads.json
-      - apps/gallery-archive/test_visual_work_discovery.py
-      - .github/workflows/gallery-image-first-reverse-search.yml
   pull_request:
     paths:
       - apps/gallery-archive/reverse_image_discovery.py
