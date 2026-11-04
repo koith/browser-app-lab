@@ -196,7 +196,29 @@ def run(model,token):
             skipped+=1
             continue
         if not photo_ok(photo,content,variant):
-            raise OwnerReadUnavailable("Existing owner SHA or pixel verification failed")
+            # Some old preview metadata is stale. No photo may be accepted
+            # from preview bytes with a mismatched digest. The existing
+            # original is a separate, SHA-verified owner file.
+            if variant == "preview":
+                print("OWNER_RESCUE_PREVIEW_SHA_MISMATCH_TRY_VERIFIED_ORIGINAL",model,flush=True)
+                if not ensure_only_private_original(model,album,photo,"original"):
+                    skipped+=1
+                    continue
+                try:
+                    verified_original=verified_file(REMOTE[model],photo["key"],env,MAX_FILE)
+                except OwnerReadUnavailable:
+                    skipped+=1
+                    continue
+                if not photo_ok(photo,verified_original,"original"):
+                    skipped+=1
+                    continue
+                content=verified_original
+                variant="original"
+            elif (album["id"],photo["number"],variant) in fullset:
+                raise OwnerReadUnavailable("Incident original failed verified SHA/decode")
+            else:
+                skipped+=1
+                continue
         receipt=send("/internal/gallery-rescue-media/"+model,content,token,{
             "X-Owner-Album":album["id"],
             "X-Owner-Number":str(photo["number"]),
