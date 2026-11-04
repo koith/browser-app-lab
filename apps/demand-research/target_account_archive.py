@@ -22,7 +22,7 @@ import time
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 
-from demand_archive import CloudArchive, canonical_json, post_key, sha256, MIMES, MAX_MEDIA_BYTES
+from demand_archive import CloudArchive, canonical_json, post_key, sha256, MIMES, MAX_MEDIA_BYTES, MAX_CATALOG
 
 ACCOUNT_RE = re.compile(r"^[A-Za-z0-9_.:-]{3,260}$")
 HOST_RE = re.compile(r"^[a-zA-Z0-9.-]{3,253}$")
@@ -242,11 +242,11 @@ class AccountCloudArchive(CloudArchive):
 
     def shared_media_key(self,key):
         if not isinstance(key,str) or not re.fullmatch(
-                r"posts/[a-f0-9]{40}/media/[0-9]{4}\\.[a-z0-9]{2,10}",key):
+                r"posts/[a-f0-9]{40}/media/[0-9]{4}\.[a-z0-9]{2,10}",key):
             return None
         return "account-media-"+self.account_hash+"-"+sha256(key.encode("utf-8"))+".bin"
 
-    def read(self,key,*,cap=3_000_000,optional=False,domain=None):
+    def read(self,key,*,cap=MAX_CATALOG,optional=False,domain=None):
         # Original canonical and legacy account-local flat paths are preferred.
         original=super().read(key,cap=cap,optional=True,domain=domain)
         if original is not None:
