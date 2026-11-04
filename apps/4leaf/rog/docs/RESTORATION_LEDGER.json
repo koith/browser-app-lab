@@ -8759,6 +8759,18 @@
         "P0-RELEASE"
       ],
       "details": "Preflight corrupted/completed old game archive before replacing active match. On quota/collision fail, preserve bytes & route; user sees preservation error, can retry after restoring storage. Real Playwright scenarios: malformed JSON, valid-but-invalid structure, completed game; failed backup and byte-identical successful retry/reload. beta.59/PWA v146. Not marked done pending GitHub PR CI & public acceptance."
+    },
+    {
+      "seq": 405,
+      "date": "2026-11-04",
+      "type": "GAME_PRIMARY_MATCH_WRITE_PRECOMMIT_AND_ROLLBACK_QA_PENDING",
+      "requestId": "REQ-20261104-GAME-SAVE-ARCHIVE-PREFLIGHT",
+      "taskIds": [
+        "M08",
+        "M09",
+        "P0-RELEASE"
+      ],
+      "details": "Further root cause: backup can succeed while subsequent localStorage.setItem('rog_match') fails, creating an unsaved live new game. Build nextMatch first, synchronously commit serialized bytes to original key, then assign match/change scene. On quota failure restore DMP PATH, preserve previous in-memory and persisted match and show 경기 저장 실패; regression covers existing unfinished game, explicit replacement consent, denied write, recovery and reload. Await CI; no completion status claimed."
     }
   ],
   "restorationPriority": {
