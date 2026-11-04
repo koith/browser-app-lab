@@ -50,6 +50,10 @@ jobs:
         env:
           FOURLEAF_SMOKE_URL: http://127.0.0.1:8765/
         run: node --test apps/4leaf/rog/tests/dice-webrtc-guest-save.cjs
+      - name: Reject malformed peer battle packets over real WebRTC and clear old session state
+        env:
+          FOURLEAF_SMOKE_URL: http://127.0.0.1:8765/
+        run: node --test apps/4leaf/rog/tests/webrtc-battle-message-resilience.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
