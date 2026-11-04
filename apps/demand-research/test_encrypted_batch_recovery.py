@@ -76,6 +76,54 @@ def test_unverified_cloud_readback_never_claims_recovered_private_batch(tmp_path
     assert list(cloud.objects)[0].startswith("metadata/recovery-pack-")
 
 
+
+
+def test_safe_failure_buckets_use_fixed_codes_not_private_exception_messages():
+    """Even secret-bearing provider errors must not leak to Actions summaries."""
+    details="private-credential-DO-NOT-LOG remote:/sensitive/filename"
+    cases=[
+        (TimeoutError(details),"timeout"),
+        (RuntimeError("(missing) "+details),"missing_remote_path"),
+        (RuntimeError("(authorization) "+details),"authorization"),
+        (RuntimeError("(capacity) "+details),"capacity"),
+        (RuntimeError("(rate_limited) "+details),"rate_limited"),
+        (RuntimeError("checksum mismatch "+details),"integrity_conflict"),
+        (RuntimeError("private cloud readback did not converge "+details),"readback_unverified"),
+        (ValueError(details),"invalid_record"),
+        (RuntimeError(details),"backend_unclassified")
+    ]
+    for error,expected in cases:
+        category=replay.safe_failure_category(error)
+        assert category==expected
+        assert details not in category
+    try:
+        try:
+            raise RuntimeError("(missing) "+details)
+        except RuntimeError as inner:
+            raise RuntimeError("private cloud post write unverified") from inner
+    except RuntimeError as outer:
+        assert replay.safe_failure_category(outer)=="missing_remote_path"
+    aggregate={"buffer_error_categories":{}}
+    replay.count_safe_failure(aggregate,"buffer_error_categories",RuntimeError(details))
+    assert aggregate=={"buffer_error_categories":{"backend_unclassified":1}}
+    assert details not in json.dumps(aggregate)
+
+
+def test_recovery_timeout_is_counted_without_disclosing_source_name(tmp_path,monkeypatch):
+    spool=RecoverySpool(tmp_path)
+    for i in range(4):
+        pid=hashlib.sha1(("timeout-private-"+str(i)).encode()).hexdigest()
+        spool.save(pid,first(pid))
+    def always_times_out(*args,**kwargs):
+        raise TimeoutError("sensitive archived original path should never be printed")
+    monkeypatch.setattr(replay,"restore_with_budget",always_times_out)
+    result=replay.replay(cloud=FakeCloud(),local_directory=tmp_path)
+    assert result["buffer_failures"]==3
+    assert result["deferred_buffers"]==1
+    assert result["buffer_error_categories"]=={"timeout":3}
+    assert "sensitive" not in json.dumps(result)
+
+
 def test_backlog_fair_rotation_preserves_oldest_and_changes_other_sources(monkeypatch):
     def fixture_page(args,**kwargs):
         assert args[0]=="api"
@@ -116,6 +164,7 @@ def test_degraded_capture_keeps_sha_verified_batch_separate_from_post_restore(tm
     assert result["post_and_media_verified"]==0
     assert result["first_observation_verified"]==0
     assert result["buffer_failures"]==3
+    assert result["buffer_error_categories"]=={"backend_unclassified":3}
     assert result["deferred_buffers"]==2
     assert len([x for x in cloud.objects if x.startswith("metadata/recovery-pack-")])==1
     assert len(list(tmp_path.glob("*.enc")))==5
