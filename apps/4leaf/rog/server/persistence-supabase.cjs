@@ -79,14 +79,23 @@ function createSupabasePersistence(options={}){
   if(!loaded||broken)throw storageError('Archive recovery required before write');
   const {payload,sha256}=encode(snapshot);
   let result;
-  if(revision===0){
-   result=await request('POST','?on_conflict=slot',
-    {slot,revision:1,payload,sha256},
-    {prefer:'resolution=ignore-duplicates,return=representation'});
-  }else{
-   result=await request('PATCH','?slot=eq.'+encodeURIComponent(slot)+'&revision=eq.'+revision,
-    {revision:revision+1,payload,sha256},
-    {prefer:'return=representation'});
+  try{
+   if(revision===0){
+    result=await request('POST','?on_conflict=slot',
+     {slot,revision:1,payload,sha256},
+     {prefer:'resolution=ignore-duplicates,return=representation'});
+   }else{
+    result=await request('PATCH','?slot=eq.'+encodeURIComponent(slot)+'&revision=eq.'+revision,
+     {revision:revision+1,payload,sha256},
+     {prefer:'return=representation'});
+   }
+  }catch(error){
+   // A write timeout, HTTP 5xx, or unreadable response does NOT prove
+   // rollback: the remote revision may already have committed. Until the
+   // authoritative row is reloaded after restart, both reads and writes
+   // must fail closed instead of exposing the old in-memory snapshot.
+   broken=true;
+   throw error;
   }
   if(result.length!==1||Number(result[0].revision)!==revision+1){
    // A second writer may have won a CAS race. Never overwrite its revision.
