@@ -258,7 +258,9 @@ def replay(cloud=None,local_directory=None):
              "buffer_failures":0,"artifact_download_failures":0,
              "deferred_buffers":0,
              "batch_sha_verified":0,"batch_ciphertext_count":0,
-             "batch_failures":0,"deferred_artifacts":0}
+             "batch_failures":0,"deferred_artifacts":0,
+             "remote_packs_sha_verified":0,"remote_pack_ciphertext_count":0,
+             "remote_pack_list_failures":0,"remote_pack_failures":0}
     if local_directory:
         source_dirs=[Path(local_directory)]
     else:
