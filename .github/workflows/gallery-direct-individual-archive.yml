@@ -1,10 +1,7 @@
 name: Gallery Direct Individual Photo Collection and Verified Storage
 on:
   workflow_dispatch:
-  # Repeat bounded public-source windows so thousands of registered pages are
-  # eventually inspected, without brute-force or bypassing source controls.
-  schedule:
-    - cron: '17 */6 * * *'
+  # Source collection paused by user (2026-11-04); no scheduled scans.
   push:
     branches: [main]
     # Storage-only fixes must not recrawl/reupload known held source objects.
@@ -143,7 +140,7 @@ jobs:
           python apps/mimmi-gallery/cloud/test_cover_cache.py
   collect-store-readback:
     needs: offline-regressions
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.GALLERY_COLLECTION_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 110
     permissions:
