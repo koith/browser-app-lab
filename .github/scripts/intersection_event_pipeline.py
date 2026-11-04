@@ -285,6 +285,21 @@ def main():
     # Emit only allowlisted workflow IDs, task codes, stage reasons; no raw
     # source data, cloud filenames, cookies, encryption keys or post content.
     print("INTERSECTION_EVENT_PIPELINE", json.dumps(result, sort_keys=True))
+    # GitHub REST/CLI job logs are not guaranteed to be readable until the
+    # entire workflow ends. Pass the narrowly validated decision directly
+    # through the job output to the dependent reporting job instead.
+    output = os.getenv("GITHUB_OUTPUT")
+    if output and result["task"] and re.fullmatch(r"INT-(?:0[1-9]|1[0-2])",
+                                                   result["task"]):
+        with open(output, "a", encoding="utf-8") as stage:
+            for name, value in (
+                ("stage_task", result["task"]),
+                ("stage_action", result["action"]),
+                ("stage_reason", result["reason"]),
+            ):
+                if not re.fullmatch(r"[A-Z0-9_-]{1,90}", value):
+                    raise ValueError("unsafe stage output")
+                stage.write(name + "=" + value + "\n")
     with open(os.getenv("GITHUB_STEP_SUMMARY", "/dev/null"), "a", encoding="utf-8") as f:
         f.write("## INTERSECTION event-driven progression\n\n"
                 f"Task: {result['task']}, action: {result['action']}, "
