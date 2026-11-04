@@ -523,6 +523,16 @@ function startGameWithConfirmation(replacementConfirmed){let map=$('map-select')
         }}]);
    }
  }
+ // A truncated, completed or schema-invalid previous save must be copied
+ // byte-for-byte BEFORE replacing the live match object and moving the DMP
+ // camera. persist() already refused the disk overwrite when that backup
+ // failed, but the old UI still launched a new, silently unsaved match.
+ // Failing the preflight leaves BOTH the original saved bytes and the
+ // active game untouched. The player can free browser storage and retry.
+ if(!archiveUnreadableSavedMatch()||!archiveNonResumableSavedMatch())
+  return modal('기존 경기 보존 실패',
+   '브라우저 저장 공간 또는 저장 권한 문제로 기존 경기 기록을 백업하지 못했습니다. 기존 데이터는 유지했습니다. 저장 공간을 확인한 후 다시 시작하세요.',
+   [{label:'확인',primary:true}]);
  // Do not alter the previous match's global DMP coordinates when a new-game
  // validation fails or the user cancels the replacement dialog.
  chooseSourcePath(map);
