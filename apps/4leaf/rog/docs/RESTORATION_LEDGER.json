@@ -1757,6 +1757,17 @@
         "P0-CHAT",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-CARDSHOP-TRANSACTION-DURABILITY",
+      "date": "2026-11-04",
+      "origin": "4LEAF 전체 미완료 업무 중 빠른 데이터 유실 오류 수정",
+      "text": "매직카덴 구매·판매는 로컬 저장 성공 후에만 GP와 보유카드 변경을 확정하고 브라우저 저장 실패 시 기존 상태를 복구한다. 구매 확인 시점에 보유·잔액을 재검증한다. 판매 가격 50%는 웹 추정 규칙이라고 명시한다.",
+      "taskIds": [
+        "SHOP-02",
+        "M02",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8806,6 +8817,30 @@
         "P0-RELEASE"
       ],
       "details": "Reject duplicate global seq and server message UUID across rooms; accept legitimate interleaved rooms; server module and Node test changed, real CI and deployment pending."
+    },
+    {
+      "seq": 408,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-CARDSHOP-TRANSACTION-DURABILITY",
+      "taskIds": [
+        "SHOP-02",
+        "M02",
+        "P0-RELEASE"
+      ],
+      "details": "Fast-priority CardShop buy/sell durable profile commit."
+    },
+    {
+      "seq": 409,
+      "date": "2026-11-04",
+      "type": "CARDSHOP_PURCHASE_SALE_FAILCLOSED_QA_PENDING",
+      "requestId": "REQ-20261104-CARDSHOP-TRANSACTION-DURABILITY",
+      "taskIds": [
+        "SHOP-02",
+        "M02",
+        "P0-RELEASE"
+      ],
+      "details": "Copied PR #696 transaction persistence and Chromium quota-failure QA after verifying source file identity on merged #718 main; CI and release not yet accepted."
     }
   ],
   "restorationPriority": {

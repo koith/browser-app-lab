@@ -393,6 +393,25 @@ function drawTeam(){
 // surviving client has NOT verified its resale GP rule. 50% is a clearly
 // labeled WEB economic fallback, never represented as source historical data.
 const inferredShopResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/2));
+// An inventory/GP change must not become visible until it is durable.
+// On localStorage quota/permission failure, restore exactly the previous
+// in-memory balances; a later page reload must not silently undo a purchase
+// or remove an item whose sale only appeared to complete.
+function commitShopTransaction(change){
+ const previousGP=profile.gp,previousOwned=profile.owned.slice();
+ change();
+ try{localStorage.setItem('rog_profile',JSON.stringify(profile))}
+ catch(error){
+  profile.gp=previousGP;profile.owned=previousOwned;
+  console.warn('4LEAF shop transaction not persisted; old balances retained',
+   error?.name||'storage-error');
+  modal('매직카덴 저장 실패',
+   '카드나 GP 변경 사항을 브라우저에 저장하지 못했습니다. 기존 보유 카드와 GP는 유지했습니다. 저장 공간을 확인한 후 다시 시도하세요.',
+   [{label:'확인',primary:true}]);
+  return false;
+ }
+ return true;
+}
 function shopCanSell(card){
  return !!card&&profile.owned.includes(card.id)&&profile.owned.length>1&&
   !profile.team.includes(card.id)&&
@@ -2075,7 +2094,23 @@ function toggleBotAutoplay(){
 }
 function init(){installBoardControls();installNativeDiceMenu();
  const botToggle=$('dice-ai-autoplay-toggle');if(botToggle)botToggle.onclick=toggleBotAutoplay;
- installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;shopPage=0;drawShop()}));$('shop-prev').onclick=()=>{shopPage--;drawShop()};$('shop-next').onclick=()=>{shopPage++;drawShop()};$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{const c=CARD_MAP[chosenCard];if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까?',[{label:'구매',primary:true,run:()=>{profile.gp-=c.price;profile.owned.push(c.id);profileUI();drawShop();drawTeam();chat('매직카덴',c.name+' 카드를 구매했습니다.','system');sfx(830)}},{label:'취소'}])};$('shop-sell').onclick=()=>{
+ installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;shopPage=0;drawShop()}));$('shop-prev').onclick=()=>{shopPage--;drawShop()};$('shop-next').onclick=()=>{shopPage++;drawShop()};$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{
+ const c=CARD_MAP[chosenCard];if(!c)return;
+ if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);
+ if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);
+ modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까?',[
+  {label:'구매',primary:true,run:()=>{
+   // Revalidate at confirmation too: a pending modal is not an ownership
+   // or GP lock, and stale duplicate intent must not overdraw the balance.
+   if(profile.owned.includes(c.id))return modal('매직카덴','이미 보유한 카드입니다.',[{label:'확인'}]);
+   if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);
+   if(!commitShopTransaction(()=>{profile.gp-=c.price;profile.owned.push(c.id)}))return;
+   profileUI();drawShop();drawTeam();
+   chat('매직카덴',c.name+' 카드를 구매했습니다.','system');sfx(830);
+  }},
+  {label:'취소'}
+ ]);
+};$('shop-sell').onclick=()=>{
  const c=CARD_MAP[chosenCard];
  if(!shopCanSell(c)){
   modal('매직카덴','선택한 카드가 없거나, 출전·진행 중 경기·마지막 보유 카드이므로 판매할 수 없습니다.',[{label:'확인'}]);
@@ -2087,8 +2122,10 @@ function init(){installBoardControls();installNativeDiceMenu();
    // Protect against double confirmation, intervening game state and
    // resale of a currently equipped/still active match chessman.
    if(!shopCanSell(c))return;
-   profile.owned=profile.owned.filter(id=>id!==c.id);
-   profile.gp+=gp;
+   if(!commitShopTransaction(()=>{
+    profile.owned=profile.owned.filter(id=>id!==c.id);
+    profile.gp+=gp;
+   }))return;
    if(chosenCard===c.id)chosenCard=profile.owned[0]||BASE_CARDS[0]?.id;
    profileUI();drawShop();drawTeam();
    chat('매직카덴',c.name+' 카드 판매 · '+gp.toLocaleString()+' GP (임시 웹 판매 규칙).','system');
