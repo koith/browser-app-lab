@@ -1,13 +1,6 @@
 name: Mimmi Free V2PH Public Gallery Photo Discovery
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'apps/mimmi-gallery/collect_v2ph_public.py'
-      - 'apps/mimmi-gallery/test_v2ph_public.py'
-      - '.github/workflows/mimmi-v2ph-public.yml'
-  schedule:
-    - cron: '45 4 * * 2,5'
 permissions:
   contents: write
 concurrency:
