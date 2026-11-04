@@ -120,7 +120,7 @@ def run(browser_type,name,width,height):
         page.get_by_role("tab",name="팔로워").click()
         page.locator("#results .person").get_by_text("Public Reader").wait_for(timeout=5000)
         page.get_by_role("tab",name="팔로잉").click()
-        assert page.get_by_text("reader.bsky.social").count()>=1
+        page.locator("#results .person").get_by_text("@reader.bsky.social").wait_for(timeout=5000)
         page.get_by_role("tab",name="게시글·답글").click()
         page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for(timeout=10000)
         # Switching tabs during the previous request must launch the new tab\x27s page.
