@@ -1735,6 +1735,17 @@
         "P0-CHAT",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-CHAT-GLOBAL-SEQUENCE-INTEGRITY",
+      "date": "2026-11-04",
+      "origin": "사용자: 전체 미완료 일감 정리 후 빠른 순서대로 GPT 병렬 개발",
+      "text": "서버 채팅은 모든 방에 하나의 전역 메시지 seq를 부여한다. 복원된 암호화/로컬 아카이브에서 서로 다른 방의 동일 seq 또는 동일 메시지 ID가 발견되면, 클라이언트 after 커서로 메시지가 누락되지 않도록 전체 복원을 거부한다. 원본 UI 파일과 게임 규칙은 변경하지 않는다.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8724,6 +8735,30 @@
         "P0-RELEASE"
       ],
       "details": "Set persistence.broken=true on any ambiguous POST/PATCH transport/HTTP/JSON result error; central already fails all endpoints closed while broken. Simulated PostgREST writes encrypted row then drops ACK; old authority must return 503, cold authority must recover same sender and replay original clientMessageId without advancing revision. Existing fail-before-commit test updated to require restart rather than stale same-process retry. CI pending; no Render prod secrets or Supabase data touched."
+    },
+    {
+      "seq": 403,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-CHAT-GLOBAL-SEQUENCE-INTEGRITY",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "GPT parallel quick-fix global chat cursor and message UUID integrity."
+    },
+    {
+      "seq": 404,
+      "date": "2026-11-04",
+      "type": "CHAT_ARCHIVE_GLOBAL_CURSOR_UNIQUENESS_CI_PENDING",
+      "requestId": "REQ-20261104-CHAT-GLOBAL-SEQUENCE-INTEGRITY",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "validateArchive now rejects duplicate global seq and message ID across different rooms, preserving unique ?after= polling cursors and rejecting ambiguous backup before any partial restore. Added valid cross-room sequence and negative collision regression. PR/CI pending; production durable DB remains unverified."
     }
   ],
   "restorationPriority": {
