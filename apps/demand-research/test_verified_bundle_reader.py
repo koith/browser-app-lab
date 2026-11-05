@@ -97,3 +97,39 @@ def test_manifest_claims_only_one_isolated_account(private_zip_client):
     assert bundle.account=="bluesky-"+archive_key(meta)
     assert bundle.post_count==1 and bundle.object_count>=8
     assert bundle.source_state=="COMPLETE_CURRENT_PUBLIC_CURSOR"
+
+
+def test_live_job_status_reads_exact_remote_run_zip_not_just_green_actions(
+        private_zip_client,monkeypatch):
+    import target_archive_api as archive_api
+    client,root,filename,post,profile=private_zip_client
+    run_id=123456789
+    monkeypatch.setattr(archive_api,"CloudArchive",lambda remote:root)
+    bundles._cache.clear()
+    verified=archive_api.read_exact_verified_archive(
+        run_id,"bluesky","qa-example.bsky.social")
+    assert verified["state"]=="REMOTE_VERIFIED"
+    assert verified["remote_verified"] is True
+    assert verified["posts"]==1
+    assert verified["objects"]>=8
+    assert verified["account_key"]=="bluesky-"+archive_key(profile)
+    assert archive_api.read_exact_verified_archive(
+        run_id,"bluesky","wrong-public.bsky.social") is None
+    assert archive_api.read_exact_verified_archive(
+        run_id+1,"bluesky","qa-example.bsky.social") is None
+    root.objects[filename]=root.objects[filename][:-13]+b"altered original"
+    bundles._cache.clear()
+    with pytest.raises(bundles.BundleInvalid):
+        archive_api.read_exact_verified_archive(
+            run_id,"bluesky","qa-example.bsky.social")
+
+
+def test_many_snapshots_selects_latest_verified_one_per_account(
+        private_zip_client):
+    client,root,filename,post,profile=private_zip_client
+    old=filename.replace("-123456789-","-123456788-")
+    root.objects[old]=root.objects[filename]
+    bundles._cache.clear()
+    current=list(bundles.available_bundles(root))
+    assert len(current)==1
+    assert current[0].name==filename
