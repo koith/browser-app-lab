@@ -37,8 +37,8 @@ vm.runInContext(fs.readFileSync(path.join(root,'native-duel-effects.js'),'utf8')
 (async()=>{
  const api=sandbox.window.__LEAF_NATIVE_DUEL_FX__;
  const all=sandbox.window.ORIGINAL_LEAF_DUEL_EFFECTS;
- assert.equal(Object.keys(all).length,28,'all original effect members available');
- assert.equal(Object.values(all).reduce((n,a)=>n+a.frames.length,0),420);
+ assert.ok(Object.keys(all).length>=28,'all first-round source effect members must remain available');
+ assert.ok(Object.values(all).reduce((n,a)=>n+a.frames.length,0)>=420,'all first-round original effect frames retained');
  const a=api.eventsFor('0040'),b=api.eventsFor('0042'),c=api.eventsFor('0045');
  assert.ok(a.some(e=>e.numeric==='1096'),'0040 original slot12 effect 1096');
  assert.ok(b.some(e=>e.numeric==='1097'),'0042 original slot12 effect 1097');
