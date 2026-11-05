@@ -175,10 +175,12 @@ def test_blue_source_replies_and_video_original_bytes_are_verified_and_resume(ca
     assert profiles[-1]["assets"]["avatar"]["status"]=="sha256_verified"
     assert profiles[-1]["followers_count"]==1
     assert len(archive.names("graph/pages"))==4
-    assert len(archive.names("threads"))==2
+    assert sum(len(archive.names("threads/"+job.post_key("bluesky",p["uri"])))
+               for p in (p1,p2))==2
     assert len(archive.names("thread-markers"))==2
-    thread=[json.loads(archive.read("threads/"+name))
-            for name in archive.names("threads")]
+    thread=[json.loads(archive.read("threads/"+pid+"/"+name))
+            for pid in (job.post_key("bluesky",p["uri"]) for p in (p1,p2))
+            for name in archive.names("threads/"+pid)]
     assert thread[0]["replies"][0]["text"]=="Public comment synthetic"
     assert "qa-example" not in capsys.readouterr().out
 
@@ -366,7 +368,8 @@ def test_all_account_object_types_ignore_nested_upload_failure():
     assert report["pages_verified"]==1
     archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
     for folder in ("metadata/source-records","metadata/checkpoints",
-                   "metadata/entries","profile/snapshots","graph/pages","threads"):
+                   "metadata/entries","profile/snapshots","graph/pages",
+                   "threads/"+job.post_key("bluesky",p["uri"])):
         assert archive.names(folder),folder
     assert len(archive.load_catalog())==1
     assert not blocked
