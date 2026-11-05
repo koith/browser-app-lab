@@ -59,7 +59,8 @@ def exercise(browser_type,label):
                 page.locator("#archiveHubFrameBox").wait_for(state="visible",timeout=12000)
                 iframe=page.locator("#archiveHubFrame")
                 assert iframe.get_attribute("src")=="/account-archive?account="+KEY
-                assert page.frame_locator("#archiveHubFrame").locator("#archived-posts").is_visible()
+                page.frame_locator("#archiveHubFrame").locator("#archived-posts").wait_for(
+                    state="visible",timeout=12000)
                 page.evaluate("""() => window.INTERSECTION_openArchive('mastodon-'+('b'.repeat(40)))""")
                 assert page.locator("#archiveHubFrame").get_attribute("src")==(
                     "/account-archive?account=mastodon-"+"b"*40)
