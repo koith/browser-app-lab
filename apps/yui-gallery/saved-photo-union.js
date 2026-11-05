@@ -25,12 +25,17 @@ window.SavedGalleryPhotoUnion=(()=>{
      const known=shaPositionByAlbum.get(album.id).get(photo.sha256);
      if(known!==undefined){
       const previous=result.images[known];
-      // Byte-identical replicas do not add a photo. Keep the server-verified
-      // original route over a static lower-quality/unaudited route for QA.
-      if(photo.ownerAlbum&&!previous.ownerAlbum){
-       result.images[known]={...previous,...photo,
-        storageNumber:photo.storageNumber??photo.number};
-      }
+      // A public Pages file with the exact same SHA is byte-identical
+      // to the owner's original. Prefer that already-committed local copy
+      // over a TeraBox gateway that can return 503 after Render Free sleeps.
+      // Keep the owner route only when there is NO matching public file.
+      const isLocal=p=>typeof p.url==='string' &&
+       /^stored-albums\/[a-z0-9-]{2,110}\/[a-zA-Z0-9._-]+\.(jpe?g|png|webp|avif)$/.test(p.url);
+      if(isLocal(photo)&&!isLocal(previous))
+       result.images[known]={...photo};
+      // Never replace a same-SHA verified Pages file with a transient
+      // owner gateway URL; the SHA proves the actual bytes are identical.
+
       continue;
      }
      const copy={...photo};
