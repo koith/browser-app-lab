@@ -31,7 +31,7 @@ def test_requires_authenticated_session_and_actions_permission(monkeypatch):
 
 def test_archive_dispatch_fails_without_same_origin_intent(client,monkeypatch):
     invoked=[]
-    monkeypatch.setattr(target_archive_api,"dispatch",lambda p,a:invoked.append((p,a)))
+    monkeypatch.setattr(target_archive_api,"dispatch",lambda p,a:(invoked.append((p,a)) or 41999999999))
     body={"platform":"bluesky","account":"public-test.bsky.social"}
     assert client.post("/api/target-archive/start",json=body).status_code==403
     assert client.post("/api/target-archive/start",json=body,headers={
@@ -50,6 +50,9 @@ def test_authenticated_public_account_dispatch_returns_queued_not_saved(client,m
     assert r.status_code==202
     assert r.json()["state"]=="QUEUED_NOT_VERIFIED"
     assert r.json()["completion_guaranteed"] is False
+    assert r.json()["run_id"]==41999999999
+    assert "." in r.json()["receipt"]
+    assert "DEMAND_ARCHIVE_DISPATCH_TOKEN" not in str(r.json())
     assert invoked==[("bluesky","public-test.bsky.social")]
     assert client.post("/api/target-archive/start",json={
         "platform":"bluesky","account":"public-test.bsky.social"},headers=headers).status_code==429
@@ -74,3 +77,71 @@ def test_dispatch_missing_private_token_is_explicit_unavailable(client,monkeypat
           json={"platform":"bluesky","account":"public-test.bsky.social"},
           headers={"Origin":"https://testserver",
                    "X-Archive-Intent":"selected-public-account-v1"}).status_code==503
+
+
+def test_oneclick_job_progress_requires_signed_same_session_receipt(client,monkeypatch):
+    monkeypatch.setattr(target_archive_api,"dispatch",lambda *_:41999999999)
+    headers={"Origin":"https://testserver","X-Archive-Intent":"selected-public-account-v1"}
+    receipt=client.post("/api/target-archive/start",
+        json={"platform":"bluesky","account":"public-test.bsky.social"},
+        headers=headers).json()["receipt"]
+    recorded=[]
+    def fake_run(run_id):
+        recorded.append(run_id)
+        return {"status":"in_progress","id":run_id}
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",fake_run)
+    uri="/api/target-archive/jobs/41999999999?receipt="+receipt
+    response=client.get(uri)
+    assert response.status_code==200
+    assert response.json()["state"]=="RUNNING"
+    assert response.json()["remote_verified"] is False
+    assert recorded==[41999999999]
+    wrong=client.get("/api/target-archive/jobs/41999999998?receipt="+receipt)
+    assert wrong.status_code==403
+    assert client.get(uri.replace(receipt,receipt[:-1]+"0")).status_code==403
+    anon=TestClient(gateway.app,base_url="https://testserver")
+    assert anon.get(uri).status_code==401
+
+
+def test_finished_workflow_is_not_verification_until_remote_zip_reads_back(client,monkeypatch):
+    monkeypatch.setattr(target_archive_api,"dispatch",lambda *_:41999999999)
+    headers={"Origin":"https://testserver","X-Archive-Intent":"selected-public-account-v1"}
+    receipt=client.post("/api/target-archive/start",
+        json={"platform":"bluesky","account":"public-test.bsky.social"},
+        headers=headers).json()["receipt"]
+    uri="/api/target-archive/jobs/41999999999?receipt="+receipt
+    run={"id":41999999999,"status":"completed","conclusion":"success"}
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",lambda _:run)
+    monkeypatch.setattr(target_archive_api,"read_exact_verified_archive",
+        lambda *args:None)
+    assert client.get(uri).json()["state"]=="VERIFYING_STORAGE"
+    assert client.get(uri).json()["remote_verified"] is False
+    monkeypatch.setattr(target_archive_api,"read_exact_verified_archive",
+        lambda *args:{"state":"REMOTE_VERIFIED","remote_verified":True,
+                     "posts":6,"objects":42,
+                     "account_key":"bluesky-"+"a"*40})
+    passed=client.get(uri)
+    assert passed.status_code==200 and passed.json()["state"]=="REMOTE_VERIFIED"
+    assert passed.json()["posts"]==6 and passed.json()["objects"]==42
+    run["conclusion"]="failure"
+    failed=client.get(uri)
+    assert failed.json()["state"]=="FAILED"
+    assert failed.json()["remote_verified"] is False
+
+
+def test_dispatch_requires_exact_trackable_run_id(client,monkeypatch):
+    monkeypatch.setattr(target_archive_api,"_github_api",lambda *args:{
+        "workflow_run_id":42001234000,"html_url":"https://github.com/owner/ignore"})
+    assert target_archive_api.dispatch("bluesky","public-test.bsky.social")==42001234000
+    monkeypatch.setattr(target_archive_api,"_github_api",lambda *args:{})
+    with pytest.raises(RuntimeError,match="trackable"):
+        target_archive_api.dispatch("bluesky","public-test.bsky.social")
+
+
+def test_unrelated_workflow_never_counts_as_archived(client,monkeypatch):
+    monkeypatch.setattr(target_archive_api,"_github_api",lambda *args:{
+        "id":41999999999,"status":"completed","conclusion":"success",
+        "path":".github/workflows/unrelated.yml","event":"workflow_dispatch",
+        "head_branch":"main"})
+    with pytest.raises(RuntimeError,match="does not match"):
+        target_archive_api.get_workflow_run(41999999999)
