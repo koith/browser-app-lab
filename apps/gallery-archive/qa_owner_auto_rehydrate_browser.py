@@ -13,13 +13,12 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 TARGET={
-    "yui":("teddy-bear97",0,1),
-    "mimmi":("v2ph-actor-a8n8n85a",10,11),
+    "yui":[("teddy-bear97",0),("djawa-privaty-public-samples",0)],
+    "mimmi":[("v2ph-actor-a8n8n85a",10),("v2ph-actor-zo5n754z",16)],
 }
 BASE="https://koith.github.io/browser-app-lab/apps"
 
-def exercise(browser,model):
-    album,index,number=TARGET[model]
+def exercise(browser,model,album,index):
     ctx=browser.new_context(viewport={"width":390,"height":844},
             is_mobile=True,has_touch=True,service_workers="block",locale="ko-KR")
     page=ctx.new_page()
@@ -31,7 +30,7 @@ def exercise(browser,model):
     phase={"warm":False,"errors":0,"recoveries":0,"readiness":0}
     def mock_media(route):
         link=route.request.url
-        if f"/media/{album}/{number}/" not in link:
+        if f"/media/{album}/" not in link:
             route.continue_()
             return
         if phase["warm"] and "/original" in link:
@@ -43,15 +42,11 @@ def exercise(browser,model):
             route.fulfill(status=503,body="mock temporary owner 503",
                 headers={"Access-Control-Allow-Origin":"https://koith.github.io",
                          "Cache-Control":"no-store"})
-    def mock_ready(route):
+    def reject_global_poll(route):
         phase["readiness"]+=1
-        ready=phase["warm"]
-        route.fulfill(status=200,content_type="application/json",
-            body=json.dumps({"ready":ready,"available":214 if ready else 0,
-                             "expected":214}),
-            headers={"Access-Control-Allow-Origin":"https://koith.github.io"})
+        route.fulfill(status=500,body="old global readiness endpoint must not gate an album")
     page.route(root,lambda route:route.fulfill(status=200,content_type="text/html",body=html))
-    page.route("**/api/gallery-media-readiness",mock_ready)
+    page.route("**/api/gallery-media-readiness",reject_global_poll)
     page.route("**/media/**",mock_media)
     try:
         response=page.goto(root+"#album="+album,wait_until="domcontentloaded",timeout=60000)
@@ -79,11 +74,11 @@ def exercise(browser,model):
                  im.closest('.photo')?.dataset.imageState!=='failed';
         }""",arg=index,timeout=30000)
         assert phase["recoveries"]>=1,(model,"no original retry after healthy status",phase)
-        assert phase["readiness"]>=1,(model,"never checked actual readiness",phase)
+        assert phase["readiness"]==0,(model,"global readiness must not be polled",phase)
         print("GALLERY_OWNER_AUTO_RECOVERY_503_TO_200_MOCK_UI_PASS",json.dumps({
-            "model":model,"browser":browser.browser_type.name,
+            "model":model,"album":album,"browser":browser.browser_type.name,
             "original_mock_errors":phase["errors"],
-            "healthy_polls":phase["readiness"],
+            "unnecessary_global_readiness_polls":phase["readiness"],
             "original_mock_recoveries":phase["recoveries"],
             "same_page_no_reload":True,
             "real_owner_media_claimed":False,
@@ -99,6 +94,7 @@ if __name__=="__main__":
     with sync_playwright() as pw:
         browser=getattr(pw,args.browser).launch(headless=True)
         try:
-            for model in ("mimmi","yui"):exercise(browser,model)
+            for model in ("mimmi","yui"):
+                for album,index in TARGET[model]:exercise(browser,model,album,index)
         finally:
             browser.close()
