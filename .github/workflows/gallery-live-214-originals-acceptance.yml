@@ -46,7 +46,6 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository)
     name: real Render exact originals (${{ matrix.model }})
@@ -67,3 +66,19 @@ jobs:
           python apps/gallery-archive/qa_live_214_incident_originals.py --model '${{ matrix.model }}'
           echo '${{ matrix.model }}: real Render exact SHA/bytes/pixels and CORS PASS' >> "$GITHUB_STEP_SUMMARY"
           echo 'NOTE: This does not establish cold-restart durability or physical iPhone device testing.' >> "$GITHUB_STEP_SUMMARY"
+
+  real-originals-release-gate:
+    if: always() && github.event_name != 'pull_request'
+    needs: [compile-contract, actual-live-owner-originals]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Never advertise success when actual live photo checks were skipped or failed
+        env:
+          COMPILE: ${{ needs.compile-contract.result }}
+          LIVE: ${{ needs.actual-live-owner-originals.result }}
+        run: |
+          test "$COMPILE" = success
+          test "$LIVE" = success
+          echo 'BOTH_MODELS_LIVE_214_ORIGINAL_SHA_BYTE_CORS_PIXEL_ACCEPTANCE_PASSED' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Only after this gate may mobile screenshot UI QA run.' >> "$GITHUB_STEP_SUMMARY"
