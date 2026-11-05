@@ -128,7 +128,8 @@ Object.defineProperty(navigator,"clipboard",{
                     "https://bsky.app/profile/qa-example.bsky.social")
                 assert len(job_reads)>=1
                 assert "receipt=synthetic-signed-receipt" in job_reads[0]
-                assert page.locator("#targetArchiveLibrary").is_visible()
+                page.locator("#targetArchiveLibrary").wait_for(
+                    state="visible",timeout=10000)
                 saved=page.locator("#targetArchiveLibraryRows a").first
                 assert saved.get_attribute("href")==(
                     "/account-archive?account=bluesky-"+"a"*40)
