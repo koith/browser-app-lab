@@ -19,7 +19,7 @@ import tempfile
 import zipfile
 
 from demand_archive import CloudArchive, canonical_json, sha256, MAX_CATALOG
-from target_account_archive import run_one, archive_key, read_bootstrap_request, Transport
+from target_account_archive import run_one, archive_key, read_bootstrap_request, Transport, profile_input
 
 MAX_BUNDLE=550_000_000
 RUN_ID_RE=re.compile(r"^[0-9]{6,30}$")
@@ -181,7 +181,23 @@ def upload_verified_bundle(zip_path,*,run_id,account_hash):
 
 def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
                    uploader=upload_verified_bundle):
-    selected=selected or read_bootstrap_request()
+    if selected is None:
+        env_platform=os.getenv("TARGET_PLATFORM","").strip()
+        env_account=os.getenv("TARGET_ACCOUNT","").strip()
+        if env_platform or env_account:
+            if not env_platform or not env_account:
+                raise ValueError("selected public account missing")
+            profile_input(env_platform,env_account)
+            try:
+                max_pages=int(os.getenv("TARGET_MAX_PAGES","2"))
+            except (TypeError,ValueError):
+                raise ValueError("invalid public account page budget") from None
+            if not 1<=max_pages<=4:
+                raise ValueError("invalid public account page budget")
+            selected={"platform":env_platform,"account":env_account,
+                      "max_pages":max_pages}
+        else:
+            selected=read_bootstrap_request()
     if selected is None:
         raise ValueError("no reviewed public account configured")
     platform=selected["platform"]
