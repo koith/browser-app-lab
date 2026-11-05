@@ -33,9 +33,13 @@ COOKIE={"mimmi":"MIMMI_COOKIE","yui":"YUI_COOKIE"}
 # Snapshot of the exact owner works visible in the user's incident screenshots.
 # The counts are intentionally strict: never accept an incomplete model index.
 TARGET={
-    "mimmi":( ("djawa-janus-scary-lantern-night",15),
+    # The user's latest iPhone screenshots: these 158 already-owned photos
+    # must load before optional cover warming or older incident works.
+    "mimmi":( ("v2ph-actor-a8n8n85a",61),
+              ("djawa-janus-scary-lantern-night",15),
               ("mimmi-indie-sana-sopmod2-2019",7) ),
-    "yui":( ("djawa-privaty-public-samples",30),
+    "yui":( ("teddy-bear97",97),
+            ("djawa-privaty-public-samples",30),
             ("yui-chinokun-illustar-2026-public",4) ),
 }
 MAX_FILE=12*1024*1024
@@ -253,7 +257,7 @@ def run(model,token):
     if receipt.get("verified") is not True:
         raise OwnerReadUnavailable("Signed catalog not acknowledged")
     chosen,full=select_rows(model,data)
-    # First restore all recorded 30+15 and former 4+7 incident originals.
+    # First restore all 214 known user-reported originals, new 61+97 works first.
     # Optional covers must never delay the user's photo-detail albums.
     priority=full+chosen
     # Keep first occurrence: an optional cover must not delay urgent photos.
