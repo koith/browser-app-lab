@@ -311,7 +311,7 @@ document.addEventListener('error',e=>{
  // Fail this tile once; keep every other photo independent.
  const url=img.getAttribute('src')||'';
  registerImageHealth(url,false);
- img.hidden=true;container.classList.add('broken-source');queueOwnerImageRecovery(img);
+ img.hidden=true;container.classList.add('broken-source');if(typeof queueOwnerImageRecovery==='function')queueOwnerImageRecovery(img);
 },true);
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumAliasEvidence={},collisionDistinct=new Set(),albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),localPreviewIndex=new Map(),detailRenderGeneration=0;
 function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
