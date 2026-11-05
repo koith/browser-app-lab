@@ -12,7 +12,7 @@ from subprocess import CompletedProcess
 
 def transient_then_ok(remote,key,destination,env):
     attempts.append((remote,key))
-    if len(attempts)<3:return False,"remote_read_rejected"
+    if len(attempts)<3:return False,"retryable_http_failure"
     destination.write_bytes(b"existing exact owner bytes")
     return True,"cat"
 attempts=[]
@@ -26,6 +26,7 @@ with patch.object(rescue,"read_existing",side_effect=transient_then_ok),patch.ob
 print("OWNER_SAME_ACCOUNT_TRANSIENT_COOLDOWN_RECOVERY_PASS")
 
 for rejected in ("provider_access_denied","provider_access_rejected",
+                 "remote_read_rejected","provider_unavailable",
                  "owner_object_not_found"):
     with patch.object(rescue,"read_existing",return_value=(False,rejected)) as read,patch.object(
             rescue.time,"sleep") as sleep:
