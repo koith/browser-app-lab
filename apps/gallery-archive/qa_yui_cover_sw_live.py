@@ -15,14 +15,19 @@ def run(browser):
     try:
         response=page.goto(URL,wait_until="domcontentloaded",timeout=60000)
         assert response and response.status==200
-        # Wait for the active worker and capture its scope and script together.
-        # A separate getRegistration() after the wait can race WebKit's SW lifecycle.
-        registration=page.wait_for_function("""async () => {
-          if(!navigator.serviceWorker)return false;
-          const r=await navigator.serviceWorker.getRegistration('./');
-          return r?.active?.scriptURL ? {scope:r.scope,script:r.active.scriptURL} : false;
-        }""",timeout=45000)
-        data=registration.json_value()
+        # navigator.serviceWorker.ready resolves only after an active worker exists.
+        # Do NOT use an async function in wait_for_function: the Promise itself
+        # can be truthy before resolving to false, yielding a bogus false handle.
+        data=page.evaluate("""async () => {
+          if(!navigator.serviceWorker)throw new Error('Service worker unavailable');
+          const registration=await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise((_,reject)=>setTimeout(
+              ()=>reject(new Error('Timed out awaiting active service worker')),45000))
+          ]);
+          return {scope:registration.scope,script:registration.active?.scriptURL||null};
+        }""")
+        assert data["script"],("missing active script",data)
         assert urlparse(data["scope"]).path==PATH,data
         assert urlparse(data["script"]).path==PATH+"gallery-cover-sw.js",data
         page.reload(wait_until="domcontentloaded",timeout=60000)
