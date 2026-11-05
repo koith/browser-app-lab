@@ -115,20 +115,30 @@
     nativeSlot:'12-empty',nativeKeyTicks:[0],
     nativeEvidence:'original-OBS-anim12-has-no-keys/static-same-body-INFERRED'});
   }
-  if(action==='attack'&&t.pak==='obs'){
-   // Board strike for the 37-frame OBS bodies, per body from its OWN table:
+  if(action==='attack'&&(t.pak==='obs'||(frames(t.anims[SLOT.poseFrontA]).length&&frames(t.anims[SLOT.poseFrontB]).length))){
+   // Board strike, per body from its OWN table:
    // front walk start, front pose A (slot 8), front pose B (slot 11) held,
    // back to the walk start. For 58 bodies this equals the former
    // structural 25,31,32,32,25; for 1057 (front art = 0-10) it is 3,9,10,10,3.
+   // R14: OBS2/OBS3 tables carry the same slots 5/8/11 (slot 8 = the same
+   // front crouch pose as OBS frame 31, checked visually on 1199/1214), so
+   // the same per-body rule applies to every body whose slots 8 and 11 are
+   // not empty (38 bodies previously held one static stance frame).
    const start=frames(t.anims[5])[0],a=frames(t.anims[SLOT.poseFrontA])[0],
     b=frames(t.anims[SLOT.poseFrontB])[0];
    const seq=[start,a,b,b,start];
-   if(!seq.every(i=>Number.isInteger(i)&&native.frames[i]))return null;
+   const ok=seq.every(i=>Number.isInteger(i)&&native.frames[i]);
+   // OBS bodies keep the established behaviour; an OBS2/OBS3 body whose
+   // strike frames are not all published falls through to its own stance
+   // hold below instead of a legacy structural guess.
+   if(!ok&&t.pak==='obs')return null;
+   if(ok){
    const result=seq.map(i=>native.frames[i]);
    result.mirror=false;result.loop=false;
    return finish(result,native,{table:'native-CHR-board-strike-front',
     nativeSlot:'5,8,11',nativeKeyTicks:[0],
-    nativeEvidence:'original-OBS-slot8-slot11-front-poses-of-this-body/role-INFERRED'});
+    nativeEvidence:(t.pak==='obs'?'original-OBS':'original-'+t.pak.toUpperCase())+'-slot8-slot11-front-poses-of-this-body/role-INFERRED'});
+   }
   }
   if(action==='hurt'||action==='victory'||action==='attack'){
    // No original slot is identified for hurt/victory or a board attack of
