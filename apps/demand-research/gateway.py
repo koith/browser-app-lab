@@ -16,6 +16,13 @@ from demand_archive import CloudArchive
 from target_archive_api import create_router as create_target_archive_router
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
+
+@app.get("/health",include_in_schema=False)
+async def liveness():
+    # Availability checks must not expose private archive names, keys or data.
+    # A healthy process can still be awaiting its three server-side secrets.
+    return JSONResponse({"alive":True},headers={"Cache-Control":"no-store"})
+
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
 REMOTE=os.getenv("DEMAND_TERABOX_REMOTE","archive:DemandResearch").rstrip("/")
 TOKEN=os.getenv("DEMAND_VIEWER_TOKEN","")
