@@ -220,18 +220,27 @@ def create_router(auth):
         auth(request)
         root=open_root()
         try:
-            names=root.names("metadata/target-accounts")
+            # Legacy nested per-record paths can return copyto/lsf missing
+            # even when a complete ZIP is remotely SHA-verified. Do not let
+            # a broken old registry hide the independently verified backups.
+            try:
+                names=root.names("metadata/target-accounts")
+            except RuntimeError:
+                names=[]
             data=[]
             for name in names:
                 if not REGISTRY_RE.fullmatch(name):
                     continue
-                raw=root.read("metadata/target-accounts/"+name,cap=4000,optional=True)
-                if raw is None:continue
-                entry=json.loads(raw)
-                if (entry.get("platform")+"-"+archive_key(entry)+".json")!=name:
+                try:
+                    raw=root.read("metadata/target-accounts/"+name,cap=4000,optional=True)
+                    if raw is None:continue
+                    entry=json.loads(raw)
+                    if (entry.get("platform")+"-"+archive_key(entry)+".json")!=name:
+                        continue
+                    data.append({"key":name[:-5],"platform":entry["platform"],
+                                 "profile_url":sanitize_safe_link(entry.get("profile_url"))})
+                except (RuntimeError,ValueError,KeyError,TypeError):
                     continue
-                data.append({"key":name[:-5],"platform":entry["platform"],
-                             "profile_url":sanitize_safe_link(entry.get("profile_url"))})
             seen={item["key"] for item in data}
             # ZIP receipts are independently re-read and verified against the
             # embedded 64-digit hashes, not inferred from GitHub green checks.
