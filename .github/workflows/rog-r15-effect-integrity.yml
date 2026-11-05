@@ -1,0 +1,24 @@
+name: 4LEAF R15 strict original OBS duel effect pixel integrity
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/original/OBS/duel-effects/**'
+      - 'apps/4leaf/rog/docs/evidence/r15/**'
+      - 'apps/4leaf/rog/tests/test_r15_effect_manifest_integrity.py'
+      - '.github/workflows/rog-r15-effect-integrity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-original:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install image verification decoder
+        run: python3 -m pip install --break-system-packages pillow
+      - name: Validate the exact 420 original source PNG bytes and 28 event members
+        run: python3 apps/4leaf/rog/tests/test_r15_effect_manifest_integrity.py
+      - name: Verify non-executable original manifest JavaScript
+        run: node --check apps/4leaf/rog/original/OBS/duel-effects/manifest.js
