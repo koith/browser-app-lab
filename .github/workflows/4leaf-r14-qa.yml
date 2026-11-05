@@ -13,7 +13,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   r14:
-    runs-on: ubuntu-latest
+    # Stable Playwright/WebKit host: ubuntu-latest switched to 26.04 and
+    # one runner stalled in `playwright install webkit --with-deps` for >20m.
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     strategy:
       fail-fast: false
