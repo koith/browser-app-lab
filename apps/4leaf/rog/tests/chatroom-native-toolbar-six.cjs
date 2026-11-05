@@ -13,7 +13,8 @@ async function run(engine){
   headless:true,...(engine==='chromium'?{args:['--no-sandbox']}:{})
  });
  try{
-  const page=await browser.newPage({viewport:{width:1280,height:850},serviceWorkers:'block'});
+  // In-room fallback remains accessible when the 54px MainFrame title strip does not fit.
+  const page=await browser.newPage({viewport:{width:1280,height:600},serviceWorkers:'block'});
   const errors=[];page.on('pageerror',e=>errors.push(e.stack||String(e)));
   await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL=''});
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
@@ -68,8 +69,8 @@ async function run(engine){
    // including the historic room3 toolbar collision (#3 and #9).
    // This never fabricates peers nor edits hidden game state directly.
    const seatPairs=[
-    [[73,66],[39,92]],[[76,64],[40,91]],[[73,63],[39,92]],
-    [[81,83],[77,69]],[[61,72],[73,97]],[[74,66],[39,93]]
+    [[72.4,56.8],[42.2,86.2]],[[68.0,54.9],[37.8,83.3]],[[80.6,60.6],[35.3,89.0]],
+    [[64.2,65.3],[18.9,93.8]],[[61,72],[73,97]],[[78.1,65.3],[50.4,93.8]]
    ];
    for(const [index,point] of [3,9].map((seat,i)=>[seat,seatPairs[background][i]])){
     await page.evaluate(([x,y])=>{
