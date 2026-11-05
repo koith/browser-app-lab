@@ -1,0 +1,26 @@
+{
+ "generated": "2026-11-05",
+ "scope": "R14-E: only resources still missing after rounds 1-13; already-recovered assets were not re-investigated",
+ "newOriginalResourcesAcquired": 0,
+ "originalResourcesNewlyConnectedToGameplay": {
+  "count": 26,
+  "what": "Dice/OBS.pak 1171 roll-table frames now drive the BATTLE dice: slot 20 = block-0 frames 18-27 (10 distinct, 15 keys / 30 ticks) and slot 12 = block-2 frames 0-15 (16 keys / 32 ticks); the 6 VERIFIED face frames were already used",
+  "where": "battle-dice-roll.js (previously only the board roll used them)",
+  "labels": "pixels, frame order and tick spans VERIFIED; fall/impact roles, tick ms and the dice->totals->lunge->outcome order INFERRED"
+ },
+ "stillMissing": [
+  {"item": "CHR card 0156 body OBS2.pak/1222.obs", "status": "BLOCKED",
+   "checked": ["chr-body-source-map.js census (98 cards, only 1222 unavailable)", "data/4leaf-* and research/4leaf-* branch list", "local workspace: no PAK/installer copies (by design)", "archive.org 4leaf item: not reachable from this sandbox (allowlist)"],
+   "next": "a different client build/patch that ships OBS2/1222; a CI job on the archive.org mirror can list OBS2.pak members if another build is added to the workflow. No other body is substituted (CardData fallback stays)."},
+  {"item": "Original hurt / victory / defend action slots", "status": "UNVERIFIED",
+   "detail": "The 13 OBS animation slots (0-12) contain idle, walk, two pose holds and the duel lunge; no slot is identified as hurt or victory. The game holds the same body's front stance and labels it UNVERIFIED."},
+  {"item": "Duel effect members (per-body duelEffects counts) and the blue/green podium contact discs seen in battle.jpg / board.jpg", "status": "MISSING",
+   "detail": "Effect OBS members and their sprite chains are not published; the coloured discs are visible only in screenshots. Not imitated with CSS."},
+  {"item": "MVE meshes, camera matrix and tile elevation", "status": "MISSING",
+   "detail": "Board/podium 3D geometry is not in the recovered archives; tile pitch 150x100 and podium placement stay WEB calibrations."},
+  {"item": "CHR -> CardData chm_N portrait mapping", "status": "MISSING",
+   "detail": "97 chm_N portraits (1-63, 101-135 without 124) vs 98 CHR cards; no recovered field links them. Cards without a sourced portrait show IMG/avatarback.png (0156 included)."},
+  {"item": "Dice sound id 2125 (OBS 1171 slot 12 tick 1)", "status": "NOT PLAYED", "detail": "sound bank not recovered"},
+  {"item": "Original 2002 tick length in ms", "status": "UNVERIFIED", "detail": "WEB 40ms/tick for actors, 22ms/tick for the battle roll"}
+ ]
+}
