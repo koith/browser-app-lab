@@ -73,8 +73,11 @@ def test_catchup_fetches_fresh_first_then_older_public_originals(tmp_path,monkey
     with pytest.raises(RuntimeError,match="unverified"):
         job.run(fetchers=[getter],cloud=Offline(),clock=lambda:now,
                 run_id="123456940",fast_mode=True)
-    assert starts[:3]==[now-16*60]*3, "recent public posts must be queried first"
-    assert starts[3:]==[now-80*60]*3, "missing window is queried second"
+    query_count=len(job.TERMS)
+    assert starts[:query_count]==[now-16*60]*query_count, (
+        "every configured keyword must be searched in the fresh public window first")
+    assert starts[query_count:]==[now-80*60]*query_count, (
+        "the missed source window must be searched for every configured keyword")
     assert len(list(tmp_path.glob("*.enc")))==2, "exact same original not counted twice"
 
 

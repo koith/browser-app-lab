@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>교집합 · 자동 수집 원본 보관함</title>
+<link rel="stylesheet" href="/auto-archive/auto_archive_view.css">
+<script src="/auto-archive/auto_archive_view.js" defer></script>
+</head>
+<body>
+<main class="wrap">
+ <header class="page-head">
+  <div class="eyebrow">TERABOX · 자동 수집 보관본</div>
+  <h1>자동 수집 원본</h1>
+  <p>설정된 공개 키워드가 포함된 게시글을 보관한 목록입니다. 원본 파일은 저장 당시의 바이트가 검증된 경우에만 표시합니다. 비공개 전환 전 보관됐더라도 원본 제공에는 보관 정책과 권리 요청이 적용됩니다.</p>
+ </header>
+ <form id="search" autocomplete="off">
+  <label>게시글 검색<input id="query" maxlength="100" type="search" placeholder="보관된 본문에서 검색"></label>
+  <label>SNS
+   <select id="platform">
+    <option value="">전체 SNS</option><option value="bluesky">Bluesky</option>
+    <option value="mastodon">Mastodon</option><option value="misskey">Misskey</option>
+    <option value="lemmy">Lemmy</option>
+   </select>
+  </label>
+  <label>첨부파일
+   <select id="mediaStatus">
+    <option value="">전체</option>
+    <option value="complete">보관 완료</option>
+    <option value="partial">일부 미보관</option>
+   </select>
+  </label>
+  <button type="submit">검색</button>
+ </form>
+ <p id="status" class="status" role="status" aria-live="polite">테라박스 원본 확인 중…</p>
+ <section id="posts" class="posts" aria-label="자동 수집 게시글">
+  <p class="empty">보관본을 읽고 있습니다.</p>
+ </section>
+ <button id="more" type="button" hidden>더 보기</button>
+ <p class="foot">원문 링크는 SNS 원본 위치이며, 미디어 플레이어와 원본 파일 링크는 인증된 보관 서버의 실제 저장 파일입니다. 보관되지 않은 첨부자료는 원본인 것처럼 표시하지 않습니다.</p>
+</main>
+</body>
+</html>

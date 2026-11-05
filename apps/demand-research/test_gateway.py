@@ -157,3 +157,95 @@ def test_private_archive_query_filters_all_remote_rows(connected_gateway,monkeyp
     assert client.get("/api/posts?media_status=complete").json()["total"]==1
     assert client.get("/api/posts?platform=invalid").status_code==400
     assert client.get("/api/posts?media_status=unknown").status_code==400
+
+
+def test_auto_viewer_requires_auth(connected_gateway):
+    client=connected_gateway
+    assert client.get("/auto-archive").status_code==401
+    assert client.get("/auto-archive/auto_archive_view.js").status_code==401
+    assert client.get("/auto-archive/auto_archive_view.css").status_code==401
+
+
+def test_auto_viewer_read_only_assets(connected_gateway):
+    client=connected_gateway
+    token=gateway.TOKEN
+    assert client.post("/api/activate",json={"token":token}).status_code==200
+    page=client.get("/auto-archive")
+    assert page.status_code==200
+    assert "frame-ancestors 'self'" in page.headers["content-security-policy"]
+    assert "no-store" in page.headers["cache-control"]
+    for asset in ("auto_archive_view.js","auto_archive_view.css"):
+        assert client.get("/auto-archive/"+asset).status_code==200
+    assert client.get("/auto-archive/gateway.py").status_code==404
+
+
+def test_auto_viewer_serves_origin_locked_original_browser_code(connected_gateway):
+    client=connected_gateway
+    client.post("/api/activate",json={"token":"strong-secret-link-only-for-local-tests-012345"})
+    page=client.get("/auto-archive")
+    assert page.status_code==200
+    assert "frame-ancestors 'self'" in page.headers["content-security-policy"]
+    assert "frame-ancestors 'none'" not in page.headers["content-security-policy"]
+    assert "자동 수집 원본" in page.text
+    assert client.get("/auto-archive/auto_archive_view.js").status_code==200
+    assert client.get("/auto-archive/auto_archive_view.css").status_code==200
+    assert client.get("/auto-archive/gateway.py").status_code==404
+
+
+def test_original_media_verified_against_real_bytes_not_metadata_only(
+        connected_gateway,monkeypatch):
+    import hashlib
+    from urllib.parse import urlsplit,parse_qs
+    blob=b"synthetic-public-original-video-content"
+    pid="a"*40
+    original_hash=hashlib.sha256(blob).hexdigest()
+    post={"id":pid,"platform":"bluesky","posted_at":"2026-11-01T00:00:00Z",
+          "text":"synthetic public keyword post","archive_complete":True,
+          "media":[{"key":"posts/"+pid+"/media/0001.mp4",
+                    "mime":"video/mp4","bytes":len(blob),
+                    "sha256":original_hash,"remote_verified":True,"kind":"video"}]}
+    async def catalog():return [post]
+    monkeypatch.setattr(gateway,"get_catalog",catalog)
+    calls=[]
+    class FakeArchive:
+        def __init__(self,*args,**kwargs):pass
+        def read_verified(self,key,digest,*,cap):
+            calls.append((key,digest,cap))
+            return blob if not calls_or_corrupt["fail"] else b"tampered-original-video"
+    calls_or_corrupt={"fail":False}
+    monkeypatch.setattr(gateway,"CloudArchive",FakeArchive)
+    client=connected_gateway
+    client.post("/api/activate",json={"token":"strong-secret-link-only-for-local-tests-012345"})
+    post_result=client.get("/api/posts").json()["posts"][0]
+    path=post_result["media"][0]["url"]
+    r=client.get(path)
+    assert r.status_code==200
+    assert r.content==blob
+    assert calls[0]==(post["media"][0]["key"],original_hash,len(blob)+1)
+    r=client.get(path,headers={"Range":"bytes=4-13"})
+    assert r.status_code==206 and r.content==blob[4:14]
+    assert r.headers["content-range"]=="bytes 4-13/"+str(len(blob))
+    calls_or_corrupt["fail"]=True
+    assert client.get(path).status_code==502
+
+
+def test_media_must_be_sha_readable_even_if_url_is_signed(connected_gateway,monkeypatch):
+    import hashlib
+    pid="b"*40
+    blob=b"synthetic-image-content"
+    async def catalog():
+        return [{"id":pid,"platform":"mastodon","posted_at":"2026-11-01T00:00:00Z",
+                 "text":"synthetic public","media":[{
+                   "key":"posts/"+pid+"/media/0001.png",
+                   "mime":"image/png","bytes":len(blob),
+                   "sha256":hashlib.sha256(blob).hexdigest(),"remote_verified":True
+                 }]}]
+    monkeypatch.setattr(gateway,"get_catalog",catalog)
+    class MissingArchive:
+        def __init__(self,*args,**kwargs):pass
+        def read_verified(self,*args,**kwargs):return None
+    monkeypatch.setattr(gateway,"CloudArchive",MissingArchive)
+    client=connected_gateway
+    client.post("/api/activate",json={"token":"strong-secret-link-only-for-local-tests-012345"})
+    url=client.get("/api/posts").json()["posts"][0]["media"][0]["url"]
+    assert client.get(url).status_code==502

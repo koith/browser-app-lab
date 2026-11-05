@@ -448,6 +448,12 @@ main{padding-top:10px}
 /* Compact integrated archive viewer: private originals never appear on public Pages. */
 .archive-hub{min-width:0;background:#f5f7fc;padding:20px;border:1px solid #ced8e7;border-radius:12px;color:#1b2e51}
 .archive-hub-header h2{font-size:23px;margin:0 0 6px;font-weight:850}
+.archive-hub-modes{display:flex;gap:7px;margin:0 0 14px;flex-wrap:wrap}
+.archive-hub-modes button{border-radius:8px;background:white;border:1px solid #ccd6e8;color:#405679;font-size:13px;font-weight:800;padding:12px 17px;cursor:pointer;min-height:42px}
+.archive-hub-modes button[aria-selected=true]{background:#2944ae;color:#fff;border-color:#2944ae}
+.archive-hub-modes button:focus-visible{outline:3px solid #4669d3;outline-offset:2px}
+@media(max-width:720px){.archive-hub-modes button{flex:1;padding:11px 7px;font-size:12px}}
+
 .archive-hub-header p{font-size:12px;color:#596980;line-height:1.65;margin:0 0 16px}
 #archiveHubStatus{padding:15px;border:1px solid #d5dfea;background:#fff;border-radius:9px;font-size:13px;line-height:1.65;color:#3e506b}
 .archive-hub-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
@@ -783,7 +789,7 @@ main{padding-top:10px}
     <option value="instagram">Instagram 릴스</option><option value="reddit">Reddit</option>
   </select>
   <select id="socialTerm" aria-label="검색어">
-    <option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="일탈계">일탈계</option>
+    <option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="섹블">섹블</option><option value="일탈계">일탈계</option>
   </select>
   <button type="button" id="socialFind">SNS 검색</button>
   <span id="socialStatus" role="status" aria-live="polite"></span>
@@ -896,8 +902,12 @@ main{padding-top:10px}
 <section id="archivesView" class="archive-hub hidden" role="tabpanel" aria-labelledby="viewArchives">
   <header class="archive-hub-header">
     <h2>백업 보관함</h2>
-    <p>테라박스에 저장하고 원본 확인을 마친 계정만 표시합니다. 게시글·사진·영상·답글·프로필을 계정별로 살펴볼 수 있습니다.</p>
+    <p>자동으로 저장한 키워드 게시글과 지정 계정의 백업본을 구분해 조회합니다. 실제 원본이 검증된 파일만 열람할 수 있습니다.</p>
   </header>
+  <div class="archive-hub-modes" role="tablist" aria-label="보관 자료 종류">
+    <button id="archiveModeAuto" type="button" role="tab" aria-selected="true">자동 저장 게시글</button>
+    <button id="archiveModeAccounts" type="button" role="tab" aria-selected="false">지정 계정 백업</button>
+  </div>
   <div id="archiveHubStatus" role="status" aria-live="polite">비공개 보관 서버의 연결 상태를 확인 중입니다.</div>
   <div id="archiveHubActions" class="archive-hub-actions" hidden>
     <button type="button" id="archiveHubReload">목록 새로고침</button>
@@ -928,7 +938,7 @@ main{padding-top:10px}
 (function(){
 "use strict";
 const API="https://api.bsky.app/xrpc/app.bsky.feed.searchPosts";
-const TERMS=["뒷계","섹트","일탈계"];
+const TERMS=["뒷계","섹트","섹블","일탈계"];
 const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS=4500;
 const cloudMode=location.hostname!=="koith.github.io";
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
@@ -1971,7 +1981,7 @@ if(cloudMode){
 <script src="target_archive_client.js?v=20261105-touch-navigation" defer></script>
 <script src="free_discovery.js" defer></script>
 <script src="account_watch.js?v=20261106-archive-tab" defer></script>
-<script src="archive_tab.js?v=20261106-archive-tab" defer></script>
+<script src="archive_tab.js?v=20261106-both-originals" defer></script>
 <script src="account_auto_analysis.js?v=20261105-account-ui-3" defer></script>
 <script src="account_index_client.js?v=20261105-account-ui-3" defer></script>
 <script src="account_group_client.js?v=20261105-account-ui-3" defer></script>

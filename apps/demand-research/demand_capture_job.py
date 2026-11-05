@@ -21,7 +21,7 @@ from urllib.request import Request, urlopen, build_opener, HTTPRedirectHandler
 from demand_archive import CloudArchive, MIMES, canonical_json, post_key, public_url, sha256
 from account_index_sources import fetch_public as bluesky_public_search
 
-TERMS = ("뒷계", "섹트", "일탈계")
+TERMS = ("뒷계", "섹트", "섹블", "일탈계")
 WINDOW_MINUTES = 16
 MAX_CATCHUP_MINUTES = 360  # bounded missed-schedule window; current 16m always comes first
 # The outer workflow sends TERM after 1,080s. Stop scheduling new records
@@ -41,7 +41,10 @@ SENSITIVE_LABELS = {"!hide", "!takedown", "porn", "sexual", "nudity", "graphic-m
 MIMES_LIMITS = {"image/jpeg": MAX_IMAGE, "image/png": MAX_IMAGE,
                 "image/webp": MAX_IMAGE, "image/avif": MAX_IMAGE,
                 "video/mp4": MAX_VIDEO, "video/webm": MAX_VIDEO,
-                "video/quicktime": MAX_VIDEO}
+                "video/quicktime": MAX_VIDEO,
+                "audio/mpeg": MAX_IMAGE, "audio/mp4": MAX_IMAGE,
+                "audio/ogg": MAX_IMAGE, "audio/webm": MAX_IMAGE,
+                "audio/wav": MAX_IMAGE, "audio/flac": MAX_IMAGE}
 
 
 class TextOnly(HTMLParser):
@@ -192,7 +195,7 @@ def mastodon(term, start, end):
             url = item.get("url") or item.get("uri")
             attachments = item.get("media_attachments") or []
             images = [m.get("url") for m in attachments if isinstance(m, dict)
-                      and m.get("type") in ("image", "video", "gifv")]
+                      and m.get("type") in ("image", "video", "gifv", "audio")]
             row = normalized("mastodon", str(item.get("uri") or item.get("id")), url,
                              text, posted, images, (item.get("account") or {}).get("url", ""))
             if row:
@@ -330,7 +333,8 @@ def make_post(row, now, get_media=download_media, pid_override=None, cloud=None)
         key = "posts/" + pid + "/media/" + str(index).zfill(4) + MIMES[mime]
         media.append({"key": key, "mime": mime, "bytes": len(blob),
                       "sha256": sha256(blob), "remote_verified": True,
-                      "kind": "video" if mime.startswith("video/") else "image",
+                      "kind": ("video" if mime.startswith("video/") else
+                               "audio" if mime.startswith("audio/") else "image"),
                       "source_url":url})
         blobs.append(blob)
     post = {"id": pid, "platform": row["platform"], "source_url": row["source_url"],
