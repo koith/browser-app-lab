@@ -15,15 +15,14 @@ def run(browser):
     try:
         response=page.goto(URL,wait_until="domcontentloaded",timeout=60000)
         assert response and response.status==200
-        page.wait_for_function("""async () => {
+        # Wait for the active worker and capture its scope and script together.
+        # A separate getRegistration() after the wait can race WebKit's SW lifecycle.
+        registration=page.wait_for_function("""async () => {
           if(!navigator.serviceWorker)return false;
           const r=await navigator.serviceWorker.getRegistration('./');
-          return !!r?.active?.scriptURL;
+          return r?.active?.scriptURL ? {scope:r.scope,script:r.active.scriptURL} : false;
         }""",timeout=45000)
-        data=page.evaluate("""async () => {
-          const r=await navigator.serviceWorker.getRegistration('./');
-          return {scope:r.scope,script:r.active.scriptURL};
-        }""")
+        data=registration.json_value()
         assert urlparse(data["scope"]).path==PATH,data
         assert urlparse(data["script"]).path==PATH+"gallery-cover-sw.js",data
         page.reload(wait_until="domcontentloaded",timeout=60000)
