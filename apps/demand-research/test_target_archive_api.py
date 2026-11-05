@@ -42,7 +42,7 @@ def test_archive_dispatch_fails_without_same_origin_intent(client,monkeypatch):
 
 def test_authenticated_public_account_dispatch_returns_queued_not_saved(client,monkeypatch):
     invoked=[]
-    monkeypatch.setattr(target_archive_api,"dispatch",lambda p,a:invoked.append((p,a)))
+    monkeypatch.setattr(target_archive_api,"dispatch",lambda p,a:(invoked.append((p,a)) or 41999999999))
     headers={"Origin":"https://testserver",
              "X-Archive-Intent":"selected-public-account-v1"}
     r=client.post("/api/target-archive/start",json={
