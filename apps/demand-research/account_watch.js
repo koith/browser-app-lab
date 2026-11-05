@@ -86,15 +86,20 @@ function write(){
 }
 watches=read();
 function setView(view){
- currentView=view==="accounts"?"accounts":"posts";
- const acc=currentView==="accounts";
- $("postsView").classList.toggle("hidden",acc);
- $("accountsView").classList.toggle("hidden",!acc);
- $("viewPosts").classList.toggle("active",!acc);
- $("viewAccounts").classList.toggle("active",acc);
- $("viewPosts").setAttribute("aria-selected",String(!acc));
- $("viewAccounts").setAttribute("aria-selected",String(acc));
- if(acc)render();
+ currentView=["posts","accounts","archives"].includes(view)?view:"posts";
+ for(const [name,panel,button] of [
+   ["posts","postsView","viewPosts"],
+   ["accounts","accountsView","viewAccounts"],
+   ["archives","archivesView","viewArchives"]
+ ]){
+   const selected=currentView===name;
+   $(panel).classList.toggle("hidden",!selected);
+   $(button).classList.toggle("active",selected);
+   $(button).setAttribute("aria-selected",String(selected));
+ }
+ if(currentView==="accounts")render();
+ window.dispatchEvent(new CustomEvent("intersection:tab-change",
+                                     {detail:{view:currentView}}));
 }
 function scheduleRender(){
  if(rafPending)return;rafPending=true;
@@ -444,11 +449,17 @@ async function refreshWatch(w,manual){
 }
 $("viewPosts").addEventListener("click",()=>setView("posts"));
 $("viewAccounts").addEventListener("click",()=>setView("accounts"));
-$("viewAccounts").parentElement.addEventListener("keydown",e=>{
- if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+$("viewArchives").addEventListener("click",()=>setView("archives"));
+$("viewPosts").parentElement.addEventListener("keydown",e=>{
+ if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;
+ const tabs=["posts","accounts","archives"];
+ let index=tabs.indexOf(currentView);
+ if(e.key==="Home")index=0;
+ else if(e.key==="End")index=tabs.length-1;
+ else index=(index+(e.key==="ArrowRight"?1:-1)+tabs.length)%tabs.length;
  e.preventDefault();
- const tab=e.key==="ArrowRight"?"accounts":"posts";
- setView(tab);$(tab==="accounts"?"viewAccounts":"viewPosts").focus();
+ setView(tabs[index]);
+ $(["viewPosts","viewAccounts","viewArchives"][index]).focus();
 });
 $("accountWatchForm").addEventListener("submit",e=>{
  e.preventDefault();
@@ -461,6 +472,7 @@ window.addEventListener("intersection:feed-updated",scheduleRender);
 window.addEventListener("intersection:date-range-change",scheduleRender);
 window.addEventListener("storage",e=>{if(e.key===STORE){watches=read();render()}});
 render();
+if(new URLSearchParams(location.search).get("tab")==="archives")setView("archives");
 // On page load, bounded refresh: no background monitoring or polling.
 Promise.resolve().then(async()=>{
   const initial=watches.filter(w=>["bluesky","mastodon","x"].includes(w.platform)).slice(0,4);
