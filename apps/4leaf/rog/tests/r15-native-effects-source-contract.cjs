@@ -43,7 +43,7 @@ vm.runInContext(fs.readFileSync(path.join(root,'native-duel-effects.js'),'utf8')
  assert.ok(a.some(e=>e.numeric==='1096'),'0040 original slot12 effect 1096');
  assert.ok(b.some(e=>e.numeric==='1097'),'0042 original slot12 effect 1097');
  assert.ok(c.some(e=>e.numeric==='1101'),'0045 original slot12 effect 1101');
- assert.deepEqual(api.eventsFor('0156'),[],'unrecovered 0156 has no fabricated source effect');
+ assert.equal(api.eventsFor('0156').length,0,'unrecovered 0156 has no fabricated source effect');
  for(const e of [...a,...b,...c]){
   assert.equal(e.member,e.source.originalMember);
   assert.equal(e.source.status,'SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED');
