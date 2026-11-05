@@ -27,6 +27,7 @@ COPY apps/demand-research/account_index_sources.py /app/account_index_sources.py
 COPY apps/demand-research/account_auto_analysis.js /app/account_auto_analysis.js
 COPY apps/demand-research/account_index_client.js /app/account_index_client.js
 COPY apps/demand-research/account_watch.js /app/account_watch.js
+COPY apps/demand-research/archive_tab.js /app/archive_tab.js
 COPY apps/demand-research/free_discovery.js /app/free_discovery.js
 COPY apps/demand-research/post_activity_ranking.js /app/post_activity_ranking.js
 COPY apps/demand-research/target_archive_client.js /app/target_archive_client.js
