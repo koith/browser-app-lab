@@ -312,6 +312,9 @@
       submitting=false;refreshButton();
     }
   });
+  window.addEventListener("intersection:private-session-ready",()=>{
+    void check();
+  });
   refreshButton();
   void check();
 })();
