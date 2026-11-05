@@ -157,3 +157,10 @@ def test_private_archive_query_filters_all_remote_rows(connected_gateway,monkeyp
     assert client.get("/api/posts?media_status=complete").json()["total"]==1
     assert client.get("/api/posts?platform=invalid").status_code==400
     assert client.get("/api/posts?media_status=unknown").status_code==400
+
+
+def test_auto_viewer_requires_auth(connected_gateway):
+    client=connected_gateway
+    assert client.get("/auto-archive").status_code==401
+    assert client.get("/auto-archive/auto_archive_view.js").status_code==401
+    assert client.get("/auto-archive/auto_archive_view.css").status_code==401
