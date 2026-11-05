@@ -29,9 +29,13 @@ ORIGIN="https://mimmi-private-gallery-free.onrender.com"
 AUDIENCE="gallery-archive-terabox-sync"
 REMOTE={"mimmi":"archive:MimmiArchive","yui":"archive:YuiArchive"}
 COOKIE={"mimmi":"MIMMI_COOKIE","yui":"YUI_COOKIE"}
+# Snapshot of the exact owner works visible in the user's incident screenshots.
+# The counts are intentionally strict: never accept an incomplete model index.
 TARGET={
-    "mimmi":"mimmi-indie-sana-sopmod2-2019",
-    "yui":"yui-chinokun-illustar-2026-public",
+    "mimmi":( ("djawa-janus-scary-lantern-night",15),
+              ("mimmi-indie-sana-sopmod2-2019",7) ),
+    "yui":( ("djawa-privaty-public-samples",30),
+            ("yui-chinokun-illustar-2026-public",4) ),
 }
 MAX_FILE=12*1024*1024
 MAX_SHARD_BYTES=58*1024*1024
@@ -209,10 +213,16 @@ def select_rows(model,catalog):
             covers_rows.append((album,item,variant))
     # Covers are ranked by existing manifest order only, not by scraping.
     chosen=covers_rows[:MAX_COVERS]
-    wanted=next((a for a in albums if a["id"]==TARGET[model]),None)
-    if wanted is None:
-        raise OwnerReadUnavailable("Screenshot incident work is not in owner's catalog")
-    full_rows=[(wanted,p,"original") for p in wanted["images"]]
+    full_rows=[]
+    for album_id, expected in TARGET[model]:
+        wanted=next((a for a in albums if a["id"]==album_id),None)
+        if wanted is None or len(wanted.get("images",[]))!=expected:
+            raise OwnerReadUnavailable("Incident work missing/incomplete: "+model)
+        numbers=[p.get("number") for p in wanted["images"]]
+        if len(set(numbers))!=expected or not all(type(n) is int and n>=1 for n in numbers):
+            raise OwnerReadUnavailable("Incident photo numbering is not unique")
+        full_rows.extend((wanted,p,"original") for p in sorted(
+            wanted["images"],key=lambda x:x["number"]))
     return chosen,full_rows
 
 
@@ -242,8 +252,8 @@ def run(model,token):
     if receipt.get("verified") is not True:
         raise OwnerReadUnavailable("Signed catalog not acknowledged")
     chosen,full=select_rows(model,data)
-    # First serve the actual user-reported 4+7 missing originals, then
-    # optional covers. Long cover batches must never block emergency photos.
+    # First restore all recorded 30+15 and former 4+7 incident originals.
+    # Optional covers must never delay the user's photo-detail albums.
     priority=full+chosen
     # Keep first occurrence: an optional cover must not delay urgent photos.
     unique={}
@@ -254,6 +264,8 @@ def run(model,token):
                 unique[key]=(album,photo,variant)
     fullset={(a["id"],p["number"],variant) for a,p,variant in full}
     count=0;urgent=0;used=0;skipped=0
+    per_work={album_id:0 for album_id,_ in TARGET[model]}
+    rejected_incident=[]
     token_timestamp=time.monotonic()
     for album,photo,variant in unique.values():
         if time.monotonic()-token_timestamp>120:
@@ -284,9 +296,12 @@ def run(model,token):
                     continue
                 variant="original"
             elif urgent_photo:
-                # Fail closed: even after the bounded same-account attempts,
-                # never publish or claim an incomplete existing original.
-                raise
+                # Do not mislabel a failed SHA as recovered, but continue
+                # other incident photos to maximize actual visible recovery.
+                rejected_incident.append((album["id"],photo["number"]))
+                print("OWNER_INCIDENT_EXACT_SHA_PHOTO_UNAVAILABLE",model,
+                      album["id"],photo["number"],flush=True)
+                continue
             else:
                 skipped+=1
                 continue
@@ -310,15 +325,17 @@ def run(model,token):
                     or not proof.headers.get("Content-Type","").startswith("image/")):
                     raise OwnerReadUnavailable("Actual live Render original SHA readback failed")
             urgent+=1
+            per_work[album["id"]]+=1
     print("OWNER_RESCUE_EXISTING_READBACK",json.dumps({
         "model":model,"albums":len(data["albums"]),
         "verified_transfer":count,"urgent_verified":urgent,
-        "urgent_expected":len(fullset),"skipped":skipped,
+        "urgent_expected":len(fullset),"incident_breakdown":per_work,
+        "incident_sha_rejected":len(rejected_incident),"skipped":skipped,
         "upstream_gallery_originals_modified":False,
         "new_image_collection":False
     }),flush=True)
-    if urgent!=len(fullset):
-        raise OwnerReadUnavailable("Not all user-reported photos were recovered")
+    if urgent!=len(fullset) or rejected_incident:
+        raise OwnerReadUnavailable("Not all user-reported photos were SHA-verified")
     if count<=urgent:
         raise OwnerReadUnavailable("No album covers recovered outside targeted work")
 

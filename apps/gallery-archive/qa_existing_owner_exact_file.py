@@ -30,7 +30,7 @@ def read_existing(remote: str, key: str, destination: Path, env: dict) -> tuple[
                     result = subprocess.run(
                         ["rclone", "cat", remote + "/" + key,
                          "--timeout=35s", "--retries=1"],
-                        stdout=out, stderr=subprocess.DEVNULL,
+                        stdout=out, stderr=subprocess.PIPE,
                         env=env, timeout=65, check=False,
                     )
             else:
@@ -38,14 +38,23 @@ def read_existing(remote: str, key: str, destination: Path, env: dict) -> tuple[
                 result = subprocess.run(
                     ["rclone", "copyto", remote + "/" + key, str(destination),
                      "--timeout=35s", "--retries=1"],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
                     env=env, timeout=65, check=False,
                 )
         except subprocess.TimeoutExpired:
             result = None
-        if result is None or result.returncode != 0:
-            # A rejected provider read is not authorization to try another
-            # transfer mode. Preserve access-control denial as a failed read.
+        if result is None:
+            return False, "transport_timeout"
+        if result.returncode != 0:
+            # Never print stderr: provider errors may include signed URLs or
+            # private storage keys. Classify a tiny allowlisted numeric code.
+            detail = (result.stderr or b"")[:32768].decode("utf-8","replace")
+            if "31326" in detail or "anti hotlinking" in detail.lower():
+                return False, "provider_access_denied"
+            if method == "cat" and re.search(r"(?<![0-9])400141(?![0-9])",detail):
+                # The existing owner storage tool documents a same-account
+                # copyto fallback for this specific cat-read API response.
+                continue
             return False, "remote_read_rejected"
         if not destination.is_file() or not destination.stat().st_size:
             return False, "remote_read_empty"

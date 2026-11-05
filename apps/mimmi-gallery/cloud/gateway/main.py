@@ -823,6 +823,59 @@ async def restore_authenticated_owner_media(model: str, request: Request):
                         headers={"Cache-Control": "no-store"})
 
 
+
+# Read-only readiness for exactly the real user-reported albums, not merely
+# whether a cover or catalog can load. No remote I/O, secrets or file bytes.
+_INCIDENT_MEDIA = {
+    "mimmi": (
+        ("djawa-janus-scary-lantern-night", 15),
+        ("mimmi-indie-sana-sopmod2-2019", 7),
+    ),
+    "yui": (
+        ("djawa-privaty-public-samples", 30),
+        ("yui-chinokun-illustar-2026-public", 4),
+    ),
+}
+
+
+@app.get("/api/gallery-media-readiness")
+async def gallery_media_readiness():
+    now = time.time()
+    available = 0
+    expected = sum(n for items in _INCIDENT_MEDIA.values() for _, n in items)
+    # A signed catalog expires in ~90 min; never report readiness when its
+    # remaining lifetime is too short to guarantee the next normal visit.
+    for model, groups in _INCIDENT_MEDIA.items():
+        state = _cache if model == "mimmi" else _yui_cache
+        catalog = state.get("catalog")
+        if not isinstance(catalog, dict) or _owner_rescue_until[model] < now + 600:
+            return JSONResponse({"ready": False, "available": available,
+                                 "expected": expected},
+                                headers={"Cache-Control": "no-store"})
+        remote = REMOTE if model == "mimmi" else YUI_REMOTE
+        albums = catalog.get("albums")
+        if not isinstance(albums, list):
+            return JSONResponse({"ready": False, "available": available,
+                                 "expected": expected},
+                                headers={"Cache-Control": "no-store"})
+        for album_id, n in groups:
+            album = next((a for a in albums if a.get("id") == album_id), None)
+            if not album or len(album.get("images", [])) != n:
+                return JSONResponse({"ready": False, "available": available,
+                                     "expected": expected},
+                                    headers={"Cache-Control": "no-store"})
+            for photo in album["images"]:
+                key = (remote, photo.get("key"), photo.get("bytes"), photo.get("sha256"))
+                if key not in _media_cache.values:
+                    return JSONResponse({"ready": False, "available": available,
+                                         "expected": expected},
+                                        headers={"Cache-Control": "no-store"})
+                available += 1
+    return JSONResponse({"ready": True, "available": available,
+                         "expected": expected},
+                        headers={"Cache-Control": "no-store"})
+
+
 @app.post("/internal/terabox-session-refresh")
 async def sync_archive_session(request: Request):
     """OIDC-authenticated, model-separated owner session refresh.
