@@ -12,6 +12,11 @@ on:
       - 'apps/4leaf/rog/original/OBS/**'
       - 'apps/4leaf/rog/tests/genesis-asset-roles.cjs'
       - '.github/workflows/rog-asset-roles.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/genesis-asset-roles.cjs'
+      - '.github/workflows/rog-asset-roles.yml'
   workflow_dispatch:
 jobs:
   source-roles:
