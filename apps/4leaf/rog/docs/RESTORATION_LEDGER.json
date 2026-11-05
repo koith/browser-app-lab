@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-03",
+  "updatedAt": "2026-11-05",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1812,6 +1812,23 @@
         "RULE-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "date": "2026-11-05",
+      "origin": "GPT and Claude R12 actual original source integration; user prioritizes public playable experience over archive census",
+      "text": "클로드 12차 원본 체스맨 97종 행동표·신규 원본 몸체 19종/662프레임과 원본 D4/D6 블록 63프레임을 실제 주잔 게임에 연결하고, 6개 상설 채팅방 좌석·이름표·메인프레임 툴바를 공개 앱에 반영한다. 전체 CI·Pages 공개 파일까지 확인하고 미검증 원본 효과·틱·26개 맵은 별도로 추적한다.",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "ACT-03",
+        "DIE-02",
+        "CHT-05"
+      ]
     }
   ],
   "tasks": [
@@ -1913,7 +1930,7 @@
       "title": "주잔 창세기전 체스맨 원본 전신",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "OBS 64/98종 281프레임; 원본 ID 연결, 34종과 정확한 행동/방향 매핑 미완료; 2026-11-02 all 45 known OBS full-37 source members downloaded and installed with 1665 original 2D sprites. Original roster remains incomplete (6 client members absent); original EXE direction/action table not decoded. | 2026-11-02 beta.37 branch: OBS full 37-frame network recovery now retries from legacy original on reconnect, and cross-character failed-state leakage removed; code committed, QA/Pages/iPhone acceptance pending; source EXE timing/rig still UNVERIFIED. | 2026-11-02 beta.39 branch: genuine complete OBS 0067/0068/0074 frame0/25..30 silhouettes independently reviewed; full original source-backed front cycle enabled for 3 actors (40→43 of 45 full source members), QA/Pages pending; exact 2002 action/FPS UNVERIFIED, 0086/0088 unreviewed.",
+      "current": "OBS 64/98종 281프레임; 원본 ID 연결, 34종과 정확한 행동/방향 매핑 미완료; 2026-11-02 all 45 known OBS full-37 source members downloaded and installed with 1665 original 2D sprites. Original roster remains incomplete (6 client members absent); original EXE direction/action table not decoded. | 2026-11-02 beta.37 branch: OBS full 37-frame network recovery now retries from legacy original on reconnect, and cross-character failed-state leakage removed; code committed, QA/Pages/iPhone acceptance pending; source EXE timing/rig still UNVERIFIED. | 2026-11-02 beta.39 branch: genuine complete OBS 0067/0068/0074 frame0/25..30 silhouettes independently reviewed; full original source-backed front cycle enabled for 3 actors (40→43 of 45 full source members), QA/Pages pending; exact 2002 action/FPS UNVERIFIED, 0086/0088 unreviewed. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: 97/98 distinct CHR owner mappings now have real original OBS/OBS2/OBS3 bodies (78 earlier + 19 recovered with 662 SHA-256 original PNGs). 0156 original source still absent. Verified all 19 load on Chromium game board; slots 0–12 source keys/ticks connected. Original hurt/victory and 13–16 roles/tick milliseconds still UNVERIFIED.",
       "acceptance": [
         "98종 실물 전신과 대기·이동·공격·피격·승리/방향별 프레임을 근거대로 구현해 CSS 대체물 제거"
       ],
@@ -1922,7 +1939,11 @@
         "apps/4leaf/rog/original/OBS/action-full/manifest.js",
         "apps/4leaf/rog/original/OBS/action-full/provenance.json",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/41320435231"
+        "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
+        "https://github.com/koith/browser-app-lab/pull/726",
+        "https://github.com/koith/browser-app-lab/pull/727",
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -1952,12 +1973,16 @@
       "title": "주사위 원본 모델·결과별 모션",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "원본 roll/eventRoll1 SPR 20프레임은 UI에 활용; 물리 주사위는 웹 대체물 | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending.",
+      "current": "원본 roll/eventRoll1 SPR 20프레임은 UI에 활용; 물리 주사위는 웹 대체물 | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Original own-palette D6 1171.obs and D4 1223.obs extra 63 PNG frames deployed. Source slot20 tumble -> slot12 impact -> confirmed engine final pips. Pixel/frame keys VERIFIED by source hashes and Chromium/WebKit. Fall/impact role, original timing, effect event 2125, slot13/3D native mesh unverified.",
       "acceptance": [
         "D4/D6 결과별 하늘 낙하/튕김/정지 원본 시퀀스를 리소스 근거로 구현하고 실제 결과와 일치"
       ],
       "evidence": [
-        "apps/4leaf/rog/dice-fall.js"
+        "apps/4leaf/rog/dice-fall.js",
+        "https://github.com/koith/browser-app-lab/pull/726",
+        "https://github.com/koith/browser-app-lab/pull/727",
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -2035,7 +2060,7 @@
       "title": "채팅 아바타 대신 실제 창세기전 체스맨과 행동",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "본체 일부 연결, 캐릭터별 원작 애니메이션 미해독; 기본 상대 c_0096의 OBS 원본 미확보로 거대 CSS 인형 표출하던 원인 확인. 기본 상대는 원본 OBS 있는 c_0045 등으로 교체, 미복원 모델은 원본 CardData 정지 초상화로 표시하고 본체 미복구 명시. 98종 전체 OBS 동작 복원 미완료.; 실제 iPhone QA: 기본 1P c_0078 -> OBS/1078.obs, 2P c_0045 -> OBS/1045.obs 원본 프레임 로드·표시 및 커다란 CSS 인형 0건. c_0096 같은 미복구 OBS는 카드 이미지로만 분명히 표시; 원본 34종 체스맨/액션 미복구 지속.; 실제 OBS 인접 시점 프레임 원본 픽셀 크기는 서로 다름; 단일 고정 크기는 잘못된 QA였음. 각 OBS 원본 프레임 metadata에 따라 검증하는 E2E 추가. 원본 행동/방향 포즈 표는 여전히 미복구.; 2026-11-02 45 exact 37-frame original sprite members recovered, SHA256-verified, only 40 visually front-reviewed adopted for full-frame playback. Offline missing new sprite URL gracefully reuses earlier authenticated OBS partial sprites (not a synthetic rig). | 2026-11-02 beta.37 branch: OBS full 37-frame network recovery now retries from legacy original on reconnect, and cross-character failed-state leakage removed; code committed, QA/Pages/iPhone acceptance pending; source EXE timing/rig still UNVERIFIED. | 2026-11-02 beta.39 branch: genuine complete OBS 0067/0068/0074 frame0/25..30 silhouettes independently reviewed; full original source-backed front cycle enabled for 3 actors (40→43 of 45 full source members), QA/Pages pending; exact 2002 action/FPS UNVERIFIED, 0086/0088 unreviewed.",
+      "current": "본체 일부 연결, 캐릭터별 원작 애니메이션 미해독; 기본 상대 c_0096의 OBS 원본 미확보로 거대 CSS 인형 표출하던 원인 확인. 기본 상대는 원본 OBS 있는 c_0045 등으로 교체, 미복원 모델은 원본 CardData 정지 초상화로 표시하고 본체 미복구 명시. 98종 전체 OBS 동작 복원 미완료.; 실제 iPhone QA: 기본 1P c_0078 -> OBS/1078.obs, 2P c_0045 -> OBS/1045.obs 원본 프레임 로드·표시 및 커다란 CSS 인형 0건. c_0096 같은 미복구 OBS는 카드 이미지로만 분명히 표시; 원본 34종 체스맨/액션 미복구 지속.; 실제 OBS 인접 시점 프레임 원본 픽셀 크기는 서로 다름; 단일 고정 크기는 잘못된 QA였음. 각 OBS 원본 프레임 metadata에 따라 검증하는 E2E 추가. 원본 행동/방향 포즈 표는 여전히 미복구.; 2026-11-02 45 exact 37-frame original sprite members recovered, SHA256-verified, only 40 visually front-reviewed adopted for full-frame playback. Offline missing new sprite URL gracefully reuses earlier authenticated OBS partial sprites (not a synthetic rig). | 2026-11-02 beta.37 branch: OBS full 37-frame network recovery now retries from legacy original on reconnect, and cross-character failed-state leakage removed; code committed, QA/Pages/iPhone acceptance pending; source EXE timing/rig still UNVERIFIED. | 2026-11-02 beta.39 branch: genuine complete OBS 0067/0068/0074 frame0/25..30 silhouettes independently reviewed; full original source-backed front cycle enabled for 3 actors (40→43 of 45 full source members), QA/Pages pending; exact 2002 action/FPS UNVERIFIED, 0086/0088 unreviewed. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Now 97/98 native CHR body source families connected on public beta.65, including 19 recovered original bodies. Original motion slots 0–12 decoded and used by original-card runtime, including 1057 reversed front/rear source. Complete original hurt/victory/13–16 and 0156 remain unfinished; true iPhone hardware acceptance unverified.",
       "acceptance": [
         "모든 캐릭터/상태에서 확인된 OBS 동작만 재생하고 나머지는 미복구로 투명하게 표시"
       ],
@@ -2051,7 +2076,11 @@
         "apps/4leaf/rog/tests/original-actor-census.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
         "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
-        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs",
+        "https://github.com/koith/browser-app-lab/pull/726",
+        "https://github.com/koith/browser-app-lab/pull/727",
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -2082,7 +2111,7 @@
       "title": "원작 주사위 눈별 낙하/튕김/정지 연출",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.; 사용자 스크린샷 흰색 입체 주사위는 웹 CSS 3D 폴백. 원본 roll.spr/eventRoll1.spr 20프레임은 ROLL UI 버튼이며 주사위 모델이 아님; 원본 D4/D6 MVE/EXE 메시/애니메이션 미복구. 원본 아닌 것을 원본으로 표시 금지. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending.",
+      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.; 사용자 스크린샷 흰색 입체 주사위는 웹 CSS 3D 폴백. 원본 roll.spr/eventRoll1.spr 20프레임은 ROLL UI 버튼이며 주사위 모델이 아님; 원본 D4/D6 MVE/EXE 메시/애니메이션 미복구. 원본 아닌 것을 원본으로 표시 금지. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Public beta.65 uses genuine SHA-pinned original 63 own-palette D4/D6 frames and verified 20/12 animation table through actual roll, then correct engine result eye; Chromium/WebKit source rolls accepted. Historical original bounce physics/3D mesh/exact tick ms/effect event 2125 still INFERRED or UNVERIFIED.",
       "acceptance": [
         "각 주사위의 최종 눈이 경기 엔진 판정과 일치, 실제 원본 연출 근거 확보"
       ],
@@ -2099,7 +2128,11 @@
         "apps/4leaf/rog/original/SourceSPR/manifest.json",
         "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
         "apps/4leaf/rog/original/OBS/embedded/dice-selected.js",
-        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
+        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs",
+        "https://github.com/koith/browser-app-lab/pull/726",
+        "https://github.com/koith/browser-app-lab/pull/727",
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -2397,7 +2430,7 @@
       "title": "원본 OBS 미복원 34종 해독",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.; 2026-10-20 2002 OBS.pak native 640-stride RLE 실제 역해독 완료: 원본 90 카드 멤버 모두 엄격 성공, 원본 PNG 616장/기존 별도 2종 13장 합쳐 92/98, 629 원본 프레임. 이전 미복구 28종 전부 진짜 OBS source pixel로 복구/게임 적용. 최종 6종 0091/0126/0129/0132/0157/0168은 SHA1 검증 2002 원본 OBS/OBS2/OBS3 삼중 검색에서 파일명이 존재하지 않음. 타 버전 공식 설치판·패치 확인 남음. ACT-01 전체 완료 아님.; 2026-10-20 통합: PR #152 squash main@bf39a52d94882d48073423a7a1e1f64c1f029c4c 원본 OBS 90/90 멤버 616개 PNG 원본 영상버퍼 인덱스 해독+초기 2/13=92/98 체스맨·629 source PNG 게임과 PWA에 실제 적용. 기존 미해독 28종(24 row+3 geometry+1 frameCount) 전부 source packet으로 해독. 원본 2002 OBS/OBS2/OBS3 전체 목록에도 없는 6개 0091/0126/0129/0132/0157/0168은 OBS fullbody 파일 미확보. CHR.pak에는 ID별 .chr 메타데이터가 있어도 OBS 전신 복구로 주장 금지. PR153 엄격 파일별 SHA/소스 offsets 실게임 수용검사 main@8f5d6df48438d2aac45d241a2a4c11b960a856e1 성공. 전체 98종·EXE 방향별 동작 표 여전히 미완료.; 2026-10-21 verified original ZIP 640-video source OBS.pak 90/90 reproduced with first continuous 0..7 packet samples plus indexes 10,18,25,30; bulk 616→945 verified PNG (+329), 2 original-only cards/13 retained, aggregate 92 bodies/958 source PNG. 6 absent IDs still unresolved; no invented models.; 2026-10-21 PR#156 original archived 640-stride decoder native frame 0..7 expansion +329 total 958 source PNG 92/98; PR#157 all 945 newly bulk samples checked SHA256, source frame geometry and native source origin, Chromium game + real duel. 6 missing original bodies remain source-absent from three 2002 OBS PAKs.; 2026-10-21 current decoded original source manifest 92/98 recovered, exact six missing member IDs 0091 철가면 / 0126 네리샤 / 0129 란 / 0132 루크 / 0157 강화병 / 0168 펜텀 유진; later alternate original client archive existence NOT VERIFIED. Other 80 full 0..7, 12 partial; no invented frames.; 2026-11-02 source-census expansion: all 45 inventoried 37-frame ORIGINAL OBS.pak members decoded fully (1665 frames, SHA256 per member/PNG, 0 failed). This does NOT locate the 6 OBS members absent in the archived 2002 client or prove original action mapping.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.; 2026-10-20 2002 OBS.pak native 640-stride RLE 실제 역해독 완료: 원본 90 카드 멤버 모두 엄격 성공, 원본 PNG 616장/기존 별도 2종 13장 합쳐 92/98, 629 원본 프레임. 이전 미복구 28종 전부 진짜 OBS source pixel로 복구/게임 적용. 최종 6종 0091/0126/0129/0132/0157/0168은 SHA1 검증 2002 원본 OBS/OBS2/OBS3 삼중 검색에서 파일명이 존재하지 않음. 타 버전 공식 설치판·패치 확인 남음. ACT-01 전체 완료 아님.; 2026-10-20 통합: PR #152 squash main@bf39a52d94882d48073423a7a1e1f64c1f029c4c 원본 OBS 90/90 멤버 616개 PNG 원본 영상버퍼 인덱스 해독+초기 2/13=92/98 체스맨·629 source PNG 게임과 PWA에 실제 적용. 기존 미해독 28종(24 row+3 geometry+1 frameCount) 전부 source packet으로 해독. 원본 2002 OBS/OBS2/OBS3 전체 목록에도 없는 6개 0091/0126/0129/0132/0157/0168은 OBS fullbody 파일 미확보. CHR.pak에는 ID별 .chr 메타데이터가 있어도 OBS 전신 복구로 주장 금지. PR153 엄격 파일별 SHA/소스 offsets 실게임 수용검사 main@8f5d6df48438d2aac45d241a2a4c11b960a856e1 성공. 전체 98종·EXE 방향별 동작 표 여전히 미완료.; 2026-10-21 verified original ZIP 640-video source OBS.pak 90/90 reproduced with first continuous 0..7 packet samples plus indexes 10,18,25,30; bulk 616→945 verified PNG (+329), 2 original-only cards/13 retained, aggregate 92 bodies/958 source PNG. 6 absent IDs still unresolved; no invented models.; 2026-10-21 PR#156 original archived 640-stride decoder native frame 0..7 expansion +329 total 958 source PNG 92/98; PR#157 all 945 newly bulk samples checked SHA256, source frame geometry and native source origin, Chromium game + real duel. 6 missing original bodies remain source-absent from three 2002 OBS PAKs.; 2026-10-21 current decoded original source manifest 92/98 recovered, exact six missing member IDs 0091 철가면 / 0126 네리샤 / 0129 란 / 0132 루크 / 0157 강화병 / 0168 펜텀 유진; later alternate original client archive existence NOT VERIFIED. Other 80 full 0..7, 12 partial; no invented frames.; 2026-11-02 source-census expansion: all 45 inventoried 37-frame ORIGINAL OBS.pak members decoded fully (1665 frames, SHA256 per member/PNG, 0 failed). This does NOT locate the 6 OBS members absent in the archived 2002 client or prove original action mapping. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: 2026-11-05 source CHR 97/98 bodies recovered/published with original source matching; 19 additional CHR bodies (662 PNG) verified, 0156 source body missing. Task stays in progress until last genuine source and full actor acceptance.",
       "acceptance": [
         "98개 ID 각각 원본 전신 PNG 1장 이상 SHA/오프셋 검증 또는 미확보 원인 기록; 가짜 CSS 체스맨 0건"
       ],
@@ -2428,7 +2461,11 @@
         "apps/4leaf/rog/tests/original-actor-census.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
         "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
-        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs",
+        "https://github.com/koith/browser-app-lab/pull/726",
+        "https://github.com/koith/browser-app-lab/pull/727",
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
       ],
       "evidenceLevel": "VERIFIED-92/98-2002-OBS-629-PNG-SHA-AND-NATIVE-640-STRIDE; 6 ABSENT IN THIS 2002 CLIENT; HISTORICAL ACTION-POSE MAP OPEN",
       "lastReviewed": "2026-11-02",
@@ -2473,7 +2510,7 @@
       "title": "캐릭터별 대기·이동·공격·피격·승리·방향 원본 프레임표",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 게임의 idle/walk/attack/hurt/victory는 현재 인덱스 추정; 출처 자료 281장만으로 98종 원본 타임라인 아님 | 구현 목표: EXE 동작테이블/OBS 프레임 배열과 원작 영상으로 포즈별 실제 방향·속도·루프 매핑; 2026-10-21 原 source OBS verified 640-video-RLE frames 0..7 contiguous decoded; deploy into real playable movement state, with actual signed per-frame source X/Y and original image bounds; expose dataset sourceFrameSequence/Provenance. FPS and EXE action/direction table not yet verified; labels explicitly WEB provisional. Original 92 body member count remains, original source frames rise from 629 to 958 (945 bulk + 13 initial) in isolated feature branch; browser movement gate added.; 2026-10-21 병합 및 QA 증거: PR#156 main@0d50e355b665dba0f395a7a767e32995f4902130 는 원본 958 OBS PNG(945 벌크+13 초기), 90종 중 80종이 원본 0..7 연속 프레임 전부 보유 (원본 전체 92종 중 80종), 실제 WebKit/Chromium game source playback/pose native coordinates 검증. PR#157 main@2f48d86729d77974ec439ea266b0ba4d20084917 는 과거 616 PNG 하드코딩 실패를 945 source-integrity 전체 파일 SHA 검사로 수정·PASS. 나머지 12종은 소스 인덱스 부족(전체 8프레임 부재)이며 임의 프레임 생성 금지. idle/walk/attack/hurt/victory는 소스 픽셀만 사용하지만 EXE 방향별 동작 인덱스와 FPS 미복원, ACT-03 완료 아님.; 2026-10-21 source-renderer integration follow-up (PR pending): native game-board actor and live winBattle podium actor previously diverged after an action event because poseByPlayer only targeted #board-pawns. Added explicit match-player ID to each actual duel chessman; propagate gameplay pose changes to both source-backed instances without changing OBS indexed bytes/FPS or inventing original EXE action mapping. Browser QA pending.; 2026-10-21 PR#159 MERGED main@03e433b3c9f8d26e9b8af2bfa22ed4831915fbdf: real Genesis match participant IDs propagated to independent winBattle podium OBS actor rendering. Board + battle action states synchronized to the same recovered source-frame indexes, preserving gameplay/dice/turn authority. Chromium native-battle browser QA passed before merge, and same SHA 958-OBS-source gameplay QA, Pages static deployment & Pages build succeeded. Real 2002 action-direction/FPS mapping and historical 3D contact still NOT verified; do not mark ACT task done.; 2026-10-21 next small source integration slice: after real combat rolls resolve, drive the actual winner's OBS victory and loser's OBS hurt pose (rather than only initial attacker/defender roles), using recovered native OBS images on real board, keeper excluded. Browser QA gates both sides against live numeric dice results, authentic frame-index manifest and idle reset. PR/QA pending; original 2002 pose table still unverified.; 2026-10-21 follow-up PR161 MERGED main@330621b17ff207d832d449419910b1833e2720cb: real resolved battle winner's source OBS victory + loser's hurt playback, correctly scoped to true match participants, native indexed sprites and post-pose idle reset. Live Chromium original winBattle combat source-index checks PR gate PASS, main smoke PASS, Pages build/deploy PASS. Historical exact EXE source action mapping/FPS/pivots still UNVERIFIED and task remains IN_PROGRESS.; 2026-10-21 PR163 code branch: 80 native complete 0..7 retain full walking cycle; original incomplete 12 stop repeating truncated source as full walk (actual first original frame still shown, WEB motion coverage exposed); before combat score resolution, defending actor no longer falsely plays hurt. True win/loss actions remain result-driven. QA/merge/deploy pending; native EXE mapping/FPS/contact not proven.; 2026-10-21 PR163 MERGED main@75880af6 v0.86.0-beta.4; prior false pre-score defender hurt and fabricated incomplete 12 source walking corrected, 80 complete 0..7 retained. PR gate original board/OBS/Chromium/WebKit/Chat/ledger PASS; post-main OBS frame 39555370075 / smoke 39555370229 PASS, Pages deploy 39555370173 + platform 39555369354 SUCCESS. Original EXE action/FPS/mesh contact still UNVERIFIED; not completed.; 2026-10-21 v0.86.0-beta.5 PR pending: real DMP movement step loop no longer restarts genuine 0..7 source frame clock per 60ms turn step; full recovered 80 native sequences may play during actual dice turns, incomplete 12 still static. Real roll regression + screenshots pending CI. Historical EXE action FPS/direction/foot pivot still OPEN.; 2026-10-21 PR165 MERGED at cff0c2d2 v0.86.0-beta.5 PWA v92: physical actual rolled movement displays all 8 verified 0..7 native OBS packets instead of resetting index on every 38–60ms DMP step. Chromium native OBS 39558708001 PASS, Chromium/WebKit release 39558707938 PASS, main 39559102284 PASS, Pages 39559102213 + build 39559102777 SUCCESS. Original action direction/FPS still UNKNOWN; ACT IN_PROGRESS.; 2026-11-01 original OBS.pak 1040/1046/1078 fully decoded and installed as 3×37=111 original 2D animation frames with SHA256 per PNG. Contact sheets independently reviewed for left-profile 14-17 and strike silhouettes 31/33/35. Browser movement and attack sequences use genuine source pixels, but EXE direction table, exact action semantics, victory/hurt/death and FPS remain UNVERIFIED.; 2026-11-02 original 37-frame source census expanded from 3 to 45 actors (1665 PNGs, each source SHA256 confirmed). 40 previously front-reviewed actor IDs use their complete genuine 25..30 gait frames; 5 direction-unreviewed IDs retain legacy partial playback. Real historic FPS and hit/victory/death table remain UNVERIFIED. | 2026-11-02 beta.39 branch: genuine complete OBS 0067/0068/0074 frame0/25..30 silhouettes independently reviewed; full original source-backed front cycle enabled for 3 actors (40→43 of 45 full source members), QA/Pages pending; exact 2002 action/FPS UNVERIFIED, 0086/0088 unreviewed.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 게임의 idle/walk/attack/hurt/victory는 현재 인덱스 추정; 출처 자료 281장만으로 98종 원본 타임라인 아님 | 구현 목표: EXE 동작테이블/OBS 프레임 배열과 원작 영상으로 포즈별 실제 방향·속도·루프 매핑; 2026-10-21 原 source OBS verified 640-video-RLE frames 0..7 contiguous decoded; deploy into real playable movement state, with actual signed per-frame source X/Y and original image bounds; expose dataset sourceFrameSequence/Provenance. FPS and EXE action/direction table not yet verified; labels explicitly WEB provisional. Original 92 body member count remains, original source frames rise from 629 to 958 (945 bulk + 13 initial) in isolated feature branch; browser movement gate added.; 2026-10-21 병합 및 QA 증거: PR#156 main@0d50e355b665dba0f395a7a767e32995f4902130 는 원본 958 OBS PNG(945 벌크+13 초기), 90종 중 80종이 원본 0..7 연속 프레임 전부 보유 (원본 전체 92종 중 80종), 실제 WebKit/Chromium game source playback/pose native coordinates 검증. PR#157 main@2f48d86729d77974ec439ea266b0ba4d20084917 는 과거 616 PNG 하드코딩 실패를 945 source-integrity 전체 파일 SHA 검사로 수정·PASS. 나머지 12종은 소스 인덱스 부족(전체 8프레임 부재)이며 임의 프레임 생성 금지. idle/walk/attack/hurt/victory는 소스 픽셀만 사용하지만 EXE 방향별 동작 인덱스와 FPS 미복원, ACT-03 완료 아님.; 2026-10-21 source-renderer integration follow-up (PR pending): native game-board actor and live winBattle podium actor previously diverged after an action event because poseByPlayer only targeted #board-pawns. Added explicit match-player ID to each actual duel chessman; propagate gameplay pose changes to both source-backed instances without changing OBS indexed bytes/FPS or inventing original EXE action mapping. Browser QA pending.; 2026-10-21 PR#159 MERGED main@03e433b3c9f8d26e9b8af2bfa22ed4831915fbdf: real Genesis match participant IDs propagated to independent winBattle podium OBS actor rendering. Board + battle action states synchronized to the same recovered source-frame indexes, preserving gameplay/dice/turn authority. Chromium native-battle browser QA passed before merge, and same SHA 958-OBS-source gameplay QA, Pages static deployment & Pages build succeeded. Real 2002 action-direction/FPS mapping and historical 3D contact still NOT verified; do not mark ACT task done.; 2026-10-21 next small source integration slice: after real combat rolls resolve, drive the actual winner's OBS victory and loser's OBS hurt pose (rather than only initial attacker/defender roles), using recovered native OBS images on real board, keeper excluded. Browser QA gates both sides against live numeric dice results, authentic frame-index manifest and idle reset. PR/QA pending; original 2002 pose table still unverified.; 2026-10-21 follow-up PR161 MERGED main@330621b17ff207d832d449419910b1833e2720cb: real resolved battle winner's source OBS victory + loser's hurt playback, correctly scoped to true match participants, native indexed sprites and post-pose idle reset. Live Chromium original winBattle combat source-index checks PR gate PASS, main smoke PASS, Pages build/deploy PASS. Historical exact EXE source action mapping/FPS/pivots still UNVERIFIED and task remains IN_PROGRESS.; 2026-10-21 PR163 code branch: 80 native complete 0..7 retain full walking cycle; original incomplete 12 stop repeating truncated source as full walk (actual first original frame still shown, WEB motion coverage exposed); before combat score resolution, defending actor no longer falsely plays hurt. True win/loss actions remain result-driven. QA/merge/deploy pending; native EXE mapping/FPS/contact not proven.; 2026-10-21 PR163 MERGED main@75880af6 v0.86.0-beta.4; prior false pre-score defender hurt and fabricated incomplete 12 source walking corrected, 80 complete 0..7 retained. PR gate original board/OBS/Chromium/WebKit/Chat/ledger PASS; post-main OBS frame 39555370075 / smoke 39555370229 PASS, Pages deploy 39555370173 + platform 39555369354 SUCCESS. Original EXE action/FPS/mesh contact still UNVERIFIED; not completed.; 2026-10-21 v0.86.0-beta.5 PR pending: real DMP movement step loop no longer restarts genuine 0..7 source frame clock per 60ms turn step; full recovered 80 native sequences may play during actual dice turns, incomplete 12 still static. Real roll regression + screenshots pending CI. Historical EXE action FPS/direction/foot pivot still OPEN.; 2026-10-21 PR165 MERGED at cff0c2d2 v0.86.0-beta.5 PWA v92: physical actual rolled movement displays all 8 verified 0..7 native OBS packets instead of resetting index on every 38–60ms DMP step. Chromium native OBS 39558708001 PASS, Chromium/WebKit release 39558707938 PASS, main 39559102284 PASS, Pages 39559102213 + build 39559102777 SUCCESS. Original action direction/FPS still UNKNOWN; ACT IN_PROGRESS.; 2026-11-01 original OBS.pak 1040/1046/1078 fully decoded and installed as 3×37=111 original 2D animation frames with SHA256 per PNG. Contact sheets independently reviewed for left-profile 14-17 and strike silhouettes 31/33/35. Browser movement and attack sequences use genuine source pixels, but EXE direction table, exact action semantics, victory/hurt/death and FPS remain UNVERIFIED.; 2026-11-02 original 37-frame source census expanded from 3 to 45 actors (1665 PNGs, each source SHA256 confirmed). 40 previously front-reviewed actor IDs use their complete genuine 25..30 gait frames; 5 direction-unreviewed IDs retain legacy partial playback. Real historic FPS and hit/victory/death table remain UNVERIFIED. | 2026-11-02 beta.39 branch: genuine complete OBS 0067/0068/0074 frame0/25..30 silhouettes independently reviewed; full original source-backed front cycle enabled for 3 actors (40→43 of 45 full source members), QA/Pages pending; exact 2002 action/FPS UNVERIFIED, 0086/0088 unreviewed. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: 2026-11-05 97 original-body source slot 0-12 action key/frame/tick order in active game; 1057 front/rear direction as source; 96/97 nonempty duel lunges, OBS2 0125 empty slot static hold. Exact ms, unnamed 13–16/effects and hurt/victory historical semantics remain unverified.",
       "acceptance": [
         "모든 복구 캐릭터·행동별 검증된 원본 프레임만 재생, 미검증 자세를 원본이라고 표기하지 않음"
       ],
@@ -2522,7 +2559,11 @@
         "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
         "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
         "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
-        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs",
+        "https://github.com/koith/browser-app-lab/pull/726",
+        "https://github.com/koith/browser-app-lab/pull/727",
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
       ],
       "evidenceLevel": "VERIFIED-92-SOURCE-OBS-BODIES/958-PNG/80-EIGHT-CONTIGUOUS-SOURCE-SETS/REAL-CHROMIUM-ANIMATION; HISTORICAL-DIRECTION-POSE-FPS-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -2763,7 +2804,7 @@
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.; 2026-11-01 source OBS 1223 D4 face sprites 1..4 are wired into browser move roll with CSS geometry as image-load failure fallback. Source member sprite frames do NOT establish native MVE collision/bounce timing; this task remains in_progress. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.; 2026-11-01 source OBS 1223 D4 face sprites 1..4 are wired into browser move roll with CSS geometry as image-load failure fallback. Source member sprite frames do NOT establish native MVE collision/bounce timing; this task remains in_progress. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: 2026-11-05 original 1171/1223 extra block 63 own-palette frames active: slot20 tumble, slot12 bounce/impact, engine verified D6/D4 rest face; archive source record keys/ticks and PNG SHA authenticated. Roles and original EXE physics/time not verified.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
@@ -2782,7 +2823,11 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39714139407",
         "https://github.com/koith/browser-app-lab/actions/runs/39714139416",
         "https://github.com/koith/browser-app-lab/actions/runs/39714489431",
-        "apps/4leaf/rog/tests/dice-fall.cjs"
+        "apps/4leaf/rog/tests/dice-fall.cjs",
+        "https://github.com/koith/browser-app-lab/pull/726",
+        "https://github.com/koith/browser-app-lab/pull/727",
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -8981,6 +9026,93 @@
         "P0-RELEASE"
       ],
       "details": "State receiving guest sends state-accepted or state-rejected based on existing durable-save gate return value. Host shows distinct synchronization notices; real two-peer Chromium test covers rejected invalid snapshot and synthetic accepted-return ack transport. Existing separate actual guest storage retry QA retained. PR/CI/Pages verification pending."
+    },
+    {
+      "seq": 418,
+      "date": "2026-11-05",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "R12 original CHR 97 and real source D4/D6, 6-room chat visible improvements: accepted for real public release."
+    },
+    {
+      "seq": 419,
+      "date": "2026-11-05",
+      "type": "ORIGINAL_SOURCE_ASSETS_IMPORTED_MAIN",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "ACT-03",
+        "DIE-02"
+      ],
+      "details": "PR #726, main 09311c564831b2ff620be4ffcbe5127d730c7034: 19 real CHR body source families, 662 SHA-matched original PNGs, 63 own-palette original D4/D6 PNGs, eight source mapping evidence JSONs and two dice table/manifest blobs. Git blob SHAs verified against Claude R12. Resource import alone did not finish runtime or original scene."
+    },
+    {
+      "seq": 420,
+      "date": "2026-11-05",
+      "type": "SIX_ROOM_CHAT_VISIBLE_CI_MERGED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-05"
+      ],
+      "details": "PR #750, main e0770c3ed4fee4f6eaafbe18c4e32386d639c01f: original MainFrame toolbar placement, 6 room seat coordinates, nickname collision mitigation, N 명 count; 9/9 related GitHub Actions pass; public social-chat.js and chatroom-native-panels.js source previously verified. Original screenshot fidelity still partial."
+    },
+    {
+      "seq": 421,
+      "date": "2026-11-05",
+      "type": "NATIVE_ACTOR_DICE_RUNTIME_CI_MERGED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "ACT-03",
+        "DIE-02",
+        "P0-RELEASE"
+      ],
+      "details": "PR #727, main d10ad1ccf0fb6a9ad52b785dc997dcf40e8d4d52: original 97 body CHR mappings including newly recovered 19; 13 slots 0-12 with native source tick/frame order; D6/D4 slot20 tumble -> slot12 impact -> engine verified final pip; Chromium SHA verifies 662 PNGs and visible 19 recovered bodies, roll shows native source frames; 13/13 PR workflow success including WebKit. Beta.65/PWA v152 merged. PUBLIC PAGES delivery not yet verified when this ledger event was written; do not mark full original fidelity complete. Missing body 0156, effect 2125, slots 13-16, exact tick lengths, 26 DMP and battle viewpoint remain."
+    },
+    {
+      "seq": 422,
+      "date": "2026-11-05",
+      "type": "R12_ORIGINAL_ACTOR_DICE_PUBLIC_SOURCE_VERIFIED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-RELEASE",
+        "ACT-03",
+        "DIE-02"
+      ],
+      "details": "After PR #727 13/13 CI success and merge SHA d10ad1ccf0fb6a9ad52b785dc997dcf40e8d4d52, actual public https://koith.github.io/browser-app-lab/apps/4leaf/rog/ served app-version.json beta.65/PWA v152, sw.js v152, dice-fall.js with OBS slot20-fall+slot12-impact, chr-body-source-map.js recovered identity cache, public original/OBS/referenced/chr-bodies-manifest.js (19 native bodies/662 frames), original/OBS/dice-blocks/manifest.js (63 source PNG frames), native-card-action-sequences.js (97 CHR bodies). This is PUBLIC SOURCE verification plus matching SHA browser CI, NOT an iPhone physical-device or 2002 visual complete-fidelity certification."
+    },
+    {
+      "seq": 423,
+      "date": "2026-11-05",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "ACT-01",
+        "ACT-03",
+        "DIE-02"
+      ],
+      "details": "Updated stale progress strings in seven task entries with PUBLIC beta65 verified 97/98 CHR bodies, 19 new recovered originals/662 SHA frames, original 63 D4/D6 frames, CI 13/13, residual 0156, unverified historical slot13–16/tick ms and mesh. Original task status and all 422 previous events remain unchanged."
     }
   ],
   "restorationPriority": {
