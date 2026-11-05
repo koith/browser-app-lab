@@ -14,6 +14,7 @@ COPY apps/demand-research/target_archive_api.py /app/target_archive_api.py
 COPY apps/demand-research/target_account_archive.py /app/target_account_archive.py
 COPY apps/demand-research/target_account_enrichment.py /app/target_account_enrichment.py
 COPY apps/demand-research/target_account_viewer.py /app/target_account_viewer.py
+COPY apps/demand-research/verified_bundle_reader.py /app/verified_bundle_reader.py
 COPY apps/demand-research/account_archive_view.html /app/account_archive_view.html
 COPY apps/demand-research/account_archive_view.js /app/account_archive_view.js
 COPY apps/demand-research/account_archive_view.css /app/account_archive_view.css
