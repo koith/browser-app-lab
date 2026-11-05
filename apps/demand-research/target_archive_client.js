@@ -19,8 +19,153 @@
   viewer.style.marginLeft="14px";
   viewer.hidden=true;
   workflow.after(viewer);
+  const panel=$("targetArchivePanel");
+  const jobStatus=document.createElement("div");
+  jobStatus.id="targetArchiveJobStatus";
+  jobStatus.className="target-archive-job-status";
+  jobStatus.hidden=true;jobStatus.setAttribute("role","status");
+  jobStatus.setAttribute("aria-live","polite");
+  const library=document.createElement("section");
+  library.id="targetArchiveLibrary";
+  library.className="target-archive-library";
+  library.hidden=true;
+  const libraryTitle=document.createElement("h4");
+  libraryTitle.textContent="저장된 계정";
+  const libraryAll=document.createElement("a");
+  libraryAll.href="/account-archive";
+  libraryAll.textContent="보관함 전체 보기";
+  libraryAll.className="target-archive-view-link";
+  const libraryRows=document.createElement("div");
+  libraryRows.id="targetArchiveLibraryRows";
+  library.append(libraryTitle,libraryAll,libraryRows);
+  panel.append(jobStatus,library);
   let gatewayReady=false;
   let submitting=false;
+  let currentRun=null;
+  let pollTimer=null;
+
+  const JOB_KEY="intersection:private-archive-job:v1";
+  function resumeReceipt(){
+    try{
+      const value=JSON.parse(sessionStorage.getItem(JOB_KEY)||"null");
+      if(value&&Number.isSafeInteger(value.run_id)&&value.run_id>0&&
+         typeof value.receipt==="string"&&value.receipt.length<900)
+        return value;
+    }catch{/* Expired or tampered browser-only job receipt. */}
+    return null;
+  }
+  function saveReceipt(value){
+    try{
+      if(value)sessionStorage.setItem(JOB_KEY,JSON.stringify(value));
+      else sessionStorage.removeItem(JOB_KEY);
+    }catch{/* Private browsing may disable sessionStorage. */}
+  }
+  function clearPoll(){
+    if(pollTimer!==null){window.clearTimeout(pollTimer);pollTimer=null;}
+  }
+  function appendViewerLink(container,accountKey,text){
+    if(!/^(bluesky|mastodon)-[a-f0-9]{40}$/.test(accountKey))return;
+    const a=document.createElement("a");
+    a.href="/account-archive?account="+encodeURIComponent(accountKey);
+    a.textContent=text||"게시글 보기";
+    a.className="target-archive-view-link";
+    container.append(a);
+  }
+  function showJob(text,kind,accountKey){
+    jobStatus.replaceChildren();
+    const label=document.createElement("span");
+    label.textContent=text;jobStatus.append(label);
+    jobStatus.dataset.state=kind||"running";
+    jobStatus.hidden=false;
+    if(accountKey)appendViewerLink(jobStatus,accountKey,"저장된 자료 열기");
+  }
+  async function loadLibrary(){
+    if(!gatewayReady)return;
+    library.hidden=false;
+    libraryRows.textContent="테라박스에서 저장된 계정을 확인 중…";
+    try{
+      const response=await fetch("/api/account-archives",{
+        credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
+      if(!response.ok)throw Error("archive library unavailable");
+      const data=await response.json();
+      const accounts=Array.isArray(data.accounts)?data.accounts:[];
+      libraryRows.replaceChildren();
+      for(const item of accounts.slice(0,8)){
+        if(!/^(bluesky|mastodon)-[a-f0-9]{40}$/.test(String(item.key||"")))continue;
+        const row=document.createElement("div");
+        row.className="target-archive-library-row";
+        const label=document.createElement("span");
+        const source=item.platform==="bluesky"?"Bluesky":"Mastodon";
+        // Only the provider's validated HTTPS public profile URL is shown.
+        let profile="";
+        try{
+          const url=new URL(String(item.profile_url||""));
+          if(url.protocol==="https:"&&!url.username&&!url.password)
+            profile=url.hostname+url.pathname;
+        }catch{}
+        label.textContent=source+" · "+(profile||"공개 계정")+
+          (item.backup_kind==="terabox_zip_sha_verified"
+             ?" · 보관 글 "+Number(item.posts_verified_in_bundle||0)+"건":"");
+        row.append(label);
+        appendViewerLink(row,item.key,"보기");
+        libraryRows.append(row);
+      }
+      if(!libraryRows.children.length){
+        const empty=document.createElement("p");
+        empty.textContent="아직 저장·검증된 계정이 없습니다.";
+        libraryRows.append(empty);
+      }
+      library.hidden=false;
+    }catch{
+      libraryRows.textContent="보관 목록을 확인하지 못했습니다. ‘보관함 전체 보기’로 다시 시도할 수 있습니다.";
+    }
+  }
+  async function pollJob(){
+    clearPoll();
+    if(!gatewayReady||!currentRun)return;
+    const job=currentRun;
+    try{
+      const response=await fetch("/api/target-archive/jobs/"+
+        encodeURIComponent(String(job.run_id))+"?receipt="+
+        encodeURIComponent(job.receipt),{
+          credentials:"same-origin",cache:"no-store",
+          headers:{Accept:"application/json"}
+        });
+      if(!response.ok)throw Error("진행 상태를 읽지 못했습니다 (HTTP "+response.status+")");
+      const result=await response.json();
+      if(currentRun!==job)return;
+      const count=Number(result.posts||0);
+      switch(result.state){
+        case "QUEUED":
+          showJob("백업 작업 접수 완료 · 실행 대기 중","queued");break;
+        case "RUNNING":
+          showJob("백업 진행 중 · 공개 자료를 수집하고 테라박스에 저장하고 있습니다.","running");break;
+        case "VERIFYING_STORAGE":
+          showJob("파일 전송 완료 여부를 확인 중 · 테라박스에서 원본을 다시 읽고 있습니다.","verifying");break;
+        case "REMOTE_VERIFIED":
+        case "PARTIAL_BACKUP":
+          showJob((result.state==="REMOTE_VERIFIED"
+            ?"테라박스 백업 완료 · 게시글 "+count+"건 · 원본 "+
+               Number(result.objects||0)+"개 검증"
+            :"백업된 자료 일부 검증됨 · 게시글 "+count+
+              "건 · 수집되지 않은 구간이 남아 있습니다."),"verified",
+            String(result.account_key||""));
+          saveReceipt(null);currentRun=null;
+          await loadLibrary();
+          return;
+        case "FAILED":
+          showJob("백업 실패 · 기존 보관 자료는 유지됩니다. 다시 실행할 수 있습니다.","failed");
+          saveReceipt(null);currentRun=null;
+          return;
+        default:
+          showJob("백업 진행 상태를 확인 중입니다.","running");
+      }
+    }catch{
+      if(currentRun!==job)return;
+      showJob("진행 상태 확인에 실패했습니다. 잠시 뒤 자동으로 다시 확인합니다.","verifying");
+    }
+    if(currentRun===job)pollTimer=window.setTimeout(pollJob,6000);
+  }
 
   function publicHost(host){
     return /^[A-Za-z0-9.-]{3,253}$/.test(host)&&!host.includes("..")&&
@@ -96,11 +241,20 @@
         credentials:"same-origin",cache:"no-store"});
       if(!response.ok)throw new Error("private gateway unavailable");
       const result=await response.json();
-      viewer.hidden=false; // authenticated read-only viewer needs no write token
+      viewer.hidden=false; // signed private session can read the archive viewer
       gatewayReady=Boolean(result.enabled);
       message.textContent=gatewayReady
-        ?"개인용 보관 서버 연결됨 · 백업 요청 시 GitHub Actions 작업을 접수합니다. 원격 저장 완료는 별도 확인됩니다."
-        :"보관 서버의 작업 실행 권한이 없습니다. GitHub Actions에서 직접 실행할 수 있습니다.";
+        ?"연결됨 · 계정 주소를 입력하고 백업을 누르면 이 화면에서 진행 상태를 확인할 수 있습니다."
+        :"비공개 보관함은 열 수 있지만 새 백업 요청 권한이 설정되지 않았습니다.";
+      if(gatewayReady){
+        void loadLibrary();
+        const remembered=resumeReceipt();
+        if(remembered){
+          currentRun=remembered;
+          showJob("이전에 요청한 백업의 진행 상태를 확인 중…","running");
+          void pollJob();
+        }
+      }
     }catch{
       viewer.hidden=true;
       gatewayReady=false;
@@ -146,10 +300,15 @@
         throw new Error("백업 작업 요청 실패 (HTTP "+response.status+")");
       }
       const result=await response.json();
-      if(result.state!=="QUEUED_NOT_VERIFIED"||result.accepted!==true)
-        throw new Error("서버 작업 응답을 확인하지 못했습니다.");
-      message.textContent="백업 작업 접수됨(대기 중). 테라박스 원격 저장 성공은 아직 확인되지 않았습니다. 기존 계정 데이터는 유지됩니다.";
-      account.value="";
+      if(result.state!=="QUEUED_NOT_VERIFIED"||result.accepted!==true||
+         !Number.isSafeInteger(result.run_id)||typeof result.receipt!=="string")
+        throw new Error("백업 작업 번호를 확인하지 못했습니다.");
+      currentRun={run_id:result.run_id,receipt:result.receipt,
+                  platform:platform.value,account:value};
+      saveReceipt(currentRun);
+      message.textContent="백업 작업이 접수됐습니다. 완료되면 이 화면에서 저장된 자료를 열 수 있습니다.";
+      showJob("백업 요청 접수 · 실행 순서를 확인 중…","queued");
+      void pollJob();
     }catch(error){
       message.textContent=String(error.message||"아카이브 요청 실패")+
         " · 필요한 경우 GitHub Actions 직접 실행 링크를 이용하세요.";
@@ -158,6 +317,9 @@
     }finally{
       submitting=false;refreshButton();
     }
+  });
+  window.addEventListener("intersection:private-session-ready",()=>{
+    void check();
   });
   refreshButton();
   void check();

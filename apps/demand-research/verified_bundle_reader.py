@@ -63,6 +63,12 @@ class VerifiedBundle:
                     raise BundleInvalid("invalid original source ZIP manifest")
                 self.source_state=manifest.get("capture_state")
                 self.recorded_at=manifest.get("recorded_at")
+                self.selected_platform=manifest.get("selected_platform")
+                self.selected_account=manifest.get("selected_account")
+                if (self.selected_platform not in ("bluesky","mastodon")
+                        or not isinstance(self.selected_account,str)
+                        or not 3<=len(self.selected_account)<=260):
+                    raise BundleInvalid("invalid reviewed public account in ZIP")
                 entries=manifest["objects"]
                 stated={item.get("key") for item in entries if isinstance(item,dict)}
                 if stated!=set(names)-{"bundle-manifest.json"}:
@@ -163,7 +169,7 @@ def names_from_cloud(root):
     return sorted((name for name in raw.decode("utf-8","replace").splitlines()
                    if BUNDLE_RE.fullmatch(name)),
                   key=lambda value:int(BUNDLE_RE.fullmatch(value).group(2)),
-                  reverse=True)[:150]
+                  reverse=True)[:20000]
 
 
 def load_verified_bundle(root,name):
@@ -186,10 +192,17 @@ def load_verified_bundle(root,name):
 
 
 def available_bundles(root):
-    # A bad newer backup must not erase a previously SHA-verified snapshot.
+    # Read one latest verified ZIP for each account, instead of downloading
+    # every old 17MB snapshot whenever the browser opens the saved-account list.
+    verified_prefixes=set()
     for name in names_from_cloud(root):
+        account_prefix=BUNDLE_RE.fullmatch(name).group(1)
+        if account_prefix in verified_prefixes:
+            continue
         try:
-            yield load_verified_bundle(root,name)
+            bundle=load_verified_bundle(root,name)
+            verified_prefixes.add(account_prefix)
+            yield bundle
         except (BundleInvalid,RuntimeError,ValueError):
             continue
 

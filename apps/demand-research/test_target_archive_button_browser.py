@@ -30,6 +30,7 @@ def verify(browser_type,kind,width,height):
             errors=[]
             status_queries=[]
             dispatched=[]
+            job_reads=[]
             clipboard_events=[]
             page.on("pageerror",lambda error:errors.append(str(error)))
             page.on("console",lambda entry:clipboard_events.append(entry.text) if entry.text.startswith("QA_COPIED:") else None)
@@ -71,7 +72,23 @@ Object.defineProperty(navigator,"clipboard",{
                         "intent":route.request.headers.get("x-archive-intent")
                     })
                     route.fulfill(status=202,content_type="application/json",
-                                  body='{"accepted":true,"state":"QUEUED_NOT_VERIFIED"}')
+                                  body=json.dumps({"accepted":True,"state":"QUEUED_NOT_VERIFIED",
+                                                   "run_id":41999000001,
+                                                   "receipt":"synthetic-signed-receipt-for-browser-QA"}))
+                elif path.startswith("/api/target-archive/jobs/41999000001"):
+                    job_reads.append(route.request.url)
+                    route.fulfill(status=200,content_type="application/json",
+                                  body=json.dumps({"run_id":41999000001,
+                                    "state":"REMOTE_VERIFIED","remote_verified":True,
+                                    "posts":6,"objects":42,
+                                    "account_key":"bluesky-"+"a"*40}))
+                elif path=="/api/account-archives":
+                    route.fulfill(status=200,content_type="application/json",
+                                  body=json.dumps({"accounts":[{
+                                    "key":"bluesky-"+"a"*40,"platform":"bluesky",
+                                    "profile_url":"https://bsky.app/profile/qa-example.bsky.social",
+                                    "backup_kind":"terabox_zip_sha_verified",
+                                    "posts_verified_in_bundle":6}]}))
                 else:
                     route.abort()
             page.route("**/*",route_it)
@@ -80,7 +97,7 @@ Object.defineProperty(navigator,"clipboard",{
             page.wait_for_function("""() => {
               const status=document.getElementById("targetArchiveStatus").textContent;
               return status.includes("공개 페이지")||
-                     status.includes("개인용 보관 서버 연결됨");
+                     status.includes("연결됨 · 계정 주소");
             }""")
             assert len(status_queries)==1
             button=page.locator("#targetArchiveSubmit")
@@ -99,19 +116,24 @@ Object.defineProperty(navigator,"clipboard",{
             if private:
                 assert button.inner_text()=="테라박스 백업 시작"
                 button.click()
-                page.wait_for_function(
-                    """() => document.getElementById("targetArchiveStatus").textContent.includes("대기 중")""")
+                page.locator("#targetArchiveJobStatus[data-state=verified]").wait_for(
+                    state="visible",timeout=15000)
                 assert dispatched==[{
                     "payload":{"platform":"bluesky","account":
                                "https://bsky.app/profile/qa-example.bsky.social"},
                     "intent":"selected-public-account-v1"
                 }]
-                assert "원격 저장 성공은 아직 확인되지" in page.locator(
-                    "#targetArchiveStatus").inner_text()
-                assert page.locator("#targetArchiveAccount").input_value()==""
-                assert button.is_enabled(),"cleared account should explain missing input"
-                button.click()
-                assert "먼저 공개 SNS 계정" in page.locator("#targetArchiveStatus").inner_text()
+                assert "게시글 6건" in page.locator("#targetArchiveJobStatus").inner_text()
+                assert page.locator("#targetArchiveAccount").input_value()==(
+                    "https://bsky.app/profile/qa-example.bsky.social")
+                assert len(job_reads)>=1
+                assert "receipt=synthetic-signed-receipt" in job_reads[0]
+                page.locator("#targetArchiveLibrary").wait_for(
+                    state="visible",timeout=10000)
+                saved=page.locator("#targetArchiveLibraryRows a").first
+                assert saved.get_attribute("href")==(
+                    "/account-archive?account=bluesky-"+"a"*40)
+                assert button.is_enabled(),"verified backup should not lock the button"
             else:
                 assert button.inner_text()=="GitHub에서 백업 실행"
                 page.locator("#targetArchivePlatform").select_option("mastodon")
