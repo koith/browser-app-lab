@@ -63,6 +63,12 @@ class VerifiedBundle:
                     raise BundleInvalid("invalid original source ZIP manifest")
                 self.source_state=manifest.get("capture_state")
                 self.recorded_at=manifest.get("recorded_at")
+                self.selected_platform=manifest.get("selected_platform")
+                self.selected_account=manifest.get("selected_account")
+                if (self.selected_platform not in ("bluesky","mastodon")
+                        or not isinstance(self.selected_account,str)
+                        or not 3<=len(self.selected_account)<=260):
+                    raise BundleInvalid("invalid reviewed public account in ZIP")
                 entries=manifest["objects"]
                 stated={item.get("key") for item in entries if isinstance(item,dict)}
                 if stated!=set(names)-{"bundle-manifest.json"}:
