@@ -19,7 +19,7 @@ from urllib.parse import urlsplit
 
 from target_account_archive import profile_input
 
-WORKFLOW = "intersection-target-account-archive.yml"
+WORKFLOW = "intersection-target-account-bundle.yml"
 _REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _last_request = None
 _lock = asyncio.Lock()
