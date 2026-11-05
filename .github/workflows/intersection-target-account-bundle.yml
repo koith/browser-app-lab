@@ -39,7 +39,10 @@ permissions:
 jobs:
   private-public-account-bundle:
     concurrency:
-      group: intersection-private-maintenance-production
+      # ZIP writes are immutable run-ID objects; do not queue behind
+      # the unrelated per-post capture journal rebuild workflow.
+      # Keep all account ZIP jobs serialized with each other.
+      group: intersection-target-zip-production
       cancel-in-progress: false
       queue: max
     runs-on: ubuntu-24.04
