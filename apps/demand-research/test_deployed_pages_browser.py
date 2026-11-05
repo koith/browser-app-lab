@@ -23,7 +23,7 @@ URL = os.getenv(
 )
 FILES = ("index.html", "post_activity_ranking.js", "public_video_trends.js",
          "target_archive_client.js", "account_auto_analysis.js", "account_watch.js",
-         "account_index_client.js", "account_group_client.js")
+         "account_index_client.js", "account_group_client.js", "archive_tab.js")
 EXPECTED = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
             for name in FILES}
 
@@ -80,6 +80,13 @@ def inspect_browser(browser_type, label, width, height):
                              timeout=45000)
         assert response and response.status == 200, "deployed HTML unavailable"
         assert page.locator("#viewPosts").count() == 1, "posts navigation missing"
+        assert page.locator("#viewArchives").count()==1, "backup library navigation missing"
+        page.locator("#viewArchives").click()
+        assert page.locator("#archivesView").is_visible()
+        page.locator("#archiveHubStatus").get_by_text(
+            "비공개 원본",exact=False).wait_for(timeout=12000)
+        assert page.locator("#archiveHubFrame").get_attribute("src") is None
+        page.locator("#viewPosts").click()
         assert page.locator("#feed").count() == 1, "feed missing"
         assert page.locator("#activityRankingRows").count() == 1, "rank UI missing"
         assert page.locator("#activityRankingDialog").count() == 1, "rank dialog missing"
