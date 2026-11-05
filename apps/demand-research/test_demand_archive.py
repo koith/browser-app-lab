@@ -54,6 +54,13 @@ class FakeCloud(CloudArchive):
             key = args[2].split("archive:DemandResearch/", 1)[1]
             self.objects[key] = Path(args[1]).read_bytes()
             return b""
+        if op == "copy":
+            assert args[2].rstrip("/") == "archive:DemandResearch"
+            for path in Path(args[1]).iterdir():
+                if path.is_file():
+                    if "--ignore-existing" not in args or path.name not in self.objects:
+                        self.objects[path.name] = path.read_bytes()
+            return b""
         raise AssertionError("unrecognized remote operation")
 
 
