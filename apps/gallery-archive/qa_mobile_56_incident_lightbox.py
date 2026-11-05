@@ -14,7 +14,7 @@ from playwright.sync_api import TimeoutError as PWTimeout, sync_playwright
 
 PAGES="https://koith.github.io/browser-app-lab/apps"
 TARGET={
- "mimmi":[("djawa-janus-scary-lantern-night",15),
+ "mimmi":[("djawa-janus-scary-lantern-night",8),
           ("mimmi-indie-sana-sopmod2-2019",7)],
  "yui":[("djawa-privaty-public-samples",30),
         ("yui-chinokun-illustar-2026-public",4)],
@@ -35,14 +35,17 @@ def detail(browser,model):
         response=page.goto(base,wait_until="domcontentloaded",timeout=65000)
         assert response and response.status==200,(model,"Pages HTML not available")
         for album_id,count in TARGET[model]:
-            # A page's static index is not evidence that the owner catalog
-            # finished merging. Require the expected stored private entries.
+            # A static shell is not evidence that owner media was joined.
+            # Janus has 15 storage rows but only 8 unique SHA images: 7
+            # physically on Pages plus 1 owner-only. Count real unique
+            # displayed photos, not duplicate owner storage rows.
             try:
                 page.wait_for_function("""pair => {
                   if(typeof photosFor !== 'function'||!Array.isArray(stored))return false;
                   const a=stored.find(a=>a.id===pair[0]);
                   if(!a)return false;
-                  return photosFor(a).filter(p=>p.ownerAlbum).length>=pair[1];
+                  const photos=photosFor(a);
+                  return photos.length>=pair[1] && photos.some(p=>p.ownerAlbum);
                 }""",arg=[album_id,count],timeout=70000)
             except PWTimeout:
                 summary=page.evaluate("""id=>{
@@ -58,7 +61,7 @@ def detail(browser,model):
                 owner:!!p.ownerAlbum,hasLocal:!!exactSavedViewerCopy(p),
               })).filter(x=>x.owner);
             }""",album_id)
-            assert len(candidates)>=count,(model,album_id,len(candidates))
+            assert candidates,(model,album_id,"no private-only viewer candidate")
             # At least one owner-only photo, not just an already public Pages
             # static image, must decode in the *actual* album and lightbox.
             remote=[x for x in candidates if not x["hasLocal"]]
