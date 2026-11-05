@@ -68,7 +68,7 @@ def inspect_browser(browser_type, label, width, height):
                     and parsed.path.startswith("/browser-app-lab/apps/demand-research/")):
                 route.continue_()
             elif (parsed.scheme == "https" and parsed.hostname=="github.com"
-                    and parsed.path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-archive.yml"):
+                    and parsed.path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-bundle.yml"):
                 route.fulfill(status=200,content_type="text/html",
                               body='<html><body><p id="workflow-opened">Owner GitHub workflow</p></body></html>')
             else:
@@ -99,11 +99,11 @@ def inspect_browser(browser_type, label, width, height):
             "https://bsky.app/profile/synthetic-qa.bsky.social")
         assert page.locator("#targetArchiveWorkflow").get_attribute("href")==(
             "https://github.com/koith/browser-app-lab/actions/workflows/"
-            "intersection-target-account-archive.yml")
+            "intersection-target-account-bundle.yml")
         page.locator("#targetArchiveSubmit").click()
         page.wait_for_url(
             "https://github.com/koith/browser-app-lab/actions/workflows/"
-            "intersection-target-account-archive.yml",timeout=15000)
+            "intersection-target-account-bundle.yml",timeout=15000)
         assert page.locator("#workflow-opened").is_visible()
         print("PAGES_BACKUP_BUTTON_ENABLED_PASS:",label,
               "empty_input_feedback=PASS same_tab_mobile_navigation=PASS private_dispatch=NOT_CLAIMED")
