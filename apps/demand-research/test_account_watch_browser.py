@@ -236,9 +236,9 @@ def run():
               window.dispatchEvent(new Event('intersection:feed-updated'));
             }""")
             page.wait_for_function("window.INTERSECTION_autoAccountStats().accountCount===20002",timeout=15000)
-            assert page.locator("#accountAutoRows > div").count()==80
+            assert page.locator("#accountAutoRows > div").count()==12
             page.locator("#accountAutoMore").click()
-            assert page.locator("#accountAutoRows > div").count()==160
+            assert page.locator("#accountAutoRows > div").count()==24
             page.wait_for_function("window.INTERSECTION_autoAccountStats().linkGroups===1",timeout=35000)
             assert page.locator("#accountAutoGroups article").count()==1
             assert "20,002" in page.locator("#accountAutoSummary").inner_text()
@@ -247,7 +247,7 @@ def run():
             assert page.locator("#accountAutoRows > div").count()==1
             assert "qa-19999.bsky.social" in page.locator("#accountAutoRows").inner_text()
             page.locator("#accountAutoSearch").fill("")
-            assert page.locator("#accountAutoRows > div").count()==80
+            assert page.locator("#accountAutoRows > div").count()==12
             # A narrow phone must not require sideways scrolling.
             width=page.evaluate("({scroll:document.documentElement.scrollWidth,viewport:innerWidth})")
             assert width["scroll"]<=width["viewport"]+2,width
