@@ -197,7 +197,7 @@ def run():
             assert int(page.locator("#accountMetricRepeat").text_content())>=2
             assert page.locator("#accountMetricCommerce").text_content()!=""
 
-            assert "계정 수를 사람 수로 간주하지" in page.locator(".account-analysis-note").inner_text()
+            assert "SNS 계정 수는 사람 수가 아닙니다" in page.locator(".account-analysis-note").text_content()
             # Add a public Mastodon account with a private status fixture: only
             # explicitly public statuses may appear in analysis.
             page.locator("#accountProfileInput").fill("https://mastodon.social/@qa")
