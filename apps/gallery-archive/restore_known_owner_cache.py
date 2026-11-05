@@ -111,9 +111,10 @@ def verified_file(remote, key, env, maximum):
         raise OwnerReadUnavailable("Invalid existing owner file")
     model="mimmi" if remote==REMOTE["mimmi"] else (
         "yui" if remote==REMOTE["yui"] else "unknown")
+    # Unknown provider rejects and provider_unavailable are not proof of a
+    # transient network error; never retry those access decisions.
     transient={"transport_timeout","retryable_http_failure",
-               "retryable_transport_failure","remote_read_empty",
-               "remote_read_rejected","provider_unavailable"}
+               "retryable_transport_failure","remote_read_empty"}
     pauses=(7,20,55)
     for attempt in range(4):
         with tempfile.TemporaryDirectory(prefix="owner-rescue-") as directory:
