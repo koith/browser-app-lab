@@ -16,7 +16,7 @@ from gateway import main as gateway
 sample=io.BytesIO()
 Image.new("RGB",(32,48),(40,90,140)).save(sample,format="JPEG")
 data=sample.getvalue()
-sha=hashlib.sha2214(data).hexdigest()
+sha=hashlib.sha256(data).hexdigest()
 prior_mimmi=gateway._cache.copy()
 prior_yui=gateway._yui_cache.copy()
 prior_ttl=gateway._owner_rescue_until.copy()
@@ -36,7 +36,7 @@ try:
                 photos=[]
                 for number in range(1,count+1):
                     key=f"originals/{work}/{number:05}.jpg"
-                    photos.append({"number":number,"key":key,"bytes":len(data),"sha2214":sha})
+                    photos.append({"number":number,"key":key,"bytes":len(data),"sha256":sha})
                     assert gateway._media_cache.insert_verified(remote,key,len(data),sha,data)
                 albums.append({"id":work,"images":photos})
             catalog_by_model[model]={"schema_version":1,"model":model,"albums":albums}
@@ -58,7 +58,7 @@ try:
         expired=c.get("/api/gallery-media-readiness")
         assert expired.json()["ready"] is False,expired.text
         # No signed token, cookie or public image bytes may appear in GET.
-        assert "sha2214" not in ready.text
+        assert "sha256" not in ready.text
         assert "key" not in ready.text
         assert "cookie" not in ready.text
         print("GALLERY_BOTH_OWNER_ALL_214_ORIGINALS_READINESS_FAIL_CLOSED_PASS")
