@@ -1,0 +1,22 @@
+name: 4LEAF R15 original OBS native duel effect source contract
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/native-duel-effects.js'
+      - 'apps/4leaf/rog/native-duel-effects.css'
+      - 'apps/4leaf/rog/tests/r15-native-effects-source-contract.cjs'
+      - '.github/workflows/rog-r15-native-effect-runtime.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-event:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the original effect runtime module syntax
+        run: node --check apps/4leaf/rog/native-duel-effects.js
+      - name: Exercise real R15 source event contract with synthetic browser DOM
+        run: node apps/4leaf/rog/tests/r15-native-effects-source-contract.cjs
