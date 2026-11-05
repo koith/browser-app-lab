@@ -1762,6 +1762,9 @@ async function loadCloud(reset){
         history.replaceState(null,"",location.pathname+location.search);
         let result=await fetch("/api/activate",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",cache:"no-store",body:JSON.stringify({token:key})});
         if(!result.ok)throw Error("전용 주소가 유효하지 않습니다.");
+        // The backup panel may have checked auth before /api/activate ran.
+        // Reconnect its private controls after the signed cookie is installed.
+        window.dispatchEvent(new Event("intersection:private-session-ready"));
       }
     }
     let params=new URLSearchParams({limit:"60",offset:String(cloudOffset),q:$("archiveQuery").value.trim(),platform:$("archivePlatform").value,media_status:$("archiveMediaStatus").value});
