@@ -1,4 +1,4 @@
-name: 4LEAF R14 published Pages actual-game acceptance
+name: 4LEAF published Pages actual-game acceptance
 on:
   push:
     branches: [main]
@@ -24,7 +24,7 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install '${{ matrix.engine }}' --with-deps
-      - name: Check published beta67/PWA154 and actual WorldMap gameplay
+      - name: Check published main release/PWA and actual WorldMap gameplay
         env:
           FOURLEAF_BROWSER: '${{ matrix.engine }}'
         run: node .github/scripts/check-4leaf-r14-public.cjs
