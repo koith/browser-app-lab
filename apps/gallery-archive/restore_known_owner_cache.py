@@ -24,6 +24,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "mimmi-gallery" / "cloud" / "gateway"))
 from cookie_format import cookie_header
+from qa_existing_owner_exact_file import read_existing
 
 ORIGIN="https://mimmi-private-gallery-free.onrender.com"
 AUDIENCE="gallery-archive-terabox-sync"
@@ -95,25 +96,25 @@ def send_verified_photo_with_catalog_recovery(model, body, token, headers, catal
 
 
 def verified_file(remote, key, env, maximum):
+    """Read via the existing proven same-account cat/copyto classifier.
+
+    The reader only changes methods on the established 400141 cat result.
+    Explicit provider denial (403/31326) stays rejected.
+    """
     if (not isinstance(key,str) or key.startswith("/")
-            or ".." in key.split("/") or "\\\\" in key or
-            not re.fullmatch("[a-zA-Z0-9/_ .-]+",key)):
+            or ".." in key.split("/") or "\\\\" in key
+            or not re.fullmatch("[a-zA-Z0-9/_ .-]+",key)):
         raise OwnerReadUnavailable("Invalid existing owner file")
-    with tempfile.TemporaryDirectory(prefix="owner-rescue-") as work:
-        destination=Path(work)/"owner-file"
-        with destination.open("wb") as file:
-            try:
-                process=subprocess.run(
-                    ["rclone","cat",remote+"/"+key,
-                     "--timeout=45s","--retries=1"],
-                    stdout=file,stderr=subprocess.DEVNULL,
-                    timeout=65,check=False,env=env)
-            except subprocess.TimeoutExpired as error:
-                raise OwnerReadUnavailable("Existing read timed out") from error
-        if process.returncode or not destination.is_file():
-            raise OwnerReadUnavailable("Authenticated original unavailable")
-        if not 1 <= destination.stat().st_size <= maximum:
-            raise OwnerReadUnavailable("Existing original size invalid")
+    with tempfile.TemporaryDirectory(prefix="owner-rescue-") as directory:
+        destination=Path(directory)/"verified-existing"
+        ok, reason=read_existing(remote,key,destination,env)
+        if not ok:
+            model="mimmi" if remote==REMOTE["mimmi"] else (
+                "yui" if remote==REMOTE["yui"] else "unknown")
+            print("OWNER_EXISTING_READ_UNAVAILABLE",model,reason,flush=True)
+            raise OwnerReadUnavailable("Existing owner file read failed")
+        if not destination.is_file() or not 1 <= destination.stat().st_size <= maximum:
+            raise OwnerReadUnavailable("Existing owner size rejected")
         return destination.read_bytes()
 
 
