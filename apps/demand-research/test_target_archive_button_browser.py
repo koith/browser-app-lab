@@ -48,7 +48,7 @@ Object.defineProperty(navigator,"clipboard",{
                 parsed=urlsplit(route.request.url)
                 path=parsed.path
                 if (parsed.hostname=="github.com" and
-                    path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-archive.yml"):
+                    path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-bundle.yml"):
                     route.fulfill(status=200,content_type="text/html",
                                   body='<html><body><p id="workflow-reached">Owner workflow</p></body></html>')
                 elif path=="/browser-app-lab/apps/demand-research/":
@@ -127,7 +127,7 @@ Object.defineProperty(navigator,"clipboard",{
                 button.click()
                 page.wait_for_url(
                     "https://github.com/koith/browser-app-lab/actions/workflows/"
-                    "intersection-target-account-archive.yml",timeout=12000)
+                    "intersection-target-account-bundle.yml",timeout=12000)
                 assert page.locator("#workflow-reached").is_visible()
                 assert clipboard_events==[
                     "QA_COPIED:https://bsky.app/profile/qa-example.bsky.social"]
