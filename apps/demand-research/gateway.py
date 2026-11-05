@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import AsyncIterator
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse, Response
 from datetime import datetime, timezone, timedelta
 from social_sources import TERMS, ROUTES, request_one_page
 import account_index
@@ -119,6 +119,33 @@ async def viewer():
     return FileResponse(VIEW_FILE,media_type="text/html; charset=utf-8",
         headers={"Cache-Control":"no-store","Referrer-Policy":"no-referrer",
                  "X-Robots-Tag":"noindex, nofollow","X-Content-Type-Options":"nosniff"})
+
+# Separate read-only viewer of the five-minute keyword capture journal.
+# Never serve archived originals on GitHub Pages or without a signed session.
+AUTO_DIR=VIEW_FILE.parent
+AUTO_FILES={"auto_archive_view.js":"application/javascript",
+            "auto_archive_view.css":"text/css"}
+AUTO_CSP=("default-src 'none'; script-src 'self'; style-src 'self'; "
+          "img-src 'self' data:; media-src 'self'; connect-src 'self'; "
+          "base-uri 'none'; form-action 'none'; frame-ancestors 'self'")
+AUTO_HEADERS={"Cache-Control":"private, no-store","Referrer-Policy":"no-referrer",
+              "X-Robots-Tag":"noindex, nofollow",
+              "X-Content-Type-Options":"nosniff"}
+@app.get("/auto-archive",include_in_schema=False)
+async def auto_archive_page(request:Request):
+    check_auth(request)
+    return FileResponse(AUTO_DIR/"auto_archive_view.html",
+                        media_type="text/html; charset=utf-8",
+                        headers={**AUTO_HEADERS,"Content-Security-Policy":AUTO_CSP})
+
+@app.get("/auto-archive/{asset_name}",include_in_schema=False)
+async def auto_archive_asset(request:Request,asset_name:str):
+    check_auth(request)
+    mime=AUTO_FILES.get(asset_name)
+    if not mime:
+        raise HTTPException(404,"Unsupported archive asset")
+    return FileResponse(AUTO_DIR/asset_name,media_type=mime,
+                        headers=AUTO_HEADERS)
 
 @app.post("/api/activate",include_in_schema=False)
 async def activate(request:Request):
@@ -397,6 +424,15 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
     if post is None or index>=len(post["media"]):raise HTTPException(404,"Not found")
     item=post["media"][index]
     total=item["bytes"]
+    # Metadata checks alone do not certify the original bytes actually
+    # returned by this backend. Fail closed if a stale/corrupt TeraBox read
+    # doesn't match the SHA256 originally committed to the private journal.
+    if not 0<total<=80_000_000:
+        raise HTTPException(413,"Original media exceeds safe readback size")
+    original=await asyncio.to_thread(
+        CloudArchive(REMOTE).read_verified,item["key"],item["sha256"],cap=total+1)
+    if original is None or len(original)!=total:
+        raise HTTPException(502,"Original media remote checksum unverified")
     start,end,status=0,total-1,200
     raw=request.headers.get("range","")
     if raw:
@@ -413,7 +449,7 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
     headers={"Accept-Ranges":"bytes","Content-Length":str(end-start+1),
              "Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"}
     if status==206: headers["Content-Range"]="bytes "+str(start)+"-"+str(end)+"/"+str(total)
-    return StreamingResponse(remote_stream(item["key"],start,end-start+1),status_code=status,media_type=item["mime"],headers=headers)
+    return Response(original[start:end+1],status_code=status,media_type=item["mime"],headers=headers)
 
 # Read-only SNS-style account archive must be registered BEFORE the
 # single-segment script catchall. All routes check the private signed session.
