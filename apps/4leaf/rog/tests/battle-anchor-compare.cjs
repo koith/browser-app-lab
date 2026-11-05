@@ -45,6 +45,9 @@ const TOLERANCE=3;
    &&document.querySelectorAll('#battle-visual .battle-visual-die').length>=4
    &&[...document.querySelectorAll('#battle-visual .battle-die-original')].every(i=>i.complete&&i.naturalWidth>0),
    null,{timeout:8000});
+  // R14: compare genuine original die sprites AFTER their fall and impact,
+  // not a transient animation key. The geometric assertions are unchanged.
+  await page.waitForFunction(()=>document.querySelector('#battle-visual')?.dataset.battleDice!=='rolling',null,{timeout:8000});
   await page.waitForTimeout(400);
   const live=await page.evaluate(()=>{
    const box=e=>e.getBoundingClientRect();
