@@ -8,15 +8,20 @@ import argparse
 from qa_prerelease_real_owner_gateway import TARGET, run
 
 INCIDENT_ALBUMS = {
-    "mimmi": ("djawa-janus-scary-lantern-night", 15),
-    "yui": ("djawa-privaty-public-samples", 30),
+    "mimmi": (("v2ph-actor-a8n8n85a", 61),
+              ("djawa-janus-scary-lantern-night", 15)),
+    "yui": (("teddy-bear97", 97),
+            ("djawa-privaty-public-samples", 30)),
 }
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("--model",choices=("mimmi","yui"),required=True)
     args=parser.parse_args()
-    TARGET[args.model]=INCIDENT_ALBUMS[args.model]
-    run(args.model)
+    count=0
+    for album_id, expected in INCIDENT_ALBUMS[args.model]:
+        TARGET[args.model]=(album_id,expected)
+        run(args.model)
+        count+=expected
     print("NEW_USER_SCREENSHOT_REAL_EXISTING_OWNER_ALL_PHOTOS_PASS",args.model,
-          INCIDENT_ALBUMS[args.model][1],flush=True)
+          count,flush=True)
