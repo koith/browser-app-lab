@@ -106,8 +106,35 @@ async function waitForPublishedVersion(){
   assert.ok(hittable,'result button must be completely visible on iPhone landscape');
   await press(button);
   await page.waitForFunction(()=>!document.getElementById('battle-visual'),null,{timeout:10000});
-  assert.deepEqual(errors,[]);assert.deepEqual(invalid,[]);
-  console.log('R14_PUBLIC_REAL_GAME_PASS',JSON.stringify({browser:engine.name(),release:meta.version,pwa:meta.pwaCache,scene,hittable}));
+  assert.deepEqual(errors,[],'public runtime must not throw');
+  // GitHub Pages occasionally responds with transient 503 for a source PNG
+  // while its own original chessman retry subsequently succeeds. Do not
+  // suppress a permanently missing file: retry it and verify the PNG magic.
+  const unrecovered=[];
+  for(const item of [...new Set(invalid)]){
+   const [statusText,...parts]=item.split(' '),url=parts.join(' ');
+   const status=Number(statusText),asset=/\.png(?:[?#]|$)/i.test(url);
+   if(!asset||![429,502,503,504].includes(status)){
+    unrecovered.push(item);continue;
+   }
+   let valid=false,last='not-checked';
+   for(let attempt=1;attempt<=4;attempt++){
+    try{
+     const res=await context.request.get(url+(url.includes('?')?'&':'?')+
+      'original_png_retry='+attempt+'_'+Date.now(),{timeout:15000});
+     const body=await res.body();
+     const header=body.subarray(0,8).toString('hex');
+     valid=res.status()===200&&header==='89504e470d0a1a0a';
+     last=res.status()+' '+header;
+     if(valid)break;
+    }catch(e){last=String(e)}
+    await sleep(600*attempt);
+   }
+   if(!valid)unrecovered.push(item+'; retry='+last);
+   else console.log('PUBLIC_ORIGINAL_PNG_REVALIDATED',url);
+  }
+  assert.deepEqual(unrecovered,[],'public game must load every original source PNG');
+  console.log('R14_PUBLIC_REAL_GAME_PASS',JSON.stringify({browser:engine.name(),release:meta.version,pwa:meta.pwaCache,scene,hittable,transientAssetErrors:invalid.length}));
  }catch(e){await page.screenshot({path:'4leaf-r14-public-fail-'+engine.name()+'.png',fullPage:true}).catch(()=>{});throw e}
  finally{await browser.close()}
 })().catch(e=>{console.error('R14_PUBLIC_REAL_GAME_FAILURE',e.stack||e);process.exitCode=1});
