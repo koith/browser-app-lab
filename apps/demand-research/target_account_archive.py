@@ -18,6 +18,7 @@ import os
 import re
 import socket
 from pathlib import Path
+import tempfile
 import time
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, build_opener, HTTPRedirectHandler
@@ -333,11 +334,55 @@ class AccountCloudArchive(CloudArchive):
         # source JSON, post/media, profile, graph, thread, entry, checkpoint.
         # No provider nested-folder mkdir/copyto requirement.
         shallow=self.shared_record_key(key)
-        written=self.shared.write_immutable(shallow,data)
-        verified=self.shared.read_verified(shallow,expected,cap=cap)
-        if verified!=data:
-            raise RuntimeError("private account record SHA readback failed")
-        return written
+        return self._write_flat_verified(shallow,data,expected,cap)
+
+    def _write_flat_verified(self,shallow,data,expected,cap):
+        """Only SHA-verified primary-domain writes; failover switches method.
+
+        Live synthetic TeraBox probe #41981153740 verified primary copyto,
+        copy, and rcat at root. Alternate-domain and nested uploads returned
+        success WITHOUT remote SHA readback. Avoid both paths for new records.
+        Never overwrite an existing different immutable object.
+        """
+        target=self.shared.remote+"/"+shallow
+        for domain in (None,"https://nephobox.com"):
+            seen=self.shared.read(shallow,cap=cap,optional=True,domain=domain)
+            if seen is not None:
+                if sha256(seen)!=expected:
+                    raise RuntimeError("immutable flat account checksum conflict")
+                return False
+        errors=[]
+        with tempfile.TemporaryDirectory(prefix="int-account-flat-") as folder:
+            source=Path(folder)/shallow
+            source.write_bytes(data)
+            # Both methods were independently proven on real private TeraBox.
+            # Switch method instead of retrying one broken provider path.
+            commands=(
+                ["copyto",str(source),target,"--ignore-existing",
+                 "--timeout","15s","--retries","1"],
+                ["copy",folder,self.shared.remote,"--ignore-existing",
+                 "--timeout","15s","--retries","1"],
+                ["copyto",str(source),target,"--ignore-existing",
+                 "--timeout","15s","--retries","1"],
+                ["copy",folder,self.shared.remote,"--ignore-existing",
+                 "--timeout","15s","--retries","1"],
+            )
+            for attempt,args in enumerate(commands):
+                if attempt:
+                    time.sleep((0.5,1.5,3.0)[attempt-1])
+                try:
+                    self.shared.command(args,timeout=85)
+                except RuntimeError as error:
+                    # No raw stderr, paths, tokens or source records in logs.
+                    errors.append(str(error).split(" (",1)[-1][:32])
+                actual=self.shared.read_verified(shallow,expected,cap=cap)
+                if actual==data:
+                    return True
+                if actual is not None:
+                    raise RuntimeError("immutable flat account remote checksum conflict")
+        # No false-green backup result when even the alternate proven method
+        # could not read back the exact original bytes.
+        raise RuntimeError("private account flat upload unverified after method fallback")
 
 
 def account_cloud(root, profile):
