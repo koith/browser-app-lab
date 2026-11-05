@@ -1,6 +1,6 @@
 {
   "candidateSelection": {
-    "max": 28,
+    "max": 65,
     "members": [
       "1096",
       "1097",
@@ -29,7 +29,44 @@
       "1229",
       "1231",
       "1233",
-      "1234"
+      "1234",
+      "1235",
+      "1236",
+      "1237",
+      "1268",
+      "1270",
+      "1272",
+      "1275",
+      "1277",
+      "2093",
+      "2095",
+      "2096",
+      "2097",
+      "2098",
+      "2100",
+      "2101",
+      "2102",
+      "2103",
+      "2104",
+      "2105",
+      "2106",
+      "2107",
+      "2108",
+      "2109",
+      "2110",
+      "2111",
+      "2112",
+      "2113",
+      "2114",
+      "2115",
+      "2116",
+      "2117",
+      "2159",
+      "2186",
+      "2187",
+      "2188",
+      "2196",
+      "2197"
     ],
     "seeds": [
       "1096",
@@ -937,6 +974,66 @@
         "12": 1
       }
     },
+    "1235": {
+      "cards": [
+        "0144"
+      ],
+      "count": 1,
+      "frames": 15,
+      "originalMember": "obs2.pak/1235.obs",
+      "pngBytes": 12632,
+      "slots": {
+        "12": 1
+      },
+      "sourceBytesSHA256": "295218f2ffc47c9f0b97cfdfa19bf183200f9ebaf91bee0876f968d0b8b472e7",
+      "sourceCandidates": [
+        "obs2.pak"
+      ],
+      "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
+      "types": {
+        "12": 1
+      }
+    },
+    "1236": {
+      "cards": [
+        "0146"
+      ],
+      "count": 1,
+      "frames": 18,
+      "originalMember": "obs2.pak/1236.obs",
+      "pngBytes": 30911,
+      "slots": {
+        "12": 1
+      },
+      "sourceBytesSHA256": "c60de7e5e7f998cad327bef69bd540243703100b51d7c380e122ee7be0286767",
+      "sourceCandidates": [
+        "obs2.pak"
+      ],
+      "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
+      "types": {
+        "18": 1
+      }
+    },
+    "1237": {
+      "cards": [
+        "0141"
+      ],
+      "count": 1,
+      "frames": 18,
+      "originalMember": "obs2.pak/1237.obs",
+      "pngBytes": 23999,
+      "slots": {
+        "12": 1
+      },
+      "sourceBytesSHA256": "f875fb251ccff8bf37c272532802996134b86f429d9cde4c324955687117eabd",
+      "sourceCandidates": [
+        "obs2.pak"
+      ],
+      "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
+      "types": {
+        "33": 1
+      }
+    },
     "1238": {
       "cards": [
         "0147"
@@ -980,6 +1077,26 @@
         "40": 2
       }
     },
+    "1268": {
+      "cards": [
+        "0157"
+      ],
+      "count": 1,
+      "frames": 4,
+      "originalMember": "obs3.pak/1268.obs",
+      "pngBytes": 3514,
+      "slots": {
+        "12": 1
+      },
+      "sourceBytesSHA256": "1807db34c5bee8a9221bfc23f5545d00b75de7b5f6fd85387ea568cfbce943dc",
+      "sourceCandidates": [
+        "obs3.pak"
+      ],
+      "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
+      "types": {
+        "12": 1
+      }
+    },
     "1269": {
       "cards": [
         "0162"
@@ -1001,6 +1118,26 @@
       "types": {
         "4": 2,
         "14": 1
+      }
+    },
+    "1270": {
+      "cards": [
+        "0168"
+      ],
+      "count": 1,
+      "frames": 9,
+      "originalMember": "obs3.pak/1270.obs",
+      "pngBytes": 7850,
+      "slots": {
+        "12": 1
+      },
+      "sourceBytesSHA256": "0908fa0f0f9dd4f92d9b353bcefd00c8183a609829b9f9350ca9bf039113ce0c",
+      "sourceCandidates": [
+        "obs3.pak"
+      ],
+      "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
+      "types": {
+        "30": 1
       }
     },
     "1271": {
@@ -1025,6 +1162,26 @@
       "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
       "types": {
         "18": 5
+      }
+    },
+    "1272": {
+      "cards": [
+        "0165"
+      ],
+      "count": 1,
+      "frames": 5,
+      "originalMember": "obs3.pak/1272.obs",
+      "pngBytes": 7148,
+      "slots": {
+        "12": 1
+      },
+      "sourceBytesSHA256": "fca87d7470e014399d0e101e4eb74160c74c5d33ca1714de613df6fca6b8114d",
+      "sourceCandidates": [
+        "obs3.pak"
+      ],
+      "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
+      "types": {
+        "30": 1
       }
     },
     "1273": {
@@ -1070,6 +1227,481 @@
       "types": {
         "15": 4
       }
+    },
+    "1275": {
+      "cards": [
+        "0163"
+      ],
+      "count": 1,
+      "frames": 15,
+      "originalMember": "obs3.pak/1275.obs",
+      "pngBytes": 22999,
+      "slots": {
+        "12": 1
+      },
+      "sourceBytesSHA256": "534c1317bac019618760324bd7d3619c960073a0ad0fd885b32bff7b1f6c6b07",
+      "sourceCandidates": [
+        "obs3.pak"
+      ],
+      "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
+      "types": {
+        "45": 1
+      }
+    },
+    "1277": {
+      "cards": [
+        "0171"
+      ],
+      "count": 1,
+      "frames": 8,
+      "originalMember": "obs3.pak/1277.obs",
+      "pngBytes": 20859,
+      "slots": {
+        "12": 1
+      },
+      "sourceBytesSHA256": "16e34ea9830c1c3b8a28c4b7bf16d68f421cb0a6f2cf17631cdd876a562e72cb",
+      "sourceCandidates": [
+        "obs3.pak"
+      ],
+      "status": "SOURCE-PIXELS-VERIFIED/ROLE-UNVERIFIED",
+      "types": {
+        "24": 1
+      }
+    },
+    "2093": {
+      "cards": [
+        "0060"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "120": 1
+      }
+    },
+    "2095": {
+      "cards": [
+        "0059"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2096": {
+      "cards": [
+        "0077"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2097": {
+      "cards": [
+        "0078"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "120": 1
+      }
+    },
+    "2098": {
+      "cards": [
+        "0084"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "90": 1
+      }
+    },
+    "2100": {
+      "cards": [
+        "0088"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2101": {
+      "cards": [
+        "0051"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2102": {
+      "cards": [
+        "0044"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "90": 1
+      }
+    },
+    "2103": {
+      "cards": [
+        "0042"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "150": 1
+      }
+    },
+    "2104": {
+      "cards": [
+        "0040"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2105": {
+      "cards": [
+        "0082"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "120": 1
+      }
+    },
+    "2106": {
+      "cards": [
+        "0089"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "90": 1
+      }
+    },
+    "2107": {
+      "cards": [
+        "0063"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "150": 1
+      }
+    },
+    "2108": {
+      "cards": [
+        "0062"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2109": {
+      "cards": [
+        "0067"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "90": 1
+      }
+    },
+    "2110": {
+      "cards": [
+        "0061"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "30": 1
+      }
+    },
+    "2111": {
+      "cards": [
+        "0066"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2112": {
+      "cards": [
+        "0071"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "120": 1
+      }
+    },
+    "2113": {
+      "cards": [
+        "0053"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "90": 1
+      }
+    },
+    "2114": {
+      "cards": [
+        "0090"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "90": 1
+      }
+    },
+    "2115": {
+      "cards": [
+        "0091"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "120": 1
+      }
+    },
+    "2116": {
+      "cards": [
+        "0076"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "90": 1
+      }
+    },
+    "2117": {
+      "cards": [
+        "0087"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "16": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "30": 1
+      }
+    },
+    "2159": {
+      "cards": [
+        "0158"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "12": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "30": 1
+      }
+    },
+    "2186": {
+      "cards": [
+        "0125"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "12": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "30": 1
+      }
+    },
+    "2187": {
+      "cards": [
+        "0126"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "12": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "30": 1
+      }
+    },
+    "2188": {
+      "cards": [
+        "0130"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "12": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2196": {
+      "cards": [
+        "0171"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "12": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "60": 1
+      }
+    },
+    "2197": {
+      "cards": [
+        "0171"
+      ],
+      "count": 1,
+      "frames": 0,
+      "slots": {
+        "12": 1
+      },
+      "sourceCandidates": [],
+      "status": "MISSING",
+      "types": {
+        "30": 1
+      }
     }
   },
   "generatedFrom": "SHA1-verified 2002 client, no Windows code executed",
@@ -1101,11 +1733,41 @@
   "runtimeDataSHA256": "827ced25bb9df9984866189f09b2de5cf1e6e8644d6cbb922d918d7f765c1d02",
   "semanticRole": "UNVERIFIED; OBS source pixels and original event tuple VERIFIED",
   "summary": {
-    "candidateMembers": 28,
-    "decodedMembers": 28,
+    "candidateMembers": 65,
+    "decodedMembers": 36,
     "decoderFailedMembers": [],
-    "missingMembers": [],
-    "outputPNGBytes": 1575524,
-    "sourceFrames": 420
+    "missingMembers": [
+      "2093",
+      "2095",
+      "2096",
+      "2097",
+      "2098",
+      "2100",
+      "2101",
+      "2102",
+      "2103",
+      "2104",
+      "2105",
+      "2106",
+      "2107",
+      "2108",
+      "2109",
+      "2110",
+      "2111",
+      "2112",
+      "2113",
+      "2114",
+      "2115",
+      "2116",
+      "2117",
+      "2159",
+      "2186",
+      "2187",
+      "2188",
+      "2196",
+      "2197"
+    ],
+    "outputPNGBytes": 1705436,
+    "sourceFrames": 512
   }
 }
