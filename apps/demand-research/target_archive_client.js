@@ -31,9 +31,13 @@
   library.hidden=true;
   const libraryTitle=document.createElement("h4");
   libraryTitle.textContent="저장된 계정";
+  const libraryAll=document.createElement("a");
+  libraryAll.href="/account-archive";
+  libraryAll.textContent="보관함 전체 보기";
+  libraryAll.className="target-archive-view-link";
   const libraryRows=document.createElement("div");
   libraryRows.id="targetArchiveLibraryRows";
-  library.append(libraryTitle,libraryRows);
+  library.append(libraryTitle,libraryAll,libraryRows);
   panel.append(jobStatus,library);
   let gatewayReady=false;
   let submitting=false;
@@ -77,6 +81,8 @@
   }
   async function loadLibrary(){
     if(!gatewayReady)return;
+    library.hidden=false;
+    libraryRows.textContent="테라박스에서 저장된 계정을 확인 중…";
     try{
       const response=await fetch("/api/account-archives",{
         credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
@@ -84,7 +90,7 @@
       const data=await response.json();
       const accounts=Array.isArray(data.accounts)?data.accounts:[];
       libraryRows.replaceChildren();
-      for(const item of accounts.slice(0,40)){
+      for(const item of accounts.slice(0,8)){
         if(!/^(bluesky|mastodon)-[a-f0-9]{40}$/.test(String(item.key||"")))continue;
         const row=document.createElement("div");
         row.className="target-archive-library-row";
@@ -111,7 +117,7 @@
       }
       library.hidden=false;
     }catch{
-      library.hidden=true; // Do not pretend an unverified archive is readable.
+      libraryRows.textContent="보관 목록을 확인하지 못했습니다. ‘보관함 전체 보기’로 다시 시도할 수 있습니다.";
     }
   }
   async function pollJob(){
