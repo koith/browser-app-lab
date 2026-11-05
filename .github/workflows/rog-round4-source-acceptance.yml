@@ -118,6 +118,12 @@ jobs:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/chatroom-native-history-reading.cjs
+      - name: WebKit R13 original default duel actors and landscape result button
+        if: matrix.engine == 'webkit'
+        env:
+          FOURLEAF_BROWSER: webkit
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/r13-default-native-opponents.cjs
       - name: Dice chat asynchronous writers never bounce a native scroll reader
         if: matrix.engine == 'chromium'
         run: node apps/4leaf/rog/tests/chat-reader-position-async.cjs
