@@ -13,6 +13,10 @@ services:
       paths:
         - apps/demand-research/**
     envVars:
+      - key: RCLONE_CONFIG_ARCHIVE_TYPE
+        value: terabox
+      - key: RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS
+        value: "1"
       - key: DEMAND_TERABOX_REMOTE
         value: archive:DemandResearch
       - key: DEMAND_ARCHIVE_DISPATCH_REPO
