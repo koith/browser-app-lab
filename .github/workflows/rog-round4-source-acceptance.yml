@@ -49,6 +49,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/obs-extended-original-live.cjs
+      - name: R13 default opponents CHR 1026/1029 on live native podium and visible landscape result
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/r13-default-native-opponents.cjs
       - name: Four actual battle outcomes and board return
         run: node apps/4leaf/rog/tests/battle-outcome-return.cjs
       - name: Original tile source contact geometry with full action frames
@@ -114,6 +118,12 @@ jobs:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/chatroom-native-history-reading.cjs
+      - name: WebKit R13 original default duel actors and landscape result button
+        if: matrix.engine == 'webkit'
+        env:
+          FOURLEAF_BROWSER: webkit
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/r13-default-native-opponents.cjs
       - name: Dice chat asynchronous writers never bounce a native scroll reader
         if: matrix.engine == 'chromium'
         run: node apps/4leaf/rog/tests/chat-reader-position-async.cjs

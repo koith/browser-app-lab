@@ -55,7 +55,11 @@ const path=require('node:path');
    const camera=window.__LEAF_CAMERA__;
    const bounds=camera.getState().routeBounds;
    const world=document.querySelector('#board-world');
-   const screenWidth=document.querySelector('#board-area').clientWidth;
+   // The world box is inset between the 1P/3P/5P and 2P/4P/6P columns;
+   // the camera's visible window is that box, not the whole #board-area
+   // (round-13 fix: edge cells were pushed under the 2P column).
+   const insetR=Math.max(0,parseFloat(getComputedStyle(world).right)||0);
+   const screenWidth=document.querySelector('#board-area').clientWidth-world.offsetLeft-insetR;
    const translate=()=>{
     const match=world.style.transform.match(/translate3d\((-?[0-9.]+)px/);
     return match?Number(match[1]):null;
