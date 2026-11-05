@@ -1,0 +1,49 @@
+name: 4LEAF R14 actors, battle roll, chat concurrency and 26 maps
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/4leaf-r14-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  r14:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.engine }} --with-deps
+      - name: Serve the app from the exact SHA
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/r14-http.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsSI http://127.0.0.1:8765/index.html >/dev/null && exit 0; sleep 1; done; exit 1
+      - name: R14-B original D6 roll on the battle podium (800x600, iPhone portrait/landscape)
+        env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
+        run: node apps/4leaf/rog/tests/r14-battle-original-roll.cjs
+      - name: R14-D six-room chat concurrency, duplicate names, burst, EXIT, room switch, reconnect
+        env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
+        run: node apps/4leaf/rog/tests/r14-chatroom-concurrency.cjs
+      - name: R14-A all 98 CHR cards, every board state and both duel sides
+        env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
+        run: node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
+      - name: 26 original DMP maps and 1920 TIS tiles
+        env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
+        run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
+      - name: Genuine native winBattle podium geometry and real result return
+        env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
+        run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
