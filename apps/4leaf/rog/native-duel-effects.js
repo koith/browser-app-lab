@@ -113,6 +113,7 @@
     container.dataset.sourceFrame=String(f.index);
     container.dataset.load='decoded-original';
     framesPlayed++;
+    stage.dataset.duelSourceEffectFrames=String((Number(stage.dataset.duelSourceEffectFrames)||0)+1);
     const start=performance.now();
     await afterPaint();
     const duration=reduced?100:TICK_MS;
@@ -130,6 +131,9 @@
   stage.dataset.duelSourceEffects=String(list.length);
   stage.dataset.duelSourceEffectEvidence=list.length?'original-event-and-pixels-VERIFIED/WEB-timing-and-placement-INFERRED':'no-original-effect-source-for-card';
   if(!list.length)return {events:0,done:Promise.resolve([])};
+  // Prefetch verified source pixels before their original event ticks.
+  // Safe even if the battle starts without a prior warm() call.
+  for(const ev of list)preloadSource(ev.source);
   const started=performance.now();
   const done=Promise.all(list.map(async ev=>{
    const delay=Math.max(0,ev.tick*TICK_MS-(performance.now()-started));
