@@ -66,6 +66,28 @@ try:
     assert got==payload and calls[0].endswith("/yui") and calls[-1]==gw.YUI_REMOTE
     print("PRIVATE_DURABLE_CATALOG_SAME_OWNER_FAILOVER_PASS")
 
+    class Stream:
+        def __init__(self,parts):
+            self.parts=list(parts)
+        async def read(self,size):
+            return self.parts.pop(0) if self.parts else b""
+    class Process:
+        returncode=0
+        stdout=Stream([b'{"schema_version":1,"model":"mimmi"}'])
+        stderr=Stream([])
+        async def wait(self):return 0
+        def kill(self):raise AssertionError("Healthy mirror process killed")
+    async def subprocess_fake(*argv,env=None):
+        assert "ownerreplica:private-mirror/mimmi/metadata/catalog.json" in argv
+        return Process()
+    with patch.object(gw,"cookie_header",side_effect=AssertionError(
+            "S3 reader must not require or normalize TeraBox owner cookies")),patch.object(
+                gw.asyncio,"create_subprocess_exec",side_effect=subprocess_fake):
+        raw=asyncio.run(gw.rclone_bytes("metadata/catalog.json",4096,
+                       remote=gw.durable_owner_remote("mimmi")))
+        assert b'"model":"mimmi"' in raw
+    print("PRIVATE_DURABLE_COLD_START_S3_NEVER_REQUIRES_TERABOX_COOKIE_PASS")
+
     gw._DURABLE_OWNER_READY=False
     assert gw.durable_owner_remote("mimmi") is None
     assert gw.durable_owner_remote("yui") is None
