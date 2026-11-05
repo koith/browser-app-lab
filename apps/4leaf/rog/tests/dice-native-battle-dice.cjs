@@ -99,6 +99,9 @@ const cells={
    window.__ROG_TEST__.resolveBattle(m.players[0],m.players[1],false);
   });
   await page.waitForSelector('#battle-visual');
+  // R14: compare genuine original die sprites AFTER their fall and impact,
+  // not a transient animation key. The geometric assertions are unchanged.
+  await page.waitForFunction(()=>document.querySelector('#battle-visual')?.dataset.battleDice!=='rolling',null,{timeout:8000});
   const state=await readDice();
   verify(state,[46,49]);
   assert.deepEqual(await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(x=>x.position)),

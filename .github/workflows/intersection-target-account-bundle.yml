@@ -39,9 +39,7 @@ permissions:
 jobs:
   private-public-account-bundle:
     concurrency:
-      # ZIP writes are immutable run-ID objects; do not queue behind
-      # the unrelated per-post capture journal rebuild workflow.
-      # Keep all account ZIP jobs serialized with each other.
+      # Independent immutable ZIP writes must not queue behind journal repair.
       group: intersection-target-zip-production
       cancel-in-progress: false
       queue: max

@@ -1841,6 +1841,16 @@
         "P0-ACTOR",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261105-003",
+      "date": "2026-11-05",
+      "origin": "user",
+      "text": "R14 대량 개발 지시 (2026-11-05): A 체스맨 98종 전수 연결·행동 슬롯, B 원본 전투 연출(주사위 낙하·충돌·튕김·정지, 공격·피격 순서), C 26개 맵·3D 시점 회귀, D 상설 채팅방 6개 동시성·재입장, E 원본 자원 누락 조사. board-camera.js·dice-original-battle-unobstructed.css·r13 테스트·R13 CI는 GPT 담당.",
+      "taskIds": [
+        "P0-PODIUM",
+        "P0-BOARD"
+      ]
     }
   ],
   "tasks": [
@@ -9150,6 +9160,27 @@
         "P0-RELEASE"
       ],
       "details": "Round13 Claude handoff ZIP SHA256 014f66947b825c3582eeb2d491a88d755eb6f65e300690bd6239886330101fef; all SHA256SUMS verified locally. External Chromium evidence: 26/26 original DMP maps, 1920 cells, 24/24 tile orientation, battle podium at desktop and iPhone portrait/landscape. Main camera was clamping to outer board while world is inset; original patch board-camera.js blob 351e8da69dc8b7e0c8e431c9cd653906f184d3b2, dice-dmp-full-camera.cjs fbd61b388762642e78527ee3bf89d044bdcfe3d5, landscape CSS ce44cb7b8670a5897948e4795a1ac55d05540c47. All three byte-identical files committed in PR #768 (pending complete CI, merge, Pages verification). Added default CHR 1026/1029 real battle browser regression to round4 workflow, requires CI result. Package includes two 490-line geometry/map audit tests and local JSON/screenshot evidence; not yet imported into GitHub, remains in handoff ZIP. MVE original 3D mesh/camera/spacing/timing remain UNVERIFIED. P0-BOARD and P0-PODIUM status unchanged until postdeploy browser acceptance."
+    },
+    {
+      "seq": 426,
+      "date": "2026-11-05",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261105-003",
+      "taskIds": [
+        "P0-PODIUM",
+        "P0-BOARD"
+      ]
+    },
+    {
+      "seq": 427,
+      "date": "2026-11-05",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261105-003",
+      "taskIds": [
+        "P0-PODIUM",
+        "P0-BOARD"
+      ],
+      "details": "R14 (base = PR #768 head 4780cd48). A: new tests/r14-chr-98-actor-audit.cjs mounts all 98 CHR cards as the real player chessman: 97 recovered bodies render their own OBS body in idle, walk toward/left/right/away, board attack, hurt, victory and both duel sides with exactly the original-table frame indices and mirror (0 defects); 0156 (OBS2/1222) is the only CardData fallback with no stale OBS pixels. Fixed: 38 OBS2/OBS3 bodies held one static frame for the board attack although their tables carry slots 5/8/11 like OBS; generator now applies the same per-body strike (34 animate, e.g. 0125 28,34,27,27,28; 4 without slot 8/11 keep their own stance) - roles INFERRED. hurt/victory: no original slot identified (97 static, UNVERIFIED). B: new battle-dice-roll.js: combat dice play OBS 1171 slot 20 (block0 18-27) -> slot 12 (block2 0-15) -> VERIFIED face, totals hidden until landing, attacker slot-12 lunge after the totals, outcome after the full lunge, bot auto-confirm after the outcome; frames/ticks VERIFIED, order/22ms tick/drop INFERRED; verified at 800x600 and iPhone portrait/landscape (tests/r14-battle-original-roll.cjs). battle-anchor-compare dice deltas 0 px vs battle.jpg at rest. C: 26 maps / 1920 cells 26/26 PASS, 24/24 arts upright, podium geometry PASS 3 viewports. D: tests/r14-chatroom-concurrency.cjs all 6 rooms: simultaneous joins agree on seats, duplicate nickname kept, 45/45 burst messages per page in order, log follows newest, EXIT/re-entry, room switch, reload drops stale avatar in ~0.5 s - no defect found, nothing changed. E: 0 new original resources; 26 already-recovered 1171 roll frames newly connected to battle; 0156/1222, hurt/victory slots, duel effects/contact discs, MVE camera, CHR->chm portrait map remain missing (docs/evidence/r14/missing-resources-r14.json). WebKit not runnable in the sandbox; .github/workflows/4leaf-r14-qa.yml runs all R14 audits in Chromium+WebKit. Statuses unchanged."
     }
   ],
   "restorationPriority": {
