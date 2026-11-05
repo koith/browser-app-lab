@@ -33,6 +33,13 @@ function showArchiveFrame(force=false){
 }
 async function loadArchive(){
   if(loading)return;
+  // A static public Pages origin can never acquire the private gateway's
+  // same-origin HttpOnly cookie, even after a synthetic session-ready event.
+  if(location.hostname==="koith.github.io"){
+    connected=false;hidePrivate();
+    status.textContent="공개 사이트에는 테라박스 비공개 원본이 노출되지 않습니다. 인증된 보관 서버가 연결되면 이 탭에서 저장된 계정을 바로 볼 수 있습니다.";
+    return;
+  }
   if(connected){showArchiveFrame();return;}
   loading=true;
   status.textContent="저장된 자료를 열 수 있는지 확인하고 있습니다…";
