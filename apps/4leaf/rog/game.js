@@ -1403,8 +1403,10 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
      // The original full-body model is not in the recovered archive;
      // share the existing inferred rig/poses, not unrelated 4LEAF avatars.
      window.__LEAF_GENESIS_ACTORS__?.mount(actor,player,imageFor(player.team[0]));
+     // R14-B: with the original battle roll the attacker waits (idle) for
+     // the dice to land; the lunge starts after the totals are shown.
      window.__LEAF_GENESIS_ACTORS__?.pose(actor,
-       panel.classList.contains('attacker')?'attack':'idle',850);
+       panel.classList.contains('attacker')&&!window.__LEAF_BATTLE_DICE_ROLL__?'attack':'idle',850);
    }else{
      // Keeper mesh is not recovered. Do not impersonate it with savaNN.
      const placeholder=document.createElement('span');
@@ -1596,20 +1598,31 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  const podiumOutcome=attackerPoints===defenderPoints?null
   :attackerPoints>defenderPoints?'attacker':'defender';
  stage.dataset.duelOutcome=podiumOutcome?podiumOutcome+'-wins':'none';
- // Round 11: wait for the attacker's original slot-12 lunge (exact tick span,
- // WEB tick ms); do not cut off an original full animation at 900ms.
- const lungeMs=Number(stage.querySelector('.leaf-battle-chessman[data-duel-side="attacker"]')
-  ?.dataset.sourceNativeDurationMs)||0;
- stage.dataset.duelOutcomeDelayMs=String(Math.max(900,lungeMs));
- if(podiumOutcome)setTimeout(()=>{
-  if(!stage.isConnected)return;
+ const outcome=lungeMs=>{
+  if(!stage.isConnected||!podiumOutcome)return;
   for(const actor of stage.querySelectorAll('.leaf-battle-chessman')){
    const side=actor.dataset.duelSide;
    actor.dataset.duelResult=side===podiumOutcome?'win':'lose';
    if(actor.dataset.chessmanId)window.__LEAF_GENESIS_ACTORS__?.pose(actor,
     side===podiumOutcome?'victory':'hurt',side===podiumOutcome?1050:650);
   }
- },Math.max(900,lungeMs));
+  stage.dataset.battlePhase='outcome';
+ };
+ // R14-B order (INFERRED): original D6 roll -> totals -> attacker slot-12
+ // lunge -> outcome. Round 11 rule kept: the outcome waits for the
+ // attacker's full original lunge (exact tick span, WEB tick ms).
+ const rolled=Promise.resolve(window.__LEAF_BATTLE_DICE_ROLL__?.play(stage)).catch(()=>{});
+ stage.battleDiceRolled=rolled;
+ rolled.then(()=>{
+  if(!stage.isConnected)return;
+  const lunger=stage.querySelector('.leaf-battle-chessman[data-duel-side="attacker"]');
+  if(window.__LEAF_BATTLE_DICE_ROLL__&&lunger?.dataset.chessmanId)
+   window.__LEAF_GENESIS_ACTORS__?.pose(lunger,'attack',850);
+  stage.dataset.battlePhase='attack';
+  const lungeMs=Number(lunger?.dataset.sourceNativeDurationMs)||0;
+  stage.dataset.duelOutcomeDelayMs=String(Math.max(900,lungeMs));
+  setTimeout(()=>outcome(lungeMs),Math.max(900,lungeMs));
+ });
  return stage;
 }
 function combat(attacker,defender,keeper=false){
@@ -1725,7 +1738,12 @@ function combat(attacker,defender,keeper=false){
       options:remoteBattle.options});
  }
  if(!selfInvolved||(keeper&&attacker.bot)){
-   setTimeout(()=>{const button=query('#modal-buttons button').find(b=>b.textContent==='결과 확인');if(!$('modal').classList.contains('hidden')&&button)button.click()},Math.max(350,keeper?600:700));
+   // R14-B: the automatic confirmation counts from the dice landing, not
+   // from the podium appearing, so a bot battle still shows the roll.
+   // It also waits for the attacker's full lunge plus a short look at the
+   // outcome pose (650ms, WEB) instead of cutting the lunge at 700ms.
+   Promise.resolve(battleStage?.battleDiceRolled).then(()=>setTimeout(()=>{const button=query('#modal-buttons button').find(b=>b.textContent==='결과 확인');if(!$('modal').classList.contains('hidden')&&button)button.click()},
+    battleStage?.dataset.duelOutcomeDelayMs?Number(battleStage.dataset.duelOutcomeDelayMs)+650:Math.max(350,keeper?600:700)));
  }
  });
 }

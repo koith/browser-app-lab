@@ -29,7 +29,11 @@ const {chromium}=require('playwright');
    'original/SourceSPRExtra/winJail-00.png',
    'original/SourceSPRExtra/winDoa-00.png',
    ...Array.from({length:6},(_,i)=>'original/SourceSPRExtra/winAbility-'+String(i).padStart(2,'0')+'.png'),
-   'dice-source-dmp-terrain-explorer.js','dice-source-dmp-terrain-explorer.css','dice-native-battle-dice.css','dice-native-battle-source-spr.css',
+   'dice-source-dmp-terrain-explorer.js','dice-source-dmp-terrain-explorer.css','dice-native-battle-dice.css','battle-dice-roll.js','battle-dice-roll.css','dice-native-battle-source-spr.css',
+   // All recovered R14 combat roll frames + the 6 verified settled D6 faces
+   ...Array.from({length:10},(_,i)=>'original/OBS/ui/1171-'+String(i+18).padStart(3,'0')+'.png'),
+   ...Array.from({length:16},(_,i)=>'original/OBS/dice-blocks/obs-1171-b2-'+String(i).padStart(3,'0')+'.png'),
+   ...Array.from({length:6},(_,i)=>'original/OBS/ui/1171-'+String(i).padStart(3,'0')+'.png'),
    'dice-original-battle-unobstructed.css','dice-2004-full-frame.css','dice-source-roll.css','dice-source-roll.js','dice-fall.js','dice-fall.css','genesis-chessman-actors.css','genesis-chessman-actors.js','dice-native-minimap-navigation.css','dice-native-minipanel-spr.js','dice-native-minipanel-spr.css',
    ...Array.from({length:4},(_,i)=>'original/SourceSPRExtra/minipanel-'+String(i).padStart(2,'0')+'.png'),
    'dice-native-tis-depth.css','dice-native-tis-orientation.css','dice-ai-autoplay.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
