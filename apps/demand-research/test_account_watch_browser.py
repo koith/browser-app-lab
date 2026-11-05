@@ -42,9 +42,9 @@ def run():
                 status=200,content_type="text/html",body=HTML))
             page.route(PAGE+"free_discovery.js",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=FREE))
-            page.route(PAGE+"account_watch.js",lambda route:route.fulfill(
+            page.route(PAGE+"account_watch.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=WATCH))
-            page.route(PAGE+"account_auto_analysis.js",lambda route:route.fulfill(
+            page.route(PAGE+"account_auto_analysis.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=AUTO))
             def public_profiles(r):
                 qs=parse_qs(urlparse(r.request.url).query)
