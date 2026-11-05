@@ -49,6 +49,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/obs-extended-original-live.cjs
+      - name: R13 default opponents CHR 1026/1029 on live native podium and visible landscape result
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/r13-default-native-opponents.cjs
       - name: Four actual battle outcomes and board return
         run: node apps/4leaf/rog/tests/battle-outcome-return.cjs
       - name: Original tile source contact geometry with full action frames
