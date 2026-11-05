@@ -52,7 +52,7 @@ jobs:
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 45
     env:
       MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
       YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
@@ -67,14 +67,14 @@ jobs:
           sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - name: Lightweight complete-owner readiness check (56 originals, no downloads)
+      - name: Lightweight complete-owner readiness check (214 originals, no downloads)
         id: ready
         if: github.event_name == 'schedule'
         shell: bash
         run: |
           if python apps/gallery-archive/probe_private_owner_runtime.py; then
             echo "healthy=true" >> "$GITHUB_OUTPUT"
-            echo "All 56 recorded owner originals are still in the private runtime cache." >> "$GITHUB_STEP_SUMMARY"
+            echo "All 214 recorded owner originals are still in the private runtime cache." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "healthy=false" >> "$GITHUB_OUTPUT"
             echo "Cold/incomplete gallery: existing-owner authenticated recovery is required." >> "$GITHUB_STEP_SUMMARY"
