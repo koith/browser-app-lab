@@ -2,10 +2,15 @@
 // Public Pages acceptance after R14 reaches main. Branch CI alone cannot
 // certify the user's live browser version or PWA update.
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 const {chromium,webkit}=require('playwright');
 const base='https://koith.github.io/browser-app-lab/apps/4leaf/rog/';
 const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
-const expected='0.86.0-beta.67',cache='4leaf-revival-pwa-v154';
+// The push job checks out the EXACT main commit that changed app-version.
+// Never freeze this QA to beta67: future R15+ releases must still work.
+const current=JSON.parse(fs.readFileSync(path.join(__dirname,'../../apps/4leaf/rog/app-version.json'),'utf8'));
+const expected=current.version,cache=current.pwaCache;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function waitForPublishedVersion(){
  const until=Date.now()+12*60_000;let observed='';
