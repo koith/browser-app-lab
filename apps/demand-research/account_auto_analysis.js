@@ -85,42 +85,65 @@ async function get(url){
   return await res.json();
  }finally{clearTimeout(timer)}
 }
-let records=new Map(),cursor=PAGE,groupCursor=30,scanDone=false,scanAt=0,busy=false,scheduled=false;
+let records=new Map(),cursor=PAGE,groupCursor=30,scanDone=false,scanAt=0,busy=false,scheduled=false,searchTerm="";
 let scanResult={checked:0,failed:0};
 function UI(){
  const host=$("accountsView");if(!host)return false;
  if($(ID))return true;
  const section=mk("section","account-auto-section");section.id=ID;
- const title=mk("h3","","공개 자기 계정 연결 그룹 · 자동 분석");
- const summary=mk("p","account-auto-summary","게시글 인덱스에서 공개 계정을 자동 집계하고 있습니다.");
+ const summary=mk("p","account-auto-summary","현재 불러온 공개 계정을 확인하는 중입니다.");
  summary.id="accountAutoSummary";
- const hints=mk("p","account-auto-hint",
-  "동일 SNS의 중복 프로필은 자동 정리합니다. 서로 다른 SNS 계정은 양쪽에서 자신이 운영하는 다른 계정이라고 공개 선언한 경우에만 A 그룹으로 표시합니다. 실제 개인의 신원을 확정하는 것은 아닙니다.");
- const status=mk("p","account-auto-status","");status.id="accountAutoStatus";
+ const title=mk("h3","","같은 운영자가 공개적으로 연결한 계정");
  const groups=mk("div","account-auto-groups");groups.id="accountAutoGroups";
  const groupMore=mk("button","account-auto-more","연결 그룹 더 보기");groupMore.id="accountAutoGroupMore";groupMore.type="button";
  groupMore.addEventListener("click",()=>{groupCursor+=30;render()});
+ const listHead=mk("div","account-auto-list-head");
+ listHead.append(mk("h4","","발견된 계정 목록"));
+ const search=mk("input");search.type="search";search.id="accountAutoSearch";
+ search.placeholder="계정 이름 또는 SNS 검색";search.setAttribute("aria-label","발견된 계정 검색");
+ search.addEventListener("input",()=>{searchTerm=search.value.trim().toLowerCase();cursor=PAGE;render()});
+ listHead.append(search);
  const listing=mk("div","account-auto-rows");listing.id="accountAutoRows";
- const more=mk("button","account-auto-more","결과 더 보기");more.type="button";more.id="accountAutoMore";
+ const more=mk("button","account-auto-more","계정 더 보기");more.type="button";more.id="accountAutoMore";
  more.addEventListener("click",()=>{cursor+=PAGE;render()});
- section.append(title,summary,hints,status,groups,groupMore,listing,more);
+ const status=mk("p","account-auto-status","");status.id="accountAutoStatus";
+ const hints=mk("details","account-auto-method");
+ hints.append(mk("summary","","계정 연결은 어떻게 확인하나요?"),
+  mk("p","account-auto-hint","프로필 양쪽에서 서로를 다른 SNS 계정이라고 공개적으로 소개한 경우에만 연결된 그룹으로 표시합니다. 미확인 계정은 다른 사람이라고 단정하지 않습니다. 수치는 현재 불러온 게시글 기준이며 전체 SNS 계정 수가 아닙니다."));
+ section.append(summary,title,groups,groupMore,listHead,listing,more,status,hints);
+ const mount=$("accountAutoMount");
  const legacy=host.querySelector(".account-intro");
- if(legacy)legacy.before(section);else host.prepend(section);
+ if(mount)mount.append(section);
+ else if(legacy)legacy.after(section);
+ else host.prepend(section);
  const css=mk("style");css.textContent=`
-.account-auto-section{padding:20px 18px;margin:0 0 22px;background:#fff;border:2px solid #252f77;box-shadow:4px 4px 0 #ffdd29}
-.account-auto-section h3{font-size:19px;margin:0 0 10px;color:#14276e}
-.account-auto-section .account-auto-summary{font-size:14px;font-weight:700;color:#14276e;margin:5px 0}
-.account-auto-section .account-auto-hint,.account-auto-status{font-size:12px;color:#52627d;line-height:1.6;margin:6px 0 10px}
-.account-auto-groups{display:grid;gap:7px;margin:8px 0 12px}
-.account-auto-groups>article{background:#eef3ff;border-left:4px solid #3451cb;padding:10px}
-.account-auto-groups strong{display:block;margin-bottom:5px}
-.account-auto-groups a,.account-auto-rows a{color:#2040a7;text-decoration:underline;overflow-wrap:anywhere}
-.account-auto-groups a+a{margin-left:12px}
-.account-auto-rows{border-top:1px solid #d6deed}
-.account-auto-rows>div{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid #e2e7f0;padding:10px 2px;font-size:12px}
-.account-auto-rows span{white-space:nowrap;color:#52627d}
-.account-auto-more{background:#263dd0;color:#fff;padding:10px 16px;border:0;margin-top:12px;font-weight:700;cursor:pointer}
-.account-auto-more[hidden]{display:none}
+#accountAutoMount .account-auto-section{padding:0;margin:0;background:transparent;border:0;box-shadow:none}
+#accountAutoMount .account-auto-section h3{font-size:14px;font-weight:850;color:#273653;margin:17px 0 9px}
+#accountAutoMount .account-auto-summary{font-size:13px;font-weight:750;color:#334b85;background:#f0f5ff;border-radius:9px;padding:12px 13px;margin:0;line-height:1.55}
+#accountAutoMount .account-auto-groups{display:grid;gap:8px;margin:8px 0 8px}
+#accountAutoMount .account-auto-groups>article{background:#f8faff;border:1px solid #dce4f3;border-radius:9px;padding:11px 12px}
+#accountAutoMount .account-auto-groups strong{display:block;font-size:12px;margin-bottom:6px;color:#263c70}
+#accountAutoMount .account-auto-groups a,#accountAutoMount .account-auto-rows a{color:#2646a0;text-decoration:none;overflow-wrap:anywhere;font-weight:700}
+#accountAutoMount .account-auto-groups a{display:inline-flex;padding:5px 0;margin-right:12px;font-size:12px}
+#accountAutoMount .account-auto-groups a:hover,#accountAutoMount .account-auto-rows a:hover{text-decoration:underline}
+#accountAutoMount .account-auto-list-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px}
+#accountAutoMount .account-auto-list-head h4{font-size:14px;margin:0;color:#263653}
+#accountAutoMount .account-auto-list-head input{border:1px solid #cbd6e8;border-radius:8px;padding:9px 10px;min-width:0;width:235px;font-size:12px}
+#accountAutoMount .account-auto-rows{border-top:1px solid #e1e6f0;margin-top:9px}
+#accountAutoMount .account-auto-rows>div{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #e9edf4;padding:10px 3px;font-size:12px}
+#accountAutoMount .account-auto-rows span{color:#67748b;white-space:nowrap;font-size:11px}
+#accountAutoMount .account-auto-status{font-size:11px;color:#64718b;line-height:1.65;margin:12px 0}
+#accountAutoMount .account-auto-method{border-top:1px solid #e7eaf2;margin-top:14px;padding-top:5px}
+#accountAutoMount .account-auto-method summary{color:#526895;font-size:11px;cursor:pointer;padding:7px 0}
+#accountAutoMount .account-auto-hint{font-size:11px;color:#67748b;line-height:1.7;margin:8px 0}
+#accountAutoMount .account-auto-more{background:#f1f5ff;border:1px solid #d5def2;border-radius:8px;color:#274398;padding:9px 13px;margin-top:9px;font-size:11px;font-weight:800;cursor:pointer}
+#accountAutoMount .account-auto-more[hidden]{display:none}
+@media(max-width:720px){
+ #accountAutoMount .account-auto-list-head{align-items:stretch;flex-direction:column}
+ #accountAutoMount .account-auto-list-head input{width:100%}
+ #accountAutoMount .account-auto-rows>div{align-items:flex-start;flex-direction:column;gap:3px}
+ #accountAutoMount .account-auto-rows span{white-space:normal}
+}
 `;
  document.head.append(css);
  return true;
@@ -152,38 +175,42 @@ function render(){
  const values=[...records.values()].sort((a,b)=>b.verified-a.verified||b.indexed-a.indexed||a.id.localeCompare(b.id));
  const known=values.reduce((n,x)=>n+x.verified,0),indexed=values.reduce((n,x)=>n+x.indexed,0);
  const groups=groupsOf(records);
- summary.textContent="자동 발견 "+values.length.toLocaleString("ko-KR")+"개 공개 계정 · 원문 확인 글 "+known.toLocaleString("ko-KR")+
-  "건 · 인덱스 링크 "+indexed.toLocaleString("ko-KR")+"건 · 상호 링크 확인 그룹 "+groups.linked.length+"개 (현재 불러온 데이터 기준)";
+ summary.textContent="현재 발견된 계정 "+values.length.toLocaleString("ko-KR")+"개 · 공개 게시글 "+known.toLocaleString("ko-KR")+"건 · 공개 연결 확인 그룹 "+groups.linked.length+"개";
+ summary.title="추가로 확인이 필요한 링크 "+indexed.toLocaleString("ko-KR")+"건";
  const eligible=Math.min(values.filter(v=>v.network==="bluesky").length,BSKY_SCAN)+Math.min(values.filter(v=>v.network==="mastodon").length,MASTODON_SCAN);
- status.textContent="공개 프로필 근거 조회 "+scanResult.checked+"/"+eligible+
-  "개 (실패 "+scanResult.failed+" · 미지원/미조회 계정은 연결 미확정)"+
-  (busy?" · 자동 검증 진행 중":scanDone?" · 이번 조회 완료":"");
+ status.textContent="연결 확인을 위해 살펴본 프로필 "+scanResult.checked.toLocaleString("ko-KR")+
+  "/"+eligible.toLocaleString("ko-KR")+"개"+
+  (busy?" · 확인 중":scanDone?" · 이번 확인 완료":"")+
+  (scanResult.failed?" · 확인하지 못한 프로필 "+scanResult.failed+"개":"");
  const fg=document.createDocumentFragment();
  for(const [i,group] of groups.linked.slice(0,groupCursor).entries()){
   const item=mk("article");
-  item.append(mk("strong","","A-"+String(i+1).padStart(3,"0")+" · 공개 자기 계정 연결 "+group.length+"개"));
+  item.append(mk("strong","","연결 그룹 "+(i+1)+" · 공개적으로 연결된 SNS 계정 "+group.length+"개"));
   for(const rec of group){
    const a=mk("a","",(names[rec.network]||rec.network)+" @"+rec.user);
    a.href=rec.url;a.target="_blank";a.rel="noopener noreferrer";item.append(a);
   }fg.append(item);
  }
  if(!groups.linked.length)fg.append(mk("p","account-auto-hint",
-   scanDone?"이번에 검사한 공개 프로필에서는 상호 링크를 확인하지 못했습니다. 미확인 계정을 별도 사용자로 단정하지 않습니다.":
-   "상호 링크가 확인되면 이곳에 자동 표시됩니다."));
+   scanDone?"확인된 계정 연결이 아직 없습니다. 연결이 없다는 이유만으로 서로 다른 사람으로 계산하지는 않습니다.":
+   "공개 프로필에 연결된 다른 SNS 계정이 있는지 확인 중입니다."));
  groupHolder.replaceChildren(fg);
  $("accountAutoGroupMore").hidden=groups.linked.length<=groupCursor;
  $("accountAutoGroupMore").textContent="연결 그룹 더 보기 ("+Math.max(0,groups.linked.length-groupCursor)+"개 남음)";
  const frag=document.createDocumentFragment();
- for(const rec of values.slice(0,cursor)){
+ const filtered=searchTerm?values.filter(rec=>
+   rec.user.includes(searchTerm)||(names[rec.network]||rec.network).toLowerCase().includes(searchTerm)):values;
+ for(const rec of filtered.slice(0,cursor)){
   const line=mk("div");
   const a=mk("a","",(names[rec.network]||rec.network)+" @"+rec.user);
   a.href=rec.url;a.target="_blank";a.rel="noopener noreferrer";
-  line.append(a,mk("span","","글 "+rec.verified+" · 링크 "+rec.indexed));
+  line.append(a,mk("span","","확인 글 "+rec.verified+"건"+(rec.indexed?" · 확인 대기 링크 "+rec.indexed+"건":"")));
   frag.append(line);
  }
+ if(!filtered.length)frag.append(mk("p","account-auto-hint","검색한 계정을 찾지 못했습니다."));
  rows.replaceChildren(frag);
- $("accountAutoMore").hidden=cursor>=values.length;
- $("accountAutoMore").textContent="결과 더 보기 ("+Math.max(0,values.length-cursor).toLocaleString("ko-KR")+"개 남음)";
+ $("accountAutoMore").hidden=cursor>=filtered.length;
+ $("accountAutoMore").textContent="계정 더 보기 ("+Math.max(0,filtered.length-cursor).toLocaleString("ko-KR")+"개 남음)";
 }
 function refresh(){
  const next=discover(),previousSize=records.size;
