@@ -21,9 +21,6 @@ COPY apps/demand-research/account_archive_view.css /app/account_archive_view.css
 COPY apps/demand-research/auto_archive_view.html /app/auto_archive_view.html
 COPY apps/demand-research/auto_archive_view.js /app/auto_archive_view.js
 COPY apps/demand-research/auto_archive_view.css /app/auto_archive_view.css
-COPY apps/demand-research/auto_archive_view.html /app/auto_archive_view.html
-COPY apps/demand-research/auto_archive_view.js /app/auto_archive_view.js
-COPY apps/demand-research/auto_archive_view.css /app/auto_archive_view.css
 COPY apps/demand-research/demand_archive.py /app/demand_archive.py
 COPY apps/demand-research/social_sources.py /app/social_sources.py
 COPY apps/demand-research/account_index.py /app/account_index.py
