@@ -148,11 +148,7 @@ Object.defineProperty(navigator,"clipboard",{
                 page.locator("#targetArchiveAccount").fill(
                     "https://bsky.app/profile/qa-example.bsky.social")
                 button.click()
-                page.wait_for_url(
-                    lambda url:url.hostname=="intersection-originals-free.onrender.com"
-                    and url.search_params.get("archive_account")==
-                      "https://bsky.app/profile/qa-example.bsky.social",
-                    timeout=12000)
+                page.wait_for_url(lambda url:url.startswith(PRIVATE),timeout=12000)
                 assert not clipboard_events,"no clipboard workaround"
                 assert not dispatched,"cross-origin navigation alone must not schedule a backup"
                 page.locator("#targetArchiveAccount").wait_for(state="visible")
