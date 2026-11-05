@@ -641,6 +641,24 @@ main{padding-top:10px}
 .target-archive button{min-height:41px;white-space:nowrap}
 .target-archive a{font-size:12px;color:inherit;text-decoration:underline;font-weight:700}
 .target-archive [role=status]{display:block;margin-top:9px;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
+
+.target-archive-job-status{display:flex!important;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:9px;margin-top:13px;padding:12px;border:1px solid #d5dfed;border-radius:9px;background:#f6f9ff;font-size:12px!important;color:#263752;line-height:1.6}
+.target-archive-job-status[hidden]{display:none!important}
+.target-archive-job-status[data-state=failed]{border-color:#dbc2c2;background:#fcf5f5}
+.target-archive-job-status[data-state=verified]{border-color:#b9d7c8;background:#f3faf7}
+.target-archive-view-link{display:inline-flex;align-items:center;justify-content:center;padding:8px 11px;background:#2846ba;color:#fff!important;text-decoration:none!important;border-radius:7px;font-size:12px!important;font-weight:800;min-height:35px}
+.target-archive-library{margin-top:15px;border-top:1px solid #e0e6ef;padding-top:13px}
+.target-archive-library[hidden]{display:none}
+.target-archive-library h4{font-size:14px;margin:0 0 7px;color:#253b6a}
+.target-archive-library-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #eef1f6}
+.target-archive-library-row span{min-width:0;flex:1;overflow-wrap:anywhere;font-size:12px;color:#3c4d6b}
+.target-archive-library>div>p{font-size:12px;line-height:1.6;color:#6d7790}
+@media(max-width:720px){
+ .target-archive-library-row{align-items:flex-start}
+ .target-archive-library-row span{line-height:1.5}
+ .target-archive-view-link{flex:none}
+}
+
 .video-trends{border:1px solid #151a30;background:#fffdf1;padding:0;margin:0 0 10px;color:#151829}
 .video-trends>summary{list-style:none;cursor:pointer;font-size:13px;font-weight:850;padding:11px 12px;display:flex;align-items:center;gap:8px}
 .video-trends>summary::-webkit-details-marker{display:none}
