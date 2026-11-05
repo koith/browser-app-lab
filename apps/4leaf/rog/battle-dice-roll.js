@@ -61,15 +61,25 @@
    {translate:'0 0',offset:1}],
    {duration:totalMs,delay,easing:'linear',fill:'backwards'}):null;
   if(delay){place(img,all[0].f,scale);die.dataset.rollFrame='20:'+all[0].f.block+':'+all[0].f.index;await sleep(delay)}
-  const t0=performance.now();let shown=null;
-  while(die.isConnected&&!state.cancelled){
-   const tick=Math.floor((performance.now()-t0)/TICK_MS);
-   if(tick>=total)break;
-   let k=all[0];for(const x of all){if(x.t<=tick)k=x;else break}
-   if(k!==shown){shown=k;place(img,k.f,scale);
-    die.dataset.battleRoll=k.slot===20?'falling':'impact';
-    die.dataset.rollFrame=k.slot+':'+k.f.block+':'+k.f.index}
-   await sleep(Math.max(12,TICK_MS/2));
+  // WebKit may decode/render a frame more slowly than a 22ms nominal
+  // WEB tick. Wall-clock seeking skipped original collision keys, even
+  // though the frame identities/ticks are VERIFIED. Walk each source key
+  // in order and yield two paint frames before advancing; any overrun
+  // extends the WEB roll duration instead of silently dropping native art.
+  const afterPaint=()=>new Promise(r=>{
+   if(typeof requestAnimationFrame!=='function'){r();return}
+   requestAnimationFrame(()=>requestAnimationFrame(r));
+  });
+  for(let i=0;i<all.length&&die.isConnected&&!state.cancelled;i++){
+   const k=all[i],until=all[i+1]?.t??total;
+   const intendedMs=Math.max(TICK_MS,(until-k.t)*TICK_MS);
+   const started=performance.now();
+   place(img,k.f,scale);
+   die.dataset.battleRoll=k.slot===20?'falling':'impact';
+   die.dataset.rollFrame=k.slot+':'+k.f.block+':'+k.f.index;
+   await afterPaint();
+   const remaining=intendedMs-(performance.now()-started);
+   if(remaining>0)await sleep(remaining);
   }
   anim?.cancel();
   clear(img);img.src=face.url;
