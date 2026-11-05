@@ -27,7 +27,7 @@ jobs:
     needs: offline-recovery-contract
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
-    timeout-minutes: 19
+    timeout-minutes: 29
     strategy:
       fail-fast: false
       matrix:
@@ -74,5 +74,5 @@ jobs:
         run: |
           test "$OFFLINE" = success
           test "$STAGE" = success
-          echo "GALLERY_PREDEPLOY_BOTH_MODELS_REAL_ORIGINALS_PREVIOUS_AND_NEW_56_PHOTOS_PASS"
+          echo "GALLERY_PREDEPLOY_BOTH_MODELS_REAL_ORIGINALS_PREVIOUS_AND_NEW_214_PHOTOS_PASS"
           echo 'Do not claim production/iPhone verification until LIVE post-deploy SHA readback also passes.' >> "$GITHUB_STEP_SUMMARY"
