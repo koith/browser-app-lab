@@ -15,7 +15,7 @@
 .inventory{margin:10px 0 0;color:#999aa0;font-size:12px}
 .mainnav a{border:1px solid #46464d;padding:7px 11px;border-radius:24px;white-space:nowrap}
 .mainnav a[aria-current]{border-color:#d9a6b7;background:#d9a6b7;color:#171419}
-.broken-source img[hidden]{display:none}.album.broken-source::before{content:'출처 이미지 연결 실패';position:absolute;left:12px;top:40%;z-index:2;font-size:12px;color:#ccc}.photo.broken-source::before{content:'원본 사이트 이미지 연결 실패';font-size:11px;color:#bbb;display:block;padding:24px 8px}
+.broken-source img[hidden]{display:none}.album.broken-source::before{content:'출처 이미지 연결 실패';position:absolute;left:12px;top:40%;z-index:2;font-size:12px;color:#ccc}.photo.broken-source::before{content:'보관된 사진을 불러오지 못했습니다';font-size:11px;color:#bbb;display:block;padding:24px 8px}
 @media(max-width:680px){.logo{font-size:16px;letter-spacing:.06em}.logo span{display:none}.topbar{gap:9px}.mainnav{gap:6px;margin-left:auto}.mainnav a{padding:6px 8px;font-size:11px}.search-toggle{width:32px;height:32px;padding:7px}.version-chip{font-size:9px}}
 .logo{font-size:23px;font-weight:850;letter-spacing:.22em;white-space:nowrap}.logo span{font-size:10px;font-weight:500;letter-spacing:.15em;color:#8a8b8e;margin-left:9px}
 .mainnav{display:flex;align-items:center;gap:25px;margin-left:auto}
@@ -205,6 +205,58 @@ if(location.hostname==='koith.github.io' && 'serviceWorker' in navigator){
 
 const $=id=>document.getElementById(id);
 const imageHealth={loaded:new Set(),failed:new Set()};
+// A failed owner image must not stay permanently blank after the existing
+// signed owner worker restores its exact SHA in Render. Poll only while a
+// user-reported screenshot album has failed visible tiles; no new collection.
+const ownerRecoveryPending=new Set();
+let ownerRecoveryTimer=null;
+const ownerRecoveryEndpoint='https://mimmi-private-gallery-free.onrender.com/api/gallery-media-readiness';
+function queueOwnerImageRecovery(img){
+ const p=ownerPhotoIndex.get(img?.dataset.owner||'');
+ if(!p||!img.isConnected||!img.closest('.photo')||
+    !['teddy-bear97','v2ph-actor-a8n8n85a'].includes(p.ownerAlbum))return;
+ ownerRecoveryPending.add(img);
+ if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,14000);
+}
+async function retryOwnerImagesIfReady(){
+ ownerRecoveryTimer=null;
+ for(const img of [...ownerRecoveryPending])if(!img.isConnected||!img.closest('.photo'))ownerRecoveryPending.delete(img);
+ if(!ownerRecoveryPending.size)return;
+ if(document.hidden){
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,30000);
+  return;
+ }
+ let ready=false;
+ const aborter=new AbortController(),timeout=setTimeout(()=>aborter.abort(),8000);
+ try{
+  const r=await fetch(ownerRecoveryEndpoint,{cache:'no-store',signal:aborter.signal});
+  const response=r.ok?await r.json():null;
+  ready=response?.ready===true&&response.expected===214&&response.available===214;
+ }catch{}finally{clearTimeout(timeout)}
+ if(ready)for(const img of [...ownerRecoveryPending]){
+  ownerRecoveryPending.delete(img);
+  const p=ownerPhotoIndex.get(img.dataset.owner||'');
+  if(!p||!img.isConnected)continue;
+  img.hidden=false;
+  img.dataset.ownerVariant='original';
+  img.closest('.photo')?.classList.remove('broken-source');
+  delete img.closest('.photo')?.dataset.imageState;
+  MimmiPrivate.asset(p,'original').then(url=>{
+   if(img.isConnected)img.src=url+'&rehydrate='+Date.now();
+  }).catch(()=>queueOwnerImageRecovery(img));
+ }
+ if(ownerRecoveryPending.size&&ownerRecoveryTimer===null)
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,30000);
+}
+function refreshOwnerFailuresOnFocus(){
+ if(!document.hidden&&ownerRecoveryPending.size){
+  if(ownerRecoveryTimer!==null)clearTimeout(ownerRecoveryTimer);
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,100);
+ }
+}
+document.addEventListener('visibilitychange',refreshOwnerFailuresOnFocus);
+window.addEventListener('focus',refreshOwnerFailuresOnFocus);
+
 function registerImageHealth(url,ok){
  if(!url||!url.startsWith('https://'))return;
  if(ok){imageHealth.loaded.add(url);imageHealth.failed.delete(url)}
@@ -221,7 +273,7 @@ function recoverSavedCover(img){
 document.addEventListener('load',e=>{
  const img=e.target;
  if(img instanceof HTMLImageElement&&img.closest('.album,.photo')&&img.naturalWidth>=100)
-  registerImageHealth(img.currentSrc||img.src,true);
+  {registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo')?.classList.remove('broken-source');}
 },true);
 document.addEventListener('error',e=>{
  const img=e.target,container=img instanceof HTMLImageElement?img.closest('.album,.photo'):null;
@@ -259,7 +311,7 @@ document.addEventListener('error',e=>{
  // Fail this tile once; keep every other photo independent.
  const url=img.getAttribute('src')||'';
  registerImageHealth(url,false);
- img.hidden=true;container.classList.add('broken-source');
+ img.hidden=true;container.classList.add('broken-source');if(typeof queueOwnerImageRecovery==='function')queueOwnerImageRecovery(img);
 },true);
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumAliasEvidence={},collisionDistinct=new Set(),albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),localPreviewIndex=new Map(),detailRenderGeneration=0;
 function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
