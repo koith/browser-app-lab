@@ -71,7 +71,7 @@ const VIEWS=[['desktop-800x600',{viewport:{width:800,height:600}}],['iphone-port
    assert.ok(rolling.every(x=>x.poses.attacker==='idle'),name+' attacker waits while dice roll');
    assert.ok(firstScored&&firstScored.totals.every(v=>v==='visible'),name+' totals shown on landing');
    assert.ok(firstAttack&&firstAttack.t>=rolling.at(-1).t,name+' lunge after landing');
-   assert.ok(firstOutcome&&firstOutcome.t-firstAttack.t>=Math.max(880,firstAttack.lungeMs-40),name+' outcome waits for the full lunge');
+   assert.ok(firstOutcome&&firstOutcome.t-firstAttack.t>=Math.max(880,firstAttack.lungeMs-40),name+' outcome waits for the full lunge '+JSON.stringify({attackAt:firstAttack?.t,outcomeAt:firstOutcome?.t,observedDuration:firstOutcome?.t-firstAttack?.t,nativeLungeMs:firstAttack?.lungeMs,required:Math.max(880,firstAttack?.lungeMs-40)}));
    assert.ok(!trace.some(x=>x.clipped),name+' no roll frame leaves the viewport');
    const rec={view:name,dice:dieCount,rollMs:rolling.at(-1).t-rolling[0].t,attackAt:firstAttack.t,outcomeAt:firstOutcome.t,
     lungeMs:firstAttack.lungeMs,perDie:perDie.map(d=>({eye:d.eye,frames:d.seq.length,first:d.seq[0],last:d.seq.at(-1)}))};
