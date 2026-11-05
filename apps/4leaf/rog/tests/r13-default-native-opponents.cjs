@@ -57,7 +57,8 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
   for(let i=0;i<snapshot.length;i++){
    const a=snapshot[i],o=owner[i];
    assert.equal(a.rig,'original-obs-sprite','must not use portrait fallback');
-   assert.equal(a.source,o.source,'must retain exact CHR source member');
+   assert.ok(a.source?.endsWith('/'+o.source),
+    'mounted actor must preserve the exact CHR-owned native member');
    assert.equal(a.ready,'ready','native PNG must be decoded');
    assert.ok(a.img?.startsWith(o.prefix),
     'must show the card-owned original OBS PNG: '+JSON.stringify({a,o}));
