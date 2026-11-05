@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-03",
+  "updatedAt": "2026-11-05",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1811,6 +1811,23 @@
         "M08",
         "RULE-03",
         "P0-RELEASE"
+      ]
+    },
+    {
+      "id": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "date": "2026-11-05",
+      "origin": "GPT and Claude R12 actual original source integration; user prioritizes public playable experience over archive census",
+      "text": "클로드 12차 원본 체스맨 97종 행동표·신규 원본 몸체 19종/662프레임과 원본 D4/D6 블록 63프레임을 실제 주잔 게임에 연결하고, 6개 상설 채팅방 좌석·이름표·메인프레임 툴바를 공개 앱에 반영한다. 전체 CI·Pages 공개 파일까지 확인하고 미검증 원본 효과·틱·26개 맵은 별도로 추적한다.",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "ACT-03",
+        "DIE-02",
+        "CHT-05"
       ]
     }
   ],
@@ -8981,6 +8998,61 @@
         "P0-RELEASE"
       ],
       "details": "State receiving guest sends state-accepted or state-rejected based on existing durable-save gate return value. Host shows distinct synchronization notices; real two-peer Chromium test covers rejected invalid snapshot and synthetic accepted-return ack transport. Existing separate actual guest storage retry QA retained. PR/CI/Pages verification pending."
+    },
+    {
+      "seq": 418,
+      "date": "2026-11-05",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "R12 original CHR 97 and real source D4/D6, 6-room chat visible improvements: accepted for real public release."
+    },
+    {
+      "seq": 419,
+      "date": "2026-11-05",
+      "type": "ORIGINAL_SOURCE_ASSETS_IMPORTED_MAIN",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "ACT-03",
+        "DIE-02"
+      ],
+      "details": "PR #726, main 09311c564831b2ff620be4ffcbe5127d730c7034: 19 real CHR body source families, 662 SHA-matched original PNGs, 63 own-palette original D4/D6 PNGs, eight source mapping evidence JSONs and two dice table/manifest blobs. Git blob SHAs verified against Claude R12. Resource import alone did not finish runtime or original scene."
+    },
+    {
+      "seq": 420,
+      "date": "2026-11-05",
+      "type": "SIX_ROOM_CHAT_VISIBLE_CI_MERGED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-05"
+      ],
+      "details": "PR #750, main e0770c3ed4fee4f6eaafbe18c4e32386d639c01f: original MainFrame toolbar placement, 6 room seat coordinates, nickname collision mitigation, N 명 count; 9/9 related GitHub Actions pass; public social-chat.js and chatroom-native-panels.js source previously verified. Original screenshot fidelity still partial."
+    },
+    {
+      "seq": 421,
+      "date": "2026-11-05",
+      "type": "NATIVE_ACTOR_DICE_RUNTIME_CI_MERGED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "ACT-03",
+        "DIE-02",
+        "P0-RELEASE"
+      ],
+      "details": "PR #727, main d10ad1ccf0fb6a9ad52b785dc997dcf40e8d4d52: original 97 body CHR mappings including newly recovered 19; 13 slots 0-12 with native source tick/frame order; D6/D4 slot20 tumble -> slot12 impact -> engine verified final pip; Chromium SHA verifies 662 PNGs and visible 19 recovered bodies, roll shows native source frames; 13/13 PR workflow success including WebKit. Beta.65/PWA v152 merged. PUBLIC PAGES delivery not yet verified when this ledger event was written; do not mark full original fidelity complete. Missing body 0156, effect 2125, slots 13-16, exact tick lengths, 26 DMP and battle viewpoint remain."
     }
   ],
   "restorationPriority": {
