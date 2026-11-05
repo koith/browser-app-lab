@@ -2,6 +2,32 @@ name: INTERSECTION — Verified One-ZIP Public Account Rescue
 
 on:
   workflow_dispatch:
+    inputs:
+      platform:
+        description: "SNS public account service"
+        required: true
+        type: choice
+        options:
+          - bluesky
+          - mastodon
+      account:
+        description: "Public handle/profile URL; no private login needed"
+        required: true
+        type: string
+      max_pages:
+        description: "Public history pages checked (1-4)"
+        required: true
+        default: "2"
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+  schedule:
+    # Preserve reviewed public-account ZIP backup every six hours.
+    # This is complementary to the separate fast public-post capture.
+    - cron: "43 */6 * * *"
   push:
     branches: [main]
     paths:
@@ -23,6 +49,9 @@ jobs:
       RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
       DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
+      TARGET_PLATFORM: ${{ inputs.platform }}
+      TARGET_ACCOUNT: ${{ inputs.account }}
+      TARGET_MAX_PAGES: ${{ inputs.max_pages }}
     steps:
       - uses: actions/checkout@v4
         with:
