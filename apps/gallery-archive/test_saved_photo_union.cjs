@@ -63,9 +63,10 @@ for(const model of ['mimmi','yui']){
  assert.equal(merged.length,2,'one SHA repeated twice must not become new photograph');
  assert.equal(new Set(merged.map(p=>p.number)).size,2);
  assert.equal(merged.find(p=>p.sha256==='b'.repeat(64)).storageNumber,1);
- assert.equal(merged.find(p=>p.sha256==='a'.repeat(64)).ownerAlbum,'work',
-  'exact-SHA local copy must use independently stored owner original');
- assert.equal(merged.find(p=>p.sha256==='a'.repeat(64)).storageNumber,2);
+ assert.equal(merged.find(p=>p.sha256==='a'.repeat(64)).url,local.url,
+  'byte-identical local original must remain the first-choice offline route');
+ assert.equal(merged.find(p=>p.sha256==='a'.repeat(64)).ownerAlbum,undefined,
+  'public local saved SHA must not be overwritten by sleeping gateway');
  const second=join([[{id:'work',images:merged}],[{id:'work',images:merged}]]);
  assert.equal(second[0].images.length,2,'repeat merge must be idempotent');
 }
@@ -84,8 +85,29 @@ for(const model of ['mimmi','yui']){
  const elapsed=Math.round(performance.now()-start);
  assert.equal(merged.length,1);
  assert.equal(merged[0].images.length,size,'large duplicate corpus must not lose or double-count photos');
- assert.ok(merged[0].images.every((p,i)=>p.ownerAlbum==='heavy'&&
-   p.storageNumber===i+1),'owner-backed SHA routes must win for every image');
- console.log('GALLERY_SHA_UNION_5000_PHOTO_OWNER_PRIORITY_PASS','elapsed_ms',elapsed);
+ assert.ok(merged[0].images.every((p,i)=>p.url==='stored-albums/heavy/'+(i+1)+'.jpg' &&
+   !p.ownerAlbum),'byte-identical Pages originals must win for every image');
+ console.log('GALLERY_SHA_UNION_5000_PHOTO_PAGES_PRIORITY_PASS','elapsed_ms',elapsed);
 }
+
+{
+ // A genuine Janus gallery has physically committed public samples
+ // and owner-backed catalog records for the same album; never make an
+ // existing local SHA depend on Render to display.
+ const albums=indexed('mimmi');
+ const local=albums[0].find(a=>a.id==='djawa-janus-scary-lantern-night');
+ const owner=albums[1].find(a=>a.id==='djawa-janus-scary-lantern-night');
+ assert.ok(local&&owner&&local.images.length>=7&&owner.images.length>=8);
+ const copied=new Set(local.images.map(p=>p.sha256));
+ const merged=join(albums).find(a=>a.id===local.id);
+ for(const photo of merged.images){
+   if(!copied.has(photo.sha256))continue;
+   const prior=local.images.find(p=>p.sha256===photo.sha256);
+   assert.equal(photo.url,prior.url,'Janus local saved original must survive union');
+   assert.ok(fs.existsSync(path.join(ROOT,'apps','mimmi-gallery',photo.url)),
+     'Janus saved original not present in current Pages source');
+ }
+ console.log('GALLERY_JANUS_SHA_IDENTICAL_LOCAL_ORIGINALS_SURVIVE_PASS');
+}
+
 console.log('GALLERY_NUMBER_COLLISION_EXACT_SHA_STORAGE_ROUTING_PASS');
