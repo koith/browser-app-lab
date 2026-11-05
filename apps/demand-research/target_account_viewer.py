@@ -16,6 +16,9 @@ from fastapi.responses import JSONResponse, FileResponse, Response
 from demand_archive import CloudArchive, sha256
 from target_account_archive import REGISTRY_RE, archive_key, account_cloud
 from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
+from verified_bundle_reader import (
+    BundleAccountCloud, available_bundles, latest_account_bundle,
+)
 
 HEX40=re.compile(r"^[a-f0-9]{40}$")
 GRAPH_PAGE=re.compile(r"^(followers|following)-([0-9]{8})\.json$")
@@ -55,6 +58,12 @@ def open_account(account):
         raise HTTPException(400,"Invalid archive account key")
     root=open_root()
     try:
+        # Prefer independently SHA-verified remote ZIP rescue when available.
+        # The older per-record TeraBox archive may be incomplete because
+        # partial writes failed before entry/checkpoint publication.
+        bundle=latest_account_bundle(root,account)
+        if bundle is not None:
+            return root,bundle.accounts[account],BundleAccountCloud(bundle)
         raw=root.read("metadata/target-accounts/"+account+".json",
                       cap=4000,optional=True)
         if raw is None:
@@ -223,9 +232,48 @@ def create_router(auth):
                     continue
                 data.append({"key":name[:-5],"platform":entry["platform"],
                              "profile_url":sanitize_safe_link(entry.get("profile_url"))})
+            seen={item["key"] for item in data}
+            # ZIP receipts are independently re-read and verified against the
+            # embedded 64-digit hashes, not inferred from GitHub green checks.
+            for bundle in available_bundles(root):
+                for account,entry in bundle.accounts.items():
+                    if account in seen:
+                        for row in data:
+                            if row["key"]==account:
+                                row["backup_kind"]="terabox_zip_sha_verified"
+                                row["posts_verified_in_bundle"]=bundle.post_count
+                                row["objects_verified_in_bundle"]=bundle.object_count
+                        continue
+                    seen.add(account)
+                    data.append({"key":account,"platform":entry["platform"],
+                                 "profile_url":sanitize_safe_link(entry.get("profile_url")),
+                                 "backup_kind":"terabox_zip_sha_verified",
+                                 "posts_verified_in_bundle":bundle.post_count,
+                                 "objects_verified_in_bundle":bundle.object_count})
             return JSONResponse({"accounts":data},headers=CACHE_HEADERS)
         except (RuntimeError,TypeError,ValueError,KeyError):
             raise HTTPException(502,"Private account index unavailable") from None
+
+    @router.get("/api/account-archives/{account}/backup-status")
+    async def backup_status(request:Request,account:str):
+        auth(request)
+        _,_,archive=open_account(account)
+        if isinstance(archive,BundleAccountCloud):
+            bundle=archive.bundle
+            return JSONResponse({
+                "storage":"private_terabox",
+                "state":"REMOTE_ZIP_SHA_VERIFIED",
+                "source_state":bundle.source_state,
+                "original_objects":bundle.object_count,
+                "public_posts":bundle.post_count,
+                "recorded_at":bundle.recorded_at,
+                "full_historical_coverage_guaranteed":False,
+            },headers=CACHE_HEADERS)
+        return JSONResponse({
+            "storage":"private_terabox",
+            "state":"LEGACY_PER_RECORD",
+            "full_historical_coverage_guaranteed":False,
+        },headers=CACHE_HEADERS)
 
     @router.get("/api/account-archives/{account}/profile")
     async def profile(request:Request,account:str):
