@@ -100,26 +100,40 @@ def send_verified_photo_with_catalog_recovery(model, body, token, headers, catal
 
 
 def verified_file(remote, key, env, maximum):
-    """Read via the existing proven same-account cat/copyto classifier.
+    """Read existing bytes only; repeat bounded same-owner transient reads.
 
-    The reader only changes methods on the established 400141 cat result.
-    Explicit provider denial (403/31326) stays rejected.
+    Never retry explicit provider access denial, not-found, malformed keys,
+    or an integrity mismatch as if it were a different authorized file.
     """
     if (not isinstance(key,str) or key.startswith("/")
-            or ".." in key.split("/") or "\\\\" in key
+            or ".." in key.split("/") or "\\" in key
             or not re.fullmatch("[a-zA-Z0-9/_ .-]+",key)):
         raise OwnerReadUnavailable("Invalid existing owner file")
-    with tempfile.TemporaryDirectory(prefix="owner-rescue-") as directory:
-        destination=Path(directory)/"verified-existing"
-        ok, reason=read_existing(remote,key,destination,env)
-        if not ok:
-            model="mimmi" if remote==REMOTE["mimmi"] else (
-                "yui" if remote==REMOTE["yui"] else "unknown")
-            print("OWNER_EXISTING_READ_UNAVAILABLE",model,reason,flush=True)
-            raise OwnerReadUnavailable("Existing owner file read failed")
-        if not destination.is_file() or not 1 <= destination.stat().st_size <= maximum:
-            raise OwnerReadUnavailable("Existing owner size rejected")
-        return destination.read_bytes()
+    model="mimmi" if remote==REMOTE["mimmi"] else (
+        "yui" if remote==REMOTE["yui"] else "unknown")
+    transient={"transport_timeout","retryable_http_failure",
+               "retryable_transport_failure","remote_read_empty",
+               "remote_read_rejected","provider_unavailable"}
+    pauses=(7,20,55)
+    for attempt in range(4):
+        with tempfile.TemporaryDirectory(prefix="owner-rescue-") as directory:
+            destination=Path(directory)/"verified-existing"
+            ok, reason=read_existing(remote,key,destination,env)
+            if ok:
+                if not destination.is_file() or not 1 <= destination.stat().st_size <= maximum:
+                    raise OwnerReadUnavailable("Existing owner size rejected")
+                return destination.read_bytes()
+        if reason in transient and attempt < len(pauses):
+            # Same account, same exact key and same documented read method.
+            # Isolated iPhone screenshot photos passed when probed later;
+            # one transient long album scan must not stop all other photos.
+            print("OWNER_EXISTING_TRANSIENT_SAME_ACCOUNT_RETRY",
+                  model,reason,attempt+1,flush=True)
+            time.sleep(pauses[attempt])
+            continue
+        print("OWNER_EXISTING_READ_UNAVAILABLE",model,reason,flush=True)
+        raise OwnerReadUnavailable("Existing owner file read failed")
+    raise OwnerReadUnavailable("Bounded same-owner retries exhausted")
 
 
 def photo_ok(photo,data,variant):
