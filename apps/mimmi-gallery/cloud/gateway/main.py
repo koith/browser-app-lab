@@ -271,9 +271,24 @@ async def get_catalog():
     async with _cache_lock:
         if _cache["catalog"] and (time.time()-_cache["time"]) < 180:
             return _cache["catalog"]
-        blob = await rclone_bytes("metadata/catalog.json", 4_000_000)
-        catalog = json.loads(blob)
-        if catalog.get("schema_version") != 1 or catalog.get("model") != "mimmi":
+        previous = _cache.get("catalog")
+        try:
+            blob = await rclone_bytes("metadata/catalog.json", 4_000_000)
+        except (HTTPException, OSError, asyncio.TimeoutError):
+            # Last valid same-owner SHA catalog was previously authenticated.
+            # Preserve browseability when TeraBox fails to supply a new copy.
+            # Photo bytes still require their own SHA verification.
+            if isinstance(previous, dict):
+                print("OWNER_VERIFIED_CATALOG_STALE_FALLBACK mimmi", flush=True)
+                return previous
+            raise
+        try:
+            catalog = json.loads(blob)
+        except (ValueError, UnicodeError):
+            raise HTTPException(status_code=502, detail="Invalid private catalog") from None
+        if (not isinstance(catalog, dict) or catalog.get("schema_version") != 1
+                or catalog.get("model") != "mimmi"
+                or not isinstance(catalog.get("albums"), list) or not catalog["albums"]):
             raise HTTPException(status_code=502, detail="Unsupported catalogue version")
         _cache["catalog"] = catalog
         _cache["time"] = time.time()
@@ -397,9 +412,21 @@ async def yui_catalog_bytes():
     async with _yui_cache_lock:
         if _yui_cache["catalog"] and time.time() - _yui_cache["time"] < 180:
             return _yui_cache["catalog"]
-        data = await rclone_bytes("metadata/catalog.json", 6_000_000, remote=YUI_REMOTE)
-        d = json.loads(data)
-        if d.get("schema_version") != 1 or d.get("model") != "yui" or not isinstance(d.get("albums"), list):
+        previous = _yui_cache.get("catalog")
+        try:
+            data = await rclone_bytes("metadata/catalog.json", 6_000_000, remote=YUI_REMOTE)
+        except (HTTPException, OSError, asyncio.TimeoutError):
+            if isinstance(previous, dict):
+                print("OWNER_VERIFIED_CATALOG_STALE_FALLBACK yui", flush=True)
+                return previous
+            raise
+        try:
+            d = json.loads(data)
+        except (ValueError, UnicodeError):
+            raise HTTPException(status_code=502, detail="Invalid Yui private catalog") from None
+        if (not isinstance(d, dict) or d.get("schema_version") != 1
+                or d.get("model") != "yui"
+                or not isinstance(d.get("albums"), list) or not d["albums"]):
             raise HTTPException(status_code=502, detail="Incorrect Yui private catalog")
         _yui_cache.update(catalog=d, time=time.time())
         return d
@@ -935,9 +962,12 @@ async def sync_archive_session(request: Request):
             if model == "mimmi":
                 global COOKIE
                 COOKIE = candidate
-                _cache.update(catalog=None, time=0.0)
+                _cache.update(catalog=catalog_data, time=time.time())
             else:
-                _yui_cache.update(catalog=None, time=0.0)
+                _yui_cache.update(catalog=catalog_data, time=time.time())
+            # The OIDC-authenticated session just read and checked the owner's
+            # actual catalog. Do not erase it or immediately re-fetch it.
+            _owner_rescue_until[model] = time.time() + 5400
             _provider_denial_gate.success(remote)
             verified.append(model)
             print("OWNER_SESSION_VERIFIED", model, flush=True)
