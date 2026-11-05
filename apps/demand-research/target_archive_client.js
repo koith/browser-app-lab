@@ -14,8 +14,13 @@
   const submit=$("targetArchiveSubmit");
   const workflow=$("targetArchiveWorkflow");
   const viewer=document.createElement("a");
-  viewer.href="/account-archive";
-  viewer.textContent="저장된 계정 아카이브 보기";
+  viewer.href="?tab=archives";
+  viewer.textContent="백업 보관함 열기";
+  viewer.addEventListener("click",event=>{
+    if(typeof window.INTERSECTION_openArchive==="function"){
+      event.preventDefault();window.INTERSECTION_openArchive("");
+    }
+  });
   viewer.style.marginLeft="14px";
   viewer.hidden=true;
   workflow.after(viewer);
@@ -32,8 +37,13 @@
   const libraryTitle=document.createElement("h4");
   libraryTitle.textContent="저장된 계정";
   const libraryAll=document.createElement("a");
-  libraryAll.href="/account-archive";
+  libraryAll.href="?tab=archives";
   libraryAll.textContent="보관함 전체 보기";
+  libraryAll.addEventListener("click",event=>{
+    if(typeof window.INTERSECTION_openArchive==="function"){
+      event.preventDefault();window.INTERSECTION_openArchive("");
+    }
+  });
   libraryAll.className="target-archive-view-link";
   const libraryRows=document.createElement("div");
   libraryRows.id="targetArchiveLibraryRows";
@@ -66,7 +76,12 @@
   function appendViewerLink(container,accountKey,text){
     if(!/^(bluesky|mastodon)-[a-f0-9]{40}$/.test(accountKey))return;
     const a=document.createElement("a");
-    a.href="/account-archive?account="+encodeURIComponent(accountKey);
+    a.href="?tab=archives&account="+encodeURIComponent(accountKey);
+    a.addEventListener("click",event=>{
+      if(typeof window.INTERSECTION_openArchive==="function"){
+        event.preventDefault();window.INTERSECTION_openArchive(accountKey);
+      }
+    });
     a.textContent=text||"게시글 보기";
     a.className="target-archive-view-link";
     container.append(a);
