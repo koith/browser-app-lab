@@ -72,3 +72,28 @@ def test_bundle_snapshot_paths_are_immutable_and_discoverable(tmp_path):
     assert len(summary["objects"])==1
     with zipfile.ZipFile(out) as archive:
         assert archive.read(summary["objects"][0]["key"])==b"test"
+
+
+def test_authenticated_manual_workflow_account_inputs_queue_verified_zip(monkeypatch):
+    monkeypatch.setenv("TARGET_PLATFORM","bluesky")
+    monkeypatch.setenv("TARGET_ACCOUNT","qa-example.bsky.social")
+    monkeypatch.setenv("TARGET_MAX_PAGES","1")
+    post=blue_row("manual001","synthetic manual workflow original")
+    api=BlueAPI({None:([post],None)})
+    seen=[]
+    def simulated_remote(package,*,run_id,account_hash):
+        assert run_id=="123456789"
+        seen.append(account_hash)
+        return {"state":"SYNTHETIC_ONLY","bytes":package.stat().st_size}
+    result=execute_bundle(api=api,run_id="123456789",cloud_check=False,
+                          uploader=simulated_remote)
+    assert result["public_posts_in_bundle"]==1
+    assert seen
+
+
+def test_authenticated_workflow_rejects_unsafe_account_before_upload(monkeypatch):
+    monkeypatch.setenv("TARGET_PLATFORM","bluesky")
+    monkeypatch.setenv("TARGET_ACCOUNT","javascript:invalid")
+    monkeypatch.setenv("TARGET_MAX_PAGES","2")
+    with pytest.raises(ValueError):
+        execute_bundle(cloud_check=False)

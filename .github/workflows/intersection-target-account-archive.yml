@@ -24,9 +24,9 @@ on:
           - "2"
           - "3"
           - "4"
-  schedule:
-    # Resume registered public accounts with one bounded, private history pass.
-    - cron: "17 */6 * * *"
+  # Legacy per-record writer remains available for manual forensic replays.
+  # Scheduled ongoing backups use intersection-target-account-bundle.yml,
+  # which passed actual TeraBox ZIP SHA readback; do not run both periodically.
   push:
     branches: [main]
     # One explicitly selected public target request can be initiated by a
