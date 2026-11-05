@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Append-only, SHA-verified existing-owner private Backblaze B2 mirror.
+"""Append-only, SHA-verified existing-owner private R2/B2 mirror.
 
 This CLI is an explicit opt-in migration runner, NOT a crawler, not a public
 photo publisher, and not the canonical TeraBox source of truth. Refuse every
-write unless a private B2 bucket and limited application key are verified.
+write unless a private, free-tier-budgeted bucket and limited application key are verified.
 No secrets, full paths, signed URLs, image bodies or provider stderr are logged.
 """
 from __future__ import annotations
@@ -32,41 +32,37 @@ from restore_known_owner_cache import (
     verified_same_owner_existing_read, ensure_only_private_original, photo_ok,
 )
 
+from private_mirror_free_policy import (
+    PolicyRefusal, check_existing_owner_budget, validated_private_config,
+    require_cloudflare_private_standard,
+)
+
 def credentials():
-    bucket=os.environ.get("OWNER_REPLICA_BUCKET","")
-    remote=os.environ.get("OWNER_DURABLE_REMOTE","")
-    endpoint=os.environ.get("RCLONE_CONFIG_OWNERREPLICA_ENDPOINT","")
-    region=os.environ.get("RCLONE_CONFIG_OWNERREPLICA_REGION","")
-    key=os.environ.get("RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID","")
-    secret=os.environ.get("RCLONE_CONFIG_OWNERREPLICA_SECRET_ACCESS_KEY","")
-    if (not re.fullmatch(r"[a-z0-9][a-z0-9-]{5,49}",bucket)
-            or remote!="ownerreplica:"+bucket
-            or os.environ.get("RCLONE_CONFIG_OWNERREPLICA_TYPE")!="s3"
-            or os.environ.get("RCLONE_CONFIG_OWNERREPLICA_PROVIDER")!="Other"
-            or not re.fullmatch(r"https://s3\.[a-z0-9-]+\.backblazeb2\.com",endpoint)
-            or not re.fullmatch(r"[a-z0-9-]{4,32}",region)
-            or region not in endpoint
-            or min(len(key),len(secret))<12):
-        raise RuntimeError("Private mirror account/bucket configuration is incomplete")
-    return bucket,remote,endpoint,region,key,secret
+    return validated_private_config()
 
 def require_private_bucket():
-    bucket,remote,endpoint,region,key,secret=credentials()
-    client=boto3.client("s3",region_name=region,endpoint_url=endpoint,
-        aws_access_key_id=key,aws_secret_access_key=secret,
+    config=credentials()
+    if config["provider"]=="cloudflare-r2":
+        # The R2 S3 GetBucketAcl API is not implemented; use Cloudflare's
+        # own read-only API to reject public r2.dev and custom domains, and
+        # reject Infrequent Access (not covered by R2 Standard free tier).
+        remote=require_cloudflare_private_standard(config)
+        print("PRIVATE_R2_STANDARD_NONPUBLIC_PATHS_VERIFIED",flush=True)
+        return remote
+    client=boto3.client("s3",region_name=config["region"],
+        endpoint_url=config["endpoint"],aws_access_key_id=config["key"],
+        aws_secret_access_key=config["secret"],
         config=Config(retries={"max_attempts":2}))
-    acl=client.get_bucket_acl(Bucket=bucket)
+    acl=client.get_bucket_acl(Bucket=config["bucket"])
     grants=acl.get("Grants",[])
     if not grants:
-        raise RuntimeError("Bucket privacy ACL was not verifiable")
+        raise RuntimeError("Private B2 ACL was not verifiable")
     for item in grants:
         grantee=item.get("Grantee",{})
         if grantee.get("Type")=="Group" or "AllUsers" in str(grantee.get("URI","")):
-            raise RuntimeError("Refusing media upload to a nonprivate bucket")
-    # A standalone account-key check must be done for EACH model/shard job:
-    # read-write credentials are never sent to the public Pages browser.
+            raise RuntimeError("Refusing owner media upload to public bucket")
     print("PRIVATE_B2_BUCKET_ACL_VERIFIED",flush=True)
-    return remote
+    return config["remote"]
 
 def run_cmd(argv,output):
     with output.open("wb") as out:
@@ -129,6 +125,10 @@ def planned_rows(model,catalog):
     return rows
 
 def main(args):
+    # A no-network, all-model free-tier guard executes before any owner file
+    # reads or private writes; this is a project cap, not provider-wide billing.
+    budget=check_existing_owner_budget(ROOT)
+    print("OWNER_PRIVATE_FREE_BUDGET_PLAN",json.dumps(budget,sort_keys=True),flush=True)
     remote=require_private_bucket()
     cookie=os.environ.get(COOKIE[args.model],"")
     if not 8<=len(cookie)<=16000:
