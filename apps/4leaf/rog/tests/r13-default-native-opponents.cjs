@@ -18,7 +18,7 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
    const map=window.__LEAF_CHR_BODY_MAP__;
    const identity=map.lookup(card),frames=map.resolve(card);
    return {card,member:identity?.member,source:frames?.originalMember,
-    prefix:frames?.frames?.[0]?.url?.replace(/-\\d{3}\\.png$/,'-'),length:frames?.frames?.length};
+    prefix:frames?.frames?.[0]?.url?.replace(/-\d{3}\.png$/,'-'),length:frames?.frames?.length};
   }));
   assert.deepEqual(owner.map(o=>o.member),['1026','1029'],
    'native CHR byte +260 must map each default opponent to its own original member');
