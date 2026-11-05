@@ -61,6 +61,42 @@ R2_READY = bool(
     and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_TYPE") == "s3"
     and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_PROVIDER") == "Cloudflare"
 )
+
+# Optional *private* S3-compatible owner mirror (B2 / R2). Never serves
+# anonymous bucket URLs or trusts unverified remote bytes. A missing mirror
+# configuration is inert; existing TeraBox routes continue unchanged.
+_DURABLE_OWNER_BASE = os.environ.get("OWNER_DURABLE_REMOTE", "").rstrip("/")
+_DURABLE_OWNER_READY = bool(
+    _DURABLE_OWNER_BASE.startswith("ownerreplica:")
+    and os.environ.get("RCLONE_CONFIG_OWNERREPLICA_TYPE") == "s3"
+    and os.environ.get("RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID")
+    and os.environ.get("RCLONE_CONFIG_OWNERREPLICA_SECRET_ACCESS_KEY")
+    and os.environ.get("RCLONE_CONFIG_OWNERREPLICA_ENDPOINT", "").startswith("https://")
+)
+
+def durable_owner_remote(model: str) -> str | None:
+    """Strictly separated namespaces; no client-provided owner selection."""
+    if model not in ("mimmi", "yui") or not _DURABLE_OWNER_READY:
+        return None
+    return _DURABLE_OWNER_BASE + "/" + model
+
+async def catalog_source_bytes(model: str, maximum: int) -> bytes:
+    """A configured, private durable mirror takes precedence over TeraBox.
+
+    Both feeds must contain the already SHA-pinned canonical owner catalog.
+    Callers independently reject a wrong model/schema before exposing data.
+    """
+    mirror = durable_owner_remote(model)
+    if mirror:
+        try:
+            return await rclone_bytes("metadata/catalog.json", maximum, remote=mirror)
+        except HTTPException as exc:
+            if exc.status_code not in (404, 502, 503, 504):
+                raise
+            print("OWNER_PRIVATE_MIRROR_CATALOG_UNAVAILABLE", model, flush=True)
+    remote = REMOTE if model == "mimmi" else YUI_REMOTE
+    return await rclone_bytes("metadata/catalog.json", maximum, remote=remote)
+
 TOKEN = os.environ.get("GALLERY_ACCESS_TOKEN", "")
 COOKIE = os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE", "")
 if os.environ.get('ARCHIVE_STORAGE_STATE_SEALED'):
@@ -93,11 +129,27 @@ async def verified_remote_media(key: str, size: int, digest: str, remote: str):
     if (type(size) is not int or not 1 <= size <= 140_000_000
             or not isinstance(digest, str) or not re.fullmatch(r'[a-f0-9]{64}', digest)):
         raise HTTPException(status_code=502, detail='Invalid private media integrity metadata')
-    async def load():
-        async def read():return await rclone_bytes(key, size + 1, remote=remote)
-        return await read_media_with_transport_recovery(read)
+
+    async def verified_from(source: str):
+        async def load():
+            async def read():return await rclone_bytes(key, size + 1, remote=source)
+            return await read_media_with_transport_recovery(read)
+        return await _media_cache.get(source, key, size, digest, load)
+
+    model = "mimmi" if remote == REMOTE else ("yui" if remote == YUI_REMOTE else None)
+    mirror = durable_owner_remote(model) if model else None
+    if mirror:
+        try:
+            return await verified_from(mirror)
+        except ValueError:
+            # Corrupt replica bytes are NEVER accepted or silently downgraded.
+            raise HTTPException(status_code=502, detail="Private mirror SHA-256 integrity failed")
+        except HTTPException as exc:
+            if exc.status_code not in (404, 502, 503, 504):
+                raise
+            print("OWNER_PRIVATE_MIRROR_MEDIA_UNAVAILABLE", model, flush=True)
     try:
-        return await _media_cache.get(remote, key, size, digest, load)
+        return await verified_from(remote)
     except ValueError:
         raise HTTPException(status_code=502, detail='Cloud media SHA-256 integrity check failed')
 
@@ -271,7 +323,7 @@ async def get_catalog():
     async with _cache_lock:
         if _cache["catalog"] and (time.time()-_cache["time"]) < 180:
             return _cache["catalog"]
-        blob = await rclone_bytes("metadata/catalog.json", 4_000_000)
+        blob = await catalog_source_bytes("mimmi", 4_000_000)
         catalog = json.loads(blob)
         if catalog.get("schema_version") != 1 or catalog.get("model") != "mimmi":
             raise HTTPException(status_code=502, detail="Unsupported catalogue version")
@@ -397,7 +449,7 @@ async def yui_catalog_bytes():
     async with _yui_cache_lock:
         if _yui_cache["catalog"] and time.time() - _yui_cache["time"] < 180:
             return _yui_cache["catalog"]
-        data = await rclone_bytes("metadata/catalog.json", 6_000_000, remote=YUI_REMOTE)
+        data = await catalog_source_bytes("yui", 6_000_000)
         d = json.loads(data)
         if d.get("schema_version") != 1 or d.get("model") != "yui" or not isinstance(d.get("albums"), list):
             raise HTTPException(status_code=502, detail="Incorrect Yui private catalog")
