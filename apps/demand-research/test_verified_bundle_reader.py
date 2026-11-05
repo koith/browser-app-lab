@@ -133,3 +133,18 @@ def test_many_snapshots_selects_latest_verified_one_per_account(
     current=list(bundles.available_bundles(root))
     assert len(current)==1
     assert current[0].name==filename
+
+
+def test_verified_zip_library_survives_broken_nested_legacy_registry(private_zip_client):
+    client,root,filename,post,profile=private_zip_client
+    runner=root.runner
+    def unavailable_old_registry(args,data=None,timeout=150,allow_missing=False):
+        if args[0]=="lsf" and "/metadata/target-accounts" in args[1]:
+            raise RuntimeError("old nested registry unavailable")
+        return runner(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    root.runner=unavailable_old_registry
+    bundles._cache.clear()
+    response=client.get("/api/account-archives")
+    assert response.status_code==200,response.text
+    assert len(response.json()["accounts"])==1
+    assert response.json()["accounts"][0]["backup_kind"]=="terabox_zip_sha_verified"
