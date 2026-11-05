@@ -9053,6 +9053,22 @@
         "P0-RELEASE"
       ],
       "details": "PR #727, main d10ad1ccf0fb6a9ad52b785dc997dcf40e8d4d52: original 97 body CHR mappings including newly recovered 19; 13 slots 0-12 with native source tick/frame order; D6/D4 slot20 tumble -> slot12 impact -> engine verified final pip; Chromium SHA verifies 662 PNGs and visible 19 recovered bodies, roll shows native source frames; 13/13 PR workflow success including WebKit. Beta.65/PWA v152 merged. PUBLIC PAGES delivery not yet verified when this ledger event was written; do not mark full original fidelity complete. Missing body 0156, effect 2125, slots 13-16, exact tick lengths, 26 DMP and battle viewpoint remain."
+    },
+    {
+      "seq": 422,
+      "date": "2026-11-05",
+      "type": "R12_ORIGINAL_ACTOR_DICE_PUBLIC_SOURCE_VERIFIED",
+      "requestId": "REQ-20261105-4LEAF-R12-ORIGINAL-ACTOR-DICE-CHAT-DEPLOY",
+      "taskIds": [
+        "M05",
+        "M07",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-RELEASE",
+        "ACT-03",
+        "DIE-02"
+      ],
+      "details": "After PR #727 13/13 CI success and merge SHA d10ad1ccf0fb6a9ad52b785dc997dcf40e8d4d52, actual public https://koith.github.io/browser-app-lab/apps/4leaf/rog/ served app-version.json beta.65/PWA v152, sw.js v152, dice-fall.js with OBS slot20-fall+slot12-impact, chr-body-source-map.js recovered identity cache, public original/OBS/referenced/chr-bodies-manifest.js (19 native bodies/662 frames), original/OBS/dice-blocks/manifest.js (63 source PNG frames), native-card-action-sequences.js (97 CHR bodies). This is PUBLIC SOURCE verification plus matching SHA browser CI, NOT an iPhone physical-device or 2002 visual complete-fidelity certification."
     }
   ],
   "restorationPriority": {
