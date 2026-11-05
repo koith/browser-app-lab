@@ -18,8 +18,7 @@ from pathlib import Path
 from PIL import Image
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from restore_known_owner_cache import verified_owner_catalog, REMOTE, COOKIE
-from gateway.cookie_format import cookie_header
+from restore_known_owner_cache import verified_owner_catalog, REMOTE, COOKIE, cookie_header
 
 TARGET = {
     "mimmi": ("v2ph-actor-a8n8n85a",44),
