@@ -16,8 +16,13 @@ HTML="""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <script src="archive_tab.js" defer></script></head><body>
 <button id="viewArchives">백업 보관함</button>
 <section id="archivesView">
+ <div role="tablist">
+  <button id="archiveModeAuto" role="tab" aria-selected="false">자동 저장 게시글</button>
+  <button id="archiveModeAccounts" role="tab" aria-selected="false">지정 계정 백업</button>
+ </div>
  <p id="archiveHubStatus"></p>
- <div id="archiveHubActions" hidden><button id="archiveHubReload">새로고침</button></div>
+ <div id="archiveHubActions" hidden><button id="archiveHubReload">새로고침</button>
+ <a id="archiveHubFullView"></a></div>
  <div id="archiveHubFrameBox" hidden><iframe id="archiveHubFrame"></iframe></div>
 </section></body></html>"""
 
@@ -45,6 +50,10 @@ def exercise(browser_type,label):
                     requests.append("viewer")
                     route.fulfill(status=200,content_type="text/html",
                       body='<html><body><p id="archived-posts">Synthetic verified posts / photos</p></body></html>')
+                elif parsed.path=="/auto-archive":
+                    requests.append("automatic-viewer")
+                    route.fulfill(status=200,content_type="text/html",
+                      body='<html><body><p id="keyword-posts">Synthetic auto-captured original videos and images</p></body></html>')
                 elif parsed.path.endswith("/archive_tab.js"):
                     route.fulfill(status=200,content_type="application/javascript",body=JS)
                 elif parsed.path==urlsplit(base).path:
@@ -53,8 +62,7 @@ def exercise(browser_type,label):
                     route.abort()
             page.route("**/*",route_it)
             page.goto(base+"?tab=archives&account="+KEY,wait_until="domcontentloaded",timeout=30000)
-            page.wait_for_function("""() => document.querySelector('#archiveHubStatus')
-               .textContent.includes('비공개')""",timeout=10000)
+            page.locator("#archiveHubStatus").wait_for(state="visible",timeout=12000)
             if private:
                 page.locator("#archiveHubFrameBox").wait_for(state="visible",timeout=12000)
                 iframe=page.locator("#archiveHubFrame")
@@ -67,6 +75,17 @@ def exercise(browser_type,label):
                 assert "account=mastodon-" in page.url
                 assert "viewer" in requests
                 assert page.locator("#archiveHubActions").is_visible()
+                page.locator("#archiveModeAuto").click()
+                assert page.locator("#archiveHubFrame").get_attribute("src")=="/auto-archive"
+                page.frame_locator("#archiveHubFrame").locator("#keyword-posts").wait_for(
+                    state="visible",timeout=12000)
+                assert "automatic-viewer" in requests
+                assert page.locator("#archiveHubFullView").get_attribute("href")=="/auto-archive"
+                page.locator("#archiveModeAccounts").click()
+                assert page.locator("#archiveHubFrame").get_attribute("src")=="/account-archive"
+                page.evaluate("window.INTERSECTION_openArchive('bluesky-'+('a'.repeat(40)))")
+                assert page.locator("#archiveHubFrame").get_attribute("src")==(
+                  "/account-archive?account="+KEY)
             else:
                 assert page.locator("#archiveHubFrameBox").is_hidden()
                 assert page.locator("#archiveHubFrame").get_attribute("src") is None
@@ -77,6 +96,10 @@ def exercise(browser_type,label):
                 assert page.locator("#archiveHubFrameBox").is_hidden()
                 assert "viewer" not in requests
                 assert "session" not in requests, "public Pages must not probe private sessions"
+                page.locator("#archiveModeAuto").click()
+                assert page.locator("#archiveHubFrame").get_attribute("src") is None
+                page.locator("#archiveModeAccounts").click()
+                assert page.locator("#archiveHubFrame").get_attribute("src") is None
             assert not errors,errors
             print("ARCHIVE_TAB_BROWSER_PASS",label,
                   "private_gateway" if private else "public_unlinked_then_login",
