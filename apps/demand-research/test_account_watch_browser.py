@@ -136,6 +136,16 @@ def run():
             assert page.locator(".primary-views button").count()==2
             assert not page.locator("#accountsView").is_visible()
             page.locator("#viewAccounts").click()
+            # UX: a clear sequence instead of five competing technical panels.
+            assert page.locator("#accountOverview").is_visible()
+            assert page.locator("#accountWatchSection").is_visible()
+            assert page.locator("#accountBackupSection").is_visible()
+            assert page.locator("#accountAutoMount #intersectionAutoAccounts").count()==1
+            assert page.locator("#accountAutoSearch").is_visible()
+            assert page.locator("#accountServerData").is_hidden()
+            assert page.locator("#accountMoreOptions").evaluate("(el)=>el.open") is False
+            labels=page.locator(".account-section-heading h3").all_inner_texts()
+            assert labels==["전체 계정 현황","관심 계정 관리","계정 백업"],labels
             assert page.locator("#accountDiscoveredList .account-discovered-card").count()==1
             assert "1개" in page.locator("#accountDiscoveredCount").text_content()
             page.locator("#viewPosts").click()
@@ -187,7 +197,7 @@ def run():
             assert int(page.locator("#accountMetricRepeat").text_content())>=2
             assert page.locator("#accountMetricCommerce").text_content()!=""
 
-            assert "계정 수를 사람 수로 간주하지" in page.locator(".account-analysis-note").inner_text()
+            assert "SNS 계정 수는 사람 수가 아닙니다" in page.locator(".account-analysis-note").text_content()
             # Add a public Mastodon account with a private status fixture: only
             # explicitly public statuses may appear in analysis.
             page.locator("#accountProfileInput").fill("https://mastodon.social/@qa")
@@ -226,13 +236,21 @@ def run():
               window.dispatchEvent(new Event('intersection:feed-updated'));
             }""")
             page.wait_for_function("window.INTERSECTION_autoAccountStats().accountCount===20002",timeout=15000)
-            assert page.locator("#accountAutoRows > div").count()==80
+            assert page.locator("#accountAutoRows > div").count()==12
             page.locator("#accountAutoMore").click()
-            assert page.locator("#accountAutoRows > div").count()==160
+            assert page.locator("#accountAutoRows > div").count()==24
             page.wait_for_function("window.INTERSECTION_autoAccountStats().linkGroups===1",timeout=35000)
             assert page.locator("#accountAutoGroups article").count()==1
             assert "20,002" in page.locator("#accountAutoSummary").inner_text()
             assert page.locator("#accountAutoGroups article a").count()==2
+            page.locator("#accountAutoSearch").fill("qa-19999")
+            assert page.locator("#accountAutoRows > div").count()==1
+            assert "qa-19999.bsky.social" in page.locator("#accountAutoRows").inner_text()
+            page.locator("#accountAutoSearch").fill("")
+            assert page.locator("#accountAutoRows > div").count()==12
+            # A narrow phone must not require sideways scrolling.
+            width=page.evaluate("({scroll:document.documentElement.scrollWidth,viewport:innerWidth})")
+            assert width["scroll"]<=width["viewport"]+2,width
             assert not errors,errors
             print("PUBLIC_ACCOUNT_WATCH_BROWSER_QA",json.dumps({
               "tabs":2,"discovered_source_accounts_visible":True,"opt_in_profiles_saved":3,"bluesky_direct_public_feed":True,

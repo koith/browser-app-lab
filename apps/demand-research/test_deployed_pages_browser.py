@@ -21,7 +21,9 @@ URL = os.getenv(
     "INTERSECTION_PAGES_URL",
     "https://koith.github.io/browser-app-lab/apps/demand-research/"
 )
-FILES = ("index.html", "post_activity_ranking.js", "public_video_trends.js", "target_archive_client.js")
+FILES = ("index.html", "post_activity_ranking.js", "public_video_trends.js",
+         "target_archive_client.js", "account_auto_analysis.js", "account_watch.js",
+         "account_index_client.js", "account_group_client.js")
 EXPECTED = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
             for name in FILES}
 
@@ -47,7 +49,7 @@ def verify_pages_bytes():
             except Exception:
                 failures.append(name + ":unavailable")
         if not failures:
-            print("PAGES_DEPLOYED_MAIN_BYTES_SHA256_PASS: index, ranking, video and backup button JS")
+            print("PAGES_DEPLOYED_MAIN_BYTES_SHA256_PASS: index, ranking, video, account analysis and backup button JS")
             return
         if attempt < 17:
             time.sleep(12)
@@ -87,6 +89,16 @@ def inspect_browser(browser_type, label, width, height):
         # control must still become usable and open the authenticated GitHub
         # workflow rather than remaining disabled forever.
         page.locator("#viewAccounts").click()
+        # Actual deployed account-analysis page must prioritize three clear
+        # user tasks and keep implementation details behind disclosure.
+        page.locator("#accountAutoSearch").wait_for(state="visible",timeout=12000)
+        assert page.locator(".account-section-heading h3").all_inner_texts()==[
+            "전체 계정 현황","관심 계정 관리","계정 백업"]
+        assert page.locator("#accountAutoMount #intersectionAutoAccounts").count()==1
+        assert page.locator("#accountServerData").is_hidden()
+        assert page.locator("#accountMoreOptions").evaluate("(el)=>el.open") is False
+        assert page.locator("#accountBackupSection").is_visible()
+        assert page.locator("#accountWatchForm").is_visible()
         page.locator("#targetArchiveStatus").get_by_text("공개 페이지",exact=False).wait_for(timeout=12000)
         page.locator("#targetArchiveAccount").fill(
             "https://bsky.app/profile/synthetic-qa.bsky.social")

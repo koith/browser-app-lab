@@ -8,16 +8,21 @@ const node=(tag,value)=>{
  const n=document.createElement(tag);if(value!==undefined)n.textContent=String(value);return n;
 };
 const section=node("section");section.id="intersectionOwnerGroups";
+const privateDetails=$("accountServerData");
+if(privateDetails)privateDetails.hidden=false;
 section.setAttribute("aria-label","복수 SNS 계정 통합 그룹");
-const title=node("h3","복수 SNS 계정 통합 · A 그룹 보기");
-const summary=node("p","공개적으로 서로를 자신의 계정이라고 밝힌 SNS 프로필을 그룹으로 묶습니다.");
+const title=node("h3","서버에서 확인한 계정 연결");
+const summary=node("p","SNS 프로필에 공개된 상호 연결 정보로 묶은 계정입니다.");
 summary.id="intersectionGroupSummary";
-const caveat=node("p","이 그룹은 공개 자기 계정 선언의 상호 연결 관계입니다. 법적 신원이나 동일 개인을 확정하지 않으며, 미확인 계정은 임의 병합하지 않습니다.");
+const caveat=node("p","두 프로필이 서로를 자신의 다른 계정이라고 소개한 경우만 연결합니다. 그 외 계정은 자동으로 합치지 않습니다.");
 const groups=node("div");groups.id="intersectionGroupRows";
 const more=node("button","연결 그룹 더 보기");more.type="button";more.id="intersectionGroupMore";
 section.append(title,summary,caveat,groups,more);
+const mount=$("accountGroupMount");
 const before=$("privateAccountIndex")||$("intersectionAutoAccounts");
-if(before)before.before(section);else host.prepend(section);
+if(mount)mount.append(section);
+else if(before)before.before(section);
+else host.prepend(section);
 const css=node("style");
 css.textContent="#intersectionOwnerGroups{background:#fff;padding:18px;border:2px solid #28469e;box-shadow:3px 3px 0 #ffda33;margin-bottom:18px;color:#14244a}"+
  "#intersectionOwnerGroups h3{font-size:18px;margin:0 0 8px}"+
@@ -34,17 +39,16 @@ let rows=[],total=0,count=null,unresolved=0,loading=false,last=0,failed="";
 function render(){
  if(failed){summary.textContent="그룹 조회 불가: "+failed;more.hidden=true;return}
  if(count===null){summary.textContent="확인된 연결 관계 집계 중…";more.hidden=true;return}
- summary.textContent="수집 계정 "+Number(count).toLocaleString("ko-KR")+"개 · 양방향 자기 계정 선언 그룹 "+
-  Number(total).toLocaleString("ko-KR")+"개 · 연결된 계정 "+
-  Number(count-unresolved).toLocaleString("ko-KR")+"개 · 연결 미확인 "+
+ summary.textContent="서버 누적 계정 "+Number(count).toLocaleString("ko-KR")+"개 중 공개 연결 확인 그룹 "+
+  Number(total).toLocaleString("ko-KR")+"개 · 연결 정보 미확인 계정 "+
   Number(unresolved).toLocaleString("ko-KR")+"개";
  const fragment=document.createDocumentFragment();
  for(const group of rows){
   const details=node("details");
-  details.append(node("summary","그룹 "+group.group_id+" · SNS 계정 "+group.account_count+
-    "개 · 고유 원문 "+group.distinct_posts+"건 · 하루 1회 제한 기여 "+(group.capped_daily_contributions||0)+"일"));
+  details.append(node("summary","연결 그룹 "+group.group_id+" · 계정 "+group.account_count+
+    "개 · 확인된 게시글 "+group.distinct_posts+"건"));
   const body=node("div");body.className="group-body";
-  body.append(node("p","연결 근거: 양방향 공개 프로필에서 서로를 자신의 계정으로 명시"));
+  body.append(node("p","연결 근거: 두 공개 프로필에 서로 다른 SNS 계정이라는 소개가 있습니다."));
   for(const a of group.accounts||[]){
    const line=node("div"),link=node("a",a.platform+" · "+a.profileUrl);
    link.href=a.profileUrl;link.target="_blank";link.rel="noopener noreferrer";link.referrerPolicy="no-referrer";
@@ -52,7 +56,7 @@ function render(){
   }
   details.append(body);fragment.append(details);
  }
- if(!rows.length)fragment.append(node("p","확인된 자기 계정 선언 그룹이 없습니다. 미발견은 운영자가 각각 다른 사람이라는 증거가 아닙니다."));
+ if(!rows.length)fragment.append(node("p","공개 연결을 확인한 그룹이 아직 없습니다."));
  groups.replaceChildren(fragment);
  more.hidden=rows.length>=total;
  more.disabled=loading;
