@@ -169,7 +169,7 @@ def names_from_cloud(root):
     return sorted((name for name in raw.decode("utf-8","replace").splitlines()
                    if BUNDLE_RE.fullmatch(name)),
                   key=lambda value:int(BUNDLE_RE.fullmatch(value).group(2)),
-                  reverse=True)[:150]
+                  reverse=True)[:20000]
 
 
 def load_verified_bundle(root,name):
@@ -192,10 +192,17 @@ def load_verified_bundle(root,name):
 
 
 def available_bundles(root):
-    # A bad newer backup must not erase a previously SHA-verified snapshot.
+    # Read one latest verified ZIP for each account, instead of downloading
+    # every old 17MB snapshot whenever the browser opens the saved-account list.
+    verified_prefixes=set()
     for name in names_from_cloud(root):
+        account_prefix=BUNDLE_RE.fullmatch(name).group(1)
+        if account_prefix in verified_prefixes:
+            continue
         try:
-            yield load_verified_bundle(root,name)
+            bundle=load_verified_bundle(root,name)
+            verified_prefixes.add(account_prefix)
+            yield bundle
         except (BundleInvalid,RuntimeError,ValueError):
             continue
 
