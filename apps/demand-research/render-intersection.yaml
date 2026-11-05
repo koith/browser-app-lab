@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: intersection-originals-free
+    runtime: docker
+    plan: free
+    region: singapore
+    repo: https://github.com/koith/browser-app-lab
+    branch: main
+    dockerfilePath: apps/demand-research/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    buildFilter:
+      paths:
+        - apps/demand-research/**
+    envVars:
+      - key: DEMAND_TERABOX_REMOTE
+        value: archive:DemandResearch
+      - key: DEMAND_ARCHIVE_DISPATCH_REPO
+        value: koith/browser-app-lab
+      - key: DEMAND_AUTO_PUBLIC_INDEX
+        value: "0"
+      - key: DEMAND_VIEWER_TOKEN
+        sync: false
+      - key: RCLONE_CONFIG_ARCHIVE_COOKIE
+        sync: false
+      - key: DEMAND_ARCHIVE_DISPATCH_TOKEN
+        sync: false
