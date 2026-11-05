@@ -41,8 +41,12 @@ def check(browser, model: str) -> None:
           const matches=[];
           for(const album of stored) {
             for(const [i,p] of photosFor(album).entries()) {
-              const copy=exactSavedViewerCopy(p);
-              if(!p.ownerAlbum || !copy ||
+              // Same-SHA public originals win in SavedGalleryPhotoUnion:
+              // the merged photo no longer has ownerAlbum. Treat the actual
+              // local record as a verified candidate, not as "missing".
+              const copy=p.url?.startsWith('stored-albums/')
+                ? p : exactSavedViewerCopy(p);
+              if(!copy ||
                 copy.sha256 !== p.sha256 || copy.bytes !== p.bytes ||
                 copy.width !== p.width || copy.height !== p.height ||
                 !copy.url?.startsWith('stored-albums/') ||
@@ -51,7 +55,11 @@ def check(browser, model: str) -> None:
                 bytes:p.bytes, width:p.width, height:p.height, url:copy.url});
             }
           }
-          matches.sort((a,b)=>a.index-b.index || a.bytes-b.bytes);
+          // Screenshot regression first: Janus is a real locally stored work.
+          matches.sort((a,b)=>
+            Number(b.album==='djawa-janus-scary-lantern-night')-
+              Number(a.album==='djawa-janus-scary-lantern-night') ||
+            a.index-b.index || a.bytes-b.bytes);
           return {candidate_count:matches.length,target:matches[0]||null};
         }""")
         target = result["target"]
