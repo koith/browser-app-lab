@@ -19,13 +19,13 @@ def run():
             page=browser.new_page(viewport={"width":390,"height":844})
             page.on("pageerror",lambda e:errors.append(str(e)))
             page.route(ORIGIN,lambda route:route.fulfill(status=200,content_type="text/html",body=HTML))
-            page.route(ORIGIN+"account_watch.js",lambda route:route.fulfill(
+            page.route(ORIGIN+"account_watch.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=WATCH))
-            page.route(ORIGIN+"account_auto_analysis.js",lambda route:route.fulfill(
+            page.route(ORIGIN+"account_auto_analysis.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=AUTO))
-            page.route(ORIGIN+"account_index_client.js",lambda route:route.fulfill(
+            page.route(ORIGIN+"account_index_client.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=ACCOUNT_UI))
-            page.route(ORIGIN+"account_group_client.js",lambda route:route.fulfill(
+            page.route(ORIGIN+"account_group_client.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=GROUP_UI))
             def group_page(route):
                 from urllib.parse import urlsplit,parse_qs
