@@ -42,7 +42,7 @@ def get(path, limit):
         with urlopen(request, timeout=38) as reply:
             if reply.status != 200:
                 raise ValueError("HTTP " + str(reply.status))
-            return dict(reply.headers), reply.read(limit + 1)
+            return {str(k).lower(): v for k,v in reply.headers.items()}, reply.read(limit + 1)
     except HTTPError as exc:
         raise ValueError("HTTP " + str(exc.code)) from exc
     except (URLError, TimeoutError, OSError) as exc:
@@ -67,11 +67,11 @@ def work(model, album_id, photo):
         raise ValueError("original byte length mismatch")
     if hashlib.sha256(payload).hexdigest() != expected_hash:
         raise ValueError("original SHA-256 mismatch")
-    if not headers.get("Content-Type", "").lower().startswith("image/"):
+    if not headers.get("content-type", "").lower().startswith("image/"):
         raise ValueError("original not returned as image")
     # Plain <img> may load without a readable CORS response. This separate
     # capability matters for SW caching, but must not falsify byte-SHA QA.
-    cors_ok = headers.get("Access-Control-Allow-Origin") in (ORIGIN, "*")
+    cors_ok = headers.get("access-control-allow-origin") in (ORIGIN, "*")
     try:
         with Image.open(io.BytesIO(payload)) as im:
             im.load()
