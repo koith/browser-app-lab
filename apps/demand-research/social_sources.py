@@ -10,7 +10,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 import ipaddress, json, os, re, unicodedata
 
-TERMS = ("뒷계", "섹트", "일탈계")
+TERMS = ("뒷계", "섹트", "섹블", "일탈계")
 ROUTES = {
     "x": "/v1/twitter/search/tweets",
     "threads": "/v1/threads/search",
