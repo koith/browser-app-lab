@@ -28,9 +28,9 @@ ROG = HERE.parent
 SOURCE = ROG / "docs/evidence/source-maps/actor-native-anim-runtime.json"
 SOURCE_SHA1 = "86526d89679ae39b85fe9808da97ad871b7888d9"
 SEEDS = ("1096", "1097", "1098", "1099", "1101", "1102", "1112", "1114", "1118", "1124")
-MAX_MEMBERS = 28
-MAX_FRAMES_PER_MEMBER = 160
-MAX_PNG_BYTES = 24000000
+MAX_MEMBERS = 65  # round 2: exhaust all unique 1000+ original source event references
+MAX_FRAMES_PER_MEMBER = 256  # OBS 1095 legitimately declares 172 native frames
+MAX_PNG_BYTES = 32000000
 EXPECTED_PACKS = ("obs.pak", "obs2.pak", "obs3.pak")
 
 def sha(data):
