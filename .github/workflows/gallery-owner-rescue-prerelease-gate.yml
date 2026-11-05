@@ -6,6 +6,7 @@ on:
       - 'apps/gallery-archive/test_owner_read_integrity_retry.py'
       - 'apps/gallery-archive/test_rescue_same_owner_400141.py'
       - 'apps/gallery-archive/qa_existing_owner_exact_file.py'
+      - 'apps/gallery-archive/test_screenshot_transient_owner_read.py'
       - 'apps/gallery-archive/qa_prerelease_new_incident_albums.py'
       - '.github/workflows/gallery-owner-rescue-prerelease-gate.yml'
 permissions:
@@ -23,6 +24,7 @@ jobs:
           python -m py_compile apps/gallery-archive/restore_known_owner_cache.py apps/gallery-archive/qa_prerelease_new_incident_albums.py
           python apps/gallery-archive/test_owner_read_integrity_retry.py
           python apps/gallery-archive/test_rescue_same_owner_400141.py
+          python apps/gallery-archive/test_screenshot_transient_owner_read.py
   stage-existing-owner-albums:
     needs: offline-recovery-contract
     if: github.event.pull_request.head.repo.full_name == github.repository
