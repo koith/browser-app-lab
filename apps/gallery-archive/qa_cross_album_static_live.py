@@ -11,14 +11,14 @@ from playwright.sync_api import sync_playwright
 
 ROOT="https://koith.github.io/browser-app-lab/apps"
 
-def check(browser,model):
+def check(browser,model,base):
     context=browser.new_context(viewport={"width":390,"height":844},
         is_mobile=True,has_touch=True,locale="ko-KR",device_scale_factor=2)
     page=context.new_page()
     errors=[]
     page.on("pageerror",lambda error:errors.append(str(error)[:180]))
     page.route("**/*onrender.com/**",lambda route:route.abort("blockedbyclient"))
-    root=f"{ROOT}/{model}-gallery/"
+    root=f"{base.rstrip('/')}/{model}-gallery/"
     try:
         result=page.goto(root,wait_until="domcontentloaded",timeout=60000)
         assert result and result.status==200
@@ -87,9 +87,10 @@ def check(browser,model):
 if __name__=="__main__":
     p=argparse.ArgumentParser()
     p.add_argument("--browser",choices=("chromium","webkit"),required=True)
+    p.add_argument("--root",default=ROOT)
     args=p.parse_args()
     with sync_playwright() as pw:
         browser=getattr(pw,args.browser).launch(headless=True)
         try:
-            for model in ("mimmi","yui"):check(browser,model)
+            for model in ("mimmi","yui"):check(browser,model,args.root)
         finally:browser.close()
