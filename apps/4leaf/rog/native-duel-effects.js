@@ -18,6 +18,12 @@
 (function(){
  const TICK_MS=40; // WEB tick for native source body lunge, not EXE timing
  const MAX_EVENTS=4,MAX_FRAMES=160;
+ // Visually reviewed genuine effect sprites. Other CHR event member values
+ // may be audio, scene triggers or unclassified actors; merely decoding an
+ // OBS member is insufficient to call it a live combat visual effect.
+ const REVIEWED_VISUAL_MEMBERS=new Set([
+  '1096','1097','1098','1099','1101','1102','1112','1114','1118'
+ ]);
  const cache=new Map();
  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const afterPaint=()=>new Promise(done=>{
@@ -40,7 +46,7 @@
   for(const [member,source] of Object.entries(original())){
    if(!isRealSource(source))continue;
    const numeric=/\/(\d{4})\.obs$/.exec(member)?.[1];
-   if(!numeric||source.originalMember!==member)continue;
+   if(!numeric||source.originalMember!==member||!REVIEWED_VISUAL_MEMBERS.has(numeric))continue;
    for(const entry of source.nativeEvents||[]){
     const [who,sourceSlot,tick,type,dx,dy]=entry;
     if(who!==card||sourceSlot!==slot||!Number.isInteger(tick)||tick<0||
