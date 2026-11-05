@@ -41,9 +41,9 @@ jobs:
       - name: R14-A all 98 CHR cards, every board state and both duel sides
         env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
         run: node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
-      - name: 26 original DMP maps and 1920 TIS tiles
+      - name: R13/R14-C all 26 maps and 1920 cells
         env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
-        run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
-      - name: Genuine native winBattle podium geometry and real result return
+        run: node apps/4leaf/rog/tests/dmp-26-map-render-audit.cjs
+      - name: Battle podium geometry (feet, own bodies, unobstructed, result -> board)
         env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
-        run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
+        run: node apps/4leaf/rog/tests/battle-podium-geometry-audit.cjs
