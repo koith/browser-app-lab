@@ -288,7 +288,7 @@ function recoverSavedCover(img){
 document.addEventListener('load',e=>{
  const img=e.target;
  if(img instanceof HTMLImageElement&&img.closest('.album,.photo')&&img.naturalWidth>=100)
-  {registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo')?.classList.remove('broken-source');}
+  {registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo')?.classList.remove('broken-source');ownerRecoveryPending.delete(img);}
 },true);
 document.addEventListener('error',e=>{
  const img=e.target,container=img instanceof HTMLImageElement?img.closest('.album,.photo'):null;
@@ -425,7 +425,7 @@ function photoHTML(p,i){
   :(p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url)+'"':'src="'+esc(p.url)+'"';
  return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" '+source+' alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>';
 }
-const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerPhotoIndex.get(e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{if(!recoverSavedCover(e.target))e.target.alt='보관본 연결을 확인해 주세요'})}}},{rootMargin:'64px'});
+const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerPhotoIndex.get(e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{if(!recoverSavedCover(e.target)){e.target.alt='보관본 연결을 확인해 주세요';queueOwnerImageRecovery(e.target)}})}}},{rootMargin:'64px'});
 function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
 // Retain the same in-flight image element as the complete album renderer takes
 // over. Recreating <img> can cancel an already downloading Pages thumbnail.
