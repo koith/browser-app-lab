@@ -82,3 +82,12 @@
   min-height:22px!important;padding:2px 5px!important;
  }
 }
+
+/* R13: original 800x600 battle result tray can overflow short landscape
+ * mobile viewports; preserve existing buttons and handlers. */
+@media(orientation:landscape) and (max-height:430px){
+ #app.app-classic-dice #game #board-area>.leaf-native-battle-actions{
+  position:fixed!important;
+  bottom:max(3px,env(safe-area-inset-bottom))!important;
+ }
+}
