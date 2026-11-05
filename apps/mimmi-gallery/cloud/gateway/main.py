@@ -243,19 +243,27 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None,
                             headers={"Retry-After": str(hold.retry_seconds),
                                      "X-Archive-Read-Cause": "provider_denial"}) from None
     client_env=os.environ.copy()
-    try:
-        # The two owner accounts have distinct authorized GitHub Secrets.
-        # Never route Yui reads with Mimmi's cookie once a Yui session exists.
-        configured=(cookie_override if cookie_override is not None else
-                    (client_env.get('RCLONE_CONFIG_ARCHIVE_YUI_COOKIE') or
-                     client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
-                    if remote_name==YUI_REMOTE else
-                    client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
-        client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(configured)
-    except ValueError:
-        raise HTTPException(status_code=503,detail='Invalid storage session configuration')
-    if client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']!=configured:
-        print('OWNER_STORAGE_COOKIE_HEADER_NORMALIZED',flush=True)
+    if remote_name.startswith("ownerreplica:"):
+        # Private durable S3 credentials are completely independent of
+        # the TeraBox cookie. A cold restart with an expired provider session
+        # must still be able to read already-mirrored canonical owner bytes.
+        if (not _DURABLE_OWNER_READY
+                or remote_name not in (durable_owner_remote("mimmi"),
+                                       durable_owner_remote("yui"))):
+            raise HTTPException(status_code=503,detail="Private mirror is not configured")
+    else:
+        try:
+            # Separate TeraBox owner account cookies; never cross model owners.
+            configured=(cookie_override if cookie_override is not None else
+                        (client_env.get('RCLONE_CONFIG_ARCHIVE_YUI_COOKIE') or
+                         client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+                        if remote_name==YUI_REMOTE else
+                        client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+            client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(configured)
+        except ValueError:
+            raise HTTPException(status_code=503,detail='Invalid storage session configuration')
+        if client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']!=configured:
+            print('OWNER_STORAGE_COOKIE_HEADER_NORMALIZED',flush=True)
     proc = await asyncio.create_subprocess_exec(
         "rclone", "cat", f"{remote or REMOTE}/{path}", "--timeout=50s", "--retries=2",
         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, env=client_env
