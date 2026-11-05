@@ -1,0 +1,22 @@
+name: Gallery Signed 214 Sync Rehydration Fail-Closed Contract
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-terabox-render-session-sync.yml'
+      - 'apps/gallery-archive/test_signed_sync_non_schedule_rehydration.py'
+      - '.github/workflows/gallery-signed-sync-rehydration-qa.yml'
+permissions:
+  contents: read
+jobs:
+  verify-all-events-restore:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test signed gateway restore cannot be bypassed by session-only success
+        run: |
+          python -m py_compile apps/gallery-archive/test_signed_sync_non_schedule_rehydration.py
+          python apps/gallery-archive/test_signed_sync_non_schedule_rehydration.py

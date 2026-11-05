@@ -44,6 +44,7 @@ jobs:
           python -m py_compile apps/gallery-archive/verify_render_gallery_read.py apps/gallery-archive/restore_known_owner_cache.py apps/gallery-archive/probe_private_owner_runtime.py
           python apps/gallery-archive/test_verify_render_gallery_read.py
           python apps/gallery-archive/test_probe_private_owner_runtime.py
+          python apps/gallery-archive/test_signed_sync_non_schedule_rehydration.py
   synchronize:
     if: >-
       github.event_name != 'pull_request' &&
@@ -69,7 +70,7 @@ jobs:
         with: {python-version: '3.12'}
       - name: Lightweight complete-owner readiness check (214 originals, no downloads)
         id: ready
-        if: github.event_name == 'schedule'
+        # Every event type must check the ACTUAL 214 owner originals, not only catalogs.
         shell: bash
         run: |
           if python apps/gallery-archive/probe_private_owner_runtime.py; then
@@ -142,7 +143,7 @@ jobs:
           echo 'Both passwordless galleries are connected to verified TeraBox albums.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Install the existing checksum-pinned owner storage client for read-only rescue
-        if: steps.ready.outputs.healthy != 'true' && (github.event_name == 'schedule' || steps.direct_owner_session.outcome == 'failure')
+        if: steps.ready.outputs.healthy != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -156,7 +157,7 @@ jobs:
           install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - name: Recover existing same-owner SHA images without any new collection or storage writes
-        if: steps.ready.outputs.healthy != 'true' && (github.event_name == 'schedule' || steps.direct_owner_session.outcome == 'failure')
+        if: steps.ready.outputs.healthy != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -166,3 +167,9 @@ jobs:
           echo "::add-mask::$YUI_COOKIE"
           python apps/gallery-archive/restore_known_owner_cache.py
           echo 'Signed previously stored originals: existing-owner SHA/bytes and live Render readback verified.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Reject partial 214-photo rehydration after any successful session refresh
+        if: steps.ready.outputs.healthy != 'true'
+        run: |
+          python apps/gallery-archive/probe_private_owner_runtime.py
+          echo 'LIVE_EXACT_214_RAM_READINESS_CONFIRMED_AFTER_SIGNED_RESCUE' >> "$GITHUB_STEP_SUMMARY"
+
