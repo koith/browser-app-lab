@@ -1,0 +1,42 @@
+name: Gallery Four Incident Albums Real Mobile Lightbox Acceptance
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_mobile_56_incident_lightbox.py'
+      - '.github/workflows/gallery-incident-mobile-lightbox-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/qa_mobile_56_incident_lightbox.py'
+      - '.github/workflows/gallery-incident-mobile-lightbox-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-mobile-album:
+    name: actual deployed album/lightbox (${{ matrix.model }} ${{ matrix.browser }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi, yui]
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/gallery-archive/qa_mobile_56_incident_lightbox.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install mobile browser without owner secrets
+        run: |
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+          python -m py_compile apps/gallery-archive/qa_mobile_56_incident_lightbox.py
+      - name: Actually open four owner incident works and compare full-screen SHA
+        run: |
+          python apps/gallery-archive/qa_mobile_56_incident_lightbox.py --browser '${{ matrix.browser }}' --model '${{ matrix.model }}'
+          echo 'LIVE_DEPLOYED_OWNER_INCIDENT_ALBUM_AND_LIGHTBOX_PASS ${{ matrix.model }} ${{ matrix.browser }}' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This does not prove unrelated works, restarts or a physical iPhone.' >> "$GITHUB_STEP_SUMMARY"
