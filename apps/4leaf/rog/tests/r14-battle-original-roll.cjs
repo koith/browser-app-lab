@@ -47,7 +47,22 @@ const VIEWS=[['desktop-800x600',{viewport:{width:800,height:600}}],['iphone-port
      if(!stop)requestAnimationFrame(tick)};
     requestAnimationFrame(tick);
     T.resolveBattle(m.players[0],m.players[1],false);
-    await new Promise(r=>setTimeout(r,5200));stop=true;return log});
+    // Chromium usually finishes within 5.2s; WebKit may need longer to
+    // paint every recovered OBS collision key before its full native lunge.
+    // A fixed 5.2s trace cut off a valid outcome at ~5.3s and misreported
+    // that as an early-result animation defect. Wait for the ACTUAL outcome,
+    // preserving all strict frame-order and lunge-duration assertions below.
+    await new Promise(resolve=>{
+     const deadline=performance.now()+20000;
+     const poll=()=>{
+      const stage=document.getElementById('battle-visual');
+      if(stage?.dataset.battlePhase==='outcome'||performance.now()>deadline){resolve();return}
+      setTimeout(poll,40);
+     };
+     poll();
+    });
+    await new Promise(r=>setTimeout(r,100));
+    stop=true;return log});
    // per-die frame order
    const dieCount=trace.find(x=>x.dice.length)?.dice.length||0;
    assert.ok(dieCount>0,name+' battle dice rendered');
