@@ -1829,6 +1829,18 @@
         "DIE-02",
         "CHT-05"
       ]
+    },
+    {
+      "id": "REQ-20261105-4LEAF-R13-MAPS-PODIUM",
+      "date": "2026-11-05",
+      "origin": "user + Claude R13 package integrated by GPT",
+      "text": "26개 DMP/TIS 맵 카메라·상단 체스맨 잘림·iPhone 가로 전투 결과 버튼 복원. Claude 13차 무결성 검증 인수 및 GitHub PR #768 핵심 원본 패치 3개 byte-identical 반영, iPhone WebKit·실제 3D 시점·전투 기본 상대 0042/0045 원본 몸체 회귀 검증 계속.",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -9113,6 +9125,31 @@
         "DIE-02"
       ],
       "details": "Updated stale progress strings in seven task entries with PUBLIC beta65 verified 97/98 CHR bodies, 19 new recovered originals/662 SHA frames, original 63 D4/D6 frames, CI 13/13, residual 0156, unverified historical slot13–16/tick ms and mesh. Original task status and all 422 previous events remain unchanged."
+    },
+    {
+      "seq": 424,
+      "date": "2026-11-05",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261105-4LEAF-R13-MAPS-PODIUM",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "P0-RELEASE"
+      ]
+    },
+    {
+      "seq": 425,
+      "date": "2026-11-05",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261105-4LEAF-R13-MAPS-PODIUM",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "P0-RELEASE"
+      ],
+      "details": "Round13 Claude handoff ZIP SHA256 014f66947b825c3582eeb2d491a88d755eb6f65e300690bd6239886330101fef; all SHA256SUMS verified locally. External Chromium evidence: 26/26 original DMP maps, 1920 cells, 24/24 tile orientation, battle podium at desktop and iPhone portrait/landscape. Main camera was clamping to outer board while world is inset; original patch board-camera.js blob 351e8da69dc8b7e0c8e431c9cd653906f184d3b2, dice-dmp-full-camera.cjs fbd61b388762642e78527ee3bf89d044bdcfe3d5, landscape CSS ce44cb7b8670a5897948e4795a1ac55d05540c47. All three byte-identical files committed in PR #768 (pending complete CI, merge, Pages verification). Added default CHR 1026/1029 real battle browser regression to round4 workflow, requires CI result. Package includes two 490-line geometry/map audit tests and local JSON/screenshot evidence; not yet imported into GitHub, remains in handoff ZIP. MVE original 3D mesh/camera/spacing/timing remain UNVERIFIED. P0-BOARD and P0-PODIUM status unchanged until postdeploy browser acceptance."
     }
   ],
   "restorationPriority": {
