@@ -33,7 +33,7 @@ def check(browser):
         """,timeout=70000)
         record=page.evaluate("""() => {
           const a=stored.find(a=>a.id==='djawa-janus-scary-lantern-night');
-          const raw=localStored.find(a=>a.id===a.id);
+          const raw=localStored.find(local=>local.id===a.id);
           const known=new Map(raw.images.map(p=>[p.sha256,p]));
           const photos=photosFor(a);
           return {
