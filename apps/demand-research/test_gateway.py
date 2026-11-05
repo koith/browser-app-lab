@@ -164,3 +164,16 @@ def test_auto_viewer_requires_auth(connected_gateway):
     assert client.get("/auto-archive").status_code==401
     assert client.get("/auto-archive/auto_archive_view.js").status_code==401
     assert client.get("/auto-archive/auto_archive_view.css").status_code==401
+
+
+def test_auto_viewer_read_only_assets(connected_gateway):
+    client=connected_gateway
+    token=gateway.TOKEN
+    assert client.post("/api/activate",json={"token":token}).status_code==200
+    page=client.get("/auto-archive")
+    assert page.status_code==200
+    assert "frame-ancestors 'self'" in page.headers["content-security-policy"]
+    assert "no-store" in page.headers["cache-control"]
+    for asset in ("auto_archive_view.js","auto_archive_view.css"):
+        assert client.get("/auto-archive/"+asset).status_code==200
+    assert client.get("/auto-archive/gateway.py").status_code==404
