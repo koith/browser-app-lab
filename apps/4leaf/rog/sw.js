@@ -16,7 +16,7 @@ const EMBEDDED_DIE_OFFLINE=[
 // silently fetch unavailable slot-20/slot-12 PNGs after the UI loads.
 // Explicit source paths are archived SHA-verifiable frames, not generated art.
 const BATTLE_D6_OFFLINE=[
- ...Array.from({length:10},(_,i)=>'./original/OBS/dice-blocks/obs-1171-b0-'+String(i+18).padStart(3,'0')+'.png'),
+ ...Array.from({length:10},(_,i)=>'./original/OBS/ui/1171-'+String(i+18).padStart(3,'0')+'.png'),
  ...Array.from({length:16},(_,i)=>'./original/OBS/dice-blocks/obs-1171-b2-'+String(i).padStart(3,'0')+'.png'),
  ...Array.from({length:6},(_,i)=>'./original/OBS/ui/1171-'+String(i).padStart(3,'0')+'.png')
 ];
