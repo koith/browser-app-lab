@@ -55,7 +55,9 @@ const path=require('node:path');
    const camera=window.__LEAF_CAMERA__;
    const bounds=camera.getState().routeBounds;
    const world=document.querySelector('#board-world');
-   const screenWidth=document.querySelector('#board-area').clientWidth;
+   // Camera visible window excludes the left and right player columns.
+   const insetR=Math.max(0,parseFloat(getComputedStyle(world).right)||0);
+   const screenWidth=document.querySelector('#board-area').clientWidth-world.offsetLeft-insetR;
    const translate=()=>{
     const match=world.style.transform.match(/translate3d\((-?[0-9.]+)px/);
     return match?Number(match[1]):null;
