@@ -37,6 +37,7 @@ with tempfile.TemporaryDirectory() as td:
 env={
  "OWNER_REPLICA_BUCKET":"gallery-private-owner-test",
  "OWNER_DURABLE_REMOTE":"ownerreplica:gallery-private-owner-test",
+ "OWNER_REPLICA_PROVIDER":"backblaze-b2",
  "RCLONE_CONFIG_OWNERREPLICA_TYPE":"s3",
  "RCLONE_CONFIG_OWNERREPLICA_PROVIDER":"Other",
  "RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID":"synthetic-access-key",
