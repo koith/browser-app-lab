@@ -16,6 +16,7 @@ HTML=(ROOT/"index.html").read_text("utf-8")
 FREE=(ROOT/"free_discovery.js").read_text("utf-8")
 WATCH=(ROOT/"account_watch.js").read_text("utf-8")
 AUTO=(ROOT/"account_auto_analysis.js").read_text("utf-8")
+ARCHIVE=(ROOT/"archive_tab.js").read_text("utf-8")
 NOW=datetime.now(timezone.utc).isoformat()
 BAD_HOST="https://x.com.evil.invalid/test"
 
@@ -44,6 +45,10 @@ def run():
                 status=200,content_type="application/javascript",body=FREE))
             page.route(PAGE+"account_watch.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=WATCH))
+            page.route(PAGE+"archive_tab.js*",lambda route:route.fulfill(
+                status=200,content_type="application/javascript",body=ARCHIVE))
+            page.route(PAGE+"api/session",lambda route:route.fulfill(
+                status=404,content_type="application/json",body='{"error":"no private gateway"}'))
             page.route(PAGE+"account_auto_analysis.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=AUTO))
             def public_profiles(r):
@@ -133,8 +138,16 @@ def run():
             page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
             page.wait_for_selector("article.post",timeout=50000)
             page.wait_for_function("document.getElementById('applyDate').disabled===false",timeout=120000)
-            assert page.locator(".primary-views button").count()==2
+            assert page.locator(".primary-views button").count()==3
             assert not page.locator("#accountsView").is_visible()
+            page.locator("#viewArchives").click()
+            assert page.locator("#archivesView").is_visible()
+            assert not page.locator("#postsView").is_visible()
+            assert not page.locator("#accountsView").is_visible()
+            page.locator("#archiveHubStatus").get_by_text(
+                "비공개 원본",exact=False).wait_for(timeout=12000)
+            assert not page.locator("#archiveHubFrameBox").is_visible()
+            page.locator("#viewPosts").click()
             page.locator("#viewAccounts").click()
             # UX: a clear sequence instead of five competing technical panels.
             assert page.locator("#accountOverview").is_visible()

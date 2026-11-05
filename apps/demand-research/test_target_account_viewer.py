@@ -99,6 +99,8 @@ def test_private_viewer_html_and_static_assets_no_secrets(populated):
     assert html.status_code==200
     assert "계정 보관함" in html.text
     assert "script-src 'self'" in html.headers["content-security-policy"]
+    assert "frame-ancestors 'self'" in html.headers["content-security-policy"]
+    assert "frame-ancestors 'none'" not in html.headers["content-security-policy"]
     assert "no-store" in html.headers["cache-control"]
     js=client.get("/account-archive/account_archive_view.js")
     css=client.get("/account-archive/account_archive_view.css")

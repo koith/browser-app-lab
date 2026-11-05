@@ -132,7 +132,7 @@ Object.defineProperty(navigator,"clipboard",{
                     state="visible",timeout=10000)
                 saved=page.locator("#targetArchiveLibraryRows a").first
                 assert saved.get_attribute("href")==(
-                    "/account-archive?account=bluesky-"+"a"*40)
+                    "?tab=archives&account=bluesky-"+"a"*40)
                 assert button.is_enabled(),"verified backup should not lock the button"
             else:
                 assert button.inner_text()=="GitHub에서 백업 실행"

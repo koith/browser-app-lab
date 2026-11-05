@@ -205,7 +205,7 @@ def create_router(auth):
                             media_type="text/html; charset=utf-8",
                             headers={**CACHE_HEADERS,
                                      "Content-Security-Policy":
-                                     "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"})
+                                     "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"})
 
     @router.get("/account-archive/{asset_name}",include_in_schema=False)
     async def asset(request:Request,asset_name:str):

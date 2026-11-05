@@ -445,6 +445,18 @@ main{padding-top:10px}
 
 /* Account analysis: three clear tasks, quiet cards, progressive detail. */
 .account-panel{background:#f4f6fb;border:1px solid #cbd5e6;box-shadow:none;padding:20px;min-height:360px}
+/* Compact integrated archive viewer: private originals never appear on public Pages. */
+.archive-hub{min-width:0;background:#f5f7fc;padding:20px;border:1px solid #ced8e7;border-radius:12px;color:#1b2e51}
+.archive-hub-header h2{font-size:23px;margin:0 0 6px;font-weight:850}
+.archive-hub-header p{font-size:12px;color:#596980;line-height:1.65;margin:0 0 16px}
+#archiveHubStatus{padding:15px;border:1px solid #d5dfea;background:#fff;border-radius:9px;font-size:13px;line-height:1.65;color:#3e506b}
+.archive-hub-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.archive-hub-actions[hidden],#archiveHubFrameBox[hidden]{display:none}
+.archive-hub-actions button,.archive-hub-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:8px;border:1px solid #adc1e8;padding:9px 14px;font-size:12px;font-weight:800;background:#fff;color:#2c47a3;text-decoration:none;cursor:pointer}
+#archiveHubFrameBox{border:1px solid #d3dbe9;border-radius:11px;background:#fff;overflow:hidden;margin-top:13px}
+#archiveHubFrame{border:0;display:block;width:100%;height:min(1200px,90dvh);min-height:630px;background:#fff}
+@media(max-width:720px){.archive-hub{padding:12px;border-radius:8px}.archive-hub-header h2{font-size:20px}.archive-hub-actions>*{flex:1}#archiveHubFrame{height:calc(100dvh - 170px);min-height:590px}.primary-views{gap:5px}.primary-views button{font-size:11px;padding:10px 5px;min-width:0;white-space:nowrap}}
+
 .account-hub-head{padding:4px 2px 16px}
 .account-hub-head h2{font-size:24px;font-weight:850;color:#16264c}
 .account-hub-head p{font-size:13px;line-height:1.65;max-width:760px;margin:7px 0 13px;color:#52617b}
@@ -707,6 +719,7 @@ main{padding-top:10px}
 <nav class="primary-views" role="tablist" aria-label="교집합 주요 화면">
   <button type="button" role="tab" id="viewPosts" class="active" aria-selected="true" aria-controls="postsView">게시글</button>
   <button type="button" role="tab" id="viewAccounts" aria-selected="false" aria-controls="accountsView">계정 분석 <span id="watchCount" aria-hidden="true">0</span></button>
+  <button type="button" role="tab" id="viewArchives" aria-selected="false" aria-controls="archivesView">백업 보관함</button>
 </nav>
 <div id="postsView" role="tabpanel" aria-labelledby="viewPosts">
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
@@ -879,6 +892,20 @@ main{padding-top:10px}
     </div>
     <p class="account-privacy">관심 목록은 브라우저에 공개 프로필 주소만 저장합니다. 게시글 원문과 개인 신원 정보는 이 목록에 저장하지 않습니다.</p>
   </details>
+</section>
+<section id="archivesView" class="archive-hub hidden" role="tabpanel" aria-labelledby="viewArchives">
+  <header class="archive-hub-header">
+    <h2>백업 보관함</h2>
+    <p>테라박스에 저장하고 원본 확인을 마친 계정만 표시합니다. 게시글·사진·영상·답글·프로필을 계정별로 살펴볼 수 있습니다.</p>
+  </header>
+  <div id="archiveHubStatus" role="status" aria-live="polite">비공개 보관 서버의 연결 상태를 확인 중입니다.</div>
+  <div id="archiveHubActions" class="archive-hub-actions" hidden>
+    <button type="button" id="archiveHubReload">목록 새로고침</button>
+    <a href="/account-archive" id="archiveHubFullView">보관함 크게 보기</a>
+  </div>
+  <div id="archiveHubFrameBox" hidden>
+    <iframe id="archiveHubFrame" title="저장된 SNS 계정과 게시글·미디어 보관함" loading="lazy" referrerpolicy="no-referrer"></iframe>
+  </div>
 </section>
 </main>
 <dialog id="activityRankingDialog" class="activity-rank-dialog" aria-labelledby="activityRankingDialogTitle">
@@ -1943,7 +1970,8 @@ if(cloudMode){
 <script src="public_video_trends.js" defer></script>
 <script src="target_archive_client.js?v=20261105-touch-navigation" defer></script>
 <script src="free_discovery.js" defer></script>
-<script src="account_watch.js?v=20261105-account-ui-3" defer></script>
+<script src="account_watch.js?v=20261106-archive-tab" defer></script>
+<script src="archive_tab.js?v=20261106-archive-tab" defer></script>
 <script src="account_auto_analysis.js?v=20261105-account-ui-3" defer></script>
 <script src="account_index_client.js?v=20261105-account-ui-3" defer></script>
 <script src="account_group_client.js?v=20261105-account-ui-3" defer></script>
