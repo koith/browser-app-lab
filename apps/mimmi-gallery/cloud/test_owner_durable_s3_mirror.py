@@ -77,7 +77,7 @@ try:
         stderr=Stream([])
         async def wait(self):return 0
         def kill(self):raise AssertionError("Healthy mirror process killed")
-    async def subprocess_fake(*argv,env=None):
+    async def subprocess_fake(*argv,**kwargs):
         assert "ownerreplica:private-mirror/mimmi/metadata/catalog.json" in argv
         return Process()
     with patch.object(gw,"cookie_header",side_effect=AssertionError(
