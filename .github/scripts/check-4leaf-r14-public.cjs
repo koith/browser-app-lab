@@ -35,6 +35,10 @@ async function waitForPublishedVersion(){
  const context=await browser.newContext({viewport:engine===webkit?{width:390,height:844}:{width:800,height:600},
   serviceWorkers:'block',hasTouch:engine===webkit,isMobile:engine===webkit});
  const page=await context.newPage(),errors=[],invalid=[];
+ // Match the real, already-passing WorldMap->DiceChannel CI entry scenario.
+ // A live production backend may be reachable independently from GitHub
+ // Pages; the game-start acceptance must not depend on external login.
+ await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  page.on('pageerror',e=>errors.push(String(e)));
  page.on('response',r=>{if(r.status()>=400&&r.url().startsWith(base))invalid.push(r.status()+' '+r.url())});
  const press=async loc=>engine===webkit?loc.tap():loc.click();
@@ -45,12 +49,25 @@ async function waitForPublishedVersion(){
    window.__LEAF_BATTLE_DICE_ROLL__&&window.__LEAF_NATIVE_CARD_ACTIONS__,null,{timeout:30000});
   assert.equal(await page.locator('meta[name="leaf-revival-version"]').getAttribute('content'),expected);
   // Real WorldMap source hit -> Ispin channel -> native READY -> real roll.
-  await press(page.locator('.world-location[data-region="dice"]'));
+  const world=page.locator('.world-location[data-region="dice"]');
+  assert.equal(await world.count(),1,'original WorldMap dice hit region must exist');
+  const hit=await world.boundingBox();
+  assert.ok(hit&&hit.width>10&&hit.height>10);
+  // 2002 source hit-mask is not necessarily active at the exact centre
+  // of its box. Exercise three interior sprite-hit pixels as in the
+  // passing world-to-dice-real-user-start.cjs test (not a JS route bypass).
+  for(const [x,y] of [[.5,.5],[.35,.42],[.6,.7]]){
+   if(await page.locator('#dice-channels:not(.hidden)').count())break;
+   await (engine===webkit?world.tap({position:{x:Math.round(hit.width*x),y:Math.round(hit.height*y)}})
+     :world.click({position:{x:Math.round(hit.width*x),y:Math.round(hit.height*y)}}));
+   await page.waitForTimeout(200);
+  }
   await page.waitForSelector('#dice-channels:not(.hidden)');
   await press(page.locator('#dice-channels .dice-channel-hotspot[data-channel="ispin:1"]'));
   await page.waitForSelector('#lobby:not(.hidden)');
   await press(page.locator('#lobby-create'));
   await page.locator('#game-mode').selectOption('hotseat');
+  await page.locator('#point-limit').selectOption('12');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#map-select').selectOption('4LEAF');
   await press(page.locator('#start-game'));
@@ -58,7 +75,10 @@ async function waitForPublishedVersion(){
   assert.equal(await page.locator('#board-nodes .tile').count(),104);
   const before=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position);
   await press(page.locator('#roll-btn'));
-  await page.waitForFunction(pos=>window.__ROG_TEST__?.getMatch()?.players?.[0]?.position>pos,before,{timeout:30000});
+  await page.waitForFunction(pos=>{
+   const m=window.__ROG_TEST__?.getMatch?.();
+   return !!m&&m.lastRoll?.length>0&&m.players[0].position>pos;
+  },before,{timeout:30000});
   await page.waitForFunction(()=>window.__LEAF_DICE_FALL__?.originalRollTable?.(6),null,{timeout:30000});
   // Source-native duel, no altered combat values: two distinct CHR bodies.
   await page.evaluate(()=>{const T=window.__ROG_TEST__,m=T.getMatch();
