@@ -149,6 +149,17 @@
   }));
   return {events:list.length,done};
  }
+ // Explicit native actor pose event, not a fragile mutation observer or
+ // monkey-patched game method. Only the real slot-12 duel attacker triggers
+ // this; ordinary board movement, defense, hurt and score code are untouched.
+ if(typeof document.addEventListener==='function')
+  document.addEventListener('leaf-native-duel-attack',event=>{
+   const actor=event.target,stage=actor?.closest?.('#battle-visual');
+   if(!stage||actor.dataset.duelSide!=='attacker'||
+      event.detail?.slot!=='12'||stage.dataset.duelNativeFxStarted)return;
+   stage.dataset.duelNativeFxStarted='true';
+   play(stage,actor,12);
+  });
  window.__LEAF_NATIVE_DUEL_FX__=Object.freeze({
   eventsFor,warm,play,tickMs:TICK_MS,
   source:'original 2002 OBS/CHR per-event member/frame/offset VERIFIED, meanings and WEB timing INFERRED'
