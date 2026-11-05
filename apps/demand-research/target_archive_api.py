@@ -157,12 +157,21 @@ def read_exact_verified_archive(run_id,platform,account):
 
 
 def same_origin_operator(request):
-    # This page is served from the private gateway URL, not public Pages.
-    # Require both same origin and a non-simple header to prevent CSRF.
+    # The signed private site is behind a TLS-terminating reverse proxy.
+    # Compare the browser Origin against the server's Host, not an internal
+    # http:// proxy hop (which can make request.base_url differ from HTTPS).
     origin=request.headers.get("origin","")
-    base=str(request.base_url).rstrip("/")
-    if (origin != base or request.headers.get("x-archive-intent","") !=
-            "selected-public-account-v1"):
+    try:
+        parsed=urlsplit(origin)
+    except ValueError:
+        raise HTTPException(403,"Private origin/intent required") from None
+    host=request.headers.get("host","").lower()
+    trusted=(parsed.scheme=="https" or
+             (parsed.scheme=="http" and host.startswith(("localhost:","127.0.0.1:"))))
+    if (not trusted or parsed.netloc.lower()!=host or
+            origin!=parsed.scheme+"://"+parsed.netloc or
+            parsed.username or parsed.password or
+            request.headers.get("x-archive-intent","")!="selected-public-account-v1"):
         raise HTTPException(403,"Private origin/intent required")
 
 
