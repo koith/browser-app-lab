@@ -43,8 +43,12 @@ const {chromium}=require('playwright');
     .map(x=>({src:x.getAttribute('src'),wh:[x.naturalWidth,x.naturalHeight],
       role:x.dataset.sourceRole})),
    board:[...document.querySelectorAll('#board-pawns .board-pawn')]
-    .map(x=>({id:x.dataset.chessmanId,source:x.dataset.actorSource,rig:x.dataset.actorRig,
-      png:x.querySelector('.leaf-chess-original-obs')?.getAttribute('src')})),
+    .map(x=>{const card=x.dataset.chessmanId;
+     const native=window.__LEAF_CHR_BODY_MAP__?.resolve(card);
+     return {id:card,source:x.dataset.actorSource,rig:x.dataset.actorRig,
+      ownMember:native?.originalMember||null,ownPngs:native?.frames?.map(f=>f.url)||[],
+      png:x.querySelector('.leaf-chess-original-obs')?.getAttribute('src')};
+    }),
    party:[...document.querySelectorAll('#dice-native-party .dice-chessman-slot.occupied')]
     .map(slot=>{
      const img=slot.querySelector('.dice-chessman-face');
@@ -67,7 +71,14 @@ const {chromium}=require('playwright');
     'sava84','sava04','sava03','sava83','sava05','sava86'][snap.actualAvatar]+'.png',
    'current selected avatar is reflected on original 1P rail');
   assert.deepEqual(snap.board.map(x=>x.rig),['original-obs-sprite','original-obs-sprite']);
-  assert.ok(snap.board.every(x=>x.source.startsWith('OBS/')&&x.png?.includes('./original/OBS/')));
+  // R14 source identity is now the actual CHR.pak +260 -> OBS member,
+  // not the obsolete generic "OBS/" label. Demand the mounted source
+  // member AND the exact original-frame URL for its own chessman. An
+  // accidentally substituted actor must fail, even when the PNG exists.
+  assert.ok(snap.board.every(x=>x.ownMember&&x.ownPngs?.includes(x.png)&&
+   (x.source==='Original-CHR-body/'+x.ownMember||
+    x.source==='OBS/'+x.ownMember)),
+   'board actor must render its own SHA-gated native CHR member: '+JSON.stringify(snap.board));
   assert.ok(snap.party.length>=1);
   for(const actor of snap.party){
    assert.ok(actor.artwork.startsWith('./original/CardData/chm_')||
