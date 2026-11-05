@@ -1,0 +1,40 @@
+name: Gallery Live 56 Existing Incident Originals Exact SHA Acceptance
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_live_56_incident_originals.py'
+      - '.github/workflows/gallery-live-56-originals-acceptance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/qa_live_56_incident_originals.py'
+      - '.github/workflows/gallery-live-56-originals-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-live-owner-originals:
+    name: actual deployed original SHA+pixels (${{ matrix.model }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi, yui]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/gallery-archive/qa_live_56_incident_originals.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image decoder, without owner credentials
+        run: |
+          python -m pip install 'Pillow==11.3.0'
+          python -m py_compile apps/gallery-archive/qa_live_56_incident_originals.py
+      - name: Check all existing incident originals from actual Render through public viewer routes
+        run: |
+          python apps/gallery-archive/qa_live_56_incident_originals.py --model '${{ matrix.model }}'
+          echo '${{ matrix.model }} existing incident originals: real deployed HTTP 200, SHA-256, exact dimensions and pixel decode PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This is not a post-restart durability or physical iPhone PASS.' >> "$GITHUB_STEP_SUMMARY"
