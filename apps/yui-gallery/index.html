@@ -172,6 +172,10 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <script src="publishers.js?v=0.1.0-beta.13"></script>
 <script>
 "use strict";
+// Cached preview covers are device-local; originals and owner metadata stay uncached.
+if(location.hostname==='koith.github.io' && 'serviceWorker' in navigator){
+ navigator.serviceWorker.register('./gallery-cover-sw.js',{scope:'./'}).catch(()=>{});
+}
 // The gallery itself is served by always-available GitHub Pages; never redirect to a sleeping Render instance.
 
 const $=id=>document.getElementById(id);

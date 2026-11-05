@@ -38,6 +38,28 @@ class VerifiedMediaCache:
         self.values.clear()
         self.bytes = 0
 
+    def insert_verified(self, namespace, path, size, sha, blob):
+        """Owner-OIDC rescue path: exact bytes only, same bounded LRU as live GET.
+
+        Caller independently checks the signed workflow, private catalog row
+        and image decode. Never insert provider error documents or unknown SHA.
+        """
+        if (type(size) is not int or not 1 <= size <= self.max_entry
+                or not isinstance(blob, bytes) or len(blob) != size
+                or not isinstance(sha, str) or len(sha) != 64
+                or hashlib.sha256(blob).hexdigest() != sha):
+            raise ValueError('Invalid preverified cache image')
+        key = (namespace, path, size, sha)
+        previous = self.values.pop(key, None)
+        if previous is not None:
+            self.bytes -= len(previous)
+        self.values[key] = blob
+        self.bytes += len(blob)
+        while self.bytes > self.max_bytes:
+            _, expired = self.values.popitem(last=False)
+            self.bytes -= len(expired)
+        return key in self.values
+
     async def get(self, namespace, path, size, sha, loader):
         key = (namespace, path, size, sha)
         if key in self.values:

@@ -232,3 +232,24 @@
   background:url("./original/ChatRoom/scrollbar.png") no-repeat -13px -9px;
  }
 }
+
+/* Original 2004 ChatRoom nickname tags: photo-measured reference height,
+ * inferred non-overlap shifts (--leaf-tag-dx/-dy) only. */
+#rooms.classic-chat-room .social-interior .social-avatar-name{
+ top:-66px!important;
+ transform:translate(calc(-50% + var(--leaf-tag-dx,0px)),calc(-100% + var(--leaf-tag-dy,0px)))!important;
+}
+@media(min-width:651px){
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list{
+  padding-top:5px!important;
+  -webkit-mask-image:linear-gradient(#000,#000),linear-gradient(#000 0 85px,transparent 85px);
+  -webkit-mask-size:13px 100%,calc(100% - 13px) 100%;
+  -webkit-mask-position:right top,left top;-webkit-mask-repeat:no-repeat;
+  mask-image:linear-gradient(#000,#000),linear-gradient(#000 0 85px,transparent 85px);
+  mask-size:13px 100%,calc(100% - 13px) 100%;
+  mask-position:right top,left top;mask-repeat:no-repeat;
+ }
+ #rooms.classic-chat-room #social-peer-panel.social-user-panel[data-native-overlay="true"]{
+  top:10px!important;left:620px!important;right:auto!important;width:163px!important;
+ }
+}

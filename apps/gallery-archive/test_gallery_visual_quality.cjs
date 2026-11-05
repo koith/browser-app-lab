@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const BASE=path.resolve(__dirname,'..');
-const measured=(score)=>({method:'decoded-pixel-v1',confidence:'measured',score});
+const measured=(score,comparedTo)=>({method:'decoded-pixel-v1',confidence:'measured',score,...(comparedTo?{same_photo_verified:true,compared_to_sha256:comparedTo}:{})});
 const paired=(previous,relation)=>({method:'paired-decoded-pixel-v1',confidence:'measured',same_photo_verified:true,compared_to_sha256:previous.sha256,relation});
 for(const model of ['yui','mimmi']){
  const root=path.join(BASE,model+'-gallery');
@@ -21,13 +21,13 @@ for(const model of ['yui','mimmi']){
   }
   return item;
  };
- const watermarked=sample(1600,2400,700000,{sha256:'b'.repeat(64),source_url:'https://cosplay.pixibb.com/watermarked.jpg',visual_quality:measured(90)});
- const blurryClean=sample(2000,3000,1450000,{sha256:'c'.repeat(64),watermark_status:'absent_verified',visual_quality:measured(45)});
+ const watermarked=sample(1600,2400,700000,{sha256:'b'.repeat(64),source_url:'https://cosplay.pixibb.com/watermarked.jpg',visual_quality:measured(90,'c'.repeat(64))});
+ const blurryClean=sample(2000,3000,1450000,{sha256:'c'.repeat(64),watermark_status:'absent_verified',visual_quality:measured(45,'b'.repeat(64))});
  assert.equal(quality.preferred(watermarked,blurryClean),watermarked,'A visibly better watermarked photo must beat blurry clean copy');
  assert.equal(quality.preferred(blurryClean,watermarked),watermarked,'Quality is independent of input order and watermark');
- const cleanSharp=sample(1400,2100,600000,{sha256:'d'.repeat(64),watermark_status:'absent_verified',visual_quality:measured(96)});
+ const cleanSharp=sample(1400,2100,600000,{sha256:'d'.repeat(64),watermark_status:'absent_verified',visual_quality:measured(96,'b'.repeat(64))});
  assert.equal(quality.preferred(watermarked,cleanSharp),cleanSharp,'Higher optical quality wins first even at lower dimensions and size');
- const cleanTie=sample(2000,3100,300000,{sha256:'e'.repeat(64),watermark_status:'absent_verified',visual_quality:measured(87)});
+ const cleanTie=sample(2000,3100,300000,{sha256:'e'.repeat(64),watermark_status:'absent_verified',visual_quality:measured(87,'b'.repeat(64))});
  assert.equal(quality.preferred(watermarked,cleanTie),cleanTie,'Verified clean edition wins only when measured quality is comparable');
  assert.equal(quality.preferred(cleanTie,watermarked),cleanTie,'Tie-break is order independent');
  const unknownClean=sample(3200,4800,2500000,{sha256:'f'.repeat(64),watermark_status:'absent_verified'});
@@ -38,7 +38,7 @@ for(const model of ['yui','mimmi']){
  const staticPreview=sample(4800,7200,6000000,{sha256:'5'.repeat(64)});
  assert.equal(quality.preferred(staticPreview,physical),physical,'Never lose owner originals because public copy has larger pixel dimensions');
  assert.equal(quality.preferred(physical,staticPreview),physical,'Owner original preservation must be source-order independent');
- const measuredStatic={...staticPreview,visual_quality:{...measured(96),photo_sha256:staticPreview.sha256}};
+ const measuredStatic={...staticPreview,visual_quality:{...measured(96,physical.sha256),photo_sha256:staticPreview.sha256}};
  const measuredArchive={...physical,visual_quality:{...measured(40),photo_sha256:physical.sha256}};
  assert.equal(quality.preferred(measuredArchive,measuredStatic),measuredStatic,'Clearly superior measured optical quality wins even over owner storage');
  const knownOld=sample(900,1300,135000,{sha256:'1'.repeat(64)});

@@ -75,7 +75,7 @@ const assert=require('node:assert/strict');
   assert.equal(proof.rosterCount,10);
   assert.equal(new Set(proof.ids).size,10,'all ten people must be distinct genuine connected tabs');
   assert.equal(new Set(proof.names).size,10,'original userlist cannot fabricate ten identical Guest NPC names');
-  assert.equal(proof.number,'10명');
+  assert.equal(proof.number,'10 명');
   assert.deepEqual(proof.originalHeader,[150,38],'genuine original ChatRoom userlist art');
   assert.ok(proof.nativeUserList==='true','recovered original userlist art actually decoded');
   assert.ok(proof.source.includes('ChatRoom/room4.png'),'original 2004 wood-room source retained');
@@ -107,7 +107,7 @@ const assert=require('node:assert/strict');
    document.querySelectorAll('#social-peer-list .social-user-row').length===11&&
    document.querySelectorAll('.social-avatar').length===11,
    null,{timeout:18000});
-  assert.equal(await host.locator('#social-native-user-count').textContent(),'11명');
+  assert.equal(await host.locator('#social-native-user-count').textContent(),'11 명');
   assert.equal(await host.locator('.social-avatar[data-seat]').count(),11);
   const extra=await host.locator('.social-avatar').evaluateAll(nodes=>nodes.map(x=>x.dataset.seat));
   assert.equal(new Set(extra).size,11,'11 real native room seats cannot overlap');
@@ -122,7 +122,7 @@ const assert=require('node:assert/strict');
     document.querySelectorAll('#social-peer-list .social-user-row').length===1&&
     document.querySelectorAll('#social-avatar-layer .social-avatar').length===1;
   },null,{timeout:25000});
-  assert.equal(await host.locator('#social-native-user-count').textContent(),'1명');
+  assert.equal(await host.locator('#social-native-user-count').textContent(),'1 명');
   assert.deepEqual(errors,[]);
   console.log('TEN GENUINE 2004 CHATROOM USERS PASS '+JSON.stringify({
    userCount:proof.userCount,elevenLive:11,rosterCount:proof.rosterCount,

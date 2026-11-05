@@ -21,7 +21,7 @@ URL = os.getenv(
     "INTERSECTION_PAGES_URL",
     "https://koith.github.io/browser-app-lab/apps/demand-research/"
 )
-FILES = ("index.html", "post_activity_ranking.js", "public_video_trends.js")
+FILES = ("index.html", "post_activity_ranking.js", "public_video_trends.js", "target_archive_client.js")
 EXPECTED = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
             for name in FILES}
 
@@ -47,7 +47,7 @@ def verify_pages_bytes():
             except Exception:
                 failures.append(name + ":unavailable")
         if not failures:
-            print("PAGES_DEPLOYED_MAIN_BYTES_SHA256_PASS: index, ranking JS and video trends JS")
+            print("PAGES_DEPLOYED_MAIN_BYTES_SHA256_PASS: index, ranking, video and backup button JS")
             return
         if attempt < 17:
             time.sleep(12)
@@ -67,6 +67,10 @@ def inspect_browser(browser_type, label, width, height):
                     and parsed.hostname == "koith.github.io"
                     and parsed.path.startswith("/browser-app-lab/apps/demand-research/")):
                 route.continue_()
+            elif (parsed.scheme == "https" and parsed.hostname=="github.com"
+                    and parsed.path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-archive.yml"):
+                route.fulfill(status=200,content_type="text/html",
+                              body='<html><body><p id="workflow-opened">Owner GitHub workflow</p></body></html>')
             else:
                 route.abort()
         page.route("**/*", restrict_network)
@@ -79,6 +83,32 @@ def inspect_browser(browser_type, label, width, height):
         assert page.locator("#activityRankingDialog").count() == 1, "rank dialog missing"
         assert page.locator("#videoTrends").count() == 1, "video trends UI missing"
         assert_rank_rows_centered(page, width)
+        # Static Pages has no private write token. The *deployed* backup
+        # control must still become usable and open the authenticated GitHub
+        # workflow rather than remaining disabled forever.
+        page.locator("#viewAccounts").click()
+        page.locator("#targetArchiveStatus").get_by_text("공개 페이지",exact=False).wait_for(timeout=12000)
+        page.locator("#targetArchiveAccount").fill(
+            "https://bsky.app/profile/synthetic-qa.bsky.social")
+        assert page.locator("#targetArchiveSubmit").is_enabled()
+        assert page.locator("#targetArchiveSubmit").inner_text()=="GitHub에서 백업 실행"
+        page.locator("#targetArchiveAccount").fill("")
+        page.locator("#targetArchiveSubmit").click()
+        assert "먼저 공개 SNS 계정" in page.locator("#targetArchiveStatus").inner_text()
+        page.locator("#targetArchiveAccount").fill(
+            "https://bsky.app/profile/synthetic-qa.bsky.social")
+        assert page.locator("#targetArchiveWorkflow").get_attribute("href")==(
+            "https://github.com/koith/browser-app-lab/actions/workflows/"
+            "intersection-target-account-archive.yml")
+        page.locator("#targetArchiveSubmit").click()
+        page.wait_for_url(
+            "https://github.com/koith/browser-app-lab/actions/workflows/"
+            "intersection-target-account-archive.yml",timeout=15000)
+        assert page.locator("#workflow-opened").is_visible()
+        print("PAGES_BACKUP_BUTTON_ENABLED_PASS:",label,
+              "empty_input_feedback=PASS same_tab_mobile_navigation=PASS private_dispatch=NOT_CLAIMED")
+        page.goto(URL + "?qa=return",wait_until="domcontentloaded",timeout=45000)
+        page.locator("#viewPosts").click()
 
         # Feed only synthetic source-proof data through the *deployed* ranking
         # module; no provider response or real account detail is accessed.

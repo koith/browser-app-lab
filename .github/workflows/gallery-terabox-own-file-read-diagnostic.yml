@@ -1,24 +1,55 @@
-name: Gallery TeraBox Own-File Alternative Read Diagnostic
+name: Gallery TeraBox Existing Owner Original Byte Read Diagnostic
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_existing_owner_exact_file.py'
+      - '.github/workflows/gallery-terabox-own-file-read-diagnostic.yml'
   push:
     branches: [main]
-    paths: ['.github/workflows/gallery-terabox-own-file-read-diagnostic.yml']
+    paths:
+      - 'apps/gallery-archive/qa_existing_owner_exact_file.py'
+      - '.github/workflows/gallery-terabox-own-file-read-diagnostic.yml'
 permissions:
   contents: read
 jobs:
-  verify-same-own-file:
+  offline-syntax:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    env:
-      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
-      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/gallery-archive/qa_existing_owner_exact_file.py
+            apps/mimmi-gallery/cloud/gateway/cookie_format.py
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: python -m pip install Pillow
-      - name: Install pinned owner storage client
+      - run: python -m py_compile apps/gallery-archive/qa_existing_owner_exact_file.py
+
+  original-byte-readback:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi, yui]
+    env:
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/gallery-archive/qa_existing_owner_exact_file.py
+            apps/mimmi-gallery/cloud/gateway/cookie_format.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'Pillow==11.3.0'
+      - name: Install checksum-pinned existing owner storage client
         shell: bash
         run: |
           set -euo pipefail
@@ -26,49 +57,19 @@ jobs:
           echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
           mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
           unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
-          bin="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
-          install -m 755 "$bin" "$RUNNER_TEMP/bin/rclone"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          test -n "$binary"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-      - name: Compare two authorized read mechanisms without printing protected responses
+      - name: Read a pre-existing photo from this model's own authenticated archive
+        env:
+          MODEL: ${{ matrix.model }}
         shell: bash
         run: |
           set -euo pipefail
           test -n "$MIMMI_COOKIE"
-          cookie="$(python - <<'PY'
-          import os,sys
-          sys.path.insert(0,'apps/mimmi-gallery/cloud/gateway')
-          from cookie_format import cookie_header
-          print(cookie_header(os.environ['MIMMI_COOKIE']))
-          PY
-          )"
-          echo "::add-mask::$cookie"
-          export RCLONE_CONFIG_ARCHIVE_COOKIE="$cookie"
-          target="archive:MimmiArchive/originals/v2ph-actor-a887785a/00008-1a7b617f8b0d60a3.jpg"
-          set +e
-          rclone cat "$target" --timeout 50s --retries 1 > "$RUNNER_TEMP/cat.bin" 2>"$RUNNER_TEMP/cat.log"
-          cat_result=$?
-          rclone copyto "$target" "$RUNNER_TEMP/copyto.jpg" --timeout 50s --retries 1 >"$RUNNER_TEMP/copyto.out" 2>"$RUNNER_TEMP/copyto.log"
-          copy_result=$?
-          set -e
-          export CAT_RC="$cat_result" COPY_RC="$copy_result"
-          python - <<'PY'
-          import hashlib,os
-          from io import BytesIO
-          from pathlib import Path
-          from PIL import Image
-          temp=Path(os.environ['RUNNER_TEMP'])
-          for name,rc in [('cat',int(os.environ['CAT_RC'])),('copyto',int(os.environ['COPY_RC']))]:
-              file=temp/('cat.bin' if name=='cat' else 'copyto.jpg')
-              raw=file.read_bytes() if file.exists() else b''
-              digest=hashlib.sha256(raw).hexdigest()
-              actual_jpeg=False
-              try:
-                  with Image.open(BytesIO(raw)) as img:
-                      img.load()
-                      actual_jpeg=img.format=='JPEG' and min(img.size)>=300
-              except Exception:
-                  pass
-              validated=rc==0 and actual_jpeg and digest.startswith('1a7b617f8b0d60a3')
-              print('SAME_OWNER_AUTHORIZED_READ',name,'rc',rc,'bytes',len(raw),'jpeg_decoded',actual_jpeg,'sha_prefix_match',digest.startswith('1a7b617f8b0d60a3'),'VERIFIED',validated)
-          PY
-          echo "Read-only diagnostic: do not delete, rename, reupload, bypass provider verification, or publish unverified originals." >> "$GITHUB_STEP_SUMMARY"
+          test -n "$YUI_COOKIE"
+          echo "::add-mask::$MIMMI_COOKIE"
+          echo "::add-mask::$YUI_COOKIE"
+          python apps/gallery-archive/qa_existing_owner_exact_file.py --model "$MODEL"
+          echo "- $MODEL: existing original exact SHA + bytes + pixel decode PASS" >> "$GITHUB_STEP_SUMMARY"

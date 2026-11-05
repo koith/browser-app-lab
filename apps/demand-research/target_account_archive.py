@@ -17,11 +17,12 @@ import json
 import os
 import re
 import socket
+from pathlib import Path
 import time
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 
-from demand_archive import CloudArchive, canonical_json, post_key, sha256, MIMES, MAX_MEDIA_BYTES
+from demand_archive import CloudArchive, canonical_json, post_key, sha256, MIMES, MAX_MEDIA_BYTES, MAX_CATALOG
 
 ACCOUNT_RE = re.compile(r"^[A-Za-z0-9_.:-]{3,260}$")
 HOST_RE = re.compile(r"^[a-zA-Z0-9.-]{3,253}$")
@@ -224,10 +225,123 @@ def archive_key(profile):
     return sha256((profile["platform"]+"\0"+profile["identity"]).encode())[:40]
 
 
+class AccountCloudArchive(CloudArchive):
+    """Read legacy account files, store new originals in private flat TeraBox.
+
+    The unofficial TeraBox backend may reject uploads under nested account
+    directories (copyto missing). One-level root objects avoid that provider
+    path resolution issue. Original logical keys, identity isolation and
+    remote SHA256 checks remain unchanged.
+    """
+
+    def __init__(self, root, profile):
+        self.account_hash=archive_key(profile)
+        self.shared=CloudArchive(remote=root.remote,runner=root.runner)
+        super().__init__(root.remote+"/account-archives/"+profile["platform"]+
+                         "/"+self.account_hash,runner=root.runner)
+
+    def shared_media_key(self,key):
+        # Historical shallow media objects remain readable after this change.
+        if not isinstance(key,str) or not re.fullmatch(
+                r"posts/[a-f0-9]{40}/media/[0-9]{4}\.[a-z0-9]{2,10}",key):
+            return None
+        return "account-media-"+self.account_hash+"-"+sha256(key.encode("utf-8"))+".bin"
+
+    def shared_record_key(self,key):
+        """Reversible, namespaced root filename enables checkpoint discovery.
+
+        A hash alone cannot support .names('graph/pages') or
+        .names('metadata/checkpoints'), so encode the verified logical key.
+        """
+        if (not isinstance(key,str) or not 1<=len(key)<=135
+                or not re.fullmatch(r"[A-Za-z0-9_./-]+",key)
+                or key.startswith("/") or ".." in key or "//" in key):
+            raise ValueError("invalid private account archive key")
+        encoded=base64.urlsafe_b64encode(key.encode("ascii")).decode("ascii").rstrip("=")
+        return "account-record-"+self.account_hash+"-"+encoded+".bin"
+
+    def read(self,key,*,cap=MAX_CATALOG,optional=False,domain=None):
+        # Always check prior canonical and account-local flat files FIRST.
+        legacy=super().read(key,cap=cap,optional=True,domain=domain)
+        if legacy is not None:
+            return legacy
+        historical=self.shared_media_key(key)
+        if historical:
+            raw=self.shared.read(historical,cap=cap,optional=True,domain=domain)
+            if raw is not None:
+                return raw
+        shallow=self.shared_record_key(key)
+        raw=self.shared.read(shallow,cap=cap,optional=True,domain=domain)
+        if raw is not None:
+            return raw
+        if optional:
+            return None
+        raise RuntimeError("private account object unavailable")
+
+    def names(self,prefix):
+        legacy=super().names(prefix)
+        # lsf is scoped to root level, not deeply nested directories.
+        # Read only own account's flat namespace; never reveal other accounts.
+        listing=self.shared.command(
+            ["lsf",self.shared.remote+"/","--files-only",
+             "--include","account-record-"+self.account_hash+"-*.bin",
+             "--retries","2"],timeout=120,allow_missing=True)
+        names=set(legacy)
+        if listing:
+            start="account-record-"+self.account_hash+"-"
+            for filename in listing.decode("utf-8","replace").splitlines():
+                if not filename.startswith(start) or not filename.endswith(".bin"):
+                    continue
+                encoded=filename[len(start):-4]
+                try:
+                    raw=base64.urlsafe_b64decode(encoded+"="*((-len(encoded))%4))
+                    key=raw.decode("ascii")
+                    if self.shared_record_key(key)!=filename:
+                        continue
+                except (ValueError,UnicodeDecodeError):
+                    continue
+                if key.startswith(prefix+"/"):
+                    name=key[len(prefix)+1:]
+                    if name and "/" not in name:
+                        names.add(name)
+        if len(names)>150000:
+            raise ValueError("private account index exceeds safe bound")
+        return sorted(names)
+
+    def write_immutable(self,key,data):
+        if not isinstance(data,bytes):
+            raise TypeError("cloud content must be bytes")
+        expected=sha256(data)
+        cap=len(data)+1
+        # Reject collisions in both historical domains; never overwrite
+        # originals, even when a root-level replica is available.
+        for domain in (None,"https://nephobox.com"):
+            existing=super().read(key,cap=cap,optional=True,domain=domain)
+            if existing is not None:
+                if sha256(existing)!=expected:
+                    raise RuntimeError("immutable account object checksum collision")
+                return False
+        historical=self.shared_media_key(key)
+        if historical:
+            for domain in (None,"https://nephobox.com"):
+                old=self.shared.read(historical,cap=cap,optional=True,domain=domain)
+                if old is not None:
+                    if sha256(old)!=expected:
+                        raise RuntimeError("immutable account media checksum collision")
+                    return False
+        # One depth-one immutable file for EVERY new logical account object:
+        # source JSON, post/media, profile, graph, thread, entry, checkpoint.
+        # No provider nested-folder mkdir/copyto requirement.
+        shallow=self.shared_record_key(key)
+        written=self.shared.write_immutable(shallow,data)
+        verified=self.shared.read_verified(shallow,expected,cap=cap)
+        if verified!=data:
+            raise RuntimeError("private account record SHA readback failed")
+        return written
+
+
 def account_cloud(root, profile):
-    return CloudArchive(
-        root.remote+"/account-archives/"+profile["platform"]+"/"+archive_key(profile),
-        runner=root.runner)
+    return AccountCloudArchive(root,profile)
 
 
 def cid_sha256(cid):
@@ -570,14 +684,42 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
             "threads":locals().get("thread_stats",{})}
 
 
-def run_registered(*, root=None, api=None, max_accounts=2):
+def read_bootstrap_request(path=None):
+    """Load only a reviewed public profile, with no credential or media in Git."""
+    source=Path(path) if path is not None else Path(__file__).with_name("target_account_bootstrap.json")
+    if not source.is_file():
+        return None
+    data=json.loads(source.read_text(encoding="utf-8"))
+    if (type(data) is not dict or set(data)!={"schema_version","platform","account","max_pages"}
+            or data.get("schema_version")!=1 or type(data.get("max_pages")) is not int
+            or not 1<=data["max_pages"]<=MAX_PAGES):
+        raise ValueError("invalid reviewed target request")
+    profile_input(data["platform"],data["account"])
+    return data
+
+
+def run_registered(*, root=None, api=None, max_accounts=2, bootstrap=False,
+                   bootstrap_path=None):
     root=root or CloudArchive()
     root.preflight()
     names=sorted(n for n in root.names("metadata/target-accounts")
                  if REGISTRY_RE.fullmatch(n))
     if not names:
-        print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",json.dumps({"registered":0,"processed":0}),flush=True)
-        return
+        # On initial TeraBox registration failure, retry the reviewed profile
+        # on the next schedule instead of repeatedly reporting an empty run.
+        request=read_bootstrap_request(bootstrap_path) if bootstrap else None
+        if request is not None:
+            result=run_one(request["platform"],request["account"],root=root,api=api,
+                           max_pages=request["max_pages"])
+            print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",
+                  json.dumps({"registered":1,"processed":1,"initial_registration":True,
+                              "posts_verified":result["posts_verified"],
+                              "state":result["status"]},sort_keys=True),flush=True)
+            return
+        print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",
+              json.dumps({"registered":0,"processed":0,
+                          "state":"NO_REGISTERED_TARGETS"},sort_keys=True),flush=True)
+        raise RuntimeError("no registered public accounts; no account backup performed")
     # Rotate the bounded slot each UTC cycle to avoid starving older entries.
     slot=int(time.time()//21600)%len(names)
     selected=[names[(slot+i)%len(names)] for i in range(min(max_accounts,len(names)))]
@@ -610,7 +752,7 @@ if __name__=="__main__":
     if args.resume_registered:
         if args.platform or args.account:
             cli.error("scheduled resume does not accept a manually targeted account")
-        run_registered()
+        run_registered(bootstrap=True)
     elif args.platform and args.account:
         run_one(args.platform,args.account,max_pages=args.max_pages)
     else:

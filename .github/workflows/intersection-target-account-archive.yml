@@ -27,6 +27,12 @@ on:
   schedule:
     # Resume registered public accounts with one bounded, private history pass.
     - cron: "17 */6 * * *"
+  push:
+    branches: [main]
+    # One explicitly selected public target request can be initiated by a
+    # reviewed commit; this path contains no credential or archived media.
+    paths:
+      - "apps/demand-research/target_account_bootstrap.json"
   pull_request:
     paths:
       - "apps/demand-research/target_account_archive.py"
@@ -39,6 +45,7 @@ on:
       - "apps/demand-research/target_account_viewer.py"
       - "apps/demand-research/test_target_account_viewer.py"
       - "apps/demand-research/test_account_archive_browser.py"
+      - "apps/demand-research/test_target_archive_button_browser.py"
       - "apps/demand-research/account_archive_view.html"
       - "apps/demand-research/account_archive_view.css"
       - "apps/demand-research/account_archive_view.js"
@@ -51,6 +58,7 @@ on:
       - "apps/demand-research/Dockerfile"
       - "apps/demand-research/demand_archive.py"
       - ".github/workflows/intersection-target-account-archive.yml"
+      - "apps/demand-research/target_account_bootstrap.json"
 
 permissions:
   contents: read
@@ -84,6 +92,7 @@ jobs:
           python -m pip install --disable-pip-version-check playwright==1.56.0
           python -m playwright install --with-deps chromium webkit
           python test_account_archive_browser.py
+          python test_target_archive_button_browser.py
 
   private-account-history:
     if: github.event_name != 'pull_request'
@@ -131,6 +140,22 @@ jobs:
             timeout --signal=TERM --kill-after=10s 1000s python target_account_archive.py \
               --platform "$TARGET_PLATFORM" --account "$TARGET_ACCOUNT" \
               --max-pages "$TARGET_MAX_PAGES"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            # The target is read from reviewed main branch content. No login
+            # cookies, tokens, or archived post/media bytes enter Git.
+            timeout --signal=TERM --kill-after=10s 1000s python - <<'PY'
+          import json
+          from pathlib import Path
+          from target_account_archive import run_one, profile_input
+          request=json.loads(Path("target_account_bootstrap.json").read_text(encoding="utf-8"))
+          if (not isinstance(request,dict) or request.get("schema_version")!=1
+                  or set(request)!={"schema_version","platform","account","max_pages"}
+                  or type(request.get("max_pages")) is not int
+                  or not 1<=request["max_pages"]<=4):
+              raise ValueError("invalid reviewed public account request")
+          profile_input(request["platform"],request["account"])
+          run_one(request["platform"],request["account"],max_pages=request["max_pages"])
+          PY
           else
             timeout --signal=TERM --kill-after=10s 1000s python target_account_archive.py \
               --resume-registered

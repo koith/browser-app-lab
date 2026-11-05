@@ -177,7 +177,8 @@ async def read_owner_media_via_copyto(path: str, limit: int, client_env: dict,
 
 
 
-async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> bytes:
+async def rclone_bytes(path: str, limit: int, *, remote: str | None = None,
+                       cookie_override: str | None = None) -> bytes:
     """Drain the *entire* remote stream, with size/timeout bounds.
 
     A single StreamReader.read(limit) may return only the first network chunk.
@@ -192,7 +193,13 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
                                      "X-Archive-Read-Cause": "provider_denial"}) from None
     client_env=os.environ.copy()
     try:
-        configured=client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE','')
+        # The two owner accounts have distinct authorized GitHub Secrets.
+        # Never route Yui reads with Mimmi's cookie once a Yui session exists.
+        configured=(cookie_override if cookie_override is not None else
+                    (client_env.get('RCLONE_CONFIG_ARCHIVE_YUI_COOKIE') or
+                     client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+                    if remote_name==YUI_REMOTE else
+                    client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
         client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(configured)
     except ValueError:
         raise HTTPException(status_code=503,detail='Invalid storage session configuration')
@@ -257,6 +264,8 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
 
 
 async def get_catalog():
+    if _cache["catalog"] and _owner_rescue_until["mimmi"] > time.time():
+        return _cache["catalog"]
     if _cache["catalog"] and (time.time()-_cache["time"]) < 180:
         return _cache["catalog"]
     async with _cache_lock:
@@ -352,8 +361,12 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
         try:
             blob = await verified_remote_media(key, declared_bytes, declared_digest, REMOTE)
         except HTTPException as error:
-            if not has_separate_preview or error.status_code not in (502, 504):
+            provider_denied = (error.status_code == 503 and
+                (error.headers or {}).get("X-Archive-Read-Cause") == "provider_denial")
+            if not has_separate_preview or (error.status_code not in (502, 504) and not provider_denied):
                 raise
+            # Fallback is an independently SHA-verified existing original,
+            # never an unverified preview or a bypass of provider denial.
             fallback = await media(album_id, image_num, 'original', download=download, v="")
             fallback.headers['X-Archive-Variant'] = 'verified-original-fallback'
             return fallback
@@ -372,9 +385,13 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
 YUI_REMOTE = "archive:YuiArchive"
 _yui_cache = {"catalog": None, "time": 0.0}
 _yui_cache_lock = asyncio.Lock()
+# Signed existing-owner snapshots remain private and expire automatically.
+_owner_rescue_until = {"mimmi": 0.0, "yui": 0.0}
 
 
 async def yui_catalog_bytes():
+    if _yui_cache["catalog"] and _owner_rescue_until["yui"] > time.time():
+        return _yui_cache["catalog"]
     if _yui_cache["catalog"] and time.time() - _yui_cache["time"] < 180:
         return _yui_cache["catalog"]
     async with _yui_cache_lock:
@@ -417,8 +434,11 @@ async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Q
     try:
         payload = await verified_remote_media(key, size, digest, YUI_REMOTE)
     except HTTPException as error:
-        if kind != 'preview' or error.status_code not in (502, 504):
+        provider_denied = (error.status_code == 503 and
+            (error.headers or {}).get("X-Archive-Read-Cause") == "provider_denial")
+        if kind != 'preview' or (error.status_code not in (502, 504) and not provider_denied):
             raise
+        # Restore a preview only through the SHA-verified existing original.
         fallback = await yui_media(album_id, image_num, 'original', download=download, v="")
         fallback.headers['X-Archive-Variant'] = 'verified-original-fallback'
         return fallback
@@ -688,57 +708,246 @@ async def signed_gallery_owner_pending(model: str,batch: str,request: Request):
     })
 
 
+
+async def _signed_rescue_payload(request: Request, maximum: int) -> bytes:
+    """OIDC-authenticated input; bound bytes before allocating a full body."""
+    authorization = request.headers.get("Authorization", "")
+    if not authorization.startswith("Bearer ") or not _verify_sync_identity(
+        authorization[len("Bearer "):], _SYNC_WORKFLOW
+    ):
+        raise HTTPException(403, "Untrusted owner-cache workflow")
+    data = bytearray()
+    async for chunk in request.stream():
+        data.extend(chunk)
+        if len(data) > maximum:
+            raise HTTPException(413, "Owner cache rescue payload too large")
+    if not data:
+        raise HTTPException(400, "Owner rescue payload is empty")
+    return bytes(data)
+
+
+@app.post("/internal/gallery-rescue-catalog/{model}")
+async def restore_authenticated_owner_catalog(model: str, request: Request):
+    """Private catalog already stored in the owner's own TeraBox account."""
+    if model not in ("mimmi", "yui"):
+        raise HTTPException(404, "Unknown model")
+    raw = await _signed_rescue_payload(request, 6_000_000)
+    try:
+        data = json.loads(raw)
+        if (not isinstance(data, dict) or data.get("schema_version") != 1
+                or data.get("model") != model or
+                not isinstance(data.get("albums"), list) or not data["albums"]):
+            raise ValueError("Wrong owner model/schema")
+        for album in data["albums"]:
+            if (not isinstance(album, dict)
+                or not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,99}", str(album.get("id", "")))
+                or not isinstance(album.get("images"), list)):
+                raise ValueError("Invalid owner album")
+            for photo in album["images"]:
+                if (not isinstance(photo, dict)
+                    or type(photo.get("number")) is not int or photo["number"] < 1
+                    or not media_key_valid(photo.get("key"))
+                    or not photo["key"].startswith("originals/" + album["id"] + "/")
+                    or not isinstance(photo.get("sha256"), str)
+                    or not re.fullmatch("[a-f0-9]{64}", photo["sha256"])
+                    or type(photo.get("bytes")) is not int
+                    or not 1 <= photo["bytes"] <= 140_000_000):
+                    raise ValueError("Invalid owner original record")
+    except (ValueError, TypeError, KeyError, AttributeError):
+        raise HTTPException(422, "Owner rescue catalog rejected") from None
+    state = _cache if model == "mimmi" else _yui_cache
+    async with _sync_lock:
+        state.update(catalog=data, time=time.time())
+        # A scheduled signed owner refresh is required before this expires.
+        _owner_rescue_until[model] = time.time() + 5400
+    print("OWNER_RESCUE_VERIFIED_CATALOG", model, len(data["albums"]), flush=True)
+    return JSONResponse({"verified": True, "model": model,
+                         "albums": len(data["albums"])},
+                        headers={"Cache-Control": "no-store"})
+
+
+@app.post("/internal/gallery-rescue-media/{model}")
+async def restore_authenticated_owner_media(model: str, request: Request):
+    """Exact SHA-checked existing file, bounded in RAM, never public storage."""
+    if model not in ("mimmi", "yui"):
+        raise HTTPException(404, "Unknown model")
+    raw = await _signed_rescue_payload(request, _media_cache.max_entry + 1)
+    album_id = request.headers.get("X-Owner-Album", "")
+    number_str = request.headers.get("X-Owner-Number", "")
+    variant = request.headers.get("X-Owner-Variant", "")
+    if (not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,99}", album_id)
+            or not number_str.isdecimal() or not 1 <= int(number_str) <= 99999
+            or variant not in ("original", "preview")):
+        raise HTTPException(400, "Invalid verified photo identifier")
+    state = _cache if model == "mimmi" else _yui_cache
+    if (_owner_rescue_until[model] <= time.time()
+            or not isinstance(state.get("catalog"), dict)):
+        raise HTTPException(409, "Owner catalog is not verified")
+    album = next((a for a in state["catalog"]["albums"] if a["id"] == album_id), None)
+    photo = next((p for p in (album or {}).get("images", [])
+                  if p.get("number") == int(number_str)), None)
+    if not photo:
+        raise HTTPException(404, "Original was not recorded")
+    key_name, sha_name, byte_name = (
+        ("preview", "preview_sha256", "preview_bytes") if variant == "preview"
+        else ("key", "sha256", "bytes")
+    )
+    key, sha, size = photo.get(key_name), photo.get(sha_name), photo.get(byte_name)
+    prefix = "previews" if variant == "preview" else "originals"
+    if (not isinstance(key, str) or not media_key_valid(key)
+            or not key.startswith(prefix + "/" + album_id + "/")
+            or not isinstance(sha, str) or not re.fullmatch("[a-f0-9]{64}", sha)
+            or type(size) is not int or not 1 <= size <= _media_cache.max_entry
+            or hashlib.sha256(raw).hexdigest() != sha or len(raw) != size):
+        raise HTTPException(422, "Owner original SHA/bytes do not match")
+    try:
+        with Image.open(BytesIO(raw)) as decoded:
+            if decoded.width * decoded.height > 40_000_000:
+                raise ValueError("Excessive decoded pixels")
+            if variant == "original" and (
+                (type(photo.get("width")) is int and photo["width"] != decoded.width)
+                or (type(photo.get("height")) is int and photo["height"] != decoded.height)
+            ):
+                raise ValueError("Wrong recorded pixel dimensions")
+            decoded.verify()
+    except (ValueError, UnidentifiedImageError, OSError,
+            Image.DecompressionBombError):
+        raise HTTPException(422, "Original does not decode as image") from None
+    remote = REMOTE if model == "mimmi" else YUI_REMOTE
+    try:
+        stored = _media_cache.insert_verified(remote, key, size, sha, raw)
+    except ValueError:
+        raise HTTPException(422, "Owner media cache refused bytes") from None
+    print("OWNER_RESCUE_SHA_MEDIA_READY", model, variant, flush=True)
+    return JSONResponse({"cached": stored, "model": model, "variant": variant},
+                        headers={"Cache-Control": "no-store"})
+
+
+
+# Read-only readiness for exactly the real user-reported albums, not merely
+# whether a cover or catalog can load. No remote I/O, secrets or file bytes.
+_INCIDENT_MEDIA = {
+    "mimmi": (
+        ("djawa-janus-scary-lantern-night", 15),
+        ("mimmi-indie-sana-sopmod2-2019", 7),
+    ),
+    "yui": (
+        ("djawa-privaty-public-samples", 30),
+        ("yui-chinokun-illustar-2026-public", 4),
+    ),
+}
+
+
+@app.get("/api/gallery-media-readiness")
+async def gallery_media_readiness():
+    now = time.time()
+    available = 0
+    expected = sum(n for items in _INCIDENT_MEDIA.values() for _, n in items)
+    # A signed catalog expires in ~90 min; never report readiness when its
+    # remaining lifetime is too short to guarantee the next normal visit.
+    for model, groups in _INCIDENT_MEDIA.items():
+        state = _cache if model == "mimmi" else _yui_cache
+        catalog = state.get("catalog")
+        if not isinstance(catalog, dict) or _owner_rescue_until[model] < now + 600:
+            return JSONResponse({"ready": False, "available": available,
+                                 "expected": expected},
+                                headers={"Cache-Control": "no-store"})
+        remote = REMOTE if model == "mimmi" else YUI_REMOTE
+        albums = catalog.get("albums")
+        if not isinstance(albums, list):
+            return JSONResponse({"ready": False, "available": available,
+                                 "expected": expected},
+                                headers={"Cache-Control": "no-store"})
+        for album_id, n in groups:
+            album = next((a for a in albums if a.get("id") == album_id), None)
+            if not album or len(album.get("images", [])) != n:
+                return JSONResponse({"ready": False, "available": available,
+                                     "expected": expected},
+                                    headers={"Cache-Control": "no-store"})
+            for photo in album["images"]:
+                key = (remote, photo.get("key"), photo.get("bytes"), photo.get("sha256"))
+                if key not in _media_cache.values:
+                    return JSONResponse({"ready": False, "available": available,
+                                         "expected": expected},
+                                        headers={"Cache-Control": "no-store"})
+                available += 1
+    return JSONResponse({"ready": True, "available": available,
+                         "expected": expected},
+                        headers={"Cache-Control": "no-store"})
+
+
 @app.post("/internal/terabox-session-refresh")
 async def sync_archive_session(request: Request):
+    """OIDC-authenticated, model-separated owner session refresh.
+
+    A failed owner must not roll back the other owner's VERIFIED refresh.
+    Never publish cookies, URLs, storage keys, or photo bytes to Pages.
+    """
     authorization = request.headers.get("Authorization", "")
     if not authorization.startswith("Bearer ") or not _verify_sync_identity(
         authorization[len("Bearer "):]
     ):
         raise HTTPException(status_code=403, detail="Invalid workflow identity")
     payload = await request.body()
-    if len(payload) > 18000:
+    if len(payload) > 36000:
         raise HTTPException(status_code=413, detail="Request too large")
     try:
-        cookie = json.loads(payload).get("cookie")
+        values = json.loads(payload)
+        if not isinstance(values, dict):
+            raise ValueError("Expected an object")
+        mimmi_cookie = values.get("cookie")
+        # Backwards compatibility for the existing signed one-cookie caller.
+        yui_cookie = values.get("yui_cookie", mimmi_cookie)
     except (ValueError, TypeError, AttributeError):
         raise HTTPException(status_code=400, detail="Invalid session payload")
-    if (
-        not isinstance(cookie, str) or not (8 <= len(cookie) <= 16000)
-        or any(ord(ch) < 32 or ord(ch) == 127 for ch in cookie)
-    ):
-        raise HTTPException(status_code=400, detail="Invalid storage session")
+    for value in (mimmi_cookie, yui_cookie):
+        if (not isinstance(value, str) or not 8 <= len(value) <= 16000
+                or any(ord(ch) < 32 or ord(ch) == 127 for ch in value)):
+            raise HTTPException(status_code=400, detail="Invalid storage session")
+
+    verified, unavailable = [], []
     async with _sync_lock:
-        old_cookie = os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE", "")
-        os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"] = cookie
-        try:
-            for model, remote in (("mimmi", REMOTE), ("yui", YUI_REMOTE)):
-                catalog_raw = await rclone_bytes(
-                    "metadata/catalog.json", 6_000_000, remote=remote
+        for model, remote, candidate, environment in (
+            ("mimmi", REMOTE, mimmi_cookie, "RCLONE_CONFIG_ARCHIVE_COOKIE"),
+            ("yui", YUI_REMOTE, yui_cookie, "RCLONE_CONFIG_ARCHIVE_YUI_COOKIE"),
+        ):
+            try:
+                raw = await rclone_bytes(
+                    "metadata/catalog.json", 6_000_000,
+                    remote=remote, cookie_override=candidate
                 )
-                catalog_data = json.loads(catalog_raw)
-                if (
-                    catalog_data.get("model") != model
-                    or not isinstance(catalog_data.get("albums"), list)
-                ):
+                catalog_data = json.loads(raw)
+                if (catalog_data.get("schema_version") != 1
+                        or catalog_data.get("model") != model
+                        or not isinstance(catalog_data.get("albums"), list)
+                        or not catalog_data["albums"]):
                     raise ValueError("Incompatible archive")
-        except Exception as error:
-            # Do not log any cookie, access token, or remote error message.
-            # Error class and model identify temporary read failure vs. schema.
-            print("TERABOX_SYNC_ERROR", model, type(error).__name__,
-                  getattr(error, "status_code", "-"), flush=True)
-            os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"] = old_cookie
-            raise HTTPException(
-                status_code=503 if isinstance(error, (HTTPException, OSError, asyncio.TimeoutError)) else 422,
-                detail="TeraBox session validation failed"
-            )
-        global COOKIE
-        COOKIE = cookie
-        _cache.update(catalog=None, time=0.0)
-        _yui_cache.update(catalog=None, time=0.0)
-    return JSONResponse(
-        {"synced": True, "models": ["yui", "mimmi"]},
-        headers={"Cache-Control": "no-store"},
-    )
+            except (HTTPException, OSError, asyncio.TimeoutError,
+                    ValueError, TypeError) as error:
+                # Never log the cookie, a provider response body or URL.
+                print("TERABOX_SYNC_ERROR", model, type(error).__name__,
+                      getattr(error, "status_code", "-"), flush=True)
+                unavailable.append(model)
+                continue
+            os.environ[environment] = candidate
+            if model == "mimmi":
+                global COOKIE
+                COOKIE = candidate
+                _cache.update(catalog=None, time=0.0)
+            else:
+                _yui_cache.update(catalog=None, time=0.0)
+            _provider_denial_gate.success(remote)
+            verified.append(model)
+            print("OWNER_SESSION_VERIFIED", model, flush=True)
+    if not verified:
+        raise HTTPException(status_code=503,
+                            detail="Neither owner storage session verified")
+    return JSONResponse({
+        "synced": len(verified) == 2,
+        "models": verified,
+        "unavailable_models": unavailable
+    }, headers={"Cache-Control": "no-store"})
+
 
 # Owner-only mobile gallery. It preserves all prior /api/* bearer clients and
 # adds an HttpOnly, same-origin session for Safari, not public photo URLs.
@@ -771,7 +980,9 @@ async def _individual_put(model,local,key,overwrite):
     if not (media_key_valid(key) or re.fullmatch(r'metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\.json',key)):
         raise HTTPException(400,'Invalid individual transfer destination')
     child=os.environ.copy()
-    child['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(child.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+    selected=(child.get('RCLONE_CONFIG_ARCHIVE_YUI_COOKIE') or
+              child.get('RCLONE_CONFIG_ARCHIVE_COOKIE','')) if model=='yui' else child.get('RCLONE_CONFIG_ARCHIVE_COOKIE','')
+    child['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(selected)
     try:
         child['RCLONE_CONFIG_ARCHIVE_JSTOKEN']=await owner_upload_state.get(
             child['RCLONE_CONFIG_ARCHIVE_COOKIE'],child.get('RCLONE_CONFIG_ARCHIVE_DOMAIN','https://www.terabox.com'))

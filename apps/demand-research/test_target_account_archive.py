@@ -150,8 +150,9 @@ def test_blue_source_replies_and_video_original_bytes_are_verified_and_resume(ca
     assert second["posts_verified"]==1
     assert second["status"]=="COMPLETE_CURRENT_PUBLIC_CURSOR"
     root="account-archives/bluesky/"+job.archive_key(job.resolve("bluesky",DID,api))
-    stored=[json.loads(v) for k,v in cloud.objects.items()
-            if k.startswith(root+"/posts/") and k.endswith("/post.json")]
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
+    stored=[json.loads(archive.read("posts/"+job.post_key("bluesky",p["uri"])+"/post.json"))
+            for p in (p1,p2)]
     assert len(stored)==2
     latest=next(p for p in stored if p["kind"]=="post")
     assert latest["media_expected"]==2
@@ -159,19 +160,27 @@ def test_blue_source_replies_and_video_original_bytes_are_verified_and_resume(ca
     assert all(m["remote_verified"] for m in latest["media"])
     assert any(m["kind"]=="video" for m in latest["media"])
     assert any(p["kind"]=="reply" and p["reply_to"] for p in stored)
-    assert cloud.objects[root+"/"+latest["media"][0]["key"]]==PHOTO
-    assert cloud.objects[root+"/"+latest["media"][1]["key"]]==VIDEO
-    assert len([k for k in cloud.objects if k.startswith(root+"/metadata/source-records/")])==2
-    assert len([k for k in cloud.objects if k.startswith(root+"/metadata/checkpoints/")])==2
-    profiles=[json.loads(raw) for k,raw in cloud.objects.items()
-              if k.startswith(root+"/profile/snapshots/")]
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
+    assert archive.read_verified(latest["media"][0]["key"],
+                                 latest["media"][0]["sha256"],cap=len(PHOTO)+1)==PHOTO
+    assert archive.read_verified(latest["media"][1]["key"],
+                                 latest["media"][1]["sha256"],cap=len(VIDEO)+1)==VIDEO
+    assert all(archive.shared_record_key(m["key"]) in cloud.objects
+               for m in latest["media"])
+    assert len(archive.names("metadata/source-records"))==2
+    assert len(archive.names("metadata/checkpoints"))==2
+    profiles=[json.loads(archive.read("profile/snapshots/"+name))
+              for name in archive.names("profile/snapshots")]
     assert profiles[-1]["description"]=="Archived public biography"
     assert profiles[-1]["assets"]["avatar"]["status"]=="sha256_verified"
     assert profiles[-1]["followers_count"]==1
-    assert len([k for k in cloud.objects if k.startswith(root+"/graph/pages/")])==4
-    assert len([k for k in cloud.objects if k.startswith(root+"/threads/")])==2
-    assert len([k for k in cloud.objects if k.startswith(root+"/thread-markers/")])==2
-    thread=[json.loads(raw) for k,raw in cloud.objects.items() if "/threads/" in k]
+    assert len(archive.names("graph/pages"))==4
+    assert sum(len(archive.names("threads/"+job.post_key("bluesky",p["uri"])))
+               for p in (p1,p2))==2
+    assert len(archive.names("thread-markers"))==2
+    thread=[json.loads(archive.read("threads/"+pid+"/"+name))
+            for pid in (job.post_key("bluesky",p["uri"]) for p in (p1,p2))
+            for name in archive.names("threads/"+pid)]
     assert thread[0]["replies"][0]["text"]=="Public comment synthetic"
     assert "qa-example" not in capsys.readouterr().out
 
@@ -194,7 +203,9 @@ def test_mastodon_author_posts_replies_and_audio_are_verified():
     result=job.run_one("mastodon","writer@mastodon.example",root=cloud,
                        api=api,max_pages=2,clock=lambda:0)
     assert result["posts_verified"]==1 and result["status"]=="COMPLETE_CURRENT_PUBLIC_CURSOR"
-    a=[json.loads(v) for k,v in cloud.objects.items() if k.endswith("/post.json")]
+    archive=job.account_cloud(cloud,job.resolve("mastodon","writer@mastodon.example",api))
+    key="posts/"+job.post_key("mastodon","mastodon.example:20200:900")+"/post.json"
+    a=[json.loads(archive.read(key))]
     assert len(a)==1 and a[0]["kind"]=="reply"
     assert a[0]["media"][0]["mime"]=="audio/mpeg"
     assert a[0]["text"]=="Public reply with sound"
@@ -210,9 +221,10 @@ def test_exact_original_blob_CID_hash_rejects_substitution_without_checkpoint():
     cloud=FakeCloud()
     with pytest.raises(job.SourceUnavailable,match="original media incomplete"):
         job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
-    assert not any("/metadata/checkpoints/" in k for k in cloud.objects)
-    assert any("/metadata/source-records/" in k for k in cloud.objects)
-    assert not any(k.endswith("/post.json") for k in cloud.objects)
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
+    assert not archive.names("metadata/checkpoints")
+    assert len(archive.names("metadata/source-records"))==1
+    assert not archive.names("metadata/entries")
 
 
 def test_missing_account_and_private_source_fail_closed():
@@ -233,10 +245,12 @@ def test_replay_same_completed_account_does_not_duplicate_post_or_media():
     api=BlueAPI({None:([post],None)})
     cloud=FakeCloud()
     job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
-    before={k:v for k,v in cloud.objects.items() if "/posts/" in k}
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
+    key="posts/"+job.post_key("bluesky",post["uri"])+"/post.json"
+    before=archive.read(key)
     result=job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
     assert result["previously_saved"]==1
-    assert {k:v for k,v in cloud.objects.items() if "/posts/" in k}==before
+    assert archive.read(key)==before
 
 
 def test_cid_sha256_is_raw_original_not_cdn_derivative():
@@ -251,3 +265,126 @@ def test_account_cloud_namespace_separates_two_public_profiles():
     p2={"platform":"bluesky","identity":"did:plc:"+"b"*24}
     assert job.account_cloud(root,p1).remote!=job.account_cloud(root,p2).remote
     assert "account-archives" in job.account_cloud(root,p1).remote
+
+
+def test_empty_registered_schedule_is_not_a_successful_backup(capsys):
+    """Green scheduled Actions runs must not claim an archive with zero targets."""
+    cloud=FakeCloud()
+    with pytest.raises(RuntimeError,match="no registered public accounts"):
+        job.run_registered(root=cloud)
+    output=capsys.readouterr().out
+    assert "TARGET_ACCOUNT_ARCHIVE_SCHEDULE" in output
+    assert '"registered": 0' in output
+    assert '"processed": 0' in output
+    assert '"state": "NO_REGISTERED_TARGETS"' in output
+    assert not any("/account-archives/" in path for path in cloud.objects)
+
+
+def test_reviewed_bootstrap_retries_first_registration_with_remote_verification(tmp_path,capsys):
+    """A failed first dispatch is retried by schedule without a false-green no-op."""
+    request=tmp_path/"selected.json"
+    request.write_text(json.dumps({"schema_version":1,"platform":"bluesky",
+                                   "account":"qa-example.bsky.social","max_pages":1}))
+    post=blue_row("bootstrap01","synthetic public original")
+    cloud=FakeCloud()
+    api=BlueAPI({None:([post],None)})
+    job.run_registered(root=cloud,api=api,bootstrap=True,bootstrap_path=request)
+    assert any("metadata/target-accounts/" in name for name in cloud.objects)
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
+    assert archive.names("metadata/entries")
+    assert len(archive.load_catalog())==1
+    assert '"initial_registration": true' in capsys.readouterr().out.lower()
+
+
+def test_reviewed_bootstrap_does_not_accept_unvalidated_config(tmp_path):
+    path=tmp_path/"selected.json"
+    path.write_text(json.dumps({"schema_version":1,"platform":"bluesky",
+                                "account":"qa-example.bsky.social",
+                                "max_pages":2,"surprise":"untrusted"}))
+    with pytest.raises(ValueError,match="invalid reviewed target"):
+        job.read_bootstrap_request(path)
+
+
+def test_shallow_private_media_recovers_when_nested_copyto_is_missing():
+    """The exact original is SHA-read back, even if nested upload paths fail."""
+    p=blue_row("missingfolder","synthetic exact source",
+               assets=[("image/jpeg",PHOTO)])
+    api=BlueAPI({None:([p],None)})
+    api.blobs={cid(PHOTO):("image/jpeg",PHOTO)}
+    cloud=FakeCloud()
+    base_runner=cloud.runner
+    attempted=[]
+    def reject_nested_upload(args,data=None,timeout=150,allow_missing=False):
+        if (args[0] in ("copyto","rcat")
+                and any("/account-archives/" in str(x) and
+                        "/media/" in str(x) for x in args)):
+            attempted.append(args[0])
+            raise RuntimeError("private cloud copyto failed (missing)")
+        return base_runner(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud.runner=reject_nested_upload
+    report=job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
+    assert report["posts_verified"]==1
+    assert report["status"]=="COMPLETE_CURRENT_PUBLIC_CURSOR"
+    resolved=job.resolve("bluesky",DID,api)
+    archive=job.account_cloud(cloud,resolved)
+    key="posts/"+job.post_key("bluesky",p["uri"])+"/media/0001.jpg"
+    shallow=archive.shared_media_key(key)
+    flat=archive.shared_record_key(key)
+    assert flat in cloud.objects
+    assert cloud.objects[flat]==PHOTO
+    assert archive.read_verified(key,job.sha256(PHOTO),cap=len(PHOTO)+1)==PHOTO
+    assert not attempted,"depth-one account records must avoid nested upload paths"
+
+
+def test_shallow_media_namespace_is_account_and_slot_scoped():
+    root=FakeCloud()
+    p1={"platform":"bluesky","identity":DID}
+    p2={"platform":"bluesky","identity":"did:plc:"+"b"*24}
+    key="posts/"+"a"*40+"/media/0001.jpg"
+    a=job.account_cloud(root,p1)
+    b=job.account_cloud(root,p2)
+    assert a.shared_media_key(key)!=b.shared_media_key(key)
+    assert a.shared_media_key(key)!=a.shared_media_key(key.replace("0001","0002"))
+    assert a.shared_media_key("../../unsafe") is None
+
+
+def test_all_account_object_types_ignore_nested_upload_failure():
+    """Metadata, checkpoints, graph, thread and original media share one flat gate."""
+    cloud=FakeCloud()
+    original_runner=cloud.runner
+    blocked=[]
+    def nested_broken(args,data=None,timeout=150,allow_missing=False):
+        if args[0] in ("copyto","rcat") and any(
+                "/account-archives/" in str(arg) for arg in args):
+            blocked.append(args[0])
+            raise RuntimeError("private cloud copyto failed (missing)")
+        return original_runner(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud.runner=nested_broken
+    p=blue_row("allobjects","test post",assets=[("image/jpeg",PHOTO)])
+    api=BlueAPI({None:([p],None)})
+    api.blobs={cid(PHOTO):("image/jpeg",PHOTO)}
+    report=job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
+    assert report["posts_verified"]==1
+    assert report["pages_verified"]==1
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
+    for folder in ("metadata/source-records","metadata/checkpoints",
+                   "metadata/entries","profile/snapshots","graph/pages",
+                   "threads/"+job.post_key("bluesky",p["uri"])):
+        assert archive.names(folder),folder
+    assert len(archive.load_catalog())==1
+    assert not blocked
+    # Fresh independently constructed reader discovers the remote records.
+    fresh=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
+    assert len(fresh.load_catalog())==1
+    assert fresh.names("metadata/checkpoints")==["page-00000001.json"]
+
+
+def test_shallow_account_record_detects_legacy_canonical_collision():
+    cloud=FakeCloud()
+    account=job.account_cloud(cloud,{"platform":"bluesky","identity":DID})
+    key="metadata/source-records/"+"a"*40+".json"
+    old=account.remote.split("archive:DemandResearch/",1)[1]+"/"+key
+    cloud.objects[old]=b"other original"
+    with pytest.raises(RuntimeError,match="checksum collision"):
+        account.write_immutable(key,b"proposed original")
+    assert account.shared_record_key(key) not in cloud.objects

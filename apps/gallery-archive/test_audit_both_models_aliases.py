@@ -68,5 +68,33 @@ class AliasAwareCoverageTests(unittest.TestCase):
             rows(self.root, "mimmi")
 
 
+    def test_unavailable_private_owner_uses_published_index_only_as_unverified_reference(self):
+        self.save("owner-index.json", {
+            "schema_version": 1, "model": "mimmi",
+            "physical_originals_indexed": 2,
+            "albums": [{"id": "djawa-main", "images": [
+                {"number": 1, "sha256": self.digest, "bytes": 20},
+                {"number": 2, "sha256": self.other, "bytes": 22}
+            ]}]
+        })
+        r = rows(self.root, "mimmi", self.root / "missing-private-catalog.json")
+        self.assertIsNone(r["private_catalog_entries"])
+        self.assertEqual(r["published_owner_index_only_rows"], 2)
+        self.assertEqual(r["gap_reference_integrity"], "PUBLISHED_METADATA_REMOTE_UNVERIFIED")
+        self.assertEqual(r["indexed_reference_positions"], 2)
+        self.assertIsNone(r["research_distinct_sha_not_in_saved_catalog"])
+        self.assertEqual(r["research_distinct_sha_not_in_index_reference"], 0)
+        self.assertIsNone(r["source_numbered_positions_not_stored"])
+
+    def test_wrong_model_published_reference_fails_closed(self):
+        self.save("owner-index.json", {
+            "schema_version": 1, "model": "yui",
+            "albums": [{"id": "djawa-main", "images": []}]
+        })
+        with self.assertRaisesRegex(ValueError, "Published owner index schema/model mismatch"):
+            rows(self.root, "mimmi", self.root / "missing-private-catalog.json")
+
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

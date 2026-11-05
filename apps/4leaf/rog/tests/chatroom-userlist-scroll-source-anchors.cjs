@@ -68,7 +68,7 @@ const ANCHOR={
      'room '+bg+' '+k+' '+JSON.stringify(m[k])+' must equal source anchor '+JSON.stringify(ANCHOR[k]));
    assert.ok(Object.values(m.hits).every(Boolean),'room '+bg+' live controls are physically hittable '+JSON.stringify(m.hits));
    assert.equal(m.rows.length,2,'two real participants listed, no fabricated names');
-   assert.equal(m.count,'2명');
+   assert.equal(m.count,'2 명','the original chat.jpg shows a space before 명');
    assert.equal(m.rowFont,'12px');
    assert.deepEqual(m.headerCanvas,[150,38],'the decoded 150x38 source canvas is kept and cropped');
    assert.equal(m.arrowOpacity,'1','source arrows are never dimmed (atlas has no disabled cell)');

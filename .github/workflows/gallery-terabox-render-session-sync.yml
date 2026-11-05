@@ -6,13 +6,19 @@ on:
       - '.github/workflows/gallery-terabox-render-session-sync.yml'
       - 'apps/gallery-archive/verify_render_gallery_read.py'
       - 'apps/gallery-archive/test_verify_render_gallery_read.py'
+      - 'apps/gallery-archive/restore_known_owner_cache.py'
+      - 'apps/gallery-archive/probe_private_owner_runtime.py'
+      - 'apps/gallery-archive/test_probe_private_owner_runtime.py'
   push:
     branches: [main]
     paths:
       - '.github/workflows/gallery-terabox-render-session-sync.yml'
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/gallery-archive/restore_known_owner_cache.py'
+      - 'apps/gallery-archive/probe_private_owner_runtime.py'
   schedule:
-    - cron: '*/15 * * * *'
+    # Poll below Render Free's 15-minute idle spin-down without new paid infra.
+    - cron: '7,17,27,37,47,57 * * * *'
   workflow_run:
     workflows: ["Deploy static content to Pages"]
     types: [completed]
@@ -35,8 +41,9 @@ jobs:
         with:
           python-version: '3.12'
       - run: |
-          python -m py_compile apps/gallery-archive/verify_render_gallery_read.py
+          python -m py_compile apps/gallery-archive/verify_render_gallery_read.py apps/gallery-archive/restore_known_owner_cache.py apps/gallery-archive/probe_private_owner_runtime.py
           python apps/gallery-archive/test_verify_render_gallery_read.py
+          python apps/gallery-archive/test_probe_private_owner_runtime.py
   synchronize:
     if: >-
       github.event_name != 'pull_request' &&
@@ -45,20 +52,44 @@ jobs:
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-24.04
-    timeout-minutes: 9
+    timeout-minutes: 25
     env:
-      ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: apps/gallery-archive
-          sparse-checkout-cone-mode: true
+          sparse-checkout: |
+            apps/gallery-archive
+            apps/mimmi-gallery/cloud/gateway/cookie_format.py
+            apps/mimmi-gallery/album-covers.json
+            apps/yui-gallery/album-covers.json
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Lightweight complete-owner readiness check (56 originals, no downloads)
+        id: ready
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          if python apps/gallery-archive/probe_private_owner_runtime.py; then
+            echo "healthy=true" >> "$GITHUB_OUTPUT"
+            echo "All 56 recorded owner originals are still in the private runtime cache." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "healthy=false" >> "$GITHUB_OUTPUT"
+            echo "Cold/incomplete gallery: existing-owner authenticated recovery is required." >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Securely refresh Render storage session without exposing cookies or viewer passwords
+        if: github.event_name != 'schedule' && steps.ready.outputs.healthy != 'true'
+        id: direct_owner_session
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$ARCHIVE_COOKIE"
-          echo "::add-mask::$ARCHIVE_COOKIE"
+          test -n "$MIMMI_COOKIE"
+          test -n "$YUI_COOKIE"
+          echo "::add-mask::$MIMMI_COOKIE"
+          echo "::add-mask::$YUI_COOKIE"
           python - <<'PY'
           import json
           import os
@@ -68,11 +99,12 @@ jobs:
 
           origin="https://mimmi-private-gallery-free.onrender.com"
           audience="gallery-archive-terabox-sync"
-          cookie=os.environ["ARCHIVE_COOKIE"]
-          if len(cookie)<8:
-              raise SystemExit("TeraBox secret missing")
+          cookie=os.environ["MIMMI_COOKIE"]
+          yui_cookie=os.environ["YUI_COOKIE"]
+          if min(len(cookie),len(yui_cookie))<8:
+              raise SystemExit("Owner storage secret missing")
 
-          for attempt in range(1,13):
+          for attempt in range(1,5):
               try:
                   identity_request=urllib.request.Request(
                       os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]+"&audience="+audience,
@@ -82,13 +114,15 @@ jobs:
                   request=urllib.request.Request(
                       origin+"/internal/terabox-session-refresh",
                       method="POST",
-                      data=json.dumps({"cookie":cookie}).encode(),
+                      data=json.dumps({"cookie":cookie,"yui_cookie":yui_cookie}).encode(),
                       headers={"Authorization":"Bearer "+identity,
                                "Content-Type":"application/json"})
                   with urllib.request.urlopen(request,timeout=120) as response:
                       result=json.load(response)
-                  if result.get("synced") is not True:
-                      raise ValueError("No acknowledged storage refresh")
+                  models=result.get("models")
+                  if result.get("synced") is not True or not isinstance(models,list) or set(models)!={"mimmi","yui"}:
+                      print("RENDER_OWNER_SESSION_PARTIAL_MODELS",models if isinstance(models,list) else [])
+                      raise SystemExit("Owner sessions not both verified")
                   print("RENDER_TERABOX_SESSION_REFRESHED")
                   break
               except urllib.error.HTTPError as error:
@@ -97,12 +131,38 @@ jobs:
                       raise SystemExit("Session refresh rejected")
               except (urllib.error.URLError,TimeoutError) as error:
                   print("RENDER_SESSION_REFRESH_NETWORK_RETRY",attempt)
-              if attempt==12:
+              if attempt==4:
                   raise SystemExit("Render storage refresh unavailable")
-              time.sleep(15)
+              time.sleep(25)
 
           PY
           # Read-only verifier retries temporary 502/503/504 without masking
           # wrong-model catalogs, provider JSON or malformed cover bytes.
           python apps/gallery-archive/verify_render_gallery_read.py
           echo 'Both passwordless galleries are connected to verified TeraBox albums.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install the existing checksum-pinned owner storage client for read-only rescue
+        if: steps.ready.outputs.healthy != 'true' && (github.event_name == 'schedule' || steps.direct_owner_session.outcome == 'failure')
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install 'Pillow==11.3.0'
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          test -n "$client"
+          install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Recover existing same-owner SHA images without any new collection or storage writes
+        if: steps.ready.outputs.healthy != 'true' && (github.event_name == 'schedule' || steps.direct_owner_session.outcome == 'failure')
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$MIMMI_COOKIE"
+          test -n "$YUI_COOKIE"
+          echo "::add-mask::$MIMMI_COOKIE"
+          echo "::add-mask::$YUI_COOKIE"
+          python apps/gallery-archive/restore_known_owner_cache.py
+          echo 'Signed previously stored originals: existing-owner SHA/bytes and live Render readback verified.' >> "$GITHUB_STEP_SUMMARY"

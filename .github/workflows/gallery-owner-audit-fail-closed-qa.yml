@@ -1,0 +1,27 @@
+name: Gallery Audit Fail-Closed Owner Catalog Reference QA
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/audit_both_models.py'
+      - 'apps/gallery-archive/test_audit_both_models_aliases.py'
+      - '.github/workflows/gallery-owner-audit-fail-closed-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/audit_both_models.py'
+      - 'apps/gallery-archive/test_audit_both_models_aliases.py'
+      - '.github/workflows/gallery-owner-audit-fail-closed-qa.yml'
+permissions:
+  contents: read
+jobs:
+  read-only-audit-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Confirm no storage reads, collector calls or writes required
+        run: |
+          python -m py_compile apps/gallery-archive/audit_both_models.py apps/gallery-archive/test_audit_both_models_aliases.py
+          PYTHONPATH=apps/gallery-archive python apps/gallery-archive/test_audit_both_models_aliases.py

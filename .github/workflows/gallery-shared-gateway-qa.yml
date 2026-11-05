@@ -6,6 +6,9 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/portal.py'
       - 'apps/mimmi-gallery/cloud/test_portal_assets.py'
       - 'apps/mimmi-gallery/cloud/test_gateway.py'
+      - 'apps/mimmi-gallery/cloud/test_owner_dual_session.py'
+      - 'apps/mimmi-gallery/cloud/test_owner_rescue_cache.py'
+      - 'apps/mimmi-gallery/cloud/test_gallery_incident_readiness.py'
       - 'apps/mimmi-gallery/cloud/test_media_versions.py'
       - 'apps/gallery-archive/test_owner_snapshot.cjs'
       - 'apps/mimmi-gallery/owner-media.js'
@@ -33,6 +36,9 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/portal.py'
       - 'apps/mimmi-gallery/cloud/test_portal_assets.py'
       - 'apps/mimmi-gallery/cloud/test_gateway.py'
+      - 'apps/mimmi-gallery/cloud/test_owner_dual_session.py'
+      - 'apps/mimmi-gallery/cloud/test_owner_rescue_cache.py'
+      - 'apps/mimmi-gallery/cloud/test_gallery_incident_readiness.py'
       - 'apps/mimmi-gallery/cloud/test_media_versions.py'
       - 'apps/gallery-archive/test_owner_snapshot.cjs'
       - 'apps/mimmi-gallery/owner-media.js'
@@ -69,6 +75,9 @@ jobs:
           python -m py_compile apps/mimmi-gallery/cloud/gateway/main.py
           python apps/mimmi-gallery/cloud/test_portal_assets.py
           python apps/mimmi-gallery/cloud/test_gateway.py
+          python apps/mimmi-gallery/cloud/test_owner_dual_session.py
+          python apps/mimmi-gallery/cloud/test_owner_rescue_cache.py
+          python apps/mimmi-gallery/cloud/test_gallery_incident_readiness.py
           python apps/mimmi-gallery/cloud/test_cover_cache.py
           python apps/mimmi-gallery/cloud/test_media_cache.py
           python apps/mimmi-gallery/cloud/test_provider_denial_gate.py

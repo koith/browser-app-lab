@@ -649,7 +649,7 @@ const path=require('path');
  assert.ok(nativeAvatarFeet.movement.split(',').every(v=>parseFloat(v)===0),
   'room seats teleport instantly without a linear walk tween');
 
- assert.equal(await host.locator('#social-native-user-count').textContent(),'1명','the original userlist title field reflects actual room occupants');
+ assert.equal(await host.locator('#social-native-user-count').textContent(),'1 명','the original userlist title field reflects actual room occupants');
  assert.ok(overlay.sourceImage.includes('/original/ChatRoom/room'),'still uses native source room bitmap');
  await host.screenshot({path:'leaf-original-overlay-chatroom-desktop.png'});
  // The archived ChatRoom/exitbtn.png lower strip is four original 66×25
@@ -850,18 +850,20 @@ const path=require('path');
  // Original room3's seat #9 sits directly beneath 30px MainFrame tool
  // strip at x608..638 / y311..528. Avatar z106 behind toolbar z109
  // blocked real click. Do not use synthetic DOM click to disguise that.
+ // The MainFrame toolbar is now above the room, so the former collision
+ // coordinates must select a real seat without any toolbar intercept.
  const toolbarSeat=await frontBack(77,69);
- assert.equal(toolbarSeat.seat,9,'reproduce the actual near-toolbar original room3 seat');
+ assert.ok(Number.isInteger(toolbarSeat.seat),'old toolbar corner selects real room seat');
  const hit=await host.locator('.social-avatar.self').evaluate(el=>{
   const r=el.getBoundingClientRect();
   const target=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
   return {actorTop:target===el||el.contains(target),
    actualHit:target?.getAttribute('aria-label'),
-   actorZ:getComputedStyle(el.closest('.social-avatar-layer')).zIndex,
-   toolbarZ:getComputedStyle(document.querySelector('.social-classic-toolbar')).zIndex};
+   toolbarInRoom:Boolean(document.querySelector('#social-image-frame .social-classic-toolbar')),
+   toolbarHost:document.querySelector('.social-classic-toolbar')?.closest('.leaf-room-mainframe-tools')?'MainFrame':'room'};
  });
  assert.ok(hit.actorTop,'native seated torso must not be intercepted by toolbar: '+JSON.stringify(hit));
- assert.ok(Number(hit.actorZ)>Number(hit.toolbarZ),'seated source character must outrank 30px toolbar');
+ assert.equal(hit.toolbarInRoom,false,'original MainFrame toolbar lives outside room art');
  const beforeNear=await host.locator('.social-avatar.self img').evaluate(el=>el.style.transform);
  await host.locator('.social-avatar.self').click({timeout:6500});
  const afterNear=await host.locator('.social-avatar.self img').evaluate(el=>el.style.transform);
@@ -886,8 +888,8 @@ const path=require('path');
  assert.equal(await host.locator('#social-online-count').textContent(),'2명');
  assert.ok(await host.locator('#social-original-userlist').isVisible(),'original participant list header remains visible during real chat');
  assert.equal(await guest.locator('#social-online-count').textContent(),'2명');
- assert.equal(await host.locator('#social-native-user-count').textContent(),'2명','source participant badge follows true host/guest peers');
- assert.equal(await guest.locator('#social-native-user-count').textContent(),'2명','remote 2-user roster count updates without fabricated members');
+ assert.equal(await host.locator('#social-native-user-count').textContent(),'2 명','source participant badge follows true host/guest peers');
+ assert.equal(await guest.locator('#social-native-user-count').textContent(),'2 명','remote 2-user roster count updates without fabricated members');
 
  // The exact recovered 104x330 ChatRoom/ringbtn.png has four 26px-wide
  // interaction states and fifteen 22px icon rows. Historical chat_ref.jpg
@@ -1109,7 +1111,7 @@ const path=require('path');
  await third.close();
  await host.screenshot({path:'leaf-original-room0-two-person.png'});
  // Leaving a room for the shop must vacate it; returning restores presence.
- await host.locator('#social-image-frame .social-original-tool[aria-label="매직카덴"]').click();
+ await host.locator('#app>.titlebar .leaf-room-mainframe-tools .social-original-tool[aria-label="매직카덴"]').click();
  await guest.waitForFunction(()=>document.querySelector('#social-online-count')?.textContent==='1명',null,{timeout:8000});
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().scope),'away:shop','shop visitors no longer count as chat occupants');
  await host.locator('[data-route="rooms"]').first().click();
@@ -1148,7 +1150,7 @@ const path=require('path');
  assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'true');
  assert.equal(await guest.locator('#social-peer-panel').isVisible(),true,'roster opens in the original room');
  assert.equal(await guest.locator('#social-peer-list .social-user-row').count(),1,'only the real participant is listed');
- assert.equal(await guest.locator('#social-native-user-count').textContent(),'1명','original participant count stays factual on mobile');
+ assert.equal(await guest.locator('#social-native-user-count').textContent(),'1 명','original participant count stays factual on mobile');
  await guest.waitForFunction(()=>document.querySelector('#social-original-userlist')?.dataset.ready==='true',null,{timeout:10000});
  assert.deepEqual(await guest.locator('#social-original-userlist').evaluate(el=>[el.width,el.height]),[150,38],'original ChatRoom userlist remains 150×38');
  await guest.screenshot({path:'leaf-native-mobile-roster-open.png'});

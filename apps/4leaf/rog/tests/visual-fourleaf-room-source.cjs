@@ -42,8 +42,9 @@ const assert=require('node:assert/strict');
     messenger:r('#rooms .messenger'),chatLog:r('#chat-log'),chatForm:r('#chat-form'),
     avatar:r('.social-avatar.self'),actorArt:r('.social-avatar.self img'),
     furniture:r('.social-room-foreground'),
-    toolbar:r('#rooms .social-classic-toolbar'),
-    expression:r('#rooms .social-exp-trigger'),exit:r('#social-back'),
+    toolbar:r('.social-classic-toolbar'),
+    expression:r('.social-exp-trigger'),exit:r('#social-back'),
+    title:r('#app>.titlebar'),
     actualOccupants:document.querySelectorAll('.social-avatar').length,
     frameArt:document.querySelector('#social-image-frame').style.backgroundImage,
     nativeLayer:document.querySelector('.social-room-foreground')?.dataset.ready
@@ -55,7 +56,10 @@ const assert=require('node:assert/strict');
   assert.equal(audit.frame.w,794,'real ChatRoom atlas width');
   assert.equal(audit.frame.h,528,'real ChatRoom atlas height');
   assert.equal(audit.app.w,794,'no oversized reconstructed 900px web window');
-  assert.equal(audit.app.h,528,'no duplicate reconstructed browser toolbar');
+  assert.equal(audit.app.h,582,'source MainFrame 54px strip plus 528px room');
+  assert.equal(audit.title.h,54);
+  assert.ok(audit.title.background.includes('MainFrame/title.png'));
+  assert.ok(audit.toolbar.y+audit.toolbar.h<=audit.frame.y,'real toolbar cannot cover original 794x528 room photo');
   assert.equal(audit.header.display,'none','source room does not have a second fabricated HTML header');
   assert.equal(audit.messenger.x-audit.frame.x,16,'original chat overlays x=16');
   assert.equal(audit.messenger.y-audit.frame.y,0,'original chat overlays y=0');
