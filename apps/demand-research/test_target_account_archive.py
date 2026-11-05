@@ -388,3 +388,43 @@ def test_shallow_account_record_detects_legacy_canonical_collision():
     with pytest.raises(RuntimeError,match="checksum collision"):
         account.write_immutable(key,b"proposed original")
     assert account.shared_record_key(key) not in cloud.objects
+
+
+def test_real_proven_copy_mode_recovers_root_copyto_rejection():
+    """A root-level copyto failure must not abort an otherwise verifiable post."""
+    p=blue_row("copyfallback","Synthetic source record",
+               assets=[("image/jpeg",PHOTO)])
+    api=BlueAPI({None:([p],None)})
+    api.blobs={cid(PHOTO):("image/jpeg",PHOTO)}
+    root=FakeCloud()
+    original=root.runner
+    seen=[]
+    def copyto_rejected(args,data=None,timeout=150,allow_missing=False):
+        if args[0]=="copyto" and any("account-record-" in str(x) for x in args):
+            seen.append("copyto_rejected")
+            raise RuntimeError("private cloud copyto failed (missing)")
+        if args[0]=="copy" and any("account-record-" in str(x.name)
+                                  for x in __import__("pathlib").Path(args[1]).iterdir()):
+            seen.append("copy_fallback")
+        return original(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    root.runner=copyto_rejected
+    outcome=job.run_one("bluesky",DID,root=root,api=api,max_pages=1,clock=lambda:0)
+    assert outcome["posts_verified"]==1
+    assert outcome["pages_verified"]==1
+    assert "copyto_rejected" in seen and "copy_fallback" in seen
+    archive=job.account_cloud(root,job.resolve("bluesky",DID,api))
+    postid=job.post_key("bluesky",p["uri"])
+    entry=json.loads(archive.read("metadata/entries/"+postid+".json"))
+    assert archive.read_verified("posts/"+postid+"/post.json",entry["sha256"]) is not None
+    assert len(archive.load_catalog())==1
+
+
+def test_proven_method_fallback_rejects_different_existing_flat_bytes():
+    root=FakeCloud()
+    archive=job.account_cloud(root,{"platform":"bluesky","identity":DID})
+    key="metadata/entries/"+"a"*40+".json"
+    physical=archive.shared_record_key(key)
+    root.objects[physical]=b"different immutable remote original"
+    with pytest.raises(RuntimeError,match="checksum conflict"):
+        archive.write_immutable(key,b"new source payload")
+    assert root.objects[physical]==b"different immutable remote original"
