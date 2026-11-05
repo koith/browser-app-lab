@@ -5,12 +5,14 @@
 if(location.hostname==="koith.github.io")return;
 const $=id=>document.getElementById(id);
 const host=$("accountsView");if(!host)return;
+const privateDetails=$("accountServerData");
+if(privateDetails)privateDetails.hidden=false;
 const el=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=String(text);return node};
 const panel=el("section");panel.id="privateAccountIndex";
 panel.className="account-auto-section";
-const title=el("h3","비공개 전체 수집 계정 인덱스");
-const summary=el("p","인증된 서버에 누적된 계정을 확인하고 있습니다.");summary.id="privateAccountSummary";
-const caution=el("p","서버에 실제 보관된 공개 계정만 집계합니다. 전체 인터넷 SNS 계정 수나 고유 인원 수가 아닙니다.");
+const title=el("h3","서버에 저장된 전체 계정");
+const summary=el("p","서버에 저장된 계정 수를 확인 중입니다.");summary.id="privateAccountSummary";
+const caution=el("p","이 숫자는 교집합이 확인한 계정 수입니다. 전체 SNS 계정 수나 실제 사람 수를 뜻하지 않습니다.");
 const toolbar=el("div");toolbar.className="account-auto-filters";
 const term=el("input");term.type="search";term.placeholder="전체 계정에서 검색";term.setAttribute("aria-label","누적 공개 계정 검색");
 const source=el("select");source.setAttribute("aria-label","SNS 필터");
@@ -22,8 +24,11 @@ toolbar.append(term,source);
 const list=el("div");list.className="account-auto-rows";list.id="privateAccountRows";
 const more=el("button","계정 더 보기");more.type="button";more.className="account-auto-more";
 panel.append(title,summary,caution,toolbar,list,more);
+const mount=$("privateAccountIndexMount");
 const local=$("intersectionAutoAccounts");
-if(local)local.before(panel);else host.prepend(panel);
+if(mount)mount.append(panel);
+else if(local)local.before(panel);
+else host.prepend(panel);
 const style=el("style");
 style.textContent="#privateAccountIndex{background:white;border:2px solid #293eb3;padding:16px;margin-bottom:12px}"+
  "#privateAccountIndex h3{margin:0 0 8px;font-size:19px}"+
@@ -43,14 +48,13 @@ function render(){
    summary.textContent=error?"비공개 계정 DB: "+error:"계정 인덱스 연결 확인 중…";
    more.hidden=true;return;
  }
- summary.textContent="누적 계정 "+Number(data.accounts).toLocaleString("ko-KR")+"개 · 관측 게시글 "+Number(data.source_rows).toLocaleString("ko-KR")+
-  "건 · 보관본 최종 동기화 "+(data.last_catalog_sync?new Date(data.last_catalog_sync*1000).toLocaleString("ko-KR"):"진행 전")+
-  (data.refreshing?" · 갱신 중":"")+
-  (data.last_catalog_skipped?" · 계정 출처를 확인할 수 없는 글 "+data.last_catalog_skipped+"건":"");
+ summary.textContent="서버에 저장된 계정 "+Number(data.accounts).toLocaleString("ko-KR")+"개 · 확인된 게시글 "+
+  Number(data.source_rows).toLocaleString("ko-KR")+"건"+
+  (data.refreshing?" · 목록 갱신 중":"");
  const w=data.public_scan_windows||{};
- caution.textContent="공개 Bluesky 자동 조회 구간: 확인 "+(w.done||0)+" · 분할 "+(w.split||0)+
-   " · 대기 "+(w.pending||0)+" · 미완료 "+(w.incomplete||0)+" · 실패 "+(w.failed||0)+
-   " · 다른 SNS는 연결된 인증 수집 출처가 있을 때만 포함합니다. 계정 수는 서로 다른 사람 수가 아닙니다.";
+ caution.textContent="공개 Bluesky 조회: 완료 "+(w.done||0)+" · 대기 "+(w.pending||0)+
+   " · 미완료 "+(w.incomplete||0)+" · 확인 실패 "+(w.failed||0)+
+   ". 다른 SNS는 연결된 수집 출처에서 확인된 자료만 포함합니다.";
  const frag=document.createDocumentFragment();
  for(const record of rows){
    const div=el("div");const a=el("a",record.platform+" · "+record.profileUrl);
