@@ -346,7 +346,12 @@ class AccountCloudArchive(CloudArchive):
         """
         target=self.shared.remote+"/"+shallow
         for domain in (None,"https://nephobox.com"):
-            seen=self.shared.read(shallow,cap=cap,optional=True,domain=domain)
+            try:
+                seen=self.shared.read(shallow,cap=cap,optional=True,domain=domain)
+            except ValueError as error:
+                # A different oversized immutable object must block writes,
+                # not trigger an unsafe overwrite or an unclassified failure.
+                raise RuntimeError("immutable flat account checksum conflict") from error
             if seen is not None:
                 if sha256(seen)!=expected:
                     raise RuntimeError("immutable flat account checksum conflict")
