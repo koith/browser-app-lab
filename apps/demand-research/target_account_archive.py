@@ -172,8 +172,13 @@ def profile_input(platform, raw):
         raw = raw.lstrip("@")
         if not ACCOUNT_RE.fullmatch(raw) or "/" in raw:
             raise ValueError("invalid Bluesky profile")
-        if raw.startswith("did:") and not DID_RE.fullmatch(raw):
-            raise ValueError("invalid Bluesky DID")
+        if raw.startswith("did:"):
+            if not DID_RE.fullmatch(raw):
+                raise ValueError("invalid Bluesky DID")
+        elif not allowed_host(raw):
+            # A Bluesky handle is a DNS-style hostname. Reject colon-bearing
+            # pseudo-schemes (e.g. javascript:) before any source request.
+            raise ValueError("invalid Bluesky handle")
         return raw
     if raw.startswith("https://"):
         u = urlsplit(require_public_https(raw))
