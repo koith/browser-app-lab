@@ -36,7 +36,11 @@
    return {
      minX:clamp(minX-97,0,SIZE.width),
      maxX:clamp(maxX+97,0,SIZE.width),
-     // Hold tall standing OBS chessmen on the map's top row.
+     // Top overscan must hold a standing OBS chessman (foot ~12px below
+     // the cell centre, body up to ~124px tall), not just the 97px tile:
+     // with 73px the camera could not scroll any further and top-row
+     // chessmen were cut at the board edge and hidden under the turn
+     // prompt (round-13 audit: PK / Warp Gate / Cup / 0170 top rows).
      minY:clamp(minY-160,0,SIZE.height),
      maxY:clamp(maxY+73,0,SIZE.height)
    };
@@ -95,8 +99,15 @@
    render(){
      const area=$('board-area'),world=$('board-world');
      if(!area||!world||state.cameraX===null)return;
-     // The map world is inset between the player columns. Camera viewport
-     // calculations must use the actual world box, not the whole board.
+     // #board-world is inset between the 1P/3P/5P and 2P/4P/6P player
+     // columns (game-authentic.css / classic-focus.css: inset 0 11.5%,
+     // 68px at 800x600). The camera used to centre and clamp against the
+     // WHOLE #board-area while the world box itself starts at that inset,
+     // so every frame was shifted right by the inset: the current player
+     // sat right of centre and right-edge cells were pushed under the 2P
+     // column / outside the board (round-13 26-map audit, e.g. Item start
+     // cell centre at x=571 of a 8..600 board). Work in the world box's
+     // own visible window instead. WEB layout fix; MVE camera unrecovered.
      const box=getComputedStyle(world);
      const insetL=world.offsetLeft||0,insetT=world.offsetTop||0;
      const insetR=Math.max(0,parseFloat(box.right)||0),insetB=Math.max(0,parseFloat(box.bottom)||0);
@@ -136,7 +147,8 @@
        for(const tile of tileLayer.children){
          const point=state.path[Number(tile.dataset.tile)];
          if(!point)continue;
-         // Cull against the whole board, expressed in board-area coordinates.
+         // Cull against the whole board area (cells beside the player
+         // columns stay partially visible), in board-area coordinates.
          const sx=point.x/100*SIZE.width*scale+x+insetL,
                sy=point.y/100*SIZE.height*scale+y+insetT;
          const areaW=area.clientWidth,areaH=area.clientHeight;
