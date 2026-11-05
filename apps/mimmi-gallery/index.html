@@ -261,7 +261,7 @@ document.addEventListener('error',e=>{
  registerImageHealth(url,false);
  img.hidden=true;container.classList.add('broken-source');
 },true);
-let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumAliasEvidence={},collisionDistinct=new Set(),albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),localPreviewIndex=new Map(),detailRenderGeneration=0;
+let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumAliasEvidence={},collisionDistinct=new Set(),albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),localPreviewIndex=new Map(),localStoredByExactSha=new Map(),detailRenderGeneration=0;
 function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
 const titleMap={};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -319,7 +319,7 @@ function card(a,hasImages){
  const cloudCover=(selected?.ownerAlbum||selected?.vaultAlbum)?selected:null;
  // An already committed, byte-identical copy can recover a failed cloud
  // cover without changing the selected photograph, crop or original route.
- const localCopy=cloudCover?localPreviewIndex.get(localPhotoKey(owned.id,selected)):null;
+ const localCopy=cloudCover?.ownerAlbum?localSavedFor({...selected,albumId:owned.id}):null;
  const fallback=localCopy?' data-saved-cover-fallback="'+esc(localCopy.url)+'"':'';
  // Byte-identical saved Pages media paints without a cold private gateway.
  // Keep data-owner intact for the original image in the lightbox.
@@ -333,27 +333,40 @@ function card(a,hasImages){
 // Exact, same-album local archive bytes can paint detail tiles without waking
 // the remote TeraBox gateway. Every fallback keeps the owner media key.
 function localPhotoKey(id,p){return [id,p.sha256,p.bytes,p.width,p.height].join('|')}
+// Byte-identical existing Pages files can safely serve any owner album of
+// this SAME model; SHA-256 + original size + dimensions all must match.
+function localShaKey(p){return [p.sha256,p.bytes,p.width,p.height].join('|')}
+function localSavedFor(p){
+ if(!p?.sha256||!/^[a-f0-9]{64}$/.test(p.sha256))return null;
+ return localPreviewIndex.get(localPhotoKey(p.albumId||p.ownerAlbum,p))||
+        localStoredByExactSha.get(localShaKey(p))||null;
+}
 // The full-screen viewer may read committed photo bytes immediately only
 // when the same album, SHA-256, byte length and dimensions all match.
 function exactSavedViewerCopy(p){
- return p?.ownerAlbum?localPreviewIndex.get(localPhotoKey(p.albumId,p))||null:null;
+ return p?.ownerAlbum?localSavedFor(p):null;
 }
 function rebuildLocalPreviewIndex(){
- const next=new Map();
+ const next=new Map(),bySha=new Map();
  for(const album of localStored){
   const id=canonicalId(album.id);
   for(const p of validImages(album)){
    const key=localPhotoKey(id,p);
    if(!next.has(key))next.set(key,p);
+   // The very same bytes can belong to two reviewed albums; do not require
+   // the private TeraBox gateway for either. Never match SHA alone.
+   const exact=localShaKey(p);
+   if(!bySha.has(exact))bySha.set(exact,p);
   }
  }
  localPreviewIndex=next;
+ localStoredByExactSha=bySha;
 }
 function photoHTML(p,i){
- const local=p.ownerAlbum?localPreviewIndex.get(localPhotoKey(p.albumId,p)):null;
- // Avoid front-loading very large full originals; remote WebP preview remains
- // preferable when a static SHA-identical copy is too expensive for mobile.
- const source=local&&local.bytes<=700000
+ const local=p.ownerAlbum?localSavedFor(p):null;
+ // Always use an already-published, exact-SHA stored original when present;
+ // lazy decoding avoids front-loading offscreen JPEGs. Render may be 503.
+ const source=local
   ?'data-owner="'+esc(p.url)+'" data-owner-variant="local" src="'+esc(local.url)+'"'
   :(p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url)+'"':'src="'+esc(p.url)+'"';
  return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" '+source+' alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>';
