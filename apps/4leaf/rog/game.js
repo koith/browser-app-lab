@@ -1620,16 +1620,8 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
    window.__LEAF_GENESIS_ACTORS__?.pose(lunger,'attack',850);
   stage.dataset.battlePhase='attack';
   const lungeMs=Number(lunger?.dataset.sourceNativeDurationMs)||0;
-  // Original source slot-12 tick span wins over any inferred 850ms UI pose.
-  // WebKit can paint the newly-started attack after JS has already armed
-  // its outcome timer. Reserve one extra WEB paint margin so every native
-  // lunge key is visible before replacing the actor with the result pose.
-  // The original 2002 tick->ms mapping is still UNVERIFIED.
-  const lungeVisibleMs=Math.max(900,lungeMs)+180;
-  stage.dataset.duelOutcomeDelayMs=String(lungeVisibleMs);
-  stage.dataset.duelAttackStartedAt=String(performance.now());
-  stage.dataset.duelNativeLungeMs=String(lungeMs);
-  setTimeout(()=>outcome(lungeMs),lungeVisibleMs);
+  stage.dataset.duelOutcomeDelayMs=String(Math.max(900,lungeMs));
+  setTimeout(()=>outcome(lungeMs),Math.max(900,lungeMs));
  });
  return stage;
 }
