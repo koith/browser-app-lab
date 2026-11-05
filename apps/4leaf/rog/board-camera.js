@@ -36,7 +36,8 @@
    return {
      minX:clamp(minX-97,0,SIZE.width),
      maxX:clamp(maxX+97,0,SIZE.width),
-     minY:clamp(minY-73,0,SIZE.height),
+     // Hold tall standing OBS chessmen on the map's top row.
+     minY:clamp(minY-160,0,SIZE.height),
      maxY:clamp(maxY+73,0,SIZE.height)
    };
  }
@@ -94,7 +95,12 @@
    render(){
      const area=$('board-area'),world=$('board-world');
      if(!area||!world||state.cameraX===null)return;
-     const width=area.clientWidth,height=area.clientHeight;
+     // The map world is inset between the player columns. Camera viewport
+     // calculations must use the actual world box, not the whole board.
+     const box=getComputedStyle(world);
+     const insetL=world.offsetLeft||0,insetT=world.offsetTop||0;
+     const insetR=Math.max(0,parseFloat(box.right)||0),insetB=Math.max(0,parseFloat(box.bottom)||0);
+     const width=area.clientWidth-insetL-insetR,height=area.clientHeight-insetT-insetB;
      if(width<20||height<20)return;
      const scale=state.scale;
      const anchorX=width*.49-state.cameraX*scale,
@@ -130,13 +136,16 @@
        for(const tile of tileLayer.children){
          const point=state.path[Number(tile.dataset.tile)];
          if(!point)continue;
-         const sx=point.x/100*SIZE.width*scale+x,sy=point.y/100*SIZE.height*scale+y;
+         // Cull against the whole board, expressed in board-area coordinates.
+         const sx=point.x/100*SIZE.width*scale+x+insetL,
+               sy=point.y/100*SIZE.height*scale+y+insetT;
+         const areaW=area.clientWidth,areaH=area.clientHeight;
          // The native sprite is a 145x97 platform. Keep partially visible
          // pieces at high zoom; fixed 120px culling margins wrongly
          // disappeared 2.4x platforms while they were still on-screen.
          const radiusX=73*scale+2,radiusY=49*scale+2;
          tile.style.visibility=(sx < -radiusX || sy < -radiusY ||
-           sx>width+radiusX || sy>height+radiusY)?'hidden':'visible';
+           sx>areaW+radiusX || sy>areaH+radiusY)?'hidden':'visible';
        }
      }
      window.__LEAF_MINIMAP_NAV__?.onCameraRender?.();
