@@ -33,9 +33,13 @@ COOKIE={"mimmi":"MIMMI_COOKIE","yui":"YUI_COOKIE"}
 # Snapshot of the exact owner works visible in the user's incident screenshots.
 # The counts are intentionally strict: never accept an incomplete model index.
 TARGET={
-    "mimmi":( ("djawa-janus-scary-lantern-night",15),
+    # The user's latest iPhone screenshots: these 158 already-owned photos
+    # must load before optional cover warming or older incident works.
+    "mimmi":( ("v2ph-actor-a8n8n85a",61),
+              ("djawa-janus-scary-lantern-night",15),
               ("mimmi-indie-sana-sopmod2-2019",7) ),
-    "yui":( ("djawa-privaty-public-samples",30),
+    "yui":( ("teddy-bear97",97),
+            ("djawa-privaty-public-samples",30),
             ("yui-chinokun-illustar-2026-public",4) ),
 }
 MAX_FILE=12*1024*1024
@@ -96,26 +100,41 @@ def send_verified_photo_with_catalog_recovery(model, body, token, headers, catal
 
 
 def verified_file(remote, key, env, maximum):
-    """Read via the existing proven same-account cat/copyto classifier.
+    """Read existing bytes only; repeat bounded same-owner transient reads.
 
-    The reader only changes methods on the established 400141 cat result.
-    Explicit provider denial (403/31326) stays rejected.
+    Never retry explicit provider access denial, not-found, malformed keys,
+    or an integrity mismatch as if it were a different authorized file.
     """
     if (not isinstance(key,str) or key.startswith("/")
-            or ".." in key.split("/") or "\\\\" in key
+            or ".." in key.split("/") or "\\" in key
             or not re.fullmatch("[a-zA-Z0-9/_ .-]+",key)):
         raise OwnerReadUnavailable("Invalid existing owner file")
-    with tempfile.TemporaryDirectory(prefix="owner-rescue-") as directory:
-        destination=Path(directory)/"verified-existing"
-        ok, reason=read_existing(remote,key,destination,env)
-        if not ok:
-            model="mimmi" if remote==REMOTE["mimmi"] else (
-                "yui" if remote==REMOTE["yui"] else "unknown")
-            print("OWNER_EXISTING_READ_UNAVAILABLE",model,reason,flush=True)
-            raise OwnerReadUnavailable("Existing owner file read failed")
-        if not destination.is_file() or not 1 <= destination.stat().st_size <= maximum:
-            raise OwnerReadUnavailable("Existing owner size rejected")
-        return destination.read_bytes()
+    model="mimmi" if remote==REMOTE["mimmi"] else (
+        "yui" if remote==REMOTE["yui"] else "unknown")
+    # Unknown provider rejects and provider_unavailable are not proof of a
+    # transient network error; never retry those access decisions.
+    transient={"transport_timeout","retryable_http_failure",
+               "retryable_transport_failure","remote_read_empty"}
+    pauses=(7,20,55)
+    for attempt in range(4):
+        with tempfile.TemporaryDirectory(prefix="owner-rescue-") as directory:
+            destination=Path(directory)/"verified-existing"
+            ok, reason=read_existing(remote,key,destination,env)
+            if ok:
+                if not destination.is_file() or not 1 <= destination.stat().st_size <= maximum:
+                    raise OwnerReadUnavailable("Existing owner size rejected")
+                return destination.read_bytes()
+        if reason in transient and attempt < len(pauses):
+            # Same account, same exact key and same documented read method.
+            # Isolated iPhone screenshot photos passed when probed later;
+            # one transient long album scan must not stop all other photos.
+            print("OWNER_EXISTING_TRANSIENT_SAME_ACCOUNT_RETRY",
+                  model,reason,attempt+1,flush=True)
+            time.sleep(pauses[attempt])
+            continue
+        print("OWNER_EXISTING_READ_UNAVAILABLE",model,reason,flush=True)
+        raise OwnerReadUnavailable("Existing owner file read failed")
+    raise OwnerReadUnavailable("Bounded same-owner retries exhausted")
 
 
 def photo_ok(photo,data,variant):
@@ -253,7 +272,7 @@ def run(model,token):
     if receipt.get("verified") is not True:
         raise OwnerReadUnavailable("Signed catalog not acknowledged")
     chosen,full=select_rows(model,data)
-    # First restore all recorded 30+15 and former 4+7 incident originals.
+    # First restore all 214 known user-reported originals, new 61+97 works first.
     # Optional covers must never delay the user's photo-detail albums.
     priority=full+chosen
     # Keep first occurrence: an optional cover must not delay urgent photos.

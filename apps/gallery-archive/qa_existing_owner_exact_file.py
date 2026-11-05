@@ -49,12 +49,21 @@ def read_existing(remote: str, key: str, destination: Path, env: dict) -> tuple[
             # Never print stderr: provider errors may include signed URLs or
             # private storage keys. Classify a tiny allowlisted numeric code.
             detail = (result.stderr or b"")[:32768].decode("utf-8","replace")
-            if "31326" in detail or "anti hotlinking" in detail.lower():
+            if ("31326" in detail or "anti hotlinking" in detail.lower()
+                    or re.search(r"(?:HTTP (?:error|status)|status(?: code)?)[\s:]*40[13]\b",detail,re.I)
+                    or re.search(r"\b40[13] (?:Forbidden|Unauthorized)\b",detail,re.I)
+                    or re.search(r"(?i)sign error.*403|403.*sign error",detail)):
                 return False, "provider_access_denied"
             if method == "cat" and re.search(r"(?<![0-9])400141(?![0-9])",detail):
                 # The existing owner storage tool documents a same-account
                 # copyto fallback for this specific cat-read API response.
                 continue
+            if re.search(r"(?:HTTP (?:error|status)|status(?: code)?)[\s:]*(?:429|50[0234])\b",detail,re.I):
+                return False, "retryable_http_failure"
+            if re.search(r"(?i)connection reset|timeout|timed out|unexpected EOF|context deadline",detail):
+                return False, "retryable_transport_failure"
+            if re.search(r"(?:HTTP (?:error|status)|status(?: code)?)[\s:]*404\b",detail,re.I):
+                return False, "owner_object_not_found"
             return False, "remote_read_rejected"
         if not destination.is_file() or not destination.stat().st_size:
             return False, "remote_read_empty"

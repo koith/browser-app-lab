@@ -21,15 +21,15 @@ def check() -> bool:
                 return False
             data=json.load(response)
             return (type(data) is dict and data.get("ready") is True and
-                type(data.get("expected")) is int and data["expected"]==56
-                and data.get("available")==56)
+                type(data.get("expected")) is int and data["expected"]==214
+                and data.get("available")==214)
     except (HTTPError, URLError, TimeoutError, ValueError, TypeError, OSError):
         return False
 
 
 if __name__=="__main__":
     if check():
-        print("BOTH_OWNER_GALLERIES_ALL_56_USER_REPORTED_ORIGINALS_STILL_AVAILABLE")
+        print("BOTH_OWNER_GALLERIES_ALL_214_USER_REPORTED_ORIGINALS_STILL_AVAILABLE")
     else:
-        print("OWNER_GALLERY_FULL_56_ORIGINALS_READBACK_REQUIRED")
+        print("OWNER_GALLERY_FULL_214_ORIGINALS_READBACK_REQUIRED")
         raise SystemExit(11)
