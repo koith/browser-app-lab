@@ -226,11 +226,63 @@ function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
 // Gallery image failures now refer to stored local/private bytes, not source hosts.
 const failedRestrictedImages=new Set();
+// A failed owner image must not stay permanently blank after the existing
+// signed owner worker restores its exact SHA in Render. Poll only while a
+// user-reported screenshot album has failed visible tiles; no new collection.
+const ownerRecoveryPending=new Set();
+let ownerRecoveryTimer=null;
+const ownerRecoveryEndpoint='https://mimmi-private-gallery-free.onrender.com/api/gallery-media-readiness';
+function queueOwnerImageRecovery(img){
+ const p=ownerPhotoIndex.get(img?.dataset.owner||'');
+ if(!p||!img.isConnected||!img.closest('.photo')||
+    !['teddy-bear97','v2ph-actor-a8n8n85a'].includes(p.ownerAlbum))return;
+ ownerRecoveryPending.add(img);
+ if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,14000);
+}
+async function retryOwnerImagesIfReady(){
+ ownerRecoveryTimer=null;
+ for(const img of [...ownerRecoveryPending])if(!img.isConnected||!img.closest('.photo'))ownerRecoveryPending.delete(img);
+ if(!ownerRecoveryPending.size)return;
+ if(document.hidden){
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,30000);
+  return;
+ }
+ let ready=false;
+ const aborter=new AbortController(),timeout=setTimeout(()=>aborter.abort(),8000);
+ try{
+  const r=await fetch(ownerRecoveryEndpoint,{cache:'no-store',signal:aborter.signal});
+  const response=r.ok?await r.json():null;
+  ready=response?.ready===true&&response.expected===214&&response.available===214;
+ }catch{}finally{clearTimeout(timeout)}
+ if(ready)for(const img of [...ownerRecoveryPending]){
+  ownerRecoveryPending.delete(img);
+  const p=ownerPhotoIndex.get(img.dataset.owner||'');
+  if(!p||!img.isConnected)continue;
+  img.hidden=false;
+  img.dataset.ownerVariant='original';
+  img.closest('.photo')?.classList.remove('broken-source');
+  delete img.closest('.photo')?.dataset.imageState;
+  YuiPrivate.asset(p,'original').then(url=>{
+   if(img.isConnected)img.src=url+'&rehydrate='+Date.now();
+  }).catch(()=>queueOwnerImageRecovery(img));
+ }
+ if(ownerRecoveryPending.size&&ownerRecoveryTimer===null)
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,30000);
+}
+function refreshOwnerFailuresOnFocus(){
+ if(!document.hidden&&ownerRecoveryPending.size){
+  if(ownerRecoveryTimer!==null)clearTimeout(ownerRecoveryTimer);
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,100);
+ }
+}
+document.addEventListener('visibilitychange',refreshOwnerFailuresOnFocus);
+window.addEventListener('focus',refreshOwnerFailuresOnFocus);
+
 function imageFailureText(){return '저장된 사진을 불러오지 못했습니다. 보관 파일과 연결 상태를 확인해 주세요.'}
 function updateImageNotice(){const count=$('detailphotos').querySelectorAll('.photo[data-image-state="failed"]').length;const notice=$('detail-media-status');notice.hidden=!count;notice.textContent=count?count+'장 로딩 실패 · 저장 파일을 확인해 주세요':''}
 function imageState(image,failed){
  const container=image.closest('.photo,.album,.media-frame');if(!container)return;
- if(failed){container.dataset.imageState='failed';container.dataset.imageError='저장된 파일 로딩 실패'}
+ if(failed){container.dataset.imageState='failed';container.dataset.imageError='저장된 파일 로딩 실패';queueOwnerImageRecovery(image)}
  else{delete container.dataset.imageState;delete container.dataset.imageError;failedRestrictedImages.delete(image.src)}
  if(image.id==='full')$('media-status').textContent=failed?imageFailureText(image.src):'';
  updateImageNotice();
