@@ -7,7 +7,7 @@
 (function(){
 "use strict";
 const ID="intersectionAutoAccounts";
-const PAGE=80, BSKY_SCAN=160, MASTODON_SCAN=32, REFRESH_MS=4*60*1000;
+const PAGE=12, BSKY_SCAN=160, MASTODON_SCAN=32, REFRESH_MS=4*60*1000;
 const $=id=>document.getElementById(id);
 const mk=(tag,cls,text)=>{
  const el=document.createElement(tag);
@@ -85,7 +85,7 @@ async function get(url){
   return await res.json();
  }finally{clearTimeout(timer)}
 }
-let records=new Map(),cursor=PAGE,groupCursor=30,scanDone=false,scanAt=0,busy=false,scheduled=false,searchTerm="";
+let records=new Map(),cursor=PAGE,groupCursor=10,scanDone=false,scanAt=0,busy=false,scheduled=false,searchTerm="";
 let scanResult={checked:0,failed:0};
 function UI(){
  const host=$("accountsView");if(!host)return false;
@@ -96,7 +96,7 @@ function UI(){
  const title=mk("h3","","같은 운영자가 공개적으로 연결한 계정");
  const groups=mk("div","account-auto-groups");groups.id="accountAutoGroups";
  const groupMore=mk("button","account-auto-more","연결 그룹 더 보기");groupMore.id="accountAutoGroupMore";groupMore.type="button";
- groupMore.addEventListener("click",()=>{groupCursor+=30;render()});
+ groupMore.addEventListener("click",()=>{groupCursor+=10;render()});
  const listHead=mk("div","account-auto-list-head");
  listHead.append(mk("h4","","발견된 계정 목록"));
  const search=mk("input");search.type="search";search.id="accountAutoSearch";
