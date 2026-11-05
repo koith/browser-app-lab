@@ -1,0 +1,100 @@
+name: 4LEAF R15 recover original OBS duel effect members
+on:
+  push:
+    branches: ['data/4leaf-r15-duel-effects-**']
+    paths:
+      - '.github/workflows/rog-r15-duel-effect-recovery.yml'
+      - 'apps/4leaf/rog/tools/extract-duel-source-effects.py'
+      - 'apps/4leaf/rog/tests/test_r15_duel_source_effects.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract-effect-sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 32
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install offline source decoding dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y unshield
+          python3 -m pip install --break-system-packages pillow
+      - name: Validate extraction logic without original archive
+        run: python3 apps/4leaf/rog/tests/test_r15_duel_source_effects.py
+      - name: SHA1-verify and unpack the archival 2002 source (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/r15-original /tmp/r15-resources
+          python3 - <<'PY'
+          import urllib.request,hashlib
+          from pathlib import Path
+          target=Path('/tmp/r15-original/client.zip')
+          expected='86526d89679ae39b85fe9808da97ad871b7888d9'
+          last=None
+          for url in ['https://archive.org/download/4leaf/4leaf.zip',
+                      'https://archive.org/download/4leaf/4leaf.zip?download=1']:
+              try:
+                  h=hashlib.sha1()
+                  req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (4LEAF archival reproduction)'})
+                  with urllib.request.urlopen(req,timeout=120) as src,target.open('wb') as dest:
+                      while chunk:=src.read(1<<20):
+                          dest.write(chunk);h.update(chunk)
+                          if dest.tell()>90*1024*1024:raise RuntimeError('archive exceeds verified size gate')
+                  if h.hexdigest()!=expected:raise RuntimeError('original client SHA1 mismatch '+h.hexdigest())
+                  print('R15_ORIGINAL_CLIENT_SHA1_VERIFIED',h.hexdigest())
+                  break
+              except Exception as e:
+                  target.unlink(missing_ok=True);last=e
+          else: raise RuntimeError('No SHA1-verified original client available: '+str(last))
+          PY
+          unzip -q /tmp/r15-original/client.zip data1.cab data1.hdr -d /tmp/r15-original
+          unshield x -d /tmp/r15-resources /tmp/r15-original/data1.cab >/dev/null
+          rm -f /tmp/r15-original/client.zip
+      - name: Recover native effect candidates using original event references
+        run: |
+          python3 apps/4leaf/rog/tools/extract-duel-source-effects.py \
+            --resources /tmp/r15-resources \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --artifact /tmp/r15-effect-audit
+      - name: Audit candidate result and prohibit false completion
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('apps/4leaf/rog/docs/evidence/r15/duel-effect-source-audit.json')
+          d=json.loads(p.read_text())
+          s=d['summary']
+          print('R15_EFFECT_SOURCE_COUNTS',s)
+          assert s['decodedMembers']>0,'No native source effects decoded; see artifact, do not claim completion'
+          assert s['sourceFrames']>0,'No source PNG frames'
+          assert s['outputPNGBytes']>0,'No original bytes'
+          for x in d['effects'].values():
+              if x['status'].startswith('SOURCE-PIXELS-'):
+                  assert x['frames']>0 and len(x['sourceBytesSHA256'])==64
+          PY
+      - name: Preserve original byte evidence even if decode/push fails
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-r15-native-duel-effect-source-audit
+          path: |
+            /tmp/r15-effect-audit/
+            apps/4leaf/rog/docs/evidence/r15/duel-effect-source-audit.json
+          if-no-files-found: warn
+          retention-days: 20
+      - name: Commit verified original effect PNGs on data branch only
+        if: github.ref_type == 'branch' && startsWith(github.ref_name, 'data/4leaf-r15-duel-effects-')
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "4LEAF original source CI"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f apps/4leaf/rog/original/OBS/duel-effects \
+            apps/4leaf/rog/docs/evidence/r15/duel-effect-source-audit.json
+          if git diff --cached --quiet; then echo "R15_SOURCE_ART_ALREADY_IDENTICAL"; exit 0; fi
+          git commit -m "data(4leaf R15): SHA-verified source OBS duel effect candidates"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
