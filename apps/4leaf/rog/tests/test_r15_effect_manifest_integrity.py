@@ -54,6 +54,11 @@ class TestR15OriginalEffects(unittest.TestCase):
                 url=row["url"]
                 self.assertRegex(url,r"^\./original/OBS/duel-effects/(obs|obs2|obs3)-\d{4}-\d{3}\.png$")
                 path=ROOT/url.removeprefix("./")
+                # A verified event reference must not silently borrow a
+                # different PAK, member or keyframe PNG (even if both files
+                # contain valid source bytes and their own SHA).
+                expected=source.split(".")[0]+"-"+numeric+"-"+str(i).zfill(3)+".png"
+                self.assertEqual(path.name,expected,"cross-member native image substitution")
                 self.assertTrue(path.is_file(),str(path))
                 data=path.read_bytes()
                 self.assertEqual(sha(data),row["sha256"],str(path))
