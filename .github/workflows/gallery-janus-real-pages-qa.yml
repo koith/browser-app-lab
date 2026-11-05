@@ -1,0 +1,57 @@
+name: Gallery Janus Real Pages Existing Originals Acceptance
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_mimmi_janus_real_pages.py'
+      - 'apps/gallery-archive/qa_local_lightbox_live.py'
+      - '.github/workflows/gallery-janus-real-pages-qa.yml'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  janus-seven-saved-originals:
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Ensure exact deployed SHA has the new fixture
+        id: source
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+          fi
+          if [[ -f apps/gallery-archive/qa_mimmi_janus_real_pages.py ]]; then
+            echo 'available=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+            echo 'HISTORIC_DEPLOY_SOURCE_NOT_VERIFIED'
+          fi
+      - name: Install mobile browser engine
+        if: steps.source.outputs.available == 'true'
+        run: |
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Real Pages seven original files and detail tiles with backend blocked
+        if: steps.source.outputs.available == 'true'
+        run: |
+          python apps/gallery-archive/qa_mimmi_janus_real_pages.py --browser ${{ matrix.browser }}
+      - name: Existing live local lightbox across both galleries
+        if: steps.source.outputs.available == 'true'
+        run: |
+          python apps/gallery-archive/qa_local_lightbox_live.py --browser ${{ matrix.browser }}
