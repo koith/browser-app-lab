@@ -1,0 +1,50 @@
+name: INTERSECTION — Verified One-ZIP Public Account Rescue
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/target_account_bundle.py"
+
+permissions:
+  contents: read
+
+jobs:
+  private-public-account-bundle:
+    concurrency:
+      group: intersection-private-maintenance-production
+      cancel-in-progress: false
+      queue: max
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
+      DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Require private cloud configuration without printing it
+        run: |
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE" || { echo "::error::Private TeraBox authentication unavailable"; exit 1; }
+      - name: Install digest-pinned free TeraBox rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rclone help backends | grep -qi terabox
+      - name: Capture public originals, upload one immutable ZIP and read SHA256 remotely
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          umask 077
+          timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py
+          echo 'An account backup is verified only if TARGET_ACCOUNT_BUNDLE_REMOTE_VERIFIED appears with remote_sha256_verified=true.' >> "$GITHUB_STEP_SUMMARY"

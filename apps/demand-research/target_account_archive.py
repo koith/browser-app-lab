@@ -620,7 +620,7 @@ def state_from_cloud(cloud):
 
 
 def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
-            clock=time.monotonic):
+            clock=time.monotonic, archive_factory=None):
     if not isinstance(max_pages,int) or not 1<=max_pages<=MAX_PAGES:
         raise ValueError("invalid per-run page budget")
     api=api or Transport()
@@ -633,7 +633,8 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                   "profile_url":profile["profile_url"],"pds":profile["pds"]}
     root.write_immutable("metadata/target-accounts/"+platform+"-"+identity+".json",
                          canonical_json(registration))
-    archive=account_cloud(root,profile)
+    archive=(archive_factory(root,profile) if archive_factory is not None
+             else account_cloud(root,profile))
     seq,cursor,previously_complete=state_from_cloud(archive)
     # Profile and public social-graph snapshots are independent from post
     # history checkpoints. An API restriction is counted, never bypassed.
