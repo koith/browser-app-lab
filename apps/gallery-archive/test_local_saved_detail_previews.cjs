@@ -15,7 +15,7 @@ for(const model of ['mimmi','yui']){
  const local={sha256:sha,bytes:120000,width:800,height:1200,
    url:'stored-albums/safe/local.webp',number:1};
  const ctx={localStored:[{id:'safe',images:[local]}],
-   stored:[{id:'safe',images:[local]}],localPreviewIndex:new Map(),
+   stored:[{id:'safe',images:[local]}],localPreviewIndex:new Map(),localStoredByExactSha:new Map(),
    canonicalId:id=>id,validImages:a=>a.images,
    esc:s=>String(s).replace(/"/g,'&quot;'),
    rotationAttributes:()=>''};
@@ -28,18 +28,26 @@ for(const model of ['mimmi','yui']){
    url:'owner:safe:1',name:'saved',number:1};
  assert.equal(api.exactSavedViewerCopy(owner).url,local.url,
    model+' lightbox must use exact same-SHA saved bytes');
- assert.equal(api.exactSavedViewerCopy({...owner,albumId:'other'}),null);
+ assert.equal(api.exactSavedViewerCopy({...owner,albumId:'other'}).url,local.url,
+   model+' cross-album exact SHA may safely use existing photo bytes');
  assert.equal(api.exactSavedViewerCopy({...owner,sha256:'b'.repeat(64)}),null);
  assert.equal(api.exactSavedViewerCopy({...owner,bytes:120001}),null);
  assert.equal(api.exactSavedViewerCopy({...owner,width:801}),null);
  assert.equal(api.exactSavedViewerCopy({...owner,ownerAlbum:undefined}),null);
  const fast=api.photoHTML(owner,0);
  assert.ok(fast.includes('src="stored-albums/safe/local.webp"'),model);
+ const crossAlbum=api.photoHTML({...owner,ownerAlbum:'another',
+   url:'owner:another:1',albumId:'another'},0);
+ assert.ok(crossAlbum.includes('src="stored-albums/safe/local.webp"'),
+   model+' same actual bytes from different reviewed album must not hit 503');
+ assert.ok(!api.photoHTML({...owner,albumId:'other',sha256:'b'.repeat(64)},0)
+    .includes('src="stored-albums/'),model+' unrelated SHA remains isolated');
+
  assert.ok(fast.includes('data-owner="owner:safe:1"'),model);
  assert.ok(fast.includes('data-owner-variant="local"'),model);
  assert.ok(fast.includes('decoding="async"'),model);
  const unrelated=api.photoHTML({...owner,albumId:'other'},0);
- assert.ok(!unrelated.includes('src="stored-albums/'),model+' album must match');
+ assert.ok(unrelated.includes('src="stored-albums/safe/local.webp"'),model+' byte-identical local copy may serve another owner album');
  const otherSha=api.photoHTML({...owner,sha256:'b'.repeat(64)},0);
  assert.ok(!otherSha.includes('src="stored-albums/'),model+' SHA must match');
  const otherSize=api.photoHTML({...owner,bytes:120001},0);
@@ -50,13 +58,13 @@ for(const model of ['mimmi','yui']){
  ctx.localStored=[{id:'safe',images:[massive]}];
  api.rebuildLocalPreviewIndex();
  const large=api.photoHTML({...owner,bytes:700001},0);
- assert.ok(!large.includes('src="stored-albums/'),model+' large originals lazy gateway');
+ assert.ok(large.includes('src="stored-albums/safe/local.webp"'),model+' prefer already published full original over denied gateway');
  assert.equal(api.exactSavedViewerCopy({...owner,bytes:700001}).url,massive.url,
    model+' full-screen lightbox may use large SHA-identical committed originals');
  const direct=api.photoHTML({...owner,ownerAlbum:undefined,
    url:'stored-albums/safe/local.webp'},0);
  assert.ok(direct.includes('src="stored-albums/safe/local.webp"'),model);
- assert.ok(html.includes('const localCopy=cloudCover?localPreviewIndex.get(localPhotoKey(owned.id,selected)):null;'),
+ assert.ok(html.includes('const localCopy=cloudCover?.ownerAlbum?localSavedFor({...selected,albumId:owned.id}):null;'),
    model+' album covers must use shared O(1) index');
  assert.ok(html.includes('  rebuildLocalPreviewIndex();'),model+' index built after union');
  console.log('GALLERY_LOCAL_SHA_DETAIL_FASTPATH_AND_FALLBACK_PASS',model);
