@@ -73,9 +73,9 @@ def exercise(browser_type,label):
                 assert page.locator("#archiveHubActions").is_hidden()
                 allowed["value"]=True
                 page.evaluate("window.dispatchEvent(new Event('intersection:private-session-ready'))")
-                page.locator("#archiveHubFrameBox").wait_for(state="visible",timeout=12000)
-                assert page.locator("#archiveHubFrame").get_attribute("src")==(
-                    "/account-archive?account="+KEY)
+                assert page.locator("#archiveHubFrameBox").is_hidden()
+                assert "viewer" not in requests
+                assert "session" not in requests, "public Pages must not probe private sessions"
             assert not errors,errors
             print("ARCHIVE_TAB_BROWSER_PASS",label,
                   "private_gateway" if private else "public_unlinked_then_login",
