@@ -23,7 +23,7 @@ HERE=Path(__file__).resolve().parent
 ROOT=HERE.parent
 sys.path.insert(0,str(HERE))
 sys.path.insert(0,str(ROOT/"mimmi-gallery"/"cloud"))
-from qa_existing_owner_exact_file import read_existing
+from restore_known_owner_cache import verified_owner_catalog, verified_same_owner_existing_read
 from gateway.cookie_format import cookie_header
 
 TARGET={
@@ -46,11 +46,9 @@ def run(model):
     signature={"Authorization":"Bearer staging-verified-identity"}
     with tempfile.TemporaryDirectory(prefix="gallery-prerelease-") as directory:
         out=Path(directory)
-        manifest=out/"catalog.json"
-        ok,method=read_existing(remote,"metadata/catalog.json",manifest,env)
-        assert ok,("Existing owner catalog unreadable",model)
-        raw=manifest.read_bytes()
-        catalog=json.loads(raw)
+        # Stage the exact same bounded, same-account reader used by the
+        # production rescue, not a weaker one-attempt diagnostic.
+        raw,catalog=verified_owner_catalog(model,env,attempts=3)
         assert catalog.get("model")==model and catalog.get("schema_version")==1
         album=next((a for a in catalog["albums"] if a.get("id")==album_id),None)
         assert album is not None,(model,"screenshot work absent")
@@ -71,10 +69,11 @@ def run(model):
                     n=p["number"]
                     path=p.get("key","")
                     assert isinstance(path,str) and path.startswith("originals/"+album_id+"/")
-                    target=out/("verified-"+str(n))
-                    good,read_method=read_existing(remote,path,target,env)
-                    assert good,(model,"owner photo unreadable",n)
-                    data=target.read_bytes()
+                    # Three bounded same-account attempts handle transient
+                    # incomplete content; explicit provider access denial is
+                    # never retried and a wrong SHA is never accepted.
+                    data=verified_same_owner_existing_read(
+                        model,path,env,p,"original",attempts=3)
                     assert len(data)==p["bytes"]
                     assert hashlib.sha256(data).hexdigest()==p["sha256"]
                     with Image.open(io.BytesIO(data)) as img:
