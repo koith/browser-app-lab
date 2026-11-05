@@ -69,8 +69,9 @@ def work(model, album_id, photo):
         raise ValueError("original SHA-256 mismatch")
     if not headers.get("Content-Type", "").lower().startswith("image/"):
         raise ValueError("original not returned as image")
-    if headers.get("Access-Control-Allow-Origin") != ORIGIN:
-        raise ValueError("browser CORS origin not permitted")
+    # Plain <img> may load without a readable CORS response. This separate
+    # capability matters for SW caching, but must not falsify byte-SHA QA.
+    cors_ok = headers.get("Access-Control-Allow-Origin") in (ORIGIN, "*")
     try:
         with Image.open(io.BytesIO(payload)) as im:
             im.load()
@@ -79,7 +80,7 @@ def work(model, album_id, photo):
         raise ValueError("image pixel decode failed") from exc
     if (dimensions != (photo.get("width"), photo.get("height"))):
         raise ValueError("image dimensions differ from archived manifest")
-    return len(payload)
+    return len(payload), cors_ok
 
 
 def main(model):
@@ -102,6 +103,7 @@ def main(model):
         matches.extend((album_id, photo) for photo in images)
     errors = []
     total_bytes = 0
+    cors_count = 0
     start = time.monotonic()
     with ThreadPoolExecutor(max_workers=3) as pool:
         jobs = {pool.submit(work, model, aid, photo): (aid, photo["number"])
@@ -109,14 +111,17 @@ def main(model):
         for job in as_completed(jobs):
             album_id, number = jobs[job]
             try:
-                total_bytes += job.result()
+                size, cors_ok = job.result()
+                total_bytes += size
+                cors_count += int(cors_ok)
             except Exception as exc:
                 # No bearer token, cookie, secret, remote path or raw response body.
                 errors.append({"album": album_id, "number": number, "reason": str(exc)[:110]})
     result = {
         "model": model, "expected": len(matches),
         "http_200_independent_sha_and_pixel_pass": len(matches)-len(errors),
-        "read_bytes": total_bytes, "elapsed_seconds": round(time.monotonic()-start, 1),
+        "read_bytes": total_bytes, "cors_readable_originals": cors_count,
+        "elapsed_seconds": round(time.monotonic()-start, 1),
         "failures": errors[:20], "fail_count": len(errors),
         "durable_restart_verified": False, "real_iphone_hardware_verified": False,
     }
