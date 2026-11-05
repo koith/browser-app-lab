@@ -1,8 +1,8 @@
 """Desktop Chromium + mobile WebKit QA of the actual backup button.
 
-Tests both real modes without external accounts or GitHub credentials:
-public Pages opens the owner-authenticated workflow for manual dispatch, and
-private gateway submits a same-origin queued request. No backup is claimed
+Tests both modes without external account credentials:
+public Pages opens the dedicated private gateway with the selected account
+prefilled; private gateway submits a same-origin queued request. No backup is claimed
 complete unless remotely verified by the separate operator workflow.
 """
 from __future__ import annotations
@@ -20,6 +20,7 @@ HTML=('<!doctype html><html lang="ko"><head><meta charset="utf-8">'
       '<script src="target_archive_client.js" defer></script></head><body>'+
       SOURCE[start:end]+'</body></html>')
 PAGE="https://koith.github.io/browser-app-lab/apps/demand-research/"
+PRIVATE="https://intersection-originals-free.onrender.com/"
 
 
 def verify(browser_type,kind,width,height):
@@ -48,11 +49,10 @@ Object.defineProperty(navigator,"clipboard",{
                 from urllib.parse import urlsplit
                 parsed=urlsplit(route.request.url)
                 path=parsed.path
-                if (parsed.hostname=="github.com" and
-                    path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-bundle.yml"):
-                    route.fulfill(status=200,content_type="text/html",
-                                  body='<html><body><p id="workflow-reached">Owner workflow</p></body></html>')
-                elif path=="/browser-app-lab/apps/demand-research/":
+                if path=="/browser-app-lab/apps/demand-research/" or (
+                    parsed.hostname=="intersection-originals-free.onrender.com" and path=="/"):
+                    route.fulfill(status=200,content_type="text/html; charset=utf-8",body=HTML)
+                elif path=="/__never__":
                     route.fulfill(status=200,content_type="text/html; charset=utf-8",
                                   body=HTML)
                 elif path.endswith("/target_archive_client.js"):
@@ -92,11 +92,12 @@ Object.defineProperty(navigator,"clipboard",{
                 else:
                     route.abort()
             page.route("**/*",route_it)
-            response=page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
+            response=page.goto(PRIVATE if private else PAGE,
+                               wait_until="domcontentloaded",timeout=30000)
             assert response and response.status==200
             page.wait_for_function("""() => {
               const status=document.getElementById("targetArchiveStatus").textContent;
-              return status.includes("공개 페이지")||
+              return status.includes("전용 보관 서버")||
                      status.includes("연결됨 · 계정 주소");
             }""")
             assert len(status_queries)==1
@@ -135,7 +136,7 @@ Object.defineProperty(navigator,"clipboard",{
                     "?tab=archives&account=bluesky-"+"a"*40)
                 assert button.is_enabled(),"verified backup should not lock the button"
             else:
-                assert button.inner_text()=="GitHub에서 백업 실행"
+                assert button.inner_text()=="전용 서버에서 백업 시작"
                 page.locator("#targetArchivePlatform").select_option("mastodon")
                 page.locator("#targetArchiveAccount").fill("qa@example.social")
                 assert button.is_enabled()
@@ -148,12 +149,17 @@ Object.defineProperty(navigator,"clipboard",{
                     "https://bsky.app/profile/qa-example.bsky.social")
                 button.click()
                 page.wait_for_url(
-                    "https://github.com/koith/browser-app-lab/actions/workflows/"
-                    "intersection-target-account-bundle.yml",timeout=12000)
-                assert page.locator("#workflow-reached").is_visible()
-                assert clipboard_events==[
-                    "QA_COPIED:https://bsky.app/profile/qa-example.bsky.social"]
-                assert not dispatched,"public Pages must not falsely claim queued work"
+                    lambda url:url.hostname=="intersection-originals-free.onrender.com"
+                    and url.search_params.get("archive_account")==
+                      "https://bsky.app/profile/qa-example.bsky.social",
+                    timeout=12000)
+                assert not clipboard_events,"no clipboard workaround"
+                assert not dispatched,"cross-origin navigation alone must not schedule a backup"
+                page.locator("#targetArchiveAccount").wait_for(state="visible")
+                assert page.locator("#targetArchiveAccount").input_value()==(
+                    "https://bsky.app/profile/qa-example.bsky.social")
+                assert page.locator("#targetArchiveSubmit").inner_text()=="인증 후 백업 시작"
+                assert "archive_account" not in page.url,"account URL must be cleared once restored"
             assert not errors,errors
             assert page.evaluate(
                 "document.documentElement.scrollWidth<=window.innerWidth+2")
