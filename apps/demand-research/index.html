@@ -789,7 +789,7 @@ main{padding-top:10px}
     <option value="instagram">Instagram 릴스</option><option value="reddit">Reddit</option>
   </select>
   <select id="socialTerm" aria-label="검색어">
-    <option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="일탈계">일탈계</option>
+    <option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="섹블">섹블</option><option value="일탈계">일탈계</option>
   </select>
   <button type="button" id="socialFind">SNS 검색</button>
   <span id="socialStatus" role="status" aria-live="polite"></span>
@@ -938,7 +938,7 @@ main{padding-top:10px}
 (function(){
 "use strict";
 const API="https://api.bsky.app/xrpc/app.bsky.feed.searchPosts";
-const TERMS=["뒷계","섹트","일탈계"];
+const TERMS=["뒷계","섹트","섹블","일탈계"];
 const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS=4500;
 const cloudMode=location.hostname!=="koith.github.io";
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
