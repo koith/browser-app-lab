@@ -39,12 +39,14 @@ def inspect(browser,model,spec):
             assert response.status==200,response.status
             assert page.url.startswith(f"{BASE}/{model}-gallery/")
             try:
-                page.wait_for_function("""([expected,minimum])=>{
+                # The SHA union correctly replaces owner routes with identical
+                # first-party files. Count every visible photo here, then
+                # independently verify all owner-index SHAs below.
+                page.wait_for_function("""minimum=>{
                     if(typeof stored==='undefined'||!Array.isArray(stored))return false;
-                    const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>p.ownerAlbum).length,0);
                     const all=stored.reduce((n,a)=>n+(a.images||[]).length,0);
-                    return owner>=expected && all>=minimum;
-                }""",arg=[spec["owner"],spec["minimum_visible"]],timeout=45000)
+                    return all>=minimum;
+                }""",arg=spec["minimum_visible"],timeout=45000)
             except Exception:
                 debug=page.evaluate("""()=>({
                   visible:typeof stored==='undefined'?null:stored.reduce((n,a)=>n+a.images.length,0),
@@ -82,6 +84,9 @@ def inspect(browser,model,spec):
                        historical_collisions_not_shown:historical.filter(sha=>!shown.has(sha)).length};
             }""")
             print("GALLERY_SHA_INTEGRITY",model,json.dumps(integrity),flush=True)
+            # owner_sha counts physical SHA records even when a Pages copy
+            # supersedes a remote owner URL; ownerAlbum counts only URLs.
+            assert integrity["owner_sha"]>=spec["owner"],(model,integrity)
             assert integrity["not_shown"]==0,(model,integrity)
             if model=="mimmi":
                 assert integrity["repeated_sha"]==0,(model,integrity)
