@@ -82,9 +82,14 @@
   min-height:22px!important;padding:2px 5px!important;
  }
 }
-
-/* R13: original 800x600 battle result tray can overflow short landscape
- * mobile viewports; preserve existing buttons and handlers. */
+/* Round 13 (2026-11-05) measured defect: on a short landscape phone
+ * (iPhone 13 landscape, 750x342 CSS px) #board-area is 344px tall below a
+ * 29px title strip, so the bottom-anchored tray landed at y=340..369 and
+ * '결과 확인' was OFF-SCREEN until the player scrolled the page
+ * (tests/battle-podium-geometry-audit.cjs, resultButtonHittable).
+ * Pin the SAME real tray (same game.js buttons/handlers) to the visible
+ * viewport bottom on short landscape screens only. WEB layout rule; the
+ * 2002 client had a fixed 800x600 window and no such case. */
 @media(orientation:landscape) and (max-height:430px){
  #app.app-classic-dice #game #board-area>.leaf-native-battle-actions{
   position:fixed!important;
