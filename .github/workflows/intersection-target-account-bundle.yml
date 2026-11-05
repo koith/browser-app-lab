@@ -39,7 +39,8 @@ permissions:
 jobs:
   private-public-account-bundle:
     concurrency:
-      group: intersection-private-maintenance-production
+      # Independent immutable ZIP writes must not queue behind journal repair.
+      group: intersection-target-zip-production
       cancel-in-progress: false
       queue: max
     runs-on: ubuntu-24.04
