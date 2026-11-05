@@ -30,7 +30,10 @@ class FakeCloud(CloudArchive):
                 return ("\n".join(found) + ("\n" if found else "")).encode()
             if args[1] == "archive:":
                 return b"DemandResearch/\n"
-            prefix = args[1].split("archive:DemandResearch/", 1)[1].rstrip("/") + "/"
+            if args[1].rstrip("/") == "archive:DemandResearch":
+                prefix = ""
+            else:
+                prefix = args[1].split("archive:DemandResearch/", 1)[1].rstrip("/") + "/"
             found = [k[len(prefix):] for k in self.objects if k.startswith(prefix)
                      and "/" not in k[len(prefix):]]
             return ("\n".join(sorted(found)) + ("\n" if found else "")).encode()

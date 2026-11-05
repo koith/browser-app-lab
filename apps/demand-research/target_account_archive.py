@@ -226,12 +226,12 @@ def archive_key(profile):
 
 
 class AccountCloudArchive(CloudArchive):
-    """Private account store with a depth-one immutable original-media fallback.
+    """Read legacy account files, store new originals in private flat TeraBox.
 
-    TeraBox's unofficial backend intermittently returns missing for nested
-    copyto paths even after mkdir/lsf succeeds. All existing canonical and
-    account-local flat files retain priority; only verified media bytes use
-    a deterministic root-level SHA-addressed object on fresh writes.
+    The unofficial TeraBox backend may reject uploads under nested account
+    directories (copyto missing). One-level root objects avoid that provider
+    path resolution issue. Original logical keys, identity isolation and
+    remote SHA256 checks remain unchanged.
     """
 
     def __init__(self, root, profile):
@@ -241,48 +241,102 @@ class AccountCloudArchive(CloudArchive):
                          "/"+self.account_hash,runner=root.runner)
 
     def shared_media_key(self,key):
+        # Historical shallow media objects remain readable after this change.
         if not isinstance(key,str) or not re.fullmatch(
                 r"posts/[a-f0-9]{40}/media/[0-9]{4}\.[a-z0-9]{2,10}",key):
             return None
         return "account-media-"+self.account_hash+"-"+sha256(key.encode("utf-8"))+".bin"
 
+    def shared_record_key(self,key):
+        """Reversible, namespaced root filename enables checkpoint discovery.
+
+        A hash alone cannot support .names('graph/pages') or
+        .names('metadata/checkpoints'), so encode the verified logical key.
+        """
+        if (not isinstance(key,str) or not 1<=len(key)<=135
+                or not re.fullmatch(r"[A-Za-z0-9_./-]+",key)
+                or key.startswith("/") or ".." in key or "//" in key):
+            raise ValueError("invalid private account archive key")
+        encoded=base64.urlsafe_b64encode(key.encode("ascii")).decode("ascii").rstrip("=")
+        return "account-record-"+self.account_hash+"-"+encoded+".bin"
+
     def read(self,key,*,cap=MAX_CATALOG,optional=False,domain=None):
-        # Original canonical and legacy account-local flat paths are preferred.
-        original=super().read(key,cap=cap,optional=True,domain=domain)
-        if original is not None:
-            return original
-        shallow=self.shared_media_key(key)
-        if shallow:
-            raw=self.shared.read(shallow,cap=cap,optional=True,domain=domain)
+        # Always check prior canonical and account-local flat files FIRST.
+        legacy=super().read(key,cap=cap,optional=True,domain=domain)
+        if legacy is not None:
+            return legacy
+        historical=self.shared_media_key(key)
+        if historical:
+            raw=self.shared.read(historical,cap=cap,optional=True,domain=domain)
             if raw is not None:
                 return raw
+        shallow=self.shared_record_key(key)
+        raw=self.shared.read(shallow,cap=cap,optional=True,domain=domain)
+        if raw is not None:
+            return raw
         if optional:
             return None
-        return super().read(key,cap=cap,optional=False,domain=domain)
+        raise RuntimeError("private account object unavailable")
+
+    def names(self,prefix):
+        legacy=super().names(prefix)
+        # lsf is scoped to root level, not deeply nested directories.
+        # Read only own account's flat namespace; never reveal other accounts.
+        listing=self.shared.command(
+            ["lsf",self.shared.remote+"/","--files-only",
+             "--include","account-record-"+self.account_hash+"-*.bin",
+             "--retries","2"],timeout=120,allow_missing=True)
+        names=set(legacy)
+        if listing:
+            start="account-record-"+self.account_hash+"-"
+            for filename in listing.decode("utf-8","replace").splitlines():
+                if not filename.startswith(start) or not filename.endswith(".bin"):
+                    continue
+                encoded=filename[len(start):-4]
+                try:
+                    raw=base64.urlsafe_b64decode(encoded+"="*((-len(encoded))%4))
+                    key=raw.decode("ascii")
+                    if self.shared_record_key(key)!=filename:
+                        continue
+                except (ValueError,UnicodeDecodeError):
+                    continue
+                if key.startswith(prefix+"/"):
+                    name=key[len(prefix)+1:]
+                    if name and "/" not in name:
+                        names.add(name)
+        if len(names)>150000:
+            raise ValueError("private account index exceeds safe bound")
+        return sorted(names)
 
     def write_immutable(self,key,data):
-        shallow=self.shared_media_key(key)
-        if shallow is None:
-            return super().write_immutable(key,data)
         if not isinstance(data,bytes):
             raise TypeError("cloud content must be bytes")
         expected=sha256(data)
         cap=len(data)+1
-        # Never mask conflicting canonical or legacy immutable objects.
+        # Reject collisions in both historical domains; never overwrite
+        # originals, even when a root-level replica is available.
         for domain in (None,"https://nephobox.com"):
             existing=super().read(key,cap=cap,optional=True,domain=domain)
-            if existing is None:
-                continue
-            if sha256(existing)!=expected:
-                raise RuntimeError("immutable account media checksum collision")
-            return False
-        # One shallow file in the same private TeraBox root, unique to the
-        # verified account AND original source slot. No additional folder
-        # creation, unsafe overwrite, public media or external storage.
+            if existing is not None:
+                if sha256(existing)!=expected:
+                    raise RuntimeError("immutable account object checksum collision")
+                return False
+        historical=self.shared_media_key(key)
+        if historical:
+            for domain in (None,"https://nephobox.com"):
+                old=self.shared.read(historical,cap=cap,optional=True,domain=domain)
+                if old is not None:
+                    if sha256(old)!=expected:
+                        raise RuntimeError("immutable account media checksum collision")
+                    return False
+        # One depth-one immutable file for EVERY new logical account object:
+        # source JSON, post/media, profile, graph, thread, entry, checkpoint.
+        # No provider nested-folder mkdir/copyto requirement.
+        shallow=self.shared_record_key(key)
         written=self.shared.write_immutable(shallow,data)
-        actual=self.shared.read_verified(shallow,expected,cap=cap)
-        if actual!=data:
-            raise RuntimeError("private account media shallow SHA readback failed")
+        verified=self.shared.read_verified(shallow,expected,cap=cap)
+        if verified!=data:
+            raise RuntimeError("private account record SHA readback failed")
         return written
 
 
