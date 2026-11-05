@@ -485,7 +485,14 @@
     if(action==='idle')pawn.dataset.sourceIdleFacing=pawn.dataset.sourceDirection;
     pawn.dataset.sourceFrontWalkVerified=String(action==='walk'&&seq.length>1);
     pawn.dataset.sourceWalkCoverage='native-CHR-OBS-indices/2002-ms-UNVERIFIED';
+    if(action==='attack')pawn.dataset.sourceAttackEvidence=seq.table+(seq.mirror?'-mirrored':'')+'/'+seq.nativeEvidence;
+    if(action==='hurt'||action==='victory')pawn.dataset.sourceOutcomeEvidence=seq.table+'/'+seq.nativeEvidence;
+    pawn.dataset.sourceNativeSlot=seq.nativeSlot||'';
    }
+   // Original one-shot length (exact tick span x WEB tick ms) so a pose
+   // timer never cuts an original animation short. ms mapping UNVERIFIED.
+   pawn.dataset.sourceNativeDurationMs=nativeSeq&&Number.isFinite(seq.nativeDurationMs)
+    ?String(seq.nativeDurationMs):'';
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
@@ -514,13 +521,19 @@
    pawn.dataset.sourcePlaybackComplete='false';
    if(seq.length>1&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
      let i=0;
+     // Original tick tables are played against the clock so a busy main
+     // thread drops steps instead of stretching the original tick span.
+     const clocked=Number.isFinite(seq.intervalMs),t0=performance.now();
      const timer=setInterval(()=>{
        if(!pawn.isConnected||pawn.dataset.chessmanId!==id||pawn.dataset.actorPose!==action){
          clearInterval(timer);sourceTimers.delete(pawn);return;
        }
-       i++;
+       const next=clocked?Math.floor((performance.now()-t0)/seq.intervalMs):i+1;
+       if(next===i)return;
+       i=loops&&clocked?next%seq.length:next;
        if(i>=seq.length){
          if(!loops){
+           if(clocked)renderNativeFrame(pawn,seq[seq.length-1]);
            clearInterval(timer);sourceTimers.delete(pawn);
            pawn.dataset.sourcePlaybackComplete='true';
            return;
@@ -528,7 +541,7 @@
          i=0;
        }
        renderNativeFrame(pawn,seq[i]);
-     },action==='idle'?340:action==='walk'?120:175);
+     },Number.isFinite(seq.intervalMs)?seq.intervalMs:action==='idle'?340:action==='walk'?120:175);
      sourceTimers.set(pawn,timer);
    }else if(!loops){
      pawn.dataset.sourcePlaybackComplete='true';
@@ -620,6 +633,10 @@
    ?'continuous-across-real-DMP-steps/WEB-120ms':
     action==='walk'?'new-source-sequence/WEB-120ms':'inactive';
   if(duration>0&&action!=='idle'){
+   const nativeMs=Number(pawn.dataset.sourceNativeDurationMs)||0;
+   // +150ms: the duel outcome timer (game.js, same span) must win the race
+   // so the attacker goes lunge -> hurt/victory, never lunge -> idle -> outcome.
+   if(nativeMs+150>duration)duration=nativeMs+150;
    const token=setTimeout(()=>{
     if(pawn.isConnected&&pawn.dataset.actorPose===action)pose(pawn,'idle',0);
    },duration);

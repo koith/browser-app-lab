@@ -117,7 +117,7 @@ const {chromium,webkit}=require('playwright');
    assert.equal(attack.seq,'25,31,32,32,25',
     card+' uses original wind-up, strike and follow-through frames');
    assert.equal(attack.evidence,
-    'strike-front-31-32/structural-37/INFERRED');
+    'native-CHR-board-strike-front/original-OBS-slot8-slot11-front-poses-of-this-body/role-INFERRED');
    assert.ok([31,32].every(f=>attack.seen.includes(f)),
     card+' actually renders all three distinct original attack poses '+JSON.stringify(attack));
    probe.push({card,side:state.seen,attack:attack.seen});

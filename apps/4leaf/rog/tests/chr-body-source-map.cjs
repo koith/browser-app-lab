@@ -12,6 +12,8 @@ const load=p=>vm.runInNewContext(fs.readFileSync(path.join(root,p),'utf8'),sandb
 load('original/OBS/action-full/manifest.js');
 load('original/OBS/action-full-ext/manifest.js');
 load('original/OBS/obs23-actors/manifest.js');
+// #579: the 19 bodies recovered 2026-11-03 with their own palettes.
+load('original/OBS/referenced/chr-bodies-manifest.js');
 load('chr-body-source-map.js');
 const api=sandbox.window.__LEAF_CHR_BODY_MAP__,all=Object.values(api.cards);
 assert.equal(all.length,98,'all 98 known original CHR card records');
@@ -27,9 +29,10 @@ assert.equal(api.lookup('0056').member,'1040','native 1040 belongs to Ishutal 00
 assert.equal(api.lookup('0170').member,'1267','Black Prince is OBS3 1267');
 assert.equal(api.lookup('0125').member,'1199','CHR proves OBS2 link');
 const available=actual.filter(c=>api.resolve(c.card));
-assert.equal(available.length,78,'78 already archived original full-body image sets');
-assert.equal(actual.length-available.length,19,'19 source bodies remain unpublished');
-assert.equal(api.resolve('0040'),null,'body 1025 not yet published; no wrong 1040 substitute');
+assert.equal(available.length,97,'78 archived + 19 recovered original full-body image sets');
+assert.equal(actual.length-available.length,0,'every CHR body member now has its own source frames');
+assert.equal(api.resolve('0040').originalMember,'OBS.pak/1025.obs','0040 shows its OWN recovered body 1025, never 1040');
+assert.ok(api.resolve('0040').frames.every(f=>f.url.startsWith('./original/OBS/referenced/obs-1025-')));
 assert.equal(api.resolve('0156'),null,'original 1222 missing, no fake body');
 assert.equal(api.resolve('0088').originalMember,'1071.obs');
 assert.equal(api.resolve('0091').originalMember,'1074.obs');
@@ -57,10 +60,11 @@ const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 assert.ok(sw.includes("'./chr-body-source-map.js'"));
 assert.ok(sw.includes("'./original/OBS/obs23-actors/manifest.js'"));
 const summary=api.getState();
-assert.equal(summary.resolvedSourceCards,78);
-assert.equal(summary.knownUnpublishedCards.length,19);
+assert.equal(summary.resolvedSourceCards,97);
+assert.equal(summary.knownUnpublishedCards.length,0);
+assert.equal(summary.recovered20261103Cards.length,19);
 assert.equal(summary.missingOriginalMembers[0],'0156');
 console.log('4LEAF CHR +260 ORIGINAL CARD-TO-BODY SOURCE QA PASS',
- JSON.stringify({cards:98,assigned:97,published:78,unpublished:19,missing:'0156',
+ JSON.stringify({cards:98,assigned:97,published:97,recovered:19,missing:'0156',
   scheherazade:'0088->1071',ironmask:'0091->1074',blackPrince:'0170->1267',
   noCardIndexedFallback:true,originalAssetDigestsChecked:true}));

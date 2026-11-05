@@ -27,8 +27,12 @@ const {chromium,webkit}=require('playwright');
    const m=window.__LEAF_CHR_BODY_MAP__;
    return Object.keys(m.cards).filter(id=>m.cards[id].pak==='OBS'&&m.resolve(id));
   });
-  assert.equal(cards.length,42,'42 true source OBS full bodies linked to actual CHR cards');
+  // 42 archived + 17 recovered OBS bodies (#579: 1025-1039, 1041, 1057).
+  assert.equal(cards.length,59,'59 true source OBS full bodies linked to actual CHR cards');
   const REAR='3,5,6,7,8',SIDE='14,15,16,17,18,19',FRONT='25,26,27,28,29,30';
+  // 1057 (card 0074) has its front art at 0-10; its OWN table swaps the
+  // rear/front slots (pixel-checked), so it is expected to differ.
+  const SWAPPED={'0074':{rear:'25,26,27,28,29,30',front:'3,4,5,6,7,8',idleRear:'22,23,24',idleFront:'0,1,2'}};
   for(const card of cards){
    const live=await page.evaluate(card=>{
     const T=window.__ROG_TEST__,m=T.getMatch();
@@ -56,23 +60,25 @@ const {chromium,webkit}=require('playwright');
     return result;
    },card);
    assert.equal(live.rig,'original-obs-sprite',card+' must not display another member or proxy');
-   assert.equal(live.items.away.walk,REAR);
+   const sw=SWAPPED[card];
+   assert.equal(live.items.away.walk,sw?sw.rear:REAR,card);
    assert.equal(live.items.left.walk,SIDE);
    assert.equal(live.items.right.walk,SIDE);
-   assert.equal(live.items.toward.walk,FRONT);
+   assert.equal(live.items.toward.walk,sw?sw.front:FRONT,card);
    assert.equal(live.items.right.mirror,'true');
    assert.equal(live.items.left.mirror,'false');
-   assert.equal(live.items.away.idle,'0,1,2');
+   assert.equal(live.items.away.idle,sw?sw.idleRear:'0,1,2',card);
    assert.equal(live.items.left.idle,'11,12,13');
    assert.equal(live.items.right.idle,'11,12,13');
-   assert.equal(live.items.toward.idle,'22,23,24');
+   assert.equal(live.items.toward.idle,sw?sw.idleFront:'22,23,24',card);
    for(const x of Object.values(live.items)){
     assert.match(x.source,/Original-CHR-body/);
     assert.match(x.provenance,/original-OBS-18-byte-keyframe-indices-VERIFIED/);
     assert.equal(x.left,x.expectedLeft,'original frame anchor and mirror must agree');
-    assert.ok(x.image.startsWith('./original/OBS/action-full'),x.image);
+    assert.ok(x.image.startsWith('./original/OBS/action-full')||
+     x.image.startsWith('./original/OBS/referenced/obs-'+live.member.match(/(\d{4})\.obs$/)[1]+'-'),x.image);
    }
-   assert.equal(live.items.away.ticks,'0,3,6,9,12');
+   assert.equal(live.items.away.ticks,sw?'0,3,6,9,12,15':'0,3,6,9,12');
   }
   for(const [card,member,front] of [
     ['0125','OBS2.pak/1199.obs','28,29,30,31,32,33'],
@@ -90,7 +96,7 @@ const {chromium,webkit}=require('playwright');
    assert.ok(state.source.includes(member),card);
    assert.equal(state.rig,'original-obs-sprite');
   }
-  for(const card of ['0040','0138','0159','0156']){
+  for(const card of ['0156']){
    const state=await page.evaluate(card=>{
     const m=window.__ROG_TEST__.getMatch(),T=window.__ROG_TEST__;
     m.players[0].team=['c_'+card];T.setMatch(m);
@@ -103,9 +109,9 @@ const {chromium,webkit}=require('playwright');
      state.portrait==='./original/IMG/avatarback.png'),card);
   }
   assert.deepEqual(errors,[],'live source model must not throw JS errors');
-  console.log('CHR 98 ORIGINAL CARD-BODY AND 42 CLASSIC ACTION-37 BROWSER PASS',
-   JSON.stringify({browser:isWebKit?'webkit':'chromium',classic:42,
-    obs23Examples:['0125','0170'],missing:['0040','0138','0159','0156'],
+  console.log('CHR 98 ORIGINAL CARD-BODY AND 59 CLASSIC ACTION-37 BROWSER PASS',
+   JSON.stringify({browser:isWebKit?'webkit':'chromium',classic:59,
+    obs23Examples:['0125','0170'],missing:['0156'],
     originalMillisKnown:false}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('CHR ORIGINAL ACTOR TABLE BROWSER FAILED',e.stack||e);process.exit(1)});

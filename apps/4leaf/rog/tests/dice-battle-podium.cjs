@@ -80,8 +80,8 @@ const path=require('node:path');
    'attacker walking frontwards uses identical native animation keys');
   assert.equal(synced.duel[1].frames,'11',
    'duel defender holds native side pose while looking at attacker');
-  assert.equal(synced.board[1].frames,'25',
-   'board defender holds genuine front pose from that same CHR member');
+  assert.equal(synced.board[1].frames,'22',
+   'board defender has no identified native hurt slot: hold this CHR body original front idle key 22, never synthetic legacy frame 25');
   assert.ok(synced.duel.every(x=>x.source==='original-obs-sprite'),
    'already recovered true OBS full bodies must be rendered on both podiums');
   // ARCHIVED SOURCE IMAGE anchor regression: validate the physical
@@ -367,18 +367,20 @@ const path=require('node:path');
   const resultActors=await page.evaluate(({winner,loser})=>
    [winner,loser].map(id=>{
     const actor=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
-    const native=window.ORIGINAL_LEAF_OBS_FRAMES[actor.dataset.chessmanId];
+    const native=window.__LEAF_CHR_BODY_MAP__.resolve(actor.dataset.chessmanId);
     const seq=(actor.dataset.sourceFrameSequence||'').split(',').map(Number);
     return {id,pose:actor.dataset.actorPose,rig:actor.dataset.actorRig,
      sequence:seq,sourceNative:native?.frames?.map(x=>x.index)||[],
+     sourceMember:native?.originalMember,nativeUrls:native?.frames?.map(x=>x.url)||[],
      img:actor.querySelector('.leaf-chess-original-obs')?.getAttribute('src')};
    }),{winner,loser});
   assert.deepEqual(resultActors.map(x=>x.pose),['victory','hurt'],
    'resolved match winner must celebrate and real loser must react, not the initial attack side');
   assert.ok(resultActors.every(x=>x.rig==='original-obs-sprite'&&
     x.sequence.length>0&&x.sequence.every(n=>x.sourceNative.includes(n))&&
-    x.img?.startsWith('./original/OBS/')),
-   'all post-result action pixels must be genuine archived OBS indices, never synthetic sprites');
+    x.sourceMember&&x.img?.startsWith('./original/OBS/')&&
+    x.nativeUrls.includes(x.img)),
+   'every resolved outcome frame must belong to this exact original CHR-mapped OBS body, never an unrelated sprite');
   await page.waitForFunction(({winner,loser})=>
    [winner,loser].every(id=>document.querySelector(
     '#board-pawns .board-pawn[data-id="'+id+'"]')?.dataset.actorPose==='idle'),

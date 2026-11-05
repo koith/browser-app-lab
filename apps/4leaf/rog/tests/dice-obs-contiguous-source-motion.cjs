@@ -81,7 +81,7 @@ const {chromium}=require('playwright');
    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'idle',0);
    return {mode,sequence,end,still,complete};
   });
-  assert.equal(oneShot.mode,'one-shot/WEB-action-unverified');
+  assert.equal(oneShot.mode,'one-shot/OBS-source-index-VERIFIED/WEB-ms-INFERRED');
   assert.equal(oneShot.end,oneShot.still,'battle action must not loop after completion');
   assert.equal(oneShot.complete,'true');
   const turn=await page.evaluate(()=>{
@@ -105,7 +105,7 @@ const {chromium}=require('playwright');
   assert.equal(live.rig,'original-obs-sprite');
   assert.ok(live.source.includes('1040.obs'));
   assert.match(live.coverage,/native-CHR-OBS-indices/);
-  for(const card of ['0040','0156']){
+  for(const card of ['0156']){
    const bad=await page.evaluate(card=>{
     const T=window.__ROG_TEST__,m=T.getMatch();m.players[0].team[0]='c_'+card;T.drawGame();
     const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');

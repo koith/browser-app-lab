@@ -84,14 +84,11 @@ const {chromium}=require('playwright');
    window.__ROG_TEST__.drawGame();
    return data;
   });
-  assert.equal(missing.rig,'original-card-portrait-fallback',
-   'card 0040 has verified original body 1025 but no published PNG; do not show unrelated 1040');
-  assert.equal(missing.css,'none','missing OBS must not show an invented tall figure');
-  assert.ok((missing.portraitSrc?.startsWith('./original/CardData/chm_')||
-    missing.portraitSrc==='./original/IMG/avatarback.png'));
-  assert.deepEqual(missing.size,[40,55]);
-  assert.notEqual(missing.visible,'none');
-  assert.match(missing.mapping,/original-OBS-missing/);
+  // #579 published body 1025 (own palette, SHA-pinned): 0040 now shows its
+  // OWN body - never the unrelated 1040 of card 0056.
+  assert.equal(missing.rig,'original-obs-sprite','card 0040 renders its own recovered body 1025');
+  assert.match(missing.source,/OBS\.pak\/1025\.obs$/,'never the unrelated 1040');
+  assert.doesNotMatch(missing.mapping||'',/original-OBS-missing/,'1025 is no longer marked missing');
   // Legitimate actual move sequence uses real 104-cell DMP game and calls
   // actor state transitions. Restore original card to continue real match.
   await page.evaluate(old=>{
@@ -124,7 +121,7 @@ const {chromium}=require('playwright');
   assert.equal(await rig.getAttribute('data-actor-pose'),'victory');
   const recovered=await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState().originalFullBodyFramesRecovered);
   assert.ok(['0056','0088','0091','0170'].every(id=>recovered.includes(id))&&
-   recovered.length===78,
+   recovered.length===97&&['0040','0074','0138','0159'].every(id=>recovered.includes(id))&&!recovered.includes('0156'),
    'recovered IDs include all existing 2002 OBS source characters without fabricating unrelated rig files');
   await page.screenshot({path:'leaf-genesis-source-card-proxy-not-chat-actor.png'});
   assert.deepEqual(errors,[]);

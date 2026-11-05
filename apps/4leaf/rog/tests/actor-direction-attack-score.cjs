@@ -79,7 +79,7 @@ const {chromium,webkit}=require('playwright');
    return {seq,ev,end:pawn.dataset.actorFrame,done:pawn.dataset.sourcePlaybackComplete};
   });
   assert.equal(attack.seq,'25,31,32,32,25');
-  assert.equal(attack.ev,'strike-front-31-32/structural-37/INFERRED');
+  assert.equal(attack.ev,'native-CHR-board-strike-front/original-OBS-slot8-slot11-front-poses-of-this-body/role-INFERRED');
   assert.equal(attack.done,'true');assert.equal(attack.end,'25');
   // Battle score numerals.
   const score=await page.evaluate(async()=>{

@@ -184,7 +184,77 @@
   }
   return frames.length;
  }
- const prefetchOriginalDice=()=>{prefetchD4();prefetchD6();prefetchEmbeddedDice();return prefetchNumerals()};
+ /* ORIGINAL ROLL TABLES (2026-11-04). The CI data branch
+  * data/4leaf-obs-blocks-20261103 decoded every extra block of 1171 (D6) and
+  * 1223 (D4) with ITS OWN palette (block 0 is byte-identical to
+  * original/OBS/ui) together with the members' animation tables:
+  *   type-2 record = show block B frame F at tick T; type-60 = id 2125.
+  * D6 slot 20 = 15 crisp rotations of block 0 (18..27, 2 ticks each),
+  * slot 12 = 16 blurred-then-settling block-2 frames with id 2125 at tick 1,
+  * slot 13 = 16 block-1 frames; D4 uses the same slot numbers (block 1 for
+  * 12, block 2 for 13). Frames/ticks VERIFIED; using slot 20 for the fall,
+  * slot 12 from the first impact (2125 = presumed impact sound) and the
+  * VERIFIED pip face at rest is INFERRED. Pins: SHA-256 over the ordered
+  * frame hashes of each member's imported block set; anything else stays
+  * off (the round-7 'embedded' chains keep their quarantine). */
+ const DICE_BLOCK_SET_SHA256=Object.freeze({
+  '1171':'0999b9e0adac7799ff89d378e3717e9335b948c2d42d7659304588ba0bd8014b',
+  '1223':'ed4df7a4c4aaa65f78c5ec8201b49cf1b17510958dd0804c45086170d2929f06'});
+ const diceBlockVerified={};
+ async function verifyDiceBlocks(){
+  const all=window.ORIGINAL_LEAF_DICE_BLOCKS?.members;
+  if(!all||!window.crypto?.subtle)return diceBlockVerified;
+  for(const member of Object.keys(DICE_BLOCK_SET_SHA256)){
+   const m=all[member];
+   if(!m)continue;
+   const joined=m.blocks.flatMap(b=>b.frames.map(f=>f.sha256)).join('');
+   const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(joined));
+   const hex=[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
+   diceBlockVerified[member]=hex===DICE_BLOCK_SET_SHA256[member];
+  }
+  return diceBlockVerified;
+ }
+ const diceBlocksReady=verifyDiceBlocks().catch(()=>diceBlockVerified);
+ function originalRollTable(sides){
+  const member=sides===4?'1223':'1171';
+  const m=window.ORIGINAL_LEAF_DICE_BLOCKS?.members?.[member];
+  const ui=window.ORIGINAL_LEAF_UI_FRAMES?.[member]?.frames;
+  if(!m||!ui||diceBlockVerified[member]!==true)return null;
+  if(m.originalMember!=='OBS.pak/'+member+'.obs')return null;
+  const blockFrames=[ui,...m.blocks.map(b=>b.frames)];
+  if(blockFrames.some((frames,b)=>frames.length!==m.blockFrames[b]))return null;
+  const prefix='./original/OBS/dice-blocks/obs-'+member+'-b';
+  if(!m.blocks.every(b=>b.frames.every((f,i)=>f.index===i&&
+   f.url===prefix+b.block+'-'+String(i).padStart(3,'0')+'.png')))return null;
+  const resolveSlot=index=>{
+   const a=m.animations[index];
+   if(!a||!a.keys.length)return null;
+   const frames=a.keys.map(([tick,block,frame])=>{
+    const f=blockFrames[block]?.[frame];
+    return f&&{...f,tick,block,sourceChain:'OBS-'+member+'-b'+block};
+   });
+   return frames.every(Boolean)?{index,ticks:a.ticks,frames,sounds:a.sounds}:null;
+  };
+  const fall=resolveSlot(20),impact=resolveSlot(12);
+  if(!fall||!impact)return null;
+  return {member,fall,impact,
+   role:'OBS-'+member+'-slots-20-12-frames-and-ticks-VERIFIED/fall-impact-role-INFERRED/ms-UNVERIFIED'};
+ }
+ const rollImageCache=new Map();
+ function prefetchRollTables(){
+  if(typeof Image!=='function')return 0;
+  for(const sides of [6,4]){
+   const t=originalRollTable(sides);
+   for(const f of t?[...t.fall.frames,...t.impact.frames]:[]){
+    if(rollImageCache.has(f.url))continue;
+    const img=new Image();rollImageCache.set(f.url,img);img.src=f.url;
+    if(typeof img.decode==='function')img.decode().catch(()=>{});
+   }
+  }
+  return rollImageCache.size;
+ }
+ diceBlocksReady.then(prefetchRollTables);
+ const prefetchOriginalDice=()=>{prefetchD4();prefetchD6();prefetchEmbeddedDice();prefetchRollTables();return prefetchNumerals()};
  const prefetchSourceDice=prefetchOriginalDice;
  if(document.readyState==='complete')prefetchSourceDice();
  else window.addEventListener('load',prefetchSourceDice,{once:true});
@@ -207,7 +277,10 @@
   nativeEmbeddedPaletteStatus:'QUARANTINED/per-block-palette-not-yet-verified',
   nativeEmbeddedPrefetchCount:embeddedDieCache.size,
   nativeEmbeddedDecodedCount:[...embeddedDieCache.values()].filter(img=>img.complete&&img.naturalWidth>0).length,
-  nativeEmbeddedRole:'source-pixel-coordinates-VERIFIED/palette-UNVERIFIED/not-live'});
+  nativeEmbeddedRole:'source-pixel-coordinates-VERIFIED/palette-UNVERIFIED/not-live',
+  originalRollTables:{d6:originalRollTable(6)?.role||null,d4:originalRollTable(4)?.role||null},
+  originalRollBlockSetsVerified:{...diceBlockVerified},
+  originalRollPrefetchCount:rollImageCache.size});
  function makeFace(n){
   const face=document.createElement('span');
   face.className='leaf-die-face leaf-die-face-'+n;
@@ -256,8 +329,9 @@
   // Never replace the VERIFIED landing eyes from the established UI
   // manifest. The 63 additional frames have incorrect per-block colours;
   // only SHA256-allowlisted and independently reviewed frames may be used.
-  const source=original&&embedded?
-   {...original,tumble:embedded.frames,nativeEmbedded:embedded}:original;
+  const rollTable=original?originalRollTable(sides):null;
+  const source=original&&rollTable?{...original,rollTable,tumble:rollTable.fall.frames}:
+   original&&embedded?{...original,tumble:embedded.frames,nativeEmbedded:embedded}:original;
   let sprite=null;
   if(source){
    sprite=document.createElement('img');
@@ -274,6 +348,10 @@
     'original-OBS-'+source.member+'/' +
     (source.partial?'partial-':'index-ordered-INFERRED-')+source.tumble.length+'-frames';
    node.dataset.embeddedSourceChains=source.nativeEmbedded?.chains.join(',')||'';
+   if(source.rollTable){
+    node.dataset.tumbleSource='original-OBS-'+source.rollTable.member+'/slot20-fall+slot12-impact';
+    node.dataset.rollTableRole=source.rollTable.role;
+   }
    node.dataset.nativeSourceRole='landing-faces-VERIFIED/tumble-frames-source-VERIFIED/order-and-FPS-INFERRED';
    sprite.dataset.sourceChain=first.sourceChain||'original-UI-OBS';
    // If the original PNG cannot load, show the WEB cube instead of nothing.
@@ -343,7 +421,33 @@
    return;
   }
   let tumbleTimer=0;
-  if(sprite&&source.tumble.length>1){
+  const table=sprite&&source.rollTable;
+  if(table){
+   // Slot 20 loops until the first floor contact (physics offset .38), then
+   // slot 12 plays once and holds its last frame; one WEB tick = the slot-12
+   // span spread over the rebound part of the presentation.
+   const impactAt=duration*.38;
+   const tickMs=Math.max(8,(duration-impactAt)/table.impact.ticks);
+   const t0=performance.now();let shown=-1;
+   const frameAt=(slot,tick)=>{let f=slot.frames[0];
+    for(const k of slot.frames){if(k.tick<=tick)f=k;else break}return f};
+   const render=f=>{if(!f||shown===f.url)return;shown=f.url;
+    sprite.src=f.url;sprite.dataset.frame=f.block+':'+f.index;
+    sprite.dataset.sourceChain=f.sourceChain};
+   node.dataset.rollTickMs=tickMs.toFixed(1)+'/WEB';
+   const step=()=>{
+    const t=performance.now()-t0;
+    if(t<impactAt){
+     node.dataset.rollPhase='fall/slot20';
+     render(frameAt(table.fall,Math.floor(t/tickMs)%table.fall.ticks));
+    }else{
+     node.dataset.rollPhase='impact/slot12';
+     render(frameAt(table.impact,Math.min(table.impact.ticks-1,Math.floor((t-impactAt)/tickMs))));
+    }
+   };
+   step();
+   tumbleTimer=setInterval(step,Math.max(16,Math.round(tickMs/2)));
+  }else if(sprite&&source.tumble.length>1){
    let k=0;
    tumbleTimer=setInterval(()=>{
     k=(k+1)%source.tumble.length;
@@ -415,6 +519,7 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION,originalD6,originalD4,originalEmbeddedDice,playableEmbeddedDice,prefetchD4,prefetchD6,prefetchEmbeddedDice,prefetchNumerals,prefetchOriginalDice,
+  faces:PIPS,orientation:ROTATION,originalD6,originalD4,originalEmbeddedDice,playableEmbeddedDice,
+  originalRollTable,diceBlocksReady,prefetchD4,prefetchD6,prefetchEmbeddedDice,prefetchNumerals,prefetchOriginalDice,
   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();
