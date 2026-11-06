@@ -28,7 +28,7 @@ def exercise(browser,model,album,index):
     png=io.BytesIO()
     Image.new("RGB",(320,480),(30,60,120)).save(png,format="PNG")
     mock_bytes=png.getvalue()
-    phase={"warm":False,"errors":0,"recoveries":0,"readiness":0}
+    phase={"warm":False,"errors":0,"recoveries":0,"readiness":0,"unnecessary_catalog":0}
     def mock_media(route):
         link=route.request.url
         if f"/media/{album}/" not in link:
@@ -47,6 +47,11 @@ def exercise(browser,model,album,index):
         phase["readiness"]+=1
         route.fulfill(status=500,body="old global readiness endpoint must not gate an album")
     page.route(root,lambda route:route.fulfill(status=200,content_type="text/html",body=html))
+    def reject_optional_catalog(route):
+        phase["unnecessary_catalog"]+=1
+        route.fulfill(status=503,body="static owner index should make this optional")
+    page.route("**/api/catalog",reject_optional_catalog)
+    page.route("**/api/yui/catalog",reject_optional_catalog)
     page.route("**/api/gallery-media-readiness",reject_global_poll)
     page.route("**/media/**",mock_media)
     try:
@@ -85,11 +90,13 @@ def exercise(browser,model,album,index):
         }""",arg=retry_index,timeout=30000)
         assert phase["recoveries"]>=1,(model,"no original retry after healthy status",phase)
         assert phase["readiness"]==0,(model,"global readiness must not be polled",phase)
+        assert phase["unnecessary_catalog"]==0,(model,"static owner manifest triggered optional Render catalog",phase)
         print("GALLERY_OWNER_AUTO_RECOVERY_503_TO_200_MOCK_UI_PASS",json.dumps({
             "model":model,"album":album,"browser":browser.browser_type.name,
             "verified_failed_owner_tile_index":retry_index,
             "original_mock_errors":phase["errors"],
             "unnecessary_global_readiness_polls":phase["readiness"],
+            "unnecessary_remote_catalog_requests":phase["unnecessary_catalog"],
             "original_mock_recoveries":phase["recoveries"],
             "same_page_no_reload":True,
             "real_owner_media_claimed":False,
