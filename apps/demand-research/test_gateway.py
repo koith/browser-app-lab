@@ -155,6 +155,13 @@ def connected_gateway(monkeypatch):
     return TestClient(gateway.app,base_url="https://testserver")
 
 
+def test_url_only_mode_does_not_require_login_for_public_apis(connected_gateway,monkeypatch):
+    monkeypatch.setenv("DEMAND_PUBLIC_ARCHIVE_MODE","1")
+    assert connected_gateway.get("/api/session").status_code==200
+    assert connected_gateway.get("/api/target-archive/status").status_code==200
+    assert connected_gateway.post("/api/accounts/sync").status_code==401
+
+
 def test_home_has_no_login_or_password(connected_gateway):
     page=connected_gateway.get("/")
     assert page.status_code==200
