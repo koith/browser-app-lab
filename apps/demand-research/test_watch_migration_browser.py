@@ -55,13 +55,13 @@ def verify(browser,label):
                       {"rows":EXPECTED,"key":KEY})
         assert page.evaluate("(key)=>JSON.parse(localStorage.getItem(key))",
                              KEY)==EXPECTED
-        page.goto(RENDER+"?tab=accounts")
-        assert page.evaluate("window.TEST_WATCHES")==[]
+        # No clicks: first Render visit automatically visits the old Pages
+        # first-party origin and returns with its saved watch list.
+        page.goto(RENDER+"?tab=accounts",wait_until="commit")
+        page.wait_for_function("window.TEST_WATCHES && window.TEST_WATCHES.length===2",
+                               timeout=18000)
         button=page.get_by_role("button",name="기존 관심 계정 복원")
         assert button.is_visible()
-        button.click()
-        page.wait_for_function("window.TEST_WATCHES && window.TEST_WATCHES.length===2",
-                               timeout=12000)
         assert page.evaluate("window.TEST_WATCHES")==EXPECTED
         assert page.evaluate("(key)=>JSON.parse(localStorage.getItem(key))",
                              KEY)==EXPECTED
