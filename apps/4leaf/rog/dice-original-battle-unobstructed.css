@@ -82,6 +82,18 @@
   min-height:22px!important;padding:2px 5px!important;
  }
 }
+/* R15 iPhone portrait source-dice visibility: an 844px-tall phone
+ * may have a short, top-aligned board-area ending near y~526. The action
+ * tray anchored to that area obscured a native battle die at y~496 even
+ * though the rest of the full viewport remained empty. Keep the SAME
+ * real result button visible at the bottom of the viewport, as in the
+ * already corrected short-landscape case. No source art is moved. */
+@media (orientation:portrait) and (max-width:650px){
+ #app.app-classic-dice #game #board-area>.leaf-native-battle-actions{
+  position:fixed!important;
+  bottom:max(4px,env(safe-area-inset-bottom))!important;
+ }
+}
 /* Round 13 (2026-11-05) measured defect: on a short landscape phone
  * (iPhone 13 landscape, 750x342 CSS px) #board-area is 344px tall below a
  * 29px title strip, so the bottom-anchored tray landed at y=340..369 and
