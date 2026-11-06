@@ -71,6 +71,7 @@ async function load(reset){
  busy=true;
  if(reset){rows=[];data=null}
  try{
+   await (window.INTERSECTION_AUTH_READY||Promise.resolve());
    const statusResp=await fetch("/api/accounts/status",option);
    if(!statusResp.ok)throw Error(statusResp.status===401?"비공개 세션 미인증":statusResp.status===503?"인덱스 저장소 미설정":"HTTP "+statusResp.status);
    const stats=await statusResp.json();
