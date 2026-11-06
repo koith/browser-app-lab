@@ -1,0 +1,30 @@
+name: Gallery Private R2 Worker (No Cloud Access) Contract
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/cloudflare-owner-gateway/**'
+      - '.github/workflows/gallery-cloudflare-worker-r2-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/cloudflare-owner-gateway/**'
+      - '.github/workflows/gallery-cloudflare-worker-r2-contract.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gallery-private-r2-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-worker-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Worker unit and secret isolation without network/storage
+        run: node --test apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs
+      - name: Syntax-check Worker entrypoint
+        run: node --check apps/gallery-archive/cloudflare-owner-gateway/worker.mjs
