@@ -64,7 +64,7 @@ async function loadOverview(){
       Number(overview.account_zip_candidates||0).toLocaleString("ko-KR")+
       "개 중 최신 1개 원격 무결성 확인. 아래에서 저장된 계정을 선택하세요.";
   }else if(overview.account_bundles_state==="empty"){
-    status.textContent="원격에 확인된 계정 ZIP 백업이 아직 없습니다. 계정 백업 실행 결과를 확인해 주세요.";
+    status.textContent="현재 원격 목록에서 SHA 검증 가능한 계정 ZIP이 0개입니다. 저장 파일의 존재 여부는 별도 검증이 필요합니다.";
   }else{
     status.textContent="계정 ZIP 원격 읽기/검증이 완료되지 않았습니다. 저장 성공으로 표시하지 않습니다.";
   }
