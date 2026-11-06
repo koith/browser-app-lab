@@ -254,14 +254,13 @@
   function refreshButton(){
     // Never leave users with a dead button or a GitHub Actions detour.
     submit.disabled=submitting;
-    submit.textContent=gatewayReady?"테라박스 백업 시작":
-      (isPrivateGateway?"보관함 연결 필요":"교집합에서 계정 백업");
+    submit.textContent=isPrivateGateway?"백업 시작":"교집합에서 계정 백업";
     workflow.hidden=true;
   }
   function openPrivateBackup(){
     if(isPrivateGateway){
-      message.textContent="이 브라우저의 개인 보관함 접속 기록이 없습니다. 기존 개인 접속 링크를 한 번 열면 이후 자동으로 연결됩니다.";
-      return;
+      message.textContent="저장소 연결을 다시 확인 중입니다. 계정 입력은 유지됩니다.";
+      void check();return;
     }
     // Pages supplies only public platform/account selection. The same
     // INTERSECTION app runs at the dedicated private Render origin; no
@@ -305,7 +304,7 @@
       viewer.hidden=false; // signed private session can read the archive viewer
       gatewayReady=Boolean(result.enabled);
       message.textContent=gatewayReady
-        ?"연결됨 · 계정 주소를 입력하고 백업을 누르면 이 화면에서 진행 상태를 확인할 수 있습니다."
+        ?"계정 이름 또는 주소를 입력하고 백업 시작을 누르세요. 이 화면에서 진행 상태를 표시합니다."
         :"비공개 보관함은 열 수 있지만 새 백업 요청 권한이 설정되지 않았습니다.";
       if(gatewayReady){
         void loadLibrary();
@@ -320,7 +319,7 @@
       viewer.hidden=true;
       gatewayReady=false;
       message.textContent=isPrivateGateway?
-        "보관함 접속 상태를 확인하지 못했습니다. 개인 접속 링크로 한 번 열면 이후 자동으로 연결됩니다.":
+        "원격 저장소 연결 확인 중입니다. 준비되면 이 화면에서 바로 백업을 실행합니다.":
         "계정을 지정하면 교집합 전용 보관함으로 이어집니다. GitHub Actions 화면으로 이동하지 않습니다. 보관함 인증 후 백업을 시작합니다.";
     }finally{
       refreshButton();
@@ -346,7 +345,18 @@
       return;
     }
     account.removeAttribute("aria-invalid");
-    if(!gatewayReady){void openPrivateBackup();return;}
+    if(!gatewayReady){
+      if(!isPrivateGateway){openPrivateBackup();return;}
+      message.textContent="저장소를 연결 중입니다. 백업 요청을 자동으로 다시 시도합니다.";
+      for(let attempt=0;attempt<4&&!gatewayReady;attempt++){
+        await check();
+        if(!gatewayReady)await new Promise(resolve=>setTimeout(resolve,2500));
+      }
+      if(!gatewayReady){
+        message.textContent="테라박스 서버가 아직 복구되지 않았습니다. 계정은 유지됩니다. 잠시 후 백업 시작을 다시 눌러 주세요.";
+        return;
+      }
+    }
     const value=normalizedAccount();
     submitting=true;
     refreshButton();
