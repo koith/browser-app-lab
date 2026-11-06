@@ -112,7 +112,10 @@ def test_oneclick_job_progress_requires_signed_same_session_receipt(client,monke
     assert recorded==[41999999999]
     wrong=client.get("/api/target-archive/jobs/41999999998?receipt="+receipt)
     assert wrong.status_code==403
-    assert client.get(uri.replace(receipt,receipt[:-1]+"0")).status_code==403
+    # Flip the final digest character to a DIFFERENT value. Replacing
+    # an existing "0" with "0" would falsely report a security regression.
+    altered=receipt[:-1]+("1" if receipt.endswith("0") else "0")
+    assert client.get(uri.replace(receipt,altered)).status_code==403
     anon=TestClient(gateway.app,base_url="https://testserver")
     assert anon.get(uri).status_code==401
 
