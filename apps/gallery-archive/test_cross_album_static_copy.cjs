@@ -2,6 +2,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
+const crypto=require('node:crypto');
 const vm=require('node:vm');
 const path=require('node:path');
 const ROOT=path.join(__dirname,'..');
@@ -58,6 +59,7 @@ for(const model of ['mimmi','yui']){
   byPublic.get(p.sha256).push({album:a.id,p});
  }
  let exactCross=0,recovered=0,wrong=0;
+ const bytesVerified=new Set();
  for(const a of privatePhotos)for(const p of a.images){
   const matches=(byPublic.get(p.sha256)||[]).filter(v=>v.p.bytes===p.bytes&&v.p.width===p.width&&v.p.height===p.height);
   if(!matches.length||matches.some(v=>v.album===a.id))continue;
@@ -67,11 +69,18 @@ for(const model of ['mimmi','yui']){
   if(actual.shaPinnedLocalCopy===true && actual.url?.startsWith('stored-albums/')){
    recovered++;assert.equal(actual.ownerAlbum,undefined);
    assert(matches.some(v=>v.p.url===actual.url),'real file SHA copy not from local index');
+   if(!bytesVerified.has(actual.url)){
+    const physicalFile=fs.readFileSync(path.join(ROOT,model+'-gallery',actual.url));
+    assert.equal(physicalFile.length,actual.bytes,'file byte count did not survive on disk');
+    assert.equal(crypto.createHash('sha256').update(physicalFile).digest('hex'),actual.sha256,
+      'physically committed file SHA mismatch');
+    bytesVerified.add(actual.url);
+   }
   }else wrong++;
  }
  assert.equal(wrong,0,model+' cross-album SHA records still going to Render');
  assert(recovered>0,'real persisted fallback not exercised for '+model);
- console.log('CROSS_ALBUM_EXISTING_PHOTOS_RESCUED',JSON.stringify({model,exact_cross_album_matches:exactCross,recovered,wrong,metadata_only:true}));
+ console.log('CROSS_ALBUM_EXISTING_PHOTOS_RESCUED',JSON.stringify({model,exact_cross_album_matches:exactCross,recovered,wrong,physical_file_sha256_verified:bytesVerified.size}));
 }
 const mGroup={};
 vm.runInNewContext(fs.readFileSync(path.join(ROOT,'mimmi-gallery/album-grouping.js'),'utf8'),{window:mGroup,URL,Set,Map,Number});
