@@ -27,11 +27,10 @@ PRIVATE="https://intersection-originals-free.onrender.com/"
 def verify(browser_type,kind,width,height):
     browser=browser_type.launch(headless=True)
     try:
-        for private,backend_available in ((False,False),(False,True),(True,True)):
+        for private in (False,True):
             page=browser.new_page(viewport={"width":width,"height":height})
             errors=[]
             status_queries=[]
-            health_queries=[]
             dispatched=[]
             job_reads=[]
             clipboard_events=[]
@@ -54,20 +53,6 @@ Object.defineProperty(navigator,"clipboard",{
                 if path=="/browser-app-lab/apps/demand-research/" or (
                     parsed.hostname=="intersection-originals-free.onrender.com" and path=="/"):
                     route.fulfill(status=200,content_type="text/html; charset=utf-8",body=HTML)
-                elif (parsed.hostname=="github.com" and
-                      path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-bundle.yml"):
-                    route.fulfill(status=200,content_type="text/html",
-                                  body='<html><body><p id="workflow-reached">Owner workflow</p></body></html>')
-                elif parsed.hostname=="intersection-originals-free.onrender.com" and path=="/ready":
-                    health_queries.append(1)
-                    if backend_available:
-                        route.fulfill(status=200,content_type="application/json",
-                                      headers={"Access-Control-Allow-Origin":"https://koith.github.io"},
-                                      body='{"ready":true}')
-                    else:
-                        route.fulfill(status=404,content_type="application/json",
-                                      headers={"Access-Control-Allow-Origin":"https://koith.github.io"},
-                                      body='{"error":"not deployed"}')
                 elif path.endswith("/target_archive_client.js"):
                     route.fulfill(status=200,content_type="text/javascript",
                                   body=(ROOT/"target_archive_client.js").read_text("utf-8"))
@@ -110,11 +95,10 @@ Object.defineProperty(navigator,"clipboard",{
             assert response and response.status==200
             page.wait_for_function("""() => {
               const status=document.getElementById("targetArchiveStatus").textContent;
-              return status.includes("계정을 지정하고")||
+              return status.includes("계정을 지정하면")||
                      status.includes("연결됨 · 계정 주소");
             }""")
             assert len(status_queries)==1
-            assert not health_queries,"page load must not wake a sleeping Render server"
             button=page.locator("#targetArchiveSubmit")
             assert button.is_enabled(),"empty account must still allow helpful feedback"
             button.click()
@@ -150,7 +134,7 @@ Object.defineProperty(navigator,"clipboard",{
                     "?tab=archives&account=bluesky-"+"a"*40)
                 assert button.is_enabled(),"verified backup should not lock the button"
             else:
-                assert button.inner_text()=="백업 시작"
+                assert button.inner_text()=="교집합에서 계정 백업"
                 page.locator("#targetArchivePlatform").select_option("mastodon")
                 page.locator("#targetArchiveAccount").fill("qa@example.social")
                 assert button.is_enabled()
@@ -162,26 +146,20 @@ Object.defineProperty(navigator,"clipboard",{
                 page.locator("#targetArchiveAccount").fill(
                     "https://bsky.app/profile/qa-example.bsky.social")
                 button.click()
-                if backend_available:
-                    page.wait_for_url(lambda url:url.startswith(PRIVATE),timeout=12000)
-                    assert not dispatched,"cross-origin navigation must not schedule a backup"
-                    page.locator("#targetArchiveAccount").wait_for(state="visible")
-                    assert page.locator("#targetArchiveAccount").input_value()==(
-                        "https://bsky.app/profile/qa-example.bsky.social")
-                    assert page.locator("#targetArchiveSubmit").inner_text()=="인증 후 백업 시작"
-                    assert "archive_account" not in page.url,"account URL must be cleared once restored"
-                else:
-                    page.wait_for_url(
-                        "https://github.com/koith/browser-app-lab/actions/workflows/"
-                        "intersection-target-account-bundle.yml",timeout=12000)
-                    assert page.locator("#workflow-reached").is_visible()
-                    assert not dispatched,"fallback must not claim a queued backup"
-                assert len(health_queries)==1,"one availability probe per click"
+                page.wait_for_url(lambda url:url.startswith(PRIVATE),timeout=12000)
+                assert not dispatched,"opening the private app must not itself queue a backup"
+                assert not clipboard_events,"no manual clipboard workaround"
+                page.locator("#targetArchiveAccount").wait_for(state="visible")
+                assert page.locator("#targetArchiveAccount").input_value()==(
+                    "https://bsky.app/profile/qa-example.bsky.social")
+                assert page.locator("#targetArchiveSubmit").inner_text()=="전용 보관함 인증 필요"
+                assert "archive_account" not in page.url,"selection removed from URL after restore"
+                assert not any("github.com" in event for event in clipboard_events)
             assert not errors,errors
             assert page.evaluate(
                 "document.documentElement.scrollWidth<=window.innerWidth+2")
             print("TARGET_BACKUP_BUTTON_BROWSER_PASS",kind,
-                  "private" if private else ("public_ready" if backend_available else "public_fallback"),
+                  "private" if private else "public_to_private_app",
                   "valid_control_and_dispatch=YES")
             page.close()
     finally:
