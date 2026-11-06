@@ -82,6 +82,23 @@
   min-height:22px!important;padding:2px 5px!important;
  }
 }
+/* R15 iPhone portrait: the native dice occupy the centre of the
+ * short board-area near y=496. A centred result button overlaps the
+ * original dice, but moving it to fixed viewport-bottom escapes the
+ * original board, breaks hit testing and causes WebKit taps to time out.
+ * Keep the SAME clickable button INSIDE the native board, under the
+ * metal podium (as in 2004), aligned to the right empty margin instead
+ * of covering the source dice; landscape retains its proven fixed rule.
+ * This is only a responsive WEB adaptation, not original 3D geometry. */
+@media (orientation:portrait) and (max-width:650px){
+ #app.app-classic-dice #game #board-area>.leaf-native-battle-actions{
+  position:absolute!important;
+  left:auto!important;
+  right:4px!important;
+  transform:none!important;
+  bottom:4px!important;
+ }
+}
 /* Round 13 (2026-11-05) measured defect: on a short landscape phone
  * (iPhone 13 landscape, 750x342 CSS px) #board-area is 344px tall below a
  * 29px title strip, so the bottom-anchored tray landed at y=340..369 and
