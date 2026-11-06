@@ -228,24 +228,49 @@
     // missing instead of looking broken on touch devices.
     submit.disabled=submitting;
     submit.textContent=gatewayReady?"테라박스 백업 시작":
-      (isPrivateGateway?"인증 후 백업 시작":"전용 서버에서 백업 시작");
-    workflow.hidden=true;
+      (isPrivateGateway?"인증 후 백업 시작":"백업 시작");
+    // Keep a usable fallback until the independent Render server is deployed.
+    workflow.hidden=gatewayReady||isPrivateGateway;
+    workflow.textContent="GitHub에서 직접 실행 (전용 서버 연결 전)";
   }
-  function openPrivateBackup(){
+  async function openPrivateBackup(){
     if(isPrivateGateway){
       message.textContent="보관 서버 인증이 필요합니다. 전용 접근 주소에서 로그인한 뒤 계정 백업을 누르세요.";
       return;
     }
-    // On Pages, navigate in the SAME tab (iOS in-app browsers block popups).
-    // No token, capability, or GitHub workflow credentials cross this link.
-    // The private origin pre-fills the form. Only a direct same-origin
-    // authenticated POST after an operator click can dispatch the job.
-    const url=new URL(PRIVATE_GATEWAY+"/");
-    url.searchParams.set("tab","accounts");
-    url.searchParams.set("archive_platform",platform.value);
-    url.searchParams.set("archive_account",account.value.trim());
-    message.textContent="계정을 선택한 상태로 비공개 보관 서버를 엽니다. 이 단계에서는 백업이 아직 시작되지 않습니다.";
-    window.location.assign(url.href);
+    // Probe ONLY after a deliberate backup click. A background probe on every
+    // Pages visit would unnecessarily wake a sleeping free Render instance.
+    submitting=true;refreshButton();
+    message.textContent="전용 보관 서버 연결을 확인하고 있습니다…";
+    const controller=new AbortController();
+    const timeout=window.setTimeout(()=>controller.abort(),4500);
+    let available=false;
+    try{
+      const response=await fetch(PRIVATE_GATEWAY+"/health",{
+        mode:"cors",credentials:"omit",cache:"no-store",signal:controller.signal});
+      if(response.ok){
+        const status=await response.json();
+        available=status.alive===true;
+      }
+    }catch{/* Missing, sleeping or network-blocked Render server. */}
+    finally{window.clearTimeout(timeout);}
+    if(available){
+      // Same-tab navigation works on iOS WebViews. No secrets cross origins;
+      // only an authenticated POST from the operator UI starts the backup.
+      const url=new URL(PRIVATE_GATEWAY+"/");
+      url.searchParams.set("tab","accounts");
+      url.searchParams.set("archive_platform",platform.value);
+      url.searchParams.set("archive_account",account.value.trim());
+      message.textContent="전용 서버로 이동합니다. 백업은 아직 시작되지 않았습니다.";
+      window.location.assign(url.href);
+      return;
+    }
+    // A not-yet-provisioned gateway must not break the older working manual
+    // GitHub workflow. It will require a signed-in operator to press Run.
+    message.textContent="전용 서버에 연결할 수 없어 GitHub 백업 실행 화면을 엽니다. 아직 백업이 시작된 것은 아닙니다.";
+    try{await navigator.clipboard?.writeText(account.value.trim());}catch{}
+    window.location.assign(workflow.href);
+    submitting=false;refreshButton();
   }
   function restoreSelectedAccount(){
     if(!isPrivateGateway)return;
@@ -294,7 +319,7 @@
       gatewayReady=false;
       message.textContent=isPrivateGateway?
         "전용 서버 인증이 확인되지 않았습니다. 비공개 접근 주소로 접속한 뒤 계정 백업을 시작하세요.":
-        "계정을 지정하면 전용 보관 서버로 이동합니다. GitHub Actions 화면에서 다시 입력할 필요가 없습니다.";
+        "계정을 지정하고 백업 시작을 누르세요. 전용 서버 연결을 확인한 뒤, 준비되지 않았다면 기존 GitHub 백업 실행 화면을 엽니다.";
     }finally{
       refreshButton();
     }
@@ -318,7 +343,7 @@
       return;
     }
     account.removeAttribute("aria-invalid");
-    if(!gatewayReady){openPrivateBackup();return;}
+    if(!gatewayReady){void openPrivateBackup();return;}
     const value=account.value.trim();
     submitting=true;
     refreshButton();
