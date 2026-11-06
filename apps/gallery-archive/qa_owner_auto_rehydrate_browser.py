@@ -58,9 +58,18 @@ def exercise(browser,model,album,index):
         photo=page.locator("#detailphotos .photo").nth(index)
         image=photo.locator("img")
         photo.scroll_into_view_if_needed(timeout=20000)
-        page.wait_for_function("""idx=>ownerRecoveryPending.size>0 &&
-          !!document.querySelectorAll('#detailphotos .photo img')[idx]?.dataset.owner
-        """,arg=index,timeout=45000)
+        page.wait_for_function("""()=>
+          [...ownerRecoveryPending].some(im=>im.isConnected&&
+            !!im.closest('#detailphotos')&&!!im.dataset.owner)
+        """,timeout=45000)
+        # The intersection observer can have multiple owner photos in flight;
+        # a fixed grid index is not necessarily the image whose 503 queued a
+        # retry. Prove restoration of the EXACT failed image, not a neighbor.
+        retry_index=page.evaluate("""() => {
+          const all=[...document.querySelectorAll('#detailphotos .photo img')];
+          return all.findIndex(im=>ownerRecoveryPending.has(im)&&im.dataset.owner);
+        }""")
+        assert retry_index>=0,(model,"no pending visible owner photo",phase)
         assert phase["errors"]>=1,(model,"mocked 503 not exercised",phase)
         # Backend becomes ready without a page refresh. The user refocuses
         # the existing tab and the same tile must repaint automatically.
@@ -72,11 +81,12 @@ def exercise(browser,model,album,index):
                  im.naturalHeight===480 && !im.hidden &&
                  !im.closest('.photo')?.classList.contains('broken-source') &&
                  im.closest('.photo')?.dataset.imageState!=='failed';
-        }""",arg=index,timeout=30000)
+        }""",arg=retry_index,timeout=30000)
         assert phase["recoveries"]>=1,(model,"no original retry after healthy status",phase)
         assert phase["readiness"]==0,(model,"global readiness must not be polled",phase)
         print("GALLERY_OWNER_AUTO_RECOVERY_503_TO_200_MOCK_UI_PASS",json.dumps({
             "model":model,"album":album,"browser":browser.browser_type.name,
+            "verified_failed_owner_tile_index":retry_index,
             "original_mock_errors":phase["errors"],
             "unnecessary_global_readiness_polls":phase["readiness"],
             "original_mock_recoveries":phase["recoveries"],
