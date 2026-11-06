@@ -6,6 +6,33 @@
 'use strict';
 window.SavedGalleryPhotoUnion=(()=>{
  function join(sources){
+  // A byte-identical owner original can exist in Pages under a *different*
+  // historic album/edition. Match only a real committed static file and all
+  // SHA + byte-count + decoded dimensions, never an arbitrary research URL.
+  const physicalBySha=new Map();
+  for(const album of (sources[0]||[])){
+   if(!album||typeof album.id!=='string')continue;
+   for(const p of (album.images||[])){
+    if(!p||!/^[a-f0-9]{64}$/.test(p.sha256||'')||
+       !Number.isSafeInteger(p.bytes)||p.bytes<1||
+       !Number.isSafeInteger(p.width)||p.width<160||
+       !Number.isSafeInteger(p.height)||p.height<160)continue;
+    if(typeof p.url!=='string'||!/^stored-albums\/[a-z0-9-]{2,110}\/[a-zA-Z0-9._-]+\.(?:jpe?g|png|webp|avif)$/.test(p.url)||
+       !p.url.startsWith('stored-albums/'+album.id+'/'))continue;
+    if(!physicalBySha.has(p.sha256))physicalBySha.set(p.sha256,{...p,physicalAlbumId:album.id});
+   }
+  }
+  function preferPhysical(p){
+   if(!p||!p.ownerAlbum)return p;
+   const local=physicalBySha.get(p.sha256);
+   if(!local||local.bytes!==p.bytes||local.width!==p.width||local.height!==p.height)return p;
+   const copy={...p,url:local.url,originalAlbumId:local.physicalAlbumId,
+               shaPinnedLocalCopy:true};
+   delete copy.ownerAlbum;
+   delete copy.ownerHosted;
+   // Use the physically committed exact-SHA file, not a broken /api/media.
+   return copy;
+  }
   const albums=new Map();
   const shaPositionByAlbum=new Map();
   for(const group of sources){
@@ -20,7 +47,8 @@ window.SavedGalleryPhotoUnion=(()=>{
     const result=albums.get(album.id);
     const count=Number(album.expected)||0;
     if(count>(Number(result.expected)||0))result.expected=count;
-    for(const photo of album.images){
+    for(const unverifiedPhoto of album.images){
+     const photo=preferPhysical(unverifiedPhoto);
      if(!photo||!/^[a-f0-9]{64}$/.test(photo.sha256||''))continue;
      const known=shaPositionByAlbum.get(album.id).get(photo.sha256);
      if(known!==undefined){
