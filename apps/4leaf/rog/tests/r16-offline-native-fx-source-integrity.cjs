@@ -56,7 +56,7 @@ for(const [id,count] of reviewed){
 const bodyManifestText=load('original/OBS/referenced/chr-bodies-manifest.js');
 const bodyPrefix='window.ORIGINAL_LEAF_RECOVERED_CHR_BODIES=';
 assert.ok(bodyManifestText.includes(bodyPrefix),'original CHR manifest missing');
-const bodies=JSON.parse(bodyManifestText.split(bodyPrefix)[1].trim().replace(/;\\s*$/,''));
+const bodies=JSON.parse(bodyManifestText.split(bodyPrefix)[1].trim().replace(/;\s*$/,''));
 let bodyFrames=0;
 for(const id of ['1026','1029']){
  const original='obs/'+id;
