@@ -191,8 +191,516 @@ function validImages(a){
   if(p.vaultAlbum)return p.url==='vault:'+p.vaultModel+':'+p.vaultAlbum+':'+(p.storageNumber??p.number)&&/^[a-f0-9]{64}$/.test(p.sha256)&&Number.isSafeInteger(p.bytes)&&p.bytes>0;
   if(p.ownerAlbum)return p.ownerAlbum===a.id&&p.url==='owner:'+a.id+':'+(p.storageNumber??p.number)&&/^[a-f0-9]{64}$/.test(p.sha256)&&Number.isSafeInteger(p.bytes)&&p.bytes>0;
   if(typeof p.url!=='string'||typeof a.id!=='string')return false;
+  const physicalAlbum=p.shaPinnedLocalCopy===true?p.originalAlbumId:a.id;
   return /^[a-z0-9][a-z0-9-]{1,100}$/.test(a.id)
-   &&new RegExp('^stored-albums/'+a.id+'/[a-zA-Z0-9._-]+\\.(?:jpe?g|png|webp|avif)$').test(p.url)
+   &&typeof physicalAlbum==='string'
+   &&/^[a-z0-9-]{2,110}$/.test(physicalAlbum)
+   &&new RegExp('^stored-albums/'+physicalAlbum+'/[a-zA-Z0-9._-]+\\.(?:jpe?g|png|webp|avif)
+   &&/^[a-f0-9]{64}$/.test(p.sha256)
+   &&Number.isSafeInteger(p.bytes)&&p.bytes>0;
+ });
+}
+function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
+function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return YuiPublishers.groups(entries,publisherRegistry,YuiLabels.describe,validImages)}
+function setMode(m,publisher=null){detailRenderGeneration++;mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;const isPublisher=mode==='publishers';$('browse-mode').textContent=isPublisher?'발행처':'화보';$('browse-toggle').dataset.mode=isPublisher?'publishers':'albums';$('browse-toggle').setAttribute('aria-pressed',String(isPublisher));$('browse-toggle').setAttribute('aria-label',isPublisher?'발행처 목록 · 화보 목록으로 전환':'화보 목록 · 발행처 목록으로 전환');render()}
+function publisherCard(group){
+ const asset=YuiPublishers.logo(group);
+ const label=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고';
+ const name=esc(group.name);
+ const wordmark='<span class="publisher-wordmark" role="img" aria-label="'+name+' — 로고 미확인">'+name+'</span>';
+ // Even a file that was verified when committed may fail a browser request.
+ // Never expose a broken-logo icon or substitute an unrelated brand image.
+ const image=asset?'<img src="'+esc(asset)+'" alt="'+name+label+'"><span class="publisher-wordmark" hidden role="img" aria-label="'+name+' — 로고 로딩 실패">'+name+'</span>':wordmark;
+ return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+name+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+name+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>';
+}
+// Publisher logo errors must fall back to verified text, not to an unverified
+// photo or an unrelated company logo. Keep other image error handling intact.
+document.addEventListener('error',event=>{
+ const img=event.target;
+ if(!(img instanceof HTMLImageElement))return;
+ const card=img.closest('.publisher');
+ if(!card)return;
+ const wordmark=card.querySelector('.publisher-wordmark');
+ if(!wordmark)return;
+ wordmark.hidden=false;
+ img.remove();
+},true);
+function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
+function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
+// Gallery image failures now refer to stored local/private bytes, not source hosts.
+const failedRestrictedImages=new Set();
+// Automatic recovery is local-first and budgeted: retry only failed,
+// currently visible owner photos. No periodic backend health polling. A cold
+// Render gateway or a single missing photo cannot hold every other album blank.
+const ownerRecoveryPending=new Set();
+const ownerRecoveryState=new WeakMap();
+let ownerRecoveryTimer=null;
+const OWNER_RECOVERY_MAX_ATTEMPTS=3;
+const OWNER_RECOVERY_COOLDOWN_MS=45000;
+function queueOwnerImageRecovery(img){
+ const p=ownerPhotoIndex.get(img?.dataset.owner||'');
+ if(!p||!img.isConnected||!img.closest('.photo'))return;
+ const s=ownerRecoveryState.get(img)||{attempts:0,last:0};
+ if(s.attempts>=OWNER_RECOVERY_MAX_ATTEMPTS)return;
+ ownerRecoveryPending.add(img);
+ if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,20000);
+}
+function ownerRetryVisible(img){
+ const box=img.getBoundingClientRect();
+ return box.bottom>=-120&&box.top<=innerHeight+200;
+}
+async function retryOwnerImagesIfReady(){
+ ownerRecoveryTimer=null;
+ for(const img of ownerRecoveryPending)
+  if(!img.isConnected||!img.closest('.photo'))ownerRecoveryPending.delete(img);
+ if(!ownerRecoveryPending.size||document.hidden||navigator.onLine===false)return;
+ let started=0,waiting=false;
+ const now=Date.now();
+ for(const img of [...ownerRecoveryPending]){
+  if(!ownerRetryVisible(img))continue;
+  const s=ownerRecoveryState.get(img)||{attempts:0,last:0};
+  if(s.attempts>=OWNER_RECOVERY_MAX_ATTEMPTS){
+   ownerRecoveryPending.delete(img);continue;
+  }
+  if(now-s.last<OWNER_RECOVERY_COOLDOWN_MS){waiting=true;continue;}
+  if(started>=2){waiting=true;break;}
+  const p=ownerPhotoIndex.get(img.dataset.owner||'');
+  ownerRecoveryPending.delete(img);
+  if(!p)continue;
+  started++;
+  s.attempts++;s.last=now;ownerRecoveryState.set(img,s);
+  // The existing image load/error listeners own the final visual status.
+  // Never show a successful-looking card until naturalWidth proves decode.
+  img.dataset.ownerVariant='original';
+  YuiPrivate.asset(p,'original').then(url=>{
+   if(!img.isConnected)return;
+   img.hidden=false;
+   img.removeAttribute('src');
+   img.src=url+(url.includes('?')?'&':'?')+'owner-retry='+s.attempts;
+  }).catch(()=>queueOwnerImageRecovery(img));
+ }
+ // One bounded cooldown for visible failures; offscreen work waits for scroll.
+ if(waiting||started&&ownerRecoveryPending.size)
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,OWNER_RECOVERY_COOLDOWN_MS);
+}
+function refreshOwnerFailuresOnFocus(){
+ if(document.hidden||!ownerRecoveryPending.size)return;
+ if(ownerRecoveryTimer!==null)clearTimeout(ownerRecoveryTimer);
+ ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,150);
+}
+document.addEventListener('visibilitychange',refreshOwnerFailuresOnFocus);
+window.addEventListener('focus',refreshOwnerFailuresOnFocus);
+window.addEventListener('online',refreshOwnerFailuresOnFocus);
+window.addEventListener('scroll',()=>{
+ if(ownerRecoveryPending.size&&ownerRecoveryTimer===null)
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,400);
+},{passive:true});
+
+function imageFailureText(){return '저장된 사진을 불러오지 못했습니다. 보관 파일과 연결 상태를 확인해 주세요.'}
+function updateImageNotice(){const count=$('detailphotos').querySelectorAll('.photo[data-image-state="failed"]').length;const notice=$('detail-media-status');notice.hidden=!count;notice.textContent=count?count+'장 로딩 실패 · 저장 파일을 확인해 주세요':''}
+function imageState(image,failed){
+ const container=image.closest('.photo,.album,.media-frame');if(!container)return;
+ if(failed){container.dataset.imageState='failed';container.dataset.imageError='저장된 파일 로딩 실패';queueOwnerImageRecovery(image)}
+ else{delete container.dataset.imageState;delete container.dataset.imageError;failedRestrictedImages.delete(image.src);ownerRecoveryPending.delete(image)}
+ if(image.id==='full')$('media-status').textContent=failed?imageFailureText(image.src):'';
+ updateImageNotice();
+}
+document.addEventListener('error',e=>{
+ const img=e.target;
+ if(!(img instanceof HTMLImageElement))return;
+ // If an exact-byte public saved cover is unavailable, use the matching
+ // authenticated private cover (then the existing original fallback).
+ if(img.dataset.owner&&img.dataset.ownerVariant==='local'){
+  const photo=ownerPhotoIndex.get(img.dataset.owner);
+  if(photo){
+   img.dataset.ownerVariant='cover';
+   YuiPrivate.asset(photo,'cover').then(url=>{
+    if(img.isConnected){img.hidden=false;img.removeAttribute('src');img.src=url}
+   }).catch(()=>{if(img.isConnected)imageState(img,true)});
+   return;
+  }
+ }
+ // For private archived tiles, a broken preview is not evidence that the
+ // separately SHA-verified original is unavailable.
+ if(img.dataset.owner&&img.dataset.ownerVariant!=='original'){
+  const photo=ownerPhotoIndex.get(img.dataset.owner);
+  if(photo&&photo.preview){
+   img.dataset.ownerVariant='original';
+   YuiPrivate.asset(photo,'original').then(url=>{
+    if(!img.isConnected)return;
+    img.hidden=false;img.removeAttribute('src');img.src=url;
+   }).catch(()=>{if(img.isConnected)imageState(img,true)});
+   return;
+  }
+ }
+ imageState(img,true);
+},true);
+document.addEventListener('load',e=>{if(e.target instanceof HTMLImageElement)imageState(e.target,false)},true);
+function photoRotation(p){return [90,270].includes(p?.display_rotation)?p.display_rotation:0}
+function rotationAttributes(p){const angle=photoRotation(p);return angle?' data-rotation="'+angle+'" style="--photo-rotation:'+angle+'deg"':''}
+function card(a,hasImages){
+ const owned=stored.find(x=>x.id===a.id)||a;
+ const p=validImages(owned),configuration=albumCovers[owned.id],selected=p.find(p=>p.sha256&&p.sha256===configuration?.sha256)||p[0],cover=selected?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
+ const label=getName(a),labels=YuiLabels.describe(owned),shortTitle=YuiLabels.coverTitle({...owned,title:label});
+ const focused=selected?.sha256&&selected.sha256===configuration?.sha256;
+ const position=focused&&Array.isArray(configuration.position)&&configuration.position.length===2&&configuration.position.every(n=>Number.isFinite(n)&&n>=0&&n<=100)?configuration.position:[50,20];
+ const style='object-position:'+position[0]+'% '+position[1]+'%;object-fit:cover';
+ const n=count?(expected!=null&&expected!==count?count+' / '+expected+'장':count+'장'):(expected!=null?expected+'장 · 미확보':'미확보 · 장수 미확인');
+ const cloudCover=(selected?.ownerAlbum||selected?.vaultAlbum)?selected:null;
+ // Use the SAME SHA and byte/dimension-verified public stored file before
+ // waiting for Render; keep the owner URL for original/full-size navigation.
+ const localCopy=cloudCover?localPreviewIndex.get(localPhotoKey(owned.id,selected)):null;
+ const img=cloudCover
+  ?(localCopy
+    ?'<img loading="lazy" referrerpolicy="no-referrer" data-owner="'+esc(cloudCover.url)+'" data-owner-variant="local" src="'+esc(localCopy.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">'
+    :'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">')
+  :cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
+ return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
+}
+// Exact, same-album local archive bytes can paint detail tiles without waking
+// the remote TeraBox gateway. Every fallback keeps the owner media key.
+function localPhotoKey(id,p){return [id,p.sha256,p.bytes,p.width,p.height].join('|')}
+// The full-screen viewer may read committed photo bytes immediately only
+// when the same album, SHA-256, byte length and dimensions all match.
+function exactSavedViewerCopy(p){
+ return p?.ownerAlbum?localPreviewIndex.get(localPhotoKey(p.albumId,p))||null:null;
+}
+function rebuildLocalPreviewIndex(){
+ const next=new Map();
+ for(const album of localStored){
+  const id=canonicalId(album.id);
+  for(const p of validImages(album)){
+   const key=localPhotoKey(id,p);
+   if(!next.has(key))next.set(key,p);
+  }
+ }
+ localPreviewIndex=next;
+}
+function photoHTML(p,i){
+ const local=p.ownerAlbum?localPreviewIndex.get(localPhotoKey(p.albumId,p)):null;
+ // Avoid front-loading very large full originals; remote WebP preview remains
+ // preferable when a static SHA-identical copy is too expensive for mobile.
+ const source=local&&local.bytes<=700000
+  ?'data-owner="'+esc(p.url)+'" data-owner-variant="local" src="'+esc(local.url)+'"'
+  :(p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url)+'"':'src="'+esc(p.url)+'"';
+ return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" '+source+' alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>';
+}
+const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerPhotoIndex.get(e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요';queueOwnerImageRecovery(e.target)})}}},{rootMargin:'64px'});
+function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
+// Retain the same in-flight image element as the complete album renderer takes
+// over. Recreating <img> can cancel an already downloading Pages thumbnail.
+// Only an exact chosen SHA AND identical saved URL may survive the handoff.
+function adoptFastCoverImages(grid,oldCards){
+ if(!oldCards.size)return;
+ for(const card of grid.querySelectorAll('button.album[data-id]')){
+  const previous=oldCards.get(card.dataset.id);
+  if(!previous?.image||!previous.sha)continue;
+  const next=card.querySelector('img'),old=previous.image;
+  if(!next||!next.getAttribute('src')||next.getAttribute('src')!==old.getAttribute('src'))continue;
+  const a=stored.find(a=>a.id===card.dataset.id);
+  if(!a)continue;
+  const imgs=validImages(a),chosen=imgs.find(p=>p.sha256===albumCovers[a.id]?.sha256)||imgs[0];
+  if(chosen?.sha256!==previous.sha)continue;
+  for(const attr of [...old.attributes])if(attr.name!=='src')old.removeAttribute(attr.name);
+  for(const attr of [...next.attributes])if(attr.name!=='src')old.setAttribute(attr.name,attr.value);
+  old.dataset.fastPreserved='1';
+  next.replaceWith(old);
+ }
+}
+let photoGridObserver=null,photoGridGeneration=0;
+// Render only the first screen of the potentially thousands-of-photos view.
+// Extend on proximity to the bottom, without detaching already decoded tiles.
+function renderPhotoGridProgressively(visible){
+ const grid=$('photogrid'),generation=photoGridGeneration;
+ grid.replaceChildren();
+ function append(offset){
+  if(generation!==photoGridGeneration||mode!=='photos')return;
+  const batch=visible.slice(offset,offset+64);
+  const from=grid.children.length;
+  grid.insertAdjacentHTML('beforeend',batch.map((p,i)=>photoHTML(p,offset+i)).join(''));
+  for(let i=from;i<grid.children.length;i++){
+   const button=grid.children[i];
+   button.onclick=()=>openViewer(visible,Number(button.dataset.i));
+  }
+  observeOwner();
+  if(offset+batch.length>=visible.length)return;
+  const sentinel=document.createElement('div');
+  sentinel.className='photo-grid-sentinel';
+  sentinel.setAttribute('aria-hidden','true');
+  sentinel.style.cssText='grid-column:1/-1;height:1px;pointer-events:none';
+  grid.appendChild(sentinel);
+  const observer=new IntersectionObserver(entries=>{
+   if(!entries.some(entry=>entry.isIntersecting))return;
+   observer.disconnect();
+   if(generation!==photoGridGeneration)return;
+   sentinel.remove();
+   append(offset+batch.length);
+  },{rootMargin:'700px'});
+  photoGridObserver=observer;
+  observer.observe(sentinel);
+ }
+ append(0);
+}
+function render(){
+ photoGridGeneration++;photoGridObserver?.disconnect();photoGridObserver=null;
+ const q=$('search').value.toLocaleLowerCase().trim();
+ const items=available(),all=mode==='photos'?items.flatMap(photosFor):[],match=s=>String(s).toLocaleLowerCase().includes(q);
+ const publisherIndex=mode==='publishers'&&!activePublisher;
+ $('publishergrid').hidden=!publisherIndex;$('albumgrid').hidden=mode==='photos'||publisherIndex;$('photogrid').hidden=mode!=='photos';$('nothing').hidden=true;
+ if(publisherIndex){const groups=publisherGroups().filter(g=>match(g.name)||g.albums.some(a=>match(getName(a))));$('publishergrid').innerHTML=groups.map(publisherCard).join('');$('publishergrid').querySelectorAll('[data-publisher]').forEach(b=>b.onclick=()=>openPublisher(b.dataset.publisher));$('total').textContent=groups.length+' publishers';$('nothing').hidden=groups.length>0;
+ }else if(mode==='photos'){
+  const visible=all.filter(p=>match(p.name));renderPhotoGridProgressively(visible);
+  $('total').textContent=visible.length+' photos';
+  $('nothing').hidden=visible.length>0;
+ }else{
+  const group=activePublisher?publisherGroups().find(g=>g.id===activePublisher):null;
+  const src=group?group.albums:mode==='all'?catalog:items;
+  if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
+  const matched=src.filter(a=>match(getName(a))).sort((a,b)=>YuiPublishers.compareNames(YuiLabels.coverTitle(a),YuiLabels.coverTitle(b))||YuiPublishers.compareNames(a.id,b.id));
+  const grid=$('albumgrid'),fastCovers=new Map([...grid.querySelectorAll('a[data-fast-cover="1"]')].map(a=>[a.dataset.id,{image:a.querySelector('img'),sha:a.dataset.fastSha}]));
+   grid.innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===a.id)||a).length>0)).join('');
+   adoptFastCoverImages(grid,fastCovers);
+  $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const a=stored.find(a=>a.id===b.dataset.id);if(a&&validImages(a).length)openAlbum(a.id)});
+  $('total').textContent=matched.length+' albums';
+  $('nothing').hidden=matched.length>0;
+ }
+ observeOwner();
+}
+function openAlbum(id,record=true){
+ photoGridObserver?.disconnect();photoGridObserver=null;
+ id=canonicalId(id);
+ const a=stored.find(x=>x.id===id);
+ if(!a||!validImages(a).length)return;
+ if(record)remember({album:id,mode,publisher:activePublisher});
+ const photos=photosFor(a),generation=++detailRenderGeneration;
+ detailAlbum=a;document.body.classList.add('detail-view');$('browse').hidden=true;$('detail').hidden=false;
+ $('albumname').textContent=getName(a);
+ $('albumtotal').textContent=photos.length+'장'+(a.expected&&photos.length<a.expected?' / '+a.expected+'장 · 일부':'');
+ const grid=$('detailphotos');grid.replaceChildren();
+ // Attach the first visible 48 images immediately; append the remainder
+ // in animation frames without detaching existing images or touch targets.
+ function append(offset){
+  if(generation!==detailRenderGeneration||detailAlbum?.id!==id||$('detail').hidden)return;
+  const end=Math.min(offset+48,photos.length),begin=grid.children.length;
+  grid.insertAdjacentHTML('beforeend',photos.slice(offset,end).map((p,i)=>photoHTML(p,offset+i)).join(''));
+  for(let i=begin;i<grid.children.length;i++){
+   const node=grid.children[i];
+   node.onclick=()=>openViewer(photos,Number(node.dataset.i));
+   const img=node.querySelector('img[data-owner]');
+   if(img)ownerObserver.observe(img);
+  }
+  updateImageNotice();
+  if(end<photos.length)requestAnimationFrame(()=>append(end));
+ }
+ append(0);
+ window.scrollTo(0,0);
+}
+function openViewer(list,i,record=true){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;const p=list[viewerIndex];if(record)remember({album:p.albumId,photo:p.number,fromPhotos:!detailAlbum,mode,publisher:activePublisher});$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer();$('close').focus({preventScroll:true})}
+let viewerGeneration=0,routeTimer=null,historyEntry=0;const viewerRoutes=new Map();
+function layoutViewer(){
+ const p=viewerList[viewerIndex],angle=photoRotation(p),image=$('full'),frame=image.parentElement;
+ image.style.cssText='';frame.style.cssText='';
+ if(!angle)return;
+ const scale=Math.min(1,Math.min(innerWidth,1800)/p.height,Math.max(1,innerHeight-71)/p.width);
+ frame.style.width=p.height*scale+'px';frame.style.height=p.width*scale+'px';
+ Object.assign(image.style,{position:'absolute',left:'50%',top:'50%',width:p.width*scale+'px',height:p.height*scale+'px',maxWidth:'none',maxHeight:'none',transform:'translate(-50%,-50%) rotate('+angle+'deg)'});
+}
+window.addEventListener('resize',()=>{if($('lightbox').classList.contains('open'))layoutViewer()});
+function showViewer(){
+ const p=viewerList[viewerIndex];if(!p)return;
+ const generation=++viewerGeneration;
+ layoutViewer();
+ const image=$('full'),status=$('media-status'),frame=image.parentElement;
+ const localCopy=exactSavedViewerCopy(p);
+ delete frame.dataset.imageState;
+ status.textContent='불러오는 중';
+ image.removeAttribute('src');image.hidden=true;image.referrerPolicy='no-referrer';
+ let variant=localCopy?'local':'original';
+ function fail(){
+  if(generation!==viewerGeneration)return;
+  if(p.ownerAlbum&&variant==='local'){
+   variant='original';
+   status.textContent='기존 보관 원본 연결 확인 중';
+   YuiPrivate.asset(p,'original').then(url=>{
+    if(generation!==viewerGeneration)return;
+    image.removeAttribute('src');image.src=url;$('original').href=url;
+   }).catch(error=>{if(generation===viewerGeneration){frame.dataset.imageState='failed';status.textContent=error.message}});
+   return;
+  }
+  if(p.ownerAlbum&&p.preview&&variant==='original'){
+   variant='preview';
+   status.textContent='원본 연결 오류 · 보관 미리보기 확인 중';
+   YuiPrivate.asset(p,'preview').then(url=>{
+    if(generation!==viewerGeneration)return;
+    delete frame.dataset.imageState;image.src=url;$('original').href=url;
+   }).catch(error=>{if(generation===viewerGeneration){frame.dataset.imageState='failed';status.textContent=error.message}});
+   return;
+  }
+  image.hidden=true;frame.dataset.imageState='failed';
+  status.textContent=imageFailureText();
+ }
+ image.onload=()=>{
+  if(generation!==viewerGeneration)return;
+  if(image.naturalWidth<100){fail();return}
+  image.hidden=false;delete frame.dataset.imageState;status.textContent='';
+ };
+ image.onerror=fail;
+ if(localCopy){
+  image.src=localCopy.url;$('original').href=localCopy.url;
+ }else if(p.ownerAlbum||p.vaultAlbum){
+  (p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p,'original')).then(url=>{
+   if(generation===viewerGeneration){image.src=url;$('original').href=url}
+  }).catch(error=>{if(generation===viewerGeneration){frame.dataset.imageState='failed';status.textContent=error.message}});
+ }else if(failedRestrictedImages.has(p.url)){
+  frame.dataset.imageState='failed';status.textContent=imageFailureText();
+ }else{image.src=p.url;$('original').href=p.url}
+ image.alt=p.name+' · '+p.number;
+ $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
+ if((p.ownerAlbum||p.vaultAlbum)&&!localCopy)$('original').removeAttribute('href');
+}
+function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
+function closeViewer(){if(history.state?.yui&&history.state.photo)goBack();else hideViewer()}
+function step(n){
+ viewerIndex=(viewerIndex+n+viewerList.length)%viewerList.length;showViewer();
+ if(history.state?.yui){const state={...history.state,photo:viewerList[viewerIndex].number,album:viewerList[viewerIndex].albumId};viewerRoutes.set(state.key,state);clearTimeout(routeTimer);
+ // WebKit rate-limits History API writes. Rapid swipes must keep rendering;
+ // remember the last photo immediately, and update its URL only after a pause.
+ routeTimer=setTimeout(()=>{if($('lightbox').classList.contains('open')&&history.state?.key===state.key)history.replaceState(state,'',routeURL(state))},1000)}
+}
+function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.album);if(s.photo)q.set('photo',s.photo);if(s.fromPhotos)q.set('from','photos');if(s.publisher)q.set('publisher',s.publisher);if(s.mode&&s.mode!=='albums')q.set('view',s.mode);return location.pathname+location.search+(q.size?'#'+q:'')}
+function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={yui:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
+function goBack(){if(history.state?.yui&&history.state.depth>0)history.back();else{const state={yui:true,depth:0,mode:activePublisher?'publishers':'albums',publisher:history.state?.album?activePublisher:null,scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
+function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums',s.publisher);if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
+// Safari can restore a page from back-forward cache with stale in-memory UI.
+// Reconstruct the saved route from the URL when no typed history.state exists.
+function routeFromLocation(){
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);
+ const album=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));
+ return {yui:true,depth:0,mode:q.get('view')||'albums',
+   publisher:q.get('publisher'),album,photo:q.get('photo'),
+   fromPhotos:q.get('from')==='photos',scroll:0};
+}
+window.addEventListener('popstate',()=>applyRoute(history.state?.yui?history.state:routeFromLocation()));
+window.addEventListener('pageshow',event=>{
+ if(event.persisted&&catalog.length)applyRoute(history.state?.yui?history.state:routeFromLocation());
+});
+$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
+$('back').onclick=goBack;
+function showSearch(){if(!$('search-dialog').open)$('search-dialog').showModal();$('search').focus()}
+function closeSearch(){if(history.state?.searchOpen&&history.state.depth>0)history.back();else $('search-dialog').close()}
+$('search-toggle').onclick=()=>{remember({mode,publisher:activePublisher,searchOpen:true});showSearch()};
+$('search-close').onclick=closeSearch;
+$('search-dialog').addEventListener('cancel',e=>{e.preventDefault();closeSearch()});
+$('search-dialog').addEventListener('click',e=>{if(e.target===$('search-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeSearch()}});
+$('search-form').onsubmit=e=>{e.preventDefault();closeSearch()};
+$('search').oninput=()=>{hideViewer();setMode(mode,activePublisher);const s={...history.state,yui:true,mode,scroll:0};history.replaceState(s,'',routeURL(s))};
+$('browse-toggle').onclick=()=>{const next=mode==='publishers'?'albums':'publishers';remember({mode:next});setMode(next);window.scrollTo(0,0)};
+$('lightbox').onclick=e=>{if(e.target===$('lightbox'))closeViewer()};
+document.addEventListener('keydown',e=>{if(!$('lightbox').classList.contains('open'))return;if(e.key==='Escape')closeViewer();else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
+// Never cancel native pinch/long-press or iOS edge navigation. A multi-touch
+// gesture remains ineligible for swiping until every finger has been lifted.
+let gesture=null;
+$('lightbox').addEventListener('touchstart',e=>{if(e.touches.length!==1){gesture=null;return}const t=e.touches[0];gesture={x:t.clientX,y:t.clientY,valid:t.clientX>28&&t.clientX<innerWidth-28&&(visualViewport?.scale||1)<=1.01}},{passive:true});
+$('lightbox').addEventListener('touchmove',e=>{if(e.touches.length!==1&&gesture)gesture.valid=false},{passive:true});
+$('lightbox').addEventListener('touchcancel',()=>{gesture=null},{passive:true});
+$('lightbox').addEventListener('touchend',e=>{if(e.touches.length){gesture=null;return}const g=gesture;gesture=null;const t=e.changedTouches[0];if(!g?.valid||!t||(visualViewport?.scale||1)>1.01)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx>0?-1:1)},{passive:true});
+
+/* Static Pages' SHA-verified owner index is essential for the gallery.
+   A transient Pages/CDN error must not silently turn thousands of saved photos
+   into an empty catalogue for the lifetime of the page. */
+async function fetchOwnerIndexWithRetry(model){
+ let lastError;
+ for(let attempt=0;attempt<4;attempt++){
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
+  try{
+   const response=await fetch('owner-index.json',{cache:'no-store',signal:controller.signal});
+   if(!response.ok)throw Error('owner-index HTTP '+response.status);
+   const index=await response.json();
+   if(index?.schema_version!==1||index.model!==model||!Array.isArray(index.albums))
+    throw Error('owner-index schema mismatch');
+   return index;
+  }catch(error){
+   lastError=error;
+   if(attempt<3)await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));
+  }finally{clearTimeout(timeout)}
+ }
+ console.warn('Saved owner index failed after four Pages requests:',String(lastError));
+ throw lastError;
+}
+
+// Backward-compatible hidden verifier is for existing archive QA; no import controls appear in the gallery.
+Promise.all([
+ fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
+ fetchOwnerIndexWithRetry('yui').then(d=>({albums:YuiPrivate.fromIndex(d)})).catch(error=>({albums:[],error:error.message})), // Complete saved-photo metadata from static Pages; originals remain on TeraBox.
+ PhotoVault.albums('yui').then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
+ fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
+ fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
+ fetch('album-aliases.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('work aliases');return r.json()}),
+ fetch('publishers.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('publisher registry');return r.json()})
+]).then(([s,owner,vault,exclusions,covers,aliases,publishers])=>{
+ publisherRegistry=publishers;
+ albumCovers=covers.covers||{};
+ albumAliases=aliases.aliases||{};
+ const excludedIds=new Set([...(exclusions.excluded_album_ids||[]),...(exclusions.excluded_source_ids||[])]),
+       excludedSources=new Set(exclusions.excluded_source_urls||[]),
+       excludedHashes=new Set(exclusions.excluded_image_sha256||[]);
+ const allowed=a=>!excludedIds.has(a.id)&&![a.source,...(a.source_pages||[])].some(u=>excludedSources.has(u));
+ localStored=(s.albums||[]).filter(allowed).map(a=>({...a,sourceHosted:false,images:(a.images||[]).map((p,i)=>({...p,number:Number.isSafeInteger(p.number)&&p.number>=1?p.number:i+1})).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+ ownerStored=(owner.albums||[]).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+ vaultStored=(vault.albums||[]).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+ remoteStored=[];publisherWorkReferences=[];
+ // Union of real saved files; no count for source-only links or duplicate hashes.
+ function rebuildStored(){
+  // The static Pages archive and TeraBox index can number the same volume
+  // differently. Preserve all distinct SHA-verified saved files.
+  stored=SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored]);
+  rebuildLocalPreviewIndex();
+  ownerPhotoIndex=new Map(stored.flatMap(a=>a.images).filter(p=>p.ownerAlbum||p.vaultAlbum).map(p=>[p.url,p]));
+  catalog=stored.slice();
+ }
+ rebuildStored();
+
+ const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
+ $('inventory').textContent=archivedCount+'장 · 실제 저장본';
+ render();
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={yui:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);
+
+ // The versioned owner-index.json on Pages is the source of truth for
+ // regular browsing. Never wake optional Render catalogue fetch when the
+ // complete static owner manifest already loaded: it can CORS-fail and slow
+ // WebKit first paint. Only use authenticated gateway metadata as a fallback
+ // if no usable SHA-verified static owner album was available.
+ if(!ownerStored.length)YuiPrivate.albums().then(albums=>{
+  if(!Array.isArray(albums)||!albums.length)return;
+  const nextOwner=YuiPrivate.reconcile(ownerStored,albums).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+  if(!nextOwner.length)return;
+  // An unchanged remote catalogue must never detach cards while a user scrolls.
+  const photoSignature=rows=>JSON.stringify(rows.map(a=>[a.id,(a.images||[]).map(p=>[p.number,p.sha256,p.bytes,p.width,p.height,p.preview_sha256])]));
+  if(photoSignature(ownerStored)===photoSignature(nextOwner))return;
+  ownerStored=nextOwner;
+  rebuildStored();
+  // A newly indexed work must be usable immediately without replacing any
+  // existing card (which would cancel an ongoing tap or scroll).
+  if(!$('browse').hidden && mode==='albums' && !activePublisher && !$('search').value.trim()){
+   const grid=$('albumgrid'),shown=new Set([...grid.querySelectorAll('.album[data-id]')].map(b=>b.dataset.id));
+   for(const a of available()){
+    if(shown.has(a.id))continue;
+    const template=document.createElement('template');template.innerHTML=card(a,true);
+    const node=template.content.firstElementChild;
+    node.onclick=()=>{const current=stored.find(x=>x.id===a.id);if(current&&validImages(current).length)openAlbum(a.id)};
+    grid.appendChild(node);shown.add(a.id);
+   }
+   $('total').textContent=grid.querySelectorAll('.album').length+' albums';
+   observeOwner();
+  }
+  // Keep existing DOM nodes and active scroll/touch/lightbox unchanged.
+  // The next user-initiated filter or navigation uses the updated catalogue;
+  // never replace all cards from an asynchronous background response.
+ }).catch(()=>{});
+}).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
+</script>
+</body></html>
+).test(p.url)
    &&/^[a-f0-9]{64}$/.test(p.sha256)
    &&Number.isSafeInteger(p.bytes)&&p.bytes>0;
  });
