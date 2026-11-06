@@ -29,6 +29,46 @@ function hidePrivate(){
   frameBox.hidden=true;actions.hidden=true;
   frame.removeAttribute("src");lastSrc="";
 }
+let overview=null,overviewTime=0,overviewPending=null;
+async function loadOverview(){
+  if(!connected)return;
+  if(!overview||Date.now()-overviewTime>180000){
+    if(!overviewPending){
+      overviewPending=(async()=>{
+        const response=await fetch("/api/archive-overview",{
+          credentials:"same-origin",cache:"no-store",
+          headers:{Accept:"application/json"}});
+        if(!response.ok)throw new Error("원격 보관본 점검 실패 (HTTP "+response.status+")");
+        const result=await response.json();
+        if(!result||typeof result!=="object")
+          throw new Error("원격 보관본 점검 응답 형식 오류");
+        overview=result;overviewTime=Date.now();
+      })().finally(()=>{overviewPending=null;});
+    }
+    try{await overviewPending;}catch{
+      if(connected)status.textContent+=" · 원격 보관본 목록 점검이 지연되고 있습니다.";
+      return;
+    }
+  }
+  if(!connected||!overview)return;
+  if(selectedMode()==="auto"){
+    if(overview.automated_posts_state==="ok"){
+      status.textContent="테라박스 원격 보관 게시글 "+
+        Number(overview.automated_posts||0).toLocaleString("ko-KR")+
+        "건 확인. 아래에서 글·사진·영상을 조회할 수 있습니다.";
+    }else{
+      status.textContent="테라박스 원본 게시글 재읽기에 실패했습니다. 저장 성공으로 표시하지 않습니다.";
+    }
+  }else if(overview.account_bundles_state==="one_verified"){
+    status.textContent="지정 계정 ZIP 후보 "+
+      Number(overview.account_zip_candidates||0).toLocaleString("ko-KR")+
+      "개 중 최신 1개 원격 무결성 확인. 아래에서 저장된 계정을 선택하세요.";
+  }else if(overview.account_bundles_state==="empty"){
+    status.textContent="원격에 확인된 계정 ZIP 백업이 아직 없습니다. 계정 백업 실행 결과를 확인해 주세요.";
+  }else{
+    status.textContent="계정 ZIP 원격 읽기/검증이 완료되지 않았습니다. 저장 성공으로 표시하지 않습니다.";
+  }
+}
 function showArchiveFrame(force=false){
   const mode=selectedMode(),url=frameUrl();
   setButtons(mode);
@@ -38,8 +78,9 @@ function showArchiveFrame(force=false){
   $("archiveHubFullView").href=url;
   frameBox.hidden=false;actions.hidden=false;
   status.textContent=mode==="auto"?
-    "자동 저장된 공개 글의 원본을 조회합니다. 실제로 검증된 파일만 표시됩니다.":
-    "지정 계정의 검증된 보관본을 조회합니다. 보관되지 않은 이력은 표시하지 않습니다.";
+    "자동 보관 게시글을 조회 중입니다. 원격 검증 결과를 곧 표시합니다.":
+    "저장된 계정 ZIP 목록을 조회 중입니다. 원격 검증 결과를 곧 표시합니다.";
+  void loadOverview();
 }
 async function loadArchive(){
   if(loading)return;
