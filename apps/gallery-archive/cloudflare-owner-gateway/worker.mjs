@@ -41,9 +41,12 @@ function identifier(model, album, number, variant) {
     Number.isSafeInteger(number) && number > 0 && number < 10000 &&
     (variant === 'original' || variant === 'preview');
 }
-function safeKey(key) {
+function safeKey(key, album, variant) {
+  // Match the already verified owner-source namespace, including filenames
+  // with spaces, but reject traversal and cross-album media substitutions.
+  const prefix = (variant === 'original' ? 'originals/' : 'previews/') + album + '/';
   return typeof key === 'string' && key.length < 1024 &&
-    /^[A-Za-z0-9._/-]+$/.test(key) && !key.startsWith('/') &&
+    key.startsWith(prefix) && /^[A-Za-z0-9/_ .-]+$/.test(key) &&
     !key.split('/').some(seg => seg === '' || seg === '.' || seg === '..');
 }
 function imageType(bytes) {
@@ -69,7 +72,7 @@ async function catalog(env, model) {
       const n = photo?.number;
       if (!Number.isSafeInteger(n) || n < 1 || n >= 10000 ||
           !isHex(photo.sha256, 64) || !Number.isSafeInteger(photo.bytes) ||
-          photo.bytes < 1 || photo.bytes > 8_000_000 || !safeKey(photo.key)) return null;
+          photo.bytes < 1 || photo.bytes > 8_000_000 || !safeKey(photo.key, album.id, 'original')) return null;
       const id = album.id + ':' + n;
       if (entries.has(id)) return null;
       entries.set(id, {
@@ -77,7 +80,7 @@ async function catalog(env, model) {
         preview: photo.preview && isHex(photo.preview_sha256, 64) &&
           Number.isSafeInteger(photo.preview_bytes) &&
           photo.preview_bytes > 0 && photo.preview_bytes <= 8_000_000 &&
-          safeKey(photo.preview)
+          safeKey(photo.preview, album.id, 'preview')
           ? { key: photo.preview, sha: photo.preview_sha256, bytes: photo.preview_bytes }
           : null
       });
