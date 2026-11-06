@@ -246,11 +246,11 @@
     const timeout=window.setTimeout(()=>controller.abort(),4500);
     let available=false;
     try{
-      const response=await fetch(PRIVATE_GATEWAY+"/health",{
+      const response=await fetch(PRIVATE_GATEWAY+"/ready",{
         mode:"cors",credentials:"omit",cache:"no-store",signal:controller.signal});
       if(response.ok){
         const status=await response.json();
-        available=status.alive===true;
+        available=status.ready===true;
       }
     }catch{/* Missing, sleeping or network-blocked Render server. */}
     finally{window.clearTimeout(timeout);}
