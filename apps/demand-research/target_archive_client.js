@@ -292,7 +292,7 @@
       gatewayReady=false;
       message.textContent=isPrivateGateway?
         "전용 서버 인증이 확인되지 않았습니다. 비공개 접근 주소로 접속한 뒤 계정 백업을 시작하세요.":
-        "계정을 지정하고 백업 시작을 누르세요. 전용 서버 연결을 확인한 뒤, 준비되지 않았다면 기존 GitHub 백업 실행 화면을 엽니다.";
+        "계정을 지정하면 교집합 전용 보관함으로 이어집니다. GitHub Actions 화면으로 이동하지 않습니다. 보관함 인증 후 백업을 시작합니다.";
     }finally{
       refreshButton();
     }
