@@ -88,6 +88,29 @@ try:
         assert b'"model":"mimmi"' in raw
     print("PRIVATE_DURABLE_COLD_START_S3_NEVER_REQUIRES_TERABOX_COOKIE_PASS")
 
+    from starlette.requests import Request
+    request=Request({"type":"http","method":"GET","path":"/api/catalog",
+                     "headers":[],"query_string":b""})
+    with patch.object(gw,"COOKIE",""),patch.object(gw,"TOKEN","test-owner-bearer"):
+        # A cold start without TeraBox must still admit an authenticated
+        # private mirror route, never unauthenticated access.
+        assert asyncio.run(gw.authenticated(request,
+                    authorization="Bearer test-owner-bearer")) is None
+        try:
+            asyncio.run(gw.authenticated(request,authorization="Bearer wrong"))
+        except HTTPException as ex:
+            assert ex.status_code==401
+        else:raise AssertionError("Private R2 bypassed authorization")
+        gw._DURABLE_OWNER_READY=False
+        try:
+            asyncio.run(gw.authenticated(request,
+                    authorization="Bearer test-owner-bearer"))
+        except HTTPException as ex:
+            assert ex.status_code==503
+        else:raise AssertionError("Unconfigured mirror bypassed TeraBox session gate")
+        gw._DURABLE_OWNER_READY=True
+    print("PRIVATE_DURABLE_COLD_START_AUTH_WITHOUT_TERABOX_COOKIE_PASS")
+
     gw._DURABLE_OWNER_READY=False
     assert gw.durable_owner_remote("mimmi") is None
     assert gw.durable_owner_remote("yui") is None
