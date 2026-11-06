@@ -55,6 +55,37 @@ def test_oidc_bridge_only_accepts_trusted_verified_token(monkeypatch):
     assert observed==["malicious-other-workflow","synthetic-verified-oidc"]
 
 
+def test_archive_inventory_is_private_and_distinguishes_missing_from_verified(monkeypatch):
+    monkeypatch.setattr(gateway,"TOKEN","synthetic-owner-link-"+"z"*32)
+    monkeypatch.setattr(gateway,"COOKIE","synthetic-terabox-fixture")
+    monkeypatch.setattr(gateway,"REMOTE","archive:DemandResearch")
+    monkeypatch.setattr(gateway,"_archive_probe",{"at":0.0,"value":None})
+    calls=[]
+    expected={"automated_posts":3,"account_zip_candidates":1,
+              "account_zip_read_verified":1,"account_registry_count":0,
+              "automated_posts_state":"ok",
+              "account_bundles_state":"one_verified","account_registry_state":"ok"}
+    monkeypatch.setattr(gateway,"_archive_inventory",
+                        lambda:(calls.append(1) or expected))
+    monkeypatch.setattr(gateway,"verify_bridge_token",
+                        lambda value: {"repository":"koith/browser-app-lab"}
+                        if value=="synthetic-signed-oidc" else (_ for _ in ()).throw(ValueError()))
+    client=TestClient(gateway.app,base_url="https://testserver")
+    assert client.get("/api/archive-overview").status_code==401
+    assert client.get("/api/bridge/diagnostics").status_code==403
+    assert client.get("/api/bridge/diagnostics",
+        headers={"Authorization":"Bearer forged"}).status_code==403
+    bridge=client.get("/api/bridge/diagnostics",
+        headers={"Authorization":"Bearer synthetic-signed-oidc"})
+    assert bridge.status_code==200 and bridge.json()==expected
+    assert "synthetic-terabox" not in bridge.text
+    assert client.post("/api/activate",
+        json={"token":"synthetic-owner-link-"+"z"*32}).status_code==200
+    result=client.get("/api/archive-overview")
+    assert result.status_code==200 and result.json()==expected
+    assert calls==[1],"private diagnostic cache should avoid duplicate cloud reads"
+
+
 def test_public_readiness_requires_all_private_settings(monkeypatch):
     client=TestClient(gateway.app,base_url="https://testserver")
     monkeypatch.delenv("DEMAND_ARCHIVE_DISPATCH_TOKEN",raising=False)
