@@ -8,7 +8,7 @@ const panel=$("archivesView"),frame=$("archiveHubFrame"),status=$("archiveHubSta
 const frameBox=$("archiveHubFrameBox"),actions=$("archiveHubActions");
 const auto=$("archiveModeAuto"),accounts=$("archiveModeAccounts");
 if(!panel||!frame||!status||!frameBox||!actions||!auto||!accounts)return;
-let loading=false,connected=false,lastSrc="";
+let loading=false,connected=false,lastSrc="",retryCount=0;
 const ACCOUNT=/^(?:bluesky|mastodon)-[a-f0-9]{40}$/;
 const PRIVATE_APP="https://intersection-originals-free.onrender.com/";
 const query=()=>new URLSearchParams(location.search);
@@ -119,12 +119,18 @@ async function loadArchive(){
     if(!response.ok)throw Error(response.status===401?"PRIVATE_LOGIN_REQUIRED":"PRIVATE_GATEWAY_UNAVAILABLE");
     const data=await response.json();
     if(data.connected!==true)throw Error("PRIVATE_LOGIN_REQUIRED");
-    connected=true;showArchiveFrame();
+    connected=true;retryCount=0;showArchiveFrame();
   }catch(error){
     connected=false;hidePrivate();
-    status.textContent=String(error.message||"")==="PRIVATE_LOGIN_REQUIRED"?
-      "이 브라우저에 개인 보관함 접속 기록이 없습니다. 개인 접속 링크로 한 번 들어오면 이후 자동으로 열립니다.":
-      "보관 서버와 통신하지 못했습니다. 저장본은 변경되지 않았습니다.";
+    status.textContent="저장소와 다시 연결 중입니다. 원본은 변경되지 않았습니다.";
+    if(retryCount<6){
+      retryCount+=1;
+      window.setTimeout(()=>{
+        if(!panel.classList.contains("hidden")&&!connected)void loadArchive();
+      },Math.min(2500*retryCount,10000));
+    }else{
+      status.textContent="보관 서버의 연결을 복구하지 못했습니다. 새로고침으로 재시도할 수 있습니다.";
+    }
   }finally{loading=false;}
 }
 function changeMode(mode,account=""){
