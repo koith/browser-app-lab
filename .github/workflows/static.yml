@@ -26,6 +26,11 @@ concurrency:
 jobs:
   # Single deploy job since we're just deploying
   deploy:
+    # This site includes 2,266 SHA-pinned original images (~0.82 GB).
+    # The default 10-minute deploy-pages client timeout canceled live deploy
+    # c7a09fcf while GitHub was still 'updating_pages'. Preserve images and
+    # allow that large deployment to finish rather than falsely report PASS.
+    timeout-minutes: 35
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -43,3 +48,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          timeout: 1800000
