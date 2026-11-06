@@ -91,7 +91,9 @@ def _save_verified(root,key,payload):
 def create_request(platform,account,root=None):
     if not enabled():
         raise RuntimeError("Durable queue disabled")
-    profile_input(platform,account)
+    normalized=profile_input(platform,account)
+    if platform=="bluesky" and not account.startswith("https://"):
+        account=normalized
     root=root or CloudArchive()
     job_id=1000000000+secrets.randbelow(9000000000)
     payload={"schema":1,"job_id":job_id,"platform":platform,
