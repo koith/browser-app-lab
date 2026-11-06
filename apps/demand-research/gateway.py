@@ -232,6 +232,22 @@ def session_value(issued_at:int)->str:
 def check_auth(request:Request):
     if not configured():
         raise HTTPException(status_code=503,detail="TeraBox gateway not connected")
+    # This dedicated site contains only already PUBLIC social-network content.
+    # Its user explicitly chose URL-only viewing and backup initiation.
+    # The bridge/credential routes still require signed GitHub OIDC.
+    # Expensive index refresh and paid discovery commands stay protected.
+    if os.getenv("DEMAND_PUBLIC_ARCHIVE_MODE","0")=="1":
+        path=request.url.path
+        if (request.method=="GET" and (
+                path in {"/api/session","/api/posts","/api/archive-overview",
+                         "/api/target-archive/status","/auto-archive",
+                         "/account-archive","/api/accounts/status",
+                         "/api/accounts","/api/account-groups"}
+                or path.startswith("/api/account-archives")
+                or path.startswith("/account-archive/")
+                or path.startswith("/auto-archive/"))
+            or request.method=="POST" and path=="/api/target-archive/start"):
+            return
     value=request.cookies.get(SESSION_COOKIE,"")
     parts=value.split(".",1)
     if len(parts)!=2 or not parts[0].isdigit() or len(parts[0])>11:
@@ -685,3 +701,29 @@ async def viewer_asset(asset_name:str):
 
 # Authenticated command routes are separate from public read-only APIs.
 app.include_router(create_target_archive_router(check_auth))
+
+# Render's free instance suspends and loses in-memory values. This must run
+# before the first HTTP request after a cold start. GitHub Actions publishes
+# only an authenticated-encrypted blob, sealed to this Render-only private key.
+async def _restore_cloud_credential():
+    global COOKIE
+    if COOKIE or not os.getenv("DEMAND_ARCHIVE_SEAL_PRIVATE"):
+        return
+    from sealed_credentials import restore_from_github
+    try:
+        recovered=await asyncio.wait_for(asyncio.to_thread(
+            restore_from_github,os.environ["DEMAND_ARCHIVE_SEAL_PRIVATE"]),timeout=16)
+    except (RuntimeError,ValueError,TypeError,TimeoutError,OSError,KeyError) as error:
+        print("SEALED_ARCHIVE_COLD_RESTORE_NOT_READY",type(error).__name__,flush=True)
+        return
+    COOKIE=recovered
+    os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"]=recovered
+    print("SEALED_ARCHIVE_COLD_RESTORE_SUCCESS",flush=True)
+    if INDEX_DB and _index_task is None:
+        await start_account_index()
+
+@app.on_event("startup")
+async def cold_start_cloud_restore():
+    await _restore_cloud_credential()
+
+
