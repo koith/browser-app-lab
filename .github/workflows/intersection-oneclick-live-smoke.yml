@@ -1,7 +1,7 @@
 name: INTERSECTION — One-Time Live Account Backup Smoke
 
 on:
-  # Adding this workflow on main runs the one-time user-requested smoke.
+  # Adding this workflow on main runs the one-time one-time public fixture smoke.
   # Subsequent unrelated pushes do not rerun the backup.
   push:
     branches: [main]
@@ -37,7 +37,7 @@ jobs:
                   return json.load(response)
           def submit():
               data=json.dumps({"platform":"bluesky",
-                               "account":"arreeumkk07.bsky.social"}).encode()
+                               "account":"bsky.app"}).encode()
               request=urllib.request.Request(base+"/api/target-archive/start",
                 method="POST",data=data,headers={
                  "Origin":base,"X-Archive-Intent":"selected-public-account-v1",
