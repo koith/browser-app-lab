@@ -277,6 +277,47 @@ const {chromium}=require('playwright');
    'original live minimap pans the real DMP game even entirely offline');
   assert.deepEqual(afterOfflineMini.players,beforeOfflineMini.players,
    'camera-only offline minimap interaction must not fake character movement');
+  // R16 live-game offline gate: cached PNG files alone are insufficient.
+  // Use the actual source-native duel game path after network is OFF.
+  await page.evaluate(()=>{
+   const test=window.__ROG_TEST__,match=test.getMatch();
+   if(!test||!match||match.players.length<2)throw Error('No offline match');
+   match.players[0].team=['c_0042'];match.players[1].team=['c_0045'];
+   test.setMatch(match);test.drawGame();
+   test.resolveBattle(match.players[0],match.players[1],false);
+  });
+  await page.waitForFunction(()=>{
+   const stage=document.getElementById('battle-visual');
+   return !!stage&&stage.dataset.duelNativeFxStarted==='true'&&
+    Number(stage.dataset.duelSourceEffectFrames)>0;
+  },null,{timeout:30000});
+  await page.waitForFunction(()=>
+   document.getElementById('battle-visual')?.dataset.battlePhase==='outcome',
+   null,{timeout:30000});
+  const offlineNativeDuel=await page.evaluate(()=>{
+   const stage=document.getElementById('battle-visual');
+   const source=window.__LEAF_NATIVE_DUEL_FX__?.eventsFor('0042')||[];
+   return {
+    offline:navigator.onLine===false,
+    originalSource:source[0]?.member||'',
+    events:Number(stage.dataset.duelSourceEffects)||0,
+    renderedFrames:Number(stage.dataset.duelSourceEffectFrames)||0,
+    fighters:[...stage.querySelectorAll('.leaf-battle-chessman')].map(a=>({
+     id:a.dataset.chessmanId,rig:a.dataset.actorRig})),
+    phase:stage.dataset.battlePhase
+   };
+  });
+  assert.equal(offlineNativeDuel.offline,true,'source battle must remain fully offline');
+  assert.equal(offlineNativeDuel.originalSource,'obs.pak/1097.obs',
+   'offline CHR 0042 must use OWN original OBS 1097 source effect');
+  assert.ok(offlineNativeDuel.events>0&&offlineNativeDuel.renderedFrames>0,
+   'first offline native duel must animate original OBS source pixels');
+  assert.deepEqual(offlineNativeDuel.fighters.map(x=>x.id),['0042','0045']);
+  assert.ok(offlineNativeDuel.fighters.every(x=>x.rig==='original-obs-sprite'),
+   'original source actors must remain real in offline duel');
+  assert.equal(offlineNativeDuel.phase,'outcome');
+  console.log('R16_ORIGINAL_OBS_FIRST_OFFLINE_DUEL_PASS',
+   JSON.stringify(offlineNativeDuel));
   assert.deepEqual(errors,[],'no unexpected JavaScript errors during offline play');
   console.log('4LEAF NATIVE OFFLINE CACHE PASS',JSON.stringify({cached:critical.length,original}));
  }finally{await browser.close()}
