@@ -224,53 +224,26 @@
     return false;
   }
   function refreshButton(){
-    // Keep the button operable so an empty/invalid account explains what is
-    // missing instead of looking broken on touch devices.
+    // Never leave users with a dead button or a GitHub Actions detour.
     submit.disabled=submitting;
     submit.textContent=gatewayReady?"테라박스 백업 시작":
-      (isPrivateGateway?"인증 후 백업 시작":"백업 시작");
-    // Keep a usable fallback until the independent Render server is deployed.
-    workflow.hidden=gatewayReady||isPrivateGateway;
-    workflow.textContent="GitHub에서 직접 실행 (전용 서버 연결 전)";
+      (isPrivateGateway?"전용 보관함 인증 필요":"교집합에서 계정 백업");
+    workflow.hidden=true;
   }
-  async function openPrivateBackup(){
+  function openPrivateBackup(){
     if(isPrivateGateway){
-      message.textContent="보관 서버 인증이 필요합니다. 전용 접근 주소에서 로그인한 뒤 계정 백업을 누르세요.";
+      message.textContent="비공개 보관함에 아직 인증되지 않았습니다. 이 교집합 화면의 전용 접속 링크로 인증한 뒤 백업을 시작할 수 있습니다.";
       return;
     }
-    // Probe ONLY after a deliberate backup click. A background probe on every
-    // Pages visit would unnecessarily wake a sleeping free Render instance.
-    submitting=true;refreshButton();
-    message.textContent="전용 보관 서버 연결을 확인하고 있습니다…";
-    const controller=new AbortController();
-    const timeout=window.setTimeout(()=>controller.abort(),4500);
-    let available=false;
-    try{
-      const response=await fetch(PRIVATE_GATEWAY+"/ready",{
-        mode:"cors",credentials:"omit",cache:"no-store",signal:controller.signal});
-      if(response.ok){
-        const status=await response.json();
-        available=status.ready===true;
-      }
-    }catch{/* Missing, sleeping or network-blocked Render server. */}
-    finally{window.clearTimeout(timeout);}
-    if(available){
-      // Same-tab navigation works on iOS WebViews. No secrets cross origins;
-      // only an authenticated POST from the operator UI starts the backup.
-      const url=new URL(PRIVATE_GATEWAY+"/");
-      url.searchParams.set("tab","accounts");
-      url.searchParams.set("archive_platform",platform.value);
-      url.searchParams.set("archive_account",account.value.trim());
-      message.textContent="전용 서버로 이동합니다. 백업은 아직 시작되지 않았습니다.";
-      window.location.assign(url.href);
-      return;
-    }
-    // A not-yet-provisioned gateway must not break the older working manual
-    // GitHub workflow. It will require a signed-in operator to press Run.
-    message.textContent="전용 서버에 연결할 수 없어 GitHub 백업 실행 화면을 엽니다. 아직 백업이 시작된 것은 아닙니다.";
-    try{await navigator.clipboard?.writeText(account.value.trim());}catch{}
-    window.location.assign(workflow.href);
-    submitting=false;refreshButton();
+    // Pages supplies only public platform/account selection. The same
+    // INTERSECTION app runs at the dedicated private Render origin; no
+    // GitHub page, popup, credential or implicit POST occurs on navigation.
+    const url=new URL(PRIVATE_GATEWAY+"/");
+    url.searchParams.set("tab","accounts");
+    url.searchParams.set("archive_platform",platform.value);
+    url.searchParams.set("archive_account",account.value.trim());
+    message.textContent="계정 선택을 유지한 채 교집합 보관함을 엽니다. 백업 실행은 인증 후 확인합니다.";
+    window.location.assign(url.href);
   }
   function restoreSelectedAccount(){
     if(!isPrivateGateway)return;
@@ -372,7 +345,7 @@
       void pollJob();
     }catch(error){
       message.textContent=String(error.message||"아카이브 요청 실패")+
-        " · 필요한 경우 GitHub Actions 직접 실행 링크를 이용하세요.";
+        " · 계정을 유지한 채 다시 시도할 수 있습니다.";
       // A transient server error must not leave a permanently disabled
       // button: the account choice remains intact for another attempt.
     }finally{
