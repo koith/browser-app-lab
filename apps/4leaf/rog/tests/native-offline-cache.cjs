@@ -37,6 +37,11 @@ const {chromium}=require('playwright');
    // R16: the first offline native duel uses exactly its OWN source
    // OBS effect sprites even if the user never started a duel while online.
    // Only 9 verified visual roles (129 source PNGs), no fabricated effects.
+   // Cold first duel must also have 0042/0045's OWN original CHR bodies
+   // CHR +260 references original OBS members 1026 and 1029, 37 frames each.
+   'original/OBS/referenced/chr-bodies-manifest.js',
+   ...['1026','1029'].flatMap(id=>Array.from({length:37},(_,i)=>
+    'original/OBS/referenced/obs-'+id+'-'+String(i).padStart(3,'0')+'.png')),
    'native-duel-effects.js','native-duel-effects.css','original/OBS/duel-effects/manifest.js',
    ...[['1096',3],['1097',5],['1098',7],['1099',12],
        ['1101',5],['1102',5],['1112',31],['1114',29],['1118',32]].flatMap(([id,n])=>
@@ -314,7 +319,7 @@ const {chromium}=require('playwright');
    'first offline native duel must animate original OBS source pixels');
   assert.deepEqual(offlineNativeDuel.fighters.map(x=>x.id),['0042','0045']);
   assert.ok(offlineNativeDuel.fighters.every(x=>x.rig==='original-obs-sprite'),
-   'original source actors must remain real in offline duel');
+   'original source actors must remain real in offline duel '+JSON.stringify(offlineNativeDuel));
   assert.equal(offlineNativeDuel.phase,'outcome');
   console.log('R16_ORIGINAL_OBS_FIRST_OFFLINE_DUEL_PASS',
    JSON.stringify(offlineNativeDuel));
