@@ -11,6 +11,7 @@ RUN python -m pip install --no-cache-dir fastapi==0.115.12 uvicorn==0.35.0 PyJWT
 WORKDIR /app
 COPY apps/demand-research/gateway.py /app/gateway.py
 COPY apps/demand-research/target_archive_api.py /app/target_archive_api.py
+COPY apps/demand-research/backup_queue.py /app/backup_queue.py
 COPY apps/demand-research/target_account_archive.py /app/target_account_archive.py
 COPY apps/demand-research/target_account_enrichment.py /app/target_account_enrichment.py
 COPY apps/demand-research/target_account_viewer.py /app/target_account_viewer.py
