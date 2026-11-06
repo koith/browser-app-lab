@@ -559,7 +559,8 @@ window.addEventListener("intersection:feed-updated",scheduleRender);
 window.addEventListener("intersection:date-range-change",scheduleRender);
 window.addEventListener("storage",e=>{if(e.key===STORE){watches=read();render()}});
 render();
-if(new URLSearchParams(location.search).get("tab")==="archives")setView("archives");
+const initialTab=new URLSearchParams(location.search).get("tab");
+if(initialTab==="archives"||initialTab==="accounts")setView(initialTab);
 // On page load, bounded refresh: no background monitoring or polling.
 Promise.resolve().then(async()=>{
   const initial=watches.filter(w=>["bluesky","mastodon","x"].includes(w.platform)).slice(0,4);
