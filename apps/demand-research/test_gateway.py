@@ -11,6 +11,70 @@ def test_offline_cloud_status_is_truthful():
     assert result.json()["cloud"]=="terabox"
     assert result.json()["configured"] is False
 
+def test_oidc_bridge_denies_unsigned_and_other_workflows(monkeypatch):
+    import os
+    client=TestClient(gateway.app,base_url="https://testserver")
+    monkeypatch.setattr(gateway,"COOKIE","")
+    monkeypatch.delenv("RCLONE_CONFIG_ARCHIVE_COOKIE",raising=False)
+    value="private-provider-test-credential-please-never-log"
+    r=client.post("/api/bridge/credential",
+       json={"assertion":"not-a-jwt","credential":value})
+    assert r.status_code in (403,503)
+    assert gateway.COOKIE==""
+    assert "private-provider-test" not in r.text
+    assert "RCLONE_CONFIG_ARCHIVE_COOKIE" not in os.environ
+
+
+def test_oidc_bridge_only_accepts_trusted_verified_token(monkeypatch):
+    import os
+    client=TestClient(gateway.app,base_url="https://testserver")
+    monkeypatch.setattr(gateway,"COOKIE","")
+    monkeypatch.setattr(gateway,"TOKEN","synthetic-private-link-"+"z"*32)
+    monkeypatch.setattr(gateway,"REMOTE","archive:DemandResearch")
+    assert client.get("/api/session").status_code==503
+    observed=[]
+    def trusted(assertion):
+        observed.append(assertion)
+        if assertion!="synthetic-verified-oidc":
+            raise ValueError("Wrong workflow")
+        return {"repository_id":"1284121913","ref":"refs/heads/main"}
+    monkeypatch.setattr(gateway,"verify_bridge_token",trusted)
+    credential="synthetic-private-terabox-cookie-test"
+    rejected=client.post("/api/bridge/credential",
+       json={"assertion":"malicious-other-workflow","credential":credential})
+    assert rejected.status_code==403
+    assert gateway.COOKIE==""
+    accepted=client.post("/api/bridge/credential",
+       json={"assertion":"synthetic-verified-oidc","credential":credential})
+    assert accepted.status_code==200
+    assert accepted.json()=={"accepted":True,"storage_configured":True}
+    assert gateway.COOKIE==credential
+    assert os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"]==credential
+    assert "synthetic-private-terabox-cookie" not in accepted.text
+    assert client.get("/api/session").status_code==401
+    assert observed==["malicious-other-workflow","synthetic-verified-oidc"]
+
+
+def test_public_readiness_requires_all_private_settings(monkeypatch):
+    client=TestClient(gateway.app,base_url="https://testserver")
+    monkeypatch.delenv("DEMAND_ARCHIVE_DISPATCH_TOKEN",raising=False)
+    monkeypatch.setattr(gateway,"TOKEN","synthetic-private-viewer-secret-"+"x"*32)
+    monkeypatch.setattr(gateway,"COOKIE","synthetic-terabox-credential")
+    monkeypatch.setattr(gateway,"REMOTE","archive:DemandResearch")
+    # The Render service can be alive but not ready for one-click backups.
+    assert client.get("/health").json()=={"alive":True}
+    pending=client.get("/ready",headers={"Origin":"https://koith.github.io"})
+    assert pending.status_code==503 and pending.json()=={"ready":False}
+    assert pending.headers["cache-control"]=="no-store"
+    monkeypatch.setenv("DEMAND_ARCHIVE_DISPATCH_TOKEN","synthetic-actions-secret-"+"y"*32)
+    ready=client.get("/ready",headers={"Origin":"https://koith.github.io"})
+    assert ready.status_code==200 and ready.json()=={"ready":True}
+    assert ready.headers["access-control-allow-origin"]=="https://koith.github.io"
+    assert "synthetic" not in ready.text
+    monkeypatch.setattr(gateway,"COOKIE","")
+    assert client.get("/ready").status_code==503
+
+
 def test_private_catalog_fails_closed_without_credentials():
     assert TestClient(gateway.app).get("/api/posts").status_code==503
 

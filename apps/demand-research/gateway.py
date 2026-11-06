@@ -13,9 +13,133 @@ import account_index_sources
 import account_groups
 from demand_archive import CloudArchive
 
-from target_archive_api import create_router as create_target_archive_router
+from target_archive_api import create_router as create_target_archive_router, dispatch_enabled
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
+
+@app.get("/health",include_in_schema=False)
+async def liveness():
+    # Availability checks must not expose private archive names, keys or data.
+    # A healthy process can still be awaiting its three server-side secrets.
+    return JSONResponse({"alive":True},headers={"Cache-Control":"no-store"})
+
+# GitHub Actions transfers its EXISTING TeraBox credential to this private
+# process over TLS. A short-lived signed OIDC JWT proves the exact repository,
+# workflow and main ref; the public web app cannot call this route successfully.
+BRIDGE_AUDIENCE="intersection-originals-free/credential-v1"
+BRIDGE_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-gateway-credential-sync.yml@refs/heads/main"
+BRIDGE_ISSUER="https://token.actions.githubusercontent.com"
+BRIDGE_JWKS=BRIDGE_ISSUER+"/.well-known/jwks"
+
+def verify_bridge_token(token):
+    if not isinstance(token,str) or len(token)>12000 or len(token)<100:
+        raise ValueError("Invalid bridge assertion")
+    # Lazy import keeps normal offline tests and public-only routes lightweight.
+    import jwt
+    client=jwt.PyJWKClient(BRIDGE_JWKS,cache_jwk_set=True,lifespan=3600,timeout=8)
+    key=client.get_signing_key_from_jwt(token)
+    claims=jwt.decode(token,key.key,algorithms=["RS256"],
+                      audience=BRIDGE_AUDIENCE,issuer=BRIDGE_ISSUER,
+                      options={"require":["exp","iat","iss","aud","sub"]},
+                      leeway=15)
+    must={
+        "repository":"koith/browser-app-lab",
+        "repository_id":"1284121913",
+        "ref":"refs/heads/main",
+        "workflow_ref":BRIDGE_WORKFLOW,
+    }
+    if any(str(claims.get(k,""))!=v for k,v in must.items()):
+        raise ValueError("Untrusted bridge workflow")
+    if claims.get("event_name") not in ("schedule","workflow_dispatch","push"):
+        raise ValueError("Unexpected bridge event")
+    return claims
+
+@app.post("/api/bridge/credential",include_in_schema=False)
+async def receive_authenticated_credential(request:Request):
+    # Never accept arbitrary public credentials, and never reflect or log NDUS.
+    raw=await request.body()
+    if len(raw)>18000:
+        raise HTTPException(413,"Bridge request too large")
+    try:
+        payload=json.loads(raw)
+        if not isinstance(payload,dict) or set(payload)!={"assertion","credential"}:
+            raise ValueError("Invalid bridge payload")
+        credential=payload["credential"]
+        if not isinstance(credential,str) or not 16<=len(credential)<=4096:
+            raise ValueError("Invalid private cloud credential")
+        if any(ord(c)<32 for c in credential):
+            raise ValueError("Invalid credential characters")
+        verify_bridge_token(payload["assertion"])
+    except (ValueError,KeyError,TypeError,AttributeError):
+        raise HTTPException(403,"Bridge authentication failed") from None
+    except Exception:
+        # JWK network failures and signature validation never become a bypass.
+        raise HTTPException(503,"Bridge verification unavailable") from None
+    global COOKIE
+    COOKIE=credential
+    os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"]=credential
+    return JSONResponse({"accepted":True,"storage_configured":configured()},
+                        headers={"Cache-Control":"no-store"})
+
+def _bridge_authenticated(request):
+    header=request.headers.get("authorization","")
+    if not header.startswith("Bearer ") or len(header)>12500:
+        raise HTTPException(403,"Bridge identity required")
+    try:
+        return verify_bridge_token(header[7:])
+    except (ValueError,TypeError,KeyError):
+        raise HTTPException(403,"Bridge identity rejected") from None
+    except Exception:
+        raise HTTPException(503,"Bridge identity verification unavailable") from None
+
+
+@app.get("/api/bridge/pending",include_in_schema=False)
+async def github_pending_requests(request:Request):
+    _bridge_authenticated(request)
+    if not configured():
+        raise HTTPException(503,"Private archive not connected")
+    try:
+        from backup_queue import pending
+        rows=await asyncio.to_thread(pending,limit=1)
+    except (RuntimeError,ValueError):
+        raise HTTPException(503,"Private queue listing unavailable") from None
+    return JSONResponse({"requests":rows},
+                        headers={"Cache-Control":"private, no-store"})
+
+
+@app.post("/api/bridge/ack",include_in_schema=False)
+async def github_acknowledge_job(request:Request):
+    _bridge_authenticated(request)
+    if not configured():
+        raise HTTPException(503,"Private archive not connected")
+    raw=await request.body()
+    if len(raw)>1000:
+        raise HTTPException(413,"Invalid bridge acknowledgment")
+    try:
+        payload=json.loads(raw)
+        if type(payload) is not dict or set(payload)!={"job_id","workflow_run_id"}:
+            raise ValueError("Invalid acknowledgment")
+        from backup_queue import accept
+        row=await asyncio.to_thread(accept,payload["job_id"],
+                                     payload["workflow_run_id"])
+    except (ValueError,TypeError,KeyError):
+        raise HTTPException(400,"Invalid bridge acknowledgment") from None
+    except RuntimeError:
+        raise HTTPException(503,"Unable to verify immutable queue acknowledgment") from None
+    return JSONResponse({"accepted":True,"job_id":row["job_id"]},
+                        headers={"Cache-Control":"private, no-store"})
+
+
+@app.get("/ready",include_in_schema=False)
+async def backup_readiness():
+    # Public frontend probes only after the user clicks backup. Liveness alone
+    # must never direct them to an unconfigured private service.
+    from backup_queue import enabled as queue_enabled
+    ready=configured() and (dispatch_enabled() or queue_enabled())
+    return JSONResponse({"ready":ready},
+                        status_code=200 if ready else 503,
+                        headers={"Cache-Control":"no-store"})
+
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
 REMOTE=os.getenv("DEMAND_TERABOX_REMOTE","archive:DemandResearch").rstrip("/")
 TOKEN=os.getenv("DEMAND_VIEWER_TOKEN","")

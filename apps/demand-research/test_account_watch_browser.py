@@ -144,8 +144,16 @@ def run():
             assert page.locator("#archivesView").is_visible()
             assert not page.locator("#postsView").is_visible()
             assert not page.locator("#accountsView").is_visible()
+            # Pages shows a link into the protected Intersection web app,
+            # not a misleading disabled viewer or a GitHub Actions detour.
             page.locator("#archiveHubStatus").get_by_text(
-                "비공개 원본",exact=False).wait_for(timeout=12000)
+                "교집합 전용 웹앱",exact=False).wait_for(timeout=12000)
+            assert page.locator("#archiveHubActions").is_visible()
+            link=page.locator("#archiveHubFullView")
+            assert link.is_visible()
+            assert link.get_attribute("href").startswith(
+                "https://intersection-originals-free.onrender.com/?tab=archives")
+            assert "github.com" not in link.get_attribute("href")
             assert not page.locator("#archiveHubFrameBox").is_visible()
             page.locator("#viewPosts").click()
             page.locator("#viewAccounts").click()

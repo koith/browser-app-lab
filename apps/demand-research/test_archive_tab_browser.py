@@ -90,7 +90,14 @@ def exercise(browser_type,label):
                 assert page.locator("#archiveHubFrameBox").is_hidden()
                 assert page.locator("#archiveHubFrame").get_attribute("src") is None
                 assert "viewer" not in requests
-                assert page.locator("#archiveHubActions").is_hidden()
+                # Public Pages must show an in-product archive link to the
+                # dedicated Intersection web app, not a GitHub Actions page.
+                assert page.locator("#archiveHubActions").is_visible()
+                link=page.locator("#archiveHubFullView")
+                assert link.get_attribute("href")==(
+                    "https://intersection-originals-free.onrender.com/"
+                    "?tab=archives&mode=accounts&account="+KEY)
+                assert "교집합 보관함" in link.inner_text()
                 allowed["value"]=True
                 page.evaluate("window.dispatchEvent(new Event('intersection:private-session-ready'))")
                 assert page.locator("#archiveHubFrameBox").is_hidden()
@@ -98,8 +105,10 @@ def exercise(browser_type,label):
                 assert "session" not in requests, "public Pages must not probe private sessions"
                 page.locator("#archiveModeAuto").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src") is None
+                assert "mode=auto" in link.get_attribute("href")
                 page.locator("#archiveModeAccounts").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src") is None
+                assert "mode=accounts" in link.get_attribute("href")
             assert not errors,errors
             print("ARCHIVE_TAB_BROWSER_PASS",label,
                   "private_gateway" if private else "public_unlinked_then_login",

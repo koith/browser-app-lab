@@ -23,17 +23,25 @@ from urllib.parse import urlsplit
 from target_account_archive import profile_input
 from demand_archive import CloudArchive
 from verified_bundle_reader import names_from_cloud, load_verified_bundle
+import backup_queue
 
 WORKFLOW = "intersection-target-account-bundle.yml"
 _REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _last_request = None
 _lock = asyncio.Lock()
+_public_run_cache = {}
 
 
 def dispatch_enabled():
     token=os.getenv("DEMAND_ARCHIVE_DISPATCH_TOKEN","")
     repo=os.getenv("DEMAND_ARCHIVE_DISPATCH_REPO","koith/browser-app-lab")
     return len(token)>=24 and _REPO.fullmatch(repo) is not None
+
+
+def can_start():
+    # The alternative OIDC-pulled durable queue does not need a permanent
+    # GitHub personal access token on Render.
+    return dispatch_enabled() or backup_queue.enabled()
 
 
 def _github_api(method,path,payload=None):
@@ -75,7 +83,31 @@ def dispatch(platform,account):
 
 
 def get_workflow_run(run_id):
-    run=_github_api("GET","actions/runs/"+str(run_id))
+    if dispatch_enabled():
+        run=_github_api("GET","actions/runs/"+str(run_id))
+    else:
+        # GitHub run metadata for a public repository is public; no private
+        # workflow token leaves GitHub Actions or gets embedded in the page.
+        cached=_public_run_cache.get(run_id)
+        if cached is not None and time.monotonic()-cached[0]<50:
+            run=cached[1]
+        else:
+            repo=os.getenv("DEMAND_ARCHIVE_DISPATCH_REPO","koith/browser-app-lab")
+            if _REPO.fullmatch(repo) is None:
+                raise RuntimeError("Untrusted repository")
+            request=UrlRequest("https://api.github.com/repos/"+repo+
+                      "/actions/runs/"+str(run_id),
+                      headers={"Accept":"application/vnd.github+json",
+                               "User-Agent":"intersection-public-workflow-status"})
+            try:
+                with urlopen(request,timeout=12) as response:
+                    if response.status!=200:
+                        raise RuntimeError("GitHub status unavailable")
+                    run=json.loads(response.read(100000))
+            except (HTTPError,URLError,ValueError,TimeoutError,OSError):
+                raise RuntimeError("GitHub status unavailable") from None
+            _public_run_cache.clear()
+            _public_run_cache[run_id]=(time.monotonic(),run)
     if (run.get("id")!=run_id or
         run.get("path")!=".github/workflows/"+WORKFLOW or
         run.get("event")!="workflow_dispatch" or
@@ -181,11 +213,11 @@ def create_router(auth):
     @router.get("/api/target-archive/status")
     async def status(request:Request):
         auth(request)
-        return JSONResponse({"enabled":bool(dispatch_enabled()),
+        return JSONResponse({"enabled":bool(can_start()),
                              "platforms":["bluesky","mastodon"],
                              "storage":"private_terabox",
                              "viewer_path":"/account-archive",
-                             "jobs_pollable":bool(dispatch_enabled()),
+                             "jobs_pollable":bool(can_start()),
                              "historical_completeness_guaranteed":False},
                             headers={"Cache-Control":"private, no-store"})
 
@@ -194,7 +226,7 @@ def create_router(auth):
         global _last_request
         auth(request)
         same_origin_operator(request)
-        if not dispatch_enabled():
+        if not can_start():
             raise HTTPException(503,"Private archive dispatch not configured")
         raw=await request.body()
         if len(raw)>900:
@@ -214,7 +246,11 @@ def create_router(auth):
             if _last_request is not None and time.monotonic()-_last_request<45:
                 raise HTTPException(429,"Archive request throttled")
             try:
-                run_id=await asyncio.to_thread(dispatch,platform,account)
+                if backup_queue.enabled():
+                    run_id=await asyncio.to_thread(
+                        backup_queue.create_request,platform,account)
+                else:
+                    run_id=await asyncio.to_thread(dispatch,platform,account)
                 receipt=make_receipt(request,run_id,platform,account)
             except RuntimeError:
                 raise HTTPException(502,"Private archive job could not be scheduled") from None
@@ -235,10 +271,24 @@ def create_router(auth):
         if not 1<=run_id<=999999999999:
             raise HTTPException(400,"Invalid workflow run id")
         item=read_receipt(request,receipt,run_id)
-        if not dispatch_enabled():
+        if not can_start():
             raise HTTPException(503,"Private archive job status unavailable")
+        workflow_id=run_id
+        if backup_queue.enabled():
+            try:
+                queued=await asyncio.to_thread(backup_queue.state,run_id)
+            except (RuntimeError,ValueError):
+                raise HTTPException(503,"Private queue status unavailable") from None
+            if queued is None:
+                raise HTTPException(404,"Unknown private backup request")
+            accepted=queued.get("accepted")
+            if accepted is None:
+                return JSONResponse({"run_id":run_id,"state":"QUEUED",
+                         "remote_verified":False,"account_key":None},
+                         headers={"Cache-Control":"private, no-store"})
+            workflow_id=accepted["workflow_run_id"]
         try:
-            run=await asyncio.to_thread(get_workflow_run,run_id)
+            run=await asyncio.to_thread(get_workflow_run,workflow_id)
         except RuntimeError:
             raise HTTPException(502,"Private archive status fetch failed") from None
         run_status=run.get("status")
@@ -248,7 +298,7 @@ def create_router(auth):
             if run.get("conclusion")=="success":
                 try:
                     verified=await asyncio.to_thread(read_exact_verified_archive,
-                       run_id,item["platform"],item["account"])
+                       workflow_id,item["platform"],item["account"])
                 except (RuntimeError,ValueError,TypeError,KeyError):
                     verified=None
                 if verified:

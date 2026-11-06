@@ -1,7 +1,7 @@
-/* INTERSECTION: selected public-account backup request.
- * The private authenticated gateway can dispatch real Actions jobs. Static
- * Pages must NEVER contain a GitHub token or claim that a click queued work:
- * its usable fallback opens the existing authenticated GitHub workflow.
+/* INTERSECTION: one-click public-account backup on the private authenticated
+ * gateway. Public Pages never sees GitHub/TeraBox tokens and ONLY navigates
+ * to the dedicated operator gateway with the selected public account prefilled.
+ * A cross-origin URL alone must never trigger an authenticated backup (CSRF).
  */
 (function(){
   "use strict";
@@ -13,6 +13,10 @@
   const account=$("targetArchiveAccount");
   const submit=$("targetArchiveSubmit");
   const workflow=$("targetArchiveWorkflow");
+  // The URL is public, never a secret. Change only after creating the
+  // dedicated Free service in the separate Render Hobby workspace.
+  const PRIVATE_GATEWAY="https://intersection-originals-free.onrender.com";
+  const isPrivateGateway=location.origin===PRIVATE_GATEWAY;
   const viewer=document.createElement("a");
   viewer.href="?tab=archives";
   viewer.textContent="백업 보관함 열기";
@@ -220,35 +224,48 @@
     return false;
   }
   function refreshButton(){
-    // Keep the button operable so an empty/invalid account explains what is
-    // missing instead of looking broken on touch devices.
+    // Never leave users with a dead button or a GitHub Actions detour.
     submit.disabled=submitting;
-    submit.textContent=gatewayReady?"테라박스 백업 시작":"GitHub에서 백업 실행";
-    workflow.hidden=gatewayReady;
+    submit.textContent=gatewayReady?"테라박스 백업 시작":
+      (isPrivateGateway?"전용 보관함 인증 필요":"교집합에서 계정 백업");
+    workflow.hidden=true;
   }
-  function manualInstructions(copied){
-    const name=account.value.trim();
-    message.textContent=(copied?"계정 주소가 복사되었습니다. ":"계정 주소를 복사해 주세요. ")+
-      "열린 GitHub Actions에서 Run workflow → "+
-      (platform.value==="bluesky"?"Bluesky":"Mastodon")+
-      " 선택 → account에 '"+name+"' 입력 → Run workflow를 눌러야 백업을 요청합니다. "+
-      "이 버튼만으로 테라박스 저장이 시작되거나 완료된 것은 아닙니다.";
+  function openPrivateBackup(){
+    if(isPrivateGateway){
+      message.textContent="비공개 보관함에 아직 인증되지 않았습니다. 이 교집합 화면의 전용 접속 링크로 인증한 뒤 백업을 시작할 수 있습니다.";
+      return;
+    }
+    // Pages supplies only public platform/account selection. The same
+    // INTERSECTION app runs at the dedicated private Render origin; no
+    // GitHub page, popup, credential or implicit POST occurs on navigation.
+    const url=new URL(PRIVATE_GATEWAY+"/");
+    url.searchParams.set("tab","accounts");
+    url.searchParams.set("archive_platform",platform.value);
+    url.searchParams.set("archive_account",account.value.trim());
+    message.textContent="계정 선택을 유지한 채 교집합 보관함을 엽니다. 백업 실행은 인증 후 확인합니다.";
+    window.location.assign(url.href);
   }
-  function openManualWorkflow(){
-    // Both actions run directly in a user gesture; no credentials on Pages.
-    // Failure to copy or a blocked popup is harmless: the workflow link and
-    // selected account remain visible for a second attempt.
-    manualInstructions(false);
-    try{
-      const copy=window.navigator.clipboard?.writeText(account.value.trim());
-      if(copy&&typeof copy.then==="function")
-        copy.then(()=>manualInstructions(true)).catch(()=>manualInstructions(false));
-    }catch{/* Manual paste remains available. */}
-    // In-app iPhone WebViews commonly block window.open(). Same-tab
-    // navigation is a real user-gesture route and works without popups.
-    // The chosen public account is also copied when the browser permits it;
-    // the Back action retains this form for manual retry.
-    window.location.assign(workflow.href);
+  function restoreSelectedAccount(){
+    if(!isPrivateGateway)return;
+    const url=new URL(location.href);
+    const chosenPlatform=url.searchParams.get("archive_platform");
+    const chosenAccount=url.searchParams.get("archive_account");
+    if(!chosenAccount)return;
+    if(["bluesky","mastodon"].includes(chosenPlatform)){
+      platform.value=chosenPlatform;
+      account.value=chosenAccount;
+    }
+    url.searchParams.delete("archive_platform");
+    url.searchParams.delete("archive_account");
+    history.replaceState(null,"",url.pathname+url.search+url.hash);
+    if(validSelection()){
+      $("viewAccounts")?.click();
+      // Give the account panel one frame to switch before scrolling.
+      window.requestAnimationFrame(()=>{
+        $("accountBackupSection")?.scrollIntoView({block:"start"});
+      });
+      message.textContent="선택한 계정이 입력됐습니다. 테라박스 백업 시작을 눌러 요청하세요.";
+    }
   }
   async function check(){
     try{
@@ -273,7 +290,9 @@
     }catch{
       viewer.hidden=true;
       gatewayReady=false;
-      message.textContent="공개 페이지에서는 비밀키 없이 직접 백업을 실행할 수 없습니다. 계정 입력 후 GitHub에서 백업 실행을 누르면 작업 실행 화면이 열립니다.";
+      message.textContent=isPrivateGateway?
+        "전용 서버 인증이 확인되지 않았습니다. 비공개 접근 주소로 접속한 뒤 계정 백업을 시작하세요.":
+        "계정을 지정하면 교집합 전용 보관함으로 이어집니다. GitHub Actions 화면으로 이동하지 않습니다. 보관함 인증 후 백업을 시작합니다.";
     }finally{
       refreshButton();
     }
@@ -297,7 +316,7 @@
       return;
     }
     account.removeAttribute("aria-invalid");
-    if(!gatewayReady){openManualWorkflow();return;}
+    if(!gatewayReady){void openPrivateBackup();return;}
     const value=account.value.trim();
     submitting=true;
     refreshButton();
@@ -326,7 +345,7 @@
       void pollJob();
     }catch(error){
       message.textContent=String(error.message||"아카이브 요청 실패")+
-        " · 필요한 경우 GitHub Actions 직접 실행 링크를 이용하세요.";
+        " · 계정을 유지한 채 다시 시도할 수 있습니다.";
       // A transient server error must not leave a permanently disabled
       // button: the account choice remains intact for another attempt.
     }finally{
@@ -336,6 +355,7 @@
   window.addEventListener("intersection:private-session-ready",()=>{
     void check();
   });
+  restoreSelectedAccount();
   refreshButton();
   void check();
 })();
