@@ -58,12 +58,12 @@ Object.defineProperty(navigator,"clipboard",{
                       path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-bundle.yml"):
                     route.fulfill(status=200,content_type="text/html",
                                   body='<html><body><p id="workflow-reached">Owner workflow</p></body></html>')
-                elif parsed.hostname=="intersection-originals-free.onrender.com" and path=="/health":
+                elif parsed.hostname=="intersection-originals-free.onrender.com" and path=="/ready":
                     health_queries.append(1)
                     if backend_available:
                         route.fulfill(status=200,content_type="application/json",
                                       headers={"Access-Control-Allow-Origin":"https://koith.github.io"},
-                                      body='{"alive":true}')
+                                      body='{"ready":true}')
                     else:
                         route.fulfill(status=404,content_type="application/json",
                                       headers={"Access-Control-Allow-Origin":"https://koith.github.io"},
