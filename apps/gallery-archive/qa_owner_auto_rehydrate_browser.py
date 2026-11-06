@@ -13,7 +13,8 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 TARGET={
-    "yui":[("teddy-bear97",0),("djawa-privaty-public-samples",0)],
+    # Teddy Bear pages 1-10 have exact local copies: select an owner-only tile.
+    "yui":[("teddy-bear97",13),("djawa-privaty-public-samples",0)],
     "mimmi":[("v2ph-actor-a8n8n85a",10),("v2ph-actor-zo5n754z",16)],
 }
 BASE="https://koith.github.io/browser-app-lab/apps"
