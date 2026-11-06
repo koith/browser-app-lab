@@ -169,17 +169,24 @@ def profile_input(platform, raw):
             if url.hostname != "bsky.app" or not url.path.startswith("/profile/"):
                 raise ValueError("invalid Bluesky profile URL")
             raw = url.path[len("/profile/"):].strip("/")
-        raw = raw.lstrip("@")
-        if not ACCOUNT_RE.fullmatch(raw) or "/" in raw:
-            raise ValueError("invalid Bluesky profile")
+        if raw.startswith("@"):
+            raw = raw[1:]
         if raw.startswith("did:"):
             if not DID_RE.fullmatch(raw):
                 raise ValueError("invalid Bluesky DID")
-        elif not allowed_host(raw):
-            # A Bluesky handle is a DNS-style hostname. Reject colon-bearing
-            # pseudo-schemes (e.g. javascript:) before any source request.
+            return raw
+        # A Bluesky short username is resolved under the official bsky.social
+        # namespace. Custom-domain handles keep their existing full hostname.
+        # The same canonical value is used in queue, workflow and manifest.
+        if "." not in raw:
+            if not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{1,61}[A-Za-z0-9])", raw):
+                raise ValueError("invalid Bluesky username")
+            raw += ".bsky.social"
+        if not allowed_host(raw) or any(
+                not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", part)
+                for part in raw.split(".")):
             raise ValueError("invalid Bluesky handle")
-        return raw
+        return raw.lower()
     if raw.startswith("https://"):
         u = urlsplit(require_public_https(raw))
         if not re.fullmatch(r"/@[A-Za-z0-9_][A-Za-z0-9_.-]{0,59}/?",u.path):
