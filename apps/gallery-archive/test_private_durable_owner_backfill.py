@@ -93,6 +93,64 @@ with patch.object(module,"verify_remotely",return_value=True) as verifier:
     assert verifier.call_count==1
 print("OWNER_DURABLE_IMMUTABLE_EXISTING_SHA_SKIP_PASS")
 
-# Finalize is the ONLY path that writes authenticated catalog metadata;
-# incomplete unverified media cannot accidentally expose it.
+from botocore.exceptions import ClientError
+import io
+from hashlib import sha256
+
+config={"bucket":"gallery-private-owner-test","region":"us-west-004",
+        "endpoint":"https://s3.us-west-004.backblazeb2.com",
+        "key":"synthetic-access-key","secret":"synthetic-secret-key"}
+new=sample("mimmi")
+new["albums"][0]["images"].append({
+    "number":2,"key":"originals/verified-owner-work/00002.jpg",
+    "sha256":"e"*64,"bytes":500,"width":320,"height":400})
+raw=json.dumps(new).encode()
+old=sample("mimmi")
+oldraw=json.dumps(old).encode()
+
+def fakes(existing):
+    client=MagicMock()
+    if existing is None:
+        client.get_object.side_effect=ClientError(
+            {"Error":{"Code":"NoSuchKey","Message":"not found"}},"GetObject")
+    else:
+        client.get_object.return_value={
+            "Body":io.BytesIO(json.dumps(existing).encode()),
+            "ETag":'"mock-previous-etag"'}
+    return client
+
+with patch.object(module,"credentials",return_value=config),patch.object(
+        module,"save_immutable",return_value=True) as saved,patch.object(
+        module,"verify_remotely",return_value=True) as readback,patch.object(
+        module.boto3,"client") as factory:
+    empty=fakes(None);factory.return_value=empty
+    assert module.publish_versioned_catalog_only_after_all_sha(
+        "mimmi",raw,new,"ownerreplica:bucket/mimmi") is True
+    assert empty.put_object.call_args.kwargs["IfNoneMatch"]=="*"
+    assert "IfMatch" not in empty.put_object.call_args.kwargs
+    assert saved.call_args.args[1]=="metadata/versions/"+sha256(raw).hexdigest()+".json"
+
+    prior=fakes(old);factory.return_value=prior
+    assert module.publish_versioned_catalog_only_after_all_sha(
+        "mimmi",raw,new,"ownerreplica:bucket/mimmi") is True
+    assert prior.put_object.call_args.kwargs["IfMatch"]=='"mock-previous-etag"'
+    assert "IfNoneMatch" not in prior.put_object.call_args.kwargs
+
+    # Revision may only APPEND new SHA records; never remove an original.
+    shrink=fakes(new);factory.return_value=shrink
+    try:
+        module.publish_versioned_catalog_only_after_all_sha(
+            "mimmi",oldraw,old,"ownerreplica:bucket/mimmi")
+    except RuntimeError:pass
+    else:raise AssertionError("New manifest silently removed an old SHA")
+    shrink.put_object.assert_not_called()
+
+    wrong_owner=fakes(sample("yui"));factory.return_value=wrong_owner
+    try:module.publish_versioned_catalog_only_after_all_sha(
+        "mimmi",raw,new,"ownerreplica:bucket/mimmi")
+    except RuntimeError:pass
+    else:raise AssertionError("Foreign owner manifest was accepted")
+    wrong_owner.put_object.assert_not_called()
+print("OWNER_DURABLE_ATOMIC_VERSIONED_CATALOG_NO_LOST_SHA_PASS")
+
 print("OWNER_DURABLE_APPEND_ONLY_SHA_PILOT_TESTS_PASS")
