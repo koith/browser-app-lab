@@ -969,8 +969,8 @@ const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS
 // The regular Posts tab shows fresh public SNS posts on BOTH hosts.
 // TeraBox-only records remain available in the Archive tab; "?source=archive"
 // is retained for direct bookmarked access to the legacy archive-only feed.
-const cloudMode=location.hostname!=="koith.github.io"&&
-  new URLSearchParams(location.search).get("source")==="archive";
+const privateHost=location.hostname!=="koith.github.io";
+const cloudMode=privateHost&&new URLSearchParams(location.search).get("source")==="archive";
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
@@ -1863,7 +1863,7 @@ $("applyDate").addEventListener("click",()=>{
   $("dateDialog").close();loadBatch(true);
 });
 $("socialFind").addEventListener("click",async ()=>{
-  if(!cloudMode)return;
+  if(!privateHost)return;
   let button=$("socialFind"),term=$("socialTerm").value,platform=$("socialPlatform").value;
   button.disabled=true;$("socialStatus").textContent="검색 중…";
   try{
@@ -1896,10 +1896,10 @@ $("more").addEventListener("click",()=>{
 
 $("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days))});
 setPreset(30);
+if(privateHost)$("socialControls").classList.remove("hidden");
 if(cloudMode){
   $("archiveControls").classList.remove("hidden");
   $("activityRanking").classList.add("hidden");
-  $("socialControls").classList.remove("hidden");
   $("source").textContent="테라박스 저장 게시글 · 글/사진/영상";
   $("openDate").classList.add("hidden");
   loadCloud(true);
