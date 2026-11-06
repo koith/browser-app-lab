@@ -90,5 +90,11 @@ jobs:
         shell: bash
         run: |
           flags=()
-          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then flags+=(--verify-progressive); fi
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            flags+=(--verify-progressive)
+          else
+            # Pending Pages deploy cannot verify a PR commit. Test candidate
+            # HTML on the Pages origin instead of silently testing old live.
+            flags+=(--candidate-html)
+          fi
           python apps/gallery-archive/qa_gallery_first_image_metrics.py --browser '${{ matrix.browser }}' "${flags[@]}"
