@@ -82,16 +82,21 @@
   min-height:22px!important;padding:2px 5px!important;
  }
 }
-/* R15 iPhone portrait source-dice visibility: an 844px-tall phone
- * may have a short, top-aligned board-area ending near y~526. The action
- * tray anchored to that area obscured a native battle die at y~496 even
- * though the rest of the full viewport remained empty. Keep the SAME
- * real result button visible at the bottom of the viewport, as in the
- * already corrected short-landscape case. No source art is moved. */
+/* R15 iPhone portrait: the native dice occupy the centre of the
+ * short board-area near y=496. A centred result button overlaps the
+ * original dice, but moving it to fixed viewport-bottom escapes the
+ * original board, breaks hit testing and causes WebKit taps to time out.
+ * Keep the SAME clickable button INSIDE the native board, under the
+ * metal podium (as in 2004), aligned to the right empty margin instead
+ * of covering the source dice; landscape retains its proven fixed rule.
+ * This is only a responsive WEB adaptation, not original 3D geometry. */
 @media (orientation:portrait) and (max-width:650px){
  #app.app-classic-dice #game #board-area>.leaf-native-battle-actions{
-  position:fixed!important;
-  bottom:max(4px,env(safe-area-inset-bottom))!important;
+  position:absolute!important;
+  left:auto!important;
+  right:4px!important;
+  transform:none!important;
+  bottom:4px!important;
  }
 }
 /* Round 13 (2026-11-05) measured defect: on a short landscape phone
