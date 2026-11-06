@@ -81,6 +81,55 @@ async def receive_authenticated_credential(request:Request):
     return JSONResponse({"accepted":True,"storage_configured":configured()},
                         headers={"Cache-Control":"no-store"})
 
+def _bridge_authenticated(request):
+    header=request.headers.get("authorization","")
+    if not header.startswith("Bearer ") or len(header)>12500:
+        raise HTTPException(403,"Bridge identity required")
+    try:
+        return verify_bridge_token(header[7:])
+    except (ValueError,TypeError,KeyError):
+        raise HTTPException(403,"Bridge identity rejected") from None
+    except Exception:
+        raise HTTPException(503,"Bridge identity verification unavailable") from None
+
+
+@app.get("/api/bridge/pending",include_in_schema=False)
+async def github_pending_requests(request:Request):
+    _bridge_authenticated(request)
+    if not configured():
+        raise HTTPException(503,"Private archive not connected")
+    try:
+        from backup_queue import pending
+        rows=await asyncio.to_thread(pending,limit=1)
+    except (RuntimeError,ValueError):
+        raise HTTPException(503,"Private queue listing unavailable") from None
+    return JSONResponse({"requests":rows},
+                        headers={"Cache-Control":"private, no-store"})
+
+
+@app.post("/api/bridge/ack",include_in_schema=False)
+async def github_acknowledge_job(request:Request):
+    _bridge_authenticated(request)
+    if not configured():
+        raise HTTPException(503,"Private archive not connected")
+    raw=await request.body()
+    if len(raw)>1000:
+        raise HTTPException(413,"Invalid bridge acknowledgment")
+    try:
+        payload=json.loads(raw)
+        if type(payload) is not dict or set(payload)!={"job_id","workflow_run_id"}:
+            raise ValueError("Invalid acknowledgment")
+        from backup_queue import accept
+        row=await asyncio.to_thread(accept,payload["job_id"],
+                                     payload["workflow_run_id"])
+    except (ValueError,TypeError,KeyError):
+        raise HTTPException(400,"Invalid bridge acknowledgment") from None
+    except RuntimeError:
+        raise HTTPException(503,"Unable to verify immutable queue acknowledgment") from None
+    return JSONResponse({"accepted":True,"job_id":row["job_id"]},
+                        headers={"Cache-Control":"private, no-store"})
+
+
 @app.get("/ready",include_in_schema=False)
 async def backup_readiness():
     # Public frontend probes only after the user clicks backup. Liveness alone
