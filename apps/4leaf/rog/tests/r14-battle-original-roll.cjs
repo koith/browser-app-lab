@@ -42,6 +42,8 @@ const VIEWS=[['desktop-800x600',{viewport:{width:800,height:600}}],['iphone-port
       dice:[...s.querySelectorAll('.battle-visual-die.battle-die-has-original')].map(d=>({eye:d.dataset.eye,f:d.dataset.rollFrame||'',st:d.dataset.battleRoll||''})),
       totals:[...s.querySelectorAll('.battle-visual-total')].map(t=>getComputedStyle(t).visibility),
       poses:Object.fromEntries([...s.querySelectorAll('.leaf-battle-chessman')].map(a=>[a.dataset.duelSide,a.dataset.actorPose])),
+      nativeAttackFrame:s.querySelector('.leaf-battle-chessman[data-duel-side="attacker"]')?.dataset.actorFrame||'',
+      nativeAttackSequence:s.querySelector('.leaf-battle-chessman[data-duel-side="attacker"]')?.dataset.sourceFrameSequence||'',
       lungeMs:Number(s.querySelector('.leaf-battle-chessman[data-duel-side="attacker"]')?.dataset.sourceNativeDurationMs)||0,
       clipped:[...s.querySelectorAll('.battle-die-original')].some(i=>{const r=i.getBoundingClientRect();return r.width>0&&(r.left<0||r.right>innerWidth||r.top<0||r.bottom>innerHeight)})})}
      if(!stop)requestAnimationFrame(tick)};
@@ -86,7 +88,22 @@ const VIEWS=[['desktop-800x600',{viewport:{width:800,height:600}}],['iphone-port
    assert.ok(rolling.every(x=>x.poses.attacker==='idle'),name+' attacker waits while dice roll');
    assert.ok(firstScored&&firstScored.totals.every(v=>v==='visible'),name+' totals shown on landing');
    assert.ok(firstAttack&&firstAttack.t>=rolling.at(-1).t,name+' lunge after landing');
-   assert.ok(firstOutcome&&firstOutcome.t-firstAttack.t>=Math.max(880,firstAttack.lungeMs-40),name+' outcome waits for the full lunge '+JSON.stringify({attackAt:firstAttack?.t,outcomeAt:firstOutcome?.t,observedDuration:firstOutcome?.t-firstAttack?.t,nativeLungeMs:firstAttack?.lungeMs,required:Math.max(880,firstAttack?.lungeMs-40)}));
+   // Source timing begins at the pose call, but this trace observes the
+   // FIRST visible attack at requestAnimationFrame. A throttled landscape
+   // WebKit paint can be observed 50ms late. Verify the ACTUAL last native
+   // frame and allow an 80ms first-paint measurement uncertainty, rather
+   // than rejecting a fully-rendered source sequence on timestamp alone.
+   const nativeKeys=(firstAttack?.nativeAttackSequence||'').split(',').filter(Boolean);
+   const finalKey=nativeKeys.at(-1);
+   assert.ok(nativeKeys.length>1&&finalKey,name+' real CHR attack source sequence');
+   assert.ok(trace.some(x=>x.phase==='attack'&&x.nativeAttackFrame===finalKey),
+    name+' original last CHR attack frame '+finalKey+' visible before outcome');
+   const visibleMs=firstOutcome?.t-firstAttack?.t;
+   const minimum=Math.max(900,firstAttack.lungeMs-80);
+   assert.ok(firstOutcome&&visibleMs>=minimum,
+    name+' original full lunge with WebKit first-paint tolerance '+JSON.stringify({
+     attackAt:firstAttack.t,outcomeAt:firstOutcome?.t,visibleMs,
+     nativeMs:firstAttack.lungeMs,minimum,finalKey}));
    assert.ok(!trace.some(x=>x.clipped),name+' no roll frame leaves the viewport');
    const rec={view:name,dice:dieCount,rollMs:rolling.at(-1).t-rolling[0].t,attackAt:firstAttack.t,outcomeAt:firstOutcome.t,
     lungeMs:firstAttack.lungeMs,perDie:perDie.map(d=>({eye:d.eye,frames:d.seq.length,first:d.seq[0],last:d.seq.at(-1)}))};
