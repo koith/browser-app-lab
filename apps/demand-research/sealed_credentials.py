@@ -66,9 +66,9 @@ def seal(secret):
 
 
 def unseal(envelope,private_key):
-    if not isinstance(envelope,dict) or set(envelope)!={
+    if (not isinstance(envelope,dict) or set(envelope)!={
             "schema_version","ephemeral","salt","nonce","ciphertext"} or
-            envelope["schema_version"]!=SCHEMA:
+            envelope["schema_version"]!=SCHEMA):
         raise ValueError("Unsupported credential envelope")
     keyraw=_decode(private_key)
     if len(keyraw)!=32:
