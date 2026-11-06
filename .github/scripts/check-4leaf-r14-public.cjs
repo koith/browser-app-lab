@@ -4,6 +4,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const crypto=require('node:crypto');
 const {chromium,webkit}=require('playwright');
 const base='https://koith.github.io/browser-app-lab/apps/4leaf/rog/';
 const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
@@ -34,7 +35,49 @@ async function waitForPublishedVersion(){
  const browser=await engine.launch(engine===chromium?{headless:true,args:['--no-sandbox']}:{headless:true});
  const context=await browser.newContext({viewport:engine===webkit?{width:390,height:844}:{width:800,height:600},
   serviceWorkers:'block',hasTouch:engine===webkit,isMobile:engine===webkit});
- const page=await context.newPage(),errors=[],invalid=[];
+ const page=await context.newPage(),errors=[],invalid=[],recoveredCSS=[];
+ const sourceRoot=path.resolve(__dirname,'../../apps/4leaf/rog');
+ const basePath=new URL(base).pathname;
+ const sha256=b=>crypto.createHash('sha256').update(b).digest('hex');
+ function localSource(url){
+  const p=new URL(url);
+  if(!p.href.startsWith(base)||!p.pathname.startsWith(basePath))return null;
+  const relative=decodeURIComponent(p.pathname.slice(basePath.length));
+  if(!relative||relative.includes('..')||relative.startsWith('/')||relative.includes('\\'))return null;
+  const source=path.resolve(sourceRoot,relative);
+  return source.startsWith(sourceRoot+path.sep)?{source,relative}:null;
+ }
+ // Transient Github Pages CSS 503: only supply the actual stylesheet to the
+ // browser before layout if a retry matches this commit's exact SHA256.
+ await context.route(/\.css(?:[?#]|$)/i,async route=>{
+  const url=route.request().url();
+  if(!url.startsWith(base)){await route.continue();return}
+  let first;
+  try{first=await route.fetch({timeout:15000})}
+  catch(e){await route.continue();return}
+  if(![429,502,503,504].includes(first.status())){
+   await route.fulfill({response:first});return;
+  }
+  const file=localSource(url);
+  if(!file||!file.relative.endsWith('.css')||!fs.existsSync(file.source)){
+   await route.fulfill({response:first});return;
+  }
+  const expected=sha256(fs.readFileSync(file.source));
+  for(let i=1;i<=4;i++){
+   try{
+    await sleep(i*350);
+    const retryUrl=url+(url.includes('?')?'&':'?')+'css_retry='+i+'_'+Date.now();
+    const response=await route.fetch({url:retryUrl,timeout:15000});
+    const body=await response.body();
+    if(response.status()===200&&sha256(body)===expected){
+     await route.fulfill({response,status:200,body});
+     recoveredCSS.push({relative:file.relative,sha256:expected});
+     return;
+    }
+   }catch(e){console.warn('PUBLIC_CSS_RETRY',file.relative,String(e).slice(0,100))}
+  }
+  await route.fulfill({response:first});
+ });
  // Match the real, already-passing WorldMap->DiceChannel CI entry scenario.
  // A live production backend may be reachable independently from GitHub
  // Pages; the game-start acceptance must not depend on external login.
@@ -107,34 +150,44 @@ async function waitForPublishedVersion(){
   await press(button);
   await page.waitForFunction(()=>!document.getElementById('battle-visual'),null,{timeout:10000});
   assert.deepEqual(errors,[],'public runtime must not throw');
-  // GitHub Pages occasionally responds with transient 503 for a source PNG
-  // while its own original chessman retry subsequently succeeds. Do not
-  // suppress a permanently missing file: retry it and verify the PNG magic.
+  // Retry only transient original PNG responses, with byte-perfect source
+  // SHA256; permanent 404, HTML error page, missing/mismatched content FAIL.
+  // Transient CSS retries occurred BEFORE layout in the network interception.
   const unrecovered=[];
   for(const item of [...new Set(invalid)]){
    const [statusText,...parts]=item.split(' '),url=parts.join(' ');
-   const status=Number(statusText),asset=/\.png(?:[?#]|$)/i.test(url);
-   if(!asset||![429,502,503,504].includes(status)){
+   const file=localSource(url);
+   if(![429,502,503,504].includes(Number(statusText))||!file||
+      !file.relative.endsWith('.png')||!fs.existsSync(file.source)){
     unrecovered.push(item);continue;
    }
+   const expectedSHA=sha256(fs.readFileSync(file.source));
    let valid=false,last='not-checked';
-   for(let attempt=1;attempt<=4;attempt++){
+   for(let i=1;i<=4;i++){
     try{
-     const res=await context.request.get(url+(url.includes('?')?'&':'?')+
-      'original_png_retry='+attempt+'_'+Date.now(),{timeout:15000});
-     const body=await res.body();
-     const header=body.subarray(0,8).toString('hex');
-     valid=res.status()===200&&header==='89504e470d0a1a0a';
-     last=res.status()+' '+header;
+     const retry=url+(url.includes('?')?'&':'?')+'original_png_retry='+i+'_'+Date.now();
+     const res=await context.request.get(retry,{timeout:15000});
+     const bytes=await res.body();
+     valid=res.status()===200&&bytes.subarray(0,8).toString('hex')==='89504e470d0a1a0a'&&
+      sha256(bytes)===expectedSHA;
+     last=res.status()+' '+sha256(bytes).slice(0,12);
      if(valid)break;
     }catch(e){last=String(e)}
-    await sleep(600*attempt);
+    await sleep(i*600);
    }
-   if(!valid)unrecovered.push(item+'; retry='+last);
-   else console.log('PUBLIC_ORIGINAL_PNG_REVALIDATED',url);
+   if(!valid)unrecovered.push(item+'; source SHA retry='+last);
+   else console.log('PUBLIC_ORIGINAL_PNG_SHA256_REVALIDATED',file.relative,expectedSHA);
   }
-  assert.deepEqual(unrecovered,[],'public game must load every original source PNG');
-  console.log('R14_PUBLIC_REAL_GAME_PASS',JSON.stringify({browser:engine.name(),release:meta.version,pwa:meta.pwaCache,scene,hittable,transientAssetErrors:invalid.length}));
+  assert.deepEqual(unrecovered,[],'public game must load or recover exact source assets');
+  const appliedCSS=await page.evaluate(names=>names.map(name=>({
+   name,loaded:[...document.querySelectorAll('link[rel="stylesheet"]')].some(l=>{
+    try{return new URL(l.href).pathname.endsWith('/'+name)&&!!l.sheet}
+    catch(e){return false}
+   })
+  })),recoveredCSS.map(x=>x.relative));
+  assert.ok(appliedCSS.every(x=>x.loaded),
+   'recovered original CSS must be present in live layout: '+JSON.stringify(appliedCSS));
+  console.log('R14_PUBLIC_REAL_GAME_PASS',JSON.stringify({browser:engine.name(),release:meta.version,pwa:meta.pwaCache,scene,hittable,transientAssetErrors:invalid.length,recoveredCSS}));
  }catch(e){await page.screenshot({path:'4leaf-r14-public-fail-'+engine.name()+'.png',fullPage:true}).catch(()=>{});throw e}
  finally{await browser.close()}
 })().catch(e=>{console.error('R14_PUBLIC_REAL_GAME_FAILURE',e.stack||e);process.exitCode=1});
