@@ -47,12 +47,29 @@ def poll_once():
             snapshot=request_json(GATEWAY+"/api/bridge/diagnostics",
                                   headers=bridge_headers,timeout=90)
             for field in ("automated_posts_state","automated_posts",
+                          "post_journal_state","post_journal_candidates",
                           "account_bundles_state","account_zip_candidates",
                           "account_zip_read_verified","account_registry_state",
                           "account_registry_count"):
                 value=snapshot.get(field)
                 if isinstance(value,(str,int)) or value is None:
                     print("INTERSECTION_ARCHIVE_AUDIT",field,value,flush=True)
+            if snapshot.get("account_zip_candidates",0)>0:
+                # This GET reads one latest ZIP from remote storage and checks
+                # the immutable name digest AND every manifest object digest.
+                # No account identity, source text or cloud credential is logged.
+                try:
+                    proof=request_json(GATEWAY+"/api/bridge/verify-one",
+                                       headers=bridge_headers,timeout=95)
+                    state=proof.get("state")
+                    if state in ("SHA_VERIFIED","READBACK_TIMED_OUT",
+                                 "READBACK_UNVERIFIED","NO_ZIP_CANDIDATES"):
+                        print("INTERSECTION_ACCOUNT_ZIP_PROOF",state,
+                              "posts",proof.get("posts") if state=="SHA_VERIFIED" else None,
+                              "objects",proof.get("objects") if state=="SHA_VERIFIED" else None,
+                              flush=True)
+                except Exception:
+                    print("INTERSECTION_ACCOUNT_ZIP_PROOF_UNAVAILABLE",flush=True)
         except Exception:
             print("INTERSECTION_ARCHIVE_AUDIT_UNAVAILABLE",flush=True)
     pending=request_json(GATEWAY+"/api/bridge/pending",headers=bridge_headers)
