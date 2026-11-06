@@ -691,7 +691,7 @@ async def viewer_script(asset_name:str):
 
 @app.get("/assets/{asset_name}",include_in_schema=False)
 async def viewer_asset(asset_name:str):
-    if not re.fullmatch(r"[a-z0-9_-]{1,50}\\.svg",asset_name):
+    if not re.fullmatch(r"[a-z0-9_-]{1,50}\.svg",asset_name):
         raise HTTPException(404,"Not found")
     path=VIEW_FILE.parent/"assets"/asset_name
     if not path.is_file():
