@@ -135,6 +135,21 @@ def fake_private_archive(monkeypatch):
     monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
 
 
+def test_bluesky_username_and_handle_are_canonical_without_profile_url():
+    assert job.profile_input("bluesky", "sample") == "sample.bsky.social"
+    assert job.profile_input("bluesky", "@Sample") == "sample.bsky.social"
+    assert job.profile_input("bluesky", "@Sample.BSKY.SOCIAL") == "sample.bsky.social"
+    assert job.profile_input("bluesky", "custom.example") == "custom.example"
+    assert job.profile_input("bluesky", "https://bsky.app/profile/Sample.bsky.social") == "sample.bsky.social"
+    assert job.profile_input("mastodon", "@writer@mastodon.example") == ("mastodon.example","writer")
+    with pytest.raises(ValueError):
+        job.profile_input("mastodon","@writer")
+    for invalid in ("@ab", "@bad_name", "@@sample", "javascript:alert(1)",
+                    "https://127.0.0.1/profile/sample", "@bad..example"):
+        with pytest.raises(ValueError):
+            job.profile_input("bluesky",invalid)
+
+
 def test_blue_source_replies_and_video_original_bytes_are_verified_and_resume(capsys):
     p1=blue_row("original01","A public synthetic initial post",
                 assets=[("image/jpeg",PHOTO),("video/mp4",VIDEO)])
