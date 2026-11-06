@@ -205,57 +205,72 @@ if(location.hostname==='koith.github.io' && 'serviceWorker' in navigator){
 
 const $=id=>document.getElementById(id);
 const imageHealth={loaded:new Set(),failed:new Set()};
-// A failed owner image must not stay permanently blank after the existing
-// signed owner worker restores its exact SHA in Render. Poll only while a
-// user-reported screenshot album has failed visible tiles; no new collection.
+// Automatic recovery is local-first and budgeted: retry only failed,
+// currently visible owner photos. No periodic backend health polling. A cold
+// Render gateway or a single missing photo cannot hold every other album blank.
 const ownerRecoveryPending=new Set();
+const ownerRecoveryState=new WeakMap();
 let ownerRecoveryTimer=null;
-const ownerRecoveryEndpoint='https://mimmi-private-gallery-free.onrender.com/api/gallery-media-readiness';
+const OWNER_RECOVERY_MAX_ATTEMPTS=3;
+const OWNER_RECOVERY_COOLDOWN_MS=45000;
 function queueOwnerImageRecovery(img){
  const p=ownerPhotoIndex.get(img?.dataset.owner||'');
- if(!p||!img.isConnected||!img.closest('.photo')||
-    !['teddy-bear97','v2ph-actor-a8n8n85a'].includes(p.ownerAlbum))return;
+ if(!p||!img.isConnected||!img.closest('.photo'))return;
+ const s=ownerRecoveryState.get(img)||{attempts:0,last:0};
+ if(s.attempts>=OWNER_RECOVERY_MAX_ATTEMPTS)return;
  ownerRecoveryPending.add(img);
- if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,14000);
+ if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,20000);
+}
+function ownerRetryVisible(img){
+ const box=img.getBoundingClientRect();
+ return box.bottom>=-120&&box.top<=innerHeight+200;
 }
 async function retryOwnerImagesIfReady(){
  ownerRecoveryTimer=null;
- for(const img of [...ownerRecoveryPending])if(!img.isConnected||!img.closest('.photo'))ownerRecoveryPending.delete(img);
- if(!ownerRecoveryPending.size)return;
- if(document.hidden){
-  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,30000);
-  return;
- }
- let ready=false;
- const aborter=new AbortController(),timeout=setTimeout(()=>aborter.abort(),8000);
- try{
-  const r=await fetch(ownerRecoveryEndpoint,{cache:'no-store',signal:aborter.signal});
-  const response=r.ok?await r.json():null;
-  ready=response?.ready===true&&response.expected===214&&response.available===214;
- }catch{}finally{clearTimeout(timeout)}
- if(ready)for(const img of [...ownerRecoveryPending]){
-  ownerRecoveryPending.delete(img);
+ for(const img of ownerRecoveryPending)
+  if(!img.isConnected||!img.closest('.photo'))ownerRecoveryPending.delete(img);
+ if(!ownerRecoveryPending.size||document.hidden||navigator.onLine===false)return;
+ let started=0,waiting=false;
+ const now=Date.now();
+ for(const img of [...ownerRecoveryPending]){
+  if(!ownerRetryVisible(img))continue;
+  const s=ownerRecoveryState.get(img)||{attempts:0,last:0};
+  if(s.attempts>=OWNER_RECOVERY_MAX_ATTEMPTS){
+   ownerRecoveryPending.delete(img);continue;
+  }
+  if(now-s.last<OWNER_RECOVERY_COOLDOWN_MS){waiting=true;continue;}
+  if(started>=2){waiting=true;break;}
   const p=ownerPhotoIndex.get(img.dataset.owner||'');
-  if(!p||!img.isConnected)continue;
-  img.hidden=false;
+  ownerRecoveryPending.delete(img);
+  if(!p)continue;
+  started++;
+  s.attempts++;s.last=now;ownerRecoveryState.set(img,s);
+  // The existing image load/error listeners own the final visual status.
+  // Never show a successful-looking card until naturalWidth proves decode.
   img.dataset.ownerVariant='original';
-  img.closest('.photo')?.classList.remove('broken-source');
-  delete img.closest('.photo')?.dataset.imageState;
   MimmiPrivate.asset(p,'original').then(url=>{
-   if(img.isConnected)img.src=url+'&rehydrate='+Date.now();
+   if(!img.isConnected)return;
+   img.hidden=false;
+   img.removeAttribute('src');
+   img.src=url+(url.includes('?')?'&':'?')+'owner-retry='+s.attempts;
   }).catch(()=>queueOwnerImageRecovery(img));
  }
- if(ownerRecoveryPending.size&&ownerRecoveryTimer===null)
-  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,30000);
+ // One bounded cooldown for visible failures; offscreen work waits for scroll.
+ if(waiting||started&&ownerRecoveryPending.size)
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,OWNER_RECOVERY_COOLDOWN_MS);
 }
 function refreshOwnerFailuresOnFocus(){
- if(!document.hidden&&ownerRecoveryPending.size){
-  if(ownerRecoveryTimer!==null)clearTimeout(ownerRecoveryTimer);
-  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,100);
- }
+ if(document.hidden||!ownerRecoveryPending.size)return;
+ if(ownerRecoveryTimer!==null)clearTimeout(ownerRecoveryTimer);
+ ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,150);
 }
 document.addEventListener('visibilitychange',refreshOwnerFailuresOnFocus);
 window.addEventListener('focus',refreshOwnerFailuresOnFocus);
+window.addEventListener('online',refreshOwnerFailuresOnFocus);
+window.addEventListener('scroll',()=>{
+ if(ownerRecoveryPending.size&&ownerRecoveryTimer===null)
+  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,400);
+},{passive:true});
 
 function registerImageHealth(url,ok){
  if(!url||!url.startsWith('https://'))return;
@@ -273,7 +288,7 @@ function recoverSavedCover(img){
 document.addEventListener('load',e=>{
  const img=e.target;
  if(img instanceof HTMLImageElement&&img.closest('.album,.photo')&&img.naturalWidth>=100)
-  {registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo')?.classList.remove('broken-source');}
+  {registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo')?.classList.remove('broken-source');ownerRecoveryPending.delete(img);}
 },true);
 document.addEventListener('error',e=>{
  const img=e.target,container=img instanceof HTMLImageElement?img.closest('.album,.photo'):null;
@@ -410,7 +425,7 @@ function photoHTML(p,i){
   :(p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url)+'"':'src="'+esc(p.url)+'"';
  return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" '+source+' alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>';
 }
-const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerPhotoIndex.get(e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{if(!recoverSavedCover(e.target))e.target.alt='보관본 연결을 확인해 주세요'})}}},{rootMargin:'64px'});
+const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerPhotoIndex.get(e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{if(!recoverSavedCover(e.target)){e.target.alt='보관본 연결을 확인해 주세요';queueOwnerImageRecovery(e.target)}})}}},{rootMargin:'64px'});
 function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
 // Retain the same in-flight image element as the complete album renderer takes
 // over. Recreating <img> can cancel an already downloading Pages thumbnail.
