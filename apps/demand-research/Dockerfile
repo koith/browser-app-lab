@@ -7,7 +7,7 @@ RUN curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-
  && find /tmp/rclone-extra -type f -name rclone -exec install -m 755 {} /usr/local/bin/rclone \; \
  && rm -rf /tmp/rclone.zip /tmp/rclone-extra \
  && rclone help backends | grep -qi terabox
-RUN python -m pip install --no-cache-dir fastapi==0.115.12 uvicorn==0.35.0
+RUN python -m pip install --no-cache-dir fastapi==0.115.12 uvicorn==0.35.0 PyJWT==2.10.1 cryptography==46.0.4
 WORKDIR /app
 COPY apps/demand-research/gateway.py /app/gateway.py
 COPY apps/demand-research/target_archive_api.py /app/target_archive_api.py
