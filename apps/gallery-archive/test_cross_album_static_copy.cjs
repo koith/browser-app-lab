@@ -60,10 +60,12 @@ for(const model of ['mimmi','yui']){
  }
  let exactCross=0,recovered=0,wrong=0;
  const bytesVerified=new Set();
+ const crossPhotos=[];
  for(const a of privatePhotos)for(const p of a.images){
   const matches=(byPublic.get(p.sha256)||[]).filter(v=>v.p.bytes===p.bytes&&v.p.width===p.width&&v.p.height===p.height);
   if(!matches.length||matches.some(v=>v.album===a.id))continue;
   exactCross++;
+  crossPhotos.push(p.sha256);
   const actual=byResult.get(a.id)?.get(p.sha256);
   assert(actual,{model,album:a.id,sha:p.sha256,why:'missing original'});
   if(actual.shaPinnedLocalCopy===true && actual.url?.startsWith('stored-albums/')){
@@ -77,6 +79,22 @@ for(const model of ['mimmi','yui']){
     bytesVerified.add(actual.url);
    }
   }else wrong++;
+ }
+ if(model==='mimmi'){
+  // Mimmi has evidence-reviewed editions that intentionally collapse
+  // duplicate SHA photos. Verify every recovered SHA remains reachable
+  // through an actual Pages original in the FINAL composed albums.
+  const grouping={};
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT,'mimmi-gallery/album-grouping.js'),'utf8'),
+    {window:grouping,URL,Set,Map,Number});
+  const aliases=JSON.parse(fs.readFileSync(path.join(ROOT,'mimmi-gallery/album-aliases.json'),'utf8'));
+  const merged=grouping.MimmiAlbumGrouping.combine(result,aliases.aliases||{},aliases.evidence||{});
+  const visible=new Set(merged.albums.flatMap(a=>a.images)
+    .filter(p=>typeof p.url==='string'&&p.url.startsWith('stored-albums/'))
+    .map(p=>p.sha256));
+  const lost=crossPhotos.filter(sha=>!visible.has(sha));
+  assert.equal(lost.length,0,'Mimmi aliases incorrectly lost a SHA-identical physical file');
+  console.log('MIMMI_GROUPED_OWNER_MATCHES_PUBLICLY_REACHABLE',crossPhotos.length);
  }
  assert.equal(wrong,0,model+' cross-album SHA records still going to Render');
  assert(recovered>0,'real persisted fallback not exercised for '+model);
