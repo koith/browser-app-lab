@@ -49,6 +49,40 @@ for(const [id,count] of reviewed){
   actual.push(expected);
  }
 }
+// A source effect is not a restored actor: enforce BOTH CHR native body
+// members from the byte-verified original CardData +260 table. This closes
+// the actual failed offline CI, where FX frames rendered but the original
+// CHR actor sprites fell back to portraits with the network disabled.
+const bodyManifestText=load('original/OBS/referenced/chr-bodies-manifest.js');
+const bodyPrefix='window.ORIGINAL_LEAF_RECOVERED_CHR_BODIES=';
+assert.ok(bodyManifestText.includes(bodyPrefix),'original CHR manifest missing');
+const bodies=JSON.parse(bodyManifestText.split(bodyPrefix)[1].trim().replace(/;\\s*$/,''));
+let bodyFrames=0;
+for(const id of ['1026','1029']){
+ const original='obs/'+id;
+ const entry=bodies[original];
+ assert.ok(entry,'original CHR body missing '+original);
+ assert.equal(entry.originalMember,'OBS.pak/'+id+'.obs');
+ assert.match(entry.sourceSHA256,/^[a-f0-9]{64}$/);
+ assert.equal(entry.blocks.length,1);
+ const frames=entry.blocks[0].frames;
+ assert.equal(frames.length,37,'native body frame count mismatch '+id);
+ for(const [index,row] of frames.entries()){
+  const expected='./original/OBS/referenced/obs-'+id+'-'+String(index).padStart(3,'0')+'.png';
+  assert.equal(row.url,expected,'native CHR body source URL mismatch');
+  assert.ok(cached.has(expected),'first offline duel CHR source not cached '+expected);
+  const bytes=fs.readFileSync(path.join(root,expected.slice(2)));
+  assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+  assert.equal(bytes.readUInt32BE(16),row.width);
+  assert.equal(bytes.readUInt32BE(20),row.height);
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),row.sha256,
+   'cached body is not its own SHA-verifiable CHR original sprite');
+  bodyFrames++;
+ }
+}
+assert.equal(bodyFrames,74);
+assert.ok(cached.has('./original/OBS/referenced/chr-bodies-manifest.js'),
+ 'native CHR source mapping must be present before first offline duel');
 assert.equal(actual.length,129);
 assert.equal(new Set(actual).size,129);
 for(const file of [
@@ -61,6 +95,6 @@ assert.ok(smoke.includes('NATIVE_DUEL_FX')||smoke.includes('nativeOfflineFx'),
  'offline browser test must decode original native effect images without network');
 console.log('R16_NATIVE_FX_COLD_OFFLINE_MANIFEST_PASS',JSON.stringify({
  version:meta.version,cache:meta.pwaCache,members:reviewed.length,
- png:actual.length,immutableSourceHashes:actual.length,archiveMembers:Object.keys(manifest).length,
+ png:actual.length,bodyFrames,immutableSourceHashes:actual.length+bodyFrames,archiveMembers:Object.keys(manifest).length,
  cachedSourceEffectFrames:reviewed.map(([id,frames])=>({id,frames}))
 }));
