@@ -143,15 +143,15 @@ Object.defineProperty(navigator,"clipboard",{
                 assert "먼저 공개 SNS 계정" in page.locator("#targetArchiveStatus").inner_text()
                 assert not dispatched
                 page.locator("#targetArchivePlatform").select_option("bluesky")
-                page.locator("#targetArchiveAccount").fill(
-                    "https://bsky.app/profile/qa-example.bsky.social")
+                assert "@example" in page.locator("#targetArchiveInputHint").inner_text()
+                page.locator("#targetArchiveAccount").fill("@QA-Example")
                 button.click()
                 page.wait_for_url(lambda url:url.startswith(PRIVATE),timeout=12000)
                 assert not dispatched,"opening the private app must not itself queue a backup"
                 assert not clipboard_events,"no manual clipboard workaround"
                 page.locator("#targetArchiveAccount").wait_for(state="visible")
                 assert page.locator("#targetArchiveAccount").input_value()==(
-                    "https://bsky.app/profile/qa-example.bsky.social")
+                    "qa-example.bsky.social")
                 assert page.locator("#targetArchiveSubmit").inner_text()=="전용 보관함 인증 필요"
                 assert "archive_account" not in page.url,"selection removed from URL after restore"
                 assert not any("github.com" in event for event in clipboard_events)
