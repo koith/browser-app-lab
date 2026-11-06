@@ -109,6 +109,66 @@ def fingerprint(records):
     return Counter((album["id"],p.get("number"),p.get("sha256"),p.get("bytes"))
                    for album in records for p in album.get("images",[]))
 
+def publish_versioned_catalog_only_after_all_sha(model, manifest_raw, catalog,
+                                                  remote):
+    """Atomic conditional head update, never overwrite previous photo bytes.
+
+    A snapshot is immutable and content-addressed. R2 standard S3 PutObject
+    If-Match/If-None-Match atomically rejects competing publishers.
+    """
+    from botocore.exceptions import ClientError
+    if (catalog.get("model") != model or catalog.get("schema_version")!=1
+            or not isinstance(catalog.get("albums"),list)):
+        raise RuntimeError("Cannot publish an unverified or wrong owner catalog")
+    digest=hashlib.sha256(manifest_raw).hexdigest()
+    # Immutable historical snapshot allows rollback after an interrupted
+    # pointer update. Existing snapshot MUST have the exact expected hash.
+    version="metadata/versions/"+digest+".json"
+    save_immutable(remote,version,manifest_raw,digest)
+    cfg=credentials()
+    client=boto3.client("s3",region_name=cfg["region"],endpoint_url=cfg["endpoint"],
+       aws_access_key_id=cfg["key"],aws_secret_access_key=cfg["secret"],
+       config=Config(retries={"max_attempts":2}))
+    key=model+"/metadata/catalog.json"
+    previous=None
+    etag=None
+    try:
+        result=client.get_object(Bucket=cfg["bucket"],Key=key)
+        raw=result["Body"].read(6_000_001)
+        if len(raw)>6_000_000:
+            raise RuntimeError("Existing private catalog exceeds size limit")
+        previous=json.loads(raw)
+        etag=result["ETag"]
+    except ClientError as exc:
+        if exc.response.get("Error",{}).get("Code") not in ("404","NoSuchKey","NotFound"):
+            raise RuntimeError("Private catalog read failed") from None
+    if previous is not None:
+        if (not isinstance(previous,dict) or previous.get("schema_version")!=1
+                or previous.get("model")!=model
+                or not isinstance(previous.get("albums"),list)
+                or not (fingerprint(previous["albums"])<=fingerprint(catalog["albums"]))):
+            raise RuntimeError("New owner index would remove or replace an existing SHA")
+        if hashlib.sha256(raw).hexdigest()==digest:
+            if not verify_remotely(remote,"metadata/catalog.json",digest,len(raw)):
+                raise RuntimeError("Identical private catalog readback unexpectedly missing")
+            return False
+    kwargs={"Bucket":cfg["bucket"],"Key":key,"Body":manifest_raw,
+            "ContentType":"application/json","CacheControl":"no-store",
+            "StorageClass":"STANDARD"}
+    if etag is not None:
+        kwargs["IfMatch"]=etag
+    else:
+        kwargs["IfNoneMatch"]="*"
+    try:
+        client.put_object(**kwargs)
+    except ClientError:
+        raise RuntimeError("Concurrent private catalog update was not accepted") from None
+    if not verify_remotely(remote,"metadata/catalog.json",digest,len(manifest_raw)):
+        raise RuntimeError("Published private catalog SHA readback mismatch")
+    return True
+
+
+
 def planned_rows(model,catalog):
     index=json.loads((ROOT/(model+"-gallery")/"owner-index.json").read_text())
     if index.get("model")!=model or not isinstance(index.get("albums"),list):
@@ -178,9 +238,9 @@ def main(args):
             for variant,key,sha,size in original_and_preview_variants(args.model,a,p):
                 if not verify_remotely(dest,key,sha,size):
                     raise RuntimeError("Full private mirror missing an exact owner variant")
-        if save_immutable(dest,"metadata/catalog.json",manifest_raw,
-             hashlib.sha256(manifest_raw).hexdigest()):
-            print("PRIVATE_OWNER_CATALOG_IMMUTABLY_MIRRORED",args.model,flush=True)
+        if publish_versioned_catalog_only_after_all_sha(
+                args.model,manifest_raw,catalog,dest):
+            print("PRIVATE_OWNER_CATALOG_ATOMIC_SNAPSHOT_COMMITTED",args.model,flush=True)
         print("PRIVATE_OWNER_MODEL_ALL_SHA_BYTES_READBACK_PASS",
               json.dumps({"model":args.model,"originals":len(rows),
                           "original_plus_preview_files":objects}),flush=True)
