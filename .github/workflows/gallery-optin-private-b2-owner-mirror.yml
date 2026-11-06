@@ -1,0 +1,144 @@
+name: Gallery Opt-In Private Existing Owner Durable Mirror
+on:
+  workflow_dispatch:
+    inputs:
+      owner_approved_private_mirror:
+        description: 'Authorize private existing-photo mirroring; no paid tier'
+        required: true
+        type: choice
+        options: [NO, YES_OWNER_APPROVED]
+        default: NO
+permissions:
+  contents: read
+concurrency:
+  group: gallery-private-existing-owner-mirror
+  cancel-in-progress: false
+jobs:
+  prepare-existing-shards:
+    if: github.event.inputs.owner_approved_private_mirror == 'YES_OWNER_APPROVED'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enumerate existing user-owned indexed originals, no new collection
+        id: plan
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          tasks=[]
+          import sys
+          sys.path.insert(0,'apps/gallery-archive')
+          from private_mirror_free_policy import check_existing_owner_budget
+          budget=check_existing_owner_budget(Path('apps'))
+          print('GALLERY_PRIVATE_MIRROR_CONSERVATIVE_FREE_BUDGET',json.dumps(budget,sort_keys=True))
+          for model in ('mimmi','yui'):
+            p=Path(f'apps/{model}-gallery/owner-index.json')
+            index=json.loads(p.read_text())
+            assert index['model']==model
+            total=sum(len(a['images']) for a in index['albums'])
+            assert total>0
+            for offset in range(0,total,100):
+              tasks.append({'model':model,'offset':offset})
+          assert len(tasks)<256
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+            out.write('matrix='+json.dumps({'include':tasks},separators=(',',':'))+'\n')
+          print('PRIVATE_OWNER_EXISTING_ONLY_SHARDS',len(tasks),flush=True)
+          PY
+  exact-sha-private-backfill:
+    needs: prepare-existing-shards
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.prepare-existing-shards.outputs.matrix) }}
+    env:
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      OWNER_REPLICA_BUCKET: ${{ secrets.GALLERY_MIRROR_PRIVATE_BUCKET }}
+      OWNER_DURABLE_REMOTE: "ownerreplica:${{ secrets.GALLERY_MIRROR_PRIVATE_BUCKET }}"
+      RCLONE_CONFIG_OWNERREPLICA_TYPE: s3
+      RCLONE_CONFIG_OWNERREPLICA_PROVIDER: ${{ secrets.GALLERY_MIRROR_RCLONE_PROVIDER }}
+      RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID: ${{ secrets.GALLERY_MIRROR_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_OWNERREPLICA_SECRET_ACCESS_KEY: ${{ secrets.GALLERY_MIRROR_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_OWNERREPLICA_ENDPOINT: ${{ secrets.GALLERY_MIRROR_S3_ENDPOINT }}
+      RCLONE_CONFIG_OWNERREPLICA_REGION: ${{ secrets.GALLERY_MIRROR_REGION }}
+      OWNER_REPLICA_PROVIDER: ${{ secrets.GALLERY_MIRROR_PROVIDER }}
+      OWNER_REPLICA_CF_ACCOUNT_ID: ${{ secrets.GALLERY_MIRROR_CF_ACCOUNT_ID }}
+      OWNER_REPLICA_CF_AUDIT_TOKEN: ${{ secrets.GALLERY_MIRROR_CF_AUDIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install checksum-pinned previously used owner client and private bucket ACL checker
+        run: |
+          set -euo pipefail
+          test -n "$MIMMI_COOKIE" && test -n "$YUI_COOKIE"
+          test -n "$RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID"
+          test -n "$RCLONE_CONFIG_OWNERREPLICA_SECRET_ACCESS_KEY"
+          echo "::add-mask::$MIMMI_COOKIE"
+          echo "::add-mask::$YUI_COOKIE"
+          echo "::add-mask::$RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID"
+          echo "::add-mask::$RCLONE_CONFIG_OWNERREPLICA_SECRET_ACCESS_KEY"
+          python -m pip install 'Pillow==11.3.0' 'boto3==1.40.70'
+          python -m py_compile apps/gallery-archive/backfill_private_owner_replica.py apps/gallery-archive/private_mirror_free_policy.py
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          test -n "$client"
+          install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Write only exact owner-SHA image bytes into proven private bucket
+        env:
+          MODEL: ${{ matrix.model }}
+          OFFSET: ${{ matrix.offset }}
+        run: |
+          python apps/gallery-archive/backfill_private_owner_replica.py --model "$MODEL" --offset "$OFFSET" --count 100
+  finalize-model-catalog:
+    needs: exact-sha-private-backfill
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi,yui]
+    env:
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      OWNER_REPLICA_BUCKET: ${{ secrets.GALLERY_MIRROR_PRIVATE_BUCKET }}
+      OWNER_DURABLE_REMOTE: "ownerreplica:${{ secrets.GALLERY_MIRROR_PRIVATE_BUCKET }}"
+      RCLONE_CONFIG_OWNERREPLICA_TYPE: s3
+      RCLONE_CONFIG_OWNERREPLICA_PROVIDER: ${{ secrets.GALLERY_MIRROR_RCLONE_PROVIDER }}
+      RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID: ${{ secrets.GALLERY_MIRROR_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_OWNERREPLICA_SECRET_ACCESS_KEY: ${{ secrets.GALLERY_MIRROR_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_OWNERREPLICA_ENDPOINT: ${{ secrets.GALLERY_MIRROR_S3_ENDPOINT }}
+      RCLONE_CONFIG_OWNERREPLICA_REGION: ${{ secrets.GALLERY_MIRROR_REGION }}
+      OWNER_REPLICA_PROVIDER: ${{ secrets.GALLERY_MIRROR_PROVIDER }}
+      OWNER_REPLICA_CF_ACCOUNT_ID: ${{ secrets.GALLERY_MIRROR_CF_ACCOUNT_ID }}
+      OWNER_REPLICA_CF_AUDIT_TOKEN: ${{ secrets.GALLERY_MIRROR_CF_AUDIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install exact same pinned private verifier
+        run: |
+          python -m pip install 'Pillow==11.3.0' 'boto3==1.40.70'
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Verify every owner original in private bucket before publishing even private catalog
+        run: |
+          python apps/gallery-archive/backfill_private_owner_replica.py --model '${{ matrix.model }}' --finalize
+          echo '${{ matrix.model }}: full private 100% SHA readback and original owner catalog PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This enables a private mirror only after Render read-only credentials are separately configured and live browser QA passes.' >> "$GITHUB_STEP_SUMMARY"

@@ -61,6 +61,41 @@ R2_READY = bool(
     and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_TYPE") == "s3"
     and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_PROVIDER") == "Cloudflare"
 )
+# Optional *private* S3-compatible owner mirror (B2 / R2). Never serves
+# anonymous bucket URLs or trusts unverified remote bytes. A missing mirror
+# configuration is inert; existing TeraBox routes continue unchanged.
+_DURABLE_OWNER_BASE = os.environ.get("OWNER_DURABLE_REMOTE", "").rstrip("/")
+_DURABLE_OWNER_READY = bool(
+    _DURABLE_OWNER_BASE.startswith("ownerreplica:")
+    and os.environ.get("RCLONE_CONFIG_OWNERREPLICA_TYPE") == "s3"
+    and os.environ.get("RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID")
+    and os.environ.get("RCLONE_CONFIG_OWNERREPLICA_SECRET_ACCESS_KEY")
+    and os.environ.get("RCLONE_CONFIG_OWNERREPLICA_ENDPOINT", "").startswith("https://")
+)
+
+def durable_owner_remote(model: str) -> str | None:
+    """Strictly separated namespaces; no client-provided owner selection."""
+    if model not in ("mimmi", "yui") or not _DURABLE_OWNER_READY:
+        return None
+    return _DURABLE_OWNER_BASE + "/" + model
+
+async def catalog_source_bytes(model: str, maximum: int) -> bytes:
+    """A configured, private durable mirror takes precedence over TeraBox.
+
+    Both feeds must contain the already SHA-pinned canonical owner catalog.
+    Callers independently reject a wrong model/schema before exposing data.
+    """
+    mirror = durable_owner_remote(model)
+    if mirror:
+        try:
+            return await rclone_bytes("metadata/catalog.json", maximum, remote=mirror)
+        except HTTPException as exc:
+            if exc.status_code not in (404, 502, 503, 504):
+                raise
+            print("OWNER_PRIVATE_MIRROR_CATALOG_UNAVAILABLE", model, flush=True)
+    remote = REMOTE if model == "mimmi" else YUI_REMOTE
+    return await rclone_bytes("metadata/catalog.json", maximum, remote=remote)
+
 TOKEN = os.environ.get("GALLERY_ACCESS_TOKEN", "")
 COOKIE = os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE", "")
 if os.environ.get('ARCHIVE_STORAGE_STATE_SEALED'):
@@ -93,11 +128,27 @@ async def verified_remote_media(key: str, size: int, digest: str, remote: str):
     if (type(size) is not int or not 1 <= size <= 140_000_000
             or not isinstance(digest, str) or not re.fullmatch(r'[a-f0-9]{64}', digest)):
         raise HTTPException(status_code=502, detail='Invalid private media integrity metadata')
-    async def load():
-        async def read():return await rclone_bytes(key, size + 1, remote=remote)
-        return await read_media_with_transport_recovery(read)
+
+    async def verified_from(source: str):
+        async def load():
+            async def read():return await rclone_bytes(key, size + 1, remote=source)
+            return await read_media_with_transport_recovery(read)
+        return await _media_cache.get(source, key, size, digest, load)
+
+    model = "mimmi" if remote == REMOTE else ("yui" if remote == YUI_REMOTE else None)
+    mirror = durable_owner_remote(model) if model else None
+    if mirror:
+        try:
+            return await verified_from(mirror)
+        except ValueError:
+            # Corrupt replica bytes are NEVER accepted or silently downgraded.
+            raise HTTPException(status_code=502, detail="Private mirror SHA-256 integrity failed")
+        except HTTPException as exc:
+            if exc.status_code not in (404, 502, 503, 504):
+                raise
+            print("OWNER_PRIVATE_MIRROR_MEDIA_UNAVAILABLE", model, flush=True)
     try:
-        return await _media_cache.get(remote, key, size, digest, load)
+        return await verified_from(remote)
     except ValueError:
         raise HTTPException(status_code=502, detail='Cloud media SHA-256 integrity check failed')
 
@@ -112,7 +163,10 @@ def media_key_valid(key: str) -> bool:
 
 
 async def authenticated(request: Request, authorization: str | None = Header(default=None)):
-    if not TOKEN or not COOKIE:
+    # A private, SHA-verified R2 mirror can serve already-owned originals
+    # after a cold start even if the old TeraBox cookie has expired.
+    # Never skip the existing browser-session/bearer authorization check.
+    if not TOKEN or (not COOKIE and not _DURABLE_OWNER_READY):
         raise HTTPException(status_code=503, detail="Cloud gateway is not connected")
     expected = "Bearer " + TOKEN
     bearer_ok = bool(authorization) and secrets.compare_digest(authorization, expected)
@@ -192,19 +246,27 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None,
                             headers={"Retry-After": str(hold.retry_seconds),
                                      "X-Archive-Read-Cause": "provider_denial"}) from None
     client_env=os.environ.copy()
-    try:
-        # The two owner accounts have distinct authorized GitHub Secrets.
-        # Never route Yui reads with Mimmi's cookie once a Yui session exists.
-        configured=(cookie_override if cookie_override is not None else
-                    (client_env.get('RCLONE_CONFIG_ARCHIVE_YUI_COOKIE') or
-                     client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
-                    if remote_name==YUI_REMOTE else
-                    client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
-        client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(configured)
-    except ValueError:
-        raise HTTPException(status_code=503,detail='Invalid storage session configuration')
-    if client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']!=configured:
-        print('OWNER_STORAGE_COOKIE_HEADER_NORMALIZED',flush=True)
+    if remote_name.startswith("ownerreplica:"):
+        # Private durable S3 credentials are completely independent of
+        # the TeraBox cookie. A cold restart with an expired provider session
+        # must still be able to read already-mirrored canonical owner bytes.
+        if (not _DURABLE_OWNER_READY
+                or remote_name not in (durable_owner_remote("mimmi"),
+                                       durable_owner_remote("yui"))):
+            raise HTTPException(status_code=503,detail="Private mirror is not configured")
+    else:
+        try:
+            # Separate TeraBox owner account cookies; never cross model owners.
+            configured=(cookie_override if cookie_override is not None else
+                        (client_env.get('RCLONE_CONFIG_ARCHIVE_YUI_COOKIE') or
+                         client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+                        if remote_name==YUI_REMOTE else
+                        client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+            client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(configured)
+        except ValueError:
+            raise HTTPException(status_code=503,detail='Invalid storage session configuration')
+        if client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']!=configured:
+            print('OWNER_STORAGE_COOKIE_HEADER_NORMALIZED',flush=True)
     proc = await asyncio.create_subprocess_exec(
         "rclone", "cat", f"{remote or REMOTE}/{path}", "--timeout=50s", "--retries=2",
         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, env=client_env
@@ -273,7 +335,7 @@ async def get_catalog():
             return _cache["catalog"]
         previous = _cache.get("catalog")
         try:
-            blob = await rclone_bytes("metadata/catalog.json", 4_000_000)
+            blob = await catalog_source_bytes("mimmi", 4_000_000)
         except (HTTPException, OSError, asyncio.TimeoutError):
             # Last valid same-owner SHA catalog was previously authenticated.
             # Preserve browseability when TeraBox fails to supply a new copy.
@@ -414,7 +476,7 @@ async def yui_catalog_bytes():
             return _yui_cache["catalog"]
         previous = _yui_cache.get("catalog")
         try:
-            data = await rclone_bytes("metadata/catalog.json", 6_000_000, remote=YUI_REMOTE)
+            data = await catalog_source_bytes("yui", 6_000_000)
         except (HTTPException, OSError, asyncio.TimeoutError):
             if isinstance(previous, dict):
                 print("OWNER_VERIFIED_CATALOG_STALE_FALLBACK yui", flush=True)
