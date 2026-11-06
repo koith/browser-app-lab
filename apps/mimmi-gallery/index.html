@@ -722,8 +722,12 @@ Promise.all([
  render();
  const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={mimmi:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);
 
- // Enrich the already-visible gallery when Render wakes; no loading/splash screen.
- MimmiPrivate.albums().then(albums=>{
+ // The versioned owner-index.json on Pages is the source of truth for
+ // regular browsing. Never wake optional Render catalogue fetch when the
+ // complete static owner manifest already loaded: it can CORS-fail and slow
+ // WebKit first paint. Only use authenticated gateway metadata as a fallback
+ // if no usable SHA-verified static owner album was available.
+ if(!ownerStored.length)MimmiPrivate.albums().then(albums=>{
   if(!Array.isArray(albums)||!albums.length)return;
   const nextOwner=MimmiPrivate.reconcile(ownerStored,albums).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
   if(!nextOwner.length)return;
