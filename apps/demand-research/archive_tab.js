@@ -10,6 +10,7 @@ const auto=$("archiveModeAuto"),accounts=$("archiveModeAccounts");
 if(!panel||!frame||!status||!frameBox||!actions||!auto||!accounts)return;
 let loading=false,connected=false,lastSrc="";
 const ACCOUNT=/^(?:bluesky|mastodon)-[a-f0-9]{40}$/;
+const PRIVATE_APP="https://intersection-originals-free.onrender.com/";
 const query=()=>new URLSearchParams(location.search);
 const chosenAccount=()=>{const selected=query().get("account")||"";return ACCOUNT.test(selected)?selected:"";};
 function selectedMode(){
@@ -45,9 +46,20 @@ async function loadArchive(){
   setButtons(selectedMode());
   if(location.hostname==="koith.github.io"){
     connected=false;hidePrivate();
-    status.textContent="자동 게시글 백업과 계정 백업의 보관함 화면이 준비되었습니다. 비공개 원본 열람 서버가 연결되지 않아 여기서는 파일을 열 수 없습니다.";
+    const url=new URL(PRIVATE_APP);
+    url.searchParams.set("tab","archives");
+    url.searchParams.set("mode",selectedMode());
+    if(chosenAccount())url.searchParams.set("account",chosenAccount());
+    const link=$("archiveHubFullView");
+    link.href=url.href;
+    link.textContent="교집합 보관함에서 열기";
+    $("archiveHubReload").hidden=true;
+    actions.hidden=false;
+    status.textContent="자동 저장 게시글과 지정 계정 백업 모두 교집합 전용 웹앱에서 조회합니다. 외부 GitHub 실행 화면으로 이동하지 않습니다.";
     return;
   }
+  $("archiveHubReload").hidden=false;
+  $("archiveHubFullView").textContent="보관함 크게 보기";
   if(connected){showArchiveFrame();return;}
   loading=true;status.textContent="테라박스 보관 서버에 연결 중…";
   try{
@@ -76,6 +88,7 @@ function changeMode(mode,account=""){
   setButtons(mode);
   $("viewArchives")?.click();
   if(connected)showArchiveFrame();
+  else if(location.hostname==="koith.github.io")void loadArchive();
   return true;
 }
 // Called by successful backup receipt or a saved-account card.
