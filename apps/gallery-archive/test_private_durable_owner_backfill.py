@@ -33,6 +33,26 @@ with tempfile.TemporaryDirectory() as td:
             except RuntimeError:pass
             else:raise AssertionError("Wrong owner SHA accepted into private mirror")
     print("OWNER_DURABLE_MIRROR_CATALOG_FINGERPRINT_CLOSED_PASS")
+    # Every verified preview must be copied too: otherwise the gallery's
+    # normal thumbnail path still 503s even when original backup succeeds.
+    one=sample("mimmi")
+    one_photo=one["albums"][0]["images"][0]
+    one_photo["preview"]="previews/verified-owner-work/00001.jpg"
+    one_photo["preview_sha256"]="e"*64
+    one_photo["preview_bytes"]=420
+    items=module.original_and_preview_variants("mimmi",one["albums"][0],one_photo)
+    assert [item[0] for item in items]==["original","preview"]
+    assert module.source_manifest_budget("mimmi",[(one["albums"][0],one_photo)])==(2,1420)
+    try:
+        module.source_manifest_budget("mimmi",[(one["albums"][0],one_photo)],limit_bytes=1419)
+    except RuntimeError:pass
+    else:raise AssertionError("Preview overflow was accepted as free")
+    one_photo["preview"]="previews/other-owner/00001.jpg"
+    try:module.original_and_preview_variants("mimmi",one["albums"][0],one_photo)
+    except RuntimeError:pass
+    else:raise AssertionError("Wrong album preview path accepted")
+    print("OWNER_DURABLE_PREVIEW_SHA_PATH_AND_FREE_BYTE_BUDGET_PASS")
+
 
 env={
  "OWNER_REPLICA_BUCKET":"gallery-private-owner-test",
