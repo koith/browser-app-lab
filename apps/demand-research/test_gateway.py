@@ -162,6 +162,15 @@ def test_url_only_mode_does_not_require_login_for_public_apis(connected_gateway,
     assert connected_gateway.post("/api/accounts/sync").status_code==401
 
 
+def test_public_bluesky_asset_is_served_without_repeated_404():
+    client=TestClient(gateway.app,base_url="https://testserver")
+    response=client.get("/assets/bluesky.svg")
+    assert response.status_code==200
+    assert response.headers["content-type"].startswith("image/svg+xml")
+    assert b"<svg" in response.content
+    assert client.get("/assets/private.svg").status_code==404
+
+
 def test_home_has_no_login_or_password(connected_gateway):
     page=connected_gateway.get("/")
     assert page.status_code==200
