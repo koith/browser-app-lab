@@ -521,7 +521,7 @@ def _archive_inventory():
         names=raw.decode("utf-8","replace").splitlines()
         result["account_zip_candidates"]=sum(
             1 for name in names if re.fullmatch(
-                r"account-bundle-[a-f0-9]{16}-[0-9]{6,30}-[a-f0-9]{16}\\.zip",name))
+                r"account-bundle-[a-f0-9]{16}-[0-9]{6,30}-[a-f0-9]{16}\.zip",name))
         result["account_bundles_state"]=(
             "candidates_unverified" if result["account_zip_candidates"]
             else "zero_candidates_unverified")
@@ -536,7 +536,7 @@ def _archive_inventory():
             names=raw.decode("utf-8","replace").splitlines()
             result["post_journal_candidates"]=sum(
                 1 for name in names if re.fullmatch(
-                    r"flat-entry-[a-f0-9]{40}\\.json",name))
+                    r"flat-entry-[a-f0-9]{40}\.json",name))
             result["post_journal_state"]="candidates_unverified"
     except (RuntimeError,ValueError,TypeError):
         result["post_journal_state"]="listing_failed"
