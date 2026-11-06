@@ -23,6 +23,8 @@ services:
         value: koith/browser-app-lab
       - key: DEMAND_AUTO_PUBLIC_INDEX
         value: "0"
+      - key: DEMAND_ARCHIVE_QUEUE_MODE
+        value: "1"
       - key: DEMAND_VIEWER_TOKEN
         sync: false
       - key: RCLONE_CONFIG_ARCHIVE_COOKIE
