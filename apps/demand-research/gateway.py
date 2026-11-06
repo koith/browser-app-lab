@@ -78,6 +78,11 @@ async def receive_authenticated_credential(request:Request):
     global COOKIE
     COOKIE=credential
     os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"]=credential
+    # On a free Render instance the secret arrives AFTER process startup.
+    # Start the optional account-index loop now; otherwise startup skipped
+    # it permanently and the Accounts page remains empty after 503 recovery.
+    if INDEX_DB and _index_task is None and configured():
+        await start_account_index()
     return JSONResponse({"accepted":True,"storage_configured":configured()},
                         headers={"Cache-Control":"no-store"})
 
