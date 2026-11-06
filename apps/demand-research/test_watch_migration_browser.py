@@ -31,12 +31,12 @@ function node(tag,cls,text){
  const result=document.createElement(tag);
  result.className=cls||"";result.textContent=text||"";return result;
 }
-%s
-%s
+__PARSER__
+__MIGRATION__
 window.TEST_WATCHES=watches.map(x=>x.url);
 })();
 </script>
-</body></html>""" % (PARSER, MIGRATION)
+</body></html>""".replace("__PARSER__",PARSER).replace("__MIGRATION__",MIGRATION)
 
 
 def verify(browser,label):
@@ -51,8 +51,8 @@ def verify(browser,label):
     page.route(RENDER+"**",respond)
     try:
         page.goto(PAGES)
-        page.evaluate("(rows,key)=>localStorage.setItem(key,JSON.stringify(rows))",
-                      EXPECTED,KEY)
+        page.evaluate("({rows,key})=>localStorage.setItem(key,JSON.stringify(rows))",
+                      {"rows":EXPECTED,"key":KEY})
         assert page.evaluate("(key)=>JSON.parse(localStorage.getItem(key))",
                              KEY)==EXPECTED
         page.goto(RENDER+"?tab=accounts")
