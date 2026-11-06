@@ -11,13 +11,13 @@ const makeEnv = (bad = false) => {
   const photos = ['mimmi', 'yui'].map(model => ({
     schema_version: 1, model,
     albums: [{ id: 'example-photo-album', images: [{
-      number: 1, key: 'media/one.jpg',
+      number: 1, key: 'originals/example-photo-album/one photo.jpg',
       sha256: digest(bytes), bytes: bytes.length
     }] }]
   }));
   for (const p of photos) {
     store.set(p.model + '/metadata/catalog.json', new TextEncoder().encode(JSON.stringify(p)));
-    store.set(p.model + '/media/one.jpg', bad && p.model === 'mimmi' ? bytes.map(x => x ^ 1) : bytes);
+    store.set(p.model + '/originals/example-photo-album/one photo.jpg', bad && p.model === 'mimmi' ? bytes.map(x => x ^ 1) : bytes);
   }
   const reads = [];
   return {
@@ -94,4 +94,18 @@ test('CORS preflight never exposes secret headers to foreign origin', async () =
   const good = await worker.fetch(request(endpoint+'/api/v1/sign','OPTIONS'),env);
   assert.equal(good.status,204);
   assert.equal(good.headers.get('Access-Control-Allow-Origin'),'https://koith.github.io');
+});
+
+test('canonical catalog refuses cross-album or preview namespace substitutions', async () => {
+  resetCatalogCacheForTests();
+  const { env,store } = makeEnv();
+  for (const model of ['mimmi','yui']) {
+    const key=model+'/metadata/catalog.json';
+    const original=JSON.parse(new TextDecoder().decode(store.get(key)));
+    original.albums[0].images[0].key='originals/another-album/photo.jpg';
+    store.set(key,new TextEncoder().encode(JSON.stringify(original)));
+  }
+  const req=request(endpoint+'/api/v1/sign','POST',
+    {model:'mimmi',album:'example-photo-album',number:1,variant:'original'},token);
+  assert.equal((await worker.fetch(req,env)).status,404);
 });
