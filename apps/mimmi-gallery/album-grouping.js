@@ -38,7 +38,7 @@
     sha.add(image.sha256);
     // UI routing uses a unique display number; API reads the original number.
     const row={...image,storageNumber:image.storageNumber??image.number,
-               originalAlbumId:from,number:++next,isAlternatePreview:true};
+               originalAlbumId:image.originalAlbumId||from,number:++next,isAlternatePreview:true};
     large.images.push(row);variantAdded++;
    }
    large.variantPreviewCount=(large.variantPreviewCount||0)+variantAdded;
