@@ -11,6 +11,26 @@ def test_offline_cloud_status_is_truthful():
     assert result.json()["cloud"]=="terabox"
     assert result.json()["configured"] is False
 
+def test_public_readiness_requires_all_private_settings(monkeypatch):
+    client=TestClient(gateway.app,base_url="https://testserver")
+    monkeypatch.delenv("DEMAND_ARCHIVE_DISPATCH_TOKEN",raising=False)
+    monkeypatch.setattr(gateway,"TOKEN","synthetic-private-viewer-secret-"+"x"*32)
+    monkeypatch.setattr(gateway,"COOKIE","synthetic-terabox-credential")
+    monkeypatch.setattr(gateway,"REMOTE","archive:DemandResearch")
+    # The Render service can be alive but not ready for one-click backups.
+    assert client.get("/health").json()=={"alive":True}
+    pending=client.get("/ready",headers={"Origin":"https://koith.github.io"})
+    assert pending.status_code==503 and pending.json()=={"ready":False}
+    assert pending.headers["cache-control"]=="no-store"
+    monkeypatch.setenv("DEMAND_ARCHIVE_DISPATCH_TOKEN","synthetic-actions-secret-"+"y"*32)
+    ready=client.get("/ready",headers={"Origin":"https://koith.github.io"})
+    assert ready.status_code==200 and ready.json()=={"ready":True}
+    assert ready.headers["access-control-allow-origin"]=="https://koith.github.io"
+    assert "synthetic" not in ready.text
+    monkeypatch.setattr(gateway,"COOKIE","")
+    assert client.get("/ready").status_code==503
+
+
 def test_private_catalog_fails_closed_without_credentials():
     assert TestClient(gateway.app).get("/api/posts").status_code==503
 
