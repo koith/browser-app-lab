@@ -113,7 +113,7 @@ Object.defineProperty(navigator,"clipboard",{
                 "https://bsky.app/profile/qa-example.bsky.social")
             assert button.is_enabled(),"valid public account must enable button"
             if private:
-                assert button.inner_text()=="테라박스 백업 시작"
+                assert button.inner_text()=="백업 시작"
                 button.click()
                 page.locator("#targetArchiveJobStatus[data-state=verified]").wait_for(
                     state="visible",timeout=15000)
@@ -152,7 +152,7 @@ Object.defineProperty(navigator,"clipboard",{
                 page.locator("#targetArchiveAccount").wait_for(state="visible")
                 assert page.locator("#targetArchiveAccount").input_value()==(
                     "qa-example.bsky.social")
-                assert page.locator("#targetArchiveSubmit").inner_text()=="보관함 연결 필요"
+                assert page.locator("#targetArchiveSubmit").inner_text()=="백업 시작"
                 assert "archive_account" not in page.url,"selection removed from URL after restore"
                 assert not any("github.com" in event for event in clipboard_events)
             assert not errors,errors
