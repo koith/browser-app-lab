@@ -153,7 +153,7 @@ def make_receipt(request,run_id,platform,account):
 
 def read_receipt(request,receipt,run_id):
     if (not isinstance(receipt,str) or len(receipt)>900 or
-            not re.fullmatch(r"[A-Za-z0-9_-]{20,800}\\.[a-f0-9]{64}",receipt)):
+            not re.fullmatch(r"[A-Za-z0-9_-]{20,800}\.[a-f0-9]{64}",receipt)):
         raise HTTPException(403,"Invalid archive job receipt")
     try:
         key,context=_receipt_signing_key(request)
