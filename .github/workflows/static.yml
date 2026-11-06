@@ -26,6 +26,9 @@ concurrency:
 jobs:
   # Single deploy job since we're just deploying
   deploy:
+    # The preserved ~878 MiB photo artifact exceeded the default deploy-pages
+    # 10 minute client timeout while GitHub Pages was updating files.
+    timeout-minutes: 35
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -43,3 +46,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          timeout: 1800000
