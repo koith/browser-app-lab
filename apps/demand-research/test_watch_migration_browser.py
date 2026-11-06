@@ -69,8 +69,9 @@ def verify(browser,label):
         assert "기존 관심 계정 2개를 복원" in page.locator("#accountWatchStatus").inner_text()
         # Merge must not create duplicates; neither browser store is deleted.
         page.get_by_role("button",name="기존 관심 계정 복원").click()
-        page.locator("#accountWatchStatus").get_by_text(
-            "기존 관심 계정 2개가",exact=False).wait_for(timeout=12000)
+        page.wait_for_function(
+            "document.querySelector('#accountWatchStatus')?.textContent.includes('기존 관심 계정 2개가')",
+            timeout=12000)
         assert page.evaluate("window.TEST_WATCHES")==EXPECTED
         page.goto(PAGES)
         assert page.evaluate("(key)=>JSON.parse(localStorage.getItem(key))",
