@@ -19,6 +19,54 @@ def client(monkeypatch):
     return client
 
 
+def test_public_backup_start_and_poll_without_admin_cookie(monkeypatch):
+    # Regression: the public browser previously received 502 AFTER the
+    # TeraBox queue accepted a job, because make_receipt demanded a login
+    # cookie. Then /jobs also returned 401 despite public site mode.
+    monkeypatch.setenv("DEMAND_PUBLIC_ARCHIVE_MODE","1")
+    monkeypatch.delenv("DEMAND_ARCHIVE_QUEUE_MODE",raising=False)
+    monkeypatch.setenv("DEMAND_ARCHIVE_DISPATCH_TOKEN",
+                       "synthetic-actions-token-"+"z"*32)
+    monkeypatch.setenv("DEMAND_ARCHIVE_DISPATCH_REPO","koith/browser-app-lab")
+    monkeypatch.setattr(gateway,"TOKEN","synthetic-public-server-secret-"+"x"*32)
+    monkeypatch.setattr(gateway,"COOKIE","synthetic-public-source-cookie")
+    monkeypatch.setattr(target_archive_api,"_last_request",None)
+    calls=[]
+    monkeypatch.setattr(target_archive_api,"dispatch",
+                        lambda platform,account:(
+                          calls.append((platform,account)) or 41999999999))
+    anonymous=TestClient(gateway.app,base_url="https://testserver")
+    assert not anonymous.cookies
+    assert anonymous.get("/api/target-archive/status").status_code==200
+    response=anonymous.post("/api/target-archive/start",
+        headers={"Origin":"https://testserver",
+                 "X-Archive-Intent":"selected-public-account-v1"},
+        json={"platform":"bluesky","account":"@Example"})
+    assert response.status_code==202,response.text
+    body=response.json()
+    assert body["accepted"] is True and body["state"]=="QUEUED_NOT_VERIFIED"
+    assert body["run_id"]==41999999999
+    assert calls==[("bluesky","example.bsky.social")]
+    assert not anonymous.cookies
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",
+        lambda run_id:{"status":"in_progress","id":run_id})
+    url="/api/target-archive/jobs/"+str(body["run_id"])+"?receipt="+body["receipt"]
+    result=anonymous.get(url)
+    assert result.status_code==200,result.text
+    assert result.json()["state"]=="RUNNING"
+    assert result.json()["remote_verified"] is False
+    altered=body["receipt"][:-1]+(
+        "1" if body["receipt"].endswith("0") else "0")
+    assert anonymous.get(url.replace(body["receipt"],altered)).status_code==403
+    assert anonymous.get("/api/target-archive/jobs/41999999999?receipt=invalid").status_code==422
+    assert anonymous.post("/api/target-archive/start",
+        json={"platform":"bluesky","account":"@Example"}).status_code==403
+    assert anonymous.post("/api/target-archive/start",
+        headers={"Origin":"https://attacker.example",
+                 "X-Archive-Intent":"selected-public-account-v1"},
+        json={"platform":"bluesky","account":"@Example"}).status_code==403
+
+
 def test_short_bluesky_username_creates_canonical_backup_request(client,monkeypatch):
     monkeypatch.delenv("DEMAND_ARCHIVE_QUEUE_MODE",raising=False)
     recorded=[]

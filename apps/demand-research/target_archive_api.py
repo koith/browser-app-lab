@@ -124,32 +124,45 @@ def _decode(data):
     return base64.urlsafe_b64decode(data+"="*((-len(data))%4))
 
 
-def make_receipt(request,run_id,platform,account):
-    # The HttpOnly signed session is the receipt's HMAC key. Server restarts
-    # do not lose outstanding job receipts; a different session cannot use one.
+def _receipt_signing_key(request):
+    # Public app mode intentionally has no login cookie. Using the old
+    # cookie-only signer made POST /start write a durable cloud request and
+    # then fail with HTTP 502 while generating the receipt. It also left the
+    # job progress route unusable. A bearer receipt instead authenticates
+    # exactly the job the requester just queued, without exposing TOKEN.
+    if os.getenv("DEMAND_PUBLIC_ARCHIVE_MODE","0")=="1":
+        from gateway import TOKEN
+        if len(TOKEN)<24:
+            raise RuntimeError("archive receipt signer unavailable")
+        return TOKEN.encode(),"archive-job-public-v2:"
     session=request.cookies.get("demand_view","")
     if len(session)<50:
         raise RuntimeError("private archive session missing")
+    return session.encode(),"archive-job-v1:"
+
+
+def make_receipt(request,run_id,platform,account):
+    key,context=_receipt_signing_key(request)
     payload=json.dumps({"run_id":run_id,"platform":platform,"account":account,
                         "at":int(time.time())},sort_keys=True,
                        separators=(",",":")).encode()
     token=_encode(payload)
-    tag=hmac.new(session.encode(),("archive-job-v1:"+token).encode(),
-                 hashlib.sha256).hexdigest()
+    tag=hmac.new(key,(context+token).encode(),hashlib.sha256).hexdigest()
     return token+"."+tag
 
 
 def read_receipt(request,receipt,run_id):
-    session=request.cookies.get("demand_view","")
     if (not isinstance(receipt,str) or len(receipt)>900 or
-            not re.fullmatch(r"[A-Za-z0-9_-]{20,800}\.[a-f0-9]{64}",receipt)
-            or len(session)<50):
-        raise HTTPException(403,"Invalid private archive job receipt")
+            not re.fullmatch(r"[A-Za-z0-9_-]{20,800}\.[a-f0-9]{64}",receipt)):
+        raise HTTPException(403,"Invalid archive job receipt")
+    try:
+        key,context=_receipt_signing_key(request)
+    except RuntimeError:
+        raise HTTPException(403,"Invalid archive job receipt") from None
     token,signature=receipt.split(".",1)
-    expected=hmac.new(session.encode(),("archive-job-v1:"+token).encode(),
-                      hashlib.sha256).hexdigest()
+    expected=hmac.new(key,(context+token).encode(),hashlib.sha256).hexdigest()
     if not hmac.compare_digest(signature,expected):
-        raise HTTPException(403,"Invalid private archive job receipt")
+        raise HTTPException(403,"Invalid archive job receipt")
     try:
         item=json.loads(_decode(token))
         if (type(item) is not dict or type(item.get("run_id")) is not int
@@ -162,7 +175,7 @@ def read_receipt(request,receipt,run_id):
         profile_input(item["platform"],item["account"])
         return item
     except (ValueError,UnicodeError,KeyError,TypeError):
-        raise HTTPException(403,"Invalid private archive job receipt") from None
+        raise HTTPException(403,"Invalid archive job receipt") from None
 
 
 def read_exact_verified_archive(run_id,platform,account):

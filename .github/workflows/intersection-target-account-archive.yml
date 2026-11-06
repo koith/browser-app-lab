@@ -68,6 +68,9 @@ on:
       - "apps/demand-research/backup_bridge_poller.py"
       - "apps/demand-research/test_target_archive_api.py"
       - "apps/demand-research/target_archive_client.js"
+      - "apps/demand-research/account_watch.js"
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/test_watch_migration_browser.py"
       - "apps/demand-research/gateway.py"
       - "apps/demand-research/index.html"
       - "apps/demand-research/Dockerfile"
@@ -111,6 +114,7 @@ jobs:
           python -m playwright install --with-deps chromium webkit
           python test_account_archive_browser.py
           python test_target_archive_button_browser.py
+          python test_watch_migration_browser.py
           python test_archive_tab_browser.py
           python test_auto_archive_view_browser.py
 

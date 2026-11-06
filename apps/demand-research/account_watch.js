@@ -84,7 +84,78 @@ function write(){
  try{localStorage.setItem(STORE,JSON.stringify(watches.map(w=>w.url)))}
  catch{storageWorks=false;$("accountWatchStatus").textContent="이 환경에서는 브라우저 저장소를 사용할 수 없습니다. 추적 목록은 현재 화면에서만 유지됩니다."}
 }
+// Interest accounts were originally saved on the GitHub Pages origin.
+// Render has a DIFFERENT localStorage and must not silently show "0" as if
+// those accounts were removed. A one-click round trip to the original
+// first-party origin recovers the exact original browser list. No API, cookie,
+// GitHub sign-in or remote mutation is needed. Never delete the source list.
+const PAGES_HOME="https://koith.github.io/browser-app-lab/apps/demand-research/";
+const RENDER_HOME="https://intersection-originals-free.onrender.com/";
+const TRANSFER_KEY="watch_import";
+let transferMessage="";
+function restoreImportedWatches(){
+ if(location.hostname!=="intersection-originals-free.onrender.com")return;
+ const current=new URLSearchParams(location.hash.slice(1));
+ if(!current.has(TRANSFER_KEY))return;
+ const payload=current.get(TRANSFER_KEY)||"";
+ current.delete(TRANSFER_KEY);
+ history.replaceState(null,"",location.pathname+location.search+
+   (current.size?"#"+current.toString():""));
+ try{
+   if(payload.length>40000)throw Error("oversize transfer");
+   const raw=atob(payload.replace(/-/g,"+").replace(/_/g,"/"));
+   const imported=JSON.parse(raw);
+   if(!Array.isArray(imported)||imported.length>MAX_WATCH)
+     throw Error("invalid transfer list");
+   const known=read(),keys=new Set(known.map(w=>w.key));
+   let added=0;
+   for(const item of imported){
+     const p=profile(typeof item==="string"?item:item?.url);
+     if(!p||keys.has(p.key)||known.length>=MAX_WATCH)continue;
+     keys.add(p.key);known.push(p);added++;
+   }
+   if(added){
+     localStorage.setItem(STORE,JSON.stringify(known.map(x=>x.url)));
+     transferMessage="기존 관심 계정 "+added+"개를 복원했습니다. 원래 목록은 그대로 유지됩니다.";
+   }else if(known.length){
+     transferMessage="기존 관심 계정 "+known.length+"개가 이 브라우저에 있습니다.";
+   }else{
+     transferMessage="이 브라우저의 예전 GitHub Pages 저장 목록을 찾지 못했습니다. 원래 사용했던 Safari 환경에서 다시 확인해 주세요.";
+   }
+ }catch{
+   transferMessage="이전 목록을 읽지 못했습니다. 기존 목록은 변경하지 않았습니다.";
+ }
+}
+function transferFromOldPages(){
+ if(location.hostname!=="koith.github.io"||
+    new URLSearchParams(location.search).get("transfer_watches")!=="1")
+   return false;
+ const old=read().map(x=>x.url);
+ // Validated provider profile URLs are ASCII. The fragment never reaches a
+ // web server log; the original localStorage is not touched.
+ const packed=btoa(JSON.stringify(old)).replaceAll("+","-")
+   .replaceAll("/","_").replace(/=+$/,"");
+ location.replace(RENDER_HOME+"?tab=accounts#"+TRANSFER_KEY+"="+packed);
+ return true;
+}
+if(transferFromOldPages())return;
+restoreImportedWatches();
 watches=read();
+if(location.hostname==="intersection-originals-free.onrender.com"){
+ const toolbar=$("accountWatchSection")?.querySelector(".account-list-toolbar");
+ if(toolbar){
+   const restore=node("button","account-restore-watches","기존 관심 계정 복원");
+   restore.type="button";
+   restore.title="이전에 GitHub Pages에서 등록한 관심 목록을 이 웹앱으로 복사합니다.";
+   restore.addEventListener("click",()=>location.assign(PAGES_HOME+"?transfer_watches=1"));
+   toolbar.append(restore);
+   if(transferMessage){
+     $("accountWatchStatus").textContent=transferMessage;
+   }else if(!watches.length){
+     $("accountWatchStatus").textContent="이 주소에는 등록된 관심 계정이 없습니다. 이전 GitHub Pages에서 등록한 계정이 있다면 ‘기존 관심 계정 복원’을 누르세요.";
+   }
+ }
+}
 function setView(view){
  currentView=["posts","accounts","archives"].includes(view)?view:"posts";
  for(const [name,panel,button] of [
