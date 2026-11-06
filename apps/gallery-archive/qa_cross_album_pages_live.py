@@ -85,7 +85,7 @@ def exercise(browser,model,overlay):
             ?p.album==='teddy-bear97':p.album==='djawa-janus-scary-lantern-night');
           const targets=(favorite.length?favorite:sample).slice(0,5);
           return {total:matches.length,targets};
-        }""")
+        }""", model)
         if model=="yui":
             assert data["total"]>0,(model,"missing real same-SHA owner fallback")
         # Mimmi aliases are allowed to collapse redundant SHA-identical cards.
