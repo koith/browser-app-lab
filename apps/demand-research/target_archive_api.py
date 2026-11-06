@@ -239,7 +239,9 @@ def create_router(auth):
             account=item["account"]
             if not isinstance(platform,str) or not isinstance(account,str):
                 raise ValueError("invalid account request")
-            profile_input(platform,account)
+            normalized=profile_input(platform,account)
+            if platform=="bluesky" and not account.startswith("https://"):
+                account=normalized
         except (ValueError,KeyError,TypeError):
             raise HTTPException(400,"Invalid public account selection") from None
         async with _lock:
