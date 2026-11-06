@@ -244,6 +244,7 @@ def check_auth(request:Request):
                          "/account-archive","/api/accounts/status",
                          "/api/accounts","/api/account-groups"}
                 or path.startswith("/api/account-archives")
+                or path.startswith("/api/target-archive/jobs/")
                 or path.startswith("/account-archive/")
                 or path.startswith("/auto-archive/"))
             or request.method=="POST" and path=="/api/target-archive/start"):
