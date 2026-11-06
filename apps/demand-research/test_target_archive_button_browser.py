@@ -1,9 +1,9 @@
 """Desktop Chromium + mobile WebKit QA of the actual backup button.
 
 Tests both modes without external account credentials:
-public Pages probes the dedicated private gateway only on a backup click and
-falls back to the existing GitHub workflow when it is offline. Private gateway
-submits a same-origin queued request. No backup is claimed
+public Pages opens the same Intersection web app at the protected Render origin.
+There is never a GitHub Actions navigation. The private gateway submits a
+same-origin queued request. No backup is claimed
 complete unless remotely verified by the separate operator workflow.
 """
 from __future__ import annotations
@@ -95,7 +95,7 @@ Object.defineProperty(navigator,"clipboard",{
             assert response and response.status==200
             page.wait_for_function("""() => {
               const status=document.getElementById("targetArchiveStatus").textContent;
-              return status.includes("계정을 지정하면")||
+              return status.includes("계정을 지정하고 백업 시작을 누르세요")||
                      status.includes("연결됨 · 계정 주소");
             }""")
             assert len(status_queries)==1
