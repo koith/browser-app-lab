@@ -1,0 +1,20 @@
+/* R15: source OBS effects are rendered PNG frames at native source origins.
+ * No invented CSS rings, particles or visual replacements. Source event
+ * positions use a 2D WEB approximation; original MVE camera is unverified. */
+#battle-visual>.leaf-native-duel-effect{
+ position:absolute;
+ inset:0;
+ pointer-events:none!important;
+ overflow:visible;
+ z-index:8;
+}
+#battle-visual .leaf-native-duel-effect-frame{
+ position:absolute;
+ display:block;
+ pointer-events:none!important;
+ image-rendering:pixelated;
+ object-fit:fill;
+ max-width:none!important;
+ max-height:none!important;
+ transform-origin:center center;
+}

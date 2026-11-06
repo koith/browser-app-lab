@@ -629,6 +629,15 @@
    states.set(pawn,{...counts,[action]:(counts[action]||0)+1});
    renderFrame(pawn,pawn.dataset.chessmanId,action);
   }
+  // A genuine slot-12 attack already begins after the original dice land.
+  // Propagate its documented CHR source event to the independent OBS effect
+  // sprite renderer without touching damage/turn calculations or pose clock.
+  if(action==='attack'&&pawn.closest?.('#battle-visual')&&
+     typeof CustomEvent==='function')
+   pawn.dispatchEvent(new CustomEvent('leaf-native-duel-attack',{
+    bubbles:true,detail:{card:pawn.dataset.chessmanId,
+     slot:pawn.dataset.sourceNativeSlot||''}
+   }));
   pawn.dataset.walkSourceClock=continueSourceWalk
    ?'continuous-across-real-DMP-steps/WEB-120ms':
     action==='walk'?'new-source-sequence/WEB-120ms':'inactive';
