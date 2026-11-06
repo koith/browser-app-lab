@@ -193,7 +193,7 @@
   }
   function normalizedAccount(){
     const raw=account.value.trim();
-    if(raw.length<3||raw.length>260||/\\s/.test(raw))return "";
+    if(raw.length<3||raw.length>260||/\s/.test(raw))return "";
     if(platform.value==="bluesky"){
       let handle=raw;
       if(raw.startsWith("https://")){
@@ -201,8 +201,8 @@
         try{url=new URL(raw);}catch{return "";}
         if(url.hostname!=="bsky.app"||url.username||url.password||
           url.search||url.hash||url.port||
-          !/^\\/profile\\/[^/]+\\/?$/.test(url.pathname))return "";
-        handle=url.pathname.slice("/profile/".length).replace(/\\/$/,"");
+          !/^\/profile\/[^/]+\/?$/.test(url.pathname))return "";
+        handle=url.pathname.slice("/profile/".length).replace(/\/$/,"");
         // Preserve valid profile URLs for the legacy verified bundle reader.
         if(handle.startsWith("did:plc:"))
           return /^did:plc:[a-z2-7]{24}$/.test(handle)?raw:"";
@@ -227,7 +227,7 @@
         try{url=new URL(raw);}catch{return "";}
         return publicHost(url.hostname)&&!url.username&&!url.password&&
           !url.port&&!url.search&&!url.hash&&
-          /^\\/@[A-Za-z0-9_][A-Za-z0-9_.-]{0,59}\\/?$/.test(url.pathname)?
+          /^\/@[A-Za-z0-9_][A-Za-z0-9_.-]{0,59}\/?$/.test(url.pathname)?
           raw:"";
       }
       const parts=raw.replace(/^@/,"").split("@");
