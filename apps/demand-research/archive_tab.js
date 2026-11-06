@@ -52,21 +52,29 @@ async function loadOverview(){
   }
   if(!connected||!overview)return;
   if(selectedMode()==="auto"){
-    if(overview.automated_posts_state==="ok"){
-      status.textContent="테라박스 원격 보관 게시글 "+
+    if(["ok","cached_verified"].includes(overview.automated_posts_state)){
+      status.textContent="원격에서 확인한 게시글 "+
         Number(overview.automated_posts||0).toLocaleString("ko-KR")+
-        "건 확인. 아래에서 글·사진·영상을 조회할 수 있습니다.";
+        "건. 아래에서 저장된 글·사진·영상을 조회하세요.";
+    }else if(overview.post_journal_state==="candidates_unverified"){
+      status.textContent="자동 수집 저널 파일 후보 "+
+        Number(overview.post_journal_candidates||0).toLocaleString("ko-KR")+
+        "개 발견. 아직 게시글 내용·첨부의 원격 무결성이 검증된 개수는 아닙니다.";
     }else{
-      status.textContent="테라박스 원본 게시글 재읽기에 실패했습니다. 저장 성공으로 표시하지 않습니다.";
+      status.textContent="테라박스 게시글 목록의 원격 읽기 상태가 확인되지 않았습니다.";
     }
   }else if(overview.account_bundles_state==="one_verified"){
     status.textContent="지정 계정 ZIP 후보 "+
       Number(overview.account_zip_candidates||0).toLocaleString("ko-KR")+
       "개 중 최신 1개 원격 무결성 확인. 아래에서 저장된 계정을 선택하세요.";
-  }else if(overview.account_bundles_state==="empty"){
-    status.textContent="현재 원격 목록에서 SHA 검증 가능한 계정 ZIP이 0개입니다. 저장 파일의 존재 여부는 별도 검증이 필요합니다.";
+  }else if(overview.account_bundles_state==="candidates_unverified"){
+    status.textContent="지정 계정 ZIP 파일 후보 "+
+      Number(overview.account_zip_candidates||0).toLocaleString("ko-KR")+
+      "개 발견. 실제 무결성 검증은 아래 계정 보관함에서 진행합니다.";
+  }else if(["empty","zero_candidates_unverified"].includes(overview.account_bundles_state)){
+    status.textContent="현재 원격 목록에서 계정 ZIP 후보 0개. 저장 파일이 전혀 없다고 단정할 수는 없습니다.";
   }else{
-    status.textContent="계정 ZIP 원격 읽기/검증이 완료되지 않았습니다. 저장 성공으로 표시하지 않습니다.";
+    status.textContent="계정 ZIP 원격 목록 확인이 완료되지 않았습니다. 저장 성공으로 표시하지 않습니다.";
   }
 }
 function showArchiveFrame(force=false){

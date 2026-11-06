@@ -49,10 +49,11 @@ def exercise(browser_type,label):
                 elif parsed.path=="/api/archive-overview":
                     requests.append("overview")
                     route.fulfill(status=200,content_type="application/json",
-                      body='{"automated_posts":3,"automated_posts_state":"ok",'
-                           '"account_zip_candidates":2,"account_zip_read_verified":1,'
-                           '"account_bundles_state":"one_verified",'
-                           '"account_registry_count":1,"account_registry_state":"ok"}')
+                      body='{"automated_posts":null,"automated_posts_state":"not_read_verified",'
+                           '"post_journal_candidates":3,"post_journal_state":"candidates_unverified",'
+                           '"account_zip_candidates":2,"account_zip_read_verified":null,'
+                           '"account_bundles_state":"candidates_unverified",'
+                           '"account_registry_count":null,"account_registry_state":"not_checked"}')
                 elif parsed.path=="/account-archive":
                     requests.append("viewer")
                     route.fulfill(status=200,content_type="text/html",
@@ -82,7 +83,7 @@ def exercise(browser_type,label):
                 assert "account=mastodon-" in page.url
                 assert "viewer" in requests
                 page.locator("#archiveHubStatus").get_by_text(
-                    "최신 1개 원격 무결성 확인",exact=False).wait_for(timeout=12000)
+                    "ZIP 파일 후보 2개 발견",exact=False).wait_for(timeout=12000)
                 assert "overview" in requests
                 assert page.locator("#archiveHubActions").is_visible()
                 page.locator("#archiveModeAuto").click()
@@ -91,7 +92,7 @@ def exercise(browser_type,label):
                     state="visible",timeout=12000)
                 assert "automatic-viewer" in requests
                 page.locator("#archiveHubStatus").get_by_text(
-                    "3건 확인",exact=False).wait_for(timeout=12000)
+                    "저널 파일 후보 3개 발견",exact=False).wait_for(timeout=12000)
                 assert page.locator("#archiveHubFullView").get_attribute("href")=="/auto-archive"
                 page.locator("#archiveModeAccounts").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src")=="/account-archive"

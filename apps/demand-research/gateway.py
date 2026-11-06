@@ -499,44 +499,47 @@ _archive_probe={"at":0.0,"value":None}
 _archive_probe_lock=asyncio.Lock()
 
 def _archive_inventory():
-    from verified_bundle_reader import names_from_cloud, load_verified_bundle
+    # Fast root inventory only: the prior implementation synchronously ran
+    # full per-post replay and 17MB+ ZIP SHA readback on every UI diagnostic,
+    # timing out at 85 s even though the storage credential was valid.
+    # Object existence is never misrepresented as remote SHA verification.
     root=CloudArchive(REMOTE)
-    result={"automated_posts":None,"account_zip_candidates":None,
-            "account_zip_read_verified":None,"account_registry_count":None,
-            "automated_posts_state":"unavailable","account_bundles_state":"unavailable",
-            "account_registry_state":"unavailable"}
+    result={"automated_posts":None,"post_journal_candidates":None,
+            "account_zip_candidates":None,"account_zip_read_verified":None,
+            "account_registry_count":None,
+            "automated_posts_state":"not_read_verified",
+            "post_journal_state":"not_checked",
+            "account_bundles_state":"not_checked",
+            "account_registry_state":"not_checked"}
+    cached=_cache.get("posts")
+    if cached is not None:
+        result["automated_posts"]=len(cached)
+        result["automated_posts_state"]="cached_verified"
     try:
-        posts=root.load_catalog(include_entries=True)
-        result["automated_posts"]=len(posts)
-        result["automated_posts_state"]="ok"
-    except (RuntimeError,ValueError,TypeError,KeyError,json.JSONDecodeError):
-        result["automated_posts_state"]="readback_failed"
-    try:
-        names=names_from_cloud(root)
-        result["account_zip_candidates"]=len(names)
-        if not names:
-            result["account_zip_read_verified"]=0
-            result["account_bundles_state"]="empty"
-        else:
-            # SHA-check only the newest ZIP here, not every historical backup.
-            # The real account viewer independently verifies its own ZIP.
-            try:
-                load_verified_bundle(root,names[0])
-                result["account_zip_read_verified"]=1
-                result["account_bundles_state"]="one_verified"
-            except (RuntimeError,ValueError,TypeError,KeyError):
-                result["account_zip_read_verified"]=0
-                result["account_bundles_state"]="readback_failed"
+        raw=root.command(["lsf",root.remote,"--files-only",
+                          "--retries","1"],timeout=28)
+        names=raw.decode("utf-8","replace").splitlines()
+        result["account_zip_candidates"]=sum(
+            1 for name in names if re.fullmatch(
+                r"account-bundle-[a-f0-9]{16}-[0-9]{6,30}-[a-f0-9]{16}\.zip",name))
+        result["account_bundles_state"]=(
+            "candidates_unverified" if result["account_zip_candidates"]
+            else "zero_candidates_unverified")
     except (RuntimeError,ValueError,TypeError):
         result["account_bundles_state"]="listing_failed"
     try:
-        names=root.names("metadata/target-accounts")
-        result["account_registry_count"]=sum(
-            1 for name in names if re.fullmatch(
-                r"(bluesky|mastodon)-[a-f0-9]{40}\.json",name))
-        result["account_registry_state"]="ok"
+        raw=root.command(["lsf",root.remote+"/metadata","--files-only",
+                          "--retries","1"],timeout=28,allow_missing=True)
+        if raw is None:
+            result["post_journal_state"]="listing_unavailable"
+        else:
+            names=raw.decode("utf-8","replace").splitlines()
+            result["post_journal_candidates"]=sum(
+                1 for name in names if re.fullmatch(
+                    r"flat-entry-[a-f0-9]{40}\.json",name))
+            result["post_journal_state"]="candidates_unverified"
     except (RuntimeError,ValueError,TypeError):
-        result["account_registry_state"]="listing_failed"
+        result["post_journal_state"]="listing_failed"
     return result
 
 async def _get_archive_inventory():
