@@ -23,6 +23,64 @@ async def liveness():
     # A healthy process can still be awaiting its three server-side secrets.
     return JSONResponse({"alive":True},headers={"Cache-Control":"no-store"})
 
+# GitHub Actions transfers its EXISTING TeraBox credential to this private
+# process over TLS. A short-lived signed OIDC JWT proves the exact repository,
+# workflow and main ref; the public web app cannot call this route successfully.
+BRIDGE_AUDIENCE="intersection-originals-free/credential-v1"
+BRIDGE_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-gateway-credential-sync.yml@refs/heads/main"
+BRIDGE_ISSUER="https://token.actions.githubusercontent.com"
+BRIDGE_JWKS=BRIDGE_ISSUER+"/.well-known/jwks"
+
+def verify_bridge_token(token):
+    if not isinstance(token,str) or len(token)>12000 or len(token)<100:
+        raise ValueError("Invalid bridge assertion")
+    # Lazy import keeps normal offline tests and public-only routes lightweight.
+    import jwt
+    client=jwt.PyJWKClient(BRIDGE_JWKS,cache_jwk_set=True,lifespan=3600,timeout=8)
+    key=client.get_signing_key_from_jwt(token)
+    claims=jwt.decode(token,key.key,algorithms=["RS256"],
+                      audience=BRIDGE_AUDIENCE,issuer=BRIDGE_ISSUER,
+                      options={"require":["exp","iat","iss","aud","sub"]},
+                      leeway=15)
+    must={
+        "repository":"koith/browser-app-lab",
+        "repository_id":"1284121913",
+        "ref":"refs/heads/main",
+        "workflow_ref":BRIDGE_WORKFLOW,
+    }
+    if any(str(claims.get(k,""))!=v for k,v in must.items()):
+        raise ValueError("Untrusted bridge workflow")
+    if claims.get("event_name") not in ("schedule","workflow_dispatch","push"):
+        raise ValueError("Unexpected bridge event")
+    return claims
+
+@app.post("/api/bridge/credential",include_in_schema=False)
+async def receive_authenticated_credential(request:Request):
+    # Never accept arbitrary public credentials, and never reflect or log NDUS.
+    raw=await request.body()
+    if len(raw)>18000:
+        raise HTTPException(413,"Bridge request too large")
+    try:
+        payload=json.loads(raw)
+        if not isinstance(payload,dict) or set(payload)!={"assertion","credential"}:
+            raise ValueError("Invalid bridge payload")
+        credential=payload["credential"]
+        if not isinstance(credential,str) or not 16<=len(credential)<=4096:
+            raise ValueError("Invalid private cloud credential")
+        if any(ord(c)<32 for c in credential):
+            raise ValueError("Invalid credential characters")
+        verify_bridge_token(payload["assertion"])
+    except (ValueError,KeyError,TypeError,AttributeError):
+        raise HTTPException(403,"Bridge authentication failed") from None
+    except Exception:
+        # JWK network failures and signature validation never become a bypass.
+        raise HTTPException(503,"Bridge verification unavailable") from None
+    global COOKIE
+    COOKIE=credential
+    os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"]=credential
+    return JSONResponse({"accepted":True,"storage_configured":configured()},
+                        headers={"Cache-Control":"no-store"})
+
 @app.get("/ready",include_in_schema=False)
 async def backup_readiness():
     # Public frontend probes only after the user clicks backup. Liveness alone
