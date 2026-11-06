@@ -95,7 +95,7 @@ Object.defineProperty(navigator,"clipboard",{
             assert response and response.status==200
             page.wait_for_function("""() => {
               const status=document.getElementById("targetArchiveStatus").textContent;
-              return status.includes("계정을 지정하고 백업 시작을 누르세요")||
+              return status.includes("계정을 지정하면 교집합 전용 보관함")||
                      status.includes("연결됨 · 계정 주소");
             }""")
             assert len(status_queries)==1
