@@ -66,6 +66,7 @@ def verify(browser,label):
         assert page.evaluate("(key)=>JSON.parse(localStorage.getItem(key))",
                              KEY)==EXPECTED
         assert "watch_import" not in page.url,"import fragment must be removed"
+        assert page.url.split("#")[0]==RENDER+"?tab=accounts",page.url
         assert "기존 관심 계정 2개를 복원" in page.locator("#accountWatchStatus").inner_text()
         # Merge must not create duplicates; neither browser store is deleted.
         page.get_by_role("button",name="기존 관심 계정 복원").click()
