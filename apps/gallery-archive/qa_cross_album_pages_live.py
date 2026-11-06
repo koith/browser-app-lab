@@ -36,6 +36,16 @@ def exercise(browser,model,overlay):
             page.route("**/album-grouping.js*",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=groups))
     try:
+        if not overlay:
+            # A browser PASS against stale Pages is NOT deployment verification.
+            paths=["index.html","saved-photo-union.js"]
+            if model=="mimmi":paths.append("album-grouping.js")
+            for asset in paths:
+                live=page_context.request.get(root+asset,timeout=35000)
+                assert live.status==200,(model,asset,"exact deployed asset HTTP",live.status)
+                expected=Path(f"apps/{model}-gallery/{asset}").read_bytes()
+                assert hashlib.sha256(live.body()).digest()==hashlib.sha256(expected).digest(),(
+                    model,asset,"Pages not at exact checked-out deployed source")
         r=page.goto(root,wait_until="domcontentloaded",timeout=60000)
         assert r and r.status==200,(model,"gallery HTML",r.status if r else None)
         page.wait_for_function("""() =>
