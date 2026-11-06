@@ -63,6 +63,7 @@ async function loadArchive(){
   if(connected){showArchiveFrame();return;}
   loading=true;status.textContent="테라박스 보관 서버에 연결 중…";
   try{
+    await (window.INTERSECTION_AUTH_READY||Promise.resolve());
     const response=await fetch("/api/session",{
       credentials:"same-origin",cache:"no-store",
       headers:{Accept:"application/json"}});
@@ -73,7 +74,7 @@ async function loadArchive(){
   }catch(error){
     connected=false;hidePrivate();
     status.textContent=String(error.message||"")==="PRIVATE_LOGIN_REQUIRED"?
-      "비공개 보관 서버의 전용 주소로 인증해야 원본 파일을 볼 수 있습니다.":
+      "이 브라우저에 개인 보관함 접속 기록이 없습니다. 개인 접속 링크로 한 번 들어오면 이후 자동으로 열립니다.":
       "보관 서버와 통신하지 못했습니다. 저장본은 변경되지 않았습니다.";
   }finally{loading=false;}
 }
