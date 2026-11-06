@@ -163,7 +163,10 @@ def media_key_valid(key: str) -> bool:
 
 
 async def authenticated(request: Request, authorization: str | None = Header(default=None)):
-    if not TOKEN or not COOKIE:
+    # A private, SHA-verified R2 mirror can serve already-owned originals
+    # after a cold start even if the old TeraBox cookie has expired.
+    # Never skip the existing browser-session/bearer authorization check.
+    if not TOKEN or (not COOKIE and not _DURABLE_OWNER_READY):
         raise HTTPException(status_code=503, detail="Cloud gateway is not connected")
     expected = "Bearer " + TOKEN
     bearer_ok = bool(authorization) and secrets.compare_digest(authorization, expected)
