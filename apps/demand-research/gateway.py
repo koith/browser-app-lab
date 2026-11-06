@@ -134,7 +134,8 @@ async def github_acknowledge_job(request:Request):
 async def backup_readiness():
     # Public frontend probes only after the user clicks backup. Liveness alone
     # must never direct them to an unconfigured private service.
-    ready=configured() and dispatch_enabled()
+    from backup_queue import enabled as queue_enabled
+    ready=configured() and (dispatch_enabled() or queue_enabled())
     return JSONResponse({"ready":ready},
                         status_code=200 if ready else 503,
                         headers={"Cache-Control":"no-store"})
