@@ -1611,6 +1611,11 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  // R14-B order (INFERRED): original D6 roll -> totals -> attacker slot-12
  // lunge -> outcome. Round 11 rule kept: the outcome waits for the
  // attacker's full original lunge (exact tick span, WEB tick ms).
+ // Decode R15 original CHR effect sprites while D6 is still rolling.
+ // No gameplay result, source tick or damage changes.
+ const nativeAttacker=stage.querySelector('.leaf-battle-chessman[data-duel-side="attacker"]');
+ if(nativeAttacker?.dataset.chessmanId)
+  window.__LEAF_NATIVE_DUEL_FX__?.warm(nativeAttacker.dataset.chessmanId).catch(()=>{});
  const rolled=Promise.resolve(window.__LEAF_BATTLE_DICE_ROLL__?.play(stage)).catch(()=>{});
  stage.battleDiceRolled=rolled;
  rolled.then(()=>{
@@ -1620,8 +1625,12 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
    window.__LEAF_GENESIS_ACTORS__?.pose(lunger,'attack',850);
   stage.dataset.battlePhase='attack';
   const lungeMs=Number(lunger?.dataset.sourceNativeDurationMs)||0;
-  stage.dataset.duelOutcomeDelayMs=String(Math.max(900,lungeMs));
-  setTimeout(()=>outcome(lungeMs),Math.max(900,lungeMs));
+  // WebKit may paint attack slot-12 after the JS timer starts; the
+  // source 1080ms action had 1029ms visible in an actual iPhone landscape
+  // CI run. Add an inferred 100ms WEB paint margin, never skip OBS keys.
+  const visibleLungeMs=Math.max(900,lungeMs)+100;
+  stage.dataset.duelOutcomeDelayMs=String(visibleLungeMs);
+  setTimeout(()=>outcome(lungeMs),visibleLungeMs);
  });
  return stage;
 }
