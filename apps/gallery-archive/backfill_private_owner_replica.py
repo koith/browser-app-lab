@@ -124,6 +124,34 @@ def planned_rows(model,catalog):
     rows.sort(key=lambda ap:(ap[0]["id"],ap[1]["number"]))
     return rows
 
+def original_and_preview_variants(model, album, photo):
+    """Only canonical owner SHA-pinned original and optional verified preview."""
+    items=[]
+    for variant in ("original", "preview"):
+        key=photo.get("key" if variant=="original" else "preview")
+        if variant=="preview" and key in (None, False):
+            continue
+        if not ensure_only_private_original(model,album,photo,variant):
+            raise RuntimeError("Existing owner "+variant+" metadata invalid")
+        sha=photo["sha256" if variant=="original" else "preview_sha256"]
+        size=photo["bytes" if variant=="original" else "preview_bytes"]
+        if not isinstance(key,str) or not 1<=size<=MAX_FILE:
+            raise RuntimeError("Existing owner variant violates private byte limit")
+        items.append((variant,key,sha,size))
+    return items
+
+def source_manifest_budget(model, rows, limit_bytes=8_000_000_000):
+    """Estimate BEFORE any write, including previews and future exact SHA keys."""
+    count=0;size=0
+    for album, photo in rows:
+        for variant,key,sha,length in original_and_preview_variants(model,album,photo):
+            count+=1
+            size+=length
+            if count>25_000 or size>limit_bytes:
+                raise RuntimeError("Existing owner complete catalog exceeds free project storage budget")
+    return count,size
+
+
 def main(args):
     # A no-network, all-model free-tier guard executes before any owner file
     # reads or private writes; this is a project cap, not provider-wide billing.
@@ -139,16 +167,23 @@ def main(args):
     env.pop("RCLONE_CONFIG_ARCHIVE_DOMAIN",None)
     manifest_raw,catalog=verified_owner_catalog(args.model,env,attempts=3)
     rows=planned_rows(args.model,catalog)
+    objects,all_bytes=source_manifest_budget(args.model,rows)
+    if all_bytes+budget["original_bytes"]>budget["project_soft_cap_bytes"]:
+        # Conservative double count of same original bytes: never assume the
+        # account has unused free tier if combined plans exceed our own cap.
+        raise RuntimeError("Private mirror all-model originals and previews exceed project budget")
     dest=remote+"/"+args.model
     if args.finalize:
         for a,p in rows:
-            if not verify_remotely(dest,p["key"],p["sha256"],p["bytes"]):
-                raise RuntimeError("Full private mirror still missing a recorded owner original")
+            for variant,key,sha,size in original_and_preview_variants(args.model,a,p):
+                if not verify_remotely(dest,key,sha,size):
+                    raise RuntimeError("Full private mirror missing an exact owner variant")
         if save_immutable(dest,"metadata/catalog.json",manifest_raw,
              hashlib.sha256(manifest_raw).hexdigest()):
             print("PRIVATE_OWNER_CATALOG_IMMUTABLY_MIRRORED",args.model,flush=True)
-        print("PRIVATE_OWNER_MODEL_ALL_ORIGINAL_SHA_BYTES_READBACK_PASS",
-              json.dumps({"model":args.model,"count":len(rows)}),flush=True)
+        print("PRIVATE_OWNER_MODEL_ALL_SHA_BYTES_READBACK_PASS",
+              json.dumps({"model":args.model,"originals":len(rows),
+                          "original_plus_preview_files":objects}),flush=True)
         return
 
     segment=rows[args.offset:args.offset+args.count]
@@ -156,23 +191,24 @@ def main(args):
         raise RuntimeError("Empty shard selected; no data processed")
     uploaded=0;existing=0;failed=0
     for album,photo in segment:
-        try:
-            if verify_remotely(dest,photo["key"],photo["sha256"],photo["bytes"]):
-                existing+=1
-                continue
-            body=verified_same_owner_existing_read(
-                args.model,photo["key"],env,photo,"original",attempts=3)
-            if not photo_ok(photo,body,"original"):
-                raise RuntimeError("Source bytes do not match owner SHA/pixels")
-            if save_immutable(dest,photo["key"],body,photo["sha256"]):
-                uploaded+=1
-            else:existing+=1
-        except (OwnerReadUnavailable,RuntimeError,subprocess.TimeoutExpired,OSError):
-            # No original key/URL, cookie, image bytes or ambiguous provider
-            # error body in logs. Other items may still be backed up safely.
-            failed+=1
+        for variant,key,sha,size in original_and_preview_variants(args.model,album,photo):
+            try:
+                if verify_remotely(dest,key,sha,size):
+                    existing+=1
+                    continue
+                body=verified_same_owner_existing_read(
+                    args.model,key,env,photo,variant,attempts=3)
+                if not photo_ok(photo,body,variant):
+                    raise RuntimeError("Source bytes do not match owner SHA/pixels")
+                if save_immutable(dest,key,body,sha):
+                    uploaded+=1
+                else:existing+=1
+            except (OwnerReadUnavailable,RuntimeError,subprocess.TimeoutExpired,OSError):
+                # Preserve other photos; no source URL or secret is logged.
+                # A failed preview must remain separate from a good original.
+                failed+=1
     print("PRIVATE_OWNER_IMMUTABLE_MIRROR_SHARD",json.dumps({
-        "model":args.model,"offset":args.offset,"count":len(segment),
+        "model":args.model,"offset":args.offset,"count":len(segment),"variants":"original_and_verified_preview",
         "uploaded":uploaded,"already_SHA_verified":existing,
         "failed":failed,"originals_publicly_published":False,
         "terabox_originals_modified":False},sort_keys=True),flush=True)
