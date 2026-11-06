@@ -40,6 +40,21 @@ def oidc_assertion():
 def poll_once():
     jwt=oidc_assertion()
     bridge_headers={"Authorization":"Bearer "+jwt}
+    if os.getenv("GITHUB_EVENT_NAME")=="push":
+        # One-shot diagnostic after main code changes; never during the
+        # five-minute credential refresh. Only aggregate counts are logged.
+        try:
+            snapshot=request_json(GATEWAY+"/api/bridge/diagnostics",
+                                  headers=bridge_headers,timeout=90)
+            for field in ("automated_posts_state","automated_posts",
+                          "account_bundles_state","account_zip_candidates",
+                          "account_zip_read_verified","account_registry_state",
+                          "account_registry_count"):
+                value=snapshot.get(field)
+                if isinstance(value,(str,int)) or value is None:
+                    print("INTERSECTION_ARCHIVE_AUDIT",field,value,flush=True)
+        except Exception:
+            print("INTERSECTION_ARCHIVE_AUDIT_UNAVAILABLE",flush=True)
     pending=request_json(GATEWAY+"/api/bridge/pending",headers=bridge_headers)
     jobs=pending.get("requests",[])
     if not isinstance(jobs,list) or len(jobs)>1:
