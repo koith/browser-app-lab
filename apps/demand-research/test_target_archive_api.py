@@ -58,7 +58,7 @@ def test_public_backup_start_and_poll_without_admin_cookie(monkeypatch):
     altered=body["receipt"][:-1]+(
         "1" if body["receipt"].endswith("0") else "0")
     assert anonymous.get(url.replace(body["receipt"],altered)).status_code==403
-    assert anonymous.get("/api/target-archive/jobs/41999999999?receipt=invalid").status_code==403
+    assert anonymous.get("/api/target-archive/jobs/41999999999?receipt=invalid").status_code==422
     assert anonymous.post("/api/target-archive/start",
         json={"platform":"bluesky","account":"@Example"}).status_code==403
     assert anonymous.post("/api/target-archive/start",
