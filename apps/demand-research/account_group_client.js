@@ -67,6 +67,7 @@ async function load(reset){
  loading=true;if(reset){rows=[];total=0}
  try{
   const params=new URLSearchParams({offset:String(rows.length),limit:String(LIMIT)});
+  await (window.INTERSECTION_AUTH_READY||Promise.resolve());
   const res=await fetch("/api/account-groups?"+params,
    {credentials:"same-origin",cache:"no-store",headers:{"Accept":"application/json"}});
   if(!res.ok)throw Error(res.status===401?"인증 전":res.status===503?"비공개 저장소 미연결":"HTTP "+res.status);

@@ -78,6 +78,11 @@ async def receive_authenticated_credential(request:Request):
     global COOKIE
     COOKIE=credential
     os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"]=credential
+    # On a free Render instance the secret arrives AFTER process startup.
+    # Start the optional account-index loop now; otherwise startup skipped
+    # it permanently and the Accounts page remains empty after 503 recovery.
+    if INDEX_DB and _index_task is None and configured():
+        await start_account_index()
     return JSONResponse({"accepted":True,"storage_configured":configured()},
                         headers={"Cache-Control":"no-store"})
 
@@ -487,6 +492,82 @@ async def discovery(request:Request,
                 del _search_cache[key_to_del]
         return JSONResponse(result,headers={"Cache-Control":"private, no-store"})
 
+# Read-only diagnostic counts. This exposes no account identity, content,
+# cookie, signed media URL or cloud key; operators can distinguish an empty
+# archive from an unavailable TeraBox read instead of seeing a blank screen.
+_archive_probe={"at":0.0,"value":None}
+_archive_probe_lock=asyncio.Lock()
+
+def _archive_inventory():
+    from verified_bundle_reader import names_from_cloud, load_verified_bundle
+    root=CloudArchive(REMOTE)
+    result={"automated_posts":None,"account_zip_candidates":None,
+            "account_zip_read_verified":None,"account_registry_count":None,
+            "automated_posts_state":"unavailable","account_bundles_state":"unavailable",
+            "account_registry_state":"unavailable"}
+    try:
+        posts=root.load_catalog(include_entries=True)
+        result["automated_posts"]=len(posts)
+        result["automated_posts_state"]="ok"
+    except (RuntimeError,ValueError,TypeError,KeyError,json.JSONDecodeError):
+        result["automated_posts_state"]="readback_failed"
+    try:
+        names=names_from_cloud(root)
+        result["account_zip_candidates"]=len(names)
+        if not names:
+            result["account_zip_read_verified"]=0
+            result["account_bundles_state"]="empty"
+        else:
+            # SHA-check only the newest ZIP here, not every historical backup.
+            # The real account viewer independently verifies its own ZIP.
+            try:
+                load_verified_bundle(root,names[0])
+                result["account_zip_read_verified"]=1
+                result["account_bundles_state"]="one_verified"
+            except (RuntimeError,ValueError,TypeError,KeyError):
+                result["account_zip_read_verified"]=0
+                result["account_bundles_state"]="readback_failed"
+    except (RuntimeError,ValueError,TypeError):
+        result["account_bundles_state"]="listing_failed"
+    try:
+        names=root.names("metadata/target-accounts")
+        result["account_registry_count"]=sum(
+            1 for name in names if re.fullmatch(
+                r"(bluesky|mastodon)-[a-f0-9]{40}\.json",name))
+        result["account_registry_state"]="ok"
+    except (RuntimeError,ValueError,TypeError):
+        result["account_registry_state"]="listing_failed"
+    return result
+
+async def _get_archive_inventory():
+    if not configured():
+        raise HTTPException(503,"Archive storage connection is being restored")
+    if (_archive_probe["value"] is not None and
+            time.monotonic()-_archive_probe["at"]<180):
+        return _archive_probe["value"]
+    async with _archive_probe_lock:
+        if (_archive_probe["value"] is not None and
+                time.monotonic()-_archive_probe["at"]<180):
+            return _archive_probe["value"]
+        try:
+            value=await asyncio.wait_for(asyncio.to_thread(_archive_inventory),timeout=85)
+        except (TimeoutError,RuntimeError,ValueError):
+            raise HTTPException(503,"Archive readback timed out") from None
+        _archive_probe.update(at=time.monotonic(),value=value)
+        return value
+
+@app.get("/api/archive-overview")
+async def archive_overview(request:Request):
+    check_auth(request)
+    return JSONResponse(await _get_archive_inventory(),
+                        headers={"Cache-Control":"private, no-store"})
+
+@app.get("/api/bridge/diagnostics",include_in_schema=False)
+async def bridge_archive_diagnostics(request:Request):
+    _bridge_authenticated(request)
+    return JSONResponse(await _get_archive_inventory(),
+                        headers={"Cache-Control":"private, no-store"})
+
 @app.get("/api/posts")
 async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=60),q:str=Query("",max_length=100),
                      platform:str=Query("",max_length=32),media_status:str=Query("",max_length=16)):
@@ -584,7 +665,7 @@ app.include_router(create_account_viewer_router(check_auth))
 # expose the Python source tree, cloud files or private database via StaticFiles.
 @app.get("/{asset_name}",include_in_schema=False)
 async def viewer_script(asset_name:str):
-    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","archive_tab.js","free_discovery.js","post_activity_ranking.js","target_archive_client.js"}:
+    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","archive_tab.js","free_discovery.js","post_activity_ranking.js","public_video_trends.js","target_archive_client.js"}:
         raise HTTPException(404,"Not found")
     return FileResponse(VIEW_FILE.parent/asset_name,media_type="application/javascript",
         headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})

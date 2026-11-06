@@ -46,6 +46,13 @@ def exercise(browser_type,label):
                     route.fulfill(status=200 if allowed["value"] else 401,
                       content_type="application/json",
                       body='{"connected":true}' if allowed["value"] else '{"detail":"Private link required"}')
+                elif parsed.path=="/api/archive-overview":
+                    requests.append("overview")
+                    route.fulfill(status=200,content_type="application/json",
+                      body='{"automated_posts":3,"automated_posts_state":"ok",'
+                           '"account_zip_candidates":2,"account_zip_read_verified":1,'
+                           '"account_bundles_state":"one_verified",'
+                           '"account_registry_count":1,"account_registry_state":"ok"}')
                 elif parsed.path=="/account-archive":
                     requests.append("viewer")
                     route.fulfill(status=200,content_type="text/html",
@@ -74,12 +81,17 @@ def exercise(browser_type,label):
                     "/account-archive?account=mastodon-"+"b"*40)
                 assert "account=mastodon-" in page.url
                 assert "viewer" in requests
+                page.locator("#archiveHubStatus").get_by_text(
+                    "최신 1개 원격 무결성 확인",exact=False).wait_for(timeout=12000)
+                assert "overview" in requests
                 assert page.locator("#archiveHubActions").is_visible()
                 page.locator("#archiveModeAuto").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src")=="/auto-archive"
                 page.frame_locator("#archiveHubFrame").locator("#keyword-posts").wait_for(
                     state="visible",timeout=12000)
                 assert "automatic-viewer" in requests
+                page.locator("#archiveHubStatus").get_by_text(
+                    "3건 확인",exact=False).wait_for(timeout=12000)
                 assert page.locator("#archiveHubFullView").get_attribute("href")=="/auto-archive"
                 page.locator("#archiveModeAccounts").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src")=="/account-archive"

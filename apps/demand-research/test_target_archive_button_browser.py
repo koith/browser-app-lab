@@ -152,7 +152,7 @@ Object.defineProperty(navigator,"clipboard",{
                 page.locator("#targetArchiveAccount").wait_for(state="visible")
                 assert page.locator("#targetArchiveAccount").input_value()==(
                     "qa-example.bsky.social")
-                assert page.locator("#targetArchiveSubmit").inner_text()=="전용 보관함 인증 필요"
+                assert page.locator("#targetArchiveSubmit").inner_text()=="보관함 연결 필요"
                 assert "archive_account" not in page.url,"selection removed from URL after restore"
                 assert not any("github.com" in event for event in clipboard_events)
             assert not errors,errors

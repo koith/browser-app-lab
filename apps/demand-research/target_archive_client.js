@@ -255,12 +255,12 @@
     // Never leave users with a dead button or a GitHub Actions detour.
     submit.disabled=submitting;
     submit.textContent=gatewayReady?"테라박스 백업 시작":
-      (isPrivateGateway?"전용 보관함 인증 필요":"교집합에서 계정 백업");
+      (isPrivateGateway?"보관함 연결 필요":"교집합에서 계정 백업");
     workflow.hidden=true;
   }
   function openPrivateBackup(){
     if(isPrivateGateway){
-      message.textContent="비공개 보관함에 아직 인증되지 않았습니다. 이 교집합 화면의 전용 접속 링크로 인증한 뒤 백업을 시작할 수 있습니다.";
+      message.textContent="이 브라우저의 개인 보관함 접속 기록이 없습니다. 기존 개인 접속 링크를 한 번 열면 이후 자동으로 연결됩니다.";
       return;
     }
     // Pages supplies only public platform/account selection. The same
@@ -297,6 +297,7 @@
   }
   async function check(){
     try{
+      await (window.INTERSECTION_AUTH_READY||Promise.resolve());
       const response=await fetch("/api/target-archive/status",{
         credentials:"same-origin",cache:"no-store"});
       if(!response.ok)throw new Error("private gateway unavailable");
@@ -319,7 +320,7 @@
       viewer.hidden=true;
       gatewayReady=false;
       message.textContent=isPrivateGateway?
-        "전용 서버 인증이 확인되지 않았습니다. 비공개 접근 주소로 접속한 뒤 계정 백업을 시작하세요.":
+        "보관함 접속 상태를 확인하지 못했습니다. 개인 접속 링크로 한 번 열면 이후 자동으로 연결됩니다.":
         "계정을 지정하면 교집합 전용 보관함으로 이어집니다. GitHub Actions 화면으로 이동하지 않습니다. 보관함 인증 후 백업을 시작합니다.";
     }finally{
       refreshButton();
