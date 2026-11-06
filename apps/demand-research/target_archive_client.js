@@ -191,37 +191,65 @@
       host!=="localhost"&&!host.endsWith(".local")&&
       !host.endsWith(".internal")&&!/^(?:\d+\.){3}\d+$/.test(host);
   }
-  function validSelection(){
+  function normalizedAccount(){
     const raw=account.value.trim();
-    if(raw.length<3||raw.length>260||/\s/.test(raw))return false;
+    if(raw.length<3||raw.length>260||/\\s/.test(raw))return "";
     if(platform.value==="bluesky"){
-      let value=raw;
+      let handle=raw;
       if(raw.startsWith("https://")){
         let url;
-        try{url=new URL(raw);}catch{return false;}
+        try{url=new URL(raw);}catch{return "";}
         if(url.hostname!=="bsky.app"||url.username||url.password||
           url.search||url.hash||url.port||
-          !/^\/profile\/[^/]+\/?$/.test(url.pathname))return false;
-        value=url.pathname.slice("/profile/".length).replace(/\/$/,"");
+          !/^\\/profile\\/[^/]+\\/?$/.test(url.pathname))return "";
+        handle=url.pathname.slice("/profile/".length).replace(/\\/$/,"");
+        // Preserve valid profile URLs for the legacy verified bundle reader.
+        if(handle.startsWith("did:plc:"))
+          return /^did:plc:[a-z2-7]{24}$/.test(handle)?raw:"";
+      }else{
+        handle=handle.replace(/^@/,"");
       }
-      value=value.replace(/^@/,"");
-      if(value.startsWith("did:plc:"))return /^did:plc:[a-z2-7]{24}$/.test(value);
-      return /^[A-Za-z0-9_.-]{3,260}$/.test(value);
+      if(handle.startsWith("did:plc:"))
+        return /^did:plc:[a-z2-7]{24}$/.test(handle)?handle:"";
+      if(!handle.includes(".")){
+        if(!/^[A-Za-z0-9][A-Za-z0-9-]{1,61}[A-Za-z0-9]$/.test(handle))return "";
+        // Bluesky default account names may be entered without .bsky.social.
+        return handle.toLowerCase()+".bsky.social";
+      }
+      if(!publicHost(handle)||!handle.split(".").every(
+        label=>/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/.test(label)))
+        return "";
+      return raw.startsWith("https://")?raw:handle.toLowerCase();
     }
     if(platform.value==="mastodon"){
       if(raw.startsWith("https://")){
         let url;
-        try{url=new URL(raw);}catch{return false;}
+        try{url=new URL(raw);}catch{return "";}
         return publicHost(url.hostname)&&!url.username&&!url.password&&
           !url.port&&!url.search&&!url.hash&&
-          /^\/@[A-Za-z0-9_][A-Za-z0-9_.-]{0,59}\/?$/.test(url.pathname);
+          /^\\/@[A-Za-z0-9_][A-Za-z0-9_.-]{0,59}\\/?$/.test(url.pathname)?
+          raw:"";
       }
       const parts=raw.replace(/^@/,"").split("@");
       return parts.length===2&&
         /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,59}$/.test(parts[0])&&
-        publicHost(parts[1]);
+        publicHost(parts[1])?parts[0]+"@"+parts[1].toLowerCase():"";
     }
-    return false;
+    return "";
+  }
+  function validSelection(){return normalizedAccount()!=="";}
+  function refreshAccountHint(){
+    if(platform.value==="bluesky"){
+      account.placeholder="@example 또는 example.bsky.social";
+      account.inputMode="text";
+      const hint=$("targetArchiveInputHint");
+      if(hint)hint.textContent="Bluesky: 이름 example, @example, @example.bsky.social 또는 프로필 URL 입력";
+    }else{
+      account.placeholder="@name@mastodon.social";
+      account.inputMode="text";
+      const hint=$("targetArchiveInputHint");
+      if(hint)hint.textContent="Mastodon: @name@서버주소 또는 프로필 URL 입력 (서버 주소 필수)";
+    }
   }
   function refreshButton(){
     // Never leave users with a dead button or a GitHub Actions detour.
@@ -241,7 +269,7 @@
     const url=new URL(PRIVATE_GATEWAY+"/");
     url.searchParams.set("tab","accounts");
     url.searchParams.set("archive_platform",platform.value);
-    url.searchParams.set("archive_account",account.value.trim());
+    url.searchParams.set("archive_account",normalizedAccount());
     message.textContent="계정 선택을 유지한 채 교집합 보관함을 엽니다. 백업 실행은 인증 후 확인합니다.";
     window.location.assign(url.href);
   }
@@ -303,6 +331,7 @@
   });
   platform.addEventListener("change",()=>{
     account.removeAttribute("aria-invalid");
+    refreshAccountHint();
     refreshButton();
   });
   form.addEventListener("submit",async event=>{
@@ -317,7 +346,7 @@
     }
     account.removeAttribute("aria-invalid");
     if(!gatewayReady){void openPrivateBackup();return;}
-    const value=account.value.trim();
+    const value=normalizedAccount();
     submitting=true;
     refreshButton();
     message.textContent="비공개 아카이브 작업 요청 중…";
@@ -356,6 +385,7 @@
     void check();
   });
   restoreSelectedAccount();
+  refreshAccountHint();
   refreshButton();
   void check();
 })();
