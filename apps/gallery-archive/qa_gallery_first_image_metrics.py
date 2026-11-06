@@ -10,21 +10,32 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from pathlib import Path
 from playwright.sync_api import sync_playwright, TimeoutError as BrowserTimeout
 
 BASE = "https://koith.github.io/browser-app-lab/apps"
 
 
-def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False) -> dict:
+def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False,
+          candidate_html: bool = False) -> dict:
     context = browser.new_context(
         viewport={"width": 390, "height": 844}, is_mobile=True,
         has_touch=True, device_scale_factor=2, locale="ko-KR",
     )
     page = context.new_page()
+    if candidate_html:
+        # A PR/push cannot assume Pages has deployed the proposed HTML.
+        # Exercise candidate HTML on the real GitHub Pages origin while
+        # loading the existing static SHA-indexed owner files from Pages.
+        root = f"{BASE}/{model}-gallery/"
+        source = Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
+        page.route(root, lambda route: route.fulfill(
+            status=200, content_type="text/html; charset=utf-8", body=source))
     errors: list[str] = []
     page.on("pageerror", lambda error: errors.append(str(error)[:180]))
     start = time.monotonic()
-    result = {"model": model, "backend_auth_supplied": False,
+    result = {"model": model, "candidate_html_under_test": candidate_html,
+              "backend_auth_supplied": False,
               "real_iphone_hardware_tested": False}
     try:
         response = page.goto(f"{BASE}/{model}-gallery/",
@@ -235,6 +246,8 @@ def main() -> None:
     parser.add_argument("--browser", choices=("chromium", "webkit"),
                         default="chromium")
     parser.add_argument("--image-timeout-ms", type=int, default=110000)
+    parser.add_argument("--candidate-html", action="store_true",
+                        help="Test checked-out PR/push HTML; does not claim deployed Pages")
     parser.add_argument("--verify-progressive", action="store_true",
                         help="Run only after the new HTML is deployed by Pages")
     args = parser.parse_args()
@@ -252,7 +265,7 @@ def main() -> None:
             try:
                 for position, model in enumerate(order):
                     measured = audit(browser, model, args.image_timeout_ms,
-                                 args.verify_progressive)
+                                 args.verify_progressive, args.candidate_html)
                     measured["order"] = " -> ".join(order)
                     measured["position_in_order"] = position + 1
                     results.append(measured)
