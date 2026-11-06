@@ -1,0 +1,91 @@
+name: INTERSECTION — One-Time Live Account Backup Smoke
+
+on:
+  # Adding this workflow on main runs the one-time user-requested smoke.
+  # Subsequent unrelated pushes do not rerun the backup.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/intersection-oneclick-live-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intersection-oneclick-live-smoke
+  cancel-in-progress: false
+
+jobs:
+  verify-oneclick:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Verify real no-login account backup request and signed progress receipt
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,time,urllib.request,urllib.error
+          from urllib.parse import quote
+          base="https://intersection-originals-free.onrender.com"
+          def get(path,timeout=35):
+              req=urllib.request.Request(base+path,headers={
+                "Accept":"application/json","User-Agent":"intersection-live-qa"})
+              with urllib.request.urlopen(req,timeout=timeout) as response:
+                  if response.status!=200:
+                      raise RuntimeError("GET did not return 200")
+                  return json.load(response)
+          def submit():
+              data=json.dumps({"platform":"bluesky",
+                               "account":"arreeumkk07.bsky.social"}).encode()
+              request=urllib.request.Request(base+"/api/target-archive/start",
+                method="POST",data=data,headers={
+                 "Origin":base,"X-Archive-Intent":"selected-public-account-v1",
+                 "Content-Type":"application/json",
+                 "Accept":"application/json",
+                 "User-Agent":"intersection-live-qa"})
+              with urllib.request.urlopen(request,timeout=90) as response:
+                  if response.status!=202:
+                      raise RuntimeError("Backup was not accepted")
+                  return json.load(response)
+          health=get("/api/health")
+          if not health.get("configured"):
+              raise SystemExit("LIVE_STORAGE_NOT_CONNECTED")
+          print("LIVE_GATEWAY_STORAGE_READY",flush=True)
+          if get("/api/session").get("cloud")=="disabled":
+              raise SystemExit("LIVE_PUBLIC_SESSION_BLOCKED")
+          status=get("/api/target-archive/status")
+          if status.get("enabled") is not True:
+              raise SystemExit("LIVE_ACCOUNT_BACKUP_DISABLED")
+          print("LIVE_NO_LOGIN_STATUS_READY",flush=True)
+          queued=None
+          for attempt in range(3):
+              try:
+                  queued=submit()
+                  break
+              except urllib.error.HTTPError as error:
+                  # The service rate limits bursts after real iPhone taps.
+                  print("LIVE_BACKUP_HTTP_STATUS",error.code,flush=True)
+                  if error.code!=429 or attempt>=2:
+                      raise
+                  time.sleep(47)
+          if (queued.get("accepted") is not True or
+              queued.get("state")!="QUEUED_NOT_VERIFIED" or
+              not isinstance(queued.get("run_id"),int) or
+              not isinstance(queued.get("receipt"),str)):
+              raise SystemExit("LIVE_BACKUP_RESPONSE_INVALID")
+          print("LIVE_PUBLIC_BACKUP_QUEUED run_id",queued["run_id"],flush=True)
+          run=queued["run_id"];receipt=queued["receipt"]
+          state=get("/api/target-archive/jobs/"+str(run)+
+                    "?receipt="+quote(receipt,safe=""))
+          if state.get("run_id")!=run or state.get("state") not in (
+              "QUEUED","RUNNING","VERIFYING_STORAGE","REMOTE_VERIFIED",
+              "PARTIAL_BACKUP"):
+              raise SystemExit("LIVE_BACKUP_PROGRESS_UNAVAILABLE")
+          print("LIVE_BACKUP_PROGRESS_WORKS",state["state"],flush=True)
+          if state.get("remote_verified") is True:
+              print("LIVE_BACKUP_TERA_SHA_VERIFIED",state.get("posts"),
+                    state.get("objects"),flush=True)
+          else:
+              print("LIVE_BACKUP_STORAGE_VERIFICATION_PENDING",flush=True)
+          PY
