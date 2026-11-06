@@ -872,9 +872,10 @@ main{padding-top:10px}
         <label for="targetArchivePlatform">SNS
           <select id="targetArchivePlatform"><option value="bluesky">Bluesky</option><option value="mastodon">Mastodon</option></select>
         </label>
-        <label for="targetArchiveAccount">백업할 계정 주소
-          <input id="targetArchiveAccount" type="text" inputmode="url" minlength="3" maxlength="260" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="https://bsky.app/profile/example.bsky.social" required>
+        <label for="targetArchiveAccount">백업할 계정 이름 또는 프로필 주소
+          <input id="targetArchiveAccount" type="text" inputmode="text" minlength="3" maxlength="260" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="@example 또는 example.bsky.social" aria-describedby="targetArchiveInputHint" required>
         </label>
+        <p id="targetArchiveInputHint" class="account-privacy">Bluesky: 이름 example, @example, @example.bsky.social 또는 프로필 URL 입력</p>
         <button id="targetArchiveSubmit" type="submit">백업 실행 경로 확인 중…</button>
       </form>
       <span id="targetArchiveStatus" role="status" aria-live="polite">백업 실행 연결을 확인 중입니다.</span>
@@ -1978,7 +1979,7 @@ if(cloudMode){
 </script>
 <script src="post_activity_ranking.js" defer></script>
 <script src="public_video_trends.js" defer></script>
-<script src="target_archive_client.js?v=20261106-private-archive-inapp" defer></script>
+<script src="target_archive_client.js?v=20261106-account-handle-input" defer></script>
 <script src="free_discovery.js" defer></script>
 <script src="account_watch.js?v=20261106-archive-tab" defer></script>
 <script src="archive_tab.js?v=20261106-private-archive-inapp" defer></script>

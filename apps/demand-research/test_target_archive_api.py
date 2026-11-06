@@ -19,6 +19,20 @@ def client(monkeypatch):
     return client
 
 
+def test_short_bluesky_username_creates_canonical_backup_request(client,monkeypatch):
+    monkeypatch.delenv("DEMAND_ARCHIVE_QUEUE_MODE",raising=False)
+    recorded=[]
+    monkeypatch.setattr(target_archive_api,"dispatch",
+                        lambda platform,account: (recorded.append((platform,account)) or 41999999999))
+    headers={"Origin":"https://testserver","X-Archive-Intent":"selected-public-account-v1"}
+    response=client.post("/api/target-archive/start",
+                         json={"platform":"bluesky","account":"@Example"},
+                         headers=headers)
+    assert response.status_code==202
+    assert response.json()["state"]=="QUEUED_NOT_VERIFIED"
+    assert recorded==[("bluesky","example.bsky.social")]
+
+
 def test_requires_authenticated_session_and_actions_permission(monkeypatch):
     test=TestClient(gateway.app,base_url="https://testserver")
     assert test.get("/api/target-archive/status").status_code==503
@@ -98,7 +112,10 @@ def test_oneclick_job_progress_requires_signed_same_session_receipt(client,monke
     assert recorded==[41999999999]
     wrong=client.get("/api/target-archive/jobs/41999999998?receipt="+receipt)
     assert wrong.status_code==403
-    assert client.get(uri.replace(receipt,receipt[:-1]+"0")).status_code==403
+    # Flip the final digest character to a DIFFERENT value. Replacing
+    # an existing "0" with "0" would falsely report a security regression.
+    altered=receipt[:-1]+("1" if receipt.endswith("0") else "0")
+    assert client.get(uri.replace(receipt,altered)).status_code==403
     anon=TestClient(gateway.app,base_url="https://testserver")
     assert anon.get(uri).status_code==401
 

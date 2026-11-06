@@ -30,6 +30,15 @@ class FakeCloud:
         return sorted(self.items)
 
 
+def test_queue_canonicalizes_short_usernames_without_url(monkeypatch):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    cloud=FakeCloud()
+    job_id=backup_queue.create_request("bluesky","@Public-Test",cloud)
+    assert backup_queue.read_request(cloud,job_id)["account"]=="public-test.bsky.social"
+    assert backup_queue.pending(cloud)==[
+        {"job_id":job_id,"platform":"bluesky","account":"public-test.bsky.social"}]
+
+
 def test_queued_account_remains_pending_until_ack(monkeypatch):
     monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
     root=FakeCloud()
