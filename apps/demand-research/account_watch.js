@@ -133,8 +133,8 @@ function transferFromOldPages(){
  const old=read().map(x=>x.url);
  // Validated provider profile URLs are ASCII. The fragment never reaches a
  // web server log; the original localStorage is not touched.
- const packed=btoa(JSON.stringify(old)).replace(/\\+/g,"-")
-   .replace(/\\//g,"_").replace(/=+$/,"");
+ const packed=btoa(JSON.stringify(old)).replaceAll("+","-")
+   .replaceAll("/","_").replace(/=+$/,"");
  location.replace(RENDER_HOME+"?tab=accounts#"+TRANSFER_KEY+"="+packed);
  return true;
 }
