@@ -528,7 +528,7 @@ def _archive_inventory():
         names=root.names("metadata/target-accounts")
         result["account_registry_count"]=sum(
             1 for name in names if re.fullmatch(
-                r"(bluesky|mastodon)-[a-f0-9]{40}\\.json",name))
+                r"(bluesky|mastodon)-[a-f0-9]{40}\.json",name))
         result["account_registry_state"]="ok"
     except (RuntimeError,ValueError,TypeError):
         result["account_registry_state"]="listing_failed"
@@ -660,7 +660,7 @@ app.include_router(create_account_viewer_router(check_auth))
 # expose the Python source tree, cloud files or private database via StaticFiles.
 @app.get("/{asset_name}",include_in_schema=False)
 async def viewer_script(asset_name:str):
-    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","archive_tab.js","free_discovery.js","post_activity_ranking.js","target_archive_client.js"}:
+    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","archive_tab.js","free_discovery.js","post_activity_ranking.js","public_video_trends.js","target_archive_client.js"}:
         raise HTTPException(404,"Not found")
     return FileResponse(VIEW_FILE.parent/asset_name,media_type="application/javascript",
         headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
