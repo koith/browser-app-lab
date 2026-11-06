@@ -34,6 +34,13 @@ const {chromium}=require('playwright');
    ...Array.from({length:10},(_,i)=>'original/OBS/ui/1171-'+String(i+18).padStart(3,'0')+'.png'),
    ...Array.from({length:16},(_,i)=>'original/OBS/dice-blocks/obs-1171-b2-'+String(i).padStart(3,'0')+'.png'),
    ...Array.from({length:6},(_,i)=>'original/OBS/ui/1171-'+String(i).padStart(3,'0')+'.png'),
+   // R16: the first offline native duel uses exactly its OWN source
+   // OBS effect sprites even if the user never started a duel while online.
+   // Only 9 verified visual roles (129 source PNGs), no fabricated effects.
+   'native-duel-effects.js','native-duel-effects.css','original/OBS/duel-effects/manifest.js',
+   ...[['1096',3],['1097',5],['1098',7],['1099',12],
+       ['1101',5],['1102',5],['1112',31],['1114',29],['1118',32]].flatMap(([id,n])=>
+        Array.from({length:n},(_,i)=>'original/OBS/duel-effects/obs-'+id+'-'+String(i).padStart(3,'0')+'.png')),
    'dice-original-battle-unobstructed.css','dice-2004-full-frame.css','dice-source-roll.css','dice-source-roll.js','dice-fall.js','dice-fall.css','genesis-chessman-actors.css','genesis-chessman-actors.js','dice-native-minimap-navigation.css','dice-native-minipanel-spr.js','dice-native-minipanel-spr.css',
    ...Array.from({length:4},(_,i)=>'original/SourceSPRExtra/minipanel-'+String(i).padStart(2,'0')+'.png'),
    'dice-native-tis-depth.css','dice-native-tis-orientation.css','dice-ai-autoplay.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
@@ -53,7 +60,7 @@ const {chromium}=require('playwright');
    if(!active)return false;
    const cache=await caches.open(active);
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
-  },critical,{timeout:40000});
+  },critical,{timeout:60000});
   // An established controller must answer image and JS fetches offline.
   await page.reload();
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller,null,{timeout:12000});
@@ -64,6 +71,25 @@ const {chromium}=require('playwright');
    &&document.querySelector('#leaf-world-stage .leaf-native-snaplogo')?.dataset.ready==='true'
    &&document.querySelector('#leaf-world-stage .leaf-native-snapnumber')?.dataset.ready==='true',
    null,{timeout:18000});
+  // Test browser decode through the installed worker with networking
+  // OFF, not merely the presence of URLs in a static JS cache list.
+  const nativeOfflineFx=await page.evaluate(async()=>{
+   const api=window.__LEAF_NATIVE_DUEL_FX__;
+   const events=api?.eventsFor('0042')||[];
+   const paths=['obs-1096-000.png','obs-1097-000.png',
+    'obs-1101-004.png','obs-1118-031.png'];
+   const decoded=await Promise.all(paths.map(async filename=>{
+    const image=new Image();
+    image.src='./original/OBS/duel-effects/'+filename;
+    await image.decode();
+    return {filename,w:image.naturalWidth,h:image.naturalHeight};
+   }));
+   return {eventMember:events[0]?.member,decoded};
+  });
+  assert.equal(nativeOfflineFx.eventMember,'obs.pak/1097.obs',
+   'cold offline duel must preserve its own source CHR action member');
+  assert.ok(nativeOfflineFx.decoded.every(x=>x.w>0&&x.h>0),
+   'cold offline original effect frames must decode as real PNG pixels');
   // Cold PWA installation must draw the true 120x270 MainFrame toolbar,
   // including its genuine four-state sprite and the 323x124 tiled panel.
   // This remains working even before the player ever navigates menus online.
