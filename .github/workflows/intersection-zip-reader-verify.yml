@@ -35,7 +35,7 @@ jobs:
           from pathlib import Path
           script=Path(".github/workflows/intersection-zip-reader-verify.yml").read_text()
           assert "rclone help backends | grep -i terabox >/dev/null" in script
-          assert "grep -qi terabox" not in script
+          assert ("grep -q" + "i terabox") not in script
           PY
   live-private-reader:
     if: github.event_name != 'pull_request'
