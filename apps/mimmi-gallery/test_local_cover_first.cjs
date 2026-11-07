@@ -20,9 +20,10 @@ delete pagesPhoto.ownerAlbum;
 delete pagesPhoto.storageNumber;
 delete pagesPhoto.preview;
 const album={id:'safe-work',title:'Safe Work',images:[ownerPhoto],expected:10};
-function render(owner,local){
+function render(owner,local,additionalSaved=[]){
  const env={
-  stored:owner?[{...album,images:[owner]}]:[{...album,images:[local]}],
+  location:{hostname:'koith.github.io'},
+  stored:owner?[{...album,images:[owner,...additionalSaved]}]:[{...album,images:[local]}],
   localStored:local?[{...album,images:[local]}]:[],
   localPreviewIndex:new Map(),
   catalog:[album],albumCovers:{},
@@ -55,6 +56,13 @@ assert.ok(!wrongDimensions.includes('src="stored-albums/safe-work/1.jpg"'),
 const staticOnly=render(null,pagesPhoto);
 assert.ok(staticOnly.includes('src="stored-albums/safe-work/1.jpg"')&&!staticOnly.includes('data-owner='),
   'Already-public-only photos remain directly viewable');
+const alternative={...pagesPhoto,number:2,sha256:'b'.repeat(64),url:'stored-albums/safe-work/2.jpg'};
+const sameWorkAlternative=render(ownerPhoto,alternative,[alternative]);
+assert.ok(sameWorkAlternative.includes('src="stored-albums/safe-work/2.jpg"'),
+  'A verified photo in the same composed work must paint when the preferred private cover has no exact saved copy');
+assert.ok(!sameWorkAlternative.includes('data-owner='),
+  'An actual committed alternative does not need the unavailable Render cover request');
+assert.equal(ownerPhoto.ownerAlbum,'safe-work','Choosing a cover must not mutate the private original');
 
 const owner=JSON.parse(fs.readFileSync(path.join(root,'owner-index.json'),'utf8'));
 const local=JSON.parse(fs.readFileSync(path.join(root,'stored-albums.json'),'utf8'));
