@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import time
 from pathlib import Path
 from urllib.parse import urlsplit
 from fastapi import APIRouter, HTTPException, Query, Request
@@ -44,9 +46,38 @@ class _BoundedZipRoot:
         self.remote=root.remote
 
     def command(self,args,*,data=None,timeout=150,allow_missing=False):
-        return self.root.command(args,data=data,
-                                 timeout=min(timeout,18),
-                                 allow_missing=allow_missing)
+        operation=args[0] if args and args[0] in ("lsf","cat") else "other"
+        # The exact 17.6 MB original ZIP was independently SHA verified on
+        # GitHub Actions. An 18-second *combined* listing/read budget dropped
+        # this same ZIP on the slower Render free instance. Keep a finite
+        # per-operation bound and let GitHub remain a separate safe fallback.
+        budget=min(timeout,55 if operation=="cat" else 30)
+        started=time.monotonic()
+        outcome="error"
+        try:
+            response=self.root.command(args,data=data,timeout=budget,
+                                       allow_missing=allow_missing)
+            outcome="missing" if response is None else "ok"
+            return response
+        except RuntimeError as error:
+            if isinstance(error.__cause__,subprocess.TimeoutExpired):
+                outcome="process_timeout"
+            else:
+                for category in ("authorization","missing","rate_limited",
+                                 "network_timeout","capacity","remote_server",
+                                 "backend_rejected"):
+                    if "("+category+")" in str(error):
+                        outcome=category
+                        break
+            raise
+        finally:
+            # Fixed categories and durations ONLY; never log original account
+            # IDs, post text, private path, ZIP bytes, cookie, or provider body.
+            print("INTERSECTION_ZIP_SOURCE_READ",
+                  "operation="+operation,
+                  "outcome="+outcome,
+                  "elapsed_ms="+str(round((time.monotonic()-started)*1000)),
+                  flush=True)
 
 
 def _verified_account_bundles(root):
