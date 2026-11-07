@@ -51,7 +51,7 @@ jobs:
                      for f in z.infolist() if not f.is_dir()]
             print('OFFICIAL_2002_ORIGINAL_ZIP_FILES',len(records))
             for row in records: print('ORIGINAL_ENTRY',row['name'],row['size'])
-            pak=[r for r in records if re.search(r'(?i)(obs2?\\.pak|\\.obs)$',r['name'])]
+            pak=[r for r in records if re.search(r'(?i)(obs2?\.pak|\.obs)$',r['name'])]
             print('DIRECT_ORIGINAL_OBS_MEMBERS',pak)
             executables=[r for r in records if r['name'].lower().endswith(('.exe','.msi','.cab','.bin'))]
             print('NESTED_INSTALLER_CANDIDATES',executables)
@@ -64,7 +64,7 @@ jobs:
               'chr_0156_original_obs2_1222':'UNVERIFIED_NO_FABRICATED_RECOVERY'
             }
             Path('4leaf-original-0156-installer-census.json').write_text(
-              json.dumps(report,indent=2,ensure_ascii=False)+'\\n')
+              json.dumps(report,indent=2,ensure_ascii=False)+'\n')
           PY
           if command -v 7z >/dev/null; then
             7z l -slt /tmp/4leaf-origin/4leaf.zip > /tmp/4leaf-origin/sevenzip-list.txt
