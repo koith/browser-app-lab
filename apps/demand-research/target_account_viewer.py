@@ -48,7 +48,7 @@ class _BoundedZipRoot:
     def command(self,args,*,data=None,timeout=150,allow_missing=False):
         operation=args[0] if args and args[0] in ("lsf","cat") else "other"
         # The exact 17.6 MB original ZIP was independently SHA verified on
-        # GitHub Actions. An 18-second *combined* listing/read budget dropped
+        # GitHub Actions. An 18-second per-operation listing/read budget dropped
         # this same ZIP on the slower Render free instance. Keep a finite
         # per-operation bound and let GitHub remain a separate safe fallback.
         budget=min(timeout,55 if operation=="cat" else 30)
