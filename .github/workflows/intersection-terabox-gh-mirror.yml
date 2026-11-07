@@ -8,6 +8,10 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/intersection-terabox-gh-mirror.yml"
+      # A tightened main-only OIDC key grant must revalidate the archived
+      # ciphertext mirror immediately after its gateway policy changes.
+      - "apps/demand-research/gateway.py"
+      - "apps/demand-research/mirror_verified_terabox_to_github.py"
   workflow_run:
     workflows:
       - "INTERSECTION — Verified One-ZIP Public Account Rescue"
