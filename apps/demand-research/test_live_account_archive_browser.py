@@ -103,6 +103,57 @@ def verify(engine, *, label, width, height):
         )
         assert doc["scroll"] <= doc["width"] + 2, "horizontal overflow on live page"
         assert not javascript_errors, "deployed browser JavaScript errors occurred"
+        # A SHA-verified TeraBox ZIP with six current public posts exists in
+        # production. A GitHub-only list used to hide it silently; demand its
+        # actual account card and immutable media on BOTH browser engines.
+        account_api=page.request.get(
+            SITE.rsplit("/",1)[0]+"/api/account-archives",timeout=120000,
+        )
+        assert account_api.status==200, "live verified account index unavailable"
+        sources=account_api.json().get("accounts",[])
+        available=[item for item in sources
+                   if item.get("backup_kind")=="terabox_zip_sha_verified"
+                   and item.get("posts_verified_in_bundle",0)>=6]
+        assert available, "verified TeraBox account ZIP not discoverable in webapp"
+        key=available[0]["key"]
+        page.locator("#accountSelect").select_option(key)
+        page.wait_for_function(
+            "() => document.querySelectorAll('#results article.post').length >= 6",
+            timeout=120000,
+        )
+        assert page.locator("#results article.post").count()>=6
+        assert page.locator("#displayName").inner_text().strip()
+        originals=page.locator("#results .post-media img")
+        assert originals.count()>0, "TeraBox ZIP posts lack original media in UI"
+        originals.first.scroll_into_view_if_needed()
+        page.wait_for_function(
+            "() => {const img=document.querySelector('#results .post-media img');"
+            "return !!img && img.complete && img.naturalWidth > 0;}",
+            timeout=90000,
+        )
+        source=originals.first.get_attribute("src")
+        assert source and source.startswith("/api/account-archives/"), (
+            "TeraBox original was not delivered through authenticated reader"
+        )
+        response=page.request.get(SITE.rsplit("/",1)[0]+source,
+                                  headers={"Range":"bytes=0-1023"},
+                                  timeout=90000)
+        assert response.status==206 and response.body(), (
+            "deployed TeraBox ZIP media HTTP Range read failed"
+        )
+        page.locator("#results article.post").first.get_by_role(
+            "button",name="댓글·상세 보기"
+        ).click()
+        page.locator("#postDetail[open]").wait_for(timeout=12000)
+        page.get_by_role("button",name="닫기").click()
+        assert page.locator("#postDetail[open]").count()==0
+        assert not javascript_errors, "TeraBox browser raised a JavaScript error"
+        print("LIVE_TERABOX_BROWSER_PASS",
+              "client="+label,"post_cards="+str(
+                  page.locator("#results article.post").count()),
+              "source=sha256_verified_terabox",
+              "original_media=PASS","range206=PASS","detail=PASS",
+              flush=True)
         print(
             "LIVE_ACCOUNT_BROWSER_PASS",
             "client=" + label,
