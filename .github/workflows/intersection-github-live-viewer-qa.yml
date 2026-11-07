@@ -1,10 +1,20 @@
 name: INTERSECTION — GitHub Encrypted Account Live Viewer E2E
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "INTERSECTION — Verified One-ZIP Public Account Rescue"
+    types: [completed]
+    branches: [main]
+  pull_request:
+    paths:
+      - ".github/workflows/intersection-github-live-viewer-qa.yml"
+      - "apps/demand-research/test_live_account_archive_browser.py"
   push:
     branches: [main]
     paths:
       - ".github/workflows/intersection-github-live-viewer-qa.yml"
+      - "apps/demand-research/test_live_account_archive_browser.py"
 
 permissions:
   contents: read
@@ -14,7 +24,19 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  syntax-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check live browser acceptance test is syntactically safe
+        run: python -m py_compile apps/demand-research/test_live_account_archive_browser.py
   live-verified-reader:
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-24.04
     timeout-minutes: 9
     steps:
@@ -95,3 +117,19 @@ jobs:
           print("LIVE_ACCOUNT_WEB_VIEWER_HTML_READY",flush=True)
           print("LIVE_GITHUB_BACKUP_END_TO_END_VERIFIED",flush=True)
           PY
+
+  live-browser:
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned real-browser drivers
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.56.0
+          python -m playwright install --with-deps chromium webkit
+      - name: Exercise real stored posts, original media, detail, tabs and responsive layout
+        run: python apps/demand-research/test_live_account_archive_browser.py
