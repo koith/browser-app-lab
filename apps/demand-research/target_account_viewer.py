@@ -6,7 +6,6 @@ No repo logs/analytics, broad CORS, unverified media or account identifier leaks
 """
 from __future__ import annotations
 
-import asyncio
 import json
 import re
 from pathlib import Path
@@ -196,10 +195,13 @@ def get_verified_media(archive,item,request):
 
 
 def create_router(auth):
+    # CloudArchive uses blocking rclone subprocesses. FastAPI dispatches these
+    # sync GET handlers to its worker pool, keeping health, receipts and queue
+    # admission responsive while a remote original is read and SHA-checked.
     router=APIRouter()
 
     @router.get("/account-archive",include_in_schema=False)
-    async def viewer(request:Request):
+    def viewer(request:Request):
         auth(request)
         return FileResponse(VIEW_DIR/"account_archive_view.html",
                             media_type="text/html; charset=utf-8",
@@ -208,7 +210,7 @@ def create_router(auth):
                                      "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"})
 
     @router.get("/account-archive/{asset_name}",include_in_schema=False)
-    async def asset(request:Request,asset_name:str):
+    def asset(request:Request,asset_name:str):
         auth(request)
         if asset_name not in ("account_archive_view.js","account_archive_view.css"):
             raise HTTPException(404,"Unknown viewer asset")
@@ -216,7 +218,7 @@ def create_router(auth):
         return FileResponse(VIEW_DIR/asset_name,media_type=mime,headers=CACHE_HEADERS)
 
     @router.get("/api/account-archives")
-    async def accounts(request:Request):
+    def accounts(request:Request):
         auth(request)
         root=open_root()
         try:
@@ -264,7 +266,7 @@ def create_router(auth):
             raise HTTPException(502,"Private account index unavailable") from None
 
     @router.get("/api/account-archives/{account}/backup-status")
-    async def backup_status(request:Request,account:str):
+    def backup_status(request:Request,account:str):
         auth(request)
         _,_,archive=open_account(account)
         if isinstance(archive,BundleAccountCloud):
@@ -285,7 +287,7 @@ def create_router(auth):
         },headers=CACHE_HEADERS)
 
     @router.get("/api/account-archives/{account}/profile")
-    async def profile(request:Request,account:str):
+    def profile(request:Request,account:str):
         auth(request)
         _,entry,archive=open_account(account)
         try:
@@ -309,19 +311,19 @@ def create_router(auth):
             raise HTTPException(502,"Archived public profile unavailable") from None
 
     @router.get("/api/account-archives/{account}/feed")
-    async def feed(request:Request,account:str,
+    def feed(request:Request,account:str,
                    offset:int=Query(0,ge=0,le=200000),
                    limit:int=Query(20,ge=1,le=50)):
         auth(request)
         _,_,archive=open_account(account)
         try:
-            return JSONResponse(await asyncio.to_thread(feed_data,archive,account,offset,limit),
+            return JSONResponse(feed_data(archive,account,offset,limit),
                                 headers=CACHE_HEADERS)
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Account history read unavailable") from None
 
     @router.get("/api/account-archives/{account}/graph/{kind}")
-    async def graph(request:Request,account:str,kind:str,
+    def graph(request:Request,account:str,kind:str,
                     offset:int=Query(0,ge=0,le=200000),
                     limit:int=Query(50,ge=1,le=100)):
         auth(request)
@@ -329,13 +331,13 @@ def create_router(auth):
             raise HTTPException(400,"Invalid public graph")
         _,_,archive=open_account(account)
         try:
-            return JSONResponse(await asyncio.to_thread(graph_data,archive,kind,offset,limit),
+            return JSONResponse(graph_data(archive,kind,offset,limit),
                                 headers=CACHE_HEADERS)
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Public graph archive unavailable") from None
 
     @router.get("/api/account-archives/{account}/threads/{pid}")
-    async def thread(request:Request,account:str,pid:str):
+    def thread(request:Request,account:str,pid:str):
         auth(request)
         if not HEX40.fullmatch(pid):
             raise HTTPException(400,"Invalid post")
@@ -362,25 +364,25 @@ def create_router(auth):
             raise HTTPException(502,"Public reply archive unavailable") from None
 
     @router.get("/api/account-archives/{account}/media/{pid}/{index}")
-    async def post_media(request:Request,account:str,pid:str,index:int):
+    def post_media(request:Request,account:str,pid:str,index:int):
         auth(request)
         if not HEX40.fullmatch(pid) or index<0 or index>=16:
             raise HTTPException(400,"Invalid original media")
         _,_,archive=open_account(account)
         try:
-            posts=await asyncio.to_thread(archive.load_catalog)
+            posts=archive.load_catalog()
             post=next((p for p in posts if p.get("id")==pid),None)
             if not post or index>=len(post.get("media",[])):
                 raise HTTPException(404,"Media not archived")
             media=post["media"][index]
             if not media.get("key","").startswith("posts/"+pid+"/media/"):
                 raise HTTPException(404,"Invalid original source")
-            return await asyncio.to_thread(get_verified_media,archive,media,request)
+            return get_verified_media(archive,media,request)
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Original media read unavailable") from None
 
     @router.get("/api/account-archives/{account}/profile-asset/{kind}")
-    async def profile_asset(request:Request,account:str,kind:str):
+    def profile_asset(request:Request,account:str,kind:str):
         auth(request)
         if kind not in ("avatar","banner"):
             raise HTTPException(400,"Invalid profile media")
@@ -392,7 +394,7 @@ def create_router(auth):
         if (asset.get("status")!="sha256_verified"
                 or not str(asset.get("key","")).startswith("profile/assets/")):
             raise HTTPException(404,"Profile image not archived")
-        return await asyncio.to_thread(get_verified_media,archive,
-                                       {**asset,"remote_verified":True},request)
+        return get_verified_media(archive,
+                                  {**asset,"remote_verified":True},request)
 
     return router

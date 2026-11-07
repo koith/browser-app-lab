@@ -54,6 +54,7 @@ on:
       - "apps/demand-research/target_account_enrichment.py"
       - "apps/demand-research/target_account_viewer.py"
       - "apps/demand-research/test_target_account_viewer.py"
+      - "apps/demand-research/test_archive_nonblocking.py"
       - "apps/demand-research/test_account_archive_browser.py"
       - "apps/demand-research/test_target_archive_button_browser.py"
       - "apps/demand-research/account_archive_view.html"
@@ -109,7 +110,7 @@ jobs:
           node --check archive_tab.js
           node --check auto_archive_view.js
           node --check account_watch.js
-          python -m pytest -q test_target_account_archive.py test_target_account_bundle.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py test_backup_queue.py test_sealed_credentials.py test_demand_archive.py test_gateway.py
+          python -m pytest -q test_archive_nonblocking.py test_target_account_archive.py test_target_account_bundle.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py test_backup_queue.py test_sealed_credentials.py test_demand_archive.py test_gateway.py
           python -m pip install --disable-pip-version-check playwright==1.56.0
           python -m playwright install --with-deps chromium webkit
           python test_account_archive_browser.py
