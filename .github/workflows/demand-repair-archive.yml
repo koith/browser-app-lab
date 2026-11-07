@@ -67,7 +67,7 @@ jobs:
           echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
           unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
           find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
-          rclone help backends | grep -qi terabox
+          rclone help backends | grep -i terabox >/dev/null
       # Private AES-GCM replay is separately operated by demand-replay-encrypted.yml
       # using the same GitHub concurrency group. Running both serially in
       # this 20-minute job previously starved the catalog's verification time.
