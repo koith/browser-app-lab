@@ -4,6 +4,11 @@ on:
     branches: [main]
     paths:
       - 'apps/4leaf/rog/app-version.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/scripts/check-4leaf-r14-public.cjs'
+      - '.github/workflows/4leaf-r14-public-live.yml'
   workflow_dispatch:
 permissions:
   contents: read
