@@ -17,9 +17,19 @@ def identity(commit,run_id,repository=REPO):
 
 def validate(raw,expected_commit):
     data=json.loads(raw)
-    if not isinstance(data,dict) or data.get('schema_version')!=1:
+    if not isinstance(data,dict):
         raise ValueError('Missing actual Pages deployment identity')
-    checked=identity(data.get('source_commit'),data.get('workflow_run_id'),data.get('repository'))
+    if data.get('schema_version')==1:
+        checked=identity(data.get('source_commit'),data.get('workflow_run_id'),data.get('repository'))
+    elif data.get('schema_version')==2 and data.get('build_kind')=='github-pages-jekyll':
+        # Native Pages renders site.github.build_revision from the actual
+        # checked-out commit. It has no custom workflow run ID to attribute.
+        identity(data.get('source_commit'),1,data.get('repository'))
+        if set(data)!={'schema_version','repository','source_commit','build_kind'}:
+            raise ValueError('Ambiguous native Pages build identity')
+        checked=data
+    else:
+        raise ValueError('Unknown actual Pages deployment identity')
     if checked['source_commit']!=expected_commit:
         raise ValueError('Operating Pages deployment is not the exact checked-out source commit')
     return checked
