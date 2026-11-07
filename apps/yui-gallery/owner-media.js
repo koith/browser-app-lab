@@ -2,6 +2,16 @@
 'use strict';
 window.YuiPrivate=(()=>{
  const cache=new Map(),inflight=new Map();let session=null;
+ // Public gateway address contains no key. Worker returns only short-lived,
+ // exact-SHA signed image URLs for already recorded gallery photo references.
+ const CLOUDFLARE_GATEWAY='https://gallery-archive-free.gallery-9f7d03138f3f.workers.dev/';
+ let cloudApiPromise=null;
+ async function cloudAsset(p,kind){
+  if(!cloudApiPromise)cloudApiPromise=import('../gallery-archive/cloudflare-owner-gateway/pages-client.mjs')
+   .then(m=>m.pagesGateway({endpoint:CLOUDFLARE_GATEWAY,model:'yui'}));
+  const api=await cloudApiPromise;
+  return api.asset(p,kind);
+ }
  function readSession(){
   // Render's first-party owner gallery uses a Secure HttpOnly cookie instead
   // of a client-visible bearer token. GitHub Pages preserves old session flow.
@@ -42,6 +52,14 @@ window.YuiPrivate=(()=>{
  async function asset(p,kind='original'){
   if(!session)session=readSession();
   if(!session)throw Error('보관소 연결 없음');
+  if(location.hostname==='koith.github.io'){
+   try{return await cloudAsset(p,kind)}
+   catch(error){
+    // Keep legacy owner access only for photos not yet present in the replica.
+    // Do not convert 403, 5xx, or SHA/auth failures into a false success.
+    if(error?.message!=='GALLERY_GATEWAY_HTTP_404')throw error;
+   }
+  }
   if(kind==='cover'){
    const version=(p.preview_sha256||p.sha256||'').slice(0,24);
    return session.api+'/api/cover/yui/'+encodeURIComponent(p.ownerAlbum)+'/'+(p.storageNumber??p.number)+'?v='+version;
