@@ -55,6 +55,26 @@ def test_oidc_bridge_only_accepts_trusted_verified_token(monkeypatch):
     assert observed==["malicious-other-workflow","synthetic-verified-oidc"]
 
 
+def test_single_zip_remote_verification_requires_oidc_and_does_not_identify_account(monkeypatch):
+    monkeypatch.setattr(gateway,"TOKEN","synthetic-private-key-"+"k"*32)
+    monkeypatch.setattr(gateway,"COOKIE","synthetic-remote-credential")
+    monkeypatch.setattr(gateway,"REMOTE","archive:DemandResearch")
+    monkeypatch.setattr(gateway,"verify_bridge_token",
+        lambda token: {"sub":"trusted-job"} if token=="verified-synthetic" else
+        (_ for _ in ()).throw(ValueError("Invalid assertion")))
+    monkeypatch.setattr(gateway,"_verify_latest_account_zip",
+                        lambda:{"state":"SHA_VERIFIED","posts":6,"objects":42})
+    client=TestClient(gateway.app,base_url="https://testserver")
+    assert client.get("/api/bridge/verify-one").status_code==403
+    assert client.get("/api/bridge/verify-one",
+        headers={"Authorization":"Bearer forged"}).status_code==403
+    result=client.get("/api/bridge/verify-one",
+        headers={"Authorization":"Bearer verified-synthetic"})
+    assert result.status_code==200
+    assert result.json()=={"state":"SHA_VERIFIED","posts":6,"objects":42}
+    assert "synthetic-remote-credential" not in result.text
+
+
 def test_archive_inventory_is_private_and_distinguishes_missing_from_verified(monkeypatch):
     monkeypatch.setattr(gateway,"TOKEN","synthetic-owner-link-"+"z"*32)
     monkeypatch.setattr(gateway,"COOKIE","synthetic-terabox-fixture")
