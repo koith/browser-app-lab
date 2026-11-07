@@ -93,6 +93,21 @@ class SnapshotChecks(unittest.TestCase):
         for path in ('subscriptions', '../outside', 'r2/buckets'):
             with self.assertRaises(ValueError): cf.call(path, 'PUT', {})
 
+    def test_content_readback_uses_official_get_v2_and_rejects_write_only_content_route(self):
+        cf = CF('dummy-token', 'a' * 32)
+        with self.assertRaisesRegex(ValueError, 'UNAPPROVED_CF_CONTROL_CALL'):
+            cf.call('workers/scripts/gallery-archive-free/content', raw=True)
+        class Response:
+            headers = {'Content-Type': 'multipart/form-data; boundary=one'}
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def read(self, limit): return b'private multipart source'
+        with patch.object(cf.opener, 'open', return_value=Response()) as request:
+            mime, raw = cf.call('workers/scripts/gallery-archive-free/content/v2', raw=True)
+        self.assertTrue(request.call_args.args[0].full_url.endswith('/content/v2'))
+        self.assertEqual(request.call_args.args[0].get_method(), 'GET')
+        self.assertEqual(raw, b'private multipart source')
+
     def test_missing_subdomain_does_not_register_or_prevent_unrouted_upload(self):
         class Missing:
             def call(self, path):
@@ -113,7 +128,7 @@ class SnapshotChecks(unittest.TestCase):
                 if tail == 'workers/scripts/gallery-archive-free' and method == 'PUT':
                     self.multipart = multipart
                     return {'success': True}
-                assert tail == 'workers/scripts/gallery-archive-free/content' and raw
+                assert tail == 'workers/scripts/gallery-archive-free/content/v2' and raw
                 return self.multipart
         cf = Direct()
         with patch('deploy_cloudflare_assets.free_account_and_existing', return_value=None):
@@ -121,7 +136,7 @@ class SnapshotChecks(unittest.TestCase):
         self.assertTrue(all(not c['albums'] for c in catalog.values()))
         self.assertEqual(cf.calls, [('workers/workers', 'POST'),
                                    ('workers/scripts/gallery-archive-free', 'PUT'),
-                                   ('workers/scripts/gallery-archive-free/content', 'GET')])
+                                   ('workers/scripts/gallery-archive-free/content/v2', 'GET')])
         for forbidden in (b'ARCHIVE_ASSETS', b'SIGNING_KEY', b'workers_dev', b'r2_buckets'):
             self.assertNotIn(forbidden, cf.multipart[1])
 

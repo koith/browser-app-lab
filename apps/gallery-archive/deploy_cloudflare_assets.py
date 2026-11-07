@@ -34,7 +34,7 @@ class CF:
 
     def call(self, tail, method='GET', body=None, raw=False, multipart=None):
         # No subscription, billing mutation, R2 or arbitrary host endpoints.
-        allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content|secrets))?|workers/subdomain|subscriptions)',
+        allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content/v2|secrets))?|workers/subdomain|subscriptions)',
                    'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'(?:/secrets)?)',
                    'POST': r'workers/(?:workers|scripts/' + NAME + r'/subdomain)'}
         if method not in allowed or not re.fullmatch(allowed[method], tail):
@@ -156,7 +156,7 @@ def free_account_and_existing(cf):
     exists = any(s.get('id') == NAME for s in scripts)
     old = None
     if exists:
-        mime, raw = cf.call('workers/scripts/' + NAME + '/content', raw=True)
+        mime, raw = cf.call('workers/scripts/' + NAME + '/content/v2', raw=True)
         old = existing_catalogs(mime, raw)
     return old
 
@@ -211,7 +211,7 @@ def bootstrap_missing_worker(cf, release):
                  f'Content-Type: {mime}\r\n\r\n').encode() + value + b'\r\n'
     body += f'--{boundary}--\r\n'.encode()
     cf.call('workers/scripts/' + NAME, 'PUT', multipart=('multipart/form-data; boundary=' + boundary, body))
-    mime, raw = cf.call('workers/scripts/' + NAME + '/content', raw=True)
+    mime, raw = cf.call('workers/scripts/' + NAME + '/content/v2', raw=True)
     catalogs = existing_catalogs(mime, raw)
     message = BytesParser(policy=default).parsebytes(b'MIME-Version: 1.0\r\nContent-Type: ' + mime.encode('ascii') + b'\r\n\r\n' + raw)
     if any(catalogs[m]['albums'] for m in MODELS) or not any(
