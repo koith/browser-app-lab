@@ -18,7 +18,7 @@ from urllib.parse import quote, urlsplit
 from urllib.request import Request, build_opener
 
 from check_cloudflare_connection import reader, account_for, NoRedirect, ProbeError
-from cloudflare_assets_snapshot import Snapshot, MODELS, KIND, checked
+from cloudflare_assets_snapshot import Snapshot, MODELS, KIND, checked, signature
 
 NAME = 'gallery-archive-free'
 WRANGLER = '4.158.0'
@@ -265,6 +265,34 @@ def bootstrap_missing_worker(cf, release):
     return catalogs
 
 
+def retain_existing_verified(snapshot, old, base, read_remote=media_bytes):
+    """Keep every verified previous row; reuse identical first-party public bytes.
+
+    Caller MUST run snapshot.public_originals() first. Any old private-only row
+    is re-read from the existing Worker and checked before the next deployment.
+    Never replace originals with metadata, mismatched images or previews.
+    """
+    retained = {m: 0 for m in MODELS}
+    if not old:
+        return retained
+    for model in MODELS:
+        for album in old[model]['albums']:
+            for photo in album['images']:
+                prior = snapshot.rows[model].get((album['id'], photo['number']))
+                if prior is not None:
+                    if signature(prior) != signature(photo):
+                        raise ValueError('PRIOR_REPLICA_SIGNATURE_MISMATCH')
+                    retained[model] += 1
+                    continue
+                if base is None:
+                    raise ValueError('EXISTING_REPLICA_READBACK_ROUTE_REQUIRED')
+                snapshot.add(model, album, photo,
+                             read_remote(base, model, album['id'], photo),
+                             photo.get('replica_source', 'existing-verified-bound-replica'))
+                retained[model] += 1
+    return retained
+
+
 def write_deploy_sources(source, assets, catalogs, account, release):
     source.mkdir(parents=True, exist_ok=True)
     original = ROOT / 'apps/gallery-archive/cloudflare-owner-gateway'
@@ -338,20 +366,11 @@ def main(args):
             print('CF_EXISTING_WORKER_HEALTH', 'TRANSPORT_' + type(error).__name__, flush=True)
         except (ValueError, TypeError) as error:
             print('CF_EXISTING_WORKER_HEALTH', 'INVALID_RESPONSE_' + type(error).__name__, flush=True)
-    retained = {m: 0 for m in MODELS}
-    if old and any(a['images'] for m in MODELS for a in old[m]['albums']):
-        if base is None:
-            # Never replace an existing replica if its original bytes cannot
-            # first be recovered and checked. No assumption about Write access.
-            raise ValueError('EXISTING_REPLICA_READBACK_ROUTE_REQUIRED')
-        print('BOUND_ASSET_PHASE', 'retain_all_previous_verified_originals', flush=True)
-        for model in MODELS:
-            for album in old[model]['albums']:
-                for photo in album['images']:
-                    snapshot.add(model, album, photo, media_bytes(base, model, album['id'], photo), photo.get('replica_source', 'existing-verified-bound-replica'))
-                    retained[model] += 1
     print('BOUND_ASSET_PHASE', 'copy_exact_existing_public_originals', flush=True)
     public = snapshot.public_originals()
+    print('BOUND_ASSET_PHASE', 'retain_all_previous_verified_originals', flush=True)
+    retained = retain_existing_verified(snapshot, old, base)
+    print('BOUND_ASSET_RETAINED_PREVIOUS', retained, flush=True)
     print('BOUND_ASSET_PHASE', 'read_exact_existing_private_originals', flush=True)
     owner = {model: snapshot.existing_owner(model, args.max_new_per_model) for model in MODELS}
     catalogs = snapshot.finish()
