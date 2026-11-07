@@ -10,5 +10,14 @@ PAGE_ORIGIN = "https://koith.github.io"
 binding = "ARCHIVE_BUCKET"
 bucket_name = "REPLACE_WITH_VERIFIED_PRIVATE_R2_STANDARD_BUCKET"
 
-# Set VIEWER_TOKEN_SHA256 and SIGNING_KEY as Worker secrets.
-# Requires explicit owner-controlled Cloudflare R2 setup.
+# Set VIEWER_TOKEN_SHA256 and SIGNING_KEY as Worker secrets for default bearer mode.
+# Passwordless existing Pages access is an explicit, separately reviewed opt-in:
+# PAGES_READ_POLICY = "existing-sha-pinned-gallery"
+# It exposes known gallery photos to visitors; SHA/CORS are not user authentication.
+#
+# To use private B2/R2 S3 instead, remove the r2_buckets binding above and configure
+# OWNER_S3_ENDPOINT, OWNER_S3_BUCKET and OWNER_S3_REGION as Worker variables;
+# OWNER_S3_ACCESS_KEY_ID and OWNER_S3_SECRET_ACCESS_KEY as Worker-only secrets.
+# Use a limited read-only key. No bucket may become public.
+# Verify actual account billing, remote original SHA readback and cloud/browser QA
+# before deploying. Published free quotas alone do not guarantee zero charges.

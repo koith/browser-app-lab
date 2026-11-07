@@ -3,6 +3,7 @@
  * No R2 objects or credentials are provisioned by this source file.
  * Pages receives only expiring, SHA-bound media URLs, never storage credentials.
  */
+import { privateS3Bucket } from './private-s3.mjs';
 const ID = /^[a-z0-9][a-z0-9-]{1,99}$/;
 const SHA = /^[a-f0-9]{64}$/;
 const cache = new Map();
@@ -58,7 +59,8 @@ function imageType(bytes) {
 }
 async function catalog(env, model) {
   const now = Date.now(), hit = cache.get(model);
-  if (hit && hit.expires > now && hit.bucket === env.ARCHIVE_BUCKET) return hit.value;
+  const bucketIdentity=env.ARCHIVE_BUCKET.cacheIdentity||env.ARCHIVE_BUCKET;
+  if (hit && hit.expires > now && hit.bucket === bucketIdentity) return hit.value;
   const item = await env.ARCHIVE_BUCKET.get(model + '/metadata/catalog.json');
   if (!item || item.size < 20 || item.size > 6_000_000) return null;
   const raw = await item.text();
@@ -86,7 +88,7 @@ async function catalog(env, model) {
       });
     }
   }
-  cache.set(model, { value: entries, bucket: env.ARCHIVE_BUCKET, expires: now + 30_000 });
+  cache.set(model, { value: entries, bucket: bucketIdentity, expires: now + 30_000 });
   return entries;
 }
 async function entry(env, model, album, number, variant) {
@@ -103,8 +105,12 @@ async function authorize(req, env) {
 }
 async function handle(request, env) {
   const u = new URL(request.url), path = u.pathname, origin = request.headers.get('Origin');
+  // Explicit opt-in mirrors the existing Pages gallery's SHA-pinned, keyless
+  // photo reads. Default private bearer policy is unchanged. Bucket credentials
+  // and canonical object keys stay on the Worker under either policy.
+  const pagesRead=env.PAGES_READ_POLICY==='existing-sha-pinned-gallery';
   if (!env.ARCHIVE_BUCKET || typeof env.SIGNING_KEY !== 'string' ||
-      env.SIGNING_KEY.length < 32 || !isHex(env.VIEWER_TOKEN_SHA256, 64)) {
+      env.SIGNING_KEY.length < 32 || (!pagesRead&&!isHex(env.VIEWER_TOKEN_SHA256, 64))) {
     return response(request, env, 503, 'NOT_CONFIGURED');
   }
   if (request.method === 'OPTIONS') {
@@ -119,7 +125,8 @@ async function handle(request, env) {
   if (path === '/api/v1/sign' && request.method === 'POST') {
     if (origin !== (env.PAGE_ORIGIN || 'https://koith.github.io'))
       return response(request, env, 403, 'ORIGIN_DENIED');
-    if (!await authorize(request, env)) return response(request, env, 401, 'UNAUTHORIZED');
+    const bearerAuthorized=await authorize(request, env);
+    if (!bearerAuthorized&&!pagesRead) return response(request, env, 401, 'UNAUTHORIZED');
     let body;
     try {
       if (Number(request.headers.get('Content-Length') || '0') > 1024)
@@ -132,6 +139,8 @@ async function handle(request, env) {
       return response(request, env, 400, 'INVALID_PHOTO');
     const p = await entry(env, model, album, number, variant);
     if (!p) return response(request, env, 404, 'PHOTO_NOT_MIRRORED');
+    if(!bearerAuthorized&&(!isHex(body?.sha256,64)||!same(body.sha256,p.sha)))
+      return response(request,env,403,'PHOTO_SHA_REQUIRED');
     const expires = Math.floor(Date.now() / 1000) + 300;
     const signature = await sign(env.SIGNING_KEY, payload(model, album, number, variant, p.sha, p.bytes, expires));
     const href = new URL('/api/v1/media/' + [model, album, number, variant].join('/'), u.origin);
@@ -177,4 +186,12 @@ async function handle(request, env) {
   return response(request, env, 404, 'NOT_FOUND');
 }
 export function resetCatalogCacheForTests() { cache.clear(); }
-export default { fetch: handle };
+export default { async fetch(request,env) {
+  try {
+    const bucket=env.ARCHIVE_BUCKET||privateS3Bucket(env);
+    return await handle(request,{...env,ARCHIVE_BUCKET:bucket});
+  } catch {
+    // Never return provider messages, signed upstream requests or credentials.
+    return response(request,env,502,'PRIVATE_STORAGE_UNAVAILABLE');
+  }
+} };
