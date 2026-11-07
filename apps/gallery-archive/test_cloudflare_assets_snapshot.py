@@ -62,12 +62,12 @@ class SnapshotChecks(unittest.TestCase):
             target.write_bytes(RAW)
             return True, None
 
-        with patch.dict(os.environ, {'MIMMI_TERABOX_NDUS': 'fixture-owner-cookie'}), (
-             patch('restore_known_owner_cache.verified_owner_catalog',
-                   return_value=(None, catalog))), (
-             patch('restore_known_owner_cache.cookie_header', return_value='fixture')),( 
-             patch('qa_existing_owner_exact_file.read_existing',
-                   side_effect=authenticated_original)):
+        with (
+            patch.dict(os.environ, {'MIMMI_TERABOX_NDUS': 'fixture-owner-cookie'}),
+            patch('restore_known_owner_cache.verified_owner_catalog', return_value=(None, catalog)),
+            patch('restore_known_owner_cache.cookie_header', return_value='fixture'),
+            patch('qa_existing_owner_exact_file.read_existing', side_effect=authenticated_original),
+        ):
             snapshot = Snapshot(self.root, self.root / 'exhaustive-replica')
             complete = snapshot.existing_owner('mimmi', maximum=0)
             self.assertEqual(complete['added'], 12)
