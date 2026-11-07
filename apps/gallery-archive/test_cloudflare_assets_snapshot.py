@@ -10,7 +10,7 @@ from urllib.error import HTTPError
 from unittest.mock import patch
 from PIL import Image
 from cloudflare_assets_snapshot import Snapshot, KIND, checked
-from deploy_cloudflare_assets import existing_catalogs, free_account_and_existing, write_deploy_sources, CF, subdomain
+from deploy_cloudflare_assets import existing_catalogs, free_account_and_existing, write_deploy_sources, CF, subdomain, bootstrap_missing_worker
 from check_cloudflare_connection import ProbeError
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -101,6 +101,35 @@ class SnapshotChecks(unittest.TestCase):
         cf = Missing()
         self.assertIsNone(subdomain(cf))
         self.assertEqual(cf.asserted_path, 'workers/subdomain')
+
+    def test_direct_upload_bootstrap_is_independent_of_assets_and_routing_and_read_back(self):
+        class Direct:
+            calls = []
+            def call(self, tail, method='GET', multipart=None, raw=False):
+                self.calls.append((tail, method))
+                if tail == 'workers/scripts/gallery-archive-free' and method == 'PUT':
+                    self.multipart = multipart
+                    return {'success': True}
+                assert tail == 'workers/scripts/gallery-archive-free/content' and raw
+                return self.multipart
+        cf = Direct()
+        with patch('deploy_cloudflare_assets.free_account_and_existing', return_value=None):
+            catalog = bootstrap_missing_worker(cf, 'a' * 40)
+        self.assertTrue(all(not c['albums'] for c in catalog.values()))
+        self.assertEqual(cf.calls, [('workers/scripts/gallery-archive-free', 'PUT'),
+                                   ('workers/scripts/gallery-archive-free/content', 'GET')])
+        for forbidden in (b'ARCHIVE_ASSETS', b'SIGNING_KEY', b'workers_dev', b'r2_buckets'):
+            self.assertNotIn(forbidden, cf.multipart[1])
+
+    def test_bootstrap_never_overwrites_an_existing_replica_and_rejects_unverified_readback(self):
+        cf = CF('dummy-token', 'a' * 32)
+        with patch('deploy_cloudflare_assets.free_account_and_existing', return_value={'mimmi': {}, 'yui': {}}):
+            with self.assertRaisesRegex(ValueError, 'REFUSES_EXISTING'):
+                bootstrap_missing_worker(cf, 'b' * 40)
+        with self.assertRaises(ValueError):
+            cf.call('workers/scripts/gallery-archive-free', 'PUT', {})
+        with self.assertRaises(ValueError):
+            cf.call('workers/subdomain', 'PUT', multipart=('text/plain', b'bad'))
 
     def test_denial_reports_exact_operation_without_upstream_secret_or_account_details(self):
         secret = 'PRIVATE_DO_NOT_PRINT_TOKEN'
