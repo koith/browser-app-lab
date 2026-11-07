@@ -63,7 +63,7 @@ function renderProfile(profile){
     $("displayName").textContent="아직 프로필 보관본 없음";
     $("handle").textContent="";
     $("biography").textContent="백업 작업을 실행해 공개 프로필이 저장되면 표시됩니다.";
-    $("profileStatus").textContent="UNVERIFIED · 프로필 원격 저장 미확인";
+    $("profileStatus").textContent="UNVERIFIED · 프로필 백업 미확인";
     if(profile.profile_url){
       const a=$("sourceProfile");a.href=validLink(profile.profile_url)||"#";a.hidden=!validLink(profile.profile_url);
     }
@@ -104,7 +104,7 @@ function mediaElement(item){
   if(mime.startsWith("image/")){
     const img=node("img");
     img.src=url;img.loading="lazy";img.decoding="async";
-    img.alt="테라박스 SHA 검증 원본 이미지";
+    img.alt="SHA-256 검증된 보관 원본 이미지";
     img.addEventListener("click",()=>window.open(url,"_blank","noopener,noreferrer"));
     return img;
   }

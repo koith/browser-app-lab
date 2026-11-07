@@ -25,6 +25,10 @@ services:
         value: "0"
       - key: DEMAND_ARCHIVE_QUEUE_MODE
         value: "1"
+      - key: DEMAND_ARCHIVE_QUEUE_STORE
+        value: sqlite
+      - key: DEMAND_ACCOUNT_TEMP_STORAGE
+        value: github_release
       - key: DEMAND_VIEWER_TOKEN
         sync: false
       - key: RCLONE_CONFIG_ARCHIVE_COOKIE

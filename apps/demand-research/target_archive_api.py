@@ -24,6 +24,7 @@ from target_account_archive import profile_input
 from demand_archive import CloudArchive, QueueStorageDenied
 from verified_bundle_reader import names_from_cloud, load_verified_bundle
 import backup_queue
+import github_temp_bundle
 
 WORKFLOW = "intersection-target-account-bundle.yml"
 _REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
@@ -179,6 +180,21 @@ def read_receipt(request,receipt,run_id):
 
 
 def read_exact_verified_archive(run_id,platform,account):
+    if github_temp_bundle.enabled():
+        # A green workflow alone never means backup success. Read actual
+        # encrypted GitHub release bytes, authenticate AES-GCM and check the
+        # embedded per-object SHA256 manifest before displaying any media.
+        bundle=github_temp_bundle.run_bundle(run_id,account)
+        if bundle is None or bundle.selected_platform!=platform:
+            return None
+        complete=bundle.source_state=="COMPLETE_CURRENT_PUBLIC_CURSOR"
+        return {"state":"REMOTE_VERIFIED" if complete else "PARTIAL_BACKUP",
+                "remote_verified":True,
+                "storage":"github_encrypted_temporary",
+                "posts":bundle.post_count,"objects":bundle.object_count,
+                "account_key":bundle.account,
+                "source_state":bundle.source_state,
+                "temporary":True}
     # A green GitHub check is NOT storage verification. Read the exact ZIP
     # for this Actions run from TeraBox and validate every object's SHA.
     remote=os.getenv("DEMAND_TERABOX_REMOTE","archive:DemandResearch")
@@ -228,7 +244,7 @@ def create_router(auth):
         auth(request)
         return JSONResponse({"enabled":bool(can_start()),
                              "platforms":["bluesky","mastodon"],
-                             "storage":"private_terabox",
+                             "storage":"github_encrypted_temporary" if github_temp_bundle.enabled() else "private_terabox",
                              "viewer_path":"/account-archive",
                              "jobs_pollable":bool(can_start()),
                              "historical_completeness_guaranteed":False},
@@ -277,7 +293,7 @@ def create_router(auth):
             _last_request=time.monotonic()
         return JSONResponse({"accepted":True,"state":"QUEUED_NOT_VERIFIED",
                              "run_id":run_id,"receipt":receipt,
-                             "storage":"private_terabox",
+                             "storage":"github_encrypted_temporary" if github_temp_bundle.enabled() else "private_terabox",
                              "scope":"currently_public_only",
                              "completion_guaranteed":False},
                             status_code=202,
