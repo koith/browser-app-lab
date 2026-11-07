@@ -59,7 +59,7 @@ jobs:
     needs: exact-bytes-and-private-routing
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 240
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -87,7 +87,7 @@ jobs:
           test -n "$binary"
           install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-      - name: Read originals, deploy Free bound assets, verify every remote original
+      - name: Read all remaining exact owner originals within Free asset budget, deploy, SHA verify each
         env:
-          MAX_NEW: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.max_new_per_model) || '32' }}
+          MAX_NEW: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.max_new_per_model) || '0' }}
         run: python apps/gallery-archive/deploy_cloudflare_assets.py --directory "$RUNNER_TEMP/gallery-private-replica" --max-new-per-model "$MAX_NEW"

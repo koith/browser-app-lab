@@ -1,5 +1,6 @@
 """Build an exact-byte personal replica; never create photo bundles or publish to Git."""
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import io
 import json
@@ -98,8 +99,10 @@ class Snapshot:
         return counts
 
     def existing_owner(self, model, maximum=32):
-        # All reads use the model's original authenticated account, never a
-        # third-party photo site, another account, or an access-control bypass.
+        # Read only the explicitly authenticated owner's original files.
+        # Four bounded parallel independent reads keep the exhaustive Free
+        # restoration within a single Actions job without parallel mutations
+        # to the SHA-checked snapshot or any upstream account settings.
         from restore_known_owner_cache import COOKIE, REMOTE, verified_owner_catalog, cookie_header
         from qa_existing_owner_exact_file import read_existing
         env = os.environ.copy()
@@ -113,39 +116,76 @@ class Snapshot:
         except Exception:
             return {'added': 0, 'state': 'EXISTING_OWNER_CATALOG_UNAVAILABLE'}
         source = {(a['id'], p['number']): (a, p) for a in catalog['albums'] for p in a['images']}
-        if set(source) != set(self.expected[model]) or any(signature(pair[1]) != signature(self.expected[model][key]) for key, pair in source.items()):
+        if set(source) != set(self.expected[model]) or any(
+                signature(pair[1]) != signature(self.expected[model][key])
+                for key, pair in source.items()):
             return {'added': 0, 'state': 'EXISTING_OWNER_CATALOG_DIFFERS_FROM_SHA_INDEX'}
         priorities = {'mimmi': ['mimmi-indie-sana-sopmod2-2019', 'djawa-pop-kitty-party'],
                       'yui': ['yuis-present33', 'teddy-bear97', 'athletic-club104']}[model]
         pending = [(a, p) for key, (a, p) in source.items() if key not in self.rows[model]]
-        pending.sort(key=lambda pair: (priorities.index(pair[0]['id']) if pair[0]['id'] in priorities else len(priorities), pair[0]['id'], pair[1]['number']))
-        added, failures = 0, Counter()
-        for album, photo in pending:
-            if maximum and added >= maximum:
-                break
+        pending.sort(key=lambda pair: (
+            priorities.index(pair[0]['id']) if pair[0]['id'] in priorities else len(priorities),
+            pair[0]['id'], pair[1]['number']))
+
+        def read_one(pair):
+            album, photo = pair
             key = photo.get('key')
             prefix = 'originals/' + album['id'] + '/'
-            if not isinstance(key, str) or not key.startswith(prefix) or not re.fullmatch(r'[A-Za-z0-9/_ .-]+', key) or any(s in ('', '.', '..') for s in key.split('/')):
-                failures['invalid_owner_key'] += 1
-                continue
-            with tempfile.TemporaryDirectory(prefix='exact-owner-read-') as temporary:
-                target = Path(temporary) / 'photo'
-                ok, reason = read_existing(REMOTE[model], key, target, env)
-                if not ok:
-                    failures[reason] += 1
-                    if reason in ('provider_access_denied', 'provider_access_rejected', 'remote_read_rejected'):
-                        break
-                    if sum(failures.values()) >= 5:
-                        break
-                    continue
-                try:
-                    added += self.add(model, album, photo, target.read_bytes(), 'existing-authenticated-owner-original')
-                except (ValueError, OSError):
-                    failures['exact_image_verification_failed'] += 1
+            if (not isinstance(key, str) or not key.startswith(prefix)
+                    or not re.fullmatch(r'[A-Za-z0-9/_ .-]+', key)
+                    or any(s in ('', '.', '..') for s in key.split('/'))):
+                return album, photo, None, 'invalid_owner_key'
+            try:
+                with tempfile.TemporaryDirectory(prefix='exact-owner-read-') as temporary:
+                    target = Path(temporary) / 'photo'
+                    ok, reason = read_existing(REMOTE[model], key, target, env)
+                    if not ok:
+                        # Never copy provider messages or private source paths
+                        # into the public workflow log.
+                        sanitized = str(reason)
+                        if not re.fullmatch(r'[a-z_]{1,55}', sanitized):
+                            sanitized = 'remote_read_failed'
+                        return album, photo, None, sanitized
+                    return album, photo, target.read_bytes(), None
+            except (OSError, ValueError, RuntimeError):
+                return album, photo, None, 'owner_read_exception'
+
+        added, failures = 0, Counter()
+        blocked = False
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            # A bounded batch limits concurrently downloaded photos to eight.
+            # Snapshot.add() is always serialized and independently verifies
+            # the raw bytes, SHA-256, image dimensions and free-budget cap.
+            for offset in range(0, len(pending), 8):
+                if maximum and added >= maximum:
                     break
-            print('BOUND_ASSET_OWNER_READ_PROGRESS', model, added, flush=True)
-        return {'added': added, 'failures': dict(failures), 'remaining_metadata_rows': len(pending) - added,
-                'state': 'EXISTING_OWNER_READ_FINISHED_NOT_FULL_GALLERY_PROOF'}
+                for album, photo, raw, reason in pool.map(read_one, pending[offset:offset + 8]):
+                    if maximum and added >= maximum:
+                        break
+                    if reason is not None:
+                        failures[reason] += 1
+                        if reason in ('provider_access_denied', 'provider_access_rejected',
+                                      'remote_read_rejected') or sum(failures.values()) >= 5:
+                            blocked = True
+                            break
+                        continue
+                    try:
+                        added += self.add(model, album, photo, raw, 'existing-authenticated-owner-original')
+                    except (ValueError, OSError):
+                        failures['exact_image_verification_failed'] += 1
+                        blocked = True
+                        break
+                    if added == 1 or added % 20 == 0:
+                        print('BOUND_ASSET_OWNER_READ_PROGRESS', model, added, flush=True)
+                if blocked:
+                    break
+        print('BOUND_ASSET_OWNER_READ_TOTAL', model, 'added', added,
+              'remaining', len(pending) - added, 'failure_count',
+              sum(failures.values()), flush=True)
+        return {'added': added, 'failures': dict(failures),
+                'remaining_metadata_rows': len(pending) - added,
+                'state': ('EXISTING_OWNER_READ_STOPPED_AFTER_FAILURES' if blocked else
+                          'EXISTING_OWNER_READ_FINISHED_NOT_FULL_GALLERY_PROOF')}
 
     def finish(self):
         self.check_budget()
