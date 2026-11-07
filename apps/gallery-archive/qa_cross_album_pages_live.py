@@ -235,30 +235,43 @@ def transient_pages_real_local_photo(browser,model,overlay):
     root=f'{BASE}/{model}-gallery/'
     context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,
         has_touch=True,service_workers='block')
-    page=context.new_page();requested=set();attempts=[]
-    page.on('request',lambda request:requested.add(request.url))
+    page=context.new_page();attempts=[]
     try:
         if overlay:
             for name in ['index.html','saved-photo-union.js']+(['album-grouping.js'] if model=='mimmi' else []):
                 text=(ROOT/f'apps/{model}-gallery'/name).read_text()
                 page.route(root if name=='index.html' else '**/'+name+'*',
                     candidate_route(text,'text/html' if name=='index.html' else 'application/javascript'))
-        page.goto(root,wait_until='domcontentloaded',timeout=60000)
-        page.wait_for_function('Array.isArray(stored)&&stored.length>0',timeout=45000)
-        target=page.evaluate('''seen=>{
-            for(const a of available()){const p=photosFor(a);
-                for(let i=p.length-1;i>0;i--){const q=p[i];
-                    if(!q.ownerAlbum&&!q.vaultAlbum&&typeof q.url==='string'&&q.url.startsWith('stored-albums/')&&
-                       !seen.includes(new URL(q.url,location.href).href))return {album:a.id,index:i,...q};}}
-            return null;
-        }''',list(requested))
-        assert target,'No untouched real local original for transient-failure test'
-        url=root+target['url']
+        # Select a real non-cover BEFORE any navigation. Choosing a target
+        # after loading allowed an in-flight/cached image to skip injection.
+        folder=ROOT/f'apps/{model}-gallery'
+        excluded=set()
+        excluded.update(re.findall(r'data-fast-sha="([a-f0-9]{64})"',(folder/'index.html').read_text()))
+        for name in ('stored-albums.json','owner-index.json'):
+            for album in json.loads((folder/name).read_text())['albums']:
+                if album.get('images'):excluded.add(album['images'][0]['sha256'])
+        covers=json.loads((folder/'album-covers.json').read_text()).get('covers',{})
+        excluded.update(p.get('sha256') for p in covers.values())
+        candidates,physical=cross_candidates(model)
+        selected=next((p for p in candidates if p['sha256'] not in excluded),None)
+        assert selected,'No actual non-cover original for transient-failure test'
+        paths=[path for path,p in physical.items() if signature(p)==signature(selected)]
+        urls={root+path for path in paths}
         def first_failure(route):
+            if route.request.url not in urls:route.continue_();return
             attempts.append(route.request.url)
             if len(attempts)==1:route.fulfill(status=503,body='controlled transient Pages failure')
             else:route.continue_()
-        page.route(url,first_failure)
+        page.route('**/stored-albums/**',first_failure)
+        page.goto(root,wait_until='domcontentloaded',timeout=60000)
+        page.wait_for_function('Array.isArray(stored)&&stored.length>0&&ownerStored.length>0',timeout=45000)
+        target=page.evaluate('''paths=>{
+            for(const a of available()){const p=photosFor(a),i=p.findIndex(q=>
+                !q.ownerAlbum&&!q.vaultAlbum&&paths.includes(q.url));
+                if(i>=0)return {album:a.id,index:i,...p[i]};}return null;
+        }''',paths)
+        assert target,'Selected real non-cover original missing from composed gallery'
+        url=root+target['url']
         open_photo(page,root,target)
         retry_count=page.locator('#detailphotos .photo[data-i="'+str(target['index'])+'"] img').evaluate(
             'img=>committedImageRetries.get(img)?.attempts||0')
