@@ -10,7 +10,7 @@ from urllib.error import HTTPError
 from unittest.mock import patch
 from PIL import Image
 from cloudflare_assets_snapshot import Snapshot, KIND, checked
-from deploy_cloudflare_assets import existing_catalogs, free_account_and_existing, write_deploy_sources, CF
+from deploy_cloudflare_assets import existing_catalogs, free_account_and_existing, write_deploy_sources, CF, subdomain
 from check_cloudflare_connection import ProbeError
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -81,6 +81,8 @@ class SnapshotChecks(unittest.TestCase):
         write_deploy_sources(source, self.root / 'replica', self.snapshot.finish(), 'a' * 32, 'b' * 40)
         config = json.loads((source / 'wrangler.json').read_text())
         self.assertTrue(config['assets']['run_worker_first'])
+        self.assertFalse(config['workers_dev'])
+        self.assertFalse(config['preview_urls'])
         self.assertEqual(config['assets']['not_found_handling'], 'none')
         for banned in ('r2_buckets', 'kv_namespaces', 'durable_objects', 'SIGNING_KEY', 'CLOUDFLARE_API_TOKEN'):
             self.assertNotIn(banned, json.dumps(config))
@@ -90,6 +92,15 @@ class SnapshotChecks(unittest.TestCase):
         cf = CF('dummy-token', 'a' * 32)
         for path in ('subscriptions', '../outside', 'r2/buckets'):
             with self.assertRaises(ValueError): cf.call(path, 'PUT', {})
+
+    def test_missing_subdomain_does_not_register_or_prevent_unrouted_upload(self):
+        class Missing:
+            def call(self, path):
+                self.asserted_path = path
+                raise ProbeError('CF_GET_WORKERS_SUBDOMAIN', 404)
+        cf = Missing()
+        self.assertIsNone(subdomain(cf))
+        self.assertEqual(cf.asserted_path, 'workers/subdomain')
 
     def test_denial_reports_exact_operation_without_upstream_secret_or_account_details(self):
         secret = 'PRIVATE_DO_NOT_PRINT_TOKEN'

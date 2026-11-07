@@ -12,6 +12,8 @@ on:
       - 'apps/gallery-archive/cloudflare_assets_snapshot.py'
       - 'apps/gallery-archive/deploy_cloudflare_assets.py'
       - 'apps/gallery-archive/test_cloudflare_assets_snapshot.py'
+      - 'apps/gallery-archive/audit_cloudflare_recovery.py'
+      - 'apps/gallery-archive/test_cloudflare_recovery_audit.py'
       - 'apps/gallery-archive/cloudflare_assets_local_fixture.py'
       - 'apps/gallery-archive/verify_cloudflare_local_runtime.py'
       - '.github/workflows/gallery-cloudflare-free-assets.yml'
@@ -21,6 +23,7 @@ on:
       - 'apps/gallery-archive/cloudflare-owner-gateway/bound-assets*'
       - 'apps/gallery-archive/cloudflare_assets_snapshot.py'
       - 'apps/gallery-archive/deploy_cloudflare_assets.py'
+      - 'apps/gallery-archive/audit_cloudflare_recovery.py'
       - '.github/workflows/gallery-cloudflare-free-assets.yml'
 permissions:
   contents: read
@@ -39,6 +42,7 @@ jobs:
         with: {python-version: '3.12'}
       - run: python -m pip install 'Pillow==11.3.0'
       - run: python apps/gallery-archive/test_cloudflare_assets_snapshot.py
+      - run: python apps/gallery-archive/test_cloudflare_recovery_audit.py
       - run: node apps/gallery-archive/cloudflare-owner-gateway/bound-assets.test.mjs
       - run: node apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs
       - name: Validate actual Workers bundling and private Text modules without a cloud account
@@ -68,6 +72,8 @@ jobs:
         with: {node-version: '24'}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
+      - name: Audit actual token, selected account and existing resources using GET only
+        run: python apps/gallery-archive/audit_cloudflare_recovery.py
       - run: python -m pip install 'Pillow==11.3.0'
       - name: Install the existing checksum-pinned owner storage client
         shell: bash
