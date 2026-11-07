@@ -1,0 +1,50 @@
+name: 4LEAF R16 source-native FX cold offline acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/sw.js'
+      - 'apps/4leaf/rog/app-version.json'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/native-offline-cache.cjs'
+      - 'apps/4leaf/rog/tests/r16-offline-native-fx-source-integrity.cjs'
+      - '.github/workflows/4leaf-r16-cold-offline-native-fx.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  provenance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check apps/4leaf/rog/sw.js
+      - run: node apps/4leaf/rog/tests/r16-offline-native-fx-source-integrity.cjs
+  cold-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 32
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser runtime
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Serve exact restored WEB release
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/4leaf-r16-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsSI http://127.0.0.1:8765/index.html >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/4leaf-r16-http.log
+          exit 1
+      - name: Cold install -> disable network -> original effect PNG decode and actual game
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/native-offline-cache.cjs
