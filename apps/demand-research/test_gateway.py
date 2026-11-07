@@ -380,3 +380,40 @@ def test_media_must_be_sha_readable_even_if_url_is_signed(connected_gateway,monk
     client.post("/api/activate",json={"token":"strong-secret-link-only-for-local-tests-012345"})
     url=client.get("/api/posts").json()["posts"][0]["media"][0]["url"]
     assert client.get(url).status_code==502
+
+
+def test_archive_key_oidc_authorizes_only_exact_main_account_or_mirror_workflow(monkeypatch):
+    import base64
+    import github_temp_bundle
+    client=TestClient(gateway.app,base_url="https://testserver")
+    monkeypatch.setattr(github_temp_bundle,"gateway_key",lambda:b"k"*32)
+    monkeypatch.setattr(gateway,"COOKIE","")
+    observed=[]
+    def signed(token,workflow=gateway.BRIDGE_WORKFLOW):
+        observed.append((token,workflow))
+        allowed={
+            "signed-account":gateway.ARCHIVE_WORKFLOW,
+            "signed-zip-mirror":gateway.MIRROR_WORKFLOW,
+        }
+        if allowed.get(token)!=workflow:
+            raise ValueError("unapproved subject")
+        return {"workflow_ref":workflow,"ref":"refs/heads/main"}
+    monkeypatch.setattr(gateway,"verify_bridge_token",signed)
+    for token in ("signed-account","signed-zip-mirror"):
+        result=client.get("/api/bridge/archive-key",headers={
+            "Authorization":"Bearer "+token})
+        assert result.status_code==200,result.status_code
+        assert base64.b64decode(result.json()["key"])==b"k"*32
+        assert "synthetic" not in result.text
+    for token in ("unrelated-action","signed-other-ref",""):
+        response=client.get("/api/bridge/archive-key",headers={
+            "Authorization":"Bearer "+token})
+        assert response.status_code==403
+    # The new mirror is allowed to receive only the encryption key;
+    # it must never update Render's provider credential.
+    bad=client.post("/api/bridge/credential",json={
+        "assertion":"signed-zip-mirror",
+        "credential":"synthetic-credential-should-stay-rejected"})
+    assert bad.status_code==403
+    assert gateway.COOKIE==""
+    assert any(workflow==gateway.MIRROR_WORKFLOW for _,workflow in observed)
