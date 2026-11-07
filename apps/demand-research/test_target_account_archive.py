@@ -443,3 +443,42 @@ def test_proven_method_fallback_rejects_different_existing_flat_bytes():
     with pytest.raises(RuntimeError,match="checksum conflict"):
         archive.write_immutable(key,b"new source payload")
     assert root.objects[physical]==b"different immutable remote original"
+
+
+def test_public_self_labelled_bluesky_posts_are_not_silently_dropped():
+    """Public sensitivity labels must not turn an existing account into zero posts."""
+    profile={"platform":"bluesky","identity":DID,
+             "profile_url":"https://bsky.app/profile/"+DID}
+    for label in ("porn","sexual","nudity","graphic-media"):
+        post=blue_row("public001","Synthetic labelled PUBLIC post")
+        post["value"]["labels"]={"$type":"com.atproto.label.defs#selfLabels",
+                                 "values":[{"val":label}]}
+        normalized=job.normalize_record(profile,post)
+        assert normalized is not None
+        assert normalized["text"]=="Synthetic labelled PUBLIC post"
+        assert normalized["raw"]["value"]["labels"]["values"][0]["val"]==label
+
+    for prohibited in ("!hide","!takedown"):
+        post=blue_row("withheld001","Synthetic provider-withheld post")
+        post["value"]["labels"]={"values":[{"val":prohibited}]}
+        assert job.normalize_record(profile,post) is None
+
+
+def test_public_labelled_posts_reach_private_encrypted_bundle(monkeypatch):
+    """Regression: an account with only publicly visible self-labels can backup."""
+    from target_account_bundle import execute_bundle
+    post=blue_row("labelled01","Synthetic public media record")
+    post["value"]["labels"]={"values":[{"val":"porn"}]}
+    api=BlueAPI({None:([post],None)})
+    stored=[]
+    def fake_remote(path,*,run_id,account_hash):
+        import zipfile
+        with zipfile.ZipFile(path) as archive:
+            names=archive.namelist()
+            stored.extend(names)
+        return {"bytes":path.stat().st_size}
+    result=execute_bundle(selected={"platform":"bluesky",
+            "account":"qa-example.bsky.social","max_pages":1},
+            api=api,run_id="42399999999",cloud_check=False,uploader=fake_remote)
+    assert result["public_posts_in_bundle"]==1
+    assert any(name.endswith("/post.json") for name in stored)
