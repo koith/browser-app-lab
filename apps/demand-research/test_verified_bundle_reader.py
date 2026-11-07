@@ -218,3 +218,46 @@ def test_live_storage_mix_keeps_terabox_when_github_index_fails(
     assert listing.status_code==200
     assert listing.json()["accounts"][0]["backup_kind"]=="terabox_zip_sha_verified"
     assert client.get("/api/account-archives/"+account+"/feed").json()["total"]==1
+
+
+def test_mixed_storage_session_cache_avoids_one_rclone_read_per_media(
+        monkeypatch):
+    class Remote:
+        remote="archive:DemandResearch"
+        def command(self,*args,**kwargs):
+            raise AssertionError("remote only through mocked verified reader")
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer,"CloudArchive",Remote)
+    monkeypatch.setattr(viewer,"_ZIP_SESSION_CACHE",None)
+    calls=[]
+    marker=object()
+    def verified_only(root):
+        assert isinstance(root,viewer._BoundedZipRoot)
+        calls.append(True)
+        return iter([marker])
+    monkeypatch.setattr(viewer,"available_bundles",verified_only)
+    assert viewer._verified_account_bundles(Remote())==(marker,)
+    # Fresh CloudArchive instances per FastAPI request must share verified
+    # immutable bytes, rather than run lsf/cat again for each card and image.
+    assert viewer._verified_account_bundles(Remote())==(marker,)
+    assert len(calls)==1
+
+
+def test_mixed_storage_provider_backoff_avoids_repeated_long_timeouts(
+        monkeypatch):
+    class Remote:
+        remote="archive:DemandResearch"
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer,"CloudArchive",Remote)
+    monkeypatch.setattr(viewer,"_ZIP_SESSION_CACHE",None)
+    calls=[]
+    def outage(_root):
+        calls.append(True)
+        raise RuntimeError("synthetic authorization denied")
+    monkeypatch.setattr(viewer,"available_bundles",outage)
+    with pytest.raises(RuntimeError):
+        viewer._verified_account_bundles(Remote())
+    with pytest.raises(RuntimeError):
+        viewer._verified_account_bundles(Remote())
+    # The app still returns the GH account rows during the provider cooldown.
+    assert len(calls)==1
