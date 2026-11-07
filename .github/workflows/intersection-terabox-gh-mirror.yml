@@ -1,0 +1,94 @@
+name: INTERSECTION — Mirror Verified TeraBox ZIP to Encrypted GitHub
+
+on:
+  # One reviewed historic, SHA-verified six-post source is recovered on first
+  # merge. Subsequent successful exact public-account backups are mirrored
+  # automatically only when coverage actually improves.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/intersection-terabox-gh-mirror.yml"
+  workflow_run:
+    workflows:
+      - "INTERSECTION — Verified One-ZIP Public Account Rescue"
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Successful owner-approved private account ZIP run ID"
+        required: true
+        type: string
+  pull_request:
+    paths:
+      - ".github/workflows/intersection-terabox-gh-mirror.yml"
+      - "apps/demand-research/mirror_verified_terabox_to_github.py"
+      - "apps/demand-research/test_mirror_verified_terabox_to_github.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intersection-encrypted-original-zip-mirror
+  cancel-in-progress: false
+
+jobs:
+  credential-free-tests:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify exact SHA, idempotency and no incomplete overwrite
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet pytest==8.4.2 cryptography==46.0.4 fastapi==0.115.12 httpx==0.28.1
+          cd apps/demand-research
+          python -m py_compile mirror_verified_terabox_to_github.py test_mirror_verified_terabox_to_github.py
+          python -m pytest -q test_mirror_verified_terabox_to_github.py test_github_temp_bundle.py test_verified_bundle_reader.py
+
+  encrypted-source-mirror:
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
+      DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
+      MIRROR_SOURCE_RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || (github.event_name == 'workflow_dispatch' && inputs.source_run_id) || '42360905305' }}
+      MIRROR_MINIMUM_POSTS: ${{ github.event_name == 'push' && '6' || '1' }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install encryption and digest-pinned existing free provider backend
+        run: |
+          set -euo pipefail
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE" || { echo "::error::Private archive unavailable"; exit 1; }
+          python -m pip install --disable-pip-version-check --quiet cryptography==46.0.4
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rclone help backends | grep -i terabox >/dev/null
+      - name: Verify source TeraBox ZIP and independently read back AES-GCM GitHub mirror
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          umask 077
+          timeout --signal=TERM --kill-after=10s 1100s python mirror_verified_terabox_to_github.py
+          echo 'Only INTERSECTION_TERABOX_GITHUB_MIRROR_END_TO_END_VERIFIED confirms a NEW remote ciphertext SHA and original ZIP checksum. ALREADY markers mean no write.' >> "$GITHUB_STEP_SUMMARY"
