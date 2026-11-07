@@ -243,3 +243,15 @@ def test_public_readback_denial_returns_no_receipt_and_throttles_resubmission(cl
     repeated = anonymous.post("/api/target-archive/start", json=selection, headers=headers)
     assert repeated.status_code == 429
     assert calls == [("bluesky", "example.bsky.social")]
+
+
+def test_bridge_read_denial_remains_service_unavailable(client, monkeypatch):
+    monkeypatch.setattr(gateway, "_bridge_authenticated", lambda request: None)
+    def deny(*args):
+        raise target_archive_api.QueueStorageDenied("private diagnostic")
+    monkeypatch.setattr(target_archive_api.backup_queue, "accept", deny)
+    response = client.post("/api/bridge/ack", json={"job_id":1234567890,
+                                                 "workflow_run_id":41999999999})
+    assert response.status_code == 503
+    assert "private diagnostic" not in response.text
+    assert "accepted" not in response.json()

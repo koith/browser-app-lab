@@ -11,7 +11,7 @@ from social_sources import TERMS, ROUTES, request_one_page
 import account_index
 import account_index_sources
 import account_groups
-from demand_archive import CloudArchive
+from demand_archive import CloudArchive, QueueStorageDenied
 
 from target_archive_api import create_router as create_target_archive_router, dispatch_enabled
 
@@ -129,7 +129,7 @@ async def github_acknowledge_job(request:Request):
                                      payload["workflow_run_id"])
     except (ValueError,TypeError,KeyError):
         raise HTTPException(400,"Invalid bridge acknowledgment") from None
-    except RuntimeError:
+    except (RuntimeError,QueueStorageDenied):
         raise HTTPException(503,"Unable to verify immutable queue acknowledgment") from None
     return JSONResponse({"accepted":True,"job_id":row["job_id"]},
                         headers={"Cache-Control":"private, no-store"})
