@@ -182,6 +182,10 @@ def inspect_covers(page):
         scroll_to_real_card(cards.nth(i))
         page.wait_for_timeout(120)
     page.wait_for_timeout(1500)
+    return cover_snapshot(page)
+
+
+def cover_snapshot(page):
     return page.evaluate('''()=>{
         const rows=[...document.querySelectorAll('#albumgrid .album')].map(card=>{
             const img=card.querySelector('img');return {album:card.dataset.id,
@@ -298,6 +302,13 @@ def exercise(browser,model,overlay,limit=12):
         page.wait_for_function("Array.isArray(stored)&&stored.length>0&&document.querySelectorAll('#albumgrid .album').length>0",timeout=80000)
         composed_rows=page.evaluate('available().reduce((n,a)=>n+photosFor(a).length,0)')
         cover_observation=inspect_covers(page)
+        public_album_ids=page.evaluate('''()=>available().filter(a=>photosFor(a).some(p=>
+            !p.ownerAlbum&&!p.vaultAlbum&&typeof p.url==='string'&&p.url.startsWith('stored-albums/'))).map(a=>a.id)''')
+        page.wait_for_function('''ids=>ids.every(id=>{
+            const image=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');
+            return image?.complete&&image.naturalWidth>0&&new URL(image.currentSrc||image.src,location.href).pathname.includes('/stored-albums/');
+        })''',arg=public_album_ids,timeout=45000)
+        cover_observation=cover_snapshot(page)
         candidates,physical=cross_candidates(model)
         print('ACTUAL_CROSS_OWNER_ROWS_SELECTED',model,len(candidates),flush=True)
         mapped=page.evaluate('''rows=>rows.map(row=>{
@@ -362,6 +373,7 @@ def exercise(browser,model,overlay,limit=12):
             'next_previous_close_back_reload':True,'unhandled_js_errors':exceptions,
             'unnecessary_render_catalog_requests':catalog_calls,
             'all_album_cover_observation':cover_observation,
+            'all_albums_with_public_original_have_decoded_covers':len(public_album_ids),
             'console_errors':console_errors[:30],
             'remaining_http_failures':failures[:30],'full_gallery_P0_restored':False,
             'iphone_hardware':False},sort_keys=True),flush=True)

@@ -365,7 +365,12 @@ function photoRotation(p){return [90,270].includes(p?.display_rotation)?p.displa
 function rotationAttributes(p){const angle=photoRotation(p);return angle?' data-rotation="'+angle+'" style="--photo-rotation:'+angle+'deg"':''}
 function card(a,hasImages){
  const owned=stored.find(x=>x.id===a.id)||a;
- const p=validImages(owned),configuration=albumCovers[owned.id],selected=p.find(p=>p.sha256&&p.sha256===configuration?.sha256)||p[0],cover=selected?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
+ const p=validImages(owned),configuration=albumCovers[owned.id],preferred=p.find(p=>p.sha256&&p.sha256===configuration?.sha256)||p[0];
+ // Keep the preferred photograph/crop whenever its exact saved copy exists.
+ // Otherwise a same-work committed photo can show the album without Render.
+ const publicCover=p.find(q=>!q.ownerAlbum&&!q.vaultAlbum&&typeof q.url==='string'&&q.url.startsWith('stored-albums/'));
+ const unavailablePreferred=location.hostname==='koith.github.io'&&(preferred?.ownerAlbum||preferred?.vaultAlbum)&&!localPreviewIndex.get(localPhotoKey(owned.id,preferred));
+ const selected=unavailablePreferred?(publicCover||preferred):preferred,cover=selected?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
  const label=getName(a),labels=YuiLabels.describe(owned),shortTitle=YuiLabels.coverTitle({...owned,title:label});
  const focused=selected?.sha256&&selected.sha256===configuration?.sha256;
  const position=focused&&Array.isArray(configuration.position)&&configuration.position.length===2&&configuration.position.every(n=>Number.isFinite(n)&&n>=0&&n<=100)?configuration.position:[50,20];
