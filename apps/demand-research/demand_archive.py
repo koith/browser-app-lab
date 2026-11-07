@@ -117,6 +117,7 @@ class CloudArchive:
         if not re.fullmatch(r"archive:[A-Za-z0-9_/-]+", self.remote):
             raise ValueError("archive destination must be a private archive: prefix")
         self.runner = runner or self._run
+        self.trace_queue = False
         self.quarantined_ids = set()
         self.repaired_entries = 0
         self.unrecoverable_entries = 0
@@ -159,7 +160,29 @@ class CloudArchive:
         return r.stdout
 
     def command(self, args, *, data=None, timeout=150, allow_missing=False):
-        return self.runner(args, data=data, timeout=timeout, allow_missing=allow_missing)
+        started = time.monotonic()
+        outcome = "error"
+        try:
+            result = self.runner(args, data=data, timeout=timeout, allow_missing=allow_missing)
+            outcome = "missing" if result is None else "ok"
+            return result
+        except RuntimeError as error:
+            # Only fixed categories; never print exception text, argv or paths.
+            for category in ("missing", "rate_limited", "duplicate", "authorization",
+                             "capacity", "network_timeout", "remote_server", "backend_rejected"):
+                if "(" + category + ")" in str(error):
+                    outcome = category
+                    break
+            if isinstance(error.__cause__, subprocess.TimeoutExpired):
+                outcome = "process_timeout"
+            raise
+        finally:
+            if self.trace_queue:
+                operation = args[0] if args[0] in ("cat", "lsf", "mkdir", "copyto", "rcat") else "other"
+                endpoint = "alternate" if "--terabox-domain" in args else "primary"
+                print("BACKUP_QUEUE_IO", "operation=" + operation, "endpoint=" + endpoint,
+                      "outcome=" + outcome, "elapsed_ms=" + str(round((time.monotonic()-started)*1000)),
+                      flush=True)
 
     def preflight(self):
         if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):

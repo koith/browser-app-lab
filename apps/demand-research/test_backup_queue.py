@@ -1,5 +1,6 @@
 """No secrets or network: durable one-click queue and safe readback fixtures."""
 import hashlib
+import subprocess
 import pytest
 import backup_queue
 
@@ -80,3 +81,55 @@ def test_queue_disabled_by_default(monkeypatch):
     monkeypatch.delenv("DEMAND_ARCHIVE_QUEUE_MODE",raising=False)
     with pytest.raises(RuntimeError,match="disabled"):
         backup_queue.create_request("bluesky","public-test.bsky.social",FakeCloud())
+
+
+@pytest.mark.parametrize("failed_stage", ["write_immutable", "read_verified"])
+def test_queue_failure_trace_identifies_stage_without_private_payload(monkeypatch, capsys, failed_stage):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE", "1")
+    monkeypatch.setattr(backup_queue.secrets, "randbelow", lambda _: 234567890)
+    root = FakeCloud()
+    private_error = "NDUS=secret-cookie account-request-1234567890.json private-account.bsky.social"
+
+    def fail(*args, **kwargs):
+        raise RuntimeError(private_error)
+
+    monkeypatch.setattr(root, failed_stage, fail)
+    with pytest.raises(RuntimeError, match="secret-cookie"):
+        backup_queue.create_request("bluesky", "private-account.bsky.social", root)
+    output = capsys.readouterr().out
+    assert "stage=" + failed_stage + " outcome=error elapsed_ms=" in output
+    assert "stage=read_verified outcome=ok" not in output
+    for sensitive in ("NDUS", "secret-cookie", "1234567890", "private-account", ".json"):
+        assert sensitive not in output
+
+
+def test_remote_sha_failure_trace_never_reports_verified_success(monkeypatch, capsys):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE", "1")
+    root = FakeCloud()
+    root.corrupt = True
+    with pytest.raises(RuntimeError, match="readback"):
+        backup_queue.create_request("bluesky", "private-account.bsky.social", root)
+    output = capsys.readouterr().out
+    assert "stage=write_immutable outcome=ok" in output
+    assert "stage=read_verified outcome=sha_unverified" in output
+    assert "stage=read_verified outcome=ok" not in output
+    assert "private-account" not in output
+
+
+@pytest.mark.parametrize("category", ["authorization", "network_timeout", "process_timeout"])
+def test_cloud_io_trace_classifies_failures_without_argv_or_exception(capsys, category):
+    private = "NDUS=secret-cookie archive:DemandResearch/account-request-1234567890.json"
+
+    def fail(args, **kwargs):
+        if category == "process_timeout":
+            raise RuntimeError(private) from subprocess.TimeoutExpired(["rclone", private], 120)
+        raise RuntimeError(private + " (" + category + ")")
+
+    root = backup_queue.CloudArchive(runner=fail)
+    root.trace_queue = True
+    with pytest.raises(RuntimeError):
+        root.command(["cat", private, "--terabox-domain", "https://nephobox.com"])
+    output = capsys.readouterr().out
+    assert "operation=cat endpoint=alternate outcome=" + category + " elapsed_ms=" in output
+    for sensitive in ("NDUS", "secret-cookie", "1234567890", "archive:", "nephobox.com"):
+        assert sensitive not in output
