@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import threading
 import time
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -44,9 +45,14 @@ class _BoundedZipRoot:
     def __init__(self,root):
         self.root=root
         self.remote=root.remote
+        self.authorization_denied=False
 
     def command(self,args,*,data=None,timeout=150,allow_missing=False):
         operation=args[0] if args and args[0] in ("lsf","cat") else "other"
+        # When a provider denies one immutable ZIP, do not issue another
+        # eight known-denied requests in the same collection pass.
+        if self.authorization_denied and operation=="cat":
+            raise RuntimeError("Private ZIP read unavailable (authorization)")
         # The exact 17.6 MB original ZIP was independently SHA verified on
         # GitHub Actions. An 18-second per-operation listing/read budget dropped
         # this same ZIP on the slower Render free instance. Keep a finite
@@ -68,6 +74,8 @@ class _BoundedZipRoot:
                                  "backend_rejected"):
                     if "("+category+")" in str(error):
                         outcome=category
+                        if category=="authorization":
+                            self.authorization_denied=True
                         break
             raise
         finally:
@@ -80,11 +88,48 @@ class _BoundedZipRoot:
                   flush=True)
 
 
+_ZIP_SESSION_CACHE=None
+_ZIP_SESSION_LOCK=threading.Lock()
+ZIP_VERIFIED_SESSION_SECONDS=90
+ZIP_UNAVAILABLE_BACKOFF_SECONDS=25
+
+
 def _verified_account_bundles(root):
-    # GH temporary mode is always a fast independent fallback. A delayed
-    # provider must not turn an already verified GH account into an error.
-    source=_BoundedZipRoot(root) if github_temp_bundle.enabled() else root
-    return available_bundles(source)
+    """Reuse only independently SHA-verified immutable ZIPs across reads.
+
+    A free Render request typically builds a fresh CloudArchive. Repeating a
+    TeraBox 403 probe for every feed, follower, image and comment request
+    previously delayed actual SIX-post playback for minutes. Synthetic roots
+    bypass this process-local cache; the GitHub verified reader stays usable.
+    """
+    global _ZIP_SESSION_CACHE
+    if not github_temp_bundle.enabled():
+        return available_bundles(root)
+    cacheable=type(root) is CloudArchive
+    now=time.monotonic()
+    if cacheable:
+        with _ZIP_SESSION_LOCK:
+            cached=_ZIP_SESSION_CACHE
+            if cached is not None and cached[0]==root.remote:
+                ttl=(ZIP_UNAVAILABLE_BACKOFF_SECONDS if cached[3]
+                     else ZIP_VERIFIED_SESSION_SECONDS)
+                if now-cached[1]<ttl:
+                    if cached[3]:
+                        raise RuntimeError("Private ZIP provider temporarily unavailable")
+                    return cached[2]
+    try:
+        # Materialize while the per-pass authorization circuit breaker is
+        # alive, not after its wrapper has been discarded.
+        result=tuple(available_bundles(_BoundedZipRoot(root)))
+    except (RuntimeError,ValueError,TypeError,BundleInvalid):
+        if cacheable:
+            with _ZIP_SESSION_LOCK:
+                _ZIP_SESSION_CACHE=(root.remote,time.monotonic(),(),True)
+        raise
+    if cacheable and len(result)<=4:
+        with _ZIP_SESSION_LOCK:
+            _ZIP_SESSION_CACHE=(root.remote,time.monotonic(),result,not bool(result))
+    return result
 
 
 

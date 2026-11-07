@@ -251,3 +251,60 @@ def test_bounded_zip_source_auth_denial_is_redacted_and_not_verified(capsys):
     output=capsys.readouterr().out
     assert "operation=cat outcome=authorization" in output
     assert "SECRET" not in output
+
+
+
+def test_provider_denial_stops_repeating_private_zip_cat_within_one_pass():
+    """An access refusal is not a signal to probe all older ZIPs."""
+    class DeniedRoot:
+        remote="archive:DemandResearch"
+        def __init__(self):
+            self.attempts=0
+        def command(self,args,**kwargs):
+            self.attempts+=1
+            raise RuntimeError("private cloud cat failed (authorization)")
+    source=DeniedRoot()
+    guard=viewer._BoundedZipRoot(source)
+    with pytest.raises(RuntimeError,match="authorization"):
+        guard.command(["cat",source.remote+"/first.zip"])
+    with pytest.raises(RuntimeError,match="authorization"):
+        guard.command(["cat",source.remote+"/second.zip"])
+    assert source.attempts==1
+
+
+def test_mixed_verified_zip_session_cache_prevents_repeated_remote_reads(
+        monkeypatch):
+    class Remote:
+        remote="archive:DemandResearch"
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer,"CloudArchive",Remote)
+    monkeypatch.setattr(viewer,"_ZIP_SESSION_CACHE",None)
+    verified=object()
+    calls=[]
+    def select(_root):
+        calls.append(1)
+        return iter([verified])
+    monkeypatch.setattr(viewer,"available_bundles",select)
+    assert viewer._verified_account_bundles(Remote())==(verified,)
+    assert viewer._verified_account_bundles(Remote())==(verified,)
+    assert len(calls)==1
+
+
+def test_mixed_verification_403_backoff_preserves_github_fallback(
+        monkeypatch):
+    class Remote:
+        remote="archive:DemandResearch"
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer,"CloudArchive",Remote)
+    monkeypatch.setattr(viewer,"_ZIP_SESSION_CACHE",None)
+    calls=[]
+    def denied(_root):
+        calls.append(1)
+        raise RuntimeError("synthetic provider denied")
+        yield
+    monkeypatch.setattr(viewer,"available_bundles",denied)
+    with pytest.raises(RuntimeError):
+        viewer._verified_account_bundles(Remote())
+    with pytest.raises(RuntimeError,match="temporarily unavailable"):
+        viewer._verified_account_bundles(Remote())
+    assert len(calls)==1
