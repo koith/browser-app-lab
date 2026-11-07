@@ -87,7 +87,7 @@ test('real local HTTP staging: automatic S3 adapter reads both catalogs and exac
  const local='http://127.0.0.1:'+server.address().port,originalFetch=globalThis.fetch;
  globalThis.fetch=async request=>{
   assert.equal(new URL(request.url).origin,env.OWNER_S3_ENDPOINT);
-  assert.equal(request.redirect,'error');
+  assert.equal(request.redirect,'manual');
   return originalFetch(local+new URL(request.url).pathname,{headers:request.headers,redirect:'error'});
  };
  try{

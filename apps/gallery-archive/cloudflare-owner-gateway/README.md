@@ -1,4 +1,42 @@
-# Render-independent private photo transport — NOT DEPLOYED
+# Render-independent private photo transport
+
+## Free bound Assets replica
+
+The owner connection is verified through PR #823's read-only Actions probe.
+`deploy_cloudflare_assets.py` adds a separate Workers Free Assets path, without
+R2, B2, a domain purchase or a paid subscription. Activation and actual cloud
+readbacks are reported by its real main-branch workflow, never by local fixtures.
+Both production galleries stay on their existing transport until cloud and
+browser acceptance are complete.
+
+`run_worker_first=true` covers every path. Originals live in an internal Assets
+binding; private canonical catalogs are Text modules in the Worker control plane.
+Direct catalog/original paths return 404. Only the existing SHA-bound photo API
+may read the binding. A readback checks every original's SHA, length and decoded
+dimensions after deployment. No private source files, cookies, deployment tokens
+or image bundles are committed or uploaded to GitHub artifacts.
+
+The runner refuses any nonempty or incomplete account subscription listing,
+never calls a billing/subscription mutation API, and uses the default Free plan.
+Project limits are 19,500 files, 4 GB and 8 MB/photo. Static Asset storage has no
+additional charge; code-first photo requests remain subject to Workers Free
+request/CPU limits. These project checks are not an account-wide promise about
+unrelated or future charges. Official references:
+
+- https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
+- https://developers.cloudflare.com/workers/platform/limits/
+
+Before replacing a previously deployed replica, the runner requires both private
+catalog Text modules via the authenticated control API, independently downloads
+and verifies every previous original, and refuses concurrent catalog changes.
+Existing owner reads use the same authenticated TeraBox accounts and exact known
+catalog fingerprints. Explicit provider denials stop that model's read sequence.
+Missing private photos stay missing, rather than being replaced by thumbnails.
+The default first run reads at most 32 new private originals per model; an
+explicit workflow limit of 0 reads all remaining originals. Existing exact public
+copies and prior replica files are retained regardless of that acquisition limit.
+
+## Original R2 / private S3 transport
 
 The suspended Render service cannot serve its private originals. This staging
 transport reads the owner's existing private R2 binding **or** a private B2/R2

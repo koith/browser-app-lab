@@ -36,6 +36,8 @@ jobs:
         run: node apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs
       - name: Check private S3 signing, limits and local HTTP readback
         run: node apps/gallery-archive/cloudflare-owner-gateway/private-s3.test.mjs
+      - name: Check internal bound asset reads and raw-path denial
+        run: node apps/gallery-archive/cloudflare-owner-gateway/bound-assets.test.mjs
       - name: Syntax-check transport modules
         run: |
           node --check apps/gallery-archive/cloudflare-owner-gateway/worker.mjs

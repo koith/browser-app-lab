@@ -35,7 +35,9 @@ export async function signedS3Get(config,key,now=new Date()) {
   let signing=await hmac('AWS4'+config.secret,day);
   for(const part of [config.region,'s3','aws4_request'])signing=await hmac(signing,part);
   const signature=hex(await hmac(signing,['AWS4-HMAC-SHA256',date,scope,await sha(canonical)].join('\n')));
-  return new Request(url,{redirect:'error',headers:{
+  // workerd supports manual/follow, not the browser-only error mode. Reject
+  // every non-200 below; a redirect must never forward signed credentials.
+  return new Request(url,{redirect:'manual',headers:{
     'x-amz-content-sha256':EMPTY_SHA,'x-amz-date':date,
     Authorization:'AWS4-HMAC-SHA256 Credential='+config.key+'/'+scope+', SignedHeaders='+names+', Signature='+signature
   }});
