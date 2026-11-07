@@ -65,9 +65,9 @@ const path=require('node:path');
    'duel actors must preserve the real match-player IDs');
   assert.deepEqual(synced.duel.map(x=>x.chessman),synced.board.map(x=>x.chessman),
    'duel and board must play each same real selected Genesis chessman');
-  // In a duel the defender faces SIDEWAYS toward their opponent; on the
-  // board that same character faces the CAMERA. Native source frame 11 vs
-  // frame 25 is a correct orientation difference, not a changed identity.
+  // R17 original archive has a distinct CHR slot-13 sequence for the
+  // duel hit response (semantic role WEB-INFERRED). Board pose still holds
+  // its own front frame. Both must preserve original CHR model identity.
   assert.deepEqual(synced.duel.map(x=>x.originalMember),
    synced.board.map(x=>x.originalMember),
    'board and podium must use identical CHR-linked original OBS bodies');
@@ -78,8 +78,8 @@ const path=require('node:path');
   }),'both presentation contexts must display the same native member, not a guessed actor');
   assert.equal(synced.duel[0].frames,synced.board[0].frames,
    'attacker walking frontwards uses identical native animation keys');
-  assert.equal(synced.duel[1].frames,'11',
-   'duel defender holds native side pose while looking at attacker');
+  assert.equal(synced.duel[1].frames,Array.from({length:36},()=>33).join(','),
+   'duel defender uses its OWN original CHR 0088 slot-13 frames (36 source ticks; hit role INFERRED)');
   assert.equal(synced.board[1].frames,'22',
    'board defender has no identified native hurt slot: hold this CHR body original front idle key 22, never synthetic legacy frame 25');
   assert.ok(synced.duel.every(x=>x.source==='original-obs-sprite'),
