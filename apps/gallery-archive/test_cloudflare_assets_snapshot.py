@@ -1,6 +1,7 @@
 from email.message import EmailMessage
 from contextlib import redirect_stdout
 import hashlib
+import os
 import io
 import json
 from pathlib import Path
@@ -42,6 +43,43 @@ class SnapshotChecks(unittest.TestCase):
             self.assertEqual((self.root / 'replica' / model / p['key']).read_bytes(), RAW)
             self.assertEqual(catalogs[model]['archive_kind'], KIND)
         self.assertEqual(self.snapshot.public_originals(), {'mimmi': 0, 'yui': 0})
+
+    def test_exhaustive_owner_reads_preserve_exact_bytes_with_bounded_batch_and_limit(self):
+        # Simulate twelve distinct slots from an exact owner manifest. The
+        # authenticated download stub never changes the target's SHA.
+        base = self.root / 'apps/mimmi-gallery'
+        original = {**PHOTO, 'key': 'originals/known-album/0001.jpg'}
+        photos = [{**original, 'number': i,
+                   'key': f'originals/known-album/{i:04d}.jpg'}
+                  for i in range(1, 13)]
+        catalog = {'model': 'mimmi', 'schema_version': 1,
+                   'albums': [{'id': 'known-album', 'images': photos}]}
+        (base / 'owner-index.json').write_text(json.dumps(catalog))
+
+        def authenticated_original(remote, key, target, env):
+            assert key.startswith('originals/known-album/')
+            assert env.get('RCLONE_CONFIG_ARCHIVE_TYPE') == 'terabox'
+            target.write_bytes(RAW)
+            return True, None
+
+        with patch.dict(os.environ, {'MIMMI_TERABOX_NDUS': 'fixture-owner-cookie'}), (
+             patch('restore_known_owner_cache.verified_owner_catalog',
+                   return_value=(None, catalog))), (
+             patch('restore_known_owner_cache.cookie_header', return_value='fixture')),( 
+             patch('qa_existing_owner_exact_file.read_existing',
+                   side_effect=authenticated_original)):
+            snapshot = Snapshot(self.root, self.root / 'exhaustive-replica')
+            complete = snapshot.existing_owner('mimmi', maximum=0)
+            self.assertEqual(complete['added'], 12)
+            self.assertEqual(complete['remaining_metadata_rows'], 0)
+            self.assertFalse(complete['failures'])
+            self.assertEqual(len(snapshot.finish()['mimmi']['albums'][0]['images']), 12)
+            for row in snapshot.finish()['mimmi']['albums'][0]['images']:
+                self.assertEqual((self.root / 'exhaustive-replica' / 'mimmi' / row['key']).read_bytes(), RAW)
+            limited = Snapshot(self.root, self.root / 'limited-replica')
+            count = limited.existing_owner('mimmi', maximum=3)
+            self.assertEqual(count['added'], 3)
+            self.assertEqual(count['remaining_metadata_rows'], 9)
 
     def test_wrong_sha_dimensions_and_foreign_owner_rows_fail_closed(self):
         for photo in ({**PHOTO, 'sha256': 'f' * 64}, {**PHOTO, 'width': WIDTH + 1}):
