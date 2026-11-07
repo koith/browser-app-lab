@@ -255,3 +255,72 @@ def test_bridge_read_denial_remains_service_unavailable(client, monkeypatch):
     assert response.status_code == 503
     assert "private diagnostic" not in response.text
     assert "accepted" not in response.json()
+
+
+def test_later_exact_account_backup_restores_stale_browser_receipt(client,monkeypatch):
+    from datetime import datetime,timezone
+    from types import SimpleNamespace
+    import backup_queue
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(backup_queue,"create_request",lambda *_:2566815851)
+    monkeypatch.setattr(backup_queue,"state",lambda *_:None)
+    later=SimpleNamespace(selected_platform="bluesky",
+         selected_account="https://bsky.app/profile/public-test.bsky.social",
+         recorded_at=datetime.now(timezone.utc).isoformat(),
+         source_state="COMPLETE_CURRENT_PUBLIC_CURSOR",
+         post_count=3,object_count=28,account="bluesky-"+"a"*40)
+    monkeypatch.setattr(target_archive_api.github_temp_bundle,
+                        "latest_bundles",lambda:[later])
+    headers={"Origin":"https://testserver",
+             "X-Archive-Intent":"selected-public-account-v1"}
+    response=client.post("/api/target-archive/start",
+             headers=headers,
+             json={"platform":"bluesky","account":"public-test.bsky.social"})
+    assert response.status_code==202
+    receipt=response.json()["receipt"]
+    restored=client.get("/api/target-archive/jobs/2566815851?receipt="+receipt)
+    assert restored.status_code==200
+    payload=restored.json()
+    assert payload["state"]=="REMOTE_VERIFIED"
+    assert payload["restored_from_verified_backup"] is True
+    assert payload["remote_verified"] is True
+    assert payload["posts"]==3 and payload["objects"]==28
+
+
+def test_stale_receipt_must_not_claim_another_or_older_account(monkeypatch):
+    from datetime import datetime,timezone,timedelta
+    from types import SimpleNamespace
+    import github_temp_bundle
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    def bundle(account,when):
+        return SimpleNamespace(selected_platform="bluesky",
+            selected_account=account,recorded_at=when.isoformat(),
+            source_state="COMPLETE_CURRENT_PUBLIC_CURSOR",
+            post_count=99,object_count=105,
+            account="bluesky-"+"f"*40)
+    now=datetime.now(timezone.utc)
+    monkeypatch.setattr(github_temp_bundle,"latest_bundles",lambda:[
+        bundle("unrelated.bsky.social",now),
+        bundle("public-test.bsky.social",now-timedelta(hours=1))])
+    assert target_archive_api.read_matching_recent_verified_archive(
+        "bluesky","public-test.bsky.social",int(now.timestamp())) is None
+
+
+def test_missing_transient_queue_without_verified_backup_is_not_endless_queued(client,monkeypatch):
+    import backup_queue
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(backup_queue,"create_request",lambda *_:2566815852)
+    monkeypatch.setattr(backup_queue,"state",lambda *_:None)
+    monkeypatch.setattr(target_archive_api.github_temp_bundle,"latest_bundles",lambda:[])
+    response=client.post("/api/target-archive/start",
+        headers={"Origin":"https://testserver",
+                 "X-Archive-Intent":"selected-public-account-v1"},
+        json={"platform":"bluesky","account":"public-test.bsky.social"})
+    assert response.status_code==202
+    receipt=response.json()["receipt"]
+    result=client.get("/api/target-archive/jobs/2566815852?receipt="+receipt)
+    assert result.status_code==200
+    assert result.json()["state"]=="NEEDS_RETRY"
+    assert result.json()["remote_verified"] is False
