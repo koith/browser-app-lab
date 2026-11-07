@@ -6,12 +6,39 @@ on:
     branches: [main]
     paths:
       - "apps/demand-research/verify_live_account_bundle.py"
+      - "apps/demand-research/verified_bundle_reader.py"
+      - "apps/demand-research/target_account_bundle.py"
+      - ".github/workflows/intersection-zip-reader-verify.yml"
+  pull_request:
+    paths:
+      - "apps/demand-research/verify_live_account_bundle.py"
+      - "apps/demand-research/verified_bundle_reader.py"
+      - ".github/workflows/intersection-zip-reader-verify.yml"
 
 permissions:
   contents: read
 
 jobs:
+  offline-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check live readback contract without private archive access
+        run: |
+          python -m py_compile apps/demand-research/verify_live_account_bundle.py apps/demand-research/verified_bundle_reader.py
+          python - <<'PY'
+          from pathlib import Path
+          script=Path(".github/workflows/intersection-zip-reader-verify.yml").read_text()
+          assert "rclone help backends | grep -i terabox >/dev/null" in script
+          assert ("grep -q" + "i terabox") not in script
+          PY
   live-private-reader:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
@@ -34,7 +61,7 @@ jobs:
           echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
           unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
           find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
-          rclone help backends | grep -qi terabox
+          rclone help backends | grep -i terabox >/dev/null
       - name: Verify archived real ZIP bytes, internal manifest and SNS reader
         working-directory: apps/demand-research
         run: |
