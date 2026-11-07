@@ -22,12 +22,16 @@ TARGET = {
     'mimmi': ('mimmi-indie-sana-sopmod2-2019', 1),
     'yui': ('yuis-present33', 1),
 }
+P0_TARGETS = {
+    'mimmi': ['mimmi-indie-sana-sopmod2-2019', 'djawa-pop-kitty-party', 'djawa-rei-beyond-the-heart'],
+    'yui': ['yuis-present33', 'teddy-bear97', 'athletic-club104'],
+}
 
 
-def expected(model):
+def expected(model, album_override=None):
     owner = json.loads((ROOT / 'apps' / f'{model}-gallery' / 'owner-index.json').read_text())
     assert owner['model'] == model and owner['schema_version'] == 1
-    album, number = TARGET[model]
+    album, number = (album_override, 1) if album_override else TARGET[model]
     for a in owner['albums']:
         if a['id'] == album:
             for p in a['images']:
@@ -53,7 +57,7 @@ def fulfill(name, mime):
     return perform
 
 
-def exercise(browser, model, mobile, deployed=False):
+def exercise(browser, model, mobile, deployed=False, album_override=None):
     root = f'{BASE}{model}-gallery/'
     ctx = browser.new_context(
         viewport={'width': 390, 'height': 844} if mobile else {'width': 1280, 'height': 840},
@@ -70,7 +74,7 @@ def exercise(browser, model, mobile, deployed=False):
     config_path = folder / 'cloudflare-gateway.json'
     config = json.loads(config_path.read_text())
     assert config == {'enabled': True, 'endpoint': WORKER}, 'Cloudflare gallery not explicitly enabled'
-    photo = expected(model)
+    photo = expected(model, album_override)
     try:
         # Test the actual live GitHub Pages HTML/owner index using the candidate
         # gallery transport and its explicit opt-in. Never alter the live site.
@@ -157,6 +161,17 @@ def exercise(browser, model, mobile, deployed=False):
         assert target, 'actual gallery missing verified owner album/photo'
         card = page.locator('#albumgrid .album[data-id="' + target['album'] + '"]')
         card.scroll_into_view_if_needed(timeout=35000)
+        if deployed and album_override:
+            cover = card.locator('img').first
+            page.wait_for_function("""id => {
+              const image=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');
+              return !!image && image.complete && image.naturalWidth>=160;
+            }""", arg=target['album'], timeout=45000)
+            cover_host = cover.evaluate("""im=>{
+              try{return new URL(im.currentSrc||im.src,location.href).hostname}catch{return ''}
+            }""")
+            assert cover_host in ('koith.github.io', 'gallery-archive-free.gallery-9f7d03138f3f.workers.dev'), (
+                'COVER_NOT_SELF_HOSTED', model, target['album'], cover_host)
         card.click(timeout=30000)
         page.wait_for_function('''a => !document.querySelector('#detail').hidden
           && document.querySelector('#detailphotos .photo[data-i="' + a.index + '"]')''',
@@ -176,6 +191,14 @@ def exercise(browser, model, mobile, deployed=False):
                 'lightbox_width': page.locator('#full').evaluate('im=>im.naturalWidth'),
                 'page_errors': errors[:3]}, sort_keys=True), flush=True)
         assert not errors, ('JavaScript runtime errors', errors[:3])
+        if deployed and album_override:
+            page.locator('#close').click(timeout=10000)
+            page.reload(wait_until='domcontentloaded', timeout=45000)
+            page.wait_for_function("""id => {
+              const album=document.querySelector('#albumgrid .album[data-id="'+id+'"]');
+              return !!album && !!album.querySelector('img');
+            }""", arg=target['album'], timeout=45000)
+            print('CLOUDFLARE_DEPLOYED_ALBUM_RELOAD_PASS', model, album_override, flush=True)
     finally:
         ctx.close()
 
@@ -185,13 +208,18 @@ def main():
     parser.add_argument('--browser', choices=['chromium', 'webkit'], required=True)
     parser.add_argument('--deployed', action='store_true',
                         help='no page interception: require real public Pages code and photos')
+    parser.add_argument('--all-p0', action='store_true',
+                        help='verify six priority real owner albums after complete remote replica')
     args = parser.parse_args()
     with sync_playwright() as p:
         engine = getattr(p, args.browser)
         browser = engine.launch(headless=True)
         try:
             for model in ('mimmi', 'yui'):
-                exercise(browser, model, mobile=args.browser == 'webkit', deployed=args.deployed)
+                selections = P0_TARGETS[model] if args.all_p0 else [None]
+                for album in selections:
+                    exercise(browser, model, mobile=args.browser == 'webkit',
+                             deployed=args.deployed, album_override=album)
         finally:
             browser.close()
 
