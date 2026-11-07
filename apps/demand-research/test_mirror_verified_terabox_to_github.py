@@ -98,3 +98,27 @@ def test_skip_weaker_snapshot_when_stronger_github_archive_exists(prepared,monke
     monkeypatch.setattr(gh,"upload_release",no_upload)
     result=mirror.mirror(source_run="123456789",root=root)
     assert result["state"]=="ALREADY_MORE_COMPLETE"
+
+
+def test_published_but_cdn_delayed_existing_mirror_is_not_uploaded_twice(
+        prepared,monkeypatch):
+    root,_name,raw,_hash=prepared
+    key=b"t"*32
+    source=mirror.load_source(root,"123456789").bundle
+    wrapped=gh.encrypt(raw,key)
+    monkeypatch.setenv("GITHUB_TOKEN","test-job-token-never-networked")
+    monkeypatch.setattr(gh,"_oidc_key",lambda:key)
+    monkeypatch.setattr(gh,"_download_tag",lambda tag,missing_ok=False:None)
+    visited=[]
+    monkeypatch.setattr(gh,"_json",lambda url,token:
+                        (visited.append((url,token)) or {"tag_name":
+                         "intersection-github-archive-123456789-a1"}))
+    monkeypatch.setattr(gh,"readback_uploaded_release",
+                        lambda tag,token:wrapped)
+    monkeypatch.setattr(gh,"upload_release",
+                        lambda *args,**kwargs:pytest.fail(
+                            "never recreate an existing immutable release"))
+    result=mirror.mirror(source_run="123456789",root=root)
+    assert result["state"]=="ALREADY_SHA_VERIFIED"
+    assert result["posts"]==source.post_count
+    assert len(visited)==1

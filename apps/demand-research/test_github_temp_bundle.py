@@ -130,3 +130,54 @@ def test_unrelated_atom_tag_never_enters_selected_account_list(monkeypatch):
         def read(self,cap):return xml
     monkeypatch.setattr(gh,"urlopen",lambda *args,**kwargs:FakeResponse())
     assert list(gh.atom_tags())==[]
+
+
+def test_new_release_waits_for_public_cdn_without_fake_success(monkeypatch):
+    from urllib.error import HTTPError
+    tag="intersection-github-archive-42360905305-a1"
+    payload=b"ciphertext-test-only-"*16
+    release={"tag_name":tag,"draft":False,"prerelease":True,
+             "assets":[{"name":"account.enc","id":123456,
+                        "size":len(payload),
+                        "browser_download_url":
+                          "https://github.com/koith/browser-app-lab/releases/download/"
+                          +tag+"/account.enc",
+                        "digest":"sha256:"+hashlib.sha256(payload).hexdigest()}]}
+    monkeypatch.setattr(gh,"_json",lambda url,token:release)
+    invoked=[]
+    def delayed_public_readback(_asset):
+        invoked.append(1)
+        if len(invoked)<3:
+            raise HTTPError("https://github.com/",404,"publishing",{},None)
+        return payload
+    monkeypatch.setattr(gh,"_download",delayed_public_readback)
+    monkeypatch.setattr(gh.time,"sleep",lambda _:None)
+    assert gh.readback_uploaded_release(tag,"nonprivate-fixture-token",attempts=3)==payload
+    assert len(invoked)==3
+
+
+def test_release_readback_rejects_403_or_wrong_asset_without_retry(monkeypatch):
+    from urllib.error import HTTPError
+    tag="intersection-github-archive-42360905305-a1"
+    monkeypatch.setattr(gh,"_json",lambda url,token:{
+        "tag_name":tag,"draft":False,"prerelease":True,
+        "assets":[{"name":"account.enc","id":123456,"size":90,
+                   "browser_download_url":
+                       "https://github.com/koith/browser-app-lab/releases/download/"
+                       +tag+"/account.enc"}]})
+    calls=[]
+    def denied(_asset):
+        calls.append(1)
+        raise HTTPError("https://github.com/",403,"forbidden",{},None)
+    monkeypatch.setattr(gh,"_download",denied)
+    monkeypatch.setattr(gh.time,"sleep",lambda _:pytest.fail("403 must not retry"))
+    with pytest.raises(RuntimeError,match="readback denied"):
+        gh.readback_uploaded_release(tag,"nonprivate-fixture-token")
+    assert len(calls)==1
+    monkeypatch.setattr(gh,"_json",lambda url,token:{
+        "tag_name":tag,"draft":False,"prerelease":True,
+        "assets":[{"name":"account.enc","id":123456,"size":90,
+                   "browser_download_url":"https://evil.invalid/asset.enc"}]})
+    with pytest.raises(BundleInvalid):
+        gh.readback_uploaded_release(tag,"nonprivate-fixture-token")
+    assert len(calls)==1
