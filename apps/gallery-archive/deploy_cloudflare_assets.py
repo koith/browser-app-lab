@@ -126,6 +126,34 @@ def existing_catalogs(mime, raw):
     return found
 
 
+def classify_worker_http_error(error, phase):
+    """Log only allowlisted response diagnostics from our own Worker."""
+    mime = (error.headers.get('Content-Type', '') or '').lower()
+    fmt = 'JSON' if 'json' in mime else 'HTML' if 'html' in mime else 'OTHER'
+    label = 'UNKNOWN'
+    try:
+        data = error.read(2048)
+        if fmt == 'JSON':
+            parsed = json.loads(data)
+            candidate = parsed.get('error') if isinstance(parsed, dict) else None
+            if candidate in ('NOT_CONFIGURED', 'PHOTO_NOT_MIRRORED', 'PHOTO_SHA_REQUIRED',
+                             'PRIVATE_STORAGE_UNAVAILABLE', 'INVALID_PHOTO', 'ORIGIN_DENIED',
+                             'STORAGE_MISMATCH', 'SIGNATURE_INVALID', 'NOT_FOUND',
+                             'BODY_TOO_LARGE', 'UNAUTHORIZED'):
+                label = candidate
+        else:
+            lower = data.lower()
+            if b'error code: 1020' in lower:
+                label = 'CLOUDFLARE_ERROR_1020'
+            elif b'error code: 1042' in lower:
+                label = 'CLOUDFLARE_ERROR_1042'
+    except (ValueError, UnicodeError, OSError):
+        pass
+    print('CF_WORKER_HTTP_REJECTION', 'phase', phase, 'http', error.code,
+          'content', fmt, 'cf_challenge', error.headers.get('cf-mitigated') == 'challenge',
+          'known_error', label, flush=True)
+
+
 def media_bytes(base, model, album, photo):
     opener = build_opener(NoRedirect())
     sign = Request(base + '/api/v1/sign', method='POST',
@@ -137,7 +165,7 @@ def media_bytes(base, model, album, photo):
         with opener.open(sign, timeout=35) as response:
             data = json.loads(response.read(4097))
     except HTTPError as error:
-        print('CF_REMOTE_ORIGINAL_SIGN_HTTP', error.code, flush=True)
+        classify_worker_http_error(error, 'sign')
         raise
     except (URLError, TimeoutError, OSError) as error:
         print('CF_REMOTE_ORIGINAL_SIGN_TRANSPORT', type(error).__name__, flush=True)
@@ -151,7 +179,7 @@ def media_bytes(base, model, album, photo):
         with opener.open(Request(data['url'], headers={'User-Agent': WORKER_VERIFY_UA}), timeout=45) as response:
             raw = response.read(8_000_001)
     except HTTPError as error:
-        print('CF_REMOTE_ORIGINAL_MEDIA_HTTP', error.code, flush=True)
+        classify_worker_http_error(error, 'media')
         raise
     checked(photo, raw)
     return raw
@@ -305,7 +333,7 @@ def main(args):
                   'recognized_gallery_release', isinstance(result, dict)
                   and result.get('transport') == 'cloudflare-bound-assets', flush=True)
         except HTTPError as error:
-            print('CF_EXISTING_WORKER_HEALTH', 'HTTP_' + str(error.code), flush=True)
+            classify_worker_http_error(error, 'existing_health')
         except (URLError, TimeoutError, OSError) as error:
             print('CF_EXISTING_WORKER_HEALTH', 'TRANSPORT_' + type(error).__name__, flush=True)
         except (ValueError, TypeError) as error:
