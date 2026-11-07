@@ -1,0 +1,56 @@
+name: 4LEAF R17 original 17-slot CHR action source and outcome provenance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tools/build-native-card-action-module.py'
+      - 'apps/4leaf/rog/native-card-action-sequences.js'
+      - 'apps/4leaf/rog/tests/r17-native-remaining-slots-source-contract.cjs'
+      - 'apps/4leaf/rog/tests/r15-native-duel-effect-live.cjs'
+      - '.github/workflows/rog-r17-native-extra-slot.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  r17-source-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check exact original 97 CHR source bodies / 17 animation slots
+        run: |
+          python3 apps/4leaf/rog/tools/build-native-card-action-module.py --check
+          node --check apps/4leaf/rog/native-card-action-sequences.js
+          node apps/4leaf/rog/tests/r17-native-remaining-slots-source-contract.cjs
+  real-duel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real native browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install '${{ matrix.engine }}' --with-deps
+      - name: Serve exact restored game assets
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/r17-http.log 2>&1 &
+          for n in $(seq 1 40); do
+            curl -fsS http://127.0.0.1:8765/index.html >/dev/null && exit 0
+            sleep .5
+          done
+          cat /tmp/r17-http.log
+          exit 1
+      - name: Real duel -> original 13/14 outcome source slots (role inferred)
+        env:
+          FOURLEAF_BROWSER: '${{ matrix.engine }}'
+        run: node apps/4leaf/rog/tests/r15-native-duel-effect-live.cjs
