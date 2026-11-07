@@ -3,6 +3,7 @@ import hashlib
 import subprocess
 import pytest
 import backup_queue
+from demand_archive import QueueStorageDenied
 
 
 class FakeCloud:
@@ -127,9 +128,82 @@ def test_cloud_io_trace_classifies_failures_without_argv_or_exception(capsys, ca
 
     root = backup_queue.CloudArchive(runner=fail)
     root.trace_queue = True
-    with pytest.raises(RuntimeError):
+    error_type = QueueStorageDenied if category == "authorization" else RuntimeError
+    with pytest.raises(error_type):
         root.command(["cat", private, "--terabox-domain", "https://nephobox.com"])
     output = capsys.readouterr().out
     assert "operation=cat endpoint=alternate outcome=" + category + " elapsed_ms=" in output
     for sensitive in ("NDUS", "secret-cookie", "1234567890", "archive:", "nephobox.com"):
         assert sensitive not in output
+
+
+def test_provider_denial_records_only_numeric_diagnostics(monkeypatch, capsys):
+    stderr = br'HTTP error 403 (403 Forbidden) returned body: "{\"error_code\":31326,\"error_msg\":\"private-server-message cookie=secret-value\"}"'
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k:
+        subprocess.CompletedProcess(a[0], 1, b"", stderr))
+    root = backup_queue.CloudArchive()
+    root.trace_queue = True
+    with pytest.raises(QueueStorageDenied) as raised:
+        root.command(["cat", "archive:DemandResearch/account-request-1234567890.json"])
+    output = capsys.readouterr().out
+    assert "http_status=403" in output
+    assert "provider_code=31326" in output
+    assert "outcome=authorization" in output
+    for sensitive in ("private-server-message", "secret-value", "cookie=", "1234567890", "archive:"):
+        assert sensitive not in output + str(raised.value)
+
+
+def test_first_readback_denial_stops_upload_and_endpoint_retries(monkeypatch, capsys):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE", "1")
+    calls = []
+    uploaded = False
+
+    def run(args, **kwargs):
+        nonlocal uploaded
+        calls.append((args[0], "alternate" if "--terabox-domain" in args else "primary"))
+        if args[0] == "cat":
+            if not uploaded:
+                return None
+            raise RuntimeError("private cloud cat failed (authorization)")
+        assert args[0] == "copyto"
+        uploaded = True
+        return b""
+
+    root = backup_queue.CloudArchive(runner=run)
+    with pytest.raises(QueueStorageDenied):
+        backup_queue.create_request("bluesky", "public-test.bsky.social", root)
+    assert calls == [("cat", "primary"), ("cat", "alternate"),
+                     ("copyto", "primary"), ("cat", "primary")]
+    assert uploaded
+    output = capsys.readouterr().out
+    assert "stage=write_immutable outcome=error" in output
+    assert "stage=read_verified outcome=ok" not in output
+
+
+def test_signed_url_words_do_not_turn_network_failure_into_access_denial(monkeypatch, capsys):
+    stderr = (b'Failed to open: Get "https://download.example/file?cookie=secret403value": '
+              b'connection reset by peer')
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k:
+        subprocess.CompletedProcess(a[0], 1, b"", stderr))
+    root = backup_queue.CloudArchive()
+    root.trace_queue = True
+    with pytest.raises(RuntimeError, match="network_timeout"):
+        root.command(["cat", "archive:DemandResearch/account-request-1234567890.json"])
+    output = capsys.readouterr().out
+    assert "outcome=network_timeout" in output
+    assert "http_status=unknown" in output
+    assert "secret403value" not in output and "download.example" not in output
+
+
+def test_malformed_cookie_header_is_distinct_from_provider_denial(monkeypatch, capsys):
+    stderr = b'net/http: invalid header field value for "Cookie": "secret-value"'
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k:
+        subprocess.CompletedProcess(a[0], 1, b"", stderr))
+    root = backup_queue.CloudArchive()
+    root.trace_queue = True
+    with pytest.raises(RuntimeError, match="invalid_header"):
+        root.command(["cat", "archive:DemandResearch/account-request-1234567890.json"])
+    output = capsys.readouterr().out
+    assert "outcome=invalid_header" in output
+    assert "http_status=unknown" in output
+    assert "secret-value" not in output and "Cookie" not in output

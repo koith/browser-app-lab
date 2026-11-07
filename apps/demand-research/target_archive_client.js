@@ -370,7 +370,11 @@
       });
       if(!response.ok){
         if(response.status===429)throw new Error("짧은 시간에 여러 번 요청했습니다. 잠시 후 재시도하세요.");
-        if(response.status===503)throw new Error("비공개 아카이브 서버 실행 권한이 설정되지 않았습니다.");
+        if(response.status===503){
+          const failure=await response.json().catch(()=>({}));
+          if(failure.code==="storage_read_denied")throw new Error("TeraBox가 백업 요청의 원격 읽기를 거부했습니다. 접수·무결성을 확인하지 못했습니다. 저장소 인증과 다운로드 권한을 확인해야 합니다.");
+          throw new Error("백업 서버가 준비되지 않았습니다. 잠시 후 다시 시도하세요.");
+        }
         throw new Error("백업 작업 요청 실패 (HTTP "+response.status+")");
       }
       const result=await response.json();
