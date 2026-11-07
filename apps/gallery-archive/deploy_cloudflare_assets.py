@@ -388,7 +388,8 @@ def main(args):
     # instead of hiding all HTTP/DNS/JSON failures behind one ValueError.
     for attempt in range(45):
         try:
-            with build_opener(NoRedirect()).open(base + '/api/v1/health', timeout=8) as response:
+            with build_opener(NoRedirect()).open(Request(base + '/api/v1/health',
+                    headers={'User-Agent': WORKER_VERIFY_UA}), timeout=8) as response:
                 status, content_type = response.status, response.headers.get('Content-Type', '')
                 raw = response.read(4096)
             if 'application/json' not in content_type.lower():
