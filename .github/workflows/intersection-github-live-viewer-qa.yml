@@ -5,6 +5,15 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/intersection-github-live-viewer-qa.yml"
+      # Revalidate the actual encrypted ZIP and media on archive changes.
+      - ".github/workflows/demand-fast-capture.yml"
+      - ".github/workflows/demand-replay-encrypted.yml"
+      - ".github/workflows/intersection-target-account-archive.yml"
+      - ".github/workflows/intersection-target-account-bundle.yml"
+      - "apps/demand-research/github_temp_bundle.py"
+      - "apps/demand-research/target_account_viewer.py"
+      - "apps/demand-research/target_archive_api.py"
+      - "apps/demand-research/gateway.py"
 
 permissions:
   contents: read
