@@ -174,6 +174,11 @@
           saveReceipt(null);currentRun=null;
           await loadLibrary();
           return;
+        case "NEEDS_RETRY":
+          showJob("이전 백업 요청의 대기 기록이 만료됐습니다. 보관함을 확인하고, 저장된 자료가 없다면 다시 백업해 주세요.","failed");
+          saveReceipt(null);currentRun=null;
+          await loadLibrary();
+          return;
         case "FAILED":
           showJob("백업 실패 · 기존 보관 자료는 유지됩니다. 다시 실행할 수 있습니다.","failed");
           saveReceipt(null);currentRun=null;
