@@ -38,6 +38,9 @@ class CF:
                    'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'/secrets)'}
         if method not in allowed or not re.fullmatch(allowed[method], tail):
             raise ValueError('UNAPPROVED_CF_CONTROL_CALL')
+        # Only fixed endpoint labels; never account IDs, tokens, body or names.
+        phase = 'CF_' + method + '_' + tail.replace(NAME, 'archive').replace('/', '_').upper()
+        print('CF_CONTROL_PHASE', phase, flush=True)
         payload = json.dumps(body).encode() if body is not None else None
         req = Request(API + '/accounts/' + self.account + '/' + tail, method=method, data=payload,
                       headers={'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'})
@@ -46,7 +49,24 @@ class CF:
                 data = response.read(20_000_001)
                 mime = response.headers.get('Content-Type', '')
         except HTTPError as error:
-            raise ProbeError('CF_CONTROL_HTTP', error.code) from None
+            codes, category = [], 'PROVIDER_REJECTED'
+            try:
+                detail = json.loads(error.read(8192))
+                errors = detail.get('errors', [])
+                codes = [e['code'] for e in errors if isinstance(e, dict)
+                         and type(e.get('code')) is int and 0 < e['code'] < 1_000_000]
+                messages = ' '.join(e.get('message', '') for e in errors
+                                    if isinstance(e, dict) and isinstance(e.get('message'), str)).lower()
+                if 'email' in messages and ('verif' in messages or 'confirm' in messages):
+                    category = 'EMAIL_VERIFICATION_REQUIRED'
+                elif 'permission' in messages or 'authentic' in messages or 'unauthoriz' in messages:
+                    category = 'TOKEN_PERMISSION_OR_AUTH_REQUIRED'
+                elif 'terms' in messages or 'onboard' in messages:
+                    category = 'ACCOUNT_ONBOARDING_REQUIRED'
+            except (ValueError, TypeError, OSError):
+                pass
+            print('CF_CONTROL_DENIAL', phase, 'http', error.code, 'codes', codes, 'category', category, flush=True)
+            raise ProbeError(phase, error.code) from None
         except (URLError, TimeoutError, OSError):
             raise ProbeError('CF_CONTROL_TRANSPORT') from None
         if len(data) > 20_000_000:

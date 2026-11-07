@@ -1,14 +1,17 @@
 from email.message import EmailMessage
+from contextlib import redirect_stdout
 import hashlib
 import io
 import json
 from pathlib import Path
 import tempfile
 import unittest
+from urllib.error import HTTPError
 from unittest.mock import patch
 from PIL import Image
 from cloudflare_assets_snapshot import Snapshot, KIND, checked
 from deploy_cloudflare_assets import existing_catalogs, free_account_and_existing, write_deploy_sources, CF
+from check_cloudflare_connection import ProbeError
 
 ROOT = Path(__file__).resolve().parents[2]
 RAW = (ROOT / 'apps/yui-gallery/stored-albums/v04/001_bd8318cfe6e0.jpg').read_bytes()
@@ -87,6 +90,22 @@ class SnapshotChecks(unittest.TestCase):
         cf = CF('dummy-token', 'a' * 32)
         for path in ('subscriptions', '../outside', 'r2/buckets'):
             with self.assertRaises(ValueError): cf.call(path, 'PUT', {})
+
+    def test_denial_reports_exact_operation_without_upstream_secret_or_account_details(self):
+        secret = 'PRIVATE_DO_NOT_PRINT_TOKEN'
+        cf = CF(secret, 'a' * 32)
+        raw = json.dumps({'errors': [{'code': 10000, 'message': 'Authentication error ' + secret}]}).encode()
+        error = HTTPError('https://private.example/' + secret, 403, secret, {}, io.BytesIO(raw))
+        output = io.StringIO()
+        with patch.object(cf.opener, 'open', side_effect=error), redirect_stdout(output):
+            with self.assertRaises(ProbeError) as caught:
+                cf.call('workers/subdomain', 'PUT', {'subdomain': 'private-account-subdomain'})
+        text = output.getvalue()
+        self.assertEqual(caught.exception.phase, 'CF_PUT_WORKERS_SUBDOMAIN')
+        self.assertIn('10000', text)
+        self.assertIn('TOKEN_PERMISSION_OR_AUTH_REQUIRED', text)
+        for private in (secret, 'a' * 32, 'private-account-subdomain'):
+            self.assertNotIn(private, text)
 
 
 if __name__ == '__main__': unittest.main()
