@@ -1,0 +1,47 @@
+name: Gallery Read-Only Independent Storage Readiness
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/check_independent_store_readiness.py'
+      - '.github/workflows/gallery-independent-store-readiness.yml'
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/check_independent_store_readiness.py'
+      - 'apps/gallery-archive/test_independent_store_readiness.py'
+      - '.github/workflows/gallery-independent-store-readiness.yml'
+permissions:
+  contents: read
+jobs:
+  no-secret-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - run: python apps/gallery-archive/test_independent_store_readiness.py
+      - run: python apps/gallery-archive/test_private_mirror_free_policy.py
+  observe-existing-only:
+    needs: no-secret-contract
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      OWNER_REPLICA_BUCKET: ${{ secrets.GALLERY_MIRROR_PRIVATE_BUCKET }}
+      OWNER_DURABLE_REMOTE: "ownerreplica:${{ secrets.GALLERY_MIRROR_PRIVATE_BUCKET }}"
+      OWNER_REPLICA_PROVIDER: ${{ secrets.GALLERY_MIRROR_PROVIDER }}
+      RCLONE_CONFIG_OWNERREPLICA_TYPE: s3
+      RCLONE_CONFIG_OWNERREPLICA_PROVIDER: ${{ secrets.GALLERY_MIRROR_RCLONE_PROVIDER }}
+      RCLONE_CONFIG_OWNERREPLICA_ACCESS_KEY_ID: ${{ secrets.GALLERY_MIRROR_ACCESS_KEY_ID }}
+      RCLONE_CONFIG_OWNERREPLICA_SECRET_ACCESS_KEY: ${{ secrets.GALLERY_MIRROR_SECRET_ACCESS_KEY }}
+      RCLONE_CONFIG_OWNERREPLICA_ENDPOINT: ${{ secrets.GALLERY_MIRROR_S3_ENDPOINT }}
+      RCLONE_CONFIG_OWNERREPLICA_REGION: ${{ secrets.GALLERY_MIRROR_REGION }}
+      OWNER_REPLICA_CF_ACCOUNT_ID: ${{ secrets.GALLERY_MIRROR_CF_ACCOUNT_ID }}
+      OWNER_REPLICA_CF_AUDIT_TOKEN: ${{ secrets.GALLERY_MIRROR_CF_AUDIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'boto3==1.40.70'
+      - name: Observe existing config and private bucket without any creation or upload
+        run: python apps/gallery-archive/check_independent_store_readiness.py
