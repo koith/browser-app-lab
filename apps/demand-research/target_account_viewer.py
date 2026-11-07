@@ -17,7 +17,7 @@ import github_temp_bundle
 from target_account_archive import REGISTRY_RE, archive_key, account_cloud
 from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
 from verified_bundle_reader import (
-    BundleAccountCloud, available_bundles, latest_account_bundle,
+    BundleAccountCloud, available_bundles, latest_account_bundle, BundleInvalid,
 )
 
 HEX40=re.compile(r"^[a-f0-9]{40}$")
