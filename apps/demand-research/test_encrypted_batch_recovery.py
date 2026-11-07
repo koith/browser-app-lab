@@ -1,5 +1,6 @@
 """Credential-free recovery batch tests: original ciphertext and cloud SHA."""
 from io import BytesIO
+from types import SimpleNamespace
 import hashlib
 import json
 import zipfile
@@ -264,7 +265,7 @@ def test_replay_streams_artifacts_and_reports_unprocessed_backlog(monkeypatch):
     monkeypatch.setattr(replay,"_gh",
                         lambda args,**kwargs:calls.append(args) or b"")
     ticks=iter([0,300,600,900])
-    monkeypatch.setattr(replay.time,"monotonic",lambda:next(ticks))
+    monkeypatch.setattr(replay,"time",SimpleNamespace(monotonic=lambda:next(ticks)))
     result=replay.replay(cloud=FakeCloud())
     assert len(calls)==2  # Third archived source remains queued, not lost.
     assert result["deferred_artifacts"]==1
