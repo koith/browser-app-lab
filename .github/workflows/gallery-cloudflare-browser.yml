@@ -1,0 +1,31 @@
+name: Gallery Cloudflare Real Browser Candidate Integration
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_cloudflare_pages_browser.py'
+      - 'apps/mimmi-gallery/owner-media.js'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/mimmi-gallery/cloudflare-gateway.json'
+      - 'apps/yui-gallery/cloudflare-gateway.json'
+      - '.github/workflows/gallery-cloudflare-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-browser:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install exact browser runtime and image validators
+        run: |
+          python -m pip install --quiet 'playwright==1.62.0' 'Pillow==11.3.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Actual Mimmi + Yui Pages browser lightbox + Cloudflare SHA original
+        run: python apps/gallery-archive/qa_cloudflare_pages_browser.py --browser '${{ matrix.browser }}'
