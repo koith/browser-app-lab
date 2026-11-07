@@ -394,15 +394,25 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     if os.environ.get("DEMAND_CAPTURE_PUBLIC_ALLOWED", "") != "1":
         raise RuntimeError("public capture needs explicit source/retention authorization")
     cloud = cloud or CloudArchive()
-    cloud_available=True
-    try:
-        cloud.preflight()
-    except RuntimeError:
-        if not fast_mode or spool is None:
-            raise
-        # The archive is unreachable, not necessarily the public SNS source.
-        # Continue only with authenticated, short-lived encrypted originals.
-        cloud_available=False
+    # A slow per-post TeraBox upload can consume 12+ minutes and prevent
+    # sampling the next public SNS post before it disappears. In the
+    # opt-in five-minute first-sighting mode, capture authenticated encrypted
+    # originals FIRST, then leave remote SHA-verified recovery to the existing
+    # workflow_run replay. Never label an Actions artifact as durable storage.
+    defer_remote=(fast_mode and
+                  os.getenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE")=="1")
+    if defer_remote and spool is None:
+        raise RuntimeError("encrypted first-sighting buffer unavailable")
+    cloud_available=not defer_remote
+    if not defer_remote:
+        try:
+            cloud.preflight()
+        except RuntimeError:
+            if not fast_mode or spool is None:
+                raise
+            # The archive is unreachable, not necessarily the public SNS.
+            # Continue with short-lived AES-GCM originals pending recovery.
+            cloud_available=False
     now = int(clock())
     run_id = run_id or os.getenv("GITHUB_RUN_ID", "")
     if not re.fullmatch(r"[0-9]{6,30}", str(run_id)):
@@ -425,9 +435,10 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     origin(term,end-mins*60,end)
             ) for origin in original_sources)
     saved = partial = duplicates = fetched = failures = buffered = 0
-    storage_failures=0 if cloud_available else 1
+    storage_failures=0 if cloud_available or defer_remote else 1
     storage_error_kinds=(
-        {} if cloud_available else {"preflight:private_cloud_unavailable":1})
+        {} if cloud_available or defer_remote else
+        {"preflight:private_cloud_unavailable":1})
     capture_interrupted = False
     early_recovered = invalid_early_captures = failed_early_recoveries = recovered = 0
     if fast_mode:
@@ -556,7 +567,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         spool.save(pid,early,post,blobs)
                         buffered+=1
                         storage_failures+=1
-                        label="cloud_unreachable:encrypted_recovery_pending"
+                        label=("source_first:encrypted_recovery_pending"
+                               if defer_remote else
+                               "cloud_unreachable:encrypted_recovery_pending")
                         storage_error_kinds[label]=storage_error_kinds.get(label,0)+1
                         partial += not post["archive_complete"]
                         continue
@@ -680,7 +693,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         "encrypted_recovery_files":(
             len(list(spool.directory.glob("*.enc"))) if spool is not None else 0),
         "encrypted_only_originals":buffered,
-        "private_cloud_circuit_open":not cloud_available
+        "private_cloud_circuit_open":not cloud_available and not defer_remote,
+        "source_first_capture_mode":defer_remote
     },sort_keys=True),flush=True)
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
@@ -720,9 +734,14 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "encrypted_recovery_files":(
                   len(list(spool.directory.glob("*.enc"))) if spool is not None else 0),
               "encrypted_only_originals":buffered,
-              "private_cloud_circuit_open":not cloud_available,
+              "private_cloud_circuit_open":not cloud_available and not defer_remote,
+        "source_first_capture_mode":defer_remote,
               "catalog": catalog,
-              "operational_status": ("DEGRADED_STORAGE" if storage_failures else
+              "operational_status": (
+                "ENCRYPTED_CAPTURE_PENDING_REMOTE_VERIFICATION"
+                if defer_remote and buffered else
+                "NO_NEW_PUBLIC_ORIGINALS" if defer_remote else
+                "DEGRADED_STORAGE" if storage_failures else
                 "CAPTURE_TIME_BUDGET" if soft_time_budget_exhausted else
                 "DEGRADED_MEDIA" if partial or failed_early_recoveries else
                 "JOURNAL_ONLY" if fast_mode else
@@ -738,4 +757,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
 
 
 if __name__ == "__main__":
-    run(fast_mode=os.environ.get("DEMAND_FAST_CAPTURE_MODE")=="1")
+    # Source-first is deliberately shorter than the five-minute poll interval.
+    # The following SHA-verified remote recovery is a separate operation.
+    run(fast_mode=os.environ.get("DEMAND_FAST_CAPTURE_MODE")=="1",
+        max_fast_seconds=(240 if os.environ.get(
+            "DEMAND_FAST_CAPTURE_DEFER_REMOTE")=="1" else
+            FAST_SOFT_BUDGET_SECONDS))
