@@ -62,6 +62,20 @@ async def verify(engine):
                 raise AssertionError("WORKER_HEALTH_SCHEMA_MISMATCH")
             print("GALLERY_REAL_WORKER_BROWSER_HEALTH", engine,
                   "http", status, "expected_transport", True, flush=True)
+            # Preview the PR's real browser-facing scripts over the production
+            # Pages origin without deploying unverified code to users.
+            async def preview_script(route):
+                url = route.request.url
+                if url.endswith("/owner-media.js"):
+                    model_name = "mimmi" if "/mimmi-gallery/" in url else "yui"
+                    path = ROOT / "apps" / (model_name + "-gallery") / "owner-media.js"
+                else:
+                    path = ROOT / "apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs"
+                await route.fulfill(body=path.read_bytes(), content_type="text/javascript")
+            await page.route("https://koith.github.io/browser-app-lab/apps/*-gallery/owner-media.js",
+                             preview_script)
+            await page.route("https://koith.github.io/browser-app-lab/apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs",
+                             preview_script)
             for model in ("mimmi", "yui"):
                 photo = sample(model)
                 # Browser MUST originate on real GitHub Pages. This executes
@@ -103,6 +117,27 @@ async def verify(engine):
                     raise AssertionError("REAL_REMOTE_ORIGINAL_NOT_VERIFIED_" + model)
                 print("GALLERY_REMOTE_PHOTO_BROWSER_PASS", engine, model,
                       "sha_bytes_pixels_verified", True, flush=True)
+                # Test the actual MimmiPrivate/YuiPrivate.asset public bridge,
+                # not a hand-written surrogate POST request.
+                client = await page.evaluate("""async ({base, photo}) => {
+                  const gateway=photo.model==='mimmi'?window.MimmiPrivate:window.YuiPrivate;
+                  if(!gateway||typeof gateway.asset!=='function')return {phase:'no_gallery_bridge'};
+                  let href;
+                  try {href=await gateway.asset({...photo,ownerAlbum:photo.album},'original')}
+                  catch(e){return {phase:'gallery_asset_rejected',kind:String(e?.message).slice(0,90)}}
+                  const url=new URL(href);
+                  if(url.origin!==base)return {phase:'legacy_renderer_selected'};
+                  const image=new Image();image.src=url.href;
+                  try {await image.decode()}catch{return {phase:'client_image_decode_failed'}}
+                  return {phase:'pass',width:image.naturalWidth,height:image.naturalHeight};
+                }""", {"base": BASE, "photo": photo})
+                if (client.get("phase") != "pass" or client.get("width") != photo["width"]
+                        or client.get("height") != photo["height"]):
+                    print("GALLERY_PR_BRIDGE_CLIENT_BROWSER_FAIL", engine, model,
+                          "phase", client.get("phase"), flush=True)
+                    raise AssertionError("PR_PAGES_CLIENT_NOT_VERIFIED_" + model)
+                print("GALLERY_PR_BRIDGE_CLIENT_BROWSER_PASS", engine, model,
+                      "real_image_decoded", True, flush=True)
         finally:
             await browser.close()
 
