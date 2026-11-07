@@ -101,7 +101,9 @@ def _make_bundle(tag, plain):
         raise BundleInvalid("Temporary backup has no unique account")
     digest = hashlib.sha256(plain).hexdigest()
     name = "account-bundle-" + accounts[0][:16] + "-" + match.group(1) + "-" + digest[:16] + ".zip"
-    return VerifiedBundle(name, plain)
+    bundle = VerifiedBundle(name, plain)
+    bundle.temporary = True
+    return bundle
 
 
 def _asset(release):
