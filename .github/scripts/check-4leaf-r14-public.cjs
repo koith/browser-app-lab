@@ -22,7 +22,33 @@ async function waitForPublishedVersion(){
    const json=await res.json();observed=json.version+' / '+json.pwaCache;
    if(json.version===expected&&json.pwaCache===cache){
     const sw=await fetch(base+'sw.js?qa='+Date.now(),{cache:'no-store'});
-    if(sw.ok&&(await sw.text()).includes("const REVISION='"+cache+"'"))return json;
+
+    if(sw.ok&&(await sw.text()).includes("const REVISION='"+cache+"'")){
+     // Pages can expose the new version before the entire original CHR
+     // artwork has propagated. Verify executable AND original PNG SHA bytes
+     // instead of accepting a version label as deployment completion.
+     const sourceRoot=path.resolve(__dirname,'../../apps/4leaf/rog');
+     const attested=[
+      'native-card-action-sequences.js',
+      'original/OBS/referenced/obs-1026-002.png',
+      'original/OBS/referenced/obs-1029-002.png'
+     ];
+     let ready=true;
+     for(const relative of attested){
+      const expectedBytes=fs.readFileSync(path.join(sourceRoot,relative));
+      const live=await fetch(base+relative+'?asset_ready='+Date.now(),{cache:'no-store'});
+      if(!live.ok){observed='original asset HTTP '+live.status+' '+relative;ready=false;break}
+      const bytes=Buffer.from(await live.arrayBuffer());
+      if(relative.endsWith('.png')&&bytes.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'){
+       observed='non-PNG actor asset '+relative;ready=false;break;
+      }
+      if(crypto.createHash('sha256').update(bytes).digest('hex')!==
+         crypto.createHash('sha256').update(expectedBytes).digest('hex')){
+       observed='original asset SHA mismatch '+relative;ready=false;break;
+      }
+     }
+     if(ready){console.log('PUBLIC_EXACT_ACTOR_JS_AND_PNG_READY',json.version);return json}
+    }
    }
   }catch(e){observed=String(e)}
   console.log('PUBLIC_RELEASE_NOT_READY',observed);
@@ -130,6 +156,30 @@ async function waitForPublishedVersion(){
   await page.waitForFunction(()=>document.querySelector('#battle-visual')?.dataset.battleDice==='rolling',null,{timeout:15000});
   await page.waitForFunction(()=>document.querySelector('#battle-visual')?.dataset.battleDice==='landed',null,{timeout:20000});
   await page.waitForFunction(()=>document.querySelector('#battle-visual')?.dataset.battlePhase==='outcome',null,{timeout:18000});
+
+  // R17 switches to the source-native outcome pose when battlePhase changes;
+  // the new frame's PNG decode is asynchronous even when the 3D/duel state
+  // has advanced. Observe actual decoded ORIGINAL pixels, not a mock frame.
+  // A missing/failed CDN image must still fail; we do not fabricate frames.
+  await page.waitForFunction(()=>{
+   const stage=document.querySelector('#battle-visual');
+   if(!stage||stage.dataset.battlePhase!=='outcome')return false;
+   const actors=[...stage.querySelectorAll('.leaf-battle-chessman')];
+   return actors.length===2&&actors.every(a=>
+    a.dataset.actorRig==='original-obs-sprite'&&
+    (a.querySelector('img.leaf-chess-original-obs')?.naturalWidth||0)>0);
+  },null,{timeout:25000}).catch(async e=>{
+   const diagnostic=await page.evaluate(()=>{
+    const stage=document.querySelector('#battle-visual');
+    return [...(stage?.querySelectorAll('.leaf-battle-chessman')||[])].map(a=>({
+     card:a.dataset.chessmanId,rig:a.dataset.actorRig,load:a.dataset.actorSourceLoad,
+     img:a.querySelector('img.leaf-chess-original-obs')?.src||'',
+     width:a.querySelector('img.leaf-chess-original-obs')?.naturalWidth||0
+    }));
+   });
+   throw Error('Public native CHR decode did not recover: '+JSON.stringify({
+    actors:diagnostic,assetErrors:invalid.slice(-12),cause:String(e)}));
+  });
   const scene=await page.evaluate(()=>{const s=document.querySelector('#battle-visual');
    const dice=[...s.querySelectorAll('.battle-visual-die.battle-die-has-original')];
    return {dice:dice.length,landed:dice.every(d=>d.dataset.battleRoll==='landed'),
