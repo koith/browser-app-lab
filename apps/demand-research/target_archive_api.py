@@ -18,6 +18,7 @@ import json
 import os
 import re
 import time
+from datetime import datetime
 from urllib.parse import urlsplit
 
 from target_account_archive import profile_input
@@ -217,6 +218,39 @@ def read_exact_verified_archive(run_id,platform,account):
     return None
 
 
+def read_matching_recent_verified_archive(platform,account,requested_at):
+    """Recover a signed job view from a later independent SHA-verified ZIP.
+
+    Render free instances lose their local SQLite queue on replacement.
+    A successful rescue job is not the same workflow run, so report its
+    existence explicitly and only when captured AFTER the signed request.
+    """
+    if not github_temp_bundle.enabled():
+        return None
+    normalized=profile_input(platform,account)
+    for bundle in github_temp_bundle.latest_bundles():
+        if bundle.selected_platform!=platform:
+            continue
+        try:
+            if profile_input(platform,bundle.selected_account)!=normalized:
+                continue
+            recorded=datetime.fromisoformat(str(bundle.recorded_at).replace("Z","+00:00")).timestamp()
+        except (ValueError,TypeError,OverflowError):
+            continue
+        if recorded<requested_at-60:
+            continue
+        complete=bundle.source_state=="COMPLETE_CURRENT_PUBLIC_CURSOR"
+        return {"state":"REMOTE_VERIFIED" if complete else "PARTIAL_BACKUP",
+                "remote_verified":True,
+                "storage":"github_encrypted_temporary",
+                "posts":bundle.post_count,"objects":bundle.object_count,
+                "account_key":bundle.account,
+                "source_state":bundle.source_state,
+                "recorded_at":bundle.recorded_at,
+                "restored_from_verified_backup":True}
+    return None
+
+
 def same_origin_operator(request):
     # The signed private site is behind a TLS-terminating reverse proxy.
     # Compare the browser Origin against the server's Host, not an internal
@@ -315,14 +349,32 @@ def create_router(auth):
                 queued=await asyncio.to_thread(backup_queue.state,run_id)
             except (RuntimeError,ValueError):
                 raise HTTPException(503,"Private queue status unavailable") from None
-            if queued is None:
-                raise HTTPException(404,"Unknown private backup request")
-            accepted=queued.get("accepted")
-            if accepted is None:
+            if queued is None or queued.get("accepted") is None:
+                # A free Render restart can drop a transient SQLite queue.
+                # Check a *real later* independently verified backup for
+                # exactly the same selected public account, not a CI flag.
+                age=max(0,int(time.time())-item["at"])
+                if queued is None or age>=120:
+                    try:
+                        verified=await asyncio.to_thread(
+                            read_matching_recent_verified_archive,
+                            item["platform"],item["account"],item["at"])
+                    except (RuntimeError,ValueError,TypeError,KeyError):
+                        verified=None
+                    if verified is not None:
+                        return JSONResponse({"run_id":run_id,**verified},
+                             headers={"Cache-Control":"private, no-store"})
+                if queued is None or age>=1200:
+                    return JSONResponse({"run_id":run_id,"state":"NEEDS_RETRY",
+                         "queued_seconds":age,"remote_verified":False,
+                         "account_key":None,
+                         "detail":"기존 요청의 대기 기록이 만료됐습니다. 보관함을 새로 조회하세요."},
+                         headers={"Cache-Control":"private, no-store"})
                 return JSONResponse({"run_id":run_id,"state":"QUEUED",
-                         "queued_seconds":max(0,int(time.time())-queued["request"]["created_at"]),
+                         "queued_seconds":age,
                          "remote_verified":False,"account_key":None},
                          headers={"Cache-Control":"private, no-store"})
+            accepted=queued["accepted"]
             workflow_id=accepted["workflow_run_id"]
         try:
             run=await asyncio.to_thread(get_workflow_run,workflow_id)
