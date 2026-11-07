@@ -66,7 +66,13 @@ jobs:
               if(cards!==runtime.albums)throw Error('Rendered saved owner+local album count wrong '+cards);
               if(await page.locator('#inventory').innerText()!==runtime.photos+'장 · 실제 저장본')throw Error('Inventory counts unarchived media');
               const urls=await page.evaluate(()=>available().flatMap(a=>validImages(a).map(p=>p.url).filter(u=>u?.startsWith('stored-albums/'))));
-              if(urls.length!==photos.length||urls.some(x=>!x.startsWith('stored-albums/')))throw Error('Remote photo shown');
+              // One byte-identical Pages file can be correctly reused by
+              // multiple SHA-pinned owner album entries. Count every
+              // actual physical file once, but allow more rendered references
+              // ONLY when their URL is in the independently SHA-checked file list.
+              const physicalPaths=new Set(photos.map(p=>p.url));
+              if(urls.length<photos.length||urls.some(x=>!physicalPaths.has(x)))
+                throw Error('Remote or unverified local photo shown');
               const failed=await page.evaluate(async list=>{
                 const bad=[];
                 for(const url of list){
@@ -86,7 +92,7 @@ jobs:
               if(!shown.startsWith('stored-albums/'))throw Error('Lightbox hotlink');
               if(external.length||errors.length)throw Error(JSON.stringify({external,errors}));
               await page.screenshot({path:'yui-stored-'+name+'.png'});
-              console.log('YUI_LOCAL_ONLY_'+name.toUpperCase()+'_PASS',cards,photos.length);
+              console.log('YUI_LOCAL_ONLY_'+name.toUpperCase()+'_PASS',cards,photos.length,'sha_identical_references',urls.length);
             }finally{await browser.close()}
           }
           (async()=>{await check(chromium,'chromium');await check(webkit,'webkit')})().catch(e=>{console.error(e.stack||String(e));process.exit(1)});

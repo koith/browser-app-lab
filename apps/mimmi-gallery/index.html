@@ -67,7 +67,7 @@ h1{margin:8px 0 0;font-weight:750;font-size:clamp(34px,5vw,56px);letter-spacing:
 .edition-sticker[data-kind="ai"]{color:#e3d1f2;background:#29223799}
 .album .placeholder{display:flex;align-items:center;justify-content:center;position:absolute;inset:0;background:linear-gradient(145deg,#33333a,#1a1c21);color:#6d6e72;font-size:54px;font-weight:800}
 .photo-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px;align-items:start;margin-bottom:30px}
-.photo{margin:0;display:block;position:relative;cursor:pointer;background:#24262b;border:0;padding:0;width:100%;overflow:hidden}
+.photo{margin:0;display:block;position:relative;cursor:pointer;background:#24262b;border:0;padding:0;width:100%;overflow:hidden;aspect-ratio:2/3}
 .photo img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;transition:transform .25s}
 .photo:hover img{transform:scale(1.035)}
 .photo[data-rotation]{aspect-ratio:2/3}
@@ -150,7 +150,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-mimmi.17</small>
+ <small id="app-version" class="version-chip">v0.1.0-mimmi.18</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -342,7 +342,7 @@ function validImages(a){
   if(!Number.isSafeInteger(p.bytes)||p.bytes<4500)return false;
   const fileAlbum=p.originalAlbumId||a.id;
   return /^[a-z0-9-]{2,110}$/.test(fileAlbum)
-   &&(fileAlbum===a.id||albumAliases[fileAlbum]===a.id)
+   &&(fileAlbum===a.id||albumAliases[fileAlbum]===a.id||p.shaPinnedLocalCopy===true)
    && new RegExp('^stored-albums/'+fileAlbum+'/[a-zA-Z0-9._-]+\\.(?:jpe?g|png|webp|avif)$').test(p.url);
  });
 }
@@ -727,7 +727,9 @@ Promise.all([
  // complete static owner manifest already loaded: it can CORS-fail and slow
  // WebKit first paint. Only use authenticated gateway metadata as a fallback
  // if no usable SHA-verified static owner album was available.
- if(!ownerStored.length)MimmiPrivate.albums().then(albums=>{
+ // Pages keeps existing local photos when its owner manifest fails; a
+ // billing-suspended optional Render catalog cannot repair that manifest.
+ if(!ownerStored.length && location.hostname!=='koith.github.io')MimmiPrivate.albums().then(albums=>{
   if(!Array.isArray(albums)||!albums.length)return;
   const nextOwner=MimmiPrivate.reconcile(ownerStored,albums).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
   if(!nextOwner.length)return;
