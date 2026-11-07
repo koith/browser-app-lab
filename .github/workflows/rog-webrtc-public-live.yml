@@ -1,0 +1,73 @@
+name: 4LEAF public real WebRTC guest HELLO and battle safety QA
+on:
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-webrtc:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 2
+      - name: Run only for a WebRTC release or explicit dispatch
+        id: gate
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ] || git diff --name-only HEAD^ HEAD | grep -Eq '^apps/4leaf/rog/(network.js|app-version.json|tests/webrtc-battle-message-resilience.cjs)$|^\.github/workflows/rog-webrtc-public-live.yml$'; then
+            echo 'run=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run=false' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.run == 'true'
+        with:
+          node-version: '22'
+      - name: Require exact deployed release and WebRTC source SHA256
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,time,urllib.request
+          from pathlib import Path
+          base='https://koith.github.io/browser-app-lab/apps/4leaf/rog/'
+          expected=json.loads(Path('apps/4leaf/rog/app-version.json').read_text())
+          wanted=hashlib.sha256(Path('apps/4leaf/rog/network.js').read_bytes()).hexdigest()
+          deadline=time.monotonic()+600
+          last='not ready'
+          while time.monotonic()<deadline:
+              try:
+                  def fetch(name):
+                      req=urllib.request.Request(base+name+'?webrtc_qa='+str(time.time_ns()),
+                          headers={'Cache-Control':'no-cache'})
+                      with urllib.request.urlopen(req,timeout=20) as res:
+                          return res.read()
+                  actual=json.loads(fetch('app-version.json'))
+                  observed=hashlib.sha256(fetch('network.js')).hexdigest()
+                  if actual==expected and observed==wanted:
+                      print('PUBLIC_WEBRTC_EXACT_SHA_READY',actual['version'],wanted)
+                      break
+                  last='version='+str(actual.get('version'))+' network_sha_match='+str(observed==wanted)
+              except Exception as exc:
+                  last=type(exc).__name__+': '+str(exc)[:150]
+              print('PUBLIC_WEBRTC_RELEASE_NOT_READY',last,flush=True)
+              time.sleep(12)
+          else:
+              raise SystemExit('Published WebRTC source did not match this commit: '+last)
+          PY
+      - name: Install actual Chromium for two separate browser peers
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Real published two-browser WebRTC early HELLO and malformed battle packets
+        if: steps.gate.outputs.run == 'true'
+        env:
+          FOURLEAF_SMOKE_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node --test apps/4leaf/rog/tests/webrtc-battle-message-resilience.cjs
