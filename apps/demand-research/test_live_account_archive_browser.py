@@ -119,24 +119,49 @@ def verify(engine, *, label, width, height):
         # Verify that the same selected archive still shows its six posts.
         assert page.locator("#results article.post").count()>=6
         assert page.locator("#displayName").inner_text().strip()
-        originals=page.locator("#results .post-media img")
-        assert originals.count()>0, "TeraBox ZIP posts lack original media in UI"
-        originals.first.scroll_into_view_if_needed()
-        page.wait_for_function(
-            "() => {const img=document.querySelector('#results .post-media img');"
-            "return !!img && img.complete && img.naturalWidth > 0;}",
-            timeout=90000,
+        # Some independently verified source posts contain video or audio
+        # rather than images. Validate the exact *actual* HTML media element,
+        # source binding and byte-range read, never assume the account has <img>.
+        originals=page.locator(
+            "#results .post-media img, #results .post-media video, "
+            "#results .post-media audio"
         )
+        assert originals.count()>=media_count>0, (
+            "previously visible verified media disappeared after tab round-trip"
+        )
+        originals.first.scroll_into_view_if_needed()
+        media_kind=originals.first.evaluate("(node) => node.tagName.toLowerCase()")
+        assert media_kind in ("img","video","audio"), "unsupported source media node"
+        if media_kind=="img":
+            page.wait_for_function(
+                "() => {const img=document.querySelector('#results .post-media img');"
+                "return !!img && img.complete && img.naturalWidth > 0;}",
+                timeout=90000,
+            )
+        else:
+            assert originals.first.evaluate("(node) => node.controls === true"), (
+                "verified video or audio has no playback controls"
+            )
         source=originals.first.get_attribute("src")
         assert source and source.startswith("/api/account-archives/"), (
-            "TeraBox original was not delivered through authenticated reader"
+            "verified original was not delivered through authenticated reader"
         )
         response=page.request.get(SITE.rsplit("/",1)[0]+source,
                                   headers={"Range":"bytes=0-1023"},
                                   timeout=90000)
         assert response.status==206 and response.body(), (
-            "deployed TeraBox ZIP media HTTP Range read failed"
+            "deployed verified media HTTP Range read failed"
         )
+        assert response.headers.get("content-range","").startswith("bytes 0-"), (
+            "original source did not provide a valid media byte range"
+        )
+        mime=response.headers.get("content-type","").split(";",1)[0].lower()
+        if media_kind=="img":
+            assert mime.startswith("image/"), "image source MIME mismatch"
+        else:
+            assert mime.startswith(media_kind+"/"), (
+                "video/audio original source MIME mismatch"
+            )
         page.locator("#results article.post").first.get_by_role(
             "button",name="댓글·상세 보기"
         ).click()
