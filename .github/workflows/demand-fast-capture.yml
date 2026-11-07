@@ -67,6 +67,10 @@ jobs:
       DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
       DEMAND_CAPTURE_PUBLIC_ALLOWED: "1"
       DEMAND_FAST_CAPTURE_MODE: "1"
+      # First observe/encrypt public originals in under a polling interval;
+      # replay asynchronously performs immutable TeraBox remote SHA checks.
+      # Red capture status while newly buffered is intentional, never a false PASS.
+      DEMAND_FAST_CAPTURE_DEFER_REMOTE: "1"
       DEMAND_ARCHIVE_RECOVERY_KEY: ${{ secrets.DEMAND_ARCHIVE_RECOVERY_KEY }}
       DEMAND_RECOVERY_SPOOL_DIR: "/tmp/intersection-private-recovery"
       GITHUB_RUN_ID: ${{ github.run_id }}
