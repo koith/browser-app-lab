@@ -79,3 +79,41 @@ def test_immutable_manifest_corruption_does_not_replace_prior(tmp_path,monkeypat
     monkeypatch.setattr(job,"read_remote",lambda *a,**k:b"tampered")
     with pytest.raises(RuntimeError,match="readback mismatch"):
         job.publish_manifest(tmp_path,{"file":"snapshot-123456789.sqlite3","sha256":"a"*64},"123456789")
+
+
+def test_bounded_remote_read_times_out_even_before_stdout_eof(monkeypatch):
+    # A stalled child keeps stdout open; the old .read(65536) never reached
+    # proc.wait(timeout). Use a safe local child, not the real cloud provider.
+    import subprocess
+    import sys
+    import time
+    actual_popen=subprocess.Popen
+    children=[]
+    def stalled(_args,**kwargs):
+        proc=actual_popen([sys.executable,"-c",
+                           "import time; time.sleep(3)"],**kwargs)
+        children.append(proc)
+        return proc
+    monkeypatch.setattr(job.subprocess,"Popen",stalled)
+    started=time.monotonic()
+    with pytest.raises(RuntimeError,match="private remote read timed out"):
+        job.read_remote("private-synthetic-only",4096,max_seconds=0.08)
+    assert time.monotonic()-started<1.5
+    assert len(children)==1 and children[0].poll() is not None
+
+
+def test_bounded_remote_read_preserves_exact_bytes_and_size_limit(monkeypatch):
+    import subprocess
+    import sys
+    actual_popen=subprocess.Popen
+    payload=b"safe synthetic original bytes"
+    def process(_args,**kwargs):
+        return actual_popen([sys.executable,"-c",
+                             "import sys; sys.stdout.buffer.write("+
+                             repr(payload)+")"],**kwargs)
+    monkeypatch.setattr(job.subprocess,"Popen",process)
+    assert job.read_remote("private-synthetic-only",len(payload),
+                           max_seconds=3)==payload
+    with pytest.raises(ValueError,match="private remote payload too large"):
+        job.read_remote("private-synthetic-only",len(payload)-1,
+                        max_seconds=3)
