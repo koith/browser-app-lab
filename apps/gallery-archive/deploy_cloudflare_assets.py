@@ -34,7 +34,7 @@ class CF:
 
     def call(self, tail, method='GET', body=None, raw=False, multipart=None):
         # No subscription, billing mutation, R2 or arbitrary host endpoints.
-        allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content/v2|secrets))?|workers/subdomain|subscriptions)',
+        allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content/v2|secrets|subdomain))?|workers/subdomain|subscriptions)',
                    'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'(?:/secrets)?)',
                    'POST': r'workers/(?:workers|scripts/' + NAME + r'/subdomain)'}
         if method not in allowed or not re.fullmatch(allowed[method], tail):
@@ -128,15 +128,26 @@ def media_bytes(base, model, album, photo):
         headers={'Origin': ORIGIN, 'Content-Type': 'application/json'},
         data=json.dumps({'model': model, 'album': album, 'number': photo['number'],
                          'variant': 'original', 'sha256': photo['sha256']}).encode())
-    with opener.open(sign, timeout=35) as response:
-        data = json.loads(response.read(4097))
+    try:
+        with opener.open(sign, timeout=35) as response:
+            data = json.loads(response.read(4097))
+    except HTTPError as error:
+        print('CF_REMOTE_ORIGINAL_SIGN_HTTP', error.code, flush=True)
+        raise
+    except (URLError, TimeoutError, OSError) as error:
+        print('CF_REMOTE_ORIGINAL_SIGN_TRANSPORT', type(error).__name__, flush=True)
+        raise
     url = urlsplit(data.get('url', ''))
     if (url.scheme + '://' + url.netloc != base or url.username or url.password or
         url.path != '/api/v1/media/' + '/'.join((model, album, str(photo['number']), 'original')) or
         data.get('sha256') != photo['sha256'] or data.get('bytes') != photo['bytes']):
         raise ValueError('REMOTE_SIGNED_PHOTO_MISMATCH')
-    with opener.open(Request(data['url']), timeout=45) as response:
-        raw = response.read(8_000_001)
+    try:
+        with opener.open(Request(data['url']), timeout=45) as response:
+            raw = response.read(8_000_001)
+    except HTTPError as error:
+        print('CF_REMOTE_ORIGINAL_MEDIA_HTTP', error.code, flush=True)
+        raise
     checked(photo, raw)
     return raw
 
@@ -268,6 +279,31 @@ def main(args):
     assets, source = work / 'assets', work / 'source'
     snapshot = Snapshot(ROOT, assets)
     base = subdomain(cf)
+    if base is not None:
+        route = cf.call('workers/scripts/' + NAME + '/subdomain')['result']
+        if not isinstance(route, dict):
+            raise ValueError('WORKER_ROUTE_STATUS_INVALID')
+        if route.get('enabled') is not True:
+            # The worker exists and has an account-level workers.dev address.
+            # Re-enable only our own fixed-name Worker, never alter other routes.
+            print('CF_EXISTING_WORKER_ROUTE_WAS_DISABLED', flush=True)
+            route = cf.call('workers/scripts/' + NAME + '/subdomain', 'POST',
+                            {'enabled': True, 'previews_enabled': False})['result']
+        print('CF_EXISTING_WORKER_ROUTE_ENABLED', route.get('enabled') is True, flush=True)
+        if route.get('enabled') is not True:
+            raise ValueError('WORKER_ROUTE_ENABLE_NOT_VERIFIED')
+        try:
+            with build_opener(NoRedirect()).open(base + '/api/v1/health', timeout=10) as response:
+                result = json.loads(response.read(4096))
+            print('CF_EXISTING_WORKER_HEALTH', 'HTTP_200',
+                  'recognized_gallery_release', isinstance(result, dict)
+                  and result.get('transport') == 'cloudflare-bound-assets', flush=True)
+        except HTTPError as error:
+            print('CF_EXISTING_WORKER_HEALTH', 'HTTP_' + str(error.code), flush=True)
+        except (URLError, TimeoutError, OSError) as error:
+            print('CF_EXISTING_WORKER_HEALTH', 'TRANSPORT_' + type(error).__name__, flush=True)
+        except (ValueError, TypeError) as error:
+            print('CF_EXISTING_WORKER_HEALTH', 'INVALID_RESPONSE_' + type(error).__name__, flush=True)
     retained = {m: 0 for m in MODELS}
     if old and any(a['images'] for m in MODELS for a in old[m]['albums']):
         if base is None:
