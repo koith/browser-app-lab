@@ -33,6 +33,30 @@ def open_root():
     return CloudArchive()
 
 
+class _BoundedZipRoot:
+    """Keep unreliable private-cloud reads from stalling the GitHub fallback.
+
+    This wrapper is only for immutable ZIP discovery. Legacy per-record paths
+    continue using the original CloudArchive and its own timeout policy.
+    """
+    def __init__(self,root):
+        self.root=root
+        self.remote=root.remote
+
+    def command(self,args,*,data=None,timeout=150,allow_missing=False):
+        return self.root.command(args,data=data,
+                                 timeout=min(timeout,18),
+                                 allow_missing=allow_missing)
+
+
+def _verified_account_bundles(root):
+    # GH temporary mode is always a fast independent fallback. A delayed
+    # provider must not turn an already verified GH account into an error.
+    source=_BoundedZipRoot(root) if github_temp_bundle.enabled() else root
+    return available_bundles(source)
+
+
+
 def public_profile_fields(doc):
     if not isinstance(doc,dict):
         return {}
@@ -56,21 +80,25 @@ def open_account(account):
     match=REGISTRY_RE.fullmatch(account+".json")
     if not match:
         raise HTTPException(400,"Invalid archive account key")
+    github=None
     if github_temp_bundle.enabled():
         try:
-            bundle=github_temp_bundle.account_bundle(account)
-            if bundle is not None:
-                return None,bundle.accounts[account],BundleAccountCloud(bundle)
+            github=github_temp_bundle.account_bundle(account)
         except (RuntimeError,ValueError,TypeError,BundleInvalid):
-            raise HTTPException(502,"Temporary GitHub archive unavailable") from None
+            # A provider outage must not suppress a separately verified ZIP.
+            github=None
     root=open_root()
     try:
-        # Prefer independently SHA-verified remote ZIP rescue when available.
-        # The older per-record TeraBox archive may be incomplete because
-        # partial writes failed before entry/checkpoint publication.
-        bundle=latest_account_bundle(root,account)
-        if bundle is not None:
+        # Prefer the fully SHA-verified TeraBox source when it contains more
+        # public posts than a previously verified temporary GitHub snapshot.
+        # A denied/slow TeraBox lookup must NOT break the GitHub reader.
+        bundle=next((item for item in _verified_account_bundles(root)
+                     if account in item.accounts),None)
+        if bundle is not None and (github is None
+                                   or bundle.post_count>github.post_count):
             return root,bundle.accounts[account],BundleAccountCloud(bundle)
+        if github is not None:
+            return None,github.accounts[account],BundleAccountCloud(github)
         raw=root.read("metadata/target-accounts/"+account+".json",
                       cap=4000,optional=True)
         if raw is None:
@@ -80,7 +108,9 @@ def open_account(account):
                 or archive_key(meta)!=match.group(2)):
             raise HTTPException(404,"Archive identity mismatch")
         return root,meta,account_cloud(root,meta)
-    except (RuntimeError,TypeError,ValueError,KeyError) as error:
+    except (RuntimeError,TypeError,ValueError,KeyError):
+        if github is not None:
+            return None,github.accounts[account],BundleAccountCloud(github)
         raise HTTPException(502,"Private account archive read unavailable") from None
 
 
@@ -229,6 +259,9 @@ def create_router(auth):
     def accounts(request:Request):
         auth(request)
         if github_temp_bundle.enabled():
+            data=[]
+            github_failed=False
+            terabox_failed=False
             try:
                 data=[{"key":bundle.account,"platform":bundle.selected_platform,
                        "profile_url":sanitize_safe_link(
@@ -240,7 +273,35 @@ def create_router(auth):
                        "temporary":True}
                       for bundle in github_temp_bundle.latest_bundles()]
             except (RuntimeError,ValueError,TypeError,BundleInvalid):
-                raise HTTPException(502,"Temporary GitHub account index unavailable") from None
+                github_failed=True
+            try:
+                root=open_root()
+                index={item["key"]:item for item in data}
+                for bundle in _verified_account_bundles(root):
+                    for account,entry in bundle.accounts.items():
+                        present=index.get(account)
+                        # Exact account identity and independently checked
+                        # whole ZIP SHA already gate both archive backends.
+                        if (present is not None and bundle.post_count<=
+                                present["posts_verified_in_bundle"]):
+                            continue
+                        row={"key":account,"platform":entry["platform"],
+                             "profile_url":sanitize_safe_link(
+                                 entry.get("profile_url")),
+                             "backup_kind":"terabox_zip_sha_verified",
+                             "posts_verified_in_bundle":bundle.post_count,
+                             "objects_verified_in_bundle":bundle.object_count,
+                             "source_state":bundle.source_state,
+                             "temporary":False}
+                        if present is None:
+                            data.append(row)
+                        else:
+                            present.update(row)
+                        index[account]=present if present is not None else row
+            except (RuntimeError,ValueError,TypeError,KeyError,BundleInvalid):
+                terabox_failed=True
+            if not data and github_failed and terabox_failed:
+                raise HTTPException(502,"Both verified account indexes unavailable")
             return JSONResponse({"accounts":data},headers=CACHE_HEADERS)
         root=open_root()
         try:
