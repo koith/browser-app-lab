@@ -218,3 +218,36 @@ def test_live_storage_mix_keeps_terabox_when_github_index_fails(
     assert listing.status_code==200
     assert listing.json()["accounts"][0]["backup_kind"]=="terabox_zip_sha_verified"
     assert client.get("/api/account-archives/"+account+"/feed").json()["total"]==1
+
+
+def test_bounded_zip_source_preserves_verified_bytes_and_caps_read_time(capsys):
+    class SyntheticRoot:
+        remote="archive:DemandResearch"
+        def __init__(self):
+            self.calls=[]
+        def command(self,args,*,data=None,timeout=150,allow_missing=False):
+            self.calls.append((args[0],timeout))
+            return b"synthetic private ZIP bytes"
+    source=SyntheticRoot()
+    wrapper=viewer._BoundedZipRoot(source)
+    assert wrapper.command(["lsf","SECRET-REMOTE-PATH"],timeout=90)
+    assert wrapper.command(["cat","SECRET-REMOTE-PATH"],timeout=180)
+    assert source.calls==[("lsf",30),("cat",55)]
+    output=capsys.readouterr().out
+    assert "INTERSECTION_ZIP_SOURCE_READ" in output
+    assert "operation=lsf outcome=ok" in output
+    assert "operation=cat outcome=ok" in output
+    assert "SECRET-REMOTE-PATH" not in output
+
+
+def test_bounded_zip_source_auth_denial_is_redacted_and_not_verified(capsys):
+    class Denied:
+        remote="archive:DemandResearch"
+        def command(self,args,*,data=None,timeout=150,allow_missing=False):
+            raise RuntimeError("private cloud cat failed (authorization) - SECRET")
+    with pytest.raises(RuntimeError,match="authorization"):
+        viewer._BoundedZipRoot(Denied()).command(
+            ["cat","SECRET-REMOTE-PATH"],timeout=180)
+    output=capsys.readouterr().out
+    assert "operation=cat outcome=authorization" in output
+    assert "SECRET" not in output
