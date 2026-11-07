@@ -251,6 +251,7 @@ jobs:
                 # prevents R17 outcome actions being marked released while
                 # Pages still serves the previous 12-slot action module.
                 curl -fsSL "$url/native-card-action-sequences.js?revision=$GITHUB_SHA" -o /tmp/leaf-live-actions.js
+                curl -fsSL "$url/network.js?revision=$GITHUB_SHA" -o /tmp/leaf-live-network.js
                 curl -fsSL "$url/sw.js?revision=$GITHUB_SHA" -o /tmp/leaf-live-sw.js
                 python3 - <<'PY'
           from pathlib import Path
@@ -258,6 +259,7 @@ jobs:
           root=Path('apps/4leaf/rog')
           for relative, published in [
             ('native-card-action-sequences.js','/tmp/leaf-live-actions.js'),
+            ('network.js','/tmp/leaf-live-network.js'),
             ('sw.js','/tmp/leaf-live-sw.js'),
           ]:
             want=hashlib.sha256((root/relative).read_bytes()).hexdigest()
