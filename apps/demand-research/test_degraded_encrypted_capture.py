@@ -101,3 +101,45 @@ def test_buffered_outage_obeys_bounded_public_scan_budget(tmp_path,monkeypatch):
                 cloud=Offline(),clock=lambda:1793667900,
                 run_id="123456937",fast_mode=True)
     assert len(list(tmp_path.glob("*.enc")))==24
+
+
+
+def test_source_first_captures_all_public_originals_without_cloud_calls(tmp_path,monkeypatch):
+    """A slow private provider must not block observing fresh public sources."""
+    class NeverTouchCloud(FakeCloud):
+        def preflight(self):
+            raise AssertionError("source-first must never preflight TeraBox")
+        def marker_ids(self):
+            raise AssertionError("source-first must not block on cloud indexes")
+        def write_immutable(self,*args,**kwargs):
+            raise AssertionError("source-first must not remotely write each post")
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE","1")
+    install_fake_media_fetch(monkeypatch)
+    rows=[source(i) for i in range(7)]
+    cloud=NeverTouchCloud()
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+                cloud=cloud,clock=lambda:1793667900,run_id="123456938",
+                fast_mode=True,max_fast_seconds=240)
+    assert len(list(tmp_path.glob("*.enc")))==7
+    assert cloud.objects=={}
+    # The existing recovery consumer, not the fast capture, performs
+    # independent immutable post and original-media remote SHA checks.
+    restored=recover_directory(tmp_path,FakeCloud())
+    assert restored["post_and_media_verified"]==7
+    assert restored["failures"]==0
+
+
+def test_source_first_no_new_data_is_not_a_backup_success(tmp_path,monkeypatch):
+    class NeverTouchCloud(FakeCloud):
+        def preflight(self):
+            raise AssertionError("source-first preflight forbidden")
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE","1")
+    output=job.run(fetchers=[lambda term,start,end:[]],
+                   cloud=NeverTouchCloud(),clock=lambda:1793667900,
+                   run_id="123456939",fast_mode=True,max_fast_seconds=240)
+    assert output["source_first_capture_mode"] is True
+    assert output["saved_verified"]==0
+    assert output["encrypted_only_originals"]==0
+    assert output["operational_status"]=="NO_NEW_PUBLIC_ORIGINALS"
+    assert not list(tmp_path.glob("*.enc"))
