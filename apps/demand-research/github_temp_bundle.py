@@ -26,6 +26,8 @@ import time
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, urlopen
 import zipfile
+import xml.etree.ElementTree as ET
+from urllib.error import HTTPError, URLError
 
 from verified_bundle_reader import VerifiedBundle, BundleInvalid, MAX_VIEW_ZIP
 
@@ -37,6 +39,9 @@ ENTRY = re.compile(r"^metadata/target-accounts/(bluesky|mastodon)-([a-f0-9]{40})
 MAGIC = b"INTGB1"
 AAD = b"intersection-github-temporary-account-zip-v1"
 ASSET = "account.enc"
+ATOM = "https://github.com/" + REPO + "/releases.atom"
+ATOM_LINK_PREFIX = "https://github.com/" + REPO + "/releases/tag/"
+_feed_cache = {"at": 0.0, "items": ()}
 MAX_CIPHER = MAX_VIEW_ZIP + 64
 CACHE_SECONDS = 90
 _cache = {}
@@ -138,16 +143,38 @@ def _download(asset):
     return raw
 
 
+def _download_public_tag(tag):
+    # The GitHub website and Release CDN do not consume the REST API's
+    # low unauthenticated shared-egress rate quota. No PAT is held on Render.
+    if not isinstance(tag,str) or TAG.fullmatch(tag) is None:
+        raise BundleInvalid("Invalid temporary release tag")
+    url = ATOM_LINK_PREFIX.replace("/releases/tag/", "/releases/download/") + tag + "/" + ASSET
+    with urlopen(Request(url, headers={"User-Agent":"intersection-account-viewer",
+                                      "Accept":"application/octet-stream"}), timeout=120) as response:
+        body = response.read(MAX_CIPHER+1)
+    if not 34 < len(body) <= MAX_CIPHER:
+        raise BundleInvalid("GitHub encrypted original missing or oversized")
+    return body
+
+
 def release_bundle(release, *, key=None):
-    asset = _asset(release)
-    artifact_id = asset.get("id")
-    if not isinstance(artifact_id, int):
-        raise BundleInvalid("Unidentified temporary backup asset")
+    if release.get("_public_atom") is True:
+        tag=release.get("tag_name","")
+        if not TAG.fullmatch(tag):
+            raise BundleInvalid("Invalid release feed entry")
+        artifact_id=tag
+        downloader=lambda: _download_public_tag(tag)
+    else:
+        asset = _asset(release)
+        artifact_id = asset.get("id")
+        if not isinstance(artifact_id, int):
+            raise BundleInvalid("Unidentified temporary backup asset")
+        downloader=lambda: _download(asset)
     with _guard:
         found = _cache.get(artifact_id)
         if found is not None and time.monotonic() - found[0] < CACHE_SECONDS:
             return found[1]
-    source = _download(asset)
+    source = downloader()
     bundle = _make_bundle(release["tag_name"], decrypt(source, key or gateway_key()))
     with _guard:
         if len(_cache) >= 2:
@@ -156,16 +183,57 @@ def release_bundle(release, *, key=None):
     return bundle
 
 
+def atom_releases():
+    now=time.monotonic()
+    with _guard:
+        if now-_feed_cache["at"]<55:
+            return list(_feed_cache["items"])
+    headers={"User-Agent":"intersection-encrypted-github-archive",
+             "Accept":"application/atom+xml"}
+    with urlopen(Request(ATOM,headers=headers),timeout=20) as response:
+        raw=response.read(2_000_001)
+    if len(raw)>2_000_000:
+        raise RuntimeError("Oversized GitHub release feed")
+    doc=ET.fromstring(raw)
+    result=[]
+    namespace="{http://www.w3.org/2005/Atom}"
+    for entry in doc.findall(namespace+"entry"):
+        for link in entry.findall(namespace+"link"):
+            url=link.get("href","")
+            if url.startswith(ATOM_LINK_PREFIX):
+                tag=url[len(ATOM_LINK_PREFIX):]
+                if TAG.fullmatch(tag):
+                    result.append({"tag_name":tag,"_public_atom":True,
+                                   "draft":False,"prerelease":True})
+                break
+    with _guard:
+        _feed_cache.update(at=time.monotonic(),items=tuple(result))
+    return result
+
+
 def releases(max_pages=2):
-    for page in range(1, min(max_pages, 3) + 1):
-        data = _json(API + "/releases?per_page=100&page=" + str(page))
-        if not isinstance(data, list):
-            raise RuntimeError("Invalid GitHub temporary backup list")
-        for item in data:
-            if isinstance(item, dict) and TAG.fullmatch(str(item.get("tag_name", ""))):
-                yield item
-        if len(data) < 100:
+    # The shared free Render egress IP exhausts GitHub's 60/hour unauthenticated
+    # API limit, even when there is just ONE archive. Always prefer the public
+    # Atom feed to discover release tags, then use GitHub's asset CDN directly.
+    try:
+        result=atom_releases()
+        if result:
+            yield from result
             return
+    except (HTTPError,URLError,TimeoutError,ET.ParseError,RuntimeError,ValueError):
+        pass
+    try:
+        for page in range(1,min(max_pages,3)+1):
+            data=_json(API+"/releases?per_page=100&page="+str(page))
+            if not isinstance(data,list):
+                raise RuntimeError("Invalid GitHub temporary backup list")
+            for item in data:
+                if isinstance(item,dict) and TAG.fullmatch(str(item.get("tag_name",""))):
+                    yield item
+            if len(data)<100:
+                return
+    except (HTTPError,URLError,TimeoutError,OSError,ValueError) as error:
+        raise RuntimeError("Public GitHub archive list unavailable") from None
 
 
 def latest_bundles(max_accounts=12):
