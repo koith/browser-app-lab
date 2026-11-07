@@ -29,7 +29,7 @@ jobs:
               if byte_range: headers["Range"]=byte_range
               req=urllib.request.Request(BASE+path,headers=headers)
               with urllib.request.urlopen(req,timeout=timeout) as r:
-                  return r.status,dict(r.headers),r.read(1500000 if byte_range else 3000000)
+                  return r.status,{k.lower():v for k,v in r.headers.items()},r.read(1500000 if byte_range else 3000000)
           def get(path, timeout=120):
               code,_,body=request(path,timeout=timeout)
               if code!=200:raise RuntimeError("Live account API status invalid")
@@ -78,7 +78,12 @@ jobs:
                       has_media=True
                       media=row["media"][0]
                       code,headers,blob=request(media["url"],byte_range="bytes=0-1023",timeout=170)
-                      if code!=206 or not blob or "Content-Range" not in headers:
+                      if (code!=206 or not blob or "content-range" not in headers
+                              or headers.get("accept-ranges")!="bytes"):
+                          print("LIVE_MEDIA_RANGE_DIAGNOSTICS status",code,
+                                "size",len(blob),
+                                "has_content_range",bool(headers.get("content-range")),
+                                "accept_ranges",headers.get("accept-ranges"),flush=True)
                           raise RuntimeError("Original media HTTP Range read failed")
                       print("LIVE_VERIFIED_MEDIA_RANGE bytes",len(blob),flush=True)
                       break
