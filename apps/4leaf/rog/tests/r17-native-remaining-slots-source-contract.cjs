@@ -83,10 +83,10 @@ for(const [id,c] of Object.entries(data.cards)){
  }
 }
 assert.equal(Object.keys(data.cards).length,97);
-assert.equal(presentExtra,85*2+97*2,
- 'source slots 15/16 must be present on exactly 85 original bodies');
-assert.equal(emptyExtras,24,
- 'preserve exactly twelve native bodies with empty 15/16 slots');
+assert.equal(presentExtra,51*2+97*2,
+ 'the source has playable 15/16 keys on 51 bodies, plus 97 each for 13/14');
+assert.equal(emptyExtras,92,
+ 'preserve 46 empty slots each at 15/16: 12 absent, 34 original sentinels');
 assert.equal(outcomeSequences,194);
 assert.equal(api.table('0156'),null,'the missing body must not be fabricated');
 assert.equal(api.sourceExtraSlots('0156'),null);
