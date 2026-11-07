@@ -81,7 +81,7 @@ def run():
             assert len(requested)==1
             assert "platform=x" in requested[0] and "%EC%84%B9%ED%8A%B8" in requested[0]
             assert page.locator('.source-badge[aria-label="출처: X"]').count()==1
-            assert page.locator("article.post a.author").get_attribute("href")=="https://x.com/qa"
+            assert page.locator('article.post:has(.source-badge[aria-label="출처: X"]) a.author').get_attribute("href")=="https://x.com/qa"
             assert page.locator("#socialStatus").inner_text().find("1건 추가")>=0
             page.locator("#viewAccounts").click()
             # Private account indexes are optional advanced panels in the new
