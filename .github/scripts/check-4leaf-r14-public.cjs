@@ -185,11 +185,50 @@ async function waitForPublishedVersion(){
    return {dice:dice.length,landed:dice.every(d=>d.dataset.battleRoll==='landed'),
     actors:[...s.querySelectorAll('.leaf-battle-chessman')].map(a=>({
      card:a.dataset.chessmanId,rig:a.dataset.actorRig,
-     image:a.querySelector('img.leaf-chess-original-obs')?.naturalWidth||0})),
+     image:a.querySelector('img.leaf-chess-original-obs')?.naturalWidth||0,
+     frameUrl:a.querySelector('img.leaf-chess-original-obs')?.currentSrc||'',
+     originalMember:a.dataset.actorSource||'',
+     result:a.dataset.duelResult||'',
+     slot:a.dataset.sourceNativeSlot||'',
+     duration:Number(a.dataset.sourceNativeDurationMs)||0,
+     provenance:a.dataset.sourceFrameSequenceProvenance||'',
+     action:a.dataset.sourceActionTable||''})),
     totals:[...s.querySelectorAll('.battle-visual-total')].map(t=>getComputedStyle(t).visibility)}});
   assert.ok(scene.dice>0&&scene.landed,'native source dice must land');
   assert.deepEqual(scene.actors.map(a=>a.card),['0042','0045']);
   assert.ok(scene.actors.every(a=>a.rig==='original-obs-sprite'&&a.image>0),'native CHR bodies must decode');
+
+  // R17: exact public rendered source frames, not just a decodable image.
+  // The original CHR source slots/ticks are VERIFIED; using them as
+  // victory/hurt is still WEB-INFERRED until an EXE action map is recovered.
+  assert.deepEqual(scene.actors.map(a=>a.slot).sort(),['13','14'],
+   'published fight must play R17 original native outcome slots 13 and 14');
+  for(const a of scene.actors){
+   const member=({'0042':'1026','0045':'1029'})[a.card];
+   assert.ok(member,'unexpected native duel actor '+a.card);
+   assert.equal(a.slot,a.result==='win'?'14':'13',
+    'published outcome must use its own CHR source slot');
+   assert.ok(a.duration>=960,'published original CHR ticks were lost');
+   assert.match(a.provenance,/VERIFIED.*INFERRED/,'must distinguish real source from WEB outcome mapping');
+   assert.match(a.action,/native-CHR-duel-(hurt|victory)-candidate-slot(13|14)/);
+   assert.ok(a.originalMember.includes('/'+member+'.obs'),
+    'published duel borrowed another CHR body for '+a.card);
+   const selected=localSource(a.frameUrl);
+   assert.ok(selected&&selected.relative.startsWith('original/OBS/')&&
+     selected.relative.endsWith('.png')&&fs.existsSync(selected.source),
+     'displayed original outcome frame must resolve into the source archive '+a.frameUrl);
+   const res=await context.request.get(a.frameUrl,{timeout:15000});
+   assert.equal(res.status(),200,'published outcome PNG unavailable: '+a.frameUrl);
+   const bytes=await res.body();
+   assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a',
+     'published native outcome frame has invalid PNG signature');
+   assert.equal(sha256(bytes),sha256(fs.readFileSync(selected.source)),
+     'published CHR outcome pixels differ from the archived source SHA '+a.card);
+  }
+  console.log('R17_PUBLIC_OUTCOME_SOURCE_SHA_PASS',JSON.stringify(scene.actors.map(a=>({
+   card:a.card,slot:a.slot,result:a.result,member:a.originalMember,
+   width:a.image,frameUrl:a.frameUrl
+  }))));
   assert.ok(scene.totals.every(t=>t==='visible'),'totals visible after landing');
   if(engine===webkit)await page.setViewportSize({width:750,height:342});
   const button=page.locator('.leaf-native-battle-actions button, #modal-buttons button',{hasText:'결과 확인'}).first();
