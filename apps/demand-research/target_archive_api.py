@@ -320,6 +320,7 @@ def create_router(auth):
             accepted=queued.get("accepted")
             if accepted is None:
                 return JSONResponse({"run_id":run_id,"state":"QUEUED",
+                         "queued_seconds":max(0,int(time.time())-queued["request"]["created_at"]),
                          "remote_verified":False,"account_key":None},
                          headers={"Cache-Control":"private, no-store"})
             workflow_id=accepted["workflow_run_id"]

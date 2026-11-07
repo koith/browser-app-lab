@@ -156,7 +156,9 @@
       const count=Number(result.posts||0);
       switch(result.state){
         case "QUEUED":
-          showJob("백업 작업 접수 완료 · 실행 대기 중","queued");break;
+          showJob(Number(result.queued_seconds||0)>=600
+            ?"백업 요청은 접수됐지만 자동 실행이 10분 넘게 지연됐습니다. 다시 누르지 말고 실행 상태를 확인하세요."
+            :"백업 작업 접수 완료 · GitHub 실행 대기 중 (일정이 지연될 수 있습니다)","queued");break;
         case "RUNNING":
           showJob("백업 진행 중 · 공개 자료를 수집하고 임시 저장소에 암호화 보관합니다.","running");break;
         case "VERIFYING_STORAGE":

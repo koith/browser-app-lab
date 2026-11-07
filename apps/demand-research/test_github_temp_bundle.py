@@ -67,7 +67,7 @@ def test_release_rejects_wrong_asset_and_digest(monkeypatch):
 
 
 def test_run_bundle_does_not_promote_unsupported_workflow_status(monkeypatch):
-    monkeypatch.setattr(gh,"releases",lambda max_pages=2:iter(()))
+    monkeypatch.setattr(gh,"tagged_bundle",lambda tag,missing_ok=False:None)
     assert gh.run_bundle(42340001000) is None
     with pytest.raises(ValueError):
         gh.run_bundle(-1)
@@ -78,3 +78,55 @@ def test_github_enabled_only_when_explicit(monkeypatch):
     assert not gh.enabled()
     monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
     assert gh.enabled()
+
+
+def test_atom_feed_finds_temporary_release_without_github_rest_api(monkeypatch):
+    tag="intersection-github-archive-42340001000-a1"
+    xml=('<?xml version="1.0" encoding="utf-8"?>'
+         '<feed xmlns="http://www.w3.org/2005/Atom">'
+         '<entry><title>temporary backup</title><link rel="alternate" '
+         'href="https://github.com/koith/browser-app-lab/releases/tag/'+tag+'"/></entry>'
+         '<entry><link href="https://github.com/untrusted/other/releases/tag/'+tag+'"/></entry>'
+         '</feed>').encode()
+    class FakeResponse:
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def read(self,cap):
+            assert cap<=1_000_001
+            return xml
+    monkeypatch.setattr(gh,"urlopen",lambda *args,**kwargs:FakeResponse())
+    assert list(gh.atom_tags())==[tag]
+
+
+def test_github_direct_tag_reader_authenticates_remote_without_rest_api(monkeypatch):
+    raw=create_synthetic_zip(monkeypatch)
+    key=b"s"*32
+    encrypted=gh.encrypt(raw,key)
+    monkeypatch.setattr(gh,"gateway_key",lambda:key)
+    monkeypatch.setattr(gh,"_download_tag",lambda tag,missing_ok=False:encrypted)
+    monkeypatch.setattr(gh,"_json",lambda *args,**kw:
+                        (_ for _ in ()).throw(AssertionError("REST API must not be queried")))
+    gh._cache.clear()
+    bundle=gh.run_bundle(42340001000,account="qa-example.bsky.social")
+    assert bundle is not None
+    assert bundle.post_count==1
+    assert bundle.temporary is True
+    monkeypatch.setattr(gh,"atom_tags",lambda:iter(["intersection-github-archive-42340001000-a1"]))
+    assert [b.account for b in gh.latest_bundles()]==[bundle.account]
+    gh._cache.clear()
+    monkeypatch.setattr(gh,"_download_tag",lambda tag,missing_ok=False:
+                        encrypted[:-1]+bytes([encrypted[-1]^1]))
+    with pytest.raises(BundleInvalid):
+        gh.run_bundle(42340001000)
+
+
+def test_unrelated_atom_tag_never_enters_selected_account_list(monkeypatch):
+    xml=(b'<feed xmlns="http://www.w3.org/2005/Atom">'
+         b'<entry><link rel="alternate" href="https://evil.example/release"/></entry>'
+         b'</feed>')
+    class FakeResponse:
+        def __enter__(self):return self
+        def __exit__(self,*args):pass
+        def read(self,cap):return xml
+    monkeypatch.setattr(gh,"urlopen",lambda *args,**kwargs:FakeResponse())
+    assert list(gh.atom_tags())==[]
