@@ -53,7 +53,7 @@ def fulfill(name, mime):
     return perform
 
 
-def exercise(browser, model, mobile):
+def exercise(browser, model, mobile, deployed=False):
     root = f'{BASE}{model}-gallery/'
     ctx = browser.new_context(
         viewport={'width': 390, 'height': 844} if mobile else {'width': 1280, 'height': 840},
@@ -74,12 +74,39 @@ def exercise(browser, model, mobile):
     try:
         # Test the actual live GitHub Pages HTML/owner index using the candidate
         # gallery transport and its explicit opt-in. Never alter the live site.
-        page.route(root + 'owner-media.js', fulfill(folder / 'owner-media.js', 'application/javascript'))
-        page.route(
-            'https://koith.github.io/browser-app-lab/apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs',
-            fulfill(module, 'application/javascript'))
-        page.route(root + 'cloudflare-gateway.json',
-            fulfill(config_path, 'application/json'))
+        if not deployed:
+            page.route(root + 'owner-media.js', fulfill(folder / 'owner-media.js', 'application/javascript'))
+            page.route(
+                'https://koith.github.io/browser-app-lab/apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs',
+                fulfill(module, 'application/javascript'))
+            page.route(root + 'cloudflare-gateway.json',
+                fulfill(config_path, 'application/json'))
+        else:
+            # Require the actual published bytes, not an overlay. Fail closed if
+            # Pages is still serving an older Render-only bundle.
+            from time import monotonic, sleep
+            deadline = monotonic() + 360
+            paths = {
+                root + 'owner-media.js': folder / 'owner-media.js',
+                root + 'cloudflare-gateway.json': config_path,
+                'https://koith.github.io/browser-app-lab/apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs': module,
+            }
+            mismatched = []
+            while monotonic() < deadline:
+                mismatched.clear()
+                for address, expected_file in paths.items():
+                    try:
+                        response = ctx.request.get(address, timeout=25000,
+                            headers={'Cache-Control': 'no-cache'})
+                        if response.status != 200 or response.body() != expected_file.read_bytes():
+                            mismatched.append(address.split('/')[-1])
+                    except Exception:
+                        mismatched.append(address.split('/')[-1])
+                if not mismatched:
+                    break
+                sleep(8)
+            assert not mismatched, ('PAGES_EXACT_GALLERY_RELEASE_NOT_VISIBLE', model, mismatched)
+            print('DEPLOYED_PAGES_EXACT_CLOUDFLARE_SOURCE_PASS', model, flush=True)
         response = page.goto(root, wait_until='domcontentloaded', timeout=80000)
         assert response and response.status == 200, 'actual Pages HTML unavailable'
         bridge = 'MimmiPrivate' if model == 'mimmi' else 'YuiPrivate'
@@ -142,7 +169,7 @@ def exercise(browser, model, mobile):
             const im=document.querySelector('#full');
             return !!im && im.complete && im.naturalWidth>0;
         }''', timeout=45000)
-        print('CLOUDFLARE_CANDIDATE_REAL_BROWSER_PHOTO_PASS',
+        print('CLOUDFLARE_'+('DEPLOYED' if deployed else 'CANDIDATE')+'_REAL_BROWSER_PHOTO_PASS',
             json.dumps({'model': model, 'mobile': mobile, 'owner_album': photo['ownerAlbum'],
                 'number': photo['number'], 'verified_sha_bytes_dimensions': True,
                 'native_cloudflare_decode': True, 'album_and_lightbox_open': True,
@@ -156,13 +183,15 @@ def exercise(browser, model, mobile):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--browser', choices=['chromium', 'webkit'], required=True)
+    parser.add_argument('--deployed', action='store_true',
+                        help='no page interception: require real public Pages code and photos')
     args = parser.parse_args()
     with sync_playwright() as p:
         engine = getattr(p, args.browser)
         browser = engine.launch(headless=True)
         try:
             for model in ('mimmi', 'yui'):
-                exercise(browser, model, mobile=args.browser == 'webkit')
+                exercise(browser, model, mobile=args.browser == 'webkit', deployed=args.deployed)
         finally:
             browser.close()
 
