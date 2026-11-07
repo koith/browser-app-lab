@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install 'Pillow==11.3.0'
       - name: Verify real workers.dev serves gallery code with documented app User-Agent
         shell: bash
         run: |
@@ -49,4 +51,95 @@ jobs:
           print('REAL_CF_RAW_PATH_DENIED_HTTP', status)
           assert status == 404, 'RAW_ASSET_ROUTE_EXPOSED'
           print('REAL_CF_WORKER_LIVE_ROUTE_PASS')
+          PY
+      - name: Verify actual Mimmi and Yui SHA, original byte length and decoded pixels remotely
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib, io, json
+          from pathlib import Path
+          from urllib.error import HTTPError
+          from urllib.parse import urlsplit
+          from urllib.request import Request, build_opener
+          from PIL import Image
+
+          BASE = 'https://gallery-archive-free.gallery-9f7d03138f3f.workers.dev'
+          ORIGIN = 'https://koith.github.io'
+          USER_AGENT = 'gallery-archive-replica-qa/1.0'
+          opener = build_opener()
+
+          def candidates(model):
+              catalog = json.loads(Path('apps', model + '-gallery', 'owner-index.json').read_text())
+              assert catalog.get('model') == model and catalog.get('schema_version') == 1
+              priorities = {
+                  'mimmi': ['mimmi-indie-sana-sopmod2-2019', 'djawa-pop-kitty-party'],
+                  'yui': ['yuis-present33', 'teddy-bear97', 'athletic-club104']
+              }[model]
+              albums = sorted(catalog['albums'], key=lambda a: (
+                  priorities.index(a['id']) if a['id'] in priorities else len(priorities), a['id']))
+              output = []
+              for album in albums:
+                  for p in album['images'][:10]:
+                      if all(k in p for k in ('number', 'sha256', 'bytes', 'width', 'height')):
+                          output.append((album['id'], p))
+                  if len(output) >= 100:
+                      break
+              return output[:100]
+
+          for model in ('mimmi', 'yui'):
+              passes = 0
+              absent = 0
+              first_failure = None
+              for album, photo in candidates(model):
+                  body = json.dumps({
+                      'model': model, 'album': album, 'number': photo['number'],
+                      'variant': 'original', 'sha256': photo['sha256']
+                  }).encode()
+                  req = Request(BASE + '/api/v1/sign', data=body, method='POST',
+                      headers={'User-Agent': USER_AGENT, 'Origin': ORIGIN, 'Content-Type': 'application/json'})
+                  try:
+                      with opener.open(req, timeout=20) as r:
+                          assert r.status == 200 and not r.geturl() != req.full_url
+                          signed = json.loads(r.read(4096))
+                  except HTTPError as e:
+                      if e.code == 404:
+                          absent += 1
+                          continue
+                      first_failure = 'SIGN_HTTP_' + str(e.code)
+                      break
+                  except Exception as e:
+                      first_failure = 'SIGN_' + type(e).__name__
+                      break
+                  try:
+                      url = signed['url']
+                      parsed = urlsplit(url)
+                      assert parsed.scheme == 'https' and parsed.netloc == urlsplit(BASE).netloc
+                      assert parsed.path == '/api/v1/media/' + '/'.join(
+                          [model, album, str(photo['number']), 'original'])
+                      assert signed['sha256'] == photo['sha256'] and signed['bytes'] == photo['bytes']
+                      with opener.open(Request(url, headers={'User-Agent': USER_AGENT}), timeout=30) as r:
+                          assert r.status == 200 and r.geturl() == url
+                          original = r.read(8_000_001)
+                      assert len(original) == photo['bytes']
+                      assert hashlib.sha256(original).hexdigest() == photo['sha256']
+                      with Image.open(io.BytesIO(original)) as image:
+                          assert image.size == (photo['width'], photo['height'])
+                          assert image.format in ('JPEG', 'PNG', 'WEBP')
+                          image.verify()
+                      with Image.open(io.BytesIO(original)) as image:
+                          image.load()
+                      passes += 1
+                      print('REAL_CLOUDFLARE_ORIGINAL_SHA_PIXELS_PASS', model,
+                            'album', album, 'number', photo['number'], 'bytes', len(original))
+                      if passes >= 2:
+                          break
+                  except HTTPError as e:
+                      first_failure = 'MEDIA_HTTP_' + str(e.code)
+                      break
+                  except Exception as e:
+                      first_failure = 'MEDIA_' + type(e).__name__
+                      break
+              print('REAL_CLOUDFLARE_PER_MODEL_RESULT', model, 'verified', passes,
+                    'absent', absent, 'failure', first_failure)
+              assert passes >= 1 and first_failure is None, 'REAL_ORIGINAL_NOT_VERIFIED_' + model
           PY
