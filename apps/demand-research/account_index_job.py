@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import selectors
 import subprocess
 import tempfile
 import time
@@ -34,23 +35,56 @@ def command(args, *, data=None, timeout=180):
     return result.stdout
 
 
-def read_remote(path,max_bytes,optional=False):
+def read_remote(path,max_bytes,optional=False,*,max_seconds=None):
+    """Bound the WHOLE remote read, not just wait() after stdout EOF.
+
+    A provider can leave rclone cat's stdout open indefinitely. Blocking
+    .read() never reaches the old wait(timeout=120), and GitHub Actions killed
+    the 15-minute account index with no durable checkpoint. This loop caps
+    time AND output without logging user records or provider error bodies.
+    """
+    if max_seconds is None:
+        max_seconds=150 if max_bytes>1_000_000 else 40
+    if max_seconds<=0 or max_bytes<=0:
+        raise ValueError("invalid bounded private remote read")
     proc=subprocess.Popen(["rclone","cat",path,"--retries","2"],
-        stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+        stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,bufsize=0)
     data=bytearray()
+    deadline=time.monotonic()+max_seconds
     try:
-        while block:=proc.stdout.read(65536):
-            data.extend(block)
-            if len(data)>max_bytes:
-                raise ValueError("private remote payload too large")
-        status=proc.wait(timeout=120)
+        with selectors.DefaultSelector() as selector:
+            selector.register(proc.stdout,selectors.EVENT_READ)
+            while True:
+                remaining=deadline-time.monotonic()
+                if remaining<=0:
+                    raise RuntimeError("private remote read timed out")
+                if not selector.select(min(remaining,2.0)):
+                    continue
+                # os.read consumes only currently available bytes; unlike
+                # BufferedReader.read(n) it cannot wait for all n bytes.
+                block=os.read(proc.stdout.fileno(),65536)
+                if not block:
+                    break
+                data.extend(block)
+                if len(data)>max_bytes:
+                    raise ValueError("private remote payload too large")
+        remaining=deadline-time.monotonic()
+        if remaining<=0:
+            raise RuntimeError("private remote read timed out")
+        try:
+            status=proc.wait(timeout=remaining)
+        except subprocess.TimeoutExpired:
+            raise RuntimeError("private remote read timed out") from None
         if status:
             if optional:return None
             raise RuntimeError("private remote read failed")
         return bytes(data)
     finally:
         if proc.poll() is None:
-            proc.kill();proc.wait()
+            proc.kill()
+            proc.wait()
+        if proc.stdout is not None:
+            proc.stdout.close()
 
 
 def _parse_manifest(raw):
