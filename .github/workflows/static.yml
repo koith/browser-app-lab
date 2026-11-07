@@ -31,22 +31,36 @@ jobs:
     timeout-minutes: 35
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || 'https://koith.github.io/browser-app-lab/' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Select the existing single Pages publisher without admin changes
+        id: publishing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python apps/gallery-archive/pages_single_publisher.py --select "$GITHUB_OUTPUT"
       - name: Setup Pages
+        if: steps.publishing.outputs.publisher == 'workflow'
         uses: actions/configure-pages@v5
       - name: Bind the public artifact to its exact checked-out source
+        if: steps.publishing.outputs.publisher == 'workflow'
         run: python apps/gallery-archive/pages_deployment_identity.py --write gallery-deployment.json
       - name: Upload artifact
+        if: steps.publishing.outputs.publisher == 'workflow'
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
           path: '.'
       - name: Deploy to GitHub Pages
+        if: steps.publishing.outputs.publisher == 'workflow'
         id: deployment
         uses: actions/deploy-pages@v5
         with:
           timeout: 1800000
+      - name: Verify the native publisher actually exposes this exact commit
+        if: steps.publishing.outputs.publisher == 'native'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python apps/gallery-archive/pages_single_publisher.py --wait-native

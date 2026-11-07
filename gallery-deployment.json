@@ -1,0 +1,5 @@
+---
+layout: null
+permalink: /gallery-deployment.json
+---
+{"schema_version":2,"repository":"koith/browser-app-lab","source_commit":{{ site.github.build_revision | jsonify }},"build_kind":"github-pages-jekyll"}

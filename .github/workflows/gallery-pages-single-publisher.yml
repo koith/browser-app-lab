@@ -1,0 +1,53 @@
+name: Gallery Pages Single Publisher and Native Source Identity
+on:
+  pull_request:
+    paths:
+      - 'gallery-deployment.json'
+      - 'apps/gallery-archive/pages_deployment_identity.py'
+      - 'apps/gallery-archive/pages_single_publisher.py'
+      - 'apps/gallery-archive/test_pages_deployment_identity.py'
+      - '.github/workflows/static.yml'
+      - '.github/workflows/gallery-pages-single-publisher.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: read
+jobs:
+  exact-native-source-and-one-publisher:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Strict source identity and publisher selection contracts
+        run: python apps/gallery-archive/test_pages_deployment_identity.py
+      - name: Read the actual existing Pages mode with the job token
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PYTHONPATH=apps/gallery-archive python - <<'PY'
+          from pages_single_publisher import pages_api,publisher
+          print('READ_ONLY_EXISTING_PAGES_MODE',publisher(pages_api()))
+          PY
+      - name: Stage only the real source-identity template for native Jekyll
+        run: |
+          mkdir _native-stamp-fixture
+          cp gallery-deployment.json _native-stamp-fixture/
+          printf 'plugins: [jekyll-github-metadata]\n' > _native-stamp-fixture/_config.yml
+      - uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./_native-stamp-fixture
+          destination: ./_native-stamp-built
+          build_revision: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Require genuine Jekyll output to name the exact checked-out source
+        run: |
+          PYTHONPATH=apps/gallery-archive python - <<'PY'
+          import subprocess
+          from pathlib import Path
+          from pages_deployment_identity import validate
+          source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          d=validate(Path('_native-stamp-built/gallery-deployment.json').read_bytes(),source)
+          assert d['build_kind']=='github-pages-jekyll'
+          print('OFFICIAL_NATIVE_JEKYLL_EXACT_SOURCE_PASS',source)
+          PY
