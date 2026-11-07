@@ -33,6 +33,9 @@ on:
     branches: [main]
     paths:
       - "apps/demand-research/target_account_bundle.py"
+      # Owner-reviewed one-time retry after fixing the public label filter.
+      # This path is removed after verifying the encrypted cloud archive.
+      - ".github/workflows/intersection-target-account-bundle.yml"
 
 permissions:
   contents: read
@@ -54,10 +57,14 @@ jobs:
       RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
       DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
-      TARGET_PLATFORM: ${{ inputs.platform }}
-      TARGET_ACCOUNT: ${{ inputs.account }}
-      TARGET_MAX_PAGES: ${{ inputs.max_pages }}
-      DEMAND_ACCOUNT_TEMP_STORAGE: ${{ github.event_name == 'workflow_dispatch' && 'github_release' || '' }}
+      # On the one designated owner-reviewed merge only, replay the selected
+      # currently public account without depending on a delayed cron queue.
+      # No private access, credentials, personal source bytes or target media
+      # are committed. Follow-up cleanup removes this emergency input.
+      TARGET_PLATFORM: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'bluesky' || inputs.platform }}
+      TARGET_ACCOUNT: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'liv0706-01.bsky.social' || inputs.account }}
+      TARGET_MAX_PAGES: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'all' || inputs.max_pages }}
+      DEMAND_ACCOUNT_TEMP_STORAGE: ${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]'))) && 'github_release' || '' }}
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
