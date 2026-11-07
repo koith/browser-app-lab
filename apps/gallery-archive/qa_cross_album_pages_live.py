@@ -84,10 +84,20 @@ def scroll_to_real_card(locator):
     # Native QA timed out in WebKit's protocol preflight before scrolling.
     # Use the page's normal instant scroll. Native touch below independently
     # verifies the actual geometry/hit target; image checks remain unchanged.
-    locator.evaluate("node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
-    locator.wait_for(state='visible',timeout=25000)
-    assert locator.evaluate('''node=>{const r=node.getBoundingClientRect();
-        return node.isConnected&&r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight}'''), 'Card is not visible after real scroll'
+    deadline=time.monotonic()+25
+    bounds=None
+    while time.monotonic()<deadline:
+        remaining=max(1,int((deadline-time.monotonic())*1000))
+        locator.evaluate("node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})",timeout=remaining)
+        locator.wait_for(state='visible',timeout=max(1,int((deadline-time.monotonic())*1000)))
+        bounds=locator.evaluate('''node=>{const r=node.getBoundingClientRect();return {
+            visible:node.isConnected&&r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight,
+            top:r.top,bottom:r.bottom,viewport:innerHeight}}''',timeout=max(1,int((deadline-time.monotonic())*1000)))
+        if bounds['visible']:return
+        # popstate schedules the application's recorded-scroll restoration in
+        # an animation frame; DOM visibility alone does not await that frame.
+        time.sleep(.05)
+    raise AssertionError(('Card did not enter the real viewport within 25s',bounds))
 
 
 def native_touch(page,locator):
