@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from playwright.sync_api import sync_playwright
 from urllib.parse import quote
+import time
 
 SITE = "https://intersection-originals-free.onrender.com/account-archive"
 
@@ -93,13 +94,23 @@ def verify(engine, *, label, width, height):
         page.get_by_role("button", name="닫기").click()
         assert page.locator("#postDetail[open]").count() == 0, "detail did not close"
 
+        tabs_started=time.monotonic()
         for tab in ("팔로워", "팔로잉", "게시글·답글"):
             page.get_by_role("tab", name=tab).click()
-            page.wait_for_function(
-                "() => !!document.querySelector('#results')?.textContent?.trim()",
-                timeout=45000,
-            )
-        page.locator("#results article.post").first.wait_for(timeout=60000)
+            if tab=="게시글·답글":
+                # Require ACTUAL saved posts after the user returns, not a
+                # nonempty loading placeholder from a stale tab.
+                page.locator("#results article.post").first.wait_for(timeout=40000)
+            else:
+                page.wait_for_function(
+                    "() => !!document.querySelector('#results')?.textContent?.trim()",
+                    timeout=30000,
+                )
+        tab_elapsed=time.monotonic()-tabs_started
+        assert tab_elapsed<40, "verified six-post archive tab round-trip too slow"
+        print("LIVE_VERIFIED_ACCOUNT_TAB_ROUNDTRIP_PASS",
+              "client="+label, "elapsed_seconds="+str(round(tab_elapsed,1)),
+              flush=True)
         doc = page.evaluate(
             "() => ({scroll:document.documentElement.scrollWidth,width:innerWidth})"
         )
