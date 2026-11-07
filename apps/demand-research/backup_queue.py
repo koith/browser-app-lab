@@ -13,6 +13,7 @@ import secrets
 import time
 import sqlite3
 from pathlib import Path
+from contextlib import contextmanager
 
 from demand_archive import CloudArchive, canonical_json, sha256
 from target_account_archive import profile_input
@@ -32,20 +33,25 @@ def sqlite_enabled():
     return enabled() and os.getenv("DEMAND_ARCHIVE_QUEUE_STORE","")=="sqlite"
 
 
+@contextmanager
 def _db():
     path=Path(os.getenv("DEMAND_ARCHIVE_QUEUE_SQLITE","/tmp/intersection-account-queue.sqlite3"))
     path.parent.mkdir(parents=True,exist_ok=True)
     conn=sqlite3.connect(str(path),timeout=5)
     conn.row_factory=sqlite3.Row
-    conn.execute('''CREATE TABLE IF NOT EXISTS account_requests (
-       job_id INTEGER PRIMARY KEY,
-       platform TEXT NOT NULL,
-       account TEXT NOT NULL,
-       created_at INTEGER NOT NULL,
-       workflow_run_id INTEGER,
-       accepted_at INTEGER
-    )''')
-    return conn
+    try:
+        with conn:
+            conn.execute('''CREATE TABLE IF NOT EXISTS account_requests (
+               job_id INTEGER PRIMARY KEY,
+               platform TEXT NOT NULL,
+               account TEXT NOT NULL,
+               created_at INTEGER NOT NULL,
+               workflow_run_id INTEGER,
+               accepted_at INTEGER
+            )''')
+            yield conn
+    finally:
+        conn.close()
 
 
 def _sqlite_record(row):
