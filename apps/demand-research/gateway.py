@@ -28,10 +28,11 @@ async def liveness():
 # workflow and main ref; the public web app cannot call this route successfully.
 BRIDGE_AUDIENCE="intersection-originals-free/credential-v1"
 BRIDGE_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-gateway-credential-sync.yml@refs/heads/main"
+ARCHIVE_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-target-account-bundle.yml@refs/heads/main"
 BRIDGE_ISSUER="https://token.actions.githubusercontent.com"
 BRIDGE_JWKS=BRIDGE_ISSUER+"/.well-known/jwks"
 
-def verify_bridge_token(token):
+def verify_bridge_token(token, workflow=BRIDGE_WORKFLOW):
     if not isinstance(token,str) or len(token)>12000 or len(token)<100:
         raise ValueError("Invalid bridge assertion")
     # Lazy import keeps normal offline tests and public-only routes lightweight.
@@ -46,7 +47,7 @@ def verify_bridge_token(token):
         "repository":"koith/browser-app-lab",
         "repository_id":"1284121913",
         "ref":"refs/heads/main",
-        "workflow_ref":BRIDGE_WORKFLOW,
+        "workflow_ref":workflow,
     }
     if any(str(claims.get(k,""))!=v for k,v in must.items()):
         raise ValueError("Untrusted bridge workflow")
@@ -96,6 +97,32 @@ def _bridge_authenticated(request):
         raise HTTPException(403,"Bridge identity rejected") from None
     except Exception:
         raise HTTPException(503,"Bridge identity verification unavailable") from None
+
+
+@app.get("/api/bridge/archive-key", include_in_schema=False)
+async def issue_temporary_archive_key(request:Request):
+    """Share a derived encryption key ONLY with the trusted selected-account runner.
+
+    The GitHub token remains inside Actions; the stable private viewer secret
+    never leaves Render. Issued key must never appear in workflow logs.
+    """
+    import base64
+    import github_temp_bundle
+    header=request.headers.get("authorization","")
+    if not header.startswith("Bearer ") or len(header)>12500:
+        raise HTTPException(403,"Authorized GitHub account runner required")
+    try:
+        verify_bridge_token(header[7:], workflow=ARCHIVE_WORKFLOW)
+    except (ValueError,TypeError,KeyError):
+        raise HTTPException(403,"GitHub account runner rejected") from None
+    except Exception:
+        raise HTTPException(503,"GitHub identity verification unavailable") from None
+    try:
+        key=github_temp_bundle.gateway_key()
+    except RuntimeError:
+        raise HTTPException(503,"Archive encryption unavailable") from None
+    return JSONResponse({"key":base64.b64encode(key).decode("ascii")},
+                        headers={"Cache-Control":"private, no-store"})
 
 
 @app.get("/api/bridge/pending",include_in_schema=False)
