@@ -73,6 +73,68 @@ jobs:
           else
             echo '7ZIP_INSTALLED=false; zipfile inspection completed'
           fi
+      - name: Inspect nested InstallShield data1.cab and extracted resource filenames
+        run: |
+          python3 - <<'PY'
+          from zipfile import ZipFile
+          from pathlib import Path
+          import hashlib
+          root=Path('/tmp/4leaf-origin')
+          with ZipFile(root/'4leaf.zip') as source:
+            for name in ('data1.cab','data1.hdr'):
+              (root/name).write_bytes(source.read(name))
+          cab=root/'data1.cab'
+          assert cab.stat().st_size==63103324
+          print('INSTALLSHIELD_CAB_SHA256',hashlib.sha256(cab.read_bytes()).hexdigest())
+          PY
+          echo 'TRY_NATIVE_7ZIP_CAB_LIST'
+          7z l -slt /tmp/4leaf-origin/data1.cab > /tmp/4leaf-origin/7zip-data1-list.txt 2>&1 || true
+          grep -Ei 'OBS2?\.PAK|1222\.OBS|Path = |Errors:|Error:' /tmp/4leaf-origin/7zip-data1-list.txt | head -n 65 || true
+          if ! command -v unshield >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq unshield
+          fi
+          echo 'TRY_UNSHIELD_INSTALLSHIELD_LIST'
+          if unshield l /tmp/4leaf-origin/data1.cab > /tmp/4leaf-origin/unshield-list.txt 2>&1; then
+            echo 'UNSHIELD_LIST_SUCCESS'
+            grep -Ei 'OBS2?\.PAK|1222\.OBS|[.]PAK' /tmp/4leaf-origin/unshield-list.txt | head -n 70 || true
+            mkdir -p /tmp/4leaf-origin/extracted
+            timeout 180 unshield x -d /tmp/4leaf-origin/extracted /tmp/4leaf-origin/data1.cab \
+              > /tmp/4leaf-origin/unshield-extract.txt 2>&1 || true
+            find /tmp/4leaf-origin/extracted -type f \( -iname '*obs*' -o -iname '*dice*' \) \
+              | head -n 85 || true
+          else
+            echo 'UNSHIELD_UNSUPPORTED_CAB_HEADER; alternate decoder still needed'
+            head -n 35 /tmp/4leaf-origin/unshield-list.txt || true
+          fi
+          python3 - <<'PY'
+          import hashlib,json,re
+          from pathlib import Path
+          root=Path('/tmp/4leaf-origin')
+          report_path=Path('4leaf-original-0156-installer-census.json')
+          report=json.loads(report_path.read_text())
+          reports=[]
+          for name in ('7zip-data1-list.txt','unshield-list.txt','unshield-extract.txt'):
+            p=root/name
+            if not p.exists():continue
+            data=p.read_text(errors='replace')
+            matches=[line for line in data.splitlines() if re.search(r'(?i)obs2?\.pak|1222\.obs',line)]
+            reports.append({'file':name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),
+              'lines':len(data.splitlines()),'obs_candidates':matches[:100]})
+            print('INSTALLSHIELD_INTERNAL_OBS_EVIDENCE',name, matches[:25])
+          paths=list((root/'extracted').rglob('*')) if (root/'extracted').exists() else []
+          extracted=[]
+          for path in paths:
+            if path.is_file() and ('obs' in path.name.lower() or 'dice' in path.name.lower()):
+              relative=str(path.relative_to(root/'extracted'))
+              extracted.append({'path':relative,'size':path.stat().st_size,
+                  'sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
+          report['cab_inspection']=reports
+          report['extracted_candidate_hashes_only']=extracted[:100]
+          report['chr_0156_original_obs2_1222']='UNVERIFIED_UNTIL_ARCHIVED_ORIGINAL_OBS_MEMBER_IS_IDENTIFIED'
+          report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+          print('NESTED_INSTALLER_ORIGINAL_PAK_CANDIDATES',len(extracted))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
