@@ -340,18 +340,42 @@ def main(args):
                 {'name': 'SIGNING_KEY', 'text': secrets.token_urlsafe(48), 'type': 'secret_text'})
     print('BOUND_ASSET_PHASE', 'verify_actual_remote_originals', flush=True)
     ready = False
-    for _ in range(15):
+    last_probe = 'NOT_RUN'
+    # Fresh workers.dev registrations can propagate after the script/asset
+    # upload succeeds. Report a bounded, non-sensitive health failure class,
+    # instead of hiding all HTTP/DNS/JSON failures behind one ValueError.
+    for attempt in range(45):
         try:
-            with build_opener(NoRedirect()).open(base + '/api/v1/health', timeout=10) as response:
-                health = json.loads(response.read(4096))
-            if health.get('source_commit') == release and health.get('transport') == 'cloudflare-bound-assets':
-                ready = True
-                break
-        except (OSError, ValueError):
-            pass
+            with build_opener(NoRedirect()).open(base + '/api/v1/health', timeout=8) as response:
+                status, content_type = response.status, response.headers.get('Content-Type', '')
+                raw = response.read(4096)
+            if 'application/json' not in content_type.lower():
+                last_probe = 'NON_JSON_HTTP_' + str(status)
+            else:
+                health = json.loads(raw)
+                if (isinstance(health, dict) and health.get('source_commit') == release
+                        and health.get('transport') == 'cloudflare-bound-assets'):
+                    ready = True
+                    last_probe = 'EXPECTED_RELEASE_HEALTH_200'
+                    break
+                last_probe = ('RELEASE_MISMATCH' if isinstance(health, dict)
+                              and health.get('source_commit') != release else 'HEALTH_SCHEMA_MISMATCH')
+        except HTTPError as error:
+            last_probe = 'HTTP_' + str(error.code)
+        except URLError as error:
+            last_probe = 'NETWORK_' + type(error.reason).__name__
+        except (OSError, ValueError, TypeError) as error:
+            last_probe = 'RESPONSE_' + type(error).__name__
+        if attempt in (0, 9, 19, 29, 44):
+            print('CF_WORKER_HEALTH_PROBE', 'attempt', attempt + 1,
+                  'state', last_probe, flush=True)
         time.sleep(2)
     if not ready:
+        print('CF_WORKER_HEALTH_FAILED', 'state', last_probe,
+              'script_and_assets_upload=previously_succeeded',
+              'remote_media_readback=not_verified', flush=True)
         raise ValueError('ACTUAL_WORKER_RELEASE_NOT_OBSERVED')
+    print('CF_WORKER_HEALTH_VERIFIED', 'exact_release=yes', flush=True)
     tasks = [(m, a['id'], p) for m in MODELS for a in catalogs[m]['albums'] for p in a['images']]
     def verify(task):
         model, album, photo = task
