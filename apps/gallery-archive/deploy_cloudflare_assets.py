@@ -24,6 +24,10 @@ NAME = 'gallery-archive-free'
 WRANGLER = '4.158.0'
 API = 'https://api.cloudflare.com/client/v4'
 ORIGIN = 'https://koith.github.io'
+# Cloudflare-managed workers.dev Browser Integrity Check rejects Python-urllib's
+# default User-Agent. The provider explicitly recommends a descriptive app UA.
+# This is owner-operated verification, not a browser impersonation.
+WORKER_VERIFY_UA = 'gallery-archive-replica-qa/1.0'
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -125,7 +129,8 @@ def existing_catalogs(mime, raw):
 def media_bytes(base, model, album, photo):
     opener = build_opener(NoRedirect())
     sign = Request(base + '/api/v1/sign', method='POST',
-        headers={'Origin': ORIGIN, 'Content-Type': 'application/json'},
+        headers={'Origin': ORIGIN, 'Content-Type': 'application/json',
+                 'User-Agent': WORKER_VERIFY_UA},
         data=json.dumps({'model': model, 'album': album, 'number': photo['number'],
                          'variant': 'original', 'sha256': photo['sha256']}).encode())
     try:
@@ -143,7 +148,7 @@ def media_bytes(base, model, album, photo):
         data.get('sha256') != photo['sha256'] or data.get('bytes') != photo['bytes']):
         raise ValueError('REMOTE_SIGNED_PHOTO_MISMATCH')
     try:
-        with opener.open(Request(data['url']), timeout=45) as response:
+        with opener.open(Request(data['url'], headers={'User-Agent': WORKER_VERIFY_UA}), timeout=45) as response:
             raw = response.read(8_000_001)
     except HTTPError as error:
         print('CF_REMOTE_ORIGINAL_MEDIA_HTTP', error.code, flush=True)
@@ -293,7 +298,8 @@ def main(args):
         if route.get('enabled') is not True:
             raise ValueError('WORKER_ROUTE_ENABLE_NOT_VERIFIED')
         try:
-            with build_opener(NoRedirect()).open(base + '/api/v1/health', timeout=10) as response:
+            with build_opener(NoRedirect()).open(Request(base + '/api/v1/health',
+                    headers={'User-Agent': WORKER_VERIFY_UA}), timeout=10) as response:
                 result = json.loads(response.read(4096))
             print('CF_EXISTING_WORKER_HEALTH', 'HTTP_200',
                   'recognized_gallery_release', isinstance(result, dict)
@@ -433,7 +439,8 @@ def main(args):
         sample = catalogs[model]['albums'][0]['images'][0]
         for path in (model + '/metadata/catalog.json', model + '/' + sample['key']):
             try:
-                opener.open(base + '/' + quote(path, safe='/'), timeout=30)
+                opener.open(Request(base + '/' + quote(path, safe='/'),
+                            headers={'User-Agent': WORKER_VERIFY_UA}), timeout=30)
             except HTTPError as error:
                 if error.code == 404:
                     continue
