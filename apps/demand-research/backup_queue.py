@@ -82,8 +82,22 @@ def read_acceptance(root,job_id):
 
 def _save_verified(root,key,payload):
     data=canonical_json(payload)
-    root.write_immutable(key,data)
-    verified=root.read_verified(key,sha256(data),cap=len(data)+1)
+    if isinstance(root, CloudArchive):
+        root.trace_queue = True
+    started = time.monotonic()
+    stage = "write_immutable"
+    outcome = "error"
+    try:
+        root.write_immutable(key,data)
+        print("BACKUP_QUEUE_STAGE stage=write_immutable outcome=ok elapsed_ms=" +
+              str(round((time.monotonic()-started)*1000)), flush=True)
+        stage = "read_verified"
+        started = time.monotonic()
+        verified=root.read_verified(key,sha256(data),cap=len(data)+1)
+        outcome = "ok" if verified == data else "sha_unverified"
+    finally:
+        print("BACKUP_QUEUE_STAGE stage=" + stage + " outcome=" + outcome + " elapsed_ms=" +
+              str(round((time.monotonic()-started)*1000)), flush=True)
     if verified!=data:
         raise RuntimeError("Backup request did not pass private storage readback")
 

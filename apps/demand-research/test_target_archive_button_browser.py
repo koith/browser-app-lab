@@ -27,7 +27,7 @@ PRIVATE="https://intersection-originals-free.onrender.com/"
 def verify(browser_type,kind,width,height):
     browser=browser_type.launch(headless=True)
     try:
-        for private in (False,True):
+        for private,denied in ((False,False),(True,False),(True,True)):
             page=browser.new_page(viewport={"width":width,"height":height})
             errors=[]
             status_queries=[]
@@ -69,10 +69,15 @@ Object.defineProperty(navigator,"clipboard",{
                         "payload":route.request.post_data_json,
                         "intent":route.request.headers.get("x-archive-intent")
                     })
-                    route.fulfill(status=202,content_type="application/json",
-                                  body=json.dumps({"accepted":True,"state":"QUEUED_NOT_VERIFIED",
-                                                   "run_id":41999000001,
-                                                   "receipt":"synthetic-signed-receipt-for-browser-QA"}))
+                    if denied:
+                        route.fulfill(status=503,content_type="application/json",
+                                      body=json.dumps({"accepted":False,
+                                                       "code":"storage_read_denied"}))
+                    else:
+                        route.fulfill(status=202,content_type="application/json",
+                                      body=json.dumps({"accepted":True,"state":"QUEUED_NOT_VERIFIED",
+                                                       "run_id":41999000001,
+                                                       "receipt":"synthetic-signed-receipt-for-browser-QA"}))
                 elif path.startswith("/api/target-archive/jobs/41999000001"):
                     job_reads.append(route.request.url)
                     route.fulfill(status=200,content_type="application/json",
@@ -96,7 +101,7 @@ Object.defineProperty(navigator,"clipboard",{
             page.wait_for_function("""() => {
               const status=document.getElementById("targetArchiveStatus").textContent;
               return status.includes("계정을 지정하면 교집합 전용 보관함")||
-                     status.includes("연결됨 · 계정 주소");
+                     status.includes("계정 이름 또는 주소를 입력하고 백업 시작");
             }""")
             assert len(status_queries)==1
             button=page.locator("#targetArchiveSubmit")
@@ -112,7 +117,20 @@ Object.defineProperty(navigator,"clipboard",{
             page.locator("#targetArchiveAccount").fill(
                 "https://bsky.app/profile/qa-example.bsky.social")
             assert button.is_enabled(),"valid public account must enable button"
-            if private:
+            if denied:
+                assert button.inner_text()=="백업 시작"
+                button.click()
+                page.wait_for_function("""() => document.getElementById(
+                    'targetArchiveStatus').textContent.includes('원격 읽기를 거부')""")
+                assert "접수·무결성을 확인하지 못했습니다" in page.locator(
+                    "#targetArchiveStatus").inner_text()
+                assert page.locator("#targetArchiveAccount").input_value()==(
+                    "https://bsky.app/profile/qa-example.bsky.social")
+                assert button.is_enabled(),"failed request must allow a later retry"
+                assert len(dispatched)==1 and not job_reads
+                assert page.evaluate("sessionStorage.getItem('intersection:private-archive-job:v1')") is None
+                assert page.locator("#targetArchiveJobStatus").is_hidden()
+            elif private:
                 assert button.inner_text()=="백업 시작"
                 button.click()
                 page.locator("#targetArchiveJobStatus[data-state=verified]").wait_for(
@@ -159,7 +177,7 @@ Object.defineProperty(navigator,"clipboard",{
             assert page.evaluate(
                 "document.documentElement.scrollWidth<=window.innerWidth+2")
             print("TARGET_BACKUP_BUTTON_BROWSER_PASS",kind,
-                  "private" if private else "public_to_private_app",
+                  "storage_read_denied" if denied else ("private" if private else "public_to_private_app"),
                   "valid_control_and_dispatch=YES")
             page.close()
     finally:

@@ -1,141 +1,253 @@
 #!/usr/bin/env python3
-"""Real Pages bytes + browser integration for SHA-identical cross-album fallback.
-
-PR mode overlays the candidate HTML/JS onto the REAL Pages origin. Post-deploy
-mode uses the exact live published files without overlay; those are distinct
-levels of evidence. No Render, TeraBox secrets or actual phone hardware.
-"""
-from __future__ import annotations
+"""Actual Pages originals and UI; candidate evidence is never operational PASS."""
 import argparse
+from collections import defaultdict
 import hashlib
 import io
 import json
 from pathlib import Path
+import re
+import subprocess
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
-BASE="https://koith.github.io/browser-app-lab/apps"
-MAX_PHOTOS_PER_MODEL=5
+BASE='https://koith.github.io/browser-app-lab/apps'
+ROOT=Path(__file__).resolve().parents[2]
 
-def exercise(browser,model,overlay):
-    root=f"{BASE}/{model}-gallery/"
-    page_context=browser.new_context(viewport={"width":390,"height":844},
-       device_scale_factor=2,is_mobile=True,has_touch=True,locale="ko-KR",
-       service_workers="block")
-    page=page_context.new_page()
-    exceptions=[]
-    page.on("pageerror",lambda e:exceptions.append(str(e)[:300]))
+
+def candidate_route(text,mime):
+    def handle(route):route.fulfill(status=200,content_type=mime,body=text)
+    return handle
+
+
+def signature(p):return (p['sha256'],p['bytes'],p['width'],p['height'])
+
+
+def cross_candidates(model):
+    folder=ROOT/f'apps/{model}-gallery'
+    physical=json.loads((folder/'stored-albums.json').read_text())
+    owner=json.loads((folder/'owner-index.json').read_text())
+    by_signature=defaultdict(list);by_url={}
+    for album in physical['albums']:
+        for photo in album['images']:
+            if not re.fullmatch(r'stored-albums/'+re.escape(album['id'])+r'/[a-zA-Z0-9._-]+\.(?:jpe?g|png|webp|avif)',photo['url']):
+                raise ValueError('Physical source is not an existing model-local Pages file')
+            by_signature[signature(photo)].append((album['id'],photo))
+            by_url[photo['url']]=photo
+    candidates=[]
+    for album in owner['albums']:
+        for photo in album['images']:
+            copies=by_signature.get(signature(photo),[])
+            if copies and not any(aid==album['id'] for aid,_ in copies):
+                candidates.append({'owner_album':album['id'],'owner_number':photo['number'],
+                    **{k:photo[k] for k in ('sha256','bytes','width','height')}})
+    if not candidates:raise ValueError('No actual cross-album owner originals were selected')
+    return candidates,by_url
+
+
+def exact_bytes(context,url,photo):
+    r=context.request.get(url,timeout=45000)
+    assert r.status==200,('actual image HTTP',r.status,url)
+    raw=r.body()
+    assert len(raw)==photo['bytes'] and hashlib.sha256(raw).hexdigest()==photo['sha256'],('actual image SHA/length',url)
+    with Image.open(io.BytesIO(raw)) as image:image.verify()
+    with Image.open(io.BytesIO(raw)) as image:
+        image.load();assert image.size==(photo['width'],photo['height']),('actual image dimensions',url)
+    return len(raw)
+
+
+def deployed_sources(context,root,model):
+    names=['index.html','saved-photo-union.js','owner-media.js','owner-index.json',
+           'stored-albums.json','album-aliases.json']
+    if model=='mimmi':names.append('album-grouping.js')
+    result={}
+    for name in names:
+        r=context.request.get(root+name,timeout=35000)
+        assert r.status==200,(model,name,'deployed source HTTP',r.status)
+        expected=(ROOT/f'apps/{model}-gallery'/name).read_bytes()
+        sha=hashlib.sha256(r.body()).hexdigest()
+        assert sha==hashlib.sha256(expected).hexdigest(),(model,name,'deployed source differs from exact checkout')
+        result[name]=sha
+    return result
+
+
+def navigate_album(page,album):
+    if page.locator('#lightbox.open').count():
+        page.locator('#close').click(timeout=20000)
+        page.wait_for_selector('#lightbox.open',state='hidden',timeout=25000)
+    if page.evaluate("id=>!document.querySelector('#detail').hidden && detailAlbum?.id===id",album):return
+    if not page.locator('#detail').is_hidden():
+        page.locator('#back').click(timeout=20000)
+        page.wait_for_selector('#detail',state='hidden',timeout=25000)
+    card=page.locator('#albumgrid .album[data-id="'+album+'"]')
+    card.scroll_into_view_if_needed(timeout=25000)
+    card.click(timeout=25000)
+    page.wait_for_function("id=>!document.querySelector('#detail').hidden && detailAlbum?.id===id",arg=album,timeout=25000)
+
+
+def decoded(page,root,target):
+    expected=root+target['url']
+    page.wait_for_function('''wanted=>{
+        const img=document.querySelector('#full');
+        return document.querySelector('#lightbox.open') && img && img.complete &&
+            img.naturalWidth>=160 && new URL(img.currentSrc||img.src,location.href).href===wanted;
+    }''',arg=expected,timeout=45000)
+    size=page.locator('#full').evaluate('im=>[im.naturalWidth,im.naturalHeight]')
+    assert size==[target['width'],target['height']],('actual lightbox pixels',target,size)
+    return expected
+
+
+def open_photo(page,root,target):
+    navigate_album(page,target['album'])
+    page.wait_for_function('''q=>[...document.querySelectorAll('#detailphotos .photo')].some(n=>Number(n.dataset.i)===q)''',arg=target['index'],timeout=25000)
+    card=page.locator('#detailphotos .photo[data-i="'+str(target['index'])+'"]')
+    card.scroll_into_view_if_needed(timeout=25000)
+    card.locator('img').wait_for(state='visible',timeout=25000)
+    page.wait_for_function('''q=>{
+        const image=document.querySelector('#detailphotos .photo[data-i="'+q.index+'"] img');
+        return image?.complete && image.naturalWidth===q.width && image.naturalHeight===q.height &&
+            new URL(image.currentSrc||image.src,location.href).href===q.url;
+    }''',arg={**target,'url':root+target['url']},timeout=45000)
+    card.click(timeout=25000)
+    decoded(page,root,target)
+
+
+def select_representatives(targets,limit):
+    grouped=defaultdict(list)
+    for t in targets:grouped[t['album']].append(t)
+    selected=[]
+    while len(selected)<limit and any(grouped.values()):
+        for key in grouped:
+            if grouped[key] and len(selected)<limit:selected.append(grouped[key].pop(0))
+    return selected
+
+
+def inspect_covers(page):
+    cards=page.locator('#albumgrid .album')
+    for i in range(0,cards.count(),4):
+        cards.nth(i).scroll_into_view_if_needed(timeout=25000)
+        page.wait_for_timeout(120)
+    page.wait_for_timeout(1500)
+    return page.evaluate('''()=>{
+        const rows=[...document.querySelectorAll('#albumgrid .album')].map(card=>{
+            const img=card.querySelector('img');return {album:card.dataset.id,
+                decoded:!!img?.complete&&img.naturalWidth>0,
+                failed:!!img?.complete&&!!img.src&&img.naturalWidth===0,
+                pending:!img?.complete,width:img?.naturalWidth||0,height:img?.naturalHeight||0};});
+        return {albums:rows.length,decoded:rows.filter(r=>r.decoded).length,
+            failed:rows.filter(r=>r.failed).length,pending:rows.filter(r=>r.pending).length,rows};
+    }''')
+
+
+def exercise(browser,model,overlay,limit=12):
+    root=f'{BASE}/{model}-gallery/'
+    source_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    relevant=[f'apps/{model}-gallery','apps/gallery-archive/qa_cross_album_pages_live.py']
+    diff=subprocess.run(['git','diff','--quiet','HEAD','--',*relevant],cwd=ROOT)
+    if diff.returncode not in (0,1):raise ValueError('Cannot establish exact checked-out source state')
+    dirty=diff.returncode!=0
+    if not overlay:assert not dirty,'Operational QA requires committed exact checked-out source'
+    print('ACTUAL_PAGES_MODEL_BEGIN',model,'CANDIDATE' if overlay else 'EXACT_DEPLOYED_SOURCE',flush=True)
+    context=browser.new_context(viewport={'width':390,'height':844},device_scale_factor=2,
+        is_mobile=True,has_touch=True,locale='ko-KR',service_workers='block')
+    page=context.new_page();exceptions=[];failures=[];catalog_calls=[];console_errors=[]
+    page.on('pageerror',lambda e:exceptions.append(str(e)[:300]))
+    page.on('console',lambda message:console_errors.append(message.text[:350]) if message.type=='error' else None)
+    page.on('requestfailed',lambda request:failures.append({'url':request.url,'failure':request.failure}))
+    page.on('response',lambda r:failures.append({'url':r.url,'status':r.status}) if r.status>=400 else None)
+    page.on('request',lambda r:catalog_calls.append(r.url) if 'onrender.com/api/' in r.url and r.url.endswith('/catalog') else None)
     if overlay:
-        html=Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
-        script=Path(f"apps/{model}-gallery/saved-photo-union.js").read_text(encoding="utf-8")
-        page.route(root,lambda route:route.fulfill(status=200,content_type="text/html",body=html))
-        page.route("**/saved-photo-union.js*",lambda route:route.fulfill(
-            status=200,content_type="application/javascript",body=script))
-        if model=="mimmi":
-            groups=Path("apps/mimmi-gallery/album-grouping.js").read_text(encoding="utf-8")
-            page.route("**/album-grouping.js*",lambda route:route.fulfill(
-                status=200,content_type="application/javascript",body=groups))
+        for name in ['index.html','saved-photo-union.js']+(['album-grouping.js'] if model=='mimmi' else []):
+            text=(ROOT/f'apps/{model}-gallery'/name).read_text()
+            pattern=root if name=='index.html' else '**/'+name+'*'
+            mime='text/html' if name=='index.html' else 'application/javascript'
+            page.route(pattern,candidate_route(text,mime))
     try:
-        if not overlay:
-            # A browser PASS against stale Pages is NOT deployment verification.
-            paths=["index.html","saved-photo-union.js"]
-            if model=="mimmi":paths.append("album-grouping.js")
-            for asset in paths:
-                live=page_context.request.get(root+asset,timeout=35000)
-                assert live.status==200,(model,asset,"exact deployed asset HTTP",live.status)
-                expected=Path(f"apps/{model}-gallery/{asset}").read_bytes()
-                assert hashlib.sha256(live.body()).digest()==hashlib.sha256(expected).digest(),(
-                    model,asset,"Pages not at exact checked-out deployed source")
-        r=page.goto(root,wait_until="domcontentloaded",timeout=60000)
-        assert r and r.status==200,(model,"gallery HTML",r.status if r else None)
-        page.wait_for_function("""model =>
-            Array.isArray(stored) && stored.length>0 &&
-            (model==='mimmi' || stored.some(a=>a.images.some(p=>p.shaPinnedLocalCopy===true))) &&
-            document.querySelectorAll('#albumgrid .album').length>0
-        """,arg=model,timeout=80000)
-        data=page.evaluate("""model => {
-          const matches=[];
-          for(const a of stored){
-            const visible=photosFor(a);
-            visible.forEach((p,i)=>{
-              if(p.shaPinnedLocalCopy===true &&
-                 typeof p.url==='string' && p.url.startsWith('stored-albums/') &&
-                 !p.ownerAlbum && p.originalAlbumId && p.originalAlbumId!==a.id &&
-                 p.bytes>4500 && p.width>=160 && p.height>=160) {
-                 matches.push({album:a.id,index:i,url:p.url,sha:p.sha256,
-                   bytes:p.bytes,width:p.width,height:p.height,originalAlbumId:p.originalAlbumId});
-              }
-            });
-          }
-          // Mimmi's 211 exact-SHA owner aliases can be safely collapsed by
-          // the already-reviewed edition grouper into an existing public
-          // album. Their absence as separate cards is NOT a loss. Verify the
-          // real Janus physical gallery instead of requiring fake duplicates.
-          const direct=[];
-          if(model==='mimmi')for(const a of stored){
-            photosFor(a).forEach((p,i)=>{
-              if(typeof p.url!=='string'||!p.url.startsWith('stored-albums/')||
-                 p.ownerAlbum||p.bytes<=4500||p.width<160||p.height<160) return;
-              direct.push({album:a.id,index:i,url:p.url,sha:p.sha256,
-                bytes:p.bytes,width:p.width,height:p.height,originalAlbumId:p.originalAlbumId||a.id});
-            });
-          }
-          const sample=model==='mimmi'?(matches.length?matches:direct):matches;
-          const favorite=sample.filter(p=>model==='yui'
-            ?p.album==='teddy-bear97':p.album==='djawa-janus-scary-lantern-night');
-          const targets=(favorite.length?favorite:sample).slice(0,5);
-          return {total:matches.length,targets};
-        }""", model)
-        if model=="yui":
-            assert data["total"]>0,(model,"missing real same-SHA owner fallback")
-        # Mimmi aliases are allowed to collapse redundant SHA-identical cards.
-        assert len(data["targets"])>=1,(model,"no real Pages picture to decode")
-        opened=0
-        for target in data["targets"]:
-            page.evaluate("id=>openAlbum(id)",target["album"])
-            page.wait_for_function("idx=>document.querySelectorAll('#detailphotos .photo').length>idx",
-                                    arg=target["index"],timeout=25000)
-            card=page.locator("#detailphotos .photo").nth(target["index"])
-            card.scroll_into_view_if_needed(timeout=25000)
-            card.locator("img").wait_for(state="visible",timeout=25000)
-            card.click(timeout=25000)
-            expected=root+target["url"]
-            page.wait_for_function("""wanted=>{
-              const img=document.querySelector('#full');
-              return !!document.querySelector('#lightbox.open') &&
-                img && img.complete && img.naturalWidth>=160 &&
-                new URL(img.currentSrc||img.src,location.href).href===wanted;
-            }""",arg=expected,timeout=45000)
-            picture=page.evaluate("""()=>{
-               const im=document.querySelector('#full');
-               return {width:im.naturalWidth,height:im.naturalHeight,src:im.currentSrc||im.src};
-            }""")
-            assert picture["width"]==target["width"] and picture["height"]==target["height"],(model,"browser dimensions",target,picture)
-            independent=page_context.request.get(expected,timeout=45000)
-            assert independent.status==200,(model,"actual Pages image HTTP",independent.status,expected)
-            data_bytes=independent.body()
-            assert hashlib.sha256(data_bytes).hexdigest()==target["sha"],(model,"live bytes SHA",target["album"])
-            assert len(data_bytes)==target["bytes"],(model,"live bytes length",target["album"])
-            with Image.open(io.BytesIO(data_bytes)) as img:
-                img.verify()
-            opened+=1
-            page.locator("#close").click(timeout=20000)
-        assert not exceptions,(model,"JavaScript exceptions",exceptions)
-        print("REAL_PAGES_CROSS_ALBUM_SHA_LIGHTBOX_PASS",json.dumps({
-            "model":model,"candidate_html":overlay,"sha_exact_cross_album_candidates":data["total"],
-            "actual_independent_sha_and_pixel_rechecks":opened,
-            "real_pages_assets":True,"render_dependency":False,
-            "iphone_hardware":False},sort_keys=True),flush=True)
-    finally:
-        page_context.close()
+        source_proof={} if overlay else deployed_sources(context,root,model)
+        response=page.goto(root,wait_until='domcontentloaded',timeout=60000)
+        assert response and response.status==200
+        page.wait_for_function("Array.isArray(stored)&&stored.length>0&&document.querySelectorAll('#albumgrid .album').length>0",timeout=80000)
+        cover_observation=inspect_covers(page)
+        candidates,physical=cross_candidates(model)
+        print('ACTUAL_CROSS_OWNER_ROWS_SELECTED',model,len(candidates),flush=True)
+        mapped=page.evaluate('''rows=>rows.map(row=>{
+            const id=canonicalId(row.owner_album),a=stored.find(a=>a.id===id);
+            if(!a)return null;
+            const photos=photosFor(a),i=photos.findIndex(p=>p.sha256===row.sha256 && p.bytes===row.bytes &&
+                p.width===row.width && p.height===row.height && typeof p.url==='string' &&
+                p.url.startsWith('stored-albums/') && !p.ownerAlbum && !p.vaultAlbum);
+            return i<0?null:{album:a.id,index:i,url:photos[i].url,sha256:photos[i].sha256,
+                bytes:photos[i].bytes,width:photos[i].width,height:photos[i].height};
+        })''',candidates)
+        assert len(mapped)==len(candidates) and all(mapped),(model,'actual cross-album owner original missing from final composed gallery',sum(p is None for p in mapped))
+        targets=[];seen=set()
+        for photo in mapped:
+            assert photo['url'] in physical and signature(photo)==signature(physical[photo['url']]),'Not an exact physical stored original'
+            key=(photo['album'],photo['sha256'])
+            if key not in seen:seen.add(key);targets.append(photo)
+        checked_urls=set();byte_count=0
+        for photo in targets:
+            if photo['url'] not in checked_urls:
+                byte_count+=exact_bytes(context,root+photo['url'],photo);checked_urls.add(photo['url'])
+                if len(checked_urls)%50==0:print('REAL_PAGES_CROSS_FILE_INTEGRITY_PROGRESS',model,len(checked_urls),flush=True)
+        selected=select_representatives(targets,len(targets) if model=='yui' else limit)
+        viewed=[]
+        for target in selected:
+            print('ACTUAL_UI_PHOTO_BEGIN',model,target['album'],target['index'],flush=True)
+            open_photo(page,root,target)
+            exact_bytes(context,root+target['url'],target)
+            viewed.append({'album':target['album'],'sha256':target['sha256'],'width':target['width'],'height':target['height']})
+            page.locator('#close').click(timeout=20000)
+            # closeViewer uses asynchronous history.back(). Waiting here is
+            # essential: reopening an album earlier races the old popstate.
+            page.wait_for_selector('#lightbox.open',state='hidden',timeout=25000)
+            page.wait_for_function('''id=>!document.querySelector('#detail').hidden && detailAlbum?.id===id && !history.state?.photo''',arg=target['album'],timeout=25000)
+        # Test next/previous on adjacent REAL local originals, independently
+        # of whether a collapsed owner alias retained the marker property.
+        pair=page.evaluate('''()=>{
+            for(const a of stored){const p=photosFor(a);
+                for(let i=0;i<p.length-1;i++)if([p[i],p[i+1]].every(q=>!q.ownerAlbum&&!q.vaultAlbum&&typeof q.url==='string'&&q.url.startsWith('stored-albums/')))
+                    return [i,i+1].map(j=>({album:a.id,index:j,url:p[j].url,sha256:p[j].sha256,bytes:p[j].bytes,width:p[j].width,height:p[j].height}));}
+            return null;
+        }''')
+        assert pair,(model,'no actual adjacent local originals for navigation')
+        open_photo(page,root,pair[0]);page.locator('#next').click();decoded(page,root,pair[1]);exact_bytes(context,root+pair[1]['url'],pair[1])
+        page.locator('#prev').click();decoded(page,root,pair[0]);page.locator('#close').click()
+        page.wait_for_selector('#lightbox.open',state='hidden',timeout=25000)
+        page.locator('#back').click();page.wait_for_selector('#detail',state='hidden',timeout=25000)
+        page.reload(wait_until='domcontentloaded',timeout=60000)
+        page.wait_for_function("Array.isArray(stored)&&stored.length>0&&document.querySelectorAll('#albumgrid .album').length>0",timeout=45000)
+        if not overlay:assert source_proof==deployed_sources(context,root,model)
+        assert not exceptions,(model,'unhandled JS errors',exceptions)
+        assert not catalog_calls,(model,'unnecessary Render catalog request',catalog_calls)
+        print('CANDIDATE_CROSS_ALBUM_PHOTO_CHECK_PASS' if overlay else 'DEPLOYED_CROSS_ALBUM_PHOTO_CHECK_PASS',json.dumps({
+            'model':model,'candidate_html':overlay,'operational_source_verified':not overlay and not dirty,
+            'source_commit':None if dirty else source_head,'checked_out_base_commit':source_head,
+            'uncommitted_candidate_source':dirty,'version':page.locator('#app-version').inner_text(),
+            'source_asset_sha256':source_proof,'cross_owner_rows':len(candidates),
+            'all_cross_owner_rows_have_exact_local_routes':len(mapped),
+            'independent_real_file_SHA_bytes_pixels':len(checked_urls),'independent_read_bytes':byte_count,
+            'actual_browser_lightbox_photos':len(viewed),'viewed':viewed,
+            'next_previous_close_back_reload':True,'unhandled_js_errors':exceptions,
+            'unnecessary_render_catalog_requests':catalog_calls,
+            'all_album_cover_observation':cover_observation,
+            'console_errors':console_errors[:30],
+            'remaining_http_failures':failures[:30],'full_gallery_P0_restored':False,
+            'iphone_hardware':False},sort_keys=True),flush=True)
+    except Exception:
+        print('ACTUAL_PAGES_FAILURE_STATE',json.dumps({'model':model,'url':page.url,
+            'unhandled_js_errors':exceptions,'http_failures':failures[-15:],
+            'ui':page.evaluate("()=>({lightbox:document.querySelector('#lightbox')?.className,detailHidden:document.querySelector('#detail')?.hidden,scroll:scrollY,route:history.state})")}),flush=True)
+        raise
+    finally:context.close()
 
-if __name__=="__main__":
-    parser=argparse.ArgumentParser()
-    parser.add_argument("--browser",choices=("chromium","webkit"),required=True)
-    parser.add_argument("--candidate-html",action="store_true")
-    args=parser.parse_args()
-    with sync_playwright() as playwright:
-        browser=getattr(playwright,args.browser).launch(headless=True)
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('--browser',choices=('chromium','webkit'),required=True)
+    p.add_argument('--candidate-html',action='store_true');p.add_argument('--max-browser-photos',type=int,default=12)
+    args=p.parse_args()
+    if not 12<=args.max_browser_photos<=500:raise SystemExit('Browser sample must retain at least twelve actual originals per model')
+    with sync_playwright() as pw:
+        browser=getattr(pw,args.browser).launch(headless=True)
         try:
-            for model in ("mimmi","yui"):exercise(browser,model,args.candidate_html)
+            for model in ('mimmi','yui'):exercise(browser,model,args.candidate_html,args.max_browser_photos)
         finally:browser.close()

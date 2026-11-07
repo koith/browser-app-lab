@@ -139,7 +139,23 @@ function transferFromOldPages(){
  return true;
 }
 if(transferFromOldPages())return;
+const arrivingFromLegacy=new URLSearchParams(location.hash.slice(1)).has(TRANSFER_KEY);
 restoreImportedWatches();
+// First visit to the new Render host: automatically restore the browser's
+// old GitHub Pages interest accounts. Same-tab top-level navigation preserves
+// each origin's own storage. Never run twice in a tab or delete the old list.
+// Manual button remains for browsers that block this first-party round trip.
+if(location.hostname==="intersection-originals-free.onrender.com"&&
+   !arrivingFromLegacy&&!read().length){
+  try{
+    const flag="intersection:watch-origin-migration-attempted:v1";
+    if(sessionStorage.getItem(flag)!=="1"){
+      sessionStorage.setItem(flag,"1");
+      location.replace(PAGES_HOME+"?transfer_watches=1");
+      return;
+    }
+  }catch{/* Safari private-mode storage may deny writes; show manual recovery */}
+}
 watches=read();
 if(location.hostname==="intersection-originals-free.onrender.com"){
  const toolbar=$("accountWatchSection")?.querySelector(".account-list-toolbar");
@@ -543,7 +559,8 @@ window.addEventListener("intersection:feed-updated",scheduleRender);
 window.addEventListener("intersection:date-range-change",scheduleRender);
 window.addEventListener("storage",e=>{if(e.key===STORE){watches=read();render()}});
 render();
-if(new URLSearchParams(location.search).get("tab")==="archives")setView("archives");
+const initialTab=new URLSearchParams(location.search).get("tab");
+if(initialTab==="archives"||initialTab==="accounts")setView(initialTab);
 // On page load, bounded refresh: no background monitoring or polling.
 Promise.resolve().then(async()=>{
   const initial=watches.filter(w=>["bluesky","mastodon","x"].includes(w.platform)).slice(0,4);

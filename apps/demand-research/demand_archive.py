@@ -111,12 +111,17 @@ def validate_catalog(payload):
                 raise ValueError("unverified catalog media")
     return payload["posts"]
 
+class QueueStorageDenied(PermissionError):
+    """Stop queue retries on provider denial; contains no provider response text."""
+
+
 class CloudArchive:
     def __init__(self, remote=None, runner=None):
         self.remote = (remote or os.getenv("DEMAND_TERABOX_REMOTE", "archive:DemandResearch")).rstrip("/")
         if not re.fullmatch(r"archive:[A-Za-z0-9_/-]+", self.remote):
             raise ValueError("archive destination must be a private archive: prefix")
         self.runner = runner or self._run
+        self.trace_queue = False
         self.quarantined_ids = set()
         self.repaired_entries = 0
         self.unrecoverable_entries = 0
@@ -137,29 +142,74 @@ class CloudArchive:
             # Diagnostics contain error classes only. Never print cookie, remote
             # paths, source text, URLs or raw backend error output to Actions.
             message = r.stderr.decode("utf-8", "replace").lower()
-            if re.search(r"not found|does not exist|doesn't exist|no such file|directory not found", message):
-                category = "missing"
-            elif re.search(r"429|rate.limit|too many requests|throttl", message):
-                category = "rate_limited"
-            elif re.search(r"409|already exists|duplicate|conflict", message):
-                category = "duplicate"
-            elif re.search(r"403|permission|access.denied|unauthorized|cookie", message):
+            # Signed URLs can contain arbitrary words/numeric substrings.
+            # Classify explicit status/fields, never a token containing "403".
+            message = re.sub(r"https?://[^\s]+", "[url]", message)
+            message = message.replace('\\"', '"')
+            status = re.search(r"http (?:error |status )?([45][0-9]{2})\b|\b([45][0-9]{2}) (?:forbidden|unauthorized)\b", message)
+            code = re.search(r"[\"']?(?:errno|error_code)[\"']?\s*[:=]\s*(-?[0-9]{1,6})\b", message)
+            http_status = int(next(v for v in status.groups() if v)) if status else None
+            provider_code = int(code.group(1)) if code else None
+            if (http_status in (401,403) or provider_code in (31326,400141,104,-6)
+                    or re.search(r"permission denied|access denied|unauthorized|invalid cookie|failed to login|anti.hotlinking", message)):
                 category = "authorization"
+            elif "invalid header field value" in message:
+                category = "invalid_header"
+            elif re.search(r"not found|does not exist|doesn't exist|no such file|directory not found", message):
+                category = "missing"
+            elif http_status == 429 or re.search(r"rate.limit|too many requests|throttl", message):
+                category = "rate_limited"
+            elif http_status == 409 or re.search(r"already exists|duplicate|conflict", message):
+                category = "duplicate"
             elif re.search(r"quota|space|capacity", message):
                 category = "capacity"
             elif re.search(r"timeout|timed out|deadline|connection", message):
                 category = "network_timeout"
-            elif re.search(r"500|502|503|504|server.error", message):
+            elif http_status in (500,502,503,504) or "server error" in message:
                 category = "remote_server"
             else:
                 category = "backend_rejected"
             if allow_missing and category == "missing":
                 return None
-            raise RuntimeError("private cloud " + args[0] + " failed (" + category + ")")
+            error = RuntimeError("private cloud " + args[0] + " failed (" + category + ")")
+            error.http_status = http_status
+            error.provider_code = provider_code
+            raise error
         return r.stdout
 
     def command(self, args, *, data=None, timeout=150, allow_missing=False):
-        return self.runner(args, data=data, timeout=timeout, allow_missing=allow_missing)
+        started = time.monotonic()
+        outcome = "error"
+        http_status = provider_code = None
+        try:
+            result = self.runner(args, data=data, timeout=timeout, allow_missing=allow_missing)
+            outcome = "missing" if result is None else "ok"
+            return result
+        except RuntimeError as error:
+            # Only fixed categories; never print exception text, argv or paths.
+            for category in ("missing", "rate_limited", "duplicate", "authorization",
+                             "capacity", "network_timeout", "remote_server", "backend_rejected", "invalid_header"):
+                if "(" + category + ")" in str(error):
+                    outcome = category
+                    break
+            http_status = getattr(error, "http_status", None)
+            provider_code = getattr(error, "provider_code", None)
+            if isinstance(error.__cause__, subprocess.TimeoutExpired):
+                outcome = "process_timeout"
+            if self.trace_queue and outcome == "authorization":
+                # Retrying uploads after a read denial cannot establish SHA
+                # integrity. Stop before rcat or alternate endpoint attempts.
+                raise QueueStorageDenied("TeraBox queue access denied") from None
+            raise
+        finally:
+            if self.trace_queue:
+                operation = args[0] if args[0] in ("cat", "lsf", "mkdir", "copyto", "rcat") else "other"
+                endpoint = "alternate" if "--terabox-domain" in args else "primary"
+                print("BACKUP_QUEUE_IO", "operation=" + operation, "endpoint=" + endpoint,
+                      "outcome=" + outcome, "elapsed_ms=" + str(round((time.monotonic()-started)*1000)),
+                      "http_status=" + (str(http_status) if type(http_status) is int else "unknown"),
+                      "provider_code=" + (str(provider_code) if type(provider_code) is int else "unknown"),
+                      flush=True)
 
     def preflight(self):
         if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):

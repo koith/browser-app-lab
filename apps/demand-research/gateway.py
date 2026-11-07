@@ -11,7 +11,7 @@ from social_sources import TERMS, ROUTES, request_one_page
 import account_index
 import account_index_sources
 import account_groups
-from demand_archive import CloudArchive
+from demand_archive import CloudArchive, QueueStorageDenied
 
 from target_archive_api import create_router as create_target_archive_router, dispatch_enabled
 
@@ -129,7 +129,7 @@ async def github_acknowledge_job(request:Request):
                                      payload["workflow_run_id"])
     except (ValueError,TypeError,KeyError):
         raise HTTPException(400,"Invalid bridge acknowledgment") from None
-    except RuntimeError:
+    except (RuntimeError,QueueStorageDenied):
         raise HTTPException(503,"Unable to verify immutable queue acknowledgment") from None
     return JSONResponse({"accepted":True,"job_id":row["job_id"]},
                         headers={"Cache-Control":"private, no-store"})
@@ -587,6 +587,34 @@ async def bridge_archive_diagnostics(request:Request):
     _bridge_authenticated(request)
     return JSONResponse(await _get_archive_inventory(),
                         headers={"Cache-Control":"private, no-store"})
+
+def _verify_latest_account_zip():
+    # This is deliberately separate from the fast listing endpoint:
+    # only independent TeraBox ZIP bytes and all manifest SHA hashes can
+    # establish a validated backup. Never return account identities.
+    from verified_bundle_reader import names_from_cloud, load_verified_bundle
+    root=CloudArchive(REMOTE)
+    try:
+        filenames=names_from_cloud(root)
+        if not filenames:
+            return {"state":"NO_ZIP_CANDIDATES","posts":None,"objects":None}
+        archive=load_verified_bundle(root,filenames[0])
+        return {"state":"SHA_VERIFIED","posts":archive.post_count,
+                "objects":archive.object_count}
+    except (RuntimeError,ValueError,TypeError,KeyError):
+        return {"state":"READBACK_UNVERIFIED","posts":None,"objects":None}
+
+@app.get("/api/bridge/verify-one",include_in_schema=False)
+async def verify_one_account_archive(request:Request):
+    _bridge_authenticated(request)
+    if not configured():
+        raise HTTPException(503,"Private archive storage unavailable")
+    try:
+        data=await asyncio.wait_for(
+            asyncio.to_thread(_verify_latest_account_zip),timeout=85)
+    except TimeoutError:
+        data={"state":"READBACK_TIMED_OUT","posts":None,"objects":None}
+    return JSONResponse(data,headers={"Cache-Control":"private, no-store"})
 
 @app.get("/api/posts")
 async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=60),q:str=Query("",max_length=100),
