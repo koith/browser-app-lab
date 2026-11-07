@@ -15,6 +15,8 @@ import os
 from pathlib import Path
 import re
 import tempfile
+from urllib.error import HTTPError
+from urllib.parse import quote
 
 from demand_archive import CloudArchive
 import github_temp_bundle as gh
@@ -88,6 +90,19 @@ def mirror(*, source_run=None, minimum_posts=1, root=None):
     key=gh._oidc_key()
     tag="intersection-github-archive-"+run_id+"-a1"
     remote=gh._download_tag(tag,missing_ok=True)
+    if remote is None and os.environ.get("GITHUB_TOKEN"):
+        # Release REST metadata can already contain the complete upload even
+        # when the public CDN has not yet published its download URL. If such
+        # a tag exists, READ IT BACK instead of attempting another release
+        # creation (which would fail with an existing immutable tag).
+        try:
+            gh._json(gh.API+"/releases/tags/"+quote(tag,safe=""),
+                     os.environ["GITHUB_TOKEN"])
+        except HTTPError as error:
+            if error.code!=404:
+                raise RuntimeError("Existing encrypted release lookup denied") from None
+        else:
+            remote=gh.readback_uploaded_release(tag,os.environ["GITHUB_TOKEN"])
     if remote is not None:
         existing=gh._make_bundle(tag,gh.decrypt(remote,key))
         if existing.digest!=archive.digest or existing.account!=archive.account:
