@@ -1,0 +1,41 @@
+"""Offline one-click SQLite queue tests; no TeraBox read/write required."""
+import pytest
+import backup_queue
+
+
+@pytest.fixture(autouse=True)
+def configure(monkeypatch,tmp_path):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_STORE","sqlite")
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_SQLITE",str(tmp_path/"queue.sqlite3"))
+
+
+def test_selected_account_starts_without_any_cloud(monkeypatch):
+    monkeypatch.setattr(backup_queue,"CloudArchive",lambda: (_ for _ in ()).throw(AssertionError("No TeraBox allowed")))
+    job=backup_queue.create_request("bluesky","@public-test")
+    assert 1000000000<=job<=9999999999
+    assert backup_queue.pending()==[{"job_id":job,"platform":"bluesky",
+                                   "account":"public-test.bsky.social"}]
+    assert backup_queue.state(job)["accepted"] is None
+    ack=backup_queue.accept(job,42340001000)
+    assert ack["workflow_run_id"]==42340001000
+    assert backup_queue.pending()==[]
+    assert backup_queue.state(job)["accepted"]["workflow_run_id"]==42340001000
+    with pytest.raises(ValueError):
+        backup_queue.accept(job,42340001001)
+
+
+def test_unknown_job_and_invalid_account_not_accepted():
+    assert backup_queue.state(1234567890) is None
+    with pytest.raises(ValueError):
+        backup_queue.create_request("unsupported","example")
+    with pytest.raises(ValueError):
+        backup_queue.accept(1234567890,42340001000)
+
+
+def test_queue_bounded_and_ordered():
+    jobs=[backup_queue.create_request("bluesky",f"public-{i}.bsky.social")
+          for i in range(backup_queue._MAX_OPEN)]
+    assert {row["job_id"] for row in backup_queue.pending(limit=20)}==set(jobs)
+    with pytest.raises(RuntimeError,match="full"):
+        backup_queue.create_request("bluesky","overflow.bsky.social")
