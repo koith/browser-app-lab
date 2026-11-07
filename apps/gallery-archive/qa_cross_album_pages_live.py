@@ -84,10 +84,20 @@ def scroll_to_real_card(locator):
     # Native QA timed out in WebKit's protocol preflight before scrolling.
     # Use the page's normal instant scroll. Native touch below independently
     # verifies the actual geometry/hit target; image checks remain unchanged.
-    locator.evaluate("node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
-    locator.wait_for(state='visible',timeout=25000)
-    assert locator.evaluate('''node=>{const r=node.getBoundingClientRect();
-        return node.isConnected&&r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight}'''), 'Card is not visible after real scroll'
+    deadline=time.monotonic()+25
+    bounds=None
+    while time.monotonic()<deadline:
+        remaining=max(1,int((deadline-time.monotonic())*1000))
+        locator.evaluate("node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})",timeout=remaining)
+        locator.wait_for(state='visible',timeout=max(1,int((deadline-time.monotonic())*1000)))
+        bounds=locator.evaluate('''node=>{const r=node.getBoundingClientRect();return {
+            visible:node.isConnected&&r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight,
+            top:r.top,bottom:r.bottom,viewport:innerHeight}}''',timeout=max(1,int((deadline-time.monotonic())*1000)))
+        if bounds['visible']:return
+        # popstate schedules the application's recorded-scroll restoration in
+        # an animation frame; DOM visibility alone does not await that frame.
+        time.sleep(.05)
+    raise AssertionError(('Card did not enter the real viewport within 25s',bounds))
 
 
 def native_touch(page,locator):
@@ -144,6 +154,7 @@ def decoded(page,root,target):
     }''',arg=expected,timeout=45000)
     size=page.locator('#full').evaluate('im=>[im.naturalWidth,im.naturalHeight]')
     assert size==[target['width'],target['height']],('actual lightbox pixels',target,size)
+    assert page.locator('#lightbox .version-chip').inner_text()==page.locator('#app-version').inner_text(), 'Viewer and main version labels differ'
     return expected
 
 
@@ -181,6 +192,10 @@ def inspect_covers(page):
         scroll_to_real_card(cards.nth(i))
         page.wait_for_timeout(120)
     page.wait_for_timeout(1500)
+    return cover_snapshot(page)
+
+
+def cover_snapshot(page):
     return page.evaluate('''()=>{
         const rows=[...document.querySelectorAll('#albumgrid .album')].map(card=>{
             const img=card.querySelector('img');return {album:card.dataset.id,
@@ -225,6 +240,60 @@ def denied_catalog_real_local_photos(browser,model,overlay):
     finally:context.close()
 
 
+def transient_pages_real_local_photo(browser,model,overlay):
+    """One controlled 503, followed by actual untouched Pages image bytes."""
+    root=f'{BASE}/{model}-gallery/'
+    context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,
+        has_touch=True,service_workers='block')
+    page=context.new_page();attempts=[]
+    try:
+        if overlay:
+            for name in ['index.html','saved-photo-union.js']+(['album-grouping.js'] if model=='mimmi' else []):
+                text=(ROOT/f'apps/{model}-gallery'/name).read_text()
+                page.route(root if name=='index.html' else '**/'+name+'*',
+                    candidate_route(text,'text/html' if name=='index.html' else 'application/javascript'))
+        # Select a real non-cover BEFORE any navigation. Choosing a target
+        # after loading allowed an in-flight/cached image to skip injection.
+        folder=ROOT/f'apps/{model}-gallery'
+        excluded=set()
+        excluded.update(re.findall(r'data-fast-sha="([a-f0-9]{64})"',(folder/'index.html').read_text()))
+        for name in ('stored-albums.json','owner-index.json'):
+            for album in json.loads((folder/name).read_text())['albums']:
+                if album.get('images'):excluded.add(album['images'][0]['sha256'])
+        covers=json.loads((folder/'album-covers.json').read_text()).get('covers',{})
+        excluded.update(p.get('sha256') for p in covers.values())
+        candidates,physical=cross_candidates(model)
+        selected=next((p for p in candidates if p['sha256'] not in excluded),None)
+        assert selected,'No actual non-cover original for transient-failure test'
+        paths=[path for path,p in physical.items() if signature(p)==signature(selected)]
+        urls={root+path for path in paths}
+        def first_failure(route):
+            if route.request.url not in urls:route.continue_();return
+            attempts.append(route.request.url)
+            if len(attempts)==1:route.fulfill(status=503,body='controlled transient Pages failure')
+            else:route.continue_()
+        page.route('**/stored-albums/**',first_failure)
+        page.goto(root,wait_until='domcontentloaded',timeout=60000)
+        page.wait_for_function('Array.isArray(stored)&&stored.length>0&&ownerStored.length>0',timeout=45000)
+        target=page.evaluate('''paths=>{
+            for(const a of available()){const p=photosFor(a),i=p.findIndex(q=>
+                !q.ownerAlbum&&!q.vaultAlbum&&paths.includes(q.url));
+                if(i>=0)return {album:a.id,index:i,...p[i]};}return null;
+        }''',paths)
+        assert target,'Selected real non-cover original missing from composed gallery'
+        url=root+target['url']
+        open_photo(page,root,target)
+        retry_count=page.locator('#detailphotos .photo[data-i="'+str(target['index'])+'"] img').evaluate(
+            'img=>committedImageRetries.get(img)?.attempts||0')
+        assert retry_count==1 and 2<=len(attempts)<=3,('Transient photo retry was missing or repeated unnecessarily',retry_count,len(attempts))
+        exact_bytes(context,url,target)
+        print('FAULT_INJECTED_TRANSIENT_PAGES_REAL_ORIGINAL_PASS',json.dumps({
+            'model':model,'candidate_html':overlay,'controlled_initial_http':503,
+            'real_Pages_followup_SHA_and_decoded_pixels':True,'automatic_grid_retries':retry_count,
+            'browser_image_requests_including_lightbox':len(attempts),'full_gallery_P0_restored':False}),flush=True)
+    finally:context.close()
+
+
 def exercise(browser,model,overlay,limit=12):
     root=f'{BASE}/{model}-gallery/'
     source_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
@@ -256,7 +325,27 @@ def exercise(browser,model,overlay,limit=12):
         page.wait_for_function("Array.isArray(stored)&&stored.length>0&&document.querySelectorAll('#albumgrid .album').length>0",timeout=80000)
         composed_rows=page.evaluate('available().reduce((n,a)=>n+photosFor(a).length,0)')
         cover_observation=inspect_covers(page)
+        public_album_ids=page.evaluate('''()=>available().filter(a=>photosFor(a).some(p=>
+            !p.ownerAlbum&&!p.vaultAlbum&&typeof p.url==='string'&&p.url.startsWith('stored-albums/'))).map(a=>a.id)''')
+        public_cover_proofs=[]
+        for album_id in public_album_ids:
+            # WebKit may defer offscreen loading. Inspect the real card in
+            # the viewport rather than waiting for offscreen lazy images.
+            card=page.locator('#albumgrid .album[data-id="'+album_id+'"]')
+            scroll_to_real_card(card)
+            page.wait_for_function('''id=>{
+                const image=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');
+                return image?.complete&&image.naturalWidth>0&&new URL(image.currentSrc||image.src,location.href).pathname.includes('/stored-albums/');
+            }''',arg=album_id,timeout=45000)
+            public_cover_proofs.append({'album':album_id,**card.locator('img').evaluate('''image=>({
+                url:new URL(image.currentSrc||image.src,location.href).href,
+                width:image.naturalWidth,height:image.naturalHeight})''')})
+        cover_observation=cover_snapshot(page)
         candidates,physical=cross_candidates(model)
+        for cover in public_cover_proofs:
+            assert cover['url'].startswith(root),'Cover left the actual model gallery'
+            file=physical.get(cover['url'][len(root):])
+            assert file and (cover['width'],cover['height'])==(file['width'],file['height']),('Actual cover pixels differ from stored original',cover)
         print('ACTUAL_CROSS_OWNER_ROWS_SELECTED',model,len(candidates),flush=True)
         mapped=page.evaluate('''rows=>rows.map(row=>{
             const id=canonicalId(row.owner_album),a=stored.find(a=>a.id===id);
@@ -320,12 +409,15 @@ def exercise(browser,model,overlay,limit=12):
             'next_previous_close_back_reload':True,'unhandled_js_errors':exceptions,
             'unnecessary_render_catalog_requests':catalog_calls,
             'all_album_cover_observation':cover_observation,
+            'all_albums_with_public_original_have_decoded_covers':len(public_album_ids),
+            'verified_public_covers':public_cover_proofs,
             'console_errors':console_errors[:30],
             'remaining_http_failures':failures[:30],'full_gallery_P0_restored':False,
             'iphone_hardware':False},sort_keys=True),flush=True)
     except Exception:
         print('ACTUAL_PAGES_FAILURE_STATE',json.dumps({'model':model,'url':page.url,
             'unhandled_js_errors':exceptions,'http_failures':failures[-15:],
+            'cover_observation':cover_snapshot(page),
             'ui':page.evaluate("()=>({lightbox:document.querySelector('#lightbox')?.className,detailHidden:document.querySelector('#detail')?.hidden,scroll:scrollY,route:history.state})")}),flush=True)
         raise
     finally:context.close()
@@ -345,4 +437,5 @@ if __name__=='__main__':
             for model in ('mimmi','yui'):
                 exercise(browser,model,args.candidate_html,args.max_browser_photos)
                 denied_catalog_real_local_photos(browser,model,args.candidate_html)
+                transient_pages_real_local_photo(browser,model,args.candidate_html)
         finally:browser.close()

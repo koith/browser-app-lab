@@ -1,6 +1,7 @@
 {
-  "version": "v0.1.0-beta.27",
-  "date": "2026-10-30",
+  "version": "v0.1.0-beta.29",
+  "date": "2026-11-07",
+  "verification_scope": "Delivery repair release. Existing progress counters are historical snapshots, not proof that private delivery or the full operating gallery is restored.",
   "policy": {
     "monthly_charge_krw": 0,
     "payment_card_required": false,

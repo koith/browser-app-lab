@@ -127,7 +127,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="../mimmi-gallery/" target="_blank" rel="noopener noreferrer">밈미 ↗</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-beta.28</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.29</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -160,7 +160,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.27</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip" data-gallery-version></small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -179,6 +179,31 @@ if(location.hostname==='koith.github.io' && 'serviceWorker' in navigator){
 // The gallery itself is served by always-available GitHub Pages; never redirect to a sleeping Render instance.
 
 const $=id=>document.getElementById(id);
+document.querySelectorAll('[data-gallery-version]').forEach(node=>node.textContent=$('app-version').textContent);
+// Retry only committed same-origin photo bytes, at most twice per image URL.
+// A transient Pages failure must not permanently hide a locally saved photo.
+const committedImageRetries=new WeakMap();
+function retryCommittedImageError(event){
+ const img=event.target;
+ if(!(img instanceof HTMLImageElement)||location.hostname!=='koith.github.io')return;
+ const src=img.getAttribute('src');if(!src)return;
+ let url;try{url=new URL(src,location.href)}catch{return}
+ const prefix=new URL('stored-albums/',location.href);
+ if(url.origin!==location.origin||!url.pathname.startsWith(prefix.pathname)||url.search||
+    !/\.(?:jpe?g|png|webp|avif)$/i.test(url.pathname))return;
+ const previous=committedImageRetries.get(img);
+ const attempts=previous?.url===url.href?previous.attempts:0;
+ if(attempts>=2)return;
+ const state={url:url.href,attempts:attempts+1};committedImageRetries.set(img,state);
+ event.stopImmediatePropagation();
+ setTimeout(()=>{
+  if(!img.isConnected||committedImageRetries.get(img)!==state||img.getAttribute('src')!==src)return;
+  if(img.complete&&img.naturalWidth>0)return;
+  img.removeAttribute('src');img.src=src;
+ },state.attempts===1?400:1200);
+}
+document.addEventListener('error',retryCommittedImageError,true);
+
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),localPreviewIndex=new Map(),detailRenderGeneration=0;
 function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
@@ -340,7 +365,12 @@ function photoRotation(p){return [90,270].includes(p?.display_rotation)?p.displa
 function rotationAttributes(p){const angle=photoRotation(p);return angle?' data-rotation="'+angle+'" style="--photo-rotation:'+angle+'deg"':''}
 function card(a,hasImages){
  const owned=stored.find(x=>x.id===a.id)||a;
- const p=validImages(owned),configuration=albumCovers[owned.id],selected=p.find(p=>p.sha256&&p.sha256===configuration?.sha256)||p[0],cover=selected?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
+ const p=validImages(owned),configuration=albumCovers[owned.id],preferred=p.find(p=>p.sha256&&p.sha256===configuration?.sha256)||p[0];
+ // Keep the preferred photograph/crop whenever its exact saved copy exists.
+ // Otherwise a same-work committed photo can show the album without Render.
+ const publicCover=p.find(q=>!q.ownerAlbum&&!q.vaultAlbum&&typeof q.url==='string'&&q.url.startsWith('stored-albums/'));
+ const unavailablePreferred=location.hostname==='koith.github.io'&&(preferred?.ownerAlbum||preferred?.vaultAlbum)&&!localPreviewIndex.get(localPhotoKey(owned.id,preferred));
+ const selected=unavailablePreferred?(publicCover||preferred):preferred,cover=selected?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
  const label=getName(a),labels=YuiLabels.describe(owned),shortTitle=YuiLabels.coverTitle({...owned,title:label});
  const focused=selected?.sha256&&selected.sha256===configuration?.sha256;
  const position=focused&&Array.isArray(configuration.position)&&configuration.position.length===2&&configuration.position.every(n=>Number.isFinite(n)&&n>=0&&n<=100)?configuration.position:[50,20];
