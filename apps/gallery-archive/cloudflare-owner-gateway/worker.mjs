@@ -4,6 +4,7 @@
  * Pages receives only expiring, SHA-bound media URLs, never storage credentials.
  */
 import { privateS3Bucket } from './private-s3.mjs';
+import { boundAssetBucket } from './bound-assets.mjs';
 const ID = /^[a-z0-9][a-z0-9-]{1,99}$/;
 const SHA = /^[a-f0-9]{64}$/;
 const cache = new Map();
@@ -57,16 +58,19 @@ function imageType(bytes) {
       String.fromCharCode(...bytes.slice(8,12)) === 'WEBP') return 'image/webp';
   return null;
 }
-async function catalog(env, model) {
-  const now = Date.now(), hit = cache.get(model);
+async function catalog(env, model, albumId) {
+  const partitioned=env.ARCHIVE_BUCKET.partitionedCatalogs===true;
+  const cacheKey=model+(partitioned?'/'+albumId:'');
+  const now = Date.now(), hit = cache.get(cacheKey);
   const bucketIdentity=env.ARCHIVE_BUCKET.cacheIdentity||env.ARCHIVE_BUCKET;
   if (hit && hit.expires > now && hit.bucket === bucketIdentity) return hit.value;
-  const item = await env.ARCHIVE_BUCKET.get(model + '/metadata/catalog.json');
+  const item = await env.ARCHIVE_BUCKET.get(model + (partitioned?'/metadata/albums/'+albumId+'.json':'/metadata/catalog.json'));
   if (!item || item.size < 20 || item.size > 6_000_000) return null;
   const raw = await item.text();
   let data;
   try { data = JSON.parse(raw); } catch { return null; }
   if (data?.schema_version !== 1 || data.model !== model || !Array.isArray(data.albums)) return null;
+  if(partitioned&&(data.albums.length!==1||data.albums[0].id!==albumId))return null;
   const entries = new Map();
   for (const album of data.albums) {
     if (!ID.test(album?.id) || !Array.isArray(album.images)) return null;
@@ -88,11 +92,11 @@ async function catalog(env, model) {
       });
     }
   }
-  cache.set(model, { value: entries, bucket: bucketIdentity, expires: now + 30_000 });
+  cache.set(cacheKey, { value: entries, bucket: bucketIdentity, expires: now + 30_000 });
   return entries;
 }
 async function entry(env, model, album, number, variant) {
-  const map = await catalog(env, model);
+  const map = await catalog(env, model, album);
   return map?.get(album + ':' + number)?.[variant] || null;
 }
 const payload = (model, album, number, variant, sha, bytes, expires) =>
@@ -188,7 +192,7 @@ async function handle(request, env) {
 export function resetCatalogCacheForTests() { cache.clear(); }
 export default { async fetch(request,env) {
   try {
-    const bucket=env.ARCHIVE_BUCKET||privateS3Bucket(env);
+    const bucket=env.ARCHIVE_BUCKET||privateS3Bucket(env)||boundAssetBucket(env);
     return await handle(request,{...env,ARCHIVE_BUCKET:bucket});
   } catch {
     // Never return provider messages, signed upstream requests or credentials.

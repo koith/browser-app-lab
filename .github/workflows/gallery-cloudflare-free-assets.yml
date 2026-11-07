@@ -1,0 +1,87 @@
+name: Gallery Free Bound Assets Replica
+on:
+  workflow_dispatch:
+    inputs:
+      max_new_per_model:
+        description: 'Existing private originals per model; 0 reads all remaining known originals'
+        type: number
+        default: 32
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/cloudflare-owner-gateway/**'
+      - 'apps/gallery-archive/cloudflare_assets_snapshot.py'
+      - 'apps/gallery-archive/deploy_cloudflare_assets.py'
+      - 'apps/gallery-archive/test_cloudflare_assets_snapshot.py'
+      - 'apps/gallery-archive/cloudflare_assets_local_fixture.py'
+      - 'apps/gallery-archive/verify_cloudflare_local_runtime.py'
+      - '.github/workflows/gallery-cloudflare-free-assets.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/cloudflare-owner-gateway/bound-assets*'
+      - 'apps/gallery-archive/cloudflare_assets_snapshot.py'
+      - 'apps/gallery-archive/deploy_cloudflare_assets.py'
+      - '.github/workflows/gallery-cloudflare-free-assets.yml'
+permissions:
+  contents: read
+concurrency:
+  group: gallery-free-assets-${{ github.event_name == 'pull_request' && github.ref || 'owner-replica' }}
+  cancel-in-progress: false
+jobs:
+  exact-bytes-and-private-routing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'Pillow==11.3.0'
+      - run: python apps/gallery-archive/test_cloudflare_assets_snapshot.py
+      - run: node apps/gallery-archive/cloudflare-owner-gateway/bound-assets.test.mjs
+      - run: node apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs
+      - name: Validate actual Workers bundling and private Text modules without a cloud account
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          python apps/gallery-archive/cloudflare_assets_local_fixture.py --directory "$RUNNER_TEMP/real-public-build-only"
+          npx --yes wrangler@4.158.0 deploy --dry-run --config "$RUNNER_TEMP/real-public-build-only/source/wrangler.json" --outdir "$RUNNER_TEMP/real-public-build-only/bundle"
+      - name: Read real JPEGs through actual workerd and deny direct original paths
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: python apps/gallery-archive/verify_cloudflare_local_runtime.py --directory "$RUNNER_TEMP/real-runtime-only"
+  replicate-existing-owned-originals:
+    needs: exact-bytes-and-private-routing
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'Pillow==11.3.0'
+      - name: Install the existing checksum-pinned owner storage client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/storage-client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/storage-client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/storage-client" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/storage-client.zip" -d "$RUNNER_TEMP/storage-client"
+          binary="$(find "$RUNNER_TEMP/storage-client" -type f -name rclone -print -quit)"
+          test -n "$binary"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Read originals, deploy Free bound assets, verify every remote original
+        env:
+          MAX_NEW: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.max_new_per_model) || '32' }}
+        run: python apps/gallery-archive/deploy_cloudflare_assets.py --directory "$RUNNER_TEMP/gallery-private-replica" --max-new-per-model "$MAX_NEW"
