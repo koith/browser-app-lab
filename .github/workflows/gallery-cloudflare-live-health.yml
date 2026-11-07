@@ -1,0 +1,52 @@
+name: Gallery Cloudflare Real Worker Health and BIC Quick QA
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-cloudflare-live-health.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-worker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Verify real workers.dev serves gallery code with documented app User-Agent
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, re
+          from urllib.error import HTTPError
+          from urllib.request import Request, build_opener
+          BASE = 'https://gallery-archive-free.gallery-9f7d03138f3f.workers.dev'
+          headers = {'User-Agent': 'gallery-archive-replica-qa/1.0'}
+          opener = build_opener()
+          def get(path):
+              try:
+                  with opener.open(Request(BASE + path, headers=headers), timeout=20) as r:
+                      return r.status, r.headers.get('content-type', ''), r.read(4096)
+              except HTTPError as e:
+                  return e.code, e.headers.get('content-type', ''), e.read(4096)
+          status, mime, raw = get('/api/v1/health')
+          print('REAL_CF_WORKER_HEALTH_HTTP', status, 'content_type_json', 'json' in mime)
+          assert status == 200, 'REAL_WORKER_HEALTH_NOT_200'
+          health = json.loads(raw)
+          assert health.get('transport') == 'cloudflare-bound-assets', 'WRONG_WORKER'
+          assert re.fullmatch(r'[a-f0-9]{40}', health.get('source_commit', '')), 'UNKNOWN_WORKER_SOURCE'
+          body = json.dumps({'model':'mimmi','album':'nonexistent-album','number':1,
+                             'variant':'original','sha256':'0'*64}).encode()
+          request = Request(BASE + '/api/v1/sign', data=body, method='POST',
+              headers={**headers, 'Origin':'https://koith.github.io',
+                       'Content-Type':'application/json'})
+          try:
+              with opener.open(request, timeout=20) as response:
+                  sign_status, signed = response.status, response.read(4096)
+          except HTTPError as e:
+              sign_status, signed = e.code, e.read(4096)
+          print('REAL_CF_WORKER_NEGATIVE_SIGN_HTTP', sign_status)
+          assert sign_status == 404 and json.loads(signed).get('error') == 'PHOTO_NOT_MIRRORED', 'SIGNED_ROUTE_NOT_EXPECTED_WORKER'
+          status, mime, raw = get('/mimmi/originals/not-a-public-asset')
+          print('REAL_CF_RAW_PATH_DENIED_HTTP', status)
+          assert status == 404, 'RAW_ASSET_ROUTE_EXPOSED'
+          print('REAL_CF_WORKER_LIVE_ROUTE_PASS')
+          PY
