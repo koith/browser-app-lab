@@ -1,0 +1,45 @@
+name: Gallery Cloudflare Read-Only Connection
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/check_cloudflare_connection.py'
+      - 'apps/gallery-archive/test_cloudflare_connection.py'
+      - '.github/workflows/gallery-cloudflare-connection.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/check_cloudflare_connection.py'
+      - 'apps/gallery-archive/test_cloudflare_connection.py'
+      - '.github/workflows/gallery-cloudflare-connection.yml'
+permissions:
+  contents: read
+jobs:
+  redaction-and-scope-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/gallery-archive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python apps/gallery-archive/test_cloudflare_connection.py
+  observe-existing-account:
+    needs: redaction-and-scope-contract
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/gallery-archive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read account, Worker and subscription metadata only
+        run: python apps/gallery-archive/check_cloudflare_connection.py
