@@ -24,6 +24,8 @@ import tempfile
 import threading
 import time
 from urllib.parse import quote, urlencode, urlsplit
+from urllib.error import HTTPError, URLError
+from xml.etree import ElementTree
 from urllib.request import Request, urlopen
 import zipfile
 
@@ -168,37 +170,113 @@ def releases(max_pages=2):
             return
 
 
+def atom_tags():
+    """Use the public GitHub release Atom feed, not rate-limited anonymous REST.
+
+    GitHub's release Atom feed currently contains a limited recent window.
+    Never infer completeness from its contents. The exact run route below can
+    additionally recover any older run by its immutable tag without listing.
+    """
+    url="https://github.com/"+REPO+"/releases.atom"
+    request=Request(url,headers={"Accept":"application/atom+xml",
+                                  "User-Agent":"intersection-private-archive-reader"})
+    try:
+        with urlopen(request,timeout=25) as response:
+            raw=response.read(1_000_001)
+    except (HTTPError,URLError,TimeoutError,OSError) as error:
+        raise RuntimeError("GitHub release feed unavailable") from None
+    if len(raw)>1_000_000:
+        raise RuntimeError("GitHub release feed exceeds safe limit")
+    try:
+        root=ElementTree.fromstring(raw)
+    except ElementTree.ParseError:
+        raise RuntimeError("Invalid GitHub release feed") from None
+    ns="{http://www.w3.org/2005/Atom}"
+    if root.tag!=ns+"feed":
+        raise RuntimeError("Unexpected GitHub release feed")
+    seen=set()
+    for entry in root.findall(ns+"entry"):
+        for link in entry.findall(ns+"link"):
+            href=link.attrib.get("href","")
+            prefix="https://github.com/"+REPO+"/releases/tag/"
+            if (href.startswith(prefix) and link.attrib.get("rel","alternate")=="alternate"):
+                tag=href[len(prefix):]
+                if TAG.fullmatch(tag) and tag not in seen:
+                    seen.add(tag)
+                    yield tag
+                break
+
+
+def _download_tag(tag, *, missing_ok=False):
+    if not TAG.fullmatch(tag):
+        raise ValueError("Invalid GitHub temporary archive tag")
+    url="https://github.com/"+REPO+"/releases/download/"+tag+"/"+ASSET
+    try:
+        with urlopen(Request(url,headers={
+                "Accept":"application/octet-stream",
+                "User-Agent":"intersection-private-archive-reader"}),timeout=65) as response:
+            raw=response.read(MAX_CIPHER+1)
+    except HTTPError as error:
+        if missing_ok and error.code==404:
+            return None
+        raise RuntimeError("GitHub temporary archive download unavailable") from None
+    except (URLError,TimeoutError,OSError):
+        raise RuntimeError("GitHub temporary archive download unavailable") from None
+    if not 34<len(raw)<=MAX_CIPHER:
+        raise BundleInvalid("Invalid remote encrypted archive size")
+    return raw
+
+
+def tagged_bundle(tag, *, missing_ok=False):
+    with _guard:
+        found=_cache.get(tag)
+        if found is not None and time.monotonic()-found[0]<CACHE_SECONDS:
+            return found[1]
+    raw=_download_tag(tag,missing_ok=missing_ok)
+    if raw is None:
+        return None
+    # AES-GCM and VerifiedBundle's whole-ZIP+manifest SHA checks establish
+    # original integrity even without the rate-limited GitHub REST metadata.
+    bundle=_make_bundle(tag,decrypt(raw,gateway_key()))
+    with _guard:
+        if len(_cache)>=2:_cache.clear()
+        _cache[tag]=(time.monotonic(),bundle)
+    return bundle
+
+
 def latest_bundles(max_accounts=12):
-    seen = set()
-    for release in releases():
+    seen=set()
+    for tag in atom_tags():
         try:
-            bundle = release_bundle(release)
-        except (BundleInvalid, RuntimeError, OSError, ValueError, zipfile.BadZipFile):
+            bundle=tagged_bundle(tag)
+        except (BundleInvalid,RuntimeError,ValueError,zipfile.BadZipFile):
             continue
         if bundle.account in seen:
             continue
         seen.add(bundle.account)
         yield bundle
-        if len(seen) >= max_accounts:
+        if len(seen)>=max_accounts:
             return
 
 
 def account_bundle(account):
     for bundle in latest_bundles():
-        if bundle.account == account:
+        if bundle.account==account:
             return bundle
     return None
 
 
-def run_bundle(run_id, account=None):
-    if type(run_id) is not int or run_id <= 0:
+def run_bundle(run_id,account=None):
+    if type(run_id) is not int or run_id<=0:
         raise ValueError("Invalid workflow id")
-    prefix = "intersection-github-archive-" + str(run_id) + "-a"
-    for release in releases():
-        if not release["tag_name"].startswith(prefix):
+    # Exact immutable URL avoids the anonymous REST rate limit, even after
+    # this run ages out of the 10 most recent release feed entries.
+    for attempt in range(1,5):
+        tag="intersection-github-archive-"+str(run_id)+"-a"+str(attempt)
+        bundle=tagged_bundle(tag,missing_ok=True)
+        if bundle is None:
             continue
-        bundle = release_bundle(release)
-        if account is None or bundle.selected_account == account:
+        if account is None or bundle.selected_account==account:
             return bundle
     return None
 
