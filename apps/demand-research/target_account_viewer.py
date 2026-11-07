@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import json
 import re
+import threading
+import time
 from pathlib import Path
 from urllib.parse import urlsplit
 from fastapi import APIRouter, HTTPException, Query, Request
@@ -49,11 +51,47 @@ class _BoundedZipRoot:
                                  allow_missing=allow_missing)
 
 
+_ZIP_SESSION_CACHE=None
+_ZIP_SESSION_LOCK=threading.Lock()
+ZIP_SESSION_SECONDS=120
+ZIP_FAILURE_RETRY_SECONDS=25
+
+
 def _verified_account_bundles(root):
-    # GH temporary mode is always a fast independent fallback. A delayed
-    # provider must not turn an already verified GH account into an error.
-    source=_BoundedZipRoot(root) if github_temp_bundle.enabled() else root
-    return available_bundles(source)
+    """Share SHA-verified immutable ZIPs during browsing; avoid repeated rclone.
+
+    When the server has GH temporary storage enabled, hitting the TeraBox
+    root on every profile, post, comment and image call made a single page
+    take minutes despite a successful download. The immutable ZIP filename
+    includes its original SHA, so a bounded cache is safe for this session.
+    FakeCloud tests deliberately bypass this cross-request process cache.
+    """
+    global _ZIP_SESSION_CACHE
+    if not github_temp_bundle.enabled():
+        return available_bundles(root)
+    cacheable=type(root) is CloudArchive
+    now=time.monotonic()
+    if cacheable:
+        with _ZIP_SESSION_LOCK:
+            item=_ZIP_SESSION_CACHE
+        if item is not None and item[0]==root.remote:
+            valid_for=(ZIP_FAILURE_RETRY_SECONDS if item[3]
+                       else ZIP_SESSION_SECONDS)
+            if now-item[1]<valid_for:
+                if item[3]:
+                    raise RuntimeError("Private ZIP provider temporarily unavailable")
+                return item[2]
+    try:
+        result=tuple(available_bundles(_BoundedZipRoot(root)))
+    except (RuntimeError,ValueError,TypeError,BundleInvalid):
+        if cacheable:
+            with _ZIP_SESSION_LOCK:
+                _ZIP_SESSION_CACHE=(root.remote,now,(),True)
+        raise
+    if cacheable and len(result)<=6:
+        with _ZIP_SESSION_LOCK:
+            _ZIP_SESSION_CACHE=(root.remote,time.monotonic(),result,False)
+    return result
 
 
 
