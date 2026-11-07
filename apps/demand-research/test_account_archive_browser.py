@@ -166,6 +166,27 @@ def run(browser_type,name,width,height):
         doc=page.evaluate("() => ({w:document.documentElement.scrollWidth, v:innerWidth})")
         assert doc["w"]<=doc["v"]+2,("horizontal overflow",doc)
         assert not errors,errors
+        # Real private storage may verify profile photos much more slowly
+        # than post JSON. Posts must appear while the profile is still pending.
+        page.add_init_script("""
+(() => {
+  const earlier=window.fetch.bind(window);
+  window.fetch=(resource,options) => {
+    const address=typeof resource==="string"?resource:(resource?.url||"");
+    if(address.endsWith("/profile")) {
+      return new Promise(resolve=>setTimeout(resolve,6500))
+        .then(()=>earlier(resource,options));
+    }
+    return earlier(resource,options);
+  };
+})();
+""")
+        page.reload(wait_until="domcontentloaded",timeout=30000)
+        page.locator("#results article.post").first.wait_for(timeout=4000)
+        assert page.locator("#results article.post").count()==2, (
+            "feed must render while 6.5-second profile request is pending")
+        assert not errors,errors
+        print("ACCOUNT_ARCHIVE_PARALLEL_FEED_PROFILE_PASS",name)
         print("ACCOUNT_ARCHIVE_BROWSER_PASS",name,
               "verified_profile_feed_thread_graph_mobile_usable=YES")
     finally:

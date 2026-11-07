@@ -267,6 +267,10 @@ async function selectAccount(value){
     return;
   }
   resetProfile();showMessage("게시글 보관본을 불러오는 중…");
+  // The remote profile snapshot can take tens of seconds to verify. Start
+  // post loading NOW, independently. A stale profile response must never
+  // overwrite a newly selected account.
+  setTab("posts");
   try{
     const profile=await get(base()+"/profile");
     if(state.account!==value)return;
@@ -277,7 +281,6 @@ async function selectAccount(value){
       $("profileStatus").textContent="프로필 원격 읽기 실패 · 보관 완료로 간주하지 않음";
     }
   }
-  if(state.account===value)setTab("posts");
 }
 async function init(){
   try{
