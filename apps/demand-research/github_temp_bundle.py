@@ -140,6 +140,36 @@ def _download(asset):
     return raw
 
 
+def readback_uploaded_release(tag, token, *, attempts=7):
+    """Independently read the *published* immutable release asset.
+
+    A freshly created GitHub Release may show an uploaded asset in REST while
+    its public CDN download still returns 404 for several seconds. Never
+    mistake a successful upload ACK for complete remote verification.
+    """
+    if not TAG.fullmatch(tag) or not isinstance(token,str) or not token:
+        raise ValueError("Invalid private release readback request")
+    if not isinstance(attempts,int) or not 1<=attempts<=8:
+        raise ValueError("Invalid bounded readback attempts")
+    endpoint=API+"/releases/tags/"+quote(tag,safe="")
+    for attempt in range(attempts):
+        try:
+            release=_json(endpoint,token)
+            asset=_asset(release)
+            return _download(asset)
+        except HTTPError as error:
+            if error.code!=404:
+                raise RuntimeError("GitHub temporary remote readback denied") from None
+        except BundleInvalid as error:
+            # Only a missing yet-to-appear asset qualifies for a bounded
+            # retry. Wrong owner, checksum or unexpected URL FAIL closed.
+            if str(error)!="Missing encrypted backup release asset":
+                raise
+        if attempt+1<attempts:
+            time.sleep(min(1+attempt*2,9))
+    raise RuntimeError("GitHub release asset readback unavailable after bounded retries")
+
+
 def release_bundle(release, *, key=None):
     asset = _asset(release)
     artifact_id = asset.get("id")
@@ -325,9 +355,7 @@ def upload_release(zip_path, *, run_id, account_hash):
         if result.returncode != 0:
             raise RuntimeError("GitHub temporary release upload failed")
     # Independently re-download the encrypted bytes from the PUBLIC URL.
-    release = _json(API + "/releases/tags/" + quote(tag, safe=""), os.environ["GITHUB_TOKEN"])
-    asset = _asset(release)
-    remote = _download(asset)
+    remote = readback_uploaded_release(tag, os.environ["GITHUB_TOKEN"])
     if not hmac.compare_digest(hashlib.sha256(remote).digest(), hashlib.sha256(wrapped).digest()):
         raise RuntimeError("GitHub remote ciphertext SHA256 readback failed")
     check = _make_bundle(tag, decrypt(remote, key))
