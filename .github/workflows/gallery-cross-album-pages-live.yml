@@ -25,7 +25,7 @@ concurrency:
 jobs:
   corpus-same-sha-contract:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +57,9 @@ jobs:
       fail-fast: false
       matrix:
         browser: [chromium, webkit]
-    runs-on: ubuntu-latest
+    # Reproduce the tested browser runtime instead of silently changing both
+    # Ubuntu and WebKit when their moving latest tags advance.
+    runs-on: ubuntu-24.04
     timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
@@ -68,7 +70,7 @@ jobs:
           python-version: '3.12'
       - name: Install real browser
         run: |
-          python -m pip install --quiet playwright pillow
+          python -m pip install --quiet 'playwright==1.62.0' pillow
           python -m playwright install --with-deps ${{ matrix.browser }}
       - name: Real Pages photo bytes / decode / lightbox by actual viewer UI
         env:

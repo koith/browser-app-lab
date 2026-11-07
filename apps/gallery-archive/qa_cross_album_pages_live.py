@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Actual Pages originals and UI; candidate evidence is never operational PASS."""
 import argparse
+import faulthandler
 from collections import defaultdict
 import hashlib
 import io
@@ -334,6 +335,9 @@ if __name__=='__main__':
     p.add_argument('--candidate-html',action='store_true');p.add_argument('--max-browser-photos',type=int,default=12)
     args=p.parse_args()
     if not 12<=args.max_browser_photos<=500:raise SystemExit('Browser sample must retain at least twelve actual originals per model')
+    # Preserve the real call stack if a native driver stops responding.
+    # This diagnostic does not extend the operation or job deadlines.
+    faulthandler.dump_traceback_later(60,repeat=True)
     with sync_playwright() as pw:
         proxy=os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy')
         browser=getattr(pw,args.browser).launch(headless=True,**({'proxy':{'server':proxy}} if proxy else {}))
