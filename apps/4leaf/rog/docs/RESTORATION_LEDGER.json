@@ -1879,6 +1879,19 @@
         "P0-ACTOR",
         "QA-02"
       ]
+    },
+    {
+      "id": "REQ-20261107-4LEAF-LIVE-R17-E2E-RECHECK",
+      "date": "2026-11-07",
+      "origin": "사용자: 직전 턴 처리 내역 명확화, 미완료 및 무검증 개발 기능의 실사용 QA 요청",
+      "text": "직전 완료 작업을 실제 PR·배포·실사용 검사로 확인하고 원작 복원의 미완료/미검증 영역을 개발·검증한다. 새 R17 원본 전투 결과 애니메이션이 공개 Pages Chromium/WebKit에서 자신의 CHR 몸체/액션 슬롯/원본 PNG SHA256을 사용함을 별도 수용한다. 완전 원작 일치로 오인하지 않는다.",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -9296,6 +9309,33 @@
         "QA-03"
       ],
       "details": "PUBLIC BETA70 VERIFIED after R17 #822 merge 017519ac, release #844 merge 217a357493a5c633d9ed3fb66c215863455d0254 (v0.86.0-beta.70 / PWA v157), and public actual-game QA fix #850 merge c3abaa23b74298685ca037bc14efe2cf04115038. Same-revision release run 42367036982 SUCCESS, including exact public SHA256 byte identity for native-card-action-sequences.js, sw.js and archived battle podium PNG. Actual published Chromium + WebKit game run 42367392773 both SUCCESS: physical WorldMap pixel-hit -> channel -> hotseat start, 104 board tiles, real 3 dice land, c_0042 vs c_0045 original CHR bodies decode (naturalWidth 47/41), outcome/result button clickable and 0 transient asset errors. Public published ChatRoom run 42367346868 SUCCESS: all 46 real browser steps including 6 rooms, chat, PWA, dice and mobile WebKit. Published screenshot-vs-original browser run 42367346831 both Chromium and WebKit SUCCESS. Earlier public run 42367036979 FAILED due race: new version exposed before native images decoded; #850 adds exact source image readiness and awaits real decoded outcome (no asset substitution). APP FUNCTIONAL/BROWSER RELEASE acceptance VERIFIED for this tested scope. Historical EXE/3D MVE, CHR 0156, 98 source semantic roles, full original matching, physical iPhone remain OPEN; no task marked done from partial browser evidence."
+    },
+    {
+      "seq": 434,
+      "date": "2026-11-07",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261107-4LEAF-LIVE-R17-E2E-RECHECK",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ]
+    },
+    {
+      "seq": 435,
+      "date": "2026-11-07",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261107-4LEAF-LIVE-R17-E2E-RECHECK",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ],
+      "details": "R17 public browser acceptance hardening VERIFIED: PR #854 merged 782f79116f00fa04c3e26ab6f860ee3f43e4e0cc after original public Chromium/WebKit workflow 42368535404 success on head c5b6fa5fb132e102390d5917db88683a54bf868f. Actual published Pages v0.86.0-beta.70/PWA v157, WorldMap physical hit->game start->104 board cells->3 dice land->source CHR duel outcome. CHR 0042=OBS.pak/1026.obs native slot14 victory candidate (2760ms), 0045=OBS.pak/1029.obs native slot13 hurt candidate (960ms); both actual decoded pixel URLs obs-1026-032.png, obs-1029-033.png SHA256 equal committed original source, no transient HTTP errors. This proves public original SOURCE FRAMES and WEB-INFERRED slot mapping operational on Chromium and WebKit, NOT historical EXE action role equivalence, 0156 recovery, original 3D models/camera, physical iPhone or total project completion. No task statuses changed."
     }
   ],
   "restorationPriority": {
