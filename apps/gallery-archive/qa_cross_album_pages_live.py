@@ -144,6 +144,7 @@ def decoded(page,root,target):
     }''',arg=expected,timeout=45000)
     size=page.locator('#full').evaluate('im=>[im.naturalWidth,im.naturalHeight]')
     assert size==[target['width'],target['height']],('actual lightbox pixels',target,size)
+    assert page.locator('#lightbox .version-chip').inner_text()==page.locator('#app-version').inner_text(), 'Viewer and main version labels differ'
     return expected
 
 
@@ -222,6 +223,47 @@ def denied_catalog_real_local_photos(browser,model,overlay):
             'model':model,'candidate_html':overlay,'controlled_owner_index_http':403,
             'controlled_render_http':503,'real_local_photo_decode_and_SHA':True,
             'render_catalog_requests':len(calls),'not_a_full_gallery_restoration':True}),flush=True)
+    finally:context.close()
+
+
+def transient_pages_real_local_photo(browser,model,overlay):
+    """One controlled 503, followed by actual untouched Pages image bytes."""
+    root=f'{BASE}/{model}-gallery/'
+    context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,
+        has_touch=True,service_workers='block')
+    page=context.new_page();requested=set();attempts=[]
+    page.on('request',lambda request:requested.add(request.url))
+    try:
+        if overlay:
+            for name in ['index.html','saved-photo-union.js']+(['album-grouping.js'] if model=='mimmi' else []):
+                text=(ROOT/f'apps/{model}-gallery'/name).read_text()
+                page.route(root if name=='index.html' else '**/'+name+'*',
+                    candidate_route(text,'text/html' if name=='index.html' else 'application/javascript'))
+        page.goto(root,wait_until='domcontentloaded',timeout=60000)
+        page.wait_for_function('Array.isArray(stored)&&stored.length>0',timeout=45000)
+        target=page.evaluate('''seen=>{
+            for(const a of available()){const p=photosFor(a);
+                for(let i=p.length-1;i>0;i--){const q=p[i];
+                    if(!q.ownerAlbum&&!q.vaultAlbum&&typeof q.url==='string'&&q.url.startsWith('stored-albums/')&&
+                       !seen.includes(new URL(q.url,location.href).href))return {album:a.id,index:i,...q};}}
+            return null;
+        }''',list(requested))
+        assert target,'No untouched real local original for transient-failure test'
+        url=root+target['url']
+        def first_failure(route):
+            attempts.append(route.request.url)
+            if len(attempts)==1:route.fulfill(status=503,body='controlled transient Pages failure')
+            else:route.continue_()
+        page.route(url,first_failure)
+        open_photo(page,root,target)
+        retry_count=page.locator('#detailphotos .photo[data-i="'+str(target['index'])+'"] img').evaluate(
+            'img=>committedImageRetries.get(img)?.attempts||0')
+        assert retry_count==1 and 2<=len(attempts)<=3,('Transient photo retry was missing or repeated unnecessarily',retry_count,len(attempts))
+        exact_bytes(context,url,target)
+        print('FAULT_INJECTED_TRANSIENT_PAGES_REAL_ORIGINAL_PASS',json.dumps({
+            'model':model,'candidate_html':overlay,'controlled_initial_http':503,
+            'real_Pages_followup_SHA_and_decoded_pixels':True,'automatic_grid_retries':retry_count,
+            'browser_image_requests_including_lightbox':len(attempts),'full_gallery_P0_restored':False}),flush=True)
     finally:context.close()
 
 
@@ -345,4 +387,5 @@ if __name__=='__main__':
             for model in ('mimmi','yui'):
                 exercise(browser,model,args.candidate_html,args.max_browser_photos)
                 denied_catalog_real_local_photos(browser,model,args.candidate_html)
+                transient_pages_real_local_photo(browser,model,args.candidate_html)
         finally:browser.close()
