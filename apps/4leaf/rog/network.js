@@ -84,15 +84,25 @@
    };
    channel.onerror=()=>{if(isCurrent())notice('통신 오류. 연결 코드를 재발급하세요.')};
    channel.onmessage=e=>{
-     if(!isCurrent()||!net.connected||ch.readyState!=='open')return;
+     // A reliable RTCDataChannel can deliver the first HELLO between
+     // readyState=open and this peer's local onopen notification. Keep
+     // commands gated, but do not lose the current channel's identity.
+     if(!isCurrent()||ch.readyState!=='open')return;
      if(typeof e.data!=='string'||e.data.length>150000)return;
      let data;try{data=JSON.parse(e.data)}catch{return}
      if(!data||typeof data!=='object')return;
      if(data.type==='hello'&&net.role==='host'){
-       net.guestName=String(data.name||'플레이어 2').slice(0,12);
+       // Only the existing open current channel may set a guest display name;
+       // a HELLO never grants turn or save authorization on its own.
+       net.guestName=(typeof data.name==='string'&&data.name.trim()
+         ?data.name.trim():'플레이어 2').slice(0,12);
        bridge()?.setGuestName?.(net.guestName);
-       if(bridge()?.getMatch?.()?.mode==='network')send({type:'state',match:bridge().getMatch()});
-     }else if(data.type==='state'&&net.role==='guest'){
+       if(net.connected&&bridge()?.getMatch?.()?.mode==='network')
+         send({type:'state',match:bridge().getMatch()});
+       return;
+     }
+     if(!net.connected)return;
+     if(data.type==='state'&&net.role==='guest'){
        // A connected DataChannel does not prove the other device has
        // accepted a state. Surface the result of the guest's durable-save
        // gate to the host instead of silently leaving the two games apart.

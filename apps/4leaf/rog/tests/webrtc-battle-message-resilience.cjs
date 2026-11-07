@@ -38,6 +38,25 @@ test('real WebRTC rejects malformed battle packets and clears old host callbacks
   ()=>window.__LEAF_NET__.connected===true,null,{timeout:25000})));
  await host.waitForFunction(()=>window.__LEAF_NET__.guestName!==null&&
   typeof window.__LEAF_BRIDGE__.onState==='function',null,{timeout:10000});
+
+ // Deterministically cover the actual DataChannel OPEN -> local onopen
+ // ordering race: HELLO may arrive before connected is published. Use
+ // the real already-connected RTC transport, not a mock onmessage call.
+ await host.evaluate(()=>{
+  window.__LEAF_NET__.guestName=null;
+  window.__LEAF_NET__.connected=false;
+ });
+ assert.equal(await guest.evaluate(()=>window.__LEAF_NET__.send({
+  type:'hello',name:'Early RTC Guest'
+ })),true,'guest must send a real channel HELLO');
+ await host.waitForFunction(()=>window.__LEAF_NET__.guestName==='Early RTC Gu',
+  null,{timeout:10000});
+ // Early identity must NEVER authorize writes or battle commands.
+ assert.equal(await host.evaluate(()=>window.__LEAF_NET__.send({
+  type:'chat',text:'DISCONNECTED_WRITES_FORBIDDEN'
+ })),false,'only a genuinely connected host may send gameplay traffic');
+ await host.evaluate(()=>{window.__LEAF_NET__.connected=true});
+ assert.deepEqual(pageErrors,[]);
  const valid={type:'battle-request',bid:8,attacker:'호스트',defender:'게스트',
   attack:11,defense:10,diceAttack:[5,6],diceDefense:[4,6],
   options:['결과 확인','자폭']};
