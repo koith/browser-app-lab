@@ -21,7 +21,7 @@ import time
 from urllib.parse import urlsplit
 
 from target_account_archive import profile_input
-from demand_archive import CloudArchive
+from demand_archive import CloudArchive, QueueStorageDenied
 from verified_bundle_reader import names_from_cloud, load_verified_bundle
 import backup_queue
 
@@ -267,6 +267,11 @@ def create_router(auth):
                 else:
                     run_id=await asyncio.to_thread(dispatch,platform,account)
                 receipt=make_receipt(request,run_id,platform,account)
+            except QueueStorageDenied:
+                _last_request=time.monotonic()
+                return JSONResponse({"accepted":False, "code":"storage_read_denied",
+                    "detail":"TeraBox가 백업 요청의 원격 읽기를 거부했습니다. 접수와 무결성을 확인하지 못했습니다. 저장소 인증·다운로드 권한 확인이 필요합니다."},
+                    status_code=503, headers={"Cache-Control":"private, no-store", "Retry-After":"45"})
             except RuntimeError:
                 raise HTTPException(502,"Private archive job could not be scheduled") from None
             _last_request=time.monotonic()

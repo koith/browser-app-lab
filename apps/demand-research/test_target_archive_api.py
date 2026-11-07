@@ -210,3 +210,48 @@ def test_unrelated_workflow_never_counts_as_archived(client,monkeypatch):
         "head_branch":"main"})
     with pytest.raises(RuntimeError,match="does not match"):
         target_archive_api.get_workflow_run(41999999999)
+
+
+def test_public_readback_denial_returns_no_receipt_and_throttles_resubmission(client, monkeypatch):
+    monkeypatch.setenv("DEMAND_PUBLIC_ARCHIVE_MODE", "1")
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE", "1")
+    calls = []
+
+    def deny(platform, account):
+        calls.append((platform, account))
+        raise target_archive_api.QueueStorageDenied("private provider detail cookie=secret-value")
+
+    monkeypatch.setattr(target_archive_api.backup_queue, "create_request", deny)
+    monkeypatch.setattr(target_archive_api, "make_receipt",
+                        lambda *a: pytest.fail("Unverified request must not receive a receipt"))
+    monkeypatch.setattr(target_archive_api, "dispatch",
+                        lambda *a: pytest.fail("Denied storage must not trigger an alternate dispatch"))
+    anonymous = TestClient(gateway.app, base_url="https://testserver")
+    headers = {"Origin": "https://testserver", "X-Archive-Intent": "selected-public-account-v1"}
+    selection = {"platform": "bluesky", "account": "@Example"}
+    response = anonymous.post("/api/target-archive/start", json=selection, headers=headers)
+    assert response.status_code == 503
+    assert response.headers["Retry-After"] == "45"
+    assert response.headers["Cache-Control"] == "private, no-store"
+    payload = response.json()
+    assert payload["accepted"] is False
+    assert payload["code"] == "storage_read_denied"
+    assert "원격 읽기" in payload["detail"]
+    assert "receipt" not in payload and "run_id" not in payload
+    assert "secret-value" not in response.text and "private provider detail" not in response.text
+    assert not anonymous.cookies
+    repeated = anonymous.post("/api/target-archive/start", json=selection, headers=headers)
+    assert repeated.status_code == 429
+    assert calls == [("bluesky", "example.bsky.social")]
+
+
+def test_bridge_read_denial_remains_service_unavailable(client, monkeypatch):
+    monkeypatch.setattr(gateway, "_bridge_authenticated", lambda request: None)
+    def deny(*args):
+        raise target_archive_api.QueueStorageDenied("private diagnostic")
+    monkeypatch.setattr(target_archive_api.backup_queue, "accept", deny)
+    response = client.post("/api/bridge/ack", json={"job_id":1234567890,
+                                                 "workflow_run_id":41999999999})
+    assert response.status_code == 503
+    assert "private diagnostic" not in response.text
+    assert "accepted" not in response.json()
