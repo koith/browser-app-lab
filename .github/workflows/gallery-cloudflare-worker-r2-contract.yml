@@ -1,4 +1,4 @@
-name: Gallery Private R2 Worker (No Cloud Access) Contract
+name: Gallery Private Storage Worker (No Cloud Access) Contract
 on:
   pull_request:
     paths:
@@ -24,7 +24,20 @@ jobs:
     timeout-minutes: 4
     steps:
       - uses: actions/checkout@v4
-      - name: Check Worker unit and secret isolation without network/storage
-        run: node --test apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs
-      - name: Syntax-check Worker entrypoint
-        run: node --check apps/gallery-archive/cloudflare-owner-gateway/worker.mjs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install independent AWS signature reference (no account credentials)
+        run: python -m pip install botocore==1.40.70
+      - name: Check Worker and Pages client with an existing actual JPEG
+        run: node apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs
+      - name: Check private S3 signing, limits and local HTTP readback
+        run: node apps/gallery-archive/cloudflare-owner-gateway/private-s3.test.mjs
+      - name: Syntax-check transport modules
+        run: |
+          node --check apps/gallery-archive/cloudflare-owner-gateway/worker.mjs
+          node --check apps/gallery-archive/cloudflare-owner-gateway/private-s3.mjs
+          node --check apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs

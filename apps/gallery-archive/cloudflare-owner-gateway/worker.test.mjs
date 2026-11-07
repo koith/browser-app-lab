@@ -1,11 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { webcrypto, createHash } from 'node:crypto';
+import {readFileSync} from 'node:fs';
+import {pagesGateway} from './pages-client.mjs';
 import worker, { resetCatalogCacheForTests } from './worker.mjs';
 globalThis.crypto ??= webcrypto;
 const token = 'abcdefghijklmnopqrstuvwxyz_123456789012345';
 const digest = value => createHash('sha256').update(value).digest('hex');
-const bytes = Uint8Array.from([255, 216, 255, 224, 1, 2, 3, 4, 5]);
+// A real already-published original, not an image-magic placeholder.
+const bytes = new Uint8Array(readFileSync(new URL('../../yui-gallery/stored-albums/v04/001_bd8318cfe6e0.jpg',import.meta.url)));
+assert.equal(digest(bytes),'bd8318cfe6e08824b26e1d3206a33400502cec23dc4d82f2c8a039520e6ec90d');
 const makeEnv = (bad = false) => {
   const store = new Map();
   const photos = ['mimmi', 'yui'].map(model => ({
@@ -108,4 +112,67 @@ test('canonical catalog refuses cross-album or preview namespace substitutions',
   const req=request(endpoint+'/api/v1/sign','POST',
     {model:'mimmi',album:'example-photo-album',number:1,variant:'original'},token);
   assert.equal((await worker.fetch(req,env)).status,404);
+});
+
+test('Pages mode is explicit; known photo SHA grants the existing keyless read without bucket secrets',async()=>{
+  resetCatalogCacheForTests();const {env,reads}=makeEnv();
+  const p={model:'yui',album:'example-photo-album',number:1,variant:'original',sha256:digest(bytes)};
+  assert.equal((await worker.fetch(request(endpoint+'/api/v1/sign','POST',p),env)).status,401);
+  env.PAGES_READ_POLICY='existing-sha-pinned-gallery';delete env.VIEWER_TOKEN_SHA256;
+  assert.equal((await worker.fetch(request(endpoint+'/api/v1/sign','POST',{...p,sha256:'0'.repeat(64)}),env)).status,403);
+  const before=reads.length;
+  assert.equal((await worker.fetch(request(endpoint+'/api/v1/sign','POST',p,null,'https://evil.example'),env)).status,403);
+  assert.equal(reads.length,before);
+  const signed=await worker.fetch(request(endpoint+'/api/v1/sign','POST',p),env);
+  assert.equal(signed.status,200);
+  const url=(await signed.json()).url;
+  const raw=await worker.fetch(request(url,'GET',null,null,null),env);
+  assert.equal(raw.status,200);assert.equal(digest(new Uint8Array(await raw.arrayBuffer())),digest(bytes));
+});
+
+test('Pages client: both models use signed actual originals, deduplicate calls and never send a bearer',async()=>{
+  resetCatalogCacheForTests();const {env}=makeEnv();env.PAGES_READ_POLICY='existing-sha-pinned-gallery';
+  delete env.VIEWER_TOKEN_SHA256;
+  for(const model of ['mimmi','yui']){
+    let calls=0;
+    const client=pagesGateway({endpoint,model,fetcher:async(url,init)=>{
+      calls++;assert.equal(init.credentials,'omit');assert.equal(init.headers.Authorization,undefined);
+      return worker.fetch(new Request(url,{...init,headers:{...init.headers,Origin:'https://koith.github.io'}}),env);
+    }});
+    const photo={ownerAlbum:'example-photo-album',storageNumber:1,number:50,sha256:digest(bytes),bytes:bytes.length};
+    const [a,b]=await Promise.all([client.asset(photo),client.asset(photo,'cover')]);
+    assert.equal(a,b);assert.equal(calls,1);assert.ok(!a.includes('originals/'));
+    const response=await worker.fetch(request(a),env);
+    assert.equal(response.status,200);assert.deepEqual(new Uint8Array(await response.arrayBuffer()),bytes);
+  }
+});
+
+test('missing preview may use only its own verified original; bad auth never falls through',async()=>{
+  resetCatalogCacheForTests();const {env}=makeEnv();env.PAGES_READ_POLICY='existing-sha-pinned-gallery';
+  let calls=0;
+  const photo={ownerAlbum:'example-photo-album',number:1,sha256:digest(bytes),bytes:bytes.length,
+    preview:'previews/example-photo-album/absent.webp',preview_sha256:'a'.repeat(64),preview_bytes:123};
+  const client=pagesGateway({endpoint,model:'yui',fetcher:(url,init)=>{
+    calls++;return worker.fetch(new Request(url,{...init,headers:{...init.headers,Origin:'https://koith.github.io'}}),env);
+  }});
+  const url=await client.asset(photo,'preview');assert.equal(calls,2);assert.ok(url.includes('/original?'));
+  assert.equal(await client.asset(photo,'cover'),url);assert.equal(calls,2);
+  const denied=pagesGateway({endpoint,model:'yui',fetcher:async()=>new Response('',{status:401})});
+  await assert.rejects(denied.asset(photo,'preview'),/GALLERY_GATEWAY_HTTP_401/);
+});
+
+test('Pages client rejects an external, wrong-SHA or expired signed URL instead of exposing it',async()=>{
+  const photo={ownerAlbum:'example-photo-album',number:1,sha256:digest(bytes),bytes:bytes.length};
+  for(const mutation of ['host','sha','expiry']){
+    resetCatalogCacheForTests();const {env}=makeEnv();env.PAGES_READ_POLICY='existing-sha-pinned-gallery';
+    const client=pagesGateway({endpoint,model:'mimmi',fetcher:async(url,init)=>{
+      const response=await worker.fetch(new Request(url,{...init,headers:{...init.headers,Origin:'https://koith.github.io'}}),env);
+      const data=await response.json();
+      if(mutation==='host')data.url=data.url.replace(endpoint,'https://unrelated.example');
+      if(mutation==='sha')data.sha256='0'.repeat(64);
+      if(mutation==='expiry')data.expires_at=1;
+      return Response.json(data);
+    }});
+    await assert.rejects(client.asset(photo),/INVALID_SIGNED_PHOTO/);
+  }
 });
