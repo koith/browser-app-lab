@@ -135,6 +135,49 @@ jobs:
           report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
           print('NESTED_INSTALLER_ORIGINAL_PAK_CANDIDATES',len(extracted))
           PY
+      - name: Parse native inverted 28-byte resource index in all original OBS PAKs
+        run: |
+          node <<'JS'
+          const fs=require('node:fs');
+          const crypto=require('node:crypto');
+          const path=require('node:path');
+          const assert=require('node:assert/strict');
+          const {loadPakIndex}=require('./apps/4leaf/rog/tools/original-pak-index.cjs');
+          const root='/tmp/4leaf-origin/extracted/4Leaf_Files/Dice';
+          const reportPath='4leaf-original-0156-installer-census.json';
+          const report=JSON.parse(fs.readFileSync(reportPath,'utf8'));
+          const indices=[];
+          for(const name of ['OBS.pak','OBS2.pak','OBS3.pak']){
+            const full=path.join(root,name);
+            assert.ok(fs.existsSync(full),'The official installer must contain '+name);
+            const index=loadPakIndex(full);
+            assert.equal(index.resourceBytesExact,true,
+              'Original PAK index checksum/length mismatch: '+name);
+            const names=index.entries.map(x=>x.name.toLowerCase());
+            const target=names.includes('1222.obs');
+            indices.push({
+              pak:name,
+              sha256:crypto.createHash('sha256').update(fs.readFileSync(full)).digest('hex'),
+              memberCount:index.count,
+              resourceBytesExact:index.resourceBytesExact,
+              target1222Present:target,
+              targetRecord:target?index.entries.find(x=>x.name.toLowerCase()==='1222.obs'):null,
+              candidates1200to1230:index.entries
+                .filter(x=>/^12(0\d|1\d|2\d|30)\.obs$/i.test(x.name))
+                .map(x=>({name:x.name,length:x.length}))
+            });
+            console.log('ORIGINAL_PAK_1222_AUDIT',name,
+              JSON.stringify({members:index.count,exact:index.resourceBytesExact,
+                target1222:target,nearby:indices.at(-1).candidates1200to1230}));
+          }
+          const actual=indices.filter(x=>x.target1222Present);
+          report.pak_index_audit=indices;
+          report.chr_0156_original_obs2_1222=actual.length?
+            'PRESENT_IN_AUTHENTIC_PAK_INDEX_NOT_YET_DECODED':
+            'ABSENT_IN_SHA1_VERIFIED_2002_INSTALLER_OBS_OBS2_OBS3';
+          fs.writeFileSync(reportPath,JSON.stringify(report,null,2)+'\n');
+          console.log('OFFICIAL_2002_CHR_0156_PAK_RESULT',report.chr_0156_original_obs2_1222);
+          JS
       - uses: actions/upload-artifact@v4
         if: always()
         with:
