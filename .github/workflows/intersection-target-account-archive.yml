@@ -63,6 +63,7 @@ on:
       - "apps/demand-research/test_target_account_archive.py"
       - "apps/demand-research/target_archive_api.py"
       - "apps/demand-research/backup_queue.py"
+      - "apps/demand-research/backup_bridge_poller.py"
       - "apps/demand-research/github_temp_bundle.py"
       - "apps/demand-research/test_github_temp_bundle.py"
       - "apps/demand-research/test_backup_queue_sqlite.py"
