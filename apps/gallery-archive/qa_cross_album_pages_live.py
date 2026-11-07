@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import time
 from PIL import Image
 from playwright.sync_api import sync_playwright
 from pages_deployment_identity import validate as validate_deployment_identity
@@ -95,7 +96,9 @@ def native_touch(page,locator):
     three actual rendered bounds and require a stable, enabled, unobstructed
     touch target before sending the browser's native touchscreen event.
     """
-    state=locator.evaluate('''async node=>{
+    deadline=time.monotonic()+25
+    while time.monotonic()<deadline:
+        state=locator.evaluate('''async node=>{
         const rect=()=>{const r=node.getBoundingClientRect();return [r.x,r.y,r.width,r.height]};
         const bounds=[rect()];
         for(let i=0;i<2;i++){await new Promise(resolve=>setTimeout(resolve,50));bounds.push(rect())}
@@ -107,7 +110,12 @@ def native_touch(page,locator):
                 style.visibility==='visible'&&style.display!=='none'&&style.pointerEvents!=='none',
             enabled:!node.matches(':disabled'),hit:!!hit&&(hit===node||node.contains(hit)),
             documentVisible:document.visibilityState==='visible'};
-    }''')
+        }''')
+        if all(state[k] for k in ('stable','visible','enabled','hit','documentVisible')):break
+        # Like native actionability, wait for an in-flight history/viewport
+        # restoration to settle. Keep the same 25s bound and all hit guards.
+        if not state['visible']:
+            locator.evaluate("node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
     assert all(state[k] for k in ('stable','visible','enabled','hit','documentVisible')),('Native touch target is not actionable',state)
     page.touchscreen.tap(state['x'],state['y'])
 
@@ -245,6 +253,7 @@ def exercise(browser,model,overlay,limit=12):
         assert response and response.status==200
         page.bring_to_front()
         page.wait_for_function("Array.isArray(stored)&&stored.length>0&&document.querySelectorAll('#albumgrid .album').length>0",timeout=80000)
+        composed_rows=page.evaluate('available().reduce((n,a)=>n+photosFor(a).length,0)')
         cover_observation=inspect_covers(page)
         candidates,physical=cross_candidates(model)
         print('ACTUAL_CROSS_OWNER_ROWS_SELECTED',model,len(candidates),flush=True)
@@ -303,6 +312,7 @@ def exercise(browser,model,overlay,limit=12):
             'source_commit':None if dirty else source_head,'checked_out_base_commit':source_head,
             'uncommitted_candidate_source':dirty,'version':page.locator('#app-version').inner_text(),
             'source_asset_sha256':source_proof,'cross_owner_rows':len(candidates),
+            'composed_photo_rows_not_a_viewing_count':composed_rows,
             'all_cross_owner_rows_have_exact_local_routes':len(mapped),
             'independent_real_file_SHA_bytes_pixels':len(checked_urls),'independent_read_bytes':byte_count,
             'actual_browser_lightbox_photos':len(viewed),'viewed':viewed,
