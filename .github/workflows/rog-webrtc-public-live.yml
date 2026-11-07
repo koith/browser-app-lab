@@ -1,5 +1,12 @@
 name: 4LEAF public real WebRTC guest HELLO and battle safety QA
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-webrtc-public-live.yml'
+      - 'apps/4leaf/rog/network.js'
+      - 'apps/4leaf/rog/app-version.json'
+      - 'apps/4leaf/rog/tests/webrtc-battle-message-resilience.cjs'
   workflow_run:
     workflows: ['Deploy static content to Pages']
     types: [completed]
@@ -21,7 +28,7 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: |
-          if [ "$EVENT" = "workflow_dispatch" ] || git diff --name-only HEAD^ HEAD | grep -Eq '^apps/4leaf/rog/(network.js|app-version.json|tests/webrtc-battle-message-resilience.cjs)$|^\.github/workflows/rog-webrtc-public-live.yml$'; then
+          if [ "$EVENT" = "workflow_dispatch" ] || [ "$EVENT" = "push" ] || git diff --name-only HEAD^ HEAD | grep -Eq '^apps/4leaf/rog/(network.js|app-version.json|tests/webrtc-battle-message-resilience.cjs)$|^\.github/workflows/rog-webrtc-public-live.yml$'; then
             echo 'run=true' >> "$GITHUB_OUTPUT"
           else
             echo 'run=false' >> "$GITHUB_OUTPUT"
