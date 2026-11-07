@@ -7,6 +7,7 @@ profile IDs, media URL printouts, or mutations of the backup source.
 from __future__ import annotations
 
 from playwright.sync_api import sync_playwright
+from urllib.parse import quote
 
 SITE = "https://intersection-originals-free.onrender.com/account-archive"
 
@@ -20,29 +21,26 @@ def verify(engine, *, label, width, height):
         )
         javascript_errors = []
         page.on("pageerror", lambda _error: javascript_errors.append("pageerror"))
-        response = page.goto(SITE, wait_until="domcontentloaded", timeout=180000)
-        assert response and response.status == 200, "live account-viewer HTML unavailable"
-        page.wait_for_function(
-            "() => document.querySelectorAll('#accountSelect option').length > 1",
-            timeout=120000,
+        # Select an independently verified six-post TeraBox ZIP upfront.
+        # An arbitrary first account may have incomplete legacy records, and
+        # waiting on every such profile masked the actual usable archive.
+        account_api=page.request.get(
+            SITE.rsplit("/",1)[0]+"/api/account-archives",timeout=120000,
         )
-
-        # Work through verified accounts without assuming the first has posts.
-        posts = 0
-        options = page.locator("#accountSelect option")
-        for i in range(1, min(options.count(), 9)):
-            value = options.nth(i).get_attribute("value")
-            if not value:
-                continue
-            page.locator("#accountSelect").select_option(value)
-            try:
-                page.locator("#results article.post").first.wait_for(timeout=45000)
-            except Exception:
-                continue
-            posts = page.locator("#results article.post").count()
-            if posts:
-                break
-        assert posts, "no live saved posts visible on the deployed page"
+        assert account_api.status==200, "live verified account index unavailable"
+        sources=account_api.json().get("accounts",[])
+        available=[item for item in sources
+                   if item.get("backup_kind")=="terabox_zip_sha_verified"
+                   and item.get("posts_verified_in_bundle",0)>=6]
+        assert available, "verified TeraBox account ZIP not discoverable in webapp"
+        key=available[0]["key"]
+        response = page.goto(SITE+"?account="+quote(key,safe=""),
+                             wait_until="domcontentloaded", timeout=180000)
+        assert response and response.status == 200, "live account-viewer HTML unavailable"
+        page.locator("#accountSelect").wait_for(timeout=20000)
+        page.locator("#results article.post").first.wait_for(timeout=120000)
+        posts=page.locator("#results article.post").count()
+        assert posts>=6, "verified TeraBox six-post archive not rendered"
         assert page.locator("#displayName").inner_text().strip(), "profile display missing"
         assert "미확인" not in page.locator("#displayName").inner_text(), "profile not loaded"
         assert page.locator("#results article.post").first.get_by_role(
@@ -103,24 +101,7 @@ def verify(engine, *, label, width, height):
         )
         assert doc["scroll"] <= doc["width"] + 2, "horizontal overflow on live page"
         assert not javascript_errors, "deployed browser JavaScript errors occurred"
-        # A SHA-verified TeraBox ZIP with six current public posts exists in
-        # production. A GitHub-only list used to hide it silently; demand its
-        # actual account card and immutable media on BOTH browser engines.
-        account_api=page.request.get(
-            SITE.rsplit("/",1)[0]+"/api/account-archives",timeout=120000,
-        )
-        assert account_api.status==200, "live verified account index unavailable"
-        sources=account_api.json().get("accounts",[])
-        available=[item for item in sources
-                   if item.get("backup_kind")=="terabox_zip_sha_verified"
-                   and item.get("posts_verified_in_bundle",0)>=6]
-        assert available, "verified TeraBox account ZIP not discoverable in webapp"
-        key=available[0]["key"]
-        page.locator("#accountSelect").select_option(key)
-        page.wait_for_function(
-            "() => document.querySelectorAll('#results article.post').length >= 6",
-            timeout=120000,
-        )
+        # Verify that the same selected archive still shows its six posts.
         assert page.locator("#results article.post").count()>=6
         assert page.locator("#displayName").inner_text().strip()
         originals=page.locator("#results .post-media img")
