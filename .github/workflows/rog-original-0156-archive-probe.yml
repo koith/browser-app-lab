@@ -1,0 +1,82 @@
+name: 4LEAF archived 2002 installer source census (CHR 0156)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-original-0156-archive-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archive-source-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve official 2002 v0.96d ZIP from public preservation mirrors
+        run: |
+          mkdir -p /tmp/4leaf-origin
+          ok=0
+          for url in \
+            'https://archive.org/download/4leaf/4leaf.zip' \
+            'https://ia801607.us.archive.org/34/items/4leaf/4leaf.zip' \
+            'https://ia601607.us.archive.org/34/items/4leaf/4leaf.zip'; do
+            echo "CHECK_ARCHIVE_HOST ${url%%/34/*}"
+            if curl --fail --location --retry 2 --retry-delay 2 --connect-timeout 15 --max-time 160 \
+              --silent --show-error "$url" -o /tmp/4leaf-origin/4leaf.zip; then
+              size=$(wc -c </tmp/4leaf-origin/4leaf.zip)
+              digest=$(sha1sum /tmp/4leaf-origin/4leaf.zip | awk '{print $1}')
+              echo "OBSERVED_ARCHIVE_SIZE=$size SHA1=$digest"
+              if [ "$size" = "64537476" ] && [ "$digest" = "86526d89679ae39b85fe9808da97ad871b7888d9" ]; then
+                ok=1
+                break
+              fi
+            fi
+          done
+          if [ "$ok" != "1" ]; then
+            echo "::error::All archive mirrors failed exact size/SHA1 validation. No original data was recovered."
+            exit 1
+          fi
+      - name: Examine all 25 archive entries and nested installer formats without executing software
+        run: |
+          python3 - <<'PY'
+          from zipfile import ZipFile
+          import hashlib, json, re
+          from pathlib import Path
+          src=Path('/tmp/4leaf-origin/4leaf.zip')
+          assert src.stat().st_size==64537476
+          assert hashlib.sha1(src.read_bytes()).hexdigest()=='86526d89679ae39b85fe9808da97ad871b7888d9'
+          with ZipFile(src) as z:
+            records=[{'name':f.filename,'size':f.file_size,'compressed':f.compress_size}
+                     for f in z.infolist() if not f.is_dir()]
+            print('OFFICIAL_2002_ORIGINAL_ZIP_FILES',len(records))
+            for row in records: print('ORIGINAL_ENTRY',row['name'],row['size'])
+            pak=[r for r in records if re.search(r'(?i)(obs2?\\.pak|\\.obs)$',r['name'])]
+            print('DIRECT_ORIGINAL_OBS_MEMBERS',pak)
+            executables=[r for r in records if r['name'].lower().endswith(('.exe','.msi','.cab','.bin'))]
+            print('NESTED_INSTALLER_CANDIDATES',executables)
+            report={
+              'archive':'https://archive.org/details/4leaf',
+              'release':'2002-07-16 v0.96d',
+              'source_zip_sha1':'86526d89679ae39b85fe9808da97ad871b7888d9',
+              'source_zip_size':64537476,'entries':records,
+              'direct_obs_entries':pak,'nested_installers':executables,
+              'chr_0156_original_obs2_1222':'UNVERIFIED_NO_FABRICATED_RECOVERY'
+            }
+            Path('4leaf-original-0156-installer-census.json').write_text(
+              json.dumps(report,indent=2,ensure_ascii=False)+'\\n')
+          PY
+          if command -v 7z >/dev/null; then
+            7z l -slt /tmp/4leaf-origin/4leaf.zip > /tmp/4leaf-origin/sevenzip-list.txt
+            echo '7ZIP_INSTALLED=true'
+            sed -n '1,110p' /tmp/4leaf-origin/sevenzip-list.txt
+          else
+            echo '7ZIP_INSTALLED=false; zipfile inspection completed'
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourleaf-0156-original-installer-metadata-only
+          path: 4leaf-original-0156-installer-census.json
+          if-no-files-found: ignore
+          retention-days: 14
