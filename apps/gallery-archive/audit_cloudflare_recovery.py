@@ -9,6 +9,9 @@ from urllib.request import Request, build_opener
 from check_cloudflare_connection import API, ACCOUNT, NoRedirect, ProbeError, account_for, reader
 
 PERMISSIONS = {'Workers Scripts Read', 'Workers Scripts Write', 'Workers Scripts Edit',
+               'Workers Admin', 'Workers Editor', 'Workers Content Read-Only', 'Workers Metadata Read-Only',
+               'Individual Workers Admin', 'Individual Workers Editor',
+               'Individual Workers Content Read-Only', 'Individual Workers Metadata Read-Only',
                'Account Settings Read', 'Account Settings Write', 'Account Settings Edit',
                'Billing Read', 'Billing Write', 'Pages Read', 'Pages Write', 'Pages Edit'}
 

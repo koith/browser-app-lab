@@ -32,19 +32,26 @@ class CF:
         self.token, self.account = token, account
         self.opener = build_opener(NoRedirect())
 
-    def call(self, tail, method='GET', body=None, raw=False):
+    def call(self, tail, method='GET', body=None, raw=False, multipart=None):
         # No subscription, billing mutation, R2 or arbitrary host endpoints.
         allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content|secrets))?|workers/subdomain|subscriptions)',
-                   'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'/secrets)',
+                   'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'(?:/secrets)?)',
                    'POST': r'workers/scripts/' + NAME + r'/subdomain'}
         if method not in allowed or not re.fullmatch(allowed[method], tail):
             raise ValueError('UNAPPROVED_CF_CONTROL_CALL')
+        if multipart is not None and (method != 'PUT' or tail != 'workers/scripts/' + NAME or body is not None):
+            raise ValueError('UNAPPROVED_MULTIPART_CALL')
+        if method == 'PUT' and tail == 'workers/scripts/' + NAME and multipart is None:
+            raise ValueError('SCRIPT_UPLOAD_REQUIRES_VALIDATED_MULTIPART')
         # Only fixed endpoint labels; never account IDs, tokens, body or names.
         phase = 'CF_' + method + '_' + tail.replace(NAME, 'archive').replace('/', '_').upper()
         print('CF_CONTROL_PHASE', phase, flush=True)
         payload = json.dumps(body).encode() if body is not None else None
+        content_type = 'application/json'
+        if multipart is not None:
+            content_type, payload = multipart
         req = Request(API + '/accounts/' + self.account + '/' + tail, method=method, data=payload,
-                      headers={'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'})
+                      headers={'Authorization': 'Bearer ' + self.token, 'Content-Type': content_type})
         try:
             with self.opener.open(req, timeout=40) as response:
                 data = response.read(20_000_001)
@@ -160,6 +167,42 @@ def subdomain(cf, register=False):
     return 'https://' + NAME + '.' + domain + '.workers.dev'
 
 
+def bootstrap_missing_worker(cf, release):
+    """Direct official upload, independent of Wrangler/Assets/subdomain APIs.
+
+    Only create our fixed, absent Worker; never overwrite an existing script.
+    Empty private catalogs make this recognizable and safely resumable. The
+    bootstrap returns404 for every request and has no storage/billing bindings.
+    """
+    if free_account_and_existing(cf) is not None:
+        raise ValueError('BOOTSTRAP_REFUSES_EXISTING_WORKER')
+    entry = ("import mimmi from './private-mimmi-catalog.txt';\n"
+             "import yui from './private-yui-catalog.txt';\n"
+             "export default {fetch(){void mimmi;void yui;return new Response('Not found',{status:404})}};\n").encode()
+    metadata = {'main_module': 'entry.mjs', 'compatibility_date': '2026-11-01',
+                'bindings': [], 'tags': ['gallery-bootstrap-' + release[:12]]}
+    parts = [('metadata', 'application/json', json.dumps(metadata).encode()),
+             ('entry.mjs', 'application/javascript+module', entry)]
+    for model in MODELS:
+        catalog = {'schema_version': 1, 'model': model, 'archive_kind': KIND, 'albums': []}
+        parts.append((f'private-{model}-catalog.txt', 'text/plain', json.dumps(catalog).encode()))
+    boundary = 'gallery-' + secrets.token_hex(24)
+    body = b''
+    for name, mime, value in parts:
+        body += (f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"; filename="{name}"\r\n'
+                 f'Content-Type: {mime}\r\n\r\n').encode() + value + b'\r\n'
+    body += f'--{boundary}--\r\n'.encode()
+    cf.call('workers/scripts/' + NAME, 'PUT', multipart=('multipart/form-data; boundary=' + boundary, body))
+    mime, raw = cf.call('workers/scripts/' + NAME + '/content', raw=True)
+    catalogs = existing_catalogs(mime, raw)
+    message = BytesParser(policy=default).parsebytes(b'MIME-Version: 1.0\r\nContent-Type: ' + mime.encode('ascii') + b'\r\n\r\n' + raw)
+    if any(catalogs[m]['albums'] for m in MODELS) or not any(
+            part.get_payload(decode=True) == entry for part in message.iter_parts()):
+        raise ValueError('BOOTSTRAP_REMOTE_CODE_AND_CATALOG_READBACK_FAILED')
+    print('CF_ACTUAL_SCRIPT_WRITE_AND_REMOTE_CODE_READBACK_VERIFIED', 'photo_uploads=0', flush=True)
+    return catalogs
+
+
 def write_deploy_sources(source, assets, catalogs, account, release):
     source.mkdir(parents=True, exist_ok=True)
     original = ROOT / 'apps/gallery-archive/cloudflare-owner-gateway'
@@ -198,12 +241,17 @@ def main(args):
     account, _ = account_for(reader(token), os.environ.get('CLOUDFLARE_ACCOUNT_ID', '').strip())
     cf = CF(token, account)
     old = free_account_and_existing(cf)
+    release = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    if old is None:
+        # Test the actual script write before expensive owner reads. This also
+        # initializes the first Worker before its Assets upload session.
+        old = bootstrap_missing_worker(cf, release)
     work = Path(args.directory).resolve()
     assets, source = work / 'assets', work / 'source'
     snapshot = Snapshot(ROOT, assets)
     base = subdomain(cf)
     retained = {m: 0 for m in MODELS}
-    if old:
+    if old and any(a['images'] for m in MODELS for a in old[m]['albums']):
         if base is None:
             # Never replace an existing replica if its original bytes cannot
             # first be recovered and checked. No assumption about Write access.
@@ -221,7 +269,6 @@ def main(args):
     catalogs = snapshot.finish()
     if any(not catalogs[m]['albums'] for m in MODELS):
         raise ValueError('BOTH_MODELS_REQUIRE_ACTUAL_FILES')
-    release = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     write_deploy_sources(source, assets, catalogs, account, release)
     # Recheck the actual billing state immediately before the deployment.
     if free_account_and_existing(cf) != old:
@@ -231,7 +278,8 @@ def main(args):
     process = subprocess.run(command, cwd=source, env={**os.environ, 'CLOUDFLARE_ACCOUNT_ID': account,
         'WRANGLER_SEND_METRICS': 'false'}, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=1200)
     if process.returncode:
-        codes = sorted(set(re.findall(rb'\[code: (\d{3,6})\]', process.stdout)))
+        clean = re.sub(rb'\x1b\[[0-9;]*[A-Za-z]', b'', process.stdout)
+        codes = sorted(set(re.findall(rb'(?i)code[\s:=\"]+(\d{3,6})', clean)))
         print('WRANGLER_DEPLOY_FAILED', process.returncode, [x.decode() for x in codes], flush=True)
         # Wrangler's full diagnostics may contain private file names/account IDs.
         # Keep only fixed operation labels, never the raw request or response.
@@ -244,6 +292,19 @@ def main(args):
             if tail in process.stdout:
                 operations.append(label)
         print('WRANGLER_FAILED_OPERATION_LABELS', operations, flush=True)
+        # Allowlisted classes only, not arbitrary provider messages or paths.
+        words = clean.lower()
+        categories = [label for needle, label in (
+            (b'authentication error', 'AUTHENTICATION_OR_SCOPE_DENIED'),
+            (b'permission', 'PERMISSION_DIAGNOSTIC_PRESENT'),
+            (b'email', 'EMAIL_DIAGNOSTIC_PRESENT'),
+            (b'onboard', 'ONBOARDING_DIAGNOSTIC_PRESENT'),
+            (b'not exist', 'RESOURCE_ABSENT_DIAGNOSTIC_PRESENT'),
+            (b'not registered', 'REGISTRATION_DIAGNOSTIC_PRESENT'),
+            (b'forbidden', 'HTTP_FORBIDDEN'), (b'403', 'STATUS_403_PRESENT'),
+            (b'free plan', 'FREE_PLAN_DIAGNOSTIC_PRESENT'),
+            (b'invalid', 'INVALID_ARGUMENT_DIAGNOSTIC_PRESENT')) if needle in words]
+        print('WRANGLER_FAILURE_CLASSES', categories, flush=True)
         from audit_cloudflare_recovery import inspect
         print('CLOUDFLARE_AFTER_UPLOAD_FAILURE_AUDIT', json.dumps(inspect(token, account), sort_keys=True), flush=True)
         raise ValueError('WORKER_DEPLOY_NOT_VERIFIED')
