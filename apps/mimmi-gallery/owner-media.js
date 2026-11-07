@@ -2,6 +2,21 @@
 'use strict';
 window.MimmiPrivate=(()=>{
  const cache=new Map(),inflight=new Map();let session=null;
+ // Optional, SHA-pinned Cloudflare replica. Absent/disabled config retains
+ // the currently deployed gallery unchanged until remote real-byte QA passes.
+ let replicaPromise=null;
+ function galleryReplica(){
+  if(location.hostname!=='koith.github.io')return Promise.resolve(null);
+  if(!replicaPromise)replicaPromise=(async()=>{
+   const response=await fetch('./cloudflare-gateway.json',{cache:'no-store',credentials:'omit'});
+   if(!response.ok)return null;
+   const config=await response.json();
+   if(config?.enabled!==true)return null;
+   const {pagesGateway}=await import('../gallery-archive/cloudflare-owner-gateway/pages-client.mjs');
+   return pagesGateway({endpoint:config.endpoint,model:'mimmi'});
+  })().catch(()=>null);
+  return replicaPromise;
+ }
  function readSession(){
   // Render's first-party owner gallery uses a Secure HttpOnly cookie instead
   // of a client-visible bearer token. GitHub Pages preserves old session flow.
@@ -37,11 +52,25 @@ window.MimmiPrivate=(()=>{
  }
  async function albums(){
   session=readSession();if(!session)return [];
+  // Pages already reads the complete, byte-identity-checked owner-index.json.
+  // Do not request the suspended Render catalog when a verified replica is active.
+  if(await galleryReplica())return [];
   return fromIndex(await (await request('/api/catalog')).json());
  }
  async function asset(p,kind='original'){
   if(!session)session=readSession();
   if(!session)throw Error('보관소 연결 없음');
+  if(p?.ownerAlbum){
+   const replica=await galleryReplica();
+   if(replica){
+    try {return await replica.asset(p,kind)}
+    catch(error){
+     // Missing (not-yet-replicated) originals or temporary worker unavailability
+     // can use the old source; never mask SHA/signature-validation errors.
+     if(!/^GALLERY_GATEWAY_HTTP_(?:404|429|500|502|503)$/.test(String(error?.message||'')))throw error;
+    }
+   }
+  }
   if(kind==='cover'){
    const version=(p.preview_sha256||p.sha256||'').slice(0,24);
    return session.api+'/api/cover/mimmi/'+encodeURIComponent(p.ownerAlbum)+'/'+(p.storageNumber??p.number)+'?v='+version;
