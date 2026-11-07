@@ -35,7 +35,8 @@ class CF:
     def call(self, tail, method='GET', body=None, raw=False):
         # No subscription, billing mutation, R2 or arbitrary host endpoints.
         allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content|secrets))?|workers/subdomain|subscriptions)',
-                   'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'/secrets)'}
+                   'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'/secrets)',
+                   'POST': r'workers/scripts/' + NAME + r'/subdomain'}
         if method not in allowed or not re.fullmatch(allowed[method], tail):
             raise ValueError('UNAPPROVED_CF_CONTROL_CALL')
         # Only fixed endpoint labels; never account IDs, tokens, body or names.
@@ -142,12 +143,14 @@ def free_account_and_existing(cf):
     return old
 
 
-def subdomain(cf):
+def subdomain(cf, register=False):
     try:
         result = cf.call('workers/subdomain')['result']
     except ProbeError as error:
         if error.status != 404:
             raise
+        if not register:
+            return None
         name = 'gallery-' + hashlib.sha256(cf.account.encode()).hexdigest()[:12]
         # Free workers.dev registration only. No domain purchase or paid plan.
         result = cf.call('workers/subdomain', 'PUT', {'subdomain': name})['result']
@@ -175,7 +178,10 @@ export default {fetch(request,env){
 '''
     (source / 'entry.mjs').write_text(entry)
     config = {'name': NAME, 'main': 'entry.mjs', 'account_id': account,
-              'compatibility_date': '2026-11-01', 'workers_dev': True, 'keep_vars': True,
+              # Official unrouted deployment: do not require account-level
+              # workers.dev registration to upload code and private Assets.
+              'compatibility_date': '2026-11-01', 'workers_dev': False,
+              'preview_urls': False, 'keep_vars': True,
               'send_metrics': False,
               'observability': {'enabled': False},
               'vars': {'PAGE_ORIGIN': ORIGIN, 'PAGES_READ_POLICY': 'existing-sha-pinned-gallery',
@@ -198,6 +204,10 @@ def main(args):
     base = subdomain(cf)
     retained = {m: 0 for m in MODELS}
     if old:
+        if base is None:
+            # Never replace an existing replica if its original bytes cannot
+            # first be recovered and checked. No assumption about Write access.
+            raise ValueError('EXISTING_REPLICA_READBACK_ROUTE_REQUIRED')
         print('BOUND_ASSET_PHASE', 'retain_all_previous_verified_originals', flush=True)
         for model in MODELS:
             for album in old[model]['albums']:
@@ -223,7 +233,26 @@ def main(args):
     if process.returncode:
         codes = sorted(set(re.findall(rb'\[code: (\d{3,6})\]', process.stdout)))
         print('WRANGLER_DEPLOY_FAILED', process.returncode, [x.decode() for x in codes], flush=True)
+        # Wrangler's full diagnostics may contain private file names/account IDs.
+        # Keep only fixed operation labels, never the raw request or response.
+        operations = []
+        for tail, label in ((b'/assets-upload-session', 'CREATE_ASSET_UPLOAD_SESSION'),
+                            (b'/workers/assets/upload', 'UPLOAD_ASSET_BYTES'),
+                            (b'/workers/scripts/' + NAME.encode(), 'UPLOAD_OR_INSPECT_WORKER'),
+                            (b'/workers/subdomain', 'ACCOUNT_SUBDOMAIN'),
+                            (b'/workers/dispatch', 'DISPATCH')):
+            if tail in process.stdout:
+                operations.append(label)
+        print('WRANGLER_FAILED_OPERATION_LABELS', operations, flush=True)
+        from audit_cloudflare_recovery import inspect
+        print('CLOUDFLARE_AFTER_UPLOAD_FAILURE_AUDIT', json.dumps(inspect(token, account), sort_keys=True), flush=True)
         raise ValueError('WORKER_DEPLOY_NOT_VERIFIED')
+    print('CF_UNROUTED_WORKER_AND_ASSETS_UPLOAD_SUCCEEDED', flush=True)
+    # Registration is a separate operation. An upload success proves that a
+    # previous registration denial did not establish missing Scripts Write.
+    base = subdomain(cf, register=True)
+    cf.call('workers/scripts/' + NAME + '/subdomain', 'POST',
+            {'enabled': True, 'previews_enabled': False})
     # Secrets never appear in config, source modules, logs or public image URLs.
     print('BOUND_ASSET_PHASE', 'configure_worker_only_signing_secret', flush=True)
     keys = cf.call('workers/scripts/' + NAME + '/secrets')['result']
