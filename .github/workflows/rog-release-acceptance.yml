@@ -245,6 +245,26 @@ jobs:
           assert hashlib.sha256(data).hexdigest()==expected, 'Published source podium PNG differs from authenticated 2002 IMG.pak decoder'
           print('4LEAF PUBLIC 355x113 BATTLE SOURCE PNG SHA256 VERIFIED',expected)
           PY
+
+                # Check the actual executable source delivered to Pages, not
+                # only a reusable version label or an unchanged PNG. This
+                # prevents R17 outcome actions being marked released while
+                # Pages still serves the previous 12-slot action module.
+                curl -fsSL "$url/native-card-action-sequences.js?revision=$GITHUB_SHA" -o /tmp/leaf-live-actions.js
+                curl -fsSL "$url/sw.js?revision=$GITHUB_SHA" -o /tmp/leaf-live-sw.js
+                python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          root=Path('apps/4leaf/rog')
+          for relative, published in [
+            ('native-card-action-sequences.js','/tmp/leaf-live-actions.js'),
+            ('sw.js','/tmp/leaf-live-sw.js'),
+          ]:
+            want=hashlib.sha256((root/relative).read_bytes()).hexdigest()
+            have=hashlib.sha256(Path(published).read_bytes()).hexdigest()
+            assert have == want, f'Public Pages stale file: {relative}: expected {want} received {have}'
+            print('4LEAF LIVE EXACT SOURCE SHA256 VERIFIED',relative,want)
+          PY
                 exit 0
               fi
             fi
