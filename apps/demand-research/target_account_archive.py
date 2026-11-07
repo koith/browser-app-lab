@@ -500,11 +500,17 @@ def normalize_record(profile, raw):
             return None
         if value.get("$type") not in (None,"app.bsky.feed.post"):
             return None
-        if value.get("labels",{}).get("values") if isinstance(value.get("labels"),dict) else False:
-            labels=value["labels"]["values"]
-            if any(isinstance(x,dict) and x.get("val") in
-                   ("!hide","!takedown","porn","sexual","nudity") for x in labels):
-                return None
+        # Public self-labels such as porn/sexual/nudity describe content,
+        # not an access restriction. The original record retains its labels
+        # for the private archive viewer to display. Dropping all such
+        # records incorrectly makes a publicly accessible account look empty.
+        # Never import provider-withheld, hidden or taken-down records.
+        label_doc=value.get("labels")
+        labels=label_doc.get("values",[]) if isinstance(label_doc,dict) else []
+        if isinstance(labels,list) and any(
+                isinstance(x,dict) and x.get("val") in ("!hide","!takedown")
+                for x in labels):
+            return None
         rkey=uri.rsplit("/",1)[-1]
         if not re.fullmatch(r"[A-Za-z0-9_-]{3,100}",rkey):
             return None
