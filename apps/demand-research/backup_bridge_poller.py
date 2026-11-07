@@ -93,7 +93,7 @@ def poll_once():
         method="POST",
         data=json.dumps({"ref":"main","return_run_details":True,
              "inputs":{"platform":task["platform"],"account":task["account"],
-                       "max_pages":"4"}}).encode(),
+                       "max_pages":"all"}}).encode(),
         headers={"Authorization":"Bearer "+github_token,
                  "Accept":"application/vnd.github+json",
                  "Content-Type":"application/json",
