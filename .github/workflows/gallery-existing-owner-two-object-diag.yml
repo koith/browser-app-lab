@@ -1,0 +1,45 @@
+name: Gallery Existing Owner Screenshot Two-Object Read Diagnostic
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_owner_screenshot_single_object_diag.py'
+      - '.github/workflows/gallery-existing-owner-two-object-diag.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose-exact-owned-object:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    name: single authorized owner file (${{ matrix.model }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi,yui]
+    env:
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install verified existing owner reader without exposing secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$MIMMI_COOKIE" && test -n "$YUI_COOKIE"
+          echo "::add-mask::$MIMMI_COOKIE"
+          echo "::add-mask::$YUI_COOKIE"
+          python -m pip install 'Pillow==11.3.0'
+          python -m py_compile apps/gallery-archive/qa_owner_screenshot_single_object_diag.py
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Single read, classify provider code without raw stderr or file paths
+        run: python apps/gallery-archive/qa_owner_screenshot_single_object_diag.py --model '${{ matrix.model }}'
