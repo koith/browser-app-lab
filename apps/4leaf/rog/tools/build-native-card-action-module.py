@@ -10,14 +10,14 @@ Output: native-card-action-sequences.js (runtime module, same public API as
 What is VERIFIED and what is not (do not upgrade in code comments or data):
   * frame index and tick of every key, per card and per animation: VERIFIED
     (18-byte type-3 records of the original member).
-  * animation slots 0-5 = idle/walk rear/side/front, 6-11 = pose holds in the
-    same rear/side/front order, slot 12 = duel lunge: role INFERRED (the
-    original table carries no names). Body 1057 proves the slots follow
+  * all original slots 0-16 retained; directional and duel roles are
+    INFERRED. Source slots 13/14 are WEB outcome candidates, 15/16 unclassified
+    (present in 85 of 97 bodies). Original tables have no semantic names. Body 1057 proves the slots follow
     DIRECTION, not frame numbers: its front art is frames 0-10 and its
     slots 0/2, 6/8, 9/11 are swapped accordingly.
   * tick -> milliseconds: UNVERIFIED (WEB value chosen in the module).
-  * effect events (type != 3): decoded but NOT played (effect members are not
-    published as full frames).
+  * source effect events are preserved in the evidence JSON. R15 separately
+    plays the visual-reviewed slot-12 originals; outcome effects UNVERIFIED.
 
 Usage: python3 tools/build-native-card-action-module.py [--check]
 --check exits 1 when the committed module differs from a fresh build.
@@ -30,7 +30,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "docs/evidence/source-maps/actor-native-anim-runtime.json"
 OUT = ROOT / "native-card-action-sequences.js"
-SLOTS = list(range(13))
+SLOTS = list(range(17))
 EMPTY = 0xFFFFFFFF
 B62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -78,13 +78,15 @@ TEMPLATE = r"""'use strict';
  * VERIFIED : frame index and tick of each key (18-byte type-3 records).
  * INFERRED : slot roles 0-2 idle, 3-5 walk (rear/side/front), 6-8 and 9-11
  *            single-pose holds (rear/side/front, used for the board strike),
- *            12 duel lunge.
- * UNVERIFIED: tick -> ms (WEB value below); effect events are NOT played. */
+ *            12 duel lunge, 13/14 outcome roles (candidate only).
+ * VERIFIED : source slots 13..16 original frame indexes, tick intervals.
+ * UNVERIFIED: tick -> ms and 13..16 meaning; R15 renders slot-12 effects. */
 (function(){
  const B62='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
  const RAW="@@TABLE@@";
  const SLOT={idleRear:0,idleSide:1,idleFront:2,walkRear:3,walkSide:4,walkFront:5,
-  poseRearA:6,poseSideA:7,poseFrontA:8,poseRearB:9,poseSideB:10,poseFrontB:11,duel:12};
+  poseRearA:6,poseSideA:7,poseFrontA:8,poseRearB:9,poseSideB:10,poseFrontB:11,duel:12,
+   extraA:13,extraB:14,extraC:15,extraD:16};
  // WEB timing, not 2002 data: 40ms/tick equals the established 120ms per
  // 3-tick walk key, so the duel lunge keeps the original RELATIVE timing.
  const TICK_MS=40;
@@ -100,7 +102,7 @@ TEMPLATE = r"""'use strict';
    for(let i=2;i<s.length;i+=4)keys.push([pair(s,i),pair(s,i+2)]);
    return {ticks:pair(s,0),keys};
   });
-  if(anims.length!==13)throw Error('OBS table must carry slots 0-12');
+  if(anims.length!==17)throw Error('OBS source table must retain all 17 slots (empty originals preserved)');
   TABLE[m[1]]=Object.freeze({pak:m[2],member:Number(m[3]),duelEffects:Number(m[4]),anims});
  }
  if(Object.keys(TABLE).length!==@@COUNT@@)throw Error('CHR body census must be @@COUNT@@');
@@ -123,7 +125,7 @@ TEMPLATE = r"""'use strict';
  function finish(result,native,meta){
   Object.assign(result,meta);
   result.nativeMilliseconds='UNVERIFIED/WEB-timing-not-2002-original';
-  result.nativeEffects='DISABLED/effect-members-not-published';
+  result.nativeEffects='slot12-native-visual-effects-R15/other-original-events-UNVERIFIED';
   return result;
  }
  function hold(native,t,o){
@@ -187,6 +189,31 @@ TEMPLATE = r"""'use strict';
     nativeSlot:'12-empty',nativeKeyTicks:[0],
     nativeEvidence:'original-OBS-anim12-has-no-keys/static-same-body-INFERRED'});
   }
+  // R17: use own original source keys for duel outcomes, never unrelated
+  // frame guesses. 13=hurt and 14=victory are WEB semantic candidates ONLY.
+  // Native frame indices/ticks VERIFIED; 2002 EXE action meanings UNVERIFIED.
+  // The still-unclassified 15/16 are exposed for inspection, not mapped.
+  if(context.duel&&(action==='hurt'||action==='victory')){
+   const slot=action==='hurt'?SLOT.extraA:SLOT.extraB;
+   const a=t.anims[slot];
+   if(a&&a.keys.length&&a.keys.every(k=>native.frames[k[1]])){
+    const result=[];
+    a.keys.forEach(([tick,frame],k)=>{
+     const end=k+1<a.keys.length?a.keys[k+1][0]:a.ticks;
+     for(let x=tick;x<Math.max(end,tick+1);x++)
+      result.push(native.frames[frame]);
+    });
+    if(!result.length)return null;
+    result.mirror=context.side==='attacker';result.loop=false;
+    result.intervalMs=TICK_MS;
+    return finish(result,native,{
+     table:'native-CHR-duel-'+action+'-candidate-slot'+slot,
+     nativeSlot:String(slot),nativeKeyTicks:a.keys.map(k=>k[0]),
+     nativeDurationTicks:a.ticks,nativeDurationMs:a.ticks*TICK_MS,
+     nativeEvidence:'original-OBS-anim'+slot+'-keys-and-ticks-VERIFIED/'+
+      'outcome-role-and-WEB-tick-ms-INFERRED'});
+   }
+  }
   if(action==='attack'&&(t.pak==='obs'||(frames(t.anims[SLOT.poseFrontA]).length&&frames(t.anims[SLOT.poseFrontB]).length))){
    // Board strike, per body from its OWN table:
    // front walk start, front pose A (slot 8), front pose B (slot 11) held,
@@ -225,8 +252,20 @@ TEMPLATE = r"""'use strict';
   }
   return null;
  }
+ // R17 no fictional original action names; inspect original 13-16 keys.
+ function sourceExtraSlots(card){
+  const t=TABLE[card];
+  if(!t||!window.__LEAF_CHR_BODY_MAP__?.resolve(card))return null;
+  return [13,14,15,16].map(slot=>{
+   const a=t.anims[slot];
+   return Object.freeze({slot,member:t.pak+'/'+t.member,
+    absent:!a,ticks:a?.ticks??null,
+    keys:Object.freeze(a?a.keys.map(k=>Object.freeze(k.slice())):[]),
+    role:'UNVERIFIED/NO_ORIGINAL_ACTION_NAME'});
+  });
+ }
  window.__LEAF_NATIVE_CARD_ACTIONS__=Object.freeze({
-  lookup,frontFrame,sequenceFor,table:card=>TABLE[card]||null,
+  lookup,frontFrame,sequenceFor,sourceExtraSlots,table:card=>TABLE[card]||null,
   getState:()=>({tableBodies:Object.keys(TABLE).length,
    // classic/obs23 = bodies whose original frames are published (resolve).
    classicBodies:Object.keys(TABLE).filter(c=>TABLE[c].pak==='obs'&&
@@ -235,8 +274,10 @@ TEMPLATE = r"""'use strict';
     window.__LEAF_CHR_BODY_MAP__?.resolve(c)).length,
    nativeKeyIndicesVerified:true,nativeKeyTicksVerified:true,
    duelLungeSlot:12,duelLungeRole:'INFERRED',
+   outcomeCandidateSlots:[13,14],unclassifiedSlots:[15,16],
+   originalKeysAndTicks:'VERIFIED',outcomeRole:'INFERRED/WEB-only',
    webTickMilliseconds:TICK_MS,originalTickMilliseconds:'UNVERIFIED',
-   sourceEffectPlayback:false})
+   sourceEffectPlayback:'R15-slot12-only'})
  });
 })();
 """
