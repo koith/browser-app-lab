@@ -5,6 +5,7 @@ from collections import defaultdict
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -50,6 +51,7 @@ def exact_bytes(context,url,photo):
     r=context.request.get(url,timeout=45000)
     assert r.status==200,('actual image HTTP',r.status,url)
     raw=r.body()
+    if hasattr(r,'dispose'):r.dispose()
     assert len(raw)==photo['bytes'] and hashlib.sha256(raw).hexdigest()==photo['sha256'],('actual image SHA/length',url)
     with Image.open(io.BytesIO(raw)) as image:image.verify()
     with Image.open(io.BytesIO(raw)) as image:
@@ -78,25 +80,49 @@ def deployed_sources(context,root,model):
 
 def scroll_to_real_card(locator):
     # Native QA timed out in WebKit's protocol preflight before scrolling.
-    # Use the page's normal instant scroll, then keep
-    # native click actionability and the exact decoded-image requirements.
+    # Use the page's normal instant scroll. Native touch below independently
+    # verifies the actual geometry/hit target; image checks remain unchanged.
     locator.evaluate("node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
     locator.wait_for(state='visible',timeout=25000)
     assert locator.evaluate('''node=>{const r=node.getBoundingClientRect();
         return node.isConnected&&r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight}'''), 'Card is not visible after real scroll'
 
 
+def native_touch(page,locator):
+    """Real iPhone-style pointer input with explicit geometry/hit guards.
+
+    Do not force clicks or call application handlers from JavaScript. Record
+    three actual rendered bounds and require a stable, enabled, unobstructed
+    touch target before sending the browser's native touchscreen event.
+    """
+    state=locator.evaluate('''async node=>{
+        const rect=()=>{const r=node.getBoundingClientRect();return [r.x,r.y,r.width,r.height]};
+        const bounds=[rect()];
+        for(let i=0;i<2;i++){await new Promise(resolve=>setTimeout(resolve,50));bounds.push(rect())}
+        const last=bounds[2],x=last[0]+last[2]/2,y=last[1]+last[3]/2;
+        const tolerance=.5/(devicePixelRatio||1),style=getComputedStyle(node),hit=document.elementFromPoint(x,y);
+        return {bounds,x,y,tolerance,
+            stable:bounds.every(b=>b.every((n,i)=>Math.abs(n-last[i])<=tolerance)),
+            visible:node.isConnected&&last[2]>0&&last[3]>0&&x>=0&&x<innerWidth&&y>=0&&y<innerHeight&&
+                style.visibility==='visible'&&style.display!=='none'&&style.pointerEvents!=='none',
+            enabled:!node.matches(':disabled'),hit:!!hit&&(hit===node||node.contains(hit)),
+            documentVisible:document.visibilityState==='visible'};
+    }''')
+    assert all(state[k] for k in ('stable','visible','enabled','hit','documentVisible')),('Native touch target is not actionable',state)
+    page.touchscreen.tap(state['x'],state['y'])
+
+
 def navigate_album(page,album):
     if page.locator('#lightbox.open').count():
-        page.locator('#close').click(timeout=20000)
+        native_touch(page,page.locator('#close'))
         page.wait_for_selector('#lightbox.open',state='hidden',timeout=25000)
     if page.evaluate("id=>!document.querySelector('#detail').hidden && detailAlbum?.id===id",album):return
     if not page.locator('#detail').is_hidden():
-        page.locator('#back').click(timeout=20000)
+        native_touch(page,page.locator('#back'))
         page.wait_for_selector('#detail',state='hidden',timeout=25000)
     card=page.locator('#albumgrid .album[data-id="'+album+'"]')
     scroll_to_real_card(card)
-    card.click(timeout=25000)
+    native_touch(page,card)
     page.wait_for_function("id=>!document.querySelector('#detail').hidden && detailAlbum?.id===id",arg=album,timeout=25000)
 
 
@@ -123,7 +149,10 @@ def open_photo(page,root,target):
         return image?.complete && image.naturalWidth===q.width && image.naturalHeight===q.height &&
             new URL(image.currentSrc||image.src,location.href).href===q.url;
     }''',arg={**target,'url':root+target['url']},timeout=45000)
-    card.click(timeout=25000)
+    # Lazy image loads and history restoration can change the viewport while
+    # decoding. Reposition the actual decoded card before native touch.
+    scroll_to_real_card(card)
+    native_touch(page,card)
     decoded(page,root,target)
 
 
@@ -246,7 +275,7 @@ def exercise(browser,model,overlay,limit=12):
             open_photo(page,root,target)
             exact_bytes(context,root+target['url'],target)
             viewed.append({'album':target['album'],'sha256':target['sha256'],'width':target['width'],'height':target['height']})
-            page.locator('#close').click(timeout=20000)
+            native_touch(page,page.locator('#close'))
             # closeViewer uses asynchronous history.back(). Waiting here is
             # essential: reopening an album earlier races the old popstate.
             page.wait_for_selector('#lightbox.open',state='hidden',timeout=25000)
@@ -260,10 +289,10 @@ def exercise(browser,model,overlay,limit=12):
             return null;
         }''')
         assert pair,(model,'no actual adjacent local originals for navigation')
-        open_photo(page,root,pair[0]);page.locator('#next').click();decoded(page,root,pair[1]);exact_bytes(context,root+pair[1]['url'],pair[1])
-        page.locator('#prev').click();decoded(page,root,pair[0]);page.locator('#close').click()
+        open_photo(page,root,pair[0]);native_touch(page,page.locator('#next'));decoded(page,root,pair[1]);exact_bytes(context,root+pair[1]['url'],pair[1])
+        native_touch(page,page.locator('#prev'));decoded(page,root,pair[0]);native_touch(page,page.locator('#close'))
         page.wait_for_selector('#lightbox.open',state='hidden',timeout=25000)
-        page.locator('#back').click();page.wait_for_selector('#detail',state='hidden',timeout=25000)
+        native_touch(page,page.locator('#back'));page.wait_for_selector('#detail',state='hidden',timeout=25000)
         page.reload(wait_until='domcontentloaded',timeout=60000)
         page.wait_for_function("Array.isArray(stored)&&stored.length>0&&document.querySelectorAll('#albumgrid .album').length>0",timeout=45000)
         if not overlay:assert source_proof==deployed_sources(context,root,model)
@@ -296,7 +325,8 @@ if __name__=='__main__':
     args=p.parse_args()
     if not 12<=args.max_browser_photos<=500:raise SystemExit('Browser sample must retain at least twelve actual originals per model')
     with sync_playwright() as pw:
-        browser=getattr(pw,args.browser).launch(headless=True)
+        proxy=os.environ.get('HTTPS_PROXY') or os.environ.get('https_proxy')
+        browser=getattr(pw,args.browser).launch(headless=True,**({'proxy':{'server':proxy}} if proxy else {}))
         try:
             for model in ('mimmi','yui'):
                 exercise(browser,model,args.candidate_html,args.max_browser_photos)
