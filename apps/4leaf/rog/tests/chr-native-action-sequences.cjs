@@ -56,7 +56,10 @@ assert.equal(seq('0088','walk','right').mirror,true);
 assert.equal(seq('0088','walk','left').mirror,false);
 assert.deepEqual(Array.from(seq('0088','walk','away').nativeKeyTicks),[0,3,6,9,12]);
 assert.match(seq('0088','walk','away').nativeMilliseconds,/UNVERIFIED/);
-assert.match(seq('0088','walk','away').nativeEffects,/DISABLED/);
+assert.match(seq('0088','walk','away').nativeEffects,/slot12-native-visual-effects-R15/,
+ 'R15 source effects are routed by native slot-12, not disabled globally');
+assert.match(seq('0088','walk','away').nativeEffects,/other-original-events-UNVERIFIED/,
+ 'other original effect semantics remain unverified');
 const temp=M.resolve('0088').frames;
 assert.equal(A.sequenceFor({frames:temp},'0088','walk','away'),null,
  'unknown source objects may not impersonate original member');
