@@ -10,6 +10,7 @@ import re
 import subprocess
 from PIL import Image
 from playwright.sync_api import sync_playwright
+from pages_deployment_identity import validate as validate_deployment_identity
 
 BASE='https://koith.github.io/browser-app-lab/apps'
 ROOT=Path(__file__).resolve().parents[2]
@@ -57,6 +58,10 @@ def exact_bytes(context,url,photo):
 
 
 def deployed_sources(context,root,model):
+    source=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    stamp=context.request.get('https://koith.github.io/browser-app-lab/gallery-deployment.json',timeout=35000)
+    assert stamp.status==200,'Actual Pages deployment source stamp is missing'
+    validate_deployment_identity(stamp.body(),source)
     names=['index.html','saved-photo-union.js','owner-media.js','owner-index.json',
            'stored-albums.json','album-aliases.json']
     if model=='mimmi':names.append('album-grouping.js')
@@ -71,6 +76,16 @@ def deployed_sources(context,root,model):
     return result
 
 
+def scroll_to_real_card(locator):
+    # Native QA timed out in WebKit's protocol preflight before scrolling.
+    # Use the page's normal instant scroll, then keep
+    # native click actionability and the exact decoded-image requirements.
+    locator.evaluate("node=>node.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
+    locator.wait_for(state='visible',timeout=25000)
+    assert locator.evaluate('''node=>{const r=node.getBoundingClientRect();
+        return node.isConnected&&r.width>0&&r.height>0&&r.bottom>0&&r.top<innerHeight}'''), 'Card is not visible after real scroll'
+
+
 def navigate_album(page,album):
     if page.locator('#lightbox.open').count():
         page.locator('#close').click(timeout=20000)
@@ -80,7 +95,7 @@ def navigate_album(page,album):
         page.locator('#back').click(timeout=20000)
         page.wait_for_selector('#detail',state='hidden',timeout=25000)
     card=page.locator('#albumgrid .album[data-id="'+album+'"]')
-    card.scroll_into_view_if_needed(timeout=25000)
+    scroll_to_real_card(card)
     card.click(timeout=25000)
     page.wait_for_function("id=>!document.querySelector('#detail').hidden && detailAlbum?.id===id",arg=album,timeout=25000)
 
@@ -101,7 +116,7 @@ def open_photo(page,root,target):
     navigate_album(page,target['album'])
     page.wait_for_function('''q=>[...document.querySelectorAll('#detailphotos .photo')].some(n=>Number(n.dataset.i)===q)''',arg=target['index'],timeout=25000)
     card=page.locator('#detailphotos .photo[data-i="'+str(target['index'])+'"]')
-    card.scroll_into_view_if_needed(timeout=25000)
+    scroll_to_real_card(card)
     card.locator('img').wait_for(state='visible',timeout=25000)
     page.wait_for_function('''q=>{
         const image=document.querySelector('#detailphotos .photo[data-i="'+q.index+'"] img');
@@ -125,7 +140,7 @@ def select_representatives(targets,limit):
 def inspect_covers(page):
     cards=page.locator('#albumgrid .album')
     for i in range(0,cards.count(),4):
-        cards.nth(i).scroll_into_view_if_needed(timeout=25000)
+        scroll_to_real_card(cards.nth(i))
         page.wait_for_timeout(120)
     page.wait_for_timeout(1500)
     return page.evaluate('''()=>{
@@ -137,6 +152,39 @@ def inspect_covers(page):
         return {albums:rows.length,decoded:rows.filter(r=>r.decoded).length,
             failed:rows.filter(r=>r.failed).length,pending:rows.filter(r=>r.pending).length,rows};
     }''')
+
+
+def denied_catalog_real_local_photos(browser,model,overlay):
+    """Controlled transport failures, real unchanged Pages image bytes."""
+    root=f'{BASE}/{model}-gallery/'
+    context=browser.new_context(viewport={'width':390,'height':844},is_mobile=True,
+        has_touch=True,service_workers='block')
+    page=context.new_page();calls=[]
+    page.on('request',lambda request:calls.append(request.url)
+        if 'onrender.com/api/' in request.url and request.url.endswith('/catalog') else None)
+    try:
+        if overlay:
+            for name in ['index.html','saved-photo-union.js']+(['album-grouping.js'] if model=='mimmi' else []):
+                text=(ROOT/f'apps/{model}-gallery'/name).read_text()
+                page.route(root if name=='index.html' else '**/'+name+'*',
+                    candidate_route(text,'text/html' if name=='index.html' else 'application/javascript'))
+        page.route('**/owner-index.json',lambda route:route.fulfill(status=403,body='controlled owner-index denial'))
+        page.route('https://mimmi-private-gallery-free.onrender.com/**',
+            lambda route:route.fulfill(status=503,body='controlled Render outage'))
+        page.goto(root,wait_until='domcontentloaded',timeout=60000)
+        page.wait_for_function('Array.isArray(stored)&&stored.length>0&&document.querySelectorAll("#albumgrid .album").length>0',timeout=45000)
+        target=page.evaluate('''()=>{
+            for(const a of stored){const p=photosFor(a),i=p.findIndex(q=>!q.ownerAlbum&&!q.vaultAlbum&&typeof q.url==='string'&&q.url.startsWith('stored-albums/'));
+                if(i>=0)return {album:a.id,index:i,...p[i]};}return null;
+        }''')
+        assert target,'Real saved local photo lost when both catalogs fail'
+        open_photo(page,root,target);exact_bytes(context,root+target['url'],target)
+        assert not calls,('Pages attempted unavailable Render catalog after static manifest denial',calls)
+        print('FAULT_INJECTED_CATALOG_DENIAL_REAL_PAGES_ORIGINAL_PASS',json.dumps({
+            'model':model,'candidate_html':overlay,'controlled_owner_index_http':403,
+            'controlled_render_http':503,'real_local_photo_decode_and_SHA':True,
+            'render_catalog_requests':len(calls),'not_a_full_gallery_restoration':True}),flush=True)
+    finally:context.close()
 
 
 def exercise(browser,model,overlay,limit=12):
@@ -166,6 +214,7 @@ def exercise(browser,model,overlay,limit=12):
         source_proof={} if overlay else deployed_sources(context,root,model)
         response=page.goto(root,wait_until='domcontentloaded',timeout=60000)
         assert response and response.status==200
+        page.bring_to_front()
         page.wait_for_function("Array.isArray(stored)&&stored.length>0&&document.querySelectorAll('#albumgrid .album').length>0",timeout=80000)
         cover_observation=inspect_covers(page)
         candidates,physical=cross_candidates(model)
@@ -249,5 +298,7 @@ if __name__=='__main__':
     with sync_playwright() as pw:
         browser=getattr(pw,args.browser).launch(headless=True)
         try:
-            for model in ('mimmi','yui'):exercise(browser,model,args.candidate_html,args.max_browser_photos)
+            for model in ('mimmi','yui'):
+                exercise(browser,model,args.candidate_html,args.max_browser_photos)
+                denied_catalog_real_local_photos(browser,model,args.candidate_html)
         finally:browser.close()

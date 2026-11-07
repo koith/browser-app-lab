@@ -670,7 +670,9 @@ Promise.all([
  // complete static owner manifest already loaded: it can CORS-fail and slow
  // WebKit first paint. Only use authenticated gateway metadata as a fallback
  // if no usable SHA-verified static owner album was available.
- if(!ownerStored.length)YuiPrivate.albums().then(albums=>{
+ // Pages keeps existing local photos when its owner manifest fails; a
+ // billing-suspended optional Render catalog cannot repair that manifest.
+ if(!ownerStored.length && location.hostname!=='koith.github.io')YuiPrivate.albums().then(albums=>{
   if(!Array.isArray(albums)||!albums.length)return;
   const nextOwner=YuiPrivate.reconcile(ownerStored,albums).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
   if(!nextOwner.length)return;
