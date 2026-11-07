@@ -63,6 +63,10 @@ on:
       - "apps/demand-research/test_target_account_archive.py"
       - "apps/demand-research/target_archive_api.py"
       - "apps/demand-research/backup_queue.py"
+      - "apps/demand-research/backup_bridge_poller.py"
+      - "apps/demand-research/github_temp_bundle.py"
+      - "apps/demand-research/test_github_temp_bundle.py"
+      - "apps/demand-research/test_backup_queue_sqlite.py"
       - "apps/demand-research/test_backup_queue.py"
       - "apps/demand-research/sealed_credentials.py"
       - "apps/demand-research/test_sealed_credentials.py"
@@ -104,13 +108,13 @@ jobs:
           set -euo pipefail
           python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4 fastapi==0.115.12 httpx==0.28.1
           cd apps/demand-research
-          python -m py_compile target_account_archive.py target_account_bundle.py verified_bundle_reader.py target_account_enrichment.py target_account_viewer.py target_archive_api.py backup_queue.py backup_bridge_poller.py sealed_credentials.py test_sealed_credentials.py test_backup_queue.py test_target_account_archive.py test_target_account_bundle.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py gateway.py
+          python -m py_compile github_temp_bundle.py test_github_temp_bundle.py test_backup_queue_sqlite.py target_account_archive.py target_account_bundle.py verified_bundle_reader.py target_account_enrichment.py target_account_viewer.py target_archive_api.py backup_queue.py backup_bridge_poller.py sealed_credentials.py test_sealed_credentials.py test_backup_queue.py test_target_account_archive.py test_target_account_bundle.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py gateway.py
           node --check target_archive_client.js
           node --check account_archive_view.js
           node --check archive_tab.js
           node --check auto_archive_view.js
           node --check account_watch.js
-          python -m pytest -q test_archive_nonblocking.py test_target_account_archive.py test_target_account_bundle.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py test_backup_queue.py test_sealed_credentials.py test_demand_archive.py test_gateway.py
+          python -m pytest -q test_archive_nonblocking.py test_target_account_archive.py test_target_account_bundle.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py test_backup_queue.py test_backup_queue_sqlite.py test_github_temp_bundle.py test_sealed_credentials.py test_demand_archive.py test_gateway.py
           python -m pip install --disable-pip-version-check playwright==1.56.0
           python -m playwright install --with-deps chromium webkit
           python test_account_archive_browser.py

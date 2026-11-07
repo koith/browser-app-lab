@@ -101,7 +101,7 @@
   async function loadLibrary(){
     if(!gatewayReady)return;
     library.hidden=false;
-    libraryRows.textContent="테라박스에서 저장된 계정을 확인 중…";
+    libraryRows.textContent="검증된 계정 보관본을 확인 중…";
     try{
       const response=await fetch("/api/account-archives",{
         credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
@@ -123,7 +123,7 @@
             profile=url.hostname+url.pathname;
         }catch{}
         label.textContent=source+" · "+(profile||"공개 계정")+
-          (item.backup_kind==="terabox_zip_sha_verified"
+          (["terabox_zip_sha_verified","github_temp_sha_verified"].includes(item.backup_kind)
              ?" · 보관 글 "+Number(item.posts_verified_in_bundle||0)+"건":"");
         row.append(label);
         appendViewerLink(row,item.key,"보기");
@@ -158,13 +158,13 @@
         case "QUEUED":
           showJob("백업 작업 접수 완료 · 실행 대기 중","queued");break;
         case "RUNNING":
-          showJob("백업 진행 중 · 공개 자료를 수집하고 테라박스에 저장하고 있습니다.","running");break;
+          showJob("백업 진행 중 · 공개 자료를 수집하고 임시 저장소에 암호화 보관합니다.","running");break;
         case "VERIFYING_STORAGE":
-          showJob("파일 전송 완료 여부를 확인 중 · 테라박스에서 원본을 다시 읽고 있습니다.","verifying");break;
+          showJob("파일 전송 완료 여부를 확인 중 · 원본을 다시 읽어 SHA를 검증합니다.","verifying");break;
         case "REMOTE_VERIFIED":
         case "PARTIAL_BACKUP":
           showJob((result.state==="REMOTE_VERIFIED"
-            ?"테라박스 백업 완료 · 게시글 "+count+"건 · 원본 "+
+            ?"검증된 임시 백업 · 게시글 "+count+"건 · 원본 "+
                Number(result.objects||0)+"개 검증"
             :"백업된 자료 일부 검증됨 · 게시글 "+count+
               "건 · 수집되지 않은 구간이 남아 있습니다."),"verified",
@@ -291,7 +291,7 @@
       window.requestAnimationFrame(()=>{
         $("accountBackupSection")?.scrollIntoView({block:"start"});
       });
-      message.textContent="선택한 계정이 입력됐습니다. 테라박스 백업 시작을 눌러 요청하세요.";
+      message.textContent="선택한 계정이 입력됐습니다. 백업 시작을 눌러 요청하세요.";
     }
   }
   async function check(){

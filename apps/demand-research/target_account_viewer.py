@@ -13,10 +13,11 @@ from urllib.parse import urlsplit
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, FileResponse, Response
 from demand_archive import CloudArchive, sha256
+import github_temp_bundle
 from target_account_archive import REGISTRY_RE, archive_key, account_cloud
 from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
 from verified_bundle_reader import (
-    BundleAccountCloud, available_bundles, latest_account_bundle,
+    BundleAccountCloud, available_bundles, latest_account_bundle, BundleInvalid,
 )
 
 HEX40=re.compile(r"^[a-f0-9]{40}$")
@@ -55,6 +56,13 @@ def open_account(account):
     match=REGISTRY_RE.fullmatch(account+".json")
     if not match:
         raise HTTPException(400,"Invalid archive account key")
+    if github_temp_bundle.enabled():
+        try:
+            bundle=github_temp_bundle.account_bundle(account)
+            if bundle is not None:
+                return None,bundle.accounts[account],BundleAccountCloud(bundle)
+        except (RuntimeError,ValueError,TypeError,BundleInvalid):
+            raise HTTPException(502,"Temporary GitHub archive unavailable") from None
     root=open_root()
     try:
         # Prefer independently SHA-verified remote ZIP rescue when available.
@@ -220,6 +228,20 @@ def create_router(auth):
     @router.get("/api/account-archives")
     def accounts(request:Request):
         auth(request)
+        if github_temp_bundle.enabled():
+            try:
+                data=[{"key":bundle.account,"platform":bundle.selected_platform,
+                       "profile_url":sanitize_safe_link(
+                           bundle.accounts[bundle.account].get("profile_url")),
+                       "backup_kind":"github_temp_sha_verified",
+                       "posts_verified_in_bundle":bundle.post_count,
+                       "objects_verified_in_bundle":bundle.object_count,
+                       "source_state":bundle.source_state,
+                       "temporary":True}
+                      for bundle in github_temp_bundle.latest_bundles()]
+            except (RuntimeError,ValueError,TypeError,BundleInvalid):
+                raise HTTPException(502,"Temporary GitHub account index unavailable") from None
+            return JSONResponse({"accounts":data},headers=CACHE_HEADERS)
         root=open_root()
         try:
             # Legacy nested per-record paths can return copyto/lsf missing
@@ -272,7 +294,7 @@ def create_router(auth):
         if isinstance(archive,BundleAccountCloud):
             bundle=archive.bundle
             return JSONResponse({
-                "storage":"private_terabox",
+                "storage":"github_encrypted_temporary" if getattr(bundle,"temporary",False) else "private_terabox",
                 "state":"REMOTE_ZIP_SHA_VERIFIED",
                 "source_state":bundle.source_state,
                 "original_objects":bundle.object_count,

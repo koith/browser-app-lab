@@ -633,7 +633,8 @@ def state_from_cloud(cloud):
 
 def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
             clock=time.monotonic, archive_factory=None):
-    if not isinstance(max_pages,int) or not 1<=max_pages<=MAX_PAGES:
+    cap=200 if os.getenv("DEMAND_TARGET_FULL_HISTORY","")=="1" else MAX_PAGES
+    if not isinstance(max_pages,int) or not 1<=max_pages<=cap:
         raise ValueError("invalid per-run page budget")
     api=api or Transport()
     root=root or CloudArchive()
