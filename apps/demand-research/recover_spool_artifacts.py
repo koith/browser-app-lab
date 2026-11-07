@@ -140,20 +140,22 @@ def preserve_encrypted_batch(cloud,spool,paths):
     if len(blob)>MAX_BUNDLE_BYTES:
         raise ValueError("encrypted recovery batch exceeds size limit")
     digest=hashlib.sha256(blob).hexdigest()
-    key="metadata/recovery-pack-"+digest+".zip"
+    # A separately verified selected-account ZIP succeeded in the TeraBox
+    # root while metadata/ child writes and readback were unreliable.
+    # Prefer the *same existing, immutable and independently SHA-retrieved*
+    # root-object transport for encrypted recovery packs as well.
+    # The reader already accepts both root and historical metadata/ keys.
+    key="recovery-pack-"+digest+".zip"
     try:
         cloud.write_immutable(key,blob)
     except RuntimeError as error:
-        # The nested metadata directory sometimes fails to resolve even when
-        # the archive root remains writable. Only a *missing path* response
-        # permits an immutable root-level fallback; checksum conflicts,
-        # authorization, quota and throttling must still fail closed.
+        # A genuinely missing root path may still work at the legacy location.
+        # Never treat authorization denial, quota, checksum conflicts or a
+        # missing remote SHA readback as permission to claim a backup.
         if safe_failure_category(error)!="missing_remote_path":
             raise
-        key="recovery-pack-"+digest+".zip"
-        # Do not let the generic canonical->flat metadata fallback silently
-        # acknowledge bytes that a root listing cannot rediscover later.
-        cloud._write_immutable_direct(key,blob)
+        key="metadata/recovery-pack-"+digest+".zip"
+        cloud.write_immutable(key,blob)
     observed=cloud.read_verified(key,digest,cap=len(blob)+1)
     if observed!=blob:
         raise RuntimeError("encrypted recovery batch TeraBox checksum unverified")

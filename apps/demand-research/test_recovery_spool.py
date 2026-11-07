@@ -283,7 +283,7 @@ def test_replay_circuit_breaker_preserves_deferred_encrypted_buffers(tmp_path,mo
     assert outcome["batch_sha_verified"]==1
     assert outcome["batch_ciphertext_count"]==5
     assert len(cloud.objects)==1
-    assert next(iter(cloud.objects)).startswith("metadata/recovery-pack-")
+    assert next(iter(cloud.objects)).startswith("recovery-pack-")
 
 
 def test_replay_per_record_runner_budget_preserves_exact_original(tmp_path):
