@@ -18,7 +18,8 @@ assert.ok(owner.physical_originals_indexed>=state.progress.primary_cloud_verifie
 assert.equal(state.storage.intended_primary.r2_required,false);
 for(const page of ['index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
- assert.ok(html.includes(state.version),page+' must visibly show '+state.version);
+ const mainVersion=html.match(/<small\b[^>]*id="app-version"[^>]*>([^<]+)<\/small>/);
+ assert.equal(mainVersion?.[1]?.trim(),state.version,page+' main version must match version.json');
  assert.ok(!html.includes('ZIP 2개를'),page+' should not claim two ZIPs');
 }
 const data=JSON.parse(fs.readFileSync(path.join(root,'stored-albums.json'),'utf8'));
