@@ -83,16 +83,16 @@ def assert_rank_rows_centered(page, width):
 
 def assert_live_activity_ranking(page):
     """Check genuine public-source account cohorts, not injected QA accounts."""
-    page.wait_for_function("""() => {
+    page.wait_for_function(r"""() => {
       const buttons=[...document.querySelectorAll('[data-rank-cohort]')];
-      const count=button=>Number((button.textContent||'').match(/(\\d+)\\s*$/)?.[1]||0);
+      const count=button=>Number((button.textContent||'').match(/(\d+)\s*$/)?.[1]||0);
       return buttons.length===2 && buttons.reduce((n,b)=>n+count(b),0)>0;
     }""",timeout=30000)
     counts={}
     for cohort in ("established","new"):
         button=page.locator('[data-rank-cohort="'+cohort+'"]')
         label=button.inner_text()
-        match=re.search(r"(\\d+)\\s*$",label)
+        match=re.search(r"(\d+)\s*$",label)
         assert match, "cohort count missing"
         n=int(match.group(1))
         counts[cohort]=n
