@@ -81,6 +81,53 @@ def assert_rank_rows_centered(page, width):
     assert abs(measured["leftGap"]-measured["rightGap"])<3,measured
     assert not measured["overflow"],measured
 
+def assert_live_activity_ranking(page):
+    """Check genuine public-source account cohorts, not injected QA accounts."""
+    page.wait_for_function(r"""() => {
+      const buttons=[...document.querySelectorAll('[data-rank-cohort]')];
+      const count=button=>Number((button.textContent||'').match(/(\d+)\s*$/)?.[1]||0);
+      return buttons.length===2 && buttons.reduce((n,b)=>n+count(b),0)>0;
+    }""",timeout=30000)
+    counts={}
+    for cohort in ("established","new"):
+        button=page.locator('[data-rank-cohort="'+cohort+'"]')
+        label=button.inner_text()
+        match=re.search(r"(\d+)\s*$",label)
+        assert match, "cohort count missing"
+        n=int(match.group(1))
+        counts[cohort]=n
+        button.click()
+        if n:
+            first=page.locator("#activityRankingRows .activity-rank-card").first
+            first.wait_for(state="visible",timeout=15000)
+            visible=page.locator("#activityRankingRows .activity-rank-card").count()
+            assert visible==min(n,20), "live ranking card count inconsistent"
+            first.click()
+            assert page.locator("#activityRankingDialog[open]").count()==1, (
+                "live rank detail failed to open"
+            )
+            assert page.locator("#activityRankingDialogContent a[target='_blank']").count()==1, (
+                "rank source attribution link missing"
+            )
+            page.locator("#activityRankingDialogClose").click()
+            assert page.locator("#activityRankingDialog[open]").count()==0
+        else:
+            assert page.locator("#activityRankingRows .activity-rank-card").count()==0
+    assert counts["established"]+counts["new"]>0, (
+        "real visible posts exist but both account cohorts are empty"
+    )
+    assert_rank_rows_centered(page,1200)
+    page.set_viewport_size({"width":390,"height":844})
+    assert_rank_rows_centered(page,390)
+    page.set_viewport_size({"width":1200,"height":900})
+    print("LIVE_PUBLIC_RANKING_VERIFIED",json.dumps({
+        "established_accounts":counts["established"],
+        "new_accounts":counts["new"],
+        "detail":True,"cohort_filter":True,
+        "desktop_10_columns":True,"mobile_5_columns":True
+    },ensure_ascii=False),flush=True)
+
+
 def assert_provider_totals_match_visible_feed(page):
     # The per-provider counts must reconcile to the filtered verified posts,
     # not the raw SNS candidates or hidden advertising rows.
@@ -405,6 +452,7 @@ def run(live=False):
                   };
                 }""")
                 print("LIVE_PUBLIC_IMAGE_INTEGRITY",json.dumps(integrity,ensure_ascii=False),flush=True)
+                assert_live_activity_ranking(page)
 
             assert not errors, "Browser JS exceptions: "+str(errors[:5])
             print("REAL_PUBLIC_BROWSER_SMOKE" if live else "INTERSECTION_COMPACT_QA",json.dumps({
