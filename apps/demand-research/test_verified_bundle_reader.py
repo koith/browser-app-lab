@@ -148,3 +148,73 @@ def test_verified_zip_library_survives_broken_nested_legacy_registry(private_zip
     assert response.status_code==200,response.text
     assert len(response.json()["accounts"])==1
     assert response.json()["accounts"][0]["backup_kind"]=="terabox_zip_sha_verified"
+
+
+def test_live_storage_mix_prefers_more_complete_sha_verified_terabox(
+        private_zip_client,monkeypatch):
+    """The real ZIP must be visible even with GitHub temporary mode enabled."""
+    client,root,name,post,meta=private_zip_client
+    account="bluesky-"+archive_key(meta)
+    complete=bundles.load_verified_bundle(root,name)
+    # This is a previously verified but less complete temporary snapshot.
+    # Actual account ZIP bytes and media still come from fixture's TeraBox root.
+    from types import SimpleNamespace
+    older=SimpleNamespace(account=account,selected_platform="bluesky",
+          accounts={account:complete.accounts[account]},post_count=0,
+          object_count=0,source_state="SOURCE_PARTIAL")
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer.github_temp_bundle,"latest_bundles",lambda:[older])
+    monkeypatch.setattr(viewer.github_temp_bundle,"account_bundle",
+                        lambda key:older if key==account else None)
+    response=client.get("/api/account-archives")
+    assert response.status_code==200,response.text
+    rows=response.json()["accounts"]
+    assert len(rows)==1
+    assert rows[0]["backup_kind"]=="terabox_zip_sha_verified"
+    assert rows[0]["posts_verified_in_bundle"]==1
+    assert rows[0]["temporary"] is False
+    receipt=client.get("/api/account-archives/"+account+"/backup-status")
+    assert receipt.status_code==200 and receipt.json()["storage"]=="private_terabox"
+    feed=client.get("/api/account-archives/"+account+"/feed")
+    assert feed.status_code==200 and feed.json()["total"]==1
+    media=feed.json()["posts"][0]["media"][0]["url"]
+    assert client.get(media).content==PHOTO
+
+
+def test_live_storage_mix_keeps_github_usable_when_terabox_fails(
+        private_zip_client,monkeypatch):
+    """A provider 403 or slow read cannot erase an independently verified backup."""
+    client,root,name,post,meta=private_zip_client
+    account="bluesky-"+archive_key(meta)
+    temporary=bundles.load_verified_bundle(root,name)
+    temporary.temporary=True
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer.github_temp_bundle,"latest_bundles",lambda:[temporary])
+    monkeypatch.setattr(viewer.github_temp_bundle,"account_bundle",
+                        lambda key:temporary if key==account else None)
+    def failed_source(_root):
+        raise RuntimeError("synthetic unavailable provider; never log remote")
+        yield
+    monkeypatch.setattr(viewer,"_verified_account_bundles",failed_source)
+    rows=client.get("/api/account-archives")
+    assert rows.status_code==200 and len(rows.json()["accounts"])==1
+    assert rows.json()["accounts"][0]["backup_kind"]=="github_temp_sha_verified"
+    feed=client.get("/api/account-archives/"+account+"/feed")
+    assert feed.status_code==200 and feed.json()["total"]==1
+    assert client.get(feed.json()["posts"][0]["media"][0]["url"]).content==PHOTO
+
+
+def test_live_storage_mix_keeps_terabox_when_github_index_fails(
+        private_zip_client,monkeypatch):
+    client,root,name,post,meta=private_zip_client
+    account="bluesky-"+archive_key(meta)
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    def failed_github():
+        raise RuntimeError("synthetic unavailable GitHub API")
+    monkeypatch.setattr(viewer.github_temp_bundle,"latest_bundles",failed_github)
+    monkeypatch.setattr(viewer.github_temp_bundle,"account_bundle",
+                        lambda _key:None)
+    listing=client.get("/api/account-archives")
+    assert listing.status_code==200
+    assert listing.json()["accounts"][0]["backup_kind"]=="terabox_zip_sha_verified"
+    assert client.get("/api/account-archives/"+account+"/feed").json()["total"]==1
