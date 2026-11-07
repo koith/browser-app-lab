@@ -188,11 +188,16 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
             if not env_platform or not env_account:
                 raise ValueError("selected public account missing")
             profile_input(env_platform,env_account)
-            try:
-                max_pages=int(os.getenv("TARGET_MAX_PAGES","2"))
-            except (TypeError,ValueError):
-                raise ValueError("invalid public account page budget") from None
-            if not 1<=max_pages<=4:
+            raw_pages=os.getenv("TARGET_MAX_PAGES","2")
+            github_temp=os.getenv("DEMAND_ACCOUNT_TEMP_STORAGE","")=="github_release"
+            if raw_pages=="all" and github_temp:
+                max_pages=200
+            else:
+                try:
+                    max_pages=int(raw_pages)
+                except (TypeError,ValueError):
+                    raise ValueError("invalid public account page budget") from None
+            if not 1<=max_pages<=(200 if github_temp else 4):
                 raise ValueError("invalid public account page budget")
             selected={"platform":env_platform,"account":env_account,
                       "max_pages":max_pages}
@@ -203,9 +208,15 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     platform=selected["platform"]
     account=selected["account"]
     pages=selected["max_pages"]
+    github_temp=os.getenv("DEMAND_ACCOUNT_TEMP_STORAGE","")=="github_release"
+    if github_temp:
+        from github_temp_bundle import upload_release
+        uploader=upload_release
+        cloud_check=False
+        os.environ["DEMAND_TARGET_FULL_HISTORY"]="1"
     if cloud_check:
         CloudArchive().preflight()
-    store=BundleStore()
+    store=BundleStore(limit=80_000_000 if github_temp else MAX_BUNDLE)
     root=BundleCloud(store)
     result=None
     interrupted=None
@@ -231,14 +242,16 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
         manifest=make_zip(store,package,state=result["status"] if result else "SOURCE_PARTIAL",
                           selected=selected)
         remote=uploader(package,run_id=run_id,account_hash=account_name)
-    totals={"platform":platform,"objects_remote_verified":len(manifest["objects"]),
+    totals={"platform":platform,"storage":"github_encrypted_temporary" if github_temp else "terabox",
+            "objects_remote_verified":len(manifest["objects"]),
             "public_posts_in_bundle":len(refs),
             "remote_sha256_verified":True,
             "remote_zip_bytes":remote["bytes"],
             "source_state":manifest["capture_state"],
             "source_partial":interrupted is not None}
-    print("TARGET_ACCOUNT_BUNDLE_REMOTE_VERIFIED "+json.dumps(totals,sort_keys=True),flush=True)
-    if interrupted:
+    marker="TARGET_ACCOUNT_GITHUB_TEMP_SHA_VERIFIED" if github_temp else "TARGET_ACCOUNT_BUNDLE_REMOTE_VERIFIED"
+    print(marker+" "+json.dumps(totals,sort_keys=True),flush=True)
+    if interrupted and not github_temp:
         raise RuntimeError("remote backup verified but source crawl is partial")
     return totals
 
