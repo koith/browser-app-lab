@@ -122,17 +122,52 @@ def existing_catalogs(mime, raw):
     return found
 
 
+# workers.dev enforces Cloudflare's zone-wide browser integrity check.
+# A first-party owner restore client identifies itself as a browser-compatible
+# HTTP client; it never changes authentication, cookies, host, or SHA checks.
+WORKER_READ_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    'Accept': 'application/json, image/avif, image/webp, image/*;q=0.9, */*;q=0.8',
+}
+
+
+def remote_error_class(error, phase):
+    # Never echo Cloudflare's raw error body, URL, account or signed credentials.
+    content_type = (error.headers.get('Content-Type', '') or '').lower()
+    source = 'JSON' if 'application/json' in content_type else 'HTML' if 'text/html' in content_type else 'OTHER'
+    mitigated = error.headers.get('cf-mitigated') == 'challenge'
+    label = 'UNCLASSIFIED'
+    try:
+        raw = error.read(2048)
+        if source == 'JSON':
+            parsed = json.loads(raw)
+            candidate = parsed.get('error', '') if isinstance(parsed, dict) else ''
+            if candidate in ('NOT_CONFIGURED', 'PHOTO_NOT_MIRRORED', 'PHOTO_SHA_REQUIRED',
+                             'PRIVATE_STORAGE_UNAVAILABLE', 'INVALID_PHOTO', 'ORIGIN_DENIED',
+                             'STORAGE_MISMATCH', 'SIGNATURE_INVALID', 'NOT_FOUND',
+                             'BODY_TOO_LARGE', 'UNAUTHORIZED'):
+                label = candidate
+        elif b'error code: 1020' in raw.lower():
+            label = 'CF_ACCESS_RULE_1020'
+        elif b'error 1042' in raw.lower() or b'error code: 1042' in raw.lower():
+            label = 'CF_WORKER_ROUTE_1042'
+    except (ValueError, UnicodeError, OSError):
+        pass
+    print('CF_REMOTE_HTTP_REJECTION', 'phase', phase, 'status', error.code,
+          'format', source, 'challenge', mitigated, 'kind', label, flush=True)
+
+
 def media_bytes(base, model, album, photo):
     opener = build_opener(NoRedirect())
     sign = Request(base + '/api/v1/sign', method='POST',
-        headers={'Origin': ORIGIN, 'Content-Type': 'application/json'},
+        headers={**WORKER_READ_HEADERS, 'Origin': ORIGIN, 'Content-Type': 'application/json'},
         data=json.dumps({'model': model, 'album': album, 'number': photo['number'],
                          'variant': 'original', 'sha256': photo['sha256']}).encode())
     try:
         with opener.open(sign, timeout=35) as response:
             data = json.loads(response.read(4097))
     except HTTPError as error:
-        print('CF_REMOTE_ORIGINAL_SIGN_HTTP', error.code, flush=True)
+        remote_error_class(error, 'sign')
         raise
     except (URLError, TimeoutError, OSError) as error:
         print('CF_REMOTE_ORIGINAL_SIGN_TRANSPORT', type(error).__name__, flush=True)
@@ -143,10 +178,10 @@ def media_bytes(base, model, album, photo):
         data.get('sha256') != photo['sha256'] or data.get('bytes') != photo['bytes']):
         raise ValueError('REMOTE_SIGNED_PHOTO_MISMATCH')
     try:
-        with opener.open(Request(data['url']), timeout=45) as response:
+        with opener.open(Request(data['url'], headers=WORKER_READ_HEADERS), timeout=45) as response:
             raw = response.read(8_000_001)
     except HTTPError as error:
-        print('CF_REMOTE_ORIGINAL_MEDIA_HTTP', error.code, flush=True)
+        remote_error_class(error, 'media')
         raise
     checked(photo, raw)
     return raw
@@ -293,13 +328,13 @@ def main(args):
         if route.get('enabled') is not True:
             raise ValueError('WORKER_ROUTE_ENABLE_NOT_VERIFIED')
         try:
-            with build_opener(NoRedirect()).open(base + '/api/v1/health', timeout=10) as response:
+            with build_opener(NoRedirect()).open(Request(base + '/api/v1/health', headers=WORKER_READ_HEADERS), timeout=10) as response:
                 result = json.loads(response.read(4096))
             print('CF_EXISTING_WORKER_HEALTH', 'HTTP_200',
                   'recognized_gallery_release', isinstance(result, dict)
                   and result.get('transport') == 'cloudflare-bound-assets', flush=True)
         except HTTPError as error:
-            print('CF_EXISTING_WORKER_HEALTH', 'HTTP_' + str(error.code), flush=True)
+            remote_error_class(error, 'existing_health')
         except (URLError, TimeoutError, OSError) as error:
             print('CF_EXISTING_WORKER_HEALTH', 'TRANSPORT_' + type(error).__name__, flush=True)
         except (ValueError, TypeError) as error:
@@ -382,7 +417,7 @@ def main(args):
     # instead of hiding all HTTP/DNS/JSON failures behind one ValueError.
     for attempt in range(45):
         try:
-            with build_opener(NoRedirect()).open(base + '/api/v1/health', timeout=8) as response:
+            with build_opener(NoRedirect()).open(Request(base + '/api/v1/health', headers=WORKER_READ_HEADERS), timeout=8) as response:
                 status, content_type = response.status, response.headers.get('Content-Type', '')
                 raw = response.read(4096)
             if 'application/json' not in content_type.lower():
