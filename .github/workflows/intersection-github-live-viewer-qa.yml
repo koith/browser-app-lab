@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows:
       - "INTERSECTION — Verified One-ZIP Public Account Rescue"
+      - "INTERSECTION — Mirror Verified TeraBox ZIP to Encrypted GitHub"
     types: [completed]
     branches: [main]
   pull_request:
