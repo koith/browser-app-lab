@@ -1,0 +1,92 @@
+name: INTERSECTION — GitHub Encrypted Account Live Viewer E2E
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/intersection-github-live-viewer-qa.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intersection-github-live-viewer-qa
+  cancel-in-progress: false
+
+jobs:
+  live-verified-reader:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - name: Verify actual GitHub release original is readable through webapp
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.request, urllib.error
+          BASE="https://intersection-originals-free.onrender.com"
+          def request(path, *, byte_range=None, timeout=120):
+              headers={"Accept":"application/json","User-Agent":"intersection-live-github-backup-qa"}
+              if byte_range: headers["Range"]=byte_range
+              req=urllib.request.Request(BASE+path,headers=headers)
+              with urllib.request.urlopen(req,timeout=timeout) as r:
+                  return r.status,dict(r.headers),r.read(1500000 if byte_range else 3000000)
+          def get(path, timeout=120):
+              code,_,body=request(path,timeout=timeout)
+              if code!=200:raise RuntimeError("Live account API status invalid")
+              return json.loads(body)
+          status=get("/api/target-archive/status")
+          if status.get("storage")!="github_encrypted_temporary":
+              raise RuntimeError("Live gateway is not configured for encrypted GitHub storage")
+          print("LIVE_GITHUB_TEMP_BACKUP_ENABLED",flush=True)
+          response=get("/api/account-archives",timeout=170)
+          accounts=[a for a in response.get("accounts",[]) if
+                    a.get("backup_kind")=="github_temp_sha_verified" and
+                    a.get("posts_verified_in_bundle",0)>0]
+          if not accounts:raise RuntimeError("No independently verified live account ZIP")
+          print("LIVE_ENCRYPTED_RELEASE_DISCOVERED count",len(accounts),flush=True)
+          account=accounts[0]
+          key=account["key"]
+          if not key.startswith(("bluesky-","mastodon-")):
+              raise RuntimeError("Invalid verified account key")
+          prefix="/api/account-archives/"+key
+          details=get(prefix+"/backup-status",timeout=100)
+          if (details.get("state")!="REMOTE_ZIP_SHA_VERIFIED" or
+              details.get("storage")!="github_encrypted_temporary"):
+              raise RuntimeError("Live source ZIP has not passed SHA verification")
+          print("LIVE_GITHUB_ZIP_VERIFIED posts",details.get("public_posts"),
+                "objects",details.get("original_objects"),flush=True)
+          profile=get(prefix+"/profile")
+          if not profile.get("available"):raise RuntimeError("Live profile snapshot unavailable")
+          print("LIVE_VERIFIED_PROFILE_READBACK",flush=True)
+          feed=get(prefix+"/feed?offset=0&limit=50")
+          posts=feed.get("posts",[])
+          if not posts or feed.get("total",0)<1:
+              raise RuntimeError("Live account post feed unavailable")
+          print("LIVE_VERIFIED_ACCOUNT_FEED total",feed["total"],flush=True)
+          post=posts[0]
+          thread=get(prefix+"/threads/"+post["id"],timeout=120)
+          if not isinstance(thread.get("replies"),list):
+              raise RuntimeError("Live account reply panel unavailable")
+          print("LIVE_VERIFIED_REPLY_PANEL captured",bool(thread.get("captured")),flush=True)
+          has_media=False
+          index=0
+          for offset in (0,50,100,150,200,250,300,350,400):
+              page=posts if offset==0 else get(prefix+"/feed?offset="+str(offset)+"&limit=50")
+              rows=page if offset==0 else page.get("posts",[])
+              for row in rows:
+                  if row.get("media"):
+                      has_media=True
+                      media=row["media"][0]
+                      code,headers,blob=request(media["url"],byte_range="bytes=0-1023",timeout=170)
+                      if code!=206 or not blob or "Content-Range" not in headers:
+                          raise RuntimeError("Original media HTTP Range read failed")
+                      print("LIVE_VERIFIED_MEDIA_RANGE bytes",len(blob),flush=True)
+                      break
+              if has_media:break
+          if not has_media:raise RuntimeError("Selected verified ZIP lacks downloadable original media")
+          code,_,html=request("/account-archive")
+          if code!=200 or b'accountSelect' not in html:
+              raise RuntimeError("Actual account-viewer page unavailable")
+          print("LIVE_ACCOUNT_WEB_VIEWER_HTML_READY",flush=True)
+          print("LIVE_GITHUB_BACKUP_END_TO_END_VERIFIED",flush=True)
+          PY
