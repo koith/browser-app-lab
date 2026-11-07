@@ -67,6 +67,9 @@ def exercise(browser, model, mobile):
     page.on('pageerror', lambda e: errors.append(str(e)[:200]))
     folder = ROOT / 'apps' / f'{model}-gallery'
     module = ROOT / 'apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs'
+    config_path = folder / 'cloudflare-gateway.json'
+    config = json.loads(config_path.read_text())
+    assert config == {'enabled': True, 'endpoint': WORKER}, 'Cloudflare gallery not explicitly enabled'
     photo = expected(model)
     try:
         # Test the actual live GitHub Pages HTML/owner index using the candidate
@@ -76,8 +79,7 @@ def exercise(browser, model, mobile):
             'https://koith.github.io/browser-app-lab/apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs',
             fulfill(module, 'application/javascript'))
         page.route(root + 'cloudflare-gateway.json',
-            lambda route: route.fulfill(status=200, content_type='application/json',
-                body=json.dumps({'enabled': True, 'endpoint': WORKER})))
+            fulfill(config_path, 'application/json'))
         response = page.goto(root, wait_until='domcontentloaded', timeout=80000)
         assert response and response.status == 200, 'actual Pages HTML unavailable'
         bridge = 'MimmiPrivate' if model == 'mimmi' else 'YuiPrivate'
