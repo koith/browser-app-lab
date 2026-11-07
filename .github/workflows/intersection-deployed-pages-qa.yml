@@ -16,6 +16,13 @@ on:
       - "apps/demand-research/target_archive_client.js"
       - "apps/demand-research/test_deployed_pages_browser.py"
       - ".github/workflows/intersection-deployed-pages-qa.yml"
+      # Recheck deployed PC/mobile viewer contracts after archive changes.
+      - ".github/workflows/demand-fast-capture.yml"
+      - ".github/workflows/intersection-target-account-archive.yml"
+      - ".github/workflows/intersection-target-account-bundle.yml"
+      - "apps/demand-research/target_account_viewer.py"
+      - "apps/demand-research/target_archive_api.py"
+      - "apps/demand-research/gateway.py"
   workflow_dispatch:
 
 permissions:
