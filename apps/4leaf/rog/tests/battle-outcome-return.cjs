@@ -1,7 +1,7 @@
 'use strict';
 // Four genuine playable duels: native podium outcome, no premature
 // defender hurt, winner/loser state, retreat by score and turn preserved.
-// Hurt/victory original source poses remain UNVERIFIED.
+// Source slot 13/14 source keys/ticks VERIFIED, roles hurt/victory WEB-INFERRED.
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 (async()=>{
@@ -51,8 +51,9 @@ const {chromium}=require('playwright');
     const w=(a.side==='attacker')===win;
     assert.equal(a.result,w?'win':'lose');
     assert.equal(a.pose,w?'victory':'hurt');
-    assert.ok(a.source===undefined||/UNVERIFIED$/.test(a.source),
-      'original EXE outcome pose evidence must never claim verified actions');
+    assert.ok(a.source===undefined||
+      /(?:original-OBS-anim(?:13|14)-keys-and-ticks-VERIFIED\/outcome-role-and-WEB-tick-ms-INFERRED|no-original-.*-UNVERIFIED)$/.test(a.source),
+      'original frame/tick source is VERIFIED, but inferred EXE outcome role must never be presented as verified');
    }
    await page.locator('.leaf-native-battle-actions button, #modal-buttons button',
     {hasText:'결과 확인'}).first().click();
