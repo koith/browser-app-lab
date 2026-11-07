@@ -9280,6 +9280,22 @@
         "QA-02"
       ],
       "details": "R17 PR #822 merged 017519acbef9bab8b7866a96694807059521c760 after 27 HEAD check-runs: 26 SUCCESS, 1 SKIPPED (push-only published-pages). Includes r17-source-integrity plus actual Chromium/WebKit real-duel, R14, R15, chat, board, World-to-game checks. 97 native CHR bodies have original slots 0..16 preserved. Source frame identity/ticks VERIFIED; hurt/victory semantic roles WEB-INFERRED, not EXE-verified. Original 0156 CHR source body absent. These tasks remain IN_PROGRESS, not source-equivalence DONE. Follow-up release PR upgrades beta69→beta70, PWA v156→v157, and requires public Pages source module + SW SHA256 equals checked-out Git revision; exact public deployment acceptance PENDING."
+    },
+    {
+      "seq": 433,
+      "date": "2026-11-07",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261107-4LEAF-R17-ACCEPTANCE",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "P0-CHAT",
+        "QA-02",
+        "QA-03"
+      ],
+      "details": "PUBLIC BETA70 VERIFIED after R17 #822 merge 017519ac, release #844 merge 217a357493a5c633d9ed3fb66c215863455d0254 (v0.86.0-beta.70 / PWA v157), and public actual-game QA fix #850 merge c3abaa23b74298685ca037bc14efe2cf04115038. Same-revision release run 42367036982 SUCCESS, including exact public SHA256 byte identity for native-card-action-sequences.js, sw.js and archived battle podium PNG. Actual published Chromium + WebKit game run 42367392773 both SUCCESS: physical WorldMap pixel-hit -> channel -> hotseat start, 104 board tiles, real 3 dice land, c_0042 vs c_0045 original CHR bodies decode (naturalWidth 47/41), outcome/result button clickable and 0 transient asset errors. Public published ChatRoom run 42367346868 SUCCESS: all 46 real browser steps including 6 rooms, chat, PWA, dice and mobile WebKit. Published screenshot-vs-original browser run 42367346831 both Chromium and WebKit SUCCESS. Earlier public run 42367036979 FAILED due race: new version exposed before native images decoded; #850 adds exact source image readiness and awaits real decoded outcome (no asset substitution). APP FUNCTIONAL/BROWSER RELEASE acceptance VERIFIED for this tested scope. Historical EXE/3D MVE, CHR 0156, 98 source semantic roles, full original matching, physical iPhone remain OPEN; no task marked done from partial browser evidence."
     }
   ],
   "restorationPriority": {
