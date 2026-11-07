@@ -105,8 +105,11 @@ class SnapshotChecks(unittest.TestCase):
     def test_direct_upload_bootstrap_is_independent_of_assets_and_routing_and_read_back(self):
         class Direct:
             calls = []
-            def call(self, tail, method='GET', multipart=None, raw=False):
+            def call(self, tail, method='GET', body=None, multipart=None, raw=False):
                 self.calls.append((tail, method))
+                if tail == 'workers/workers' and method == 'POST':
+                    assert body['name'] == 'gallery-archive-free'
+                    return {'result': {'name': body['name'], 'id': 'b' * 32}}
                 if tail == 'workers/scripts/gallery-archive-free' and method == 'PUT':
                     self.multipart = multipart
                     return {'success': True}
@@ -116,7 +119,8 @@ class SnapshotChecks(unittest.TestCase):
         with patch('deploy_cloudflare_assets.free_account_and_existing', return_value=None):
             catalog = bootstrap_missing_worker(cf, 'a' * 40)
         self.assertTrue(all(not c['albums'] for c in catalog.values()))
-        self.assertEqual(cf.calls, [('workers/scripts/gallery-archive-free', 'PUT'),
+        self.assertEqual(cf.calls, [('workers/workers', 'POST'),
+                                   ('workers/scripts/gallery-archive-free', 'PUT'),
                                    ('workers/scripts/gallery-archive-free/content', 'GET')])
         for forbidden in (b'ARCHIVE_ASSETS', b'SIGNING_KEY', b'workers_dev', b'r2_buckets'):
             self.assertNotIn(forbidden, cf.multipart[1])
@@ -146,6 +150,22 @@ class SnapshotChecks(unittest.TestCase):
         self.assertIn('TOKEN_PERMISSION_OR_AUTH_REQUIRED', text)
         for private in (secret, 'a' * 32, 'private-account-subdomain'):
             self.assertNotIn(private, text)
+
+    def test_null_provider_code_access_denial_and_html_challenge_are_not_conflated(self):
+        for raw, headers, category, shape in (
+            (json.dumps({'errors': [{'code': None, 'message': 'No access to the specified resource.'}]}).encode(),
+             {}, 'RESOURCE_ACCESS_DENIED', 'json'),
+            (b'<html>Blocked PRIVATE_ACCOUNT_AND_TOKEN</html>', {'cf-mitigated': 'challenge'},
+             'EDGE_OR_CHALLENGE_REJECTED_NOT_PERMISSION_PROOF', 'html')):
+            cf = CF('PRIVATE_ACCOUNT_AND_TOKEN', 'a' * 32)
+            error = HTTPError('https://private.invalid', 403, 'private', headers, io.BytesIO(raw))
+            output = io.StringIO()
+            with patch.object(cf.opener, 'open', side_effect=error), redirect_stdout(output):
+                with self.assertRaises(ProbeError):
+                    cf.call('workers/workers', 'POST', {'name': 'gallery-archive-free'})
+            self.assertIn(category, output.getvalue())
+            self.assertIn('"body_format": "' + shape + '"', output.getvalue())
+            self.assertNotIn('PRIVATE_ACCOUNT_AND_TOKEN', output.getvalue())
 
 
 if __name__ == '__main__': unittest.main()

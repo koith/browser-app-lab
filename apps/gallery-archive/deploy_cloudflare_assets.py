@@ -36,7 +36,7 @@ class CF:
         # No subscription, billing mutation, R2 or arbitrary host endpoints.
         allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content|secrets))?|workers/subdomain|subscriptions)',
                    'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'(?:/secrets)?)',
-                   'POST': r'workers/scripts/' + NAME + r'/subdomain'}
+                   'POST': r'workers/(?:workers|scripts/' + NAME + r'/subdomain)'}
         if method not in allowed or not re.fullmatch(allowed[method], tail):
             raise ValueError('UNAPPROVED_CF_CONTROL_CALL')
         if multipart is not None and (method != 'PUT' or tail != 'workers/scripts/' + NAME or body is not None):
@@ -58,22 +58,33 @@ class CF:
                 mime = response.headers.get('Content-Type', '')
         except HTTPError as error:
             codes, category = [], 'PROVIDER_REJECTED'
+            body_format, null_codes, challenge = 'unparsed', 0, error.headers.get('cf-mitigated') == 'challenge'
             try:
-                detail = json.loads(error.read(8192))
+                raw_error = error.read(8192)
+                body_format = 'html' if raw_error.lstrip().startswith(b'<') else 'text'
+                detail = json.loads(raw_error)
+                body_format = 'json'
                 errors = detail.get('errors', [])
+                null_codes = sum(isinstance(e, dict) and e.get('code') is None for e in errors)
                 codes = [e['code'] for e in errors if isinstance(e, dict)
                          and type(e.get('code')) is int and 0 < e['code'] < 1_000_000]
                 messages = ' '.join(e.get('message', '') for e in errors
                                     if isinstance(e, dict) and isinstance(e.get('message'), str)).lower()
                 if 'email' in messages and ('verif' in messages or 'confirm' in messages):
                     category = 'EMAIL_VERIFICATION_REQUIRED'
+                elif 'no access to the specified resource' in messages:
+                    category = 'RESOURCE_ACCESS_DENIED'
                 elif 'permission' in messages or 'authentic' in messages or 'unauthoriz' in messages:
                     category = 'TOKEN_PERMISSION_OR_AUTH_REQUIRED'
                 elif 'terms' in messages or 'onboard' in messages:
                     category = 'ACCOUNT_ONBOARDING_REQUIRED'
             except (ValueError, TypeError, OSError):
                 pass
+            if body_format == 'html' or challenge:
+                category = 'EDGE_OR_CHALLENGE_REJECTED_NOT_PERMISSION_PROOF'
             print('CF_CONTROL_DENIAL', phase, 'http', error.code, 'codes', codes, 'category', category, flush=True)
+            print('CF_CONTROL_DENIAL_SHAPE', json.dumps({'body_format': body_format,
+                'null_error_codes': null_codes, 'challenge_header': challenge}, sort_keys=True), flush=True)
             raise ProbeError(phase, error.code) from None
         except (URLError, TimeoutError, OSError):
             raise ProbeError('CF_CONTROL_TRANSPORT') from None
@@ -176,6 +187,13 @@ def bootstrap_missing_worker(cf, release):
     """
     if free_account_and_existing(cf) is not None:
         raise ValueError('BOOTSTRAP_REFUSES_EXISTING_WORKER')
+    # Independent official JSON creation API: establish the Worker resource
+    # before multipart source/Assets upload. No domain, billing or paid binding.
+    created = cf.call('workers/workers', 'POST', {'name': NAME,
+        'tags': ['gallery-bootstrap-' + release[:12]], 'observability': {'enabled': False}, 'logpush': False})['result']
+    if not isinstance(created, dict) or created.get('name') != NAME or not re.fullmatch(r'[a-f0-9]{32}', created.get('id', '')):
+        raise ValueError('CREATED_WORKER_IDENTITY_UNVERIFIED')
+    print('CF_OFFICIAL_WORKER_RESOURCE_CREATED', 'photo_uploads=0', flush=True)
     entry = ("import mimmi from './private-mimmi-catalog.txt';\n"
              "import yui from './private-yui-catalog.txt';\n"
              "export default {fetch(){void mimmi;void yui;return new Response('Not found',{status:404})}};\n").encode()
