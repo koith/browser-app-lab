@@ -71,7 +71,11 @@ const browserType=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
     evidence:stage.dataset.duelSourceEffectEvidence,
     attackEvent:stage.dataset.duelNativeFxStarted,
     actors:[...stage.querySelectorAll('.leaf-battle-chessman')].map(a=>({
-     card:a.dataset.chessmanId,rig:a.dataset.actorRig,side:a.dataset.duelSide})),
+     card:a.dataset.chessmanId,rig:a.dataset.actorRig,side:a.dataset.duelSide,
+     result:a.dataset.duelResult,slot:a.dataset.sourceNativeSlot,
+     duration:Number(a.dataset.sourceNativeDurationMs)||0,
+     source:a.dataset.sourceFrameSequenceProvenance,
+     action:a.dataset.sourceActionTable})),
     trace};
   });
   assert.equal(rec.attackEvent,'true');
@@ -83,6 +87,20 @@ const browserType=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
    'attacker must draw its OWN original effect 1097 (no CSS substituting another card)');
   assert.deepEqual(rec.actors.map(x=>x.card),['0042','0045']);
   assert.ok(rec.actors.every(x=>x.rig==='original-obs-sprite'));
+  // R17: real WebKit/Chromium outcome must use each CHR's own original
+  // post-lunge native slot, not arbitrary poses or synthetic sprite frames.
+  // Source index/tick VERIFIED; slot 13=hurt / 14=victory WEB-INFERRED.
+  assert.deepEqual(rec.actors.map(x=>x.slot).sort(),['13','14'],
+   'both original source outcome slots must be active');
+  for(const actor of rec.actors){
+   assert.equal(actor.slot,actor.result==='win'?'14':'13',
+    'WEB-inferred win/hurt role must use a source-verifiable slot');
+   assert.ok(actor.duration>=960,'source slot tick duration retained');
+   assert.match(actor.source||'',/VERIFIED.*INFERRED/,
+    'original source provenance and semantic uncertainty visible');
+   assert.match(actor.action||'',/native-CHR-duel-(hurt|victory)-candidate-slot(13|14)/,
+    'actual gameplay pose must draw indexed original source frames');
+  }
   assert.deepEqual(errors,[]);
   console.log('R15_NATIVE_DUEL_EFFECTS_LIVE_PASS',JSON.stringify({
    browser:browserType.name(),members:inventory.members,frames:inventory.frames,
