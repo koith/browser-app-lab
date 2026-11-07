@@ -304,12 +304,25 @@ def exercise(browser,model,overlay,limit=12):
         cover_observation=inspect_covers(page)
         public_album_ids=page.evaluate('''()=>available().filter(a=>photosFor(a).some(p=>
             !p.ownerAlbum&&!p.vaultAlbum&&typeof p.url==='string'&&p.url.startsWith('stored-albums/'))).map(a=>a.id)''')
-        page.wait_for_function('''ids=>ids.every(id=>{
-            const image=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');
-            return image?.complete&&image.naturalWidth>0&&new URL(image.currentSrc||image.src,location.href).pathname.includes('/stored-albums/');
-        })''',arg=public_album_ids,timeout=45000)
+        public_cover_proofs=[]
+        for album_id in public_album_ids:
+            # WebKit may defer offscreen loading. Inspect the real card in
+            # the viewport rather than waiting for offscreen lazy images.
+            card=page.locator('#albumgrid .album[data-id="'+album_id+'"]')
+            scroll_to_real_card(card)
+            page.wait_for_function('''id=>{
+                const image=document.querySelector('#albumgrid .album[data-id="'+id+'"] img');
+                return image?.complete&&image.naturalWidth>0&&new URL(image.currentSrc||image.src,location.href).pathname.includes('/stored-albums/');
+            }''',arg=album_id,timeout=45000)
+            public_cover_proofs.append({'album':album_id,**card.locator('img').evaluate('''image=>({
+                url:new URL(image.currentSrc||image.src,location.href).href,
+                width:image.naturalWidth,height:image.naturalHeight})''')})
         cover_observation=cover_snapshot(page)
         candidates,physical=cross_candidates(model)
+        for cover in public_cover_proofs:
+            assert cover['url'].startswith(root),'Cover left the actual model gallery'
+            file=physical.get(cover['url'][len(root):])
+            assert file and (cover['width'],cover['height'])==(file['width'],file['height']),('Actual cover pixels differ from stored original',cover)
         print('ACTUAL_CROSS_OWNER_ROWS_SELECTED',model,len(candidates),flush=True)
         mapped=page.evaluate('''rows=>rows.map(row=>{
             const id=canonicalId(row.owner_album),a=stored.find(a=>a.id===id);
@@ -374,12 +387,14 @@ def exercise(browser,model,overlay,limit=12):
             'unnecessary_render_catalog_requests':catalog_calls,
             'all_album_cover_observation':cover_observation,
             'all_albums_with_public_original_have_decoded_covers':len(public_album_ids),
+            'verified_public_covers':public_cover_proofs,
             'console_errors':console_errors[:30],
             'remaining_http_failures':failures[:30],'full_gallery_P0_restored':False,
             'iphone_hardware':False},sort_keys=True),flush=True)
     except Exception:
         print('ACTUAL_PAGES_FAILURE_STATE',json.dumps({'model':model,'url':page.url,
             'unhandled_js_errors':exceptions,'http_failures':failures[-15:],
+            'cover_observation':cover_snapshot(page),
             'ui':page.evaluate("()=>({lightbox:document.querySelector('#lightbox')?.className,detailHidden:document.querySelector('#detail')?.hidden,scroll:scrollY,route:history.state})")}),flush=True)
         raise
     finally:context.close()
