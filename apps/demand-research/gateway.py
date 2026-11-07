@@ -29,6 +29,7 @@ async def liveness():
 BRIDGE_AUDIENCE="intersection-originals-free/credential-v1"
 BRIDGE_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-gateway-credential-sync.yml@refs/heads/main"
 ARCHIVE_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-target-account-bundle.yml@refs/heads/main"
+MIRROR_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-terabox-gh-mirror.yml@refs/heads/main"
 BRIDGE_ISSUER="https://token.actions.githubusercontent.com"
 BRIDGE_JWKS=BRIDGE_ISSUER+"/.well-known/jwks"
 
@@ -51,7 +52,10 @@ def verify_bridge_token(token, workflow=BRIDGE_WORKFLOW):
     }
     if any(str(claims.get(k,""))!=v for k,v in must.items()):
         raise ValueError("Untrusted bridge workflow")
-    if claims.get("event_name") not in ("schedule","workflow_dispatch","push"):
+    allowed_events=("schedule","workflow_dispatch","push")
+    if workflow==MIRROR_WORKFLOW:
+        allowed_events+=("workflow_run",)
+    if claims.get("event_name") not in allowed_events:
         raise ValueError("Unexpected bridge event")
     return claims
 
@@ -112,7 +116,13 @@ async def issue_temporary_archive_key(request:Request):
     if not header.startswith("Bearer ") or len(header)>12500:
         raise HTTPException(403,"Authorized GitHub account runner required")
     try:
-        verify_bridge_token(header[7:], workflow=ARCHIVE_WORKFLOW)
+        try:
+            verify_bridge_token(header[7:], workflow=ARCHIVE_WORKFLOW)
+        except ValueError:
+            # This new main-only workflow reads a previously SHA-verified ZIP
+            # and needs the derived AES key for the same existing GH reader.
+            # It CANNOT call /api/bridge/credential or write provider cookie.
+            verify_bridge_token(header[7:], workflow=MIRROR_WORKFLOW)
     except (ValueError,TypeError,KeyError):
         raise HTTPException(403,"GitHub account runner rejected") from None
     except Exception:
