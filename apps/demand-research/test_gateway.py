@@ -451,3 +451,60 @@ def test_account_status_background_refresh_is_singleflight_and_cooled_down(monke
         assert calls == ["refresh"]
 
     asyncio.run(exercise())
+
+
+
+def test_viewer_hydrates_nonempty_sha_validated_private_sqlite_without_network(tmp_path,monkeypatch):
+    """Installer only receives an already verified local candidate."""
+    import account_index
+    source=tmp_path/"verified.sqlite3"
+    target=tmp_path/"viewer.sqlite3"
+    with account_index.connect(str(source)) as db:
+        db.execute("INSERT INTO accounts(url,platform,updated_at) VALUES(?,?,?)",
+                   ("https://bsky.app/profile/public-fixture.bsky.social","bluesky",1))
+        db.execute("INSERT INTO observed(source,post_hash,account_url,posted_at,checked_at) "
+                   "VALUES(?,?,?,?,?)",("discovery","sample-only",
+                   "https://bsky.app/profile/public-fixture.bsky.social","",1))
+    monkeypatch.setattr(gateway,"INDEX_DB",str(target))
+    assert gateway._install_sha_verified_index(source)=="sha_verified_restored"
+    assert account_index.status(str(target))["accounts"]==1
+    assert gateway._install_sha_verified_index(source)=="existing_records_preserved"
+
+
+def test_viewer_rejects_empty_remote_index_and_preserves_existing(tmp_path,monkeypatch):
+    import account_index
+    target=tmp_path/"viewer.sqlite3"
+    source=tmp_path/"empty.sqlite3"
+    with account_index.connect(str(source)):
+        pass
+    monkeypatch.setattr(gateway,"INDEX_DB",str(target))
+    assert gateway._install_sha_verified_index(source)=="empty_snapshot"
+    assert account_index.status(str(target))["accounts"]==0
+
+
+def test_viewer_snapshot_worker_timeout_stops_all_children(tmp_path,monkeypatch):
+    import subprocess
+    import account_index
+    import sys
+    import time
+    target=tmp_path/"viewer.sqlite3"
+    monkeypatch.setattr(gateway,"INDEX_DB",str(target))
+    class Stub:
+        pid=1234567
+        def __init__(self):
+            self.terminated=False
+        def wait(self,timeout=None):
+            if timeout:
+                raise subprocess.TimeoutExpired("synthetic-private-worker",timeout)
+            self.terminated=True
+            return -9
+        def poll(self):
+            return None if not self.terminated else -9
+    child=Stub()
+    monkeypatch.setattr(gateway.subprocess,"Popen",lambda *a,**k:child)
+    signal_calls=[]
+    monkeypatch.setattr(gateway.os,"killpg",lambda pid,sig:signal_calls.append(pid))
+    assert gateway._hydrate_account_index_from_remote()=="remote_timeout"
+    assert signal_calls==[child.pid]
+    assert child.terminated
+    assert account_index.status(str(target))["accounts"]==0
