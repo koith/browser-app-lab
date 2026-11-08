@@ -201,11 +201,16 @@ jobs:
             print('NATIVE_DICE_DLL_CANDIDATE_COUNT',len(candidates))
           manifest=json.loads(Path('4leaf-original-dice-source-audit.json').read_text())
           assert manifest['summary']['archiveCount']>0, 'empty native dice source inventory'
+          source=manifest['dieBody3dInvestigation']
           print('NATIVE_D4_D6_SHA_GROUNDED_INVENTORY',json.dumps({
             'archiveCount':manifest['summary']['archiveCount'],
             'totalEntries':manifest['summary']['totalEntries'],
-            'historicalModelsAuthenticated':not manifest.get('unverifiedGraphicsRole',True),
-            'sourceBinaries':len(manifest.get('clientExecutableContainers',[]))
+            'potential3dCandidateNames':source['candidateCount'],
+            'sourceBinaries':len(source['clientExecutableContainers']),
+            'verifiedOriginalD4Mesh':source['verifiedOriginalD4Mesh'],
+            'verifiedOriginalD6Mesh':source['verifiedOriginalD6Mesh'],
+            'verifiedOriginal3dTexture':source['verifiedOriginal3dTexture'],
+            'verifiedOriginalFallBounceKeyframes':source['verifiedOriginalFallBounceKeyframes']
           }))
           PY
       - uses: actions/upload-artifact@v4
