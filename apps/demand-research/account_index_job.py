@@ -5,6 +5,7 @@ No usernames, posts, or cloud credentials are printed or uploaded to Actions.
 """
 from __future__ import annotations
 import hashlib
+from contextlib import contextmanager
 import json
 import os
 import re
@@ -25,6 +26,36 @@ SNAP_RE=re.compile(r"^snapshot-[0-9]{6,30}\.sqlite3$")
 MANIFEST_RE=re.compile(r"^manifest-[0-9]{6,30}\.json$")
 MAX_DB=120_000_000
 MAX_CATALOG=70_000_000
+
+# Keep operational logs strictly aggregate-only. A hung Actions job must
+# identify its last stage without exposing account IDs, original posts, URLs,
+# TeraBox paths, credentials, or exception messages.
+_INDEX_STAGES=frozenset({
+    "remote_preflight", "manifest_lookup", "snapshot_load",
+    "public_source_scan", "catalog_read", "catalog_sync", "profile_scan",
+    "snapshot_upload_readback", "manifest_upload_readback",
+})
+
+
+@contextmanager
+def audit_stage(name):
+    if name not in _INDEX_STAGES:
+        raise ValueError("unsupported private index stage")
+    started=time.monotonic()
+    status="failed"
+    print("PRIVATE_ACCOUNT_INDEX_STAGE",json.dumps({
+        "stage":name,"state":"begin"},sort_keys=True),flush=True)
+    try:
+        yield
+    except BaseException:
+        raise
+    else:
+        status="pass"
+    finally:
+        print("PRIVATE_ACCOUNT_INDEX_STAGE",json.dumps({
+            "stage":name,"state":status,
+            "elapsed_ms":max(0,int((time.monotonic()-started)*1000))},
+            sort_keys=True),flush=True)
 
 
 def command(args, *, data=None, timeout=180):
@@ -166,23 +197,32 @@ def run():
     if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):
         raise RuntimeError("private cloud credential missing")
     # This read-only preflight distinguishes missing first snapshot from broken auth.
-    command(["lsf","archive:","--max-depth","1","--retries","2"],timeout=100)
+    with audit_stage("remote_preflight"):
+        command(["lsf","archive:","--max-depth","1","--retries","2"],timeout=100)
     run_id=os.environ.get("GITHUB_RUN_ID","")
     with tempfile.TemporaryDirectory(prefix="intersection-index-") as folder:
         db=Path(folder)/"accounts.sqlite3"
-        prior=latest_manifest()
-        if prior:load_snapshot(db,prior)
-        scan=account_index_sources.run_batch(str(db),max_requests=6)
+        with audit_stage("manifest_lookup"):
+            prior=latest_manifest()
+        if prior:
+            with audit_stage("snapshot_load"):
+                load_snapshot(db,prior)
+        with audit_stage("public_source_scan"):
+            scan=account_index_sources.run_batch(str(db),max_requests=6)
         catalog_info="not_found"
         # New immutable versioned catalog with legacy fallback.
-        posts=CloudArchive("archive:DemandResearch").load_catalog()
+        with audit_stage("catalog_read"):
+            posts=CloudArchive("archive:DemandResearch").load_catalog()
         if posts:
-            imported=account_index.sync_catalog(str(db),posts)
-            catalog_info="verified_"+str(imported["accepted"])
-        group_scan=account_groups.scan_known_profiles(str(db),max_profiles=55)
+            with audit_stage("catalog_sync"):
+                imported=account_index.sync_catalog(str(db),posts)
+                catalog_info="verified_"+str(imported["accepted"])
+        with audit_stage("profile_scan"):
+            group_scan=account_groups.scan_known_profiles(str(db),max_profiles=55)
         stats=account_index.status(str(db))
         windows=account_index_sources.coverage(str(db))
-        output=create_snapshot(db,run_id)
+        with audit_stage("snapshot_upload_readback"):
+            output=create_snapshot(db,run_id)
         groups=account_groups.groups_page(str(db),limit=1)
         output.update({"account_groups":groups["total"],
             "grouped_accounts":groups["linked_accounts"],
@@ -194,7 +234,8 @@ def run():
             "last_public_scan_accepted":scan.get("accepted",0)})
         # An immutable manifest is written LAST. Failed writes cannot clobber
         # the previously verified snapshot, and a readback confirms every byte.
-        pointer=publish_manifest(folder,output,run_id)
+        with audit_stage("manifest_upload_readback"):
+            pointer=publish_manifest(folder,output,run_id)
         if pointer["sha256"]!=output["sha256"] or pointer["file"]!=output["file"]:
             raise RuntimeError("versioned pointer readback mismatch")
         print("PRIVATE_ACCOUNT_INDEX_VERIFIED",json.dumps({
