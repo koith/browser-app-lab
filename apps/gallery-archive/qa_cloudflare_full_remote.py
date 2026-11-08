@@ -17,6 +17,8 @@ BASE = 'https://gallery-archive-free.gallery-9f7d03138f3f.workers.dev'
 COUNTS = {'mimmi': 4658, 'yui': 3066}
 TARGETS = {('mimmi','djawa-asuna-the-maid',4), ('mimmi','djawa-asuna-the-maid',5),
            ('mimmi','mimmi-indie-sana-sopmod2-2019',1), ('yui','yuis-present33',1)}
+SCREENSHOT_ALBUMS = {('mimmi','v2ph-azur-lane-tashkent'):69,
+                     ('yui','djawa-privaty-public-samples'):30}
 
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -62,6 +64,9 @@ def indexed():
         assert index['model']==model and index['schema_version']==1
         unique=set()
         for a in index['albums']:
+            screenshot_expected = SCREENSHOT_ALBUMS.get((model,a['id']))
+            if screenshot_expected is not None:
+                assert len(a['images']) == screenshot_expected, ('SCREENSHOT_ALBUM_SIZE',model,a['id'])
             for photo in a['images']:
                 key=(a['id'],photo['number'])
                 assert key not in unique
@@ -106,9 +111,10 @@ def main():
     print('LIVE_WORKER_SOURCE',health.get('source_commit'),flush=True)
     all_items=indexed()
     items=all_items if args.scope=='all' else [
-        item for item in all_items if (item[0],item[1],item[2]['number']) in TARGETS]
+        item for item in all_items if ((item[0],item[1],item[2]['number']) in TARGETS
+        or (item[0],item[1]) in SCREENSHOT_ALBUMS)]
     if args.scope=='targeted':
-        assert len(items)==len(TARGETS)
+        assert len(items)==len(TARGETS)+sum(SCREENSHOT_ALBUMS.values()), 'INCIDENT_TARGET_COVERAGE'
     passed={'mimmi':0,'yui':0}
     failures=[]
     with ThreadPoolExecutor(max_workers=4) as pool:
