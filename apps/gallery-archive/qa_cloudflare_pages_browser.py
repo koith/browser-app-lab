@@ -147,9 +147,16 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
         assert urlsplit(decoded['current']).netloc == urlsplit(WORKER).netloc
 
         # Real main gallery album/detail interaction, not only a synthetic image.
-        page.wait_for_function('''() => typeof available === 'function'
-            && typeof photosFor === 'function'
-            && document.querySelectorAll('#albumgrid .album').length > 0''', timeout=60000)
+        # A static-only first grid is not proof that the asynchronous SHA owner
+        # index has loaded. Chromium can reach it before the requested owner
+        # original is added; wait for the actual photo, not any album card.
+        page.wait_for_function('''q => {
+            if(typeof available!=='function' || typeof photosFor!=='function')return false;
+            return available().some(a => photosFor(a).some(p =>
+                p.ownerAlbum===q.ownerAlbum &&
+                (p.storageNumber ?? p.number)===q.number &&
+                p.sha256===q.sha256));
+        }''', arg=photo, timeout=60000)
         target = page.evaluate('''q => {
            for(const album of available()) {
              const photos = photosFor(album);
