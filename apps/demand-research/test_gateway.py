@@ -462,7 +462,7 @@ def test_remote_account_index_snapshot_sha_checked_then_hydrated(tmp_path,monkey
     target=tmp_path/"gateway.sqlite3"
     account_index.sync_catalog(str(src),[{
         "id":"synthetic-post","platform":"x",
-        "profile_url":"https://x.com/test_syn_private",
+        "profile_url":"https://x.com/testsyn",
         "text":"synthetic index only"}])
     assert account_index.status(str(src))["accounts"]==1
     monkeypatch.setattr(gateway,"INDEX_DB",str(target))
@@ -489,7 +489,7 @@ def test_unverified_remote_index_download_cannot_clobber_live_db(tmp_path,monkey
     target=tmp_path/"gateway.sqlite3"
     account_index.sync_catalog(str(target),[{
         "id":"old-synthetic","platform":"x",
-        "profile_url":"https://x.com/verified_existing",
+        "profile_url":"https://x.com/verifyold",
         "text":"Existing data must survive"}])
     monkeypatch.setattr(gateway,"INDEX_DB",str(target))
     monkeypatch.setattr(account_index_job,"latest_manifest",lambda:{
