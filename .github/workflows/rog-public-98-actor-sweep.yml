@@ -17,8 +17,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: published-98-actors-\${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: \${{ github.event_name == 'pull_request' }}
+  group: published-98-actors-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   source-actors-real-pages:
     runs-on: ubuntu-24.04
@@ -83,16 +83,16 @@ jobs:
       - name: Install real Chromium/WebKit
         run: |
           npm install --no-save playwright
-          npx playwright install "\${{ matrix.engine }}" --with-deps
+          npx playwright install "${{ matrix.engine }}" --with-deps
       - name: Audit 98 cards: board poses, source frames, real duel both sides
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
-          FOURLEAF_BROWSER: \${{ matrix.engine }}
-          LEAF_AUDIT_OUT: fourleaf-public-98-\${{ matrix.engine }}.json
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          LEAF_AUDIT_OUT: fourleaf-public-98-${{ matrix.engine }}.json
         run: node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
       - name: Summarize complete 98-card public source acceptance
         env:
-          FOURLEAF_BROWSER: \${{ matrix.engine }}
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
         run: |
           node <<'JS'
           const fs=require('node:fs'),assert=require('node:assert/strict');
@@ -109,7 +109,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: fourleaf-public-98-evidence-\${{ matrix.engine }}
-          path: fourleaf-public-98-\${{ matrix.engine }}.json
+          name: fourleaf-public-98-evidence-${{ matrix.engine }}
+          path: fourleaf-public-98-${{ matrix.engine }}.json
           if-no-files-found: ignore
           retention-days: 14
