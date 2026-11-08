@@ -11,11 +11,13 @@ on:
     paths:
       - ".github/workflows/intersection-github-live-viewer-qa.yml"
       - "apps/demand-research/test_live_account_archive_browser.py"
+      - "apps/demand-research/test_live_account_index_browser.py"
   push:
     branches: [main]
     paths:
       - ".github/workflows/intersection-github-live-viewer-qa.yml"
       - "apps/demand-research/test_live_account_archive_browser.py"
+      - "apps/demand-research/test_live_account_index_browser.py"
 
 permissions:
   contents: read
@@ -35,7 +37,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check live browser acceptance test is syntactically safe
-        run: python -m py_compile apps/demand-research/test_live_account_archive_browser.py
+        run: python -m py_compile apps/demand-research/test_live_account_archive_browser.py apps/demand-research/test_live_account_index_browser.py
   live-verified-reader:
     if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-24.04
@@ -132,5 +134,7 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check playwright==1.56.0
           python -m playwright install --with-deps chromium webkit
+      - name: Verify verified account-index UI in real desktop Chromium and mobile WebKit
+        run: python apps/demand-research/test_live_account_index_browser.py
       - name: Exercise real stored posts, original media, detail, tabs and responsive layout
         run: python apps/demand-research/test_live_account_archive_browser.py
