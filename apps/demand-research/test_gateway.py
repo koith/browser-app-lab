@@ -518,3 +518,72 @@ def test_account_snapshot_refresh_metadata_only_after_success(monkeypatch):
     assert calls==[""]
     assert gateway._index_snapshot_info["verified"] is True
     assert gateway._index_snapshot_info["catalog"]=="deferred_timeout"
+
+
+
+def test_oidc_signed_snapshot_import_is_sha_checked_idempotent_and_monotonic(tmp_path,monkeypatch):
+    import hashlib
+    import sqlite3
+    import account_index
+    candidate=tmp_path/"verified.sqlite3"
+    viewer=tmp_path/"viewer.sqlite3"
+    account_index.sync_catalog(str(candidate),[{
+        "id":"synthetic-original","platform":"x",
+        "profile_url":"https://x.com/synthetic-public-test",
+        "text":"synthetic public index test"}])
+    with sqlite3.connect(str(candidate)) as db:
+        db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+    blob=candidate.read_bytes()
+    digest=hashlib.sha256(blob).hexdigest()
+    monkeypatch.setattr(gateway,"INDEX_DB",str(viewer))
+    monkeypatch.setattr(gateway,"_index_snapshot_info",
+                        {"sha256":"","catalog":"not_checked","verified":False})
+    def trusted(token,workflow=gateway.BRIDGE_WORKFLOW):
+        if token!="synthetic-main-oidc" or workflow!=gateway.INDEX_IMPORT_WORKFLOW:
+            raise ValueError("wrong main workflow")
+        return {"repository":"koith/browser-app-lab","ref":"refs/heads/main"}
+    monkeypatch.setattr(gateway,"verify_bridge_token",trusted)
+    client=TestClient(gateway.app)
+    headers={"Authorization":"Bearer synthetic-main-oidc",
+             "X-Index-SHA256":digest,"X-Index-Source-Run":"42445680007"}
+    assert client.post("/api/bridge/index-snapshot",content=blob).status_code==403
+    denied=client.post("/api/bridge/index-snapshot",
+                       content=blob,headers={**headers,"Authorization":"Bearer another-workflow"})
+    assert denied.status_code==403
+    assert account_index.status(str(viewer))["accounts"]==0
+    invalid=client.post("/api/bridge/index-snapshot",
+                        content=blob,headers={**headers,"X-Index-SHA256":"0"*64})
+    assert invalid.status_code==422
+    assert account_index.status(str(viewer))["accounts"]==0
+    accepted=client.post("/api/bridge/index-snapshot",content=blob,headers=headers)
+    assert accepted.status_code==200, accepted.text
+    assert accepted.json()["accepted"] is True
+    assert accepted.json()["accounts"]==1
+    assert account_index.status(str(viewer))["accounts"]==1
+    assert gateway._index_snapshot_info["verified"] is True
+    assert client.post("/api/bridge/index-snapshot",content=blob,headers=headers).status_code==200
+    stale=client.post("/api/bridge/index-snapshot",content=blob,
+                      headers={**headers,"X-Index-Source-Run":"42445679999"})
+    assert stale.status_code==409
+    assert account_index.status(str(viewer))["accounts"]==1
+
+
+def test_oidc_signed_snapshot_rejects_corrupted_sqlite_without_clobber(tmp_path,monkeypatch):
+    import hashlib
+    import account_index
+    viewer=tmp_path/"index.sqlite3"
+    account_index.sync_catalog(str(viewer),[{
+        "id":"existing-fixture","platform":"x",
+        "profile_url":"https://x.com/existing-synthetic-index",
+        "text":"Do not erase existing checked rows"}])
+    monkeypatch.setattr(gateway,"INDEX_DB",str(viewer))
+    monkeypatch.setattr(gateway,"verify_bridge_token",
+                        lambda token,workflow=None: {"repository":"koith/browser-app-lab"})
+    blob=b"not a SQLite snapshot"
+    client=TestClient(gateway.app)
+    r=client.post("/api/bridge/index-snapshot",content=blob,headers={
+        "Authorization":"Bearer synthetic-test","X-Index-SHA256":hashlib.sha256(blob).hexdigest(),
+        "X-Index-Source-Run":"42445680008"})
+    assert r.status_code==422
+    assert account_index.status(str(viewer))["accounts"]==1
+    assert "existing-synthetic-index" not in r.text
