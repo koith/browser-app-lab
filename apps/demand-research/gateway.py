@@ -215,6 +215,19 @@ _index_lazy_task=None
 _index_lazy_attempt_at=0.0
 INDEX_LAZY_RETRY_SECONDS=180
 
+def _safe_index_restore_stage(name, operation):
+    if name not in ("manifest_lookup","snapshot_download","sqlite_check","sqlite_install"):
+        raise ValueError("unsupported index snapshot phase")
+    try:
+        return operation()
+    except Exception as error:
+        # The exception body can contain private remote URLs, IDs or cookies.
+        # Only allowlisted phase and exception CLASS are observable.
+        print("ACCOUNT_INDEX_REMOTE_SNAPSHOT_PHASE_FAILED",
+              name,type(error).__name__,flush=True)
+        raise
+
+
 def _read_verified_account_index_snapshot(previous_sha=""):
     """Restore immutable SHA-checked account index without scanning every post.
 
@@ -224,22 +237,30 @@ def _read_verified_account_index_snapshot(previous_sha=""):
     A failed read never replaces the existing local SQLite database.
     """
     import account_index_job
-    manifest=account_index_job.latest_manifest()
+    manifest=_safe_index_restore_stage(
+        "manifest_lookup",account_index_job.latest_manifest)
     if not manifest:
+        print("ACCOUNT_INDEX_REMOTE_SNAPSHOT_PHASE_FAILED",
+              "manifest_lookup","MissingManifest",flush=True)
         raise RuntimeError("verified account index snapshot unavailable")
     if manifest["sha256"]==previous_sha:
         return {"sha256":previous_sha,"unchanged":True}
     with tempfile.TemporaryDirectory(prefix="intersection-index-view-") as d:
         verified=Path(d)/"verified.sqlite3"
-        account_index_job.load_snapshot(verified,manifest)
+        _safe_index_restore_stage(
+            "snapshot_download",lambda:account_index_job.load_snapshot(verified,manifest))
         source=sqlite3.connect(str(verified),timeout=20)
         try:
-            if source.execute("PRAGMA integrity_check").fetchone()[0]!="ok":
+            if _safe_index_restore_stage(
+                    "sqlite_check",
+                    lambda:source.execute("PRAGMA integrity_check").fetchone()[0])!="ok":
                 raise RuntimeError("account index snapshot integrity check failed")
-            stats=account_index.status(str(verified))
+            stats=_safe_index_restore_stage(
+                "sqlite_check",lambda:account_index.status(str(verified)))
             destination=sqlite3.connect(INDEX_DB,timeout=25)
             try:
-                source.backup(destination)
+                _safe_index_restore_stage(
+                    "sqlite_install",lambda:source.backup(destination))
             finally:
                 destination.close()
         finally:
