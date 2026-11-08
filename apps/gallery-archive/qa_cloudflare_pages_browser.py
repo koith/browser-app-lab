@@ -209,6 +209,12 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
         if deployed and album_override in ('v2ph-azur-lane-tashkent', 'djawa-privaty-public-samples'):
             expected_tiles = {'v2ph-azur-lane-tashkent': 69,
                               'djawa-privaty-public-samples': 30}[album_override]
+            # Actual gallery appends the first 48 tiles synchronously, then
+            # appends the remaining unique saved photos on the next animation
+            # frame. Check complete population before testing native pixels.
+            page.wait_for_function("""n =>
+                document.querySelectorAll('#detailphotos .photo').length===n
+            """, arg=expected_tiles, timeout=20000)
             tiles = page.locator('#detailphotos .photo')
             assert tiles.count() == expected_tiles, ('SCREENSHOT_ALBUM_TILE_COUNT', model,
                                                        album_override, tiles.count())
