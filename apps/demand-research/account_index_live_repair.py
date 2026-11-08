@@ -18,7 +18,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-from account_index_job import latest_manifest, load_snapshot
+from account_index_job import latest_manifest, latest_manifest_from_public_actions, load_snapshot
 
 GATEWAY="https://intersection-originals-free.onrender.com"
 AUDIENCE="intersection-originals-free/credential-v1"
@@ -26,7 +26,7 @@ MAX_INDEX_BYTES=8*1024*1024
 
 def validated_index():
     print("ACCOUNT_INDEX_LIVE_PHASE manifest_lookup",flush=True)
-    manifest=latest_manifest()
+    manifest=latest_manifest() or latest_manifest_from_public_actions()
     if not manifest:
         raise RuntimeError("private index manifest unavailable")
     print("ACCOUNT_INDEX_LIVE_PHASE manifest_verified",flush=True)
