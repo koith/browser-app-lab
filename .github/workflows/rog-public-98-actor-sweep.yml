@@ -84,7 +84,7 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install "${{ matrix.engine }}" --with-deps
-      - name: Audit 98 cards: board poses, source frames, real duel both sides
+      - name: 'Audit 98 cards: board poses, source frames, real duel both sides'
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
           FOURLEAF_BROWSER: ${{ matrix.engine }}
