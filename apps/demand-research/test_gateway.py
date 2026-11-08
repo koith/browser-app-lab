@@ -529,7 +529,7 @@ def test_oidc_signed_snapshot_import_is_sha_checked_idempotent_and_monotonic(tmp
     viewer=tmp_path/"viewer.sqlite3"
     account_index.sync_catalog(str(candidate),[{
         "id":"synthetic-original","platform":"x",
-        "profile_url":"https://x.com/synthetic-public-test",
+        "profile_url":"https://x.com/qa_test_a",
         "text":"synthetic public index test"}])
     with sqlite3.connect(str(candidate)) as db:
         db.execute("PRAGMA wal_checkpoint(TRUNCATE)")
@@ -574,7 +574,7 @@ def test_oidc_signed_snapshot_rejects_corrupted_sqlite_without_clobber(tmp_path,
     viewer=tmp_path/"index.sqlite3"
     account_index.sync_catalog(str(viewer),[{
         "id":"existing-fixture","platform":"x",
-        "profile_url":"https://x.com/existing-synthetic-index",
+        "profile_url":"https://x.com/qa_test_b",
         "text":"Do not erase existing checked rows"}])
     monkeypatch.setattr(gateway,"INDEX_DB",str(viewer))
     monkeypatch.setattr(gateway,"verify_bridge_token",
@@ -586,4 +586,4 @@ def test_oidc_signed_snapshot_rejects_corrupted_sqlite_without_clobber(tmp_path,
         "X-Index-Source-Run":"42445680008"})
     assert r.status_code==422
     assert account_index.status(str(viewer))["accounts"]==1
-    assert "existing-synthetic-index" not in r.text
+    assert "qa_test_b" not in r.text
