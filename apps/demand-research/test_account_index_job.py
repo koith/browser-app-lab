@@ -146,3 +146,41 @@ def test_account_index_stage_audit_redacts_exception_and_refuses_unknown_stage(c
         with job.audit_stage("account@private.example"):
             pass
     assert capsys.readouterr().out==""
+
+
+
+def test_catalog_reader_timeout_preserves_checkpoint_budget(tmp_path):
+    import sys
+    import time
+    start=time.monotonic()
+    code=job.catalog_sync_bounded(
+        str(tmp_path/"accounts.sqlite3"),tmp_path,timeout_seconds=0.08,
+        worker=[sys.executable,"-c","import time; time.sleep(4)"])
+    assert code=="deferred_timeout"
+    assert time.monotonic()-start<2.0
+    assert not (tmp_path/"catalog-sync-result.json").exists()
+
+
+def test_catalog_reader_success_requires_bounded_verified_receipt(tmp_path):
+    import sys
+    marker=tmp_path/"catalog-sync-result.json"
+    script=("import pathlib,sys;pathlib.Path(sys.argv[1]).write_text("
+            "chr(123)+'\\\"accepted\\\": 2, \\\"has_posts\\\": true'+chr(125))")
+    assert job.catalog_sync_bounded(
+        tmp_path/"accounts.sqlite3",tmp_path,timeout_seconds=4,
+        worker=[sys.executable,"-c",script,str(marker)])=="verified_2"
+    assert marker.exists()
+
+
+def test_catalog_reader_never_claims_verified_without_receipt(tmp_path):
+    import sys
+    assert job.catalog_sync_bounded(
+        tmp_path/"accounts.sqlite3",tmp_path,timeout_seconds=4,
+        worker=[sys.executable,"-c","pass"])=="deferred_invalid_receipt"
+
+
+def test_catalog_worker_requires_private_cloud_config(tmp_path,monkeypatch):
+    monkeypatch.delenv("RCLONE_CONFIG_ARCHIVE_COOKIE",raising=False)
+    with pytest.raises(RuntimeError,match="credential"):
+        job.catalog_sync_child(tmp_path/"accounts.sqlite3",tmp_path/"catalog-sync-result.json")
+    assert not (tmp_path/"catalog-sync-result.json").exists()

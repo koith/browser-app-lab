@@ -10,6 +10,8 @@ import json
 import os
 import re
 import selectors
+import signal
+import sys
 import subprocess
 import tempfile
 import time
@@ -193,6 +195,68 @@ def create_snapshot(path,run_id):
     return {"file":name,"sha256":digest,"at":int(time.time())}
 
 
+def catalog_sync_child(db_path, marker_path):
+    """Isolated worker: write ONLY bounded aggregate success after DB commit.
+
+    Terminating this process group never deletes previously verified snapshots
+    or any cloud object. The catalog remains optional to a partial checkpoint.
+    """
+    if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):
+        raise RuntimeError("private cloud credential missing")
+    posts=CloudArchive("archive:DemandResearch").load_catalog()
+    accepted=0
+    if posts:
+        imported=account_index.sync_catalog(db_path,posts)
+        accepted=imported["accepted"]
+    result={"accepted":accepted,"has_posts":bool(posts)}
+    Path(marker_path).write_text(json.dumps(result,sort_keys=True))
+
+
+def catalog_sync_bounded(db_path, folder, *, timeout_seconds=90, worker=None):
+    """Avoid a stuck remote catalog preventing all other account checkpoints.
+
+    The worker is in its own process group so a timeout also stops its rclone
+    descendants. On any failure, never report a verified catalog sync. The
+    parent may still SHA-verify an immutable PARTIAL checkpoint later.
+    """
+    marker=Path(folder)/"catalog-sync-result.json"
+    argv=(worker if worker is not None else [
+        sys.executable,str(Path(__file__).resolve()),
+        "--catalog-sync",str(db_path),str(marker)])
+    process=subprocess.Popen(argv,stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL,start_new_session=True)
+    try:
+        try:
+            code=process.wait(timeout=timeout_seconds)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(process.pid,signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            process.wait()
+            return "deferred_timeout"
+    finally:
+        if process.poll() is None:
+            try:
+                os.killpg(process.pid,signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            process.wait()
+    if code:
+        return "deferred_error"
+    try:
+        data=marker.read_bytes()
+        if len(data)>256:
+            raise ValueError("oversized private catalog receipt")
+        info=json.loads(data)
+        if (type(info) is not dict or type(info.get("accepted")) is not int
+                or not 0<=info["accepted"]<=100000 or type(info.get("has_posts")) is not bool):
+            raise ValueError("invalid private catalog receipt")
+    except (FileNotFoundError,ValueError,TypeError,KeyError,UnicodeError):
+        return "deferred_invalid_receipt"
+    return "verified_"+str(info["accepted"]) if info["has_posts"] else "not_found"
+
+
 def run():
     if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):
         raise RuntimeError("private cloud credential missing")
@@ -209,14 +273,10 @@ def run():
                 load_snapshot(db,prior)
         with audit_stage("public_source_scan"):
             scan=account_index_sources.run_batch(str(db),max_requests=6)
-        catalog_info="not_found"
-        # New immutable versioned catalog with legacy fallback.
+        # The provider may hang for multiple 120s object-read retries.
+        # Isolate it and preserve earlier verified index data on timeout.
         with audit_stage("catalog_read"):
-            posts=CloudArchive("archive:DemandResearch").load_catalog()
-        if posts:
-            with audit_stage("catalog_sync"):
-                imported=account_index.sync_catalog(str(db),posts)
-                catalog_info="verified_"+str(imported["accepted"])
+            catalog_info=catalog_sync_bounded(str(db),folder)
         with audit_stage("profile_scan"):
             group_scan=account_groups.scan_known_profiles(str(db),max_profiles=55)
         stats=account_index.status(str(db))
@@ -238,14 +298,25 @@ def run():
             pointer=publish_manifest(folder,output,run_id)
         if pointer["sha256"]!=output["sha256"] or pointer["file"]!=output["file"]:
             raise RuntimeError("versioned pointer readback mismatch")
-        print("PRIVATE_ACCOUNT_INDEX_VERIFIED",json.dumps({
+        partial=catalog_info.startswith("deferred_")
+        print("PRIVATE_ACCOUNT_INDEX_PARTIAL_CHECKPOINT_VERIFIED" if partial
+              else "PRIVATE_ACCOUNT_INDEX_VERIFIED",json.dumps({
             "accounts":output["accounts"],"source_rows":output["source_rows"],
             "account_groups":output["account_groups"],
             "grouped_accounts":output["grouped_accounts"],
             "public_scan_windows":windows,"catalog":catalog_info,
             "snapshot_readback_sha256":True,"no_person_identity_inference":True
         },ensure_ascii=False),flush=True)
+        # No false green workflow: partial progress is durable, but remote
+        # catalog ingestion is still incomplete and must be retried.
+        if partial:
+            raise RuntimeError("private catalog sync remains unverified")
 
 
 if __name__=="__main__":
-    run()
+    if len(sys.argv)==4 and sys.argv[1]=="--catalog-sync":
+        catalog_sync_child(sys.argv[2],sys.argv[3])
+    elif len(sys.argv)==1:
+        run()
+    else:
+        raise SystemExit("invalid private index worker arguments")
