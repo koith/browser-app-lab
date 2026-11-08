@@ -85,7 +85,7 @@ jobs:
           assert.equal(result.engine,engine);
           assert.equal(result.summary.cards,6,'all six selected native CHR sources must be exercised');
           assert.equal(result.summary.recoveredBodies,5,'five source-backed actors must decode');
-          assert.deepEqual(result.summary.unrecovered,['0156=OBS2.pak/1222.obs'],
+          assert.deepEqual(result.summary.unrecovered,['0156=null'],
            'the source-absent card must never borrow another original CHR body');
           assert.deepEqual(result.summary.cardsWithDefects,[]);
           assert.deepEqual(result.summary.pageErrors,[]);
