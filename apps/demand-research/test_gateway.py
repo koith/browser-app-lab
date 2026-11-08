@@ -518,3 +518,17 @@ def test_account_snapshot_refresh_metadata_only_after_success(monkeypatch):
     assert calls==[""]
     assert gateway._index_snapshot_info["verified"] is True
     assert gateway._index_snapshot_info["catalog"]=="deferred_timeout"
+
+
+
+def test_index_restore_phase_logs_never_expose_private_exception(capsys):
+    def failed_remote_read():
+        raise RuntimeError("PRIVATE_CREDENTIAL_OR_ACCOUNT_MUST_NOT_LEAK")
+    with pytest.raises(RuntimeError):
+        gateway._safe_index_restore_stage("manifest_lookup",failed_remote_read)
+    output=capsys.readouterr().out
+    assert "ACCOUNT_INDEX_REMOTE_SNAPSHOT_PHASE_FAILED manifest_lookup RuntimeError" in output
+    assert "PRIVATE_CREDENTIAL_OR_ACCOUNT_MUST_NOT_LEAK" not in output
+    with pytest.raises(ValueError,match="unsupported"):
+        gateway._safe_index_restore_stage("secret/private/path",failed_remote_read)
+    assert capsys.readouterr().out==""
