@@ -1,0 +1,100 @@
+name: 4LEAF public real CHR actor, original frames and two-sided duel QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-public-actor-e2e.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-public-actor-e2e.yml'
+      - 'apps/4leaf/rog/app-version.json'
+      - 'apps/4leaf/rog/chr-body-source-map.js'
+      - 'apps/4leaf/rog/native-card-action-sequences.js'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  public-actor-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require the actual published version, source actor map and action JS SHA256
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,time,urllib.request
+          from pathlib import Path
+          base='https://koith.github.io/browser-app-lab/apps/4leaf/rog/'
+          root=Path('apps/4leaf/rog')
+          sources=('chr-body-source-map.js','native-card-action-sequences.js',
+                   'genesis-chessman-actors.js','sw.js')
+          expected_version=json.loads((root/'app-version.json').read_text())
+          expected={p:hashlib.sha256((root/p).read_bytes()).hexdigest() for p in sources}
+          deadline=time.monotonic()+240
+          last='not ready'
+          while time.monotonic()<deadline:
+            try:
+              def fetch(path):
+                request=urllib.request.Request(base+path+'?public_actor_qa='+str(time.time_ns()),
+                  headers={'Cache-Control':'no-cache'})
+                with urllib.request.urlopen(request,timeout=20) as response:
+                  assert response.status==200
+                  return response.read()
+              version=json.loads(fetch('app-version.json'))
+              results={p:hashlib.sha256(fetch(p)).hexdigest()==expected[p] for p in sources}
+              if version==expected_version and all(results.values()):
+                print('PUBLIC_4LEAF_CHR_SOURCES_EXACT_SHA_VERIFIED',version['version'],results)
+                break
+              last='version '+str(version.get('version'))+' SHA match '+str(results)
+            except Exception as e:
+              last=type(e).__name__+': '+str(e)[:180]
+            print('PUBLIC_4LEAF_CHR_SOURCE_NOT_READY',last,flush=True)
+            time.sleep(12)
+          else:
+            raise SystemExit('Published CHR source does not match exact Git checkout: '+last)
+          PY
+      - name: Install the real browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.engine }} --with-deps
+      - name: Real public page - owned CHR source frames across board poses and both duel sides
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+          FOURLEAF_BROWSER: '${{ matrix.engine }}'
+          LEAF_CARDS: '0040,0042,0045,0056,0096,0156'
+          LEAF_AUDIT_OUT: public-r14-${{ matrix.engine }}.json
+        run: |
+          node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
+          node - <<'JS'
+          const fs=require('node:fs');
+          const assert=require('node:assert/strict');
+          const engine=process.env.FOURLEAF_BROWSER;
+          const result=JSON.parse(fs.readFileSync(process.env.LEAF_AUDIT_OUT,'utf8'));
+          assert.equal(result.engine,engine);
+          assert.equal(result.summary.cards,6,'all six selected native CHR sources must be exercised');
+          assert.equal(result.summary.recoveredBodies,5,'five source-backed actors must decode');
+          assert.deepEqual(result.summary.unrecovered,['0156=OBS2.pak/1222.obs'],
+           'the source-absent card must never borrow another original CHR body');
+          assert.deepEqual(result.summary.cardsWithDefects,[]);
+          assert.deepEqual(result.summary.pageErrors,[]);
+          console.log('PUBLIC_CHR_6_CARDS_REAL_DUEL_PASS',engine,JSON.stringify(result.summary));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-public-r14-6-cards-${{ matrix.engine }}
+          path: public-r14-${{ matrix.engine }}.json
+          if-no-files-found: ignore
+          retention-days: 14
