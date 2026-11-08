@@ -15,10 +15,10 @@ ROOT = "https://koith.github.io/browser-app-lab"
 RENDER = "mimmi-private-gallery-free.onrender.com"
 TASK_BASELINE = "e4b633fc189429e79c9b70038ef6f2b6b9fdd0a5"
 MODELS = {
-    "yui": {"min_count": 3053, "min_private": 3030, "raw_owner_index":3030,
+    "yui": {"min_count": 3053, "raw_owner_index":3030,
             "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97",
                           "yui-public-official-x-teapawt")},
-    "mimmi": {"min_count": 2526, "min_private": 2525, "raw_owner_index":3214,
+    "mimmi": {"min_count": 2526, "raw_owner_index":3214,
               "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart")},
 }
 
@@ -135,7 +135,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
         assert page.url.startswith(url), (model, "unexpected redirect away from GitHub Pages", page.url)
         assert RENDER not in page.url, (model, "Render interstitial", page.url)
         try:
-            page.wait_for_function("""([minimum, privateMinimum]) => {
+            page.wait_for_function("""minimum => {
               if (typeof stored === 'undefined' || !Array.isArray(stored)) return false;
               const total=stored.reduce((n,a)=>n+(a.images||[]).length,0);
               const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>!!p.ownerAlbum).length,0);
@@ -145,7 +145,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
               // makes a healthy gallery time out; the full per-file/album
               // SHA + dimensions + byte-count gate below proves coverage.
               return total>=minimum && owner>0;
-            }""", arg=[rule["min_count"], rule["min_private"]], timeout=95000)
+            }""", arg=rule["min_count"], timeout=95000)
         except PlaywrightTimeoutError as exc:
             # An unlabelled timeout cannot tell a broken stored index from
             # a Pages/CDN fetch failure, blocked IndexedDB, or a JS error.
