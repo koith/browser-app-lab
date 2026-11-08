@@ -176,6 +176,23 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
         page.wait_for_function('''a => !document.querySelector('#detail').hidden
           && document.querySelector('#detailphotos .photo[data-i="' + a.index + '"]')''',
           arg=target, timeout=45000)
+        if deployed and album_override in ('v2ph-azur-lane-tashkent', 'djawa-privaty-public-samples'):
+            expected_tiles = {'v2ph-azur-lane-tashkent': 69,
+                              'djawa-privaty-public-samples': 30}[album_override]
+            tiles = page.locator('#detailphotos .photo')
+            assert tiles.count() == expected_tiles, ('SCREENSHOT_ALBUM_TILE_COUNT', model,
+                                                       album_override, tiles.count())
+            for tile_index in range(expected_tiles):
+                tile = tiles.nth(tile_index)
+                tile.scroll_into_view_if_needed(timeout=30000)
+                page.wait_for_function("""i => {
+                    const tile=document.querySelector('#detailphotos .photo[data-i="'+i+'"]');
+                    const im=tile?.querySelector('img');
+                    return !!im && im.complete && im.naturalWidth>=160 &&
+                        tile.dataset.imageState!=='failed';
+                }""", arg=tile_index, timeout=35000)
+            print('CLOUDFLARE_DEPLOYED_SCREENSHOT_ALBUM_ALL_TILES_DECODED',
+                  model, album_override, expected_tiles, flush=True)
         detail = page.locator('#detailphotos .photo[data-i="' + str(target['index']) + '"]')
         detail.scroll_into_view_if_needed(timeout=35000)
         detail.click(timeout=30000)
