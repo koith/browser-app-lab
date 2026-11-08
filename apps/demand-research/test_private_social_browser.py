@@ -84,9 +84,11 @@ def run():
             assert page.locator('article.post:has(.source-badge[aria-label="출처: X"]) a.author').get_attribute("href")=="https://x.com/qa"
             assert page.locator("#socialStatus").inner_text().find("1건 추가")>=0
             page.locator("#viewAccounts").click()
-            # Private account indexes are optional advanced panels in the new
-            # UX. Open the section before verifying its existing functionality.
-            page.locator("#accountServerData > summary").click()
+            # The verified account panel now opens on initialization.
+            # Do not click its summary again: that would close the panel.
+            page.wait_for_function(
+                "() => document.querySelector('#accountServerData')?.open === true",
+                timeout=25000)
             page.wait_for_selector("#intersectionGroupRows details",timeout=25000)
             assert "A-fixture123" in page.locator("#intersectionGroupRows summary").inner_text()
             page.locator("#intersectionGroupRows summary").click()
