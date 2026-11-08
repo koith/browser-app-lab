@@ -178,10 +178,43 @@ jobs:
           fs.writeFileSync(reportPath,JSON.stringify(report,null,2)+'\n');
           console.log('OFFICIAL_2002_CHR_0156_PAK_RESULT',report.chr_0156_original_obs2_1222);
           JS
+      - name: Inspect original D4/D6 source packages and Windows Dice DLL without executing the client
+        run: |
+          python3 apps/4leaf/rog/tools/audit-original-dice-resources.py \
+            /tmp/4leaf-origin/extracted 4leaf-original-dice-source-audit.json
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, subprocess, sys
+          archive=Path('/tmp/4leaf-origin/extracted')
+          candidates=[p for p in archive.rglob('*') if p.is_file() and p.name.lower()=='dice.dll']
+          output=Path('4leaf-original-dice-dll-audit.json')
+          if len(candidates)==1:
+            print('NATIVE_DICE_DLL_ORIGINAL_PATH',candidates[0].relative_to(archive))
+            subprocess.run([sys.executable,'apps/4leaf/rog/tools/probe-original-dice-dll-resources.py',
+              str(candidates[0]),str(output)],check=True)
+          else:
+            output.write_text(json.dumps({
+              'status':'UNVERIFIED_DICE_DLL_FILE_COUNT_'+str(len(candidates)),
+              'decodedNativeD4Mesh':False,'decodedNativeD6Mesh':False,
+              'executableRan':False,'resourcePayloadRedistributed':False
+            },indent=2)+'\n')
+            print('NATIVE_DICE_DLL_CANDIDATE_COUNT',len(candidates))
+          manifest=json.loads(Path('4leaf-original-dice-source-audit.json').read_text())
+          assert manifest['summary']['archiveCount']>0, 'empty native dice source inventory'
+          print('NATIVE_D4_D6_SHA_GROUNDED_INVENTORY',json.dumps({
+            'archiveCount':manifest['summary']['archiveCount'],
+            'totalEntries':manifest['summary']['totalEntries'],
+            'historicalModelsAuthenticated':not manifest.get('unverifiedGraphicsRole',True),
+            'sourceBinaries':len(manifest.get('clientExecutableContainers',[]))
+          }))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: fourleaf-0156-original-installer-metadata-only
-          path: 4leaf-original-0156-installer-census.json
+          path: |
+            4leaf-original-0156-installer-census.json
+            4leaf-original-dice-source-audit.json
+            4leaf-original-dice-dll-audit.json
           if-no-files-found: ignore
           retention-days: 14
