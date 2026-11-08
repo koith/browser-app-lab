@@ -237,8 +237,10 @@ def _read_verified_account_index_snapshot(previous_sha=""):
     A failed read never replaces the existing local SQLite database.
     """
     import account_index_job
-    manifest=_safe_index_restore_stage(
-        "manifest_lookup",account_index_job.latest_manifest)
+    def choose_manifest():
+        return (account_index_job.latest_manifest()
+                or account_index_job.latest_manifest_from_public_actions())
+    manifest=_safe_index_restore_stage("manifest_lookup",choose_manifest)
     if not manifest:
         print("ACCOUNT_INDEX_REMOTE_SNAPSHOT_PHASE_FAILED",
               "manifest_lookup","MissingManifest",flush=True)
