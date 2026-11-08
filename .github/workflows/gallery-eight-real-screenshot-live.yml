@@ -1,3 +1,5 @@
+# The live gallery appends tiles after the first 48 on animation frames.
+# Real browser checks await the complete album and native pixel decode.
 name: Gallery Eight Real Albums and 99 Screenshot Tiles Mobile Acceptance
 on:
   pull_request:
