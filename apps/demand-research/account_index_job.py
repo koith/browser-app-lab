@@ -5,9 +5,13 @@ No usernames, posts, or cloud credentials are printed or uploaded to Actions.
 """
 from __future__ import annotations
 import hashlib
+from contextlib import contextmanager
 import json
 import os
 import re
+import selectors
+import signal
+import sys
 import subprocess
 import tempfile
 import time
@@ -25,6 +29,36 @@ MANIFEST_RE=re.compile(r"^manifest-[0-9]{6,30}\.json$")
 MAX_DB=120_000_000
 MAX_CATALOG=70_000_000
 
+# Keep operational logs strictly aggregate-only. A hung Actions job must
+# identify its last stage without exposing account IDs, original posts, URLs,
+# TeraBox paths, credentials, or exception messages.
+_INDEX_STAGES=frozenset({
+    "remote_preflight", "manifest_lookup", "snapshot_load",
+    "public_source_scan", "catalog_read", "catalog_sync", "profile_scan",
+    "snapshot_upload_readback", "manifest_upload_readback",
+})
+
+
+@contextmanager
+def audit_stage(name):
+    if name not in _INDEX_STAGES:
+        raise ValueError("unsupported private index stage")
+    started=time.monotonic()
+    status="failed"
+    print("PRIVATE_ACCOUNT_INDEX_STAGE",json.dumps({
+        "stage":name,"state":"begin"},sort_keys=True),flush=True)
+    try:
+        yield
+    except BaseException:
+        raise
+    else:
+        status="pass"
+    finally:
+        print("PRIVATE_ACCOUNT_INDEX_STAGE",json.dumps({
+            "stage":name,"state":status,
+            "elapsed_ms":max(0,int((time.monotonic()-started)*1000))},
+            sort_keys=True),flush=True)
+
 
 def command(args, *, data=None, timeout=180):
     result=subprocess.run(["rclone",*args],input=data,stdout=subprocess.PIPE,
@@ -34,23 +68,56 @@ def command(args, *, data=None, timeout=180):
     return result.stdout
 
 
-def read_remote(path,max_bytes,optional=False):
+def read_remote(path,max_bytes,optional=False,*,max_seconds=None):
+    """Bound the WHOLE remote read, not just wait() after stdout EOF.
+
+    A provider can leave rclone cat's stdout open indefinitely. Blocking
+    .read() never reaches the old wait(timeout=120), and GitHub Actions killed
+    the 15-minute account index with no durable checkpoint. This loop caps
+    time AND output without logging user records or provider error bodies.
+    """
+    if max_seconds is None:
+        max_seconds=150 if max_bytes>1_000_000 else 40
+    if max_seconds<=0 or max_bytes<=0:
+        raise ValueError("invalid bounded private remote read")
     proc=subprocess.Popen(["rclone","cat",path,"--retries","2"],
-        stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+        stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,bufsize=0)
     data=bytearray()
+    deadline=time.monotonic()+max_seconds
     try:
-        while block:=proc.stdout.read(65536):
-            data.extend(block)
-            if len(data)>max_bytes:
-                raise ValueError("private remote payload too large")
-        status=proc.wait(timeout=120)
+        with selectors.DefaultSelector() as selector:
+            selector.register(proc.stdout,selectors.EVENT_READ)
+            while True:
+                remaining=deadline-time.monotonic()
+                if remaining<=0:
+                    raise RuntimeError("private remote read timed out")
+                if not selector.select(min(remaining,2.0)):
+                    continue
+                # os.read consumes only currently available bytes; unlike
+                # BufferedReader.read(n) it cannot wait for all n bytes.
+                block=os.read(proc.stdout.fileno(),65536)
+                if not block:
+                    break
+                data.extend(block)
+                if len(data)>max_bytes:
+                    raise ValueError("private remote payload too large")
+        remaining=deadline-time.monotonic()
+        if remaining<=0:
+            raise RuntimeError("private remote read timed out")
+        try:
+            status=proc.wait(timeout=remaining)
+        except subprocess.TimeoutExpired:
+            raise RuntimeError("private remote read timed out") from None
         if status:
             if optional:return None
             raise RuntimeError("private remote read failed")
         return bytes(data)
     finally:
         if proc.poll() is None:
-            proc.kill();proc.wait()
+            proc.kill()
+            proc.wait()
+        if proc.stdout is not None:
+            proc.stdout.close()
 
 
 def _parse_manifest(raw):
@@ -128,27 +195,94 @@ def create_snapshot(path,run_id):
     return {"file":name,"sha256":digest,"at":int(time.time())}
 
 
+def catalog_sync_child(db_path, marker_path):
+    """Isolated worker: write ONLY bounded aggregate success after DB commit.
+
+    Terminating this process group never deletes previously verified snapshots
+    or any cloud object. The catalog remains optional to a partial checkpoint.
+    """
+    if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):
+        raise RuntimeError("private cloud credential missing")
+    posts=CloudArchive("archive:DemandResearch").load_catalog()
+    accepted=0
+    if posts:
+        imported=account_index.sync_catalog(db_path,posts)
+        accepted=imported["accepted"]
+    result={"accepted":accepted,"has_posts":bool(posts)}
+    Path(marker_path).write_text(json.dumps(result,sort_keys=True))
+
+
+def catalog_sync_bounded(db_path, folder, *, timeout_seconds=90, worker=None):
+    """Avoid a stuck remote catalog preventing all other account checkpoints.
+
+    The worker is in its own process group so a timeout also stops its rclone
+    descendants. On any failure, never report a verified catalog sync. The
+    parent may still SHA-verify an immutable PARTIAL checkpoint later.
+    """
+    marker=Path(folder)/"catalog-sync-result.json"
+    argv=(worker if worker is not None else [
+        sys.executable,str(Path(__file__).resolve()),
+        "--catalog-sync",str(db_path),str(marker)])
+    process=subprocess.Popen(argv,stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL,start_new_session=True)
+    try:
+        try:
+            code=process.wait(timeout=timeout_seconds)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(process.pid,signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            process.wait()
+            return "deferred_timeout"
+    finally:
+        if process.poll() is None:
+            try:
+                os.killpg(process.pid,signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            process.wait()
+    if code:
+        return "deferred_error"
+    try:
+        data=marker.read_bytes()
+        if len(data)>256:
+            raise ValueError("oversized private catalog receipt")
+        info=json.loads(data)
+        if (type(info) is not dict or type(info.get("accepted")) is not int
+                or not 0<=info["accepted"]<=100000 or type(info.get("has_posts")) is not bool):
+            raise ValueError("invalid private catalog receipt")
+    except (FileNotFoundError,ValueError,TypeError,KeyError,UnicodeError):
+        return "deferred_invalid_receipt"
+    return "verified_"+str(info["accepted"]) if info["has_posts"] else "not_found"
+
+
 def run():
     if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):
         raise RuntimeError("private cloud credential missing")
     # This read-only preflight distinguishes missing first snapshot from broken auth.
-    command(["lsf","archive:","--max-depth","1","--retries","2"],timeout=100)
+    with audit_stage("remote_preflight"):
+        command(["lsf","archive:","--max-depth","1","--retries","2"],timeout=100)
     run_id=os.environ.get("GITHUB_RUN_ID","")
     with tempfile.TemporaryDirectory(prefix="intersection-index-") as folder:
         db=Path(folder)/"accounts.sqlite3"
-        prior=latest_manifest()
-        if prior:load_snapshot(db,prior)
-        scan=account_index_sources.run_batch(str(db),max_requests=6)
-        catalog_info="not_found"
-        # New immutable versioned catalog with legacy fallback.
-        posts=CloudArchive("archive:DemandResearch").load_catalog()
-        if posts:
-            imported=account_index.sync_catalog(str(db),posts)
-            catalog_info="verified_"+str(imported["accepted"])
-        group_scan=account_groups.scan_known_profiles(str(db),max_profiles=55)
+        with audit_stage("manifest_lookup"):
+            prior=latest_manifest()
+        if prior:
+            with audit_stage("snapshot_load"):
+                load_snapshot(db,prior)
+        with audit_stage("public_source_scan"):
+            scan=account_index_sources.run_batch(str(db),max_requests=6)
+        # The provider may hang for multiple 120s object-read retries.
+        # Isolate it and preserve earlier verified index data on timeout.
+        with audit_stage("catalog_read"):
+            catalog_info=catalog_sync_bounded(str(db),folder)
+        with audit_stage("profile_scan"):
+            group_scan=account_groups.scan_known_profiles(str(db),max_profiles=55)
         stats=account_index.status(str(db))
         windows=account_index_sources.coverage(str(db))
-        output=create_snapshot(db,run_id)
+        with audit_stage("snapshot_upload_readback"):
+            output=create_snapshot(db,run_id)
         groups=account_groups.groups_page(str(db),limit=1)
         output.update({"account_groups":groups["total"],
             "grouped_accounts":groups["linked_accounts"],
@@ -160,17 +294,29 @@ def run():
             "last_public_scan_accepted":scan.get("accepted",0)})
         # An immutable manifest is written LAST. Failed writes cannot clobber
         # the previously verified snapshot, and a readback confirms every byte.
-        pointer=publish_manifest(folder,output,run_id)
+        with audit_stage("manifest_upload_readback"):
+            pointer=publish_manifest(folder,output,run_id)
         if pointer["sha256"]!=output["sha256"] or pointer["file"]!=output["file"]:
             raise RuntimeError("versioned pointer readback mismatch")
-        print("PRIVATE_ACCOUNT_INDEX_VERIFIED",json.dumps({
+        partial=catalog_info.startswith("deferred_")
+        print("PRIVATE_ACCOUNT_INDEX_PARTIAL_CHECKPOINT_VERIFIED" if partial
+              else "PRIVATE_ACCOUNT_INDEX_VERIFIED",json.dumps({
             "accounts":output["accounts"],"source_rows":output["source_rows"],
             "account_groups":output["account_groups"],
             "grouped_accounts":output["grouped_accounts"],
             "public_scan_windows":windows,"catalog":catalog_info,
             "snapshot_readback_sha256":True,"no_person_identity_inference":True
         },ensure_ascii=False),flush=True)
+        # No false green workflow: partial progress is durable, but remote
+        # catalog ingestion is still incomplete and must be retried.
+        if partial:
+            raise RuntimeError("private catalog sync remains unverified")
 
 
 if __name__=="__main__":
-    run()
+    if len(sys.argv)==4 and sys.argv[1]=="--catalog-sync":
+        catalog_sync_child(sys.argv[2],sys.argv[3])
+    elif len(sys.argv)==1:
+        run()
+    else:
+        raise SystemExit("invalid private index worker arguments")
