@@ -1,0 +1,42 @@
+name: Gallery Eight Real Albums and 99 Screenshot Tiles Mobile Acceptance
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-eight-real-screenshot-live.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-eight-real-screenshot-live.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gallery-eight-real-screenshot-qa
+  cancel-in-progress: false
+jobs:
+  mobile-webkit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install real WebKit image decoder
+        run: |
+          python -m pip install --quiet 'playwright==1.62.0' 'Pillow==11.3.0'
+          python -m playwright install --with-deps webkit
+      - name: Verify eight albums, all 99 incident tiles and iPhone-sized lightboxes on actual Pages
+        run: python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser webkit
+  desktop-chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install actual Chromium image decoder
+        run: |
+          python -m pip install --quiet 'playwright==1.62.0' 'Pillow==11.3.0'
+          python -m playwright install --with-deps chromium
+      - name: Verify eight albums, all 99 incident tiles and lightboxes on actual Pages
+        run: python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser chromium
