@@ -23,15 +23,15 @@ TARGET = {
     'yui': ('yuis-present33', 1),
 }
 P0_TARGETS = {
-    'mimmi': ['mimmi-indie-sana-sopmod2-2019', 'djawa-pop-kitty-party', 'djawa-rei-beyond-the-heart'],
-    'yui': ['yuis-present33', 'teddy-bear97', 'athletic-club104'],
+    'mimmi': ['mimmi-indie-sana-sopmod2-2019', 'djawa-pop-kitty-party', 'djawa-rei-beyond-the-heart', 'v2ph-azur-lane-tashkent'],
+    'yui': ['yuis-present33', 'teddy-bear97', 'athletic-club104', 'djawa-privaty-public-samples'],
 }
 
 
 def expected(model, album_override=None):
     owner = json.loads((ROOT / 'apps' / f'{model}-gallery' / 'owner-index.json').read_text())
     assert owner['model'] == model and owner['schema_version'] == 1
-    album, number = (album_override, 1) if album_override else TARGET[model]
+    album, number = (album_override, {'v2ph-azur-lane-tashkent': 11, 'djawa-privaty-public-samples': 8}.get(album_override, 1)) if album_override else TARGET[model]
     for a in owner['albums']:
         if a['id'] == album:
             for p in a['images']:
@@ -176,6 +176,23 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
         page.wait_for_function('''a => !document.querySelector('#detail').hidden
           && document.querySelector('#detailphotos .photo[data-i="' + a.index + '"]')''',
           arg=target, timeout=45000)
+        if deployed and album_override in ('v2ph-azur-lane-tashkent', 'djawa-privaty-public-samples'):
+            expected_tiles = {'v2ph-azur-lane-tashkent': 69,
+                              'djawa-privaty-public-samples': 30}[album_override]
+            tiles = page.locator('#detailphotos .photo')
+            assert tiles.count() == expected_tiles, ('SCREENSHOT_ALBUM_TILE_COUNT', model,
+                                                       album_override, tiles.count())
+            for tile_index in range(expected_tiles):
+                tile = tiles.nth(tile_index)
+                tile.scroll_into_view_if_needed(timeout=30000)
+                page.wait_for_function("""i => {
+                    const tile=document.querySelector('#detailphotos .photo[data-i="'+i+'"]');
+                    const im=tile?.querySelector('img');
+                    return !!im && im.complete && im.naturalWidth>=160 &&
+                        tile.dataset.imageState!=='failed';
+                }""", arg=tile_index, timeout=35000)
+            print('CLOUDFLARE_DEPLOYED_SCREENSHOT_ALBUM_ALL_TILES_DECODED',
+                  model, album_override, expected_tiles, flush=True)
         detail = page.locator('#detailphotos .photo[data-i="' + str(target['index']) + '"]')
         detail.scroll_into_view_if_needed(timeout=35000)
         detail.click(timeout=30000)
@@ -209,7 +226,7 @@ def main():
     parser.add_argument('--deployed', action='store_true',
                         help='no page interception: require real public Pages code and photos')
     parser.add_argument('--all-p0', action='store_true',
-                        help='verify six priority real owner albums after complete remote replica')
+                        help='verify eight priority real owner albums including screenshot failures after complete remote replica')
     args = parser.parse_args()
     with sync_playwright() as p:
         engine = getattr(p, args.browser)
