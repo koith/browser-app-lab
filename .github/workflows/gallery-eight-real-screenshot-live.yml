@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/gallery-eight-real-screenshot-live.yml'
+      - 'apps/gallery-archive/qa_cloudflare_pages_browser.py'
   push:
     branches: [main]
     paths:
