@@ -146,26 +146,49 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
             photo['width'], photo['height']), 'browser failed actual original decode'
         assert urlsplit(decoded['current']).netloc == urlsplit(WORKER).netloc
 
-        # Real main gallery album/detail interaction, not only a synthetic image.
-        # A static-only first grid is not proof that the asynchronous SHA owner
-        # index has loaded. Chromium can reach it before the requested owner
-        # original is added; wait for the actual photo, not any album card.
-        page.wait_for_function('''q => {
-            if(typeof available!=='function' || typeof photosFor!=='function')return false;
-            return available().some(a => photosFor(a).some(p =>
-                p.ownerAlbum===q.ownerAlbum &&
-                (p.storageNumber ?? p.number)===q.number &&
-                p.sha256===q.sha256));
-        }''', arg=photo, timeout=60000)
-        target = page.evaluate('''q => {
-           for(const album of available()) {
-             const photos = photosFor(album);
-             const ix = photos.findIndex(p => p.ownerAlbum === q.ownerAlbum &&
-                  (p.storageNumber ?? p.number) === q.number && p.sha256 === q.sha256);
-             if(ix >= 0) return {album: album.id, index: ix};
-           } return null;
-        }''', photo)
-        assert target, 'actual gallery missing verified owner album/photo'
+        # Production union may substitute an exact SHA+length+pixel local copy
+        # for a remotely addressed owner photo. This is the SAME photo, not a
+        # missing owner original. Never require p.ownerAlbum for such local
+        # replacements: SavedGalleryPhotoUnion.preferPhysical removes that
+        # marker deliberately. The visible album and exact file identity must
+        # still match; a hash match in an unrelated album is not enough.
+        locate = """q => {
+          if (typeof available !== 'function' || typeof photosFor !== 'function')
+            return false;
+          for (const album of available()) {
+            const photos = photosFor(album);
+            const index = photos.findIndex(p =>
+              p.sha256 === q.sha256 && p.bytes === q.bytes &&
+              p.width === q.width && p.height === q.height &&
+              ((p.ownerAlbum === q.ownerAlbum &&
+                (p.storageNumber ?? p.number) === q.number) ||
+               (!p.ownerAlbum && album.id === q.ownerAlbum)));
+            if (index >= 0) return {album: album.id, index};
+          }
+          return false;
+        }"""
+        try:
+            target = page.wait_for_function(locate, arg=photo, timeout=60000).json_value()
+        except Exception:
+            # Evidence is diagnostic only. A missing gallery photo still fails
+            # the gate even if the Worker serves the raw original correctly.
+            diagnostics = page.evaluate("""q => ({
+              albumPresent: typeof available === 'function' &&
+                available().some(a => a.id === q.ownerAlbum),
+              albumPhotos: typeof available === 'function' &&
+                available().filter(a=>a.id===q.ownerAlbum)
+                  .map(a=>({id:a.id,count:photosFor(a).length,
+                     matchingSha:photosFor(a).filter(p=>p.sha256===q.sha256)
+                       .map(p=>({number:p.number,storageNumber:p.storageNumber,
+                                 local:!!p.shaPinnedLocalCopy,hasOwner:!!p.ownerAlbum}))})),
+              totalAlbums: typeof available==='function' ? available().length : -1
+            })""", photo)
+            print('GALLERY_EXACT_PHOTO_NOT_VISIBLE',
+                  json.dumps({'model': model, 'album': photo['ownerAlbum'],
+                              'number': photo['number'], 'details': diagnostics},
+                             sort_keys=True), flush=True)
+            raise
+        assert target and target['album'], 'actual gallery missing exact stored photo'
         card = page.locator('#albumgrid .album[data-id="' + target['album'] + '"]')
         card.scroll_into_view_if_needed(timeout=35000)
         if deployed and album_override:

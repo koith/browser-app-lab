@@ -1,6 +1,10 @@
 name: Gallery Cloudflare Deployed Photo Browser Acceptance
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_cloudflare_pages_browser.py'
+      - '.github/workflows/gallery-cloudflare-deployed-release.yml'
   push:
     branches: [main]
     paths:
@@ -13,12 +17,12 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: gallery-cloudflare-public-release
+  group: gallery-cloudflare-public-release-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
   cancel-in-progress: false
 jobs:
   real-deployed-photo:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -34,4 +38,4 @@ jobs:
       - name: Verify exact deployed Pages gallery, original SHA, native image and lightbox
         run: |
           python -m py_compile apps/gallery-archive/qa_cloudflare_pages_browser.py
-          python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --browser '${{ matrix.browser }}'
+          python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser '${{ matrix.browser }}'
