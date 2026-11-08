@@ -30,6 +30,7 @@ BRIDGE_AUDIENCE="intersection-originals-free/credential-v1"
 BRIDGE_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-gateway-credential-sync.yml@refs/heads/main"
 ARCHIVE_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-target-account-bundle.yml@refs/heads/main"
 MIRROR_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-terabox-gh-mirror.yml@refs/heads/main"
+INDEX_IMPORT_WORKFLOW="koith/browser-app-lab/.github/workflows/intersection-index-live-repair.yml@refs/heads/main"
 BRIDGE_ISSUER="https://token.actions.githubusercontent.com"
 BRIDGE_JWKS=BRIDGE_ISSUER+"/.well-known/jwks"
 
@@ -53,7 +54,7 @@ def verify_bridge_token(token, workflow=BRIDGE_WORKFLOW):
     if any(str(claims.get(k,""))!=v for k,v in must.items()):
         raise ValueError("Untrusted bridge workflow")
     allowed_events=("schedule","workflow_dispatch","push")
-    if workflow==MIRROR_WORKFLOW:
+    if workflow in (MIRROR_WORKFLOW,INDEX_IMPORT_WORKFLOW):
         allowed_events+=("workflow_run",)
     if claims.get("event_name") not in allowed_events:
         raise ValueError("Unexpected bridge event")
@@ -101,6 +102,88 @@ def _bridge_authenticated(request):
         raise HTTPException(403,"Bridge identity rejected") from None
     except Exception:
         raise HTTPException(503,"Bridge identity verification unavailable") from None
+
+
+@app.post("/api/bridge/index-snapshot",include_in_schema=False)
+async def accept_signed_index_snapshot(request:Request):
+    """Import an already SHA-verified, immutable public-account index.
+
+    The GitHub main-branch repair worker has access to the TeraBox snapshot
+    when the free Render reader receives provider 403. Only its short-lived
+    signed OIDC assertion can import. Never print or return account records.
+    """
+    header=request.headers.get("authorization","")
+    if not header.startswith("Bearer ") or len(header)>12500:
+        raise HTTPException(403,"Signed index import required")
+    try:
+        verify_bridge_token(header[7:],workflow=INDEX_IMPORT_WORKFLOW)
+    except (ValueError,KeyError,TypeError):
+        raise HTTPException(403,"Index import identity rejected") from None
+    except Exception:
+        raise HTTPException(503,"Index import identity unavailable") from None
+    if not INDEX_DB:
+        raise HTTPException(503,"Private index storage not configured")
+    digest=request.headers.get("x-index-sha256","")
+    run_id=request.headers.get("x-index-source-run","")
+    if not SHA_RE.fullmatch(digest) or not re.fullmatch(r"[0-9]{6,30}",run_id):
+        raise HTTPException(400,"Invalid signed index metadata")
+    cap=8*1024*1024
+    try:
+        declared=int(request.headers.get("content-length","0"))
+    except ValueError:
+        raise HTTPException(413,"Index too large") from None
+    if declared<=0 or declared>cap:
+        raise HTTPException(413,"Index too large")
+    raw=bytearray()
+    async for part in request.stream():
+        raw.extend(part)
+        if len(raw)>cap:
+            raise HTTPException(413,"Index too large")
+    if len(raw)!=declared or not secrets.compare_digest(hashlib.sha256(raw).hexdigest(),digest):
+        raise HTTPException(422,"Index SHA256 mismatch")
+    with tempfile.TemporaryDirectory(prefix="intersection-signed-index-") as folder:
+        candidate=Path(folder)/"verified.sqlite3"
+        candidate.write_bytes(raw)
+        try:
+            source=sqlite3.connect("file:"+str(candidate)+"?mode=ro",uri=True)
+            try:
+                if source.execute("PRAGMA integrity_check").fetchone()[0]!="ok":
+                    raise ValueError("invalid SQLite")
+                count=source.execute("SELECT count(*) FROM accounts").fetchone()[0]
+                rows=source.execute("SELECT count(*) FROM observed").fetchone()[0]
+                if not (isinstance(count,int) and count>0 and isinstance(rows,int) and rows>0):
+                    raise ValueError("empty index")
+                async with _index_lock:
+                    dest=account_index.connect(INDEX_DB)
+                    try:
+                        previous=dict(dest.execute(
+                            "SELECT key,value FROM index_meta WHERE key IN "
+                            "('last_imported_index_run','last_imported_index_sha')").fetchall())
+                        current=int(previous.get("last_imported_index_run","0"))
+                        if int(run_id)<current or (
+                            int(run_id)==current and previous.get("last_imported_index_sha")!=digest):
+                            raise HTTPException(409,"Older or conflicting index revision")
+                        if int(run_id)>current:
+                            source.backup(dest)
+                            dest.execute("INSERT OR REPLACE INTO index_meta(key,value) VALUES(?,?)",
+                                         ("last_imported_index_run",run_id))
+                            dest.execute("INSERT OR REPLACE INTO index_meta(key,value) VALUES(?,?)",
+                                         ("last_imported_index_sha",digest))
+                            dest.commit()
+                    finally:
+                        dest.close()
+                    global _index_synced_at,_index_last_error
+                    _index_synced_at=time.monotonic()
+                    _index_last_error=""
+                    _index_snapshot_info.update(sha256=digest,catalog="not_verified",verified=True)
+            finally:
+                source.close()
+        except (sqlite3.Error,ValueError,TypeError):
+            raise HTTPException(422,"Invalid verified index database") from None
+    print("ACCOUNT_INDEX_SIGNED_IMPORT_SHA_VERIFIED",
+          json.dumps({"accounts":count,"source_rows":rows},sort_keys=True),flush=True)
+    return JSONResponse({"accepted":True,"accounts":count,"source_rows":rows},
+                        headers={"Cache-Control":"no-store"})
 
 
 @app.get("/api/bridge/archive-key", include_in_schema=False)
