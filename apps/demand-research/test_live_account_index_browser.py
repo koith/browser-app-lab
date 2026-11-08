@@ -51,7 +51,9 @@ def verify(engine,label,width,height):
         source=page.locator("#privateAccountIndex select[aria-label='SNS 필터']")
         source.select_option("bluesky")
         page.wait_for_function(
-            "() => document.querySelectorAll('#privateAccountRows > div').length>0",
+            "() => {const rows=[...document.querySelectorAll('#privateAccountRows a')];"
+            "return rows.length>0 && rows.every(x => x.href.startsWith("
+            "'https://bsky.app/profile/'));}",
             timeout=60000)
         links=page.locator("#privateAccountRows a")
         assert links.count()>0, "no real filtered Bluesky rows"
