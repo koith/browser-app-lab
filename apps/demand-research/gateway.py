@@ -1,6 +1,6 @@
 """Private TeraBox post viewer gateway. Never expose cloud credentials in Pages."""
 from __future__ import annotations
-import asyncio, hashlib, hmac, json, os, re, secrets, time
+import asyncio, hashlib, hmac, json, os, re, secrets, time, signal, sqlite3, subprocess, sys, tempfile
 from pathlib import Path
 from typing import AsyncIterator
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -210,6 +210,7 @@ _index_lock=asyncio.Lock()
 _index_synced_at=0.0
 _index_last_error=""
 _index_task=None
+_index_snapshot_state="not_attempted"
 _index_lazy_task=None
 _index_lazy_attempt_at=0.0
 INDEX_LAZY_RETRY_SECONDS=180
@@ -230,17 +231,93 @@ async def refresh_account_index(force=False):
             _index_last_error=type(error).__name__
             raise
 
+def _install_sha_verified_index(candidate):
+    """Copy a verified, nonempty SQLite snapshot without replacing live data.
+
+    A subprocess has already read back and SHA-matched the TeraBox object.
+    Recheck schema/integrity before SQLite's transactional backup. Existing
+    nonempty indexes always win, so a late worker cannot erase fresh changes.
+    """
+    if not INDEX_DB:
+        return "not_configured"
+    source=sqlite3.connect("file:"+str(candidate)+"?mode=ro",uri=True)
+    try:
+        if source.execute("PRAGMA quick_check").fetchone()[0]!="ok":
+            return "invalid_sqlite"
+        count=source.execute("SELECT count(*) FROM accounts").fetchone()[0]
+        rows=source.execute("SELECT count(*) FROM observed").fetchone()[0]
+        if not (count>0 and rows>0):
+            return "empty_snapshot"
+        dest=account_index.connect(INDEX_DB)
+        try:
+            if dest.execute("SELECT count(*) FROM accounts").fetchone()[0]:
+                return "existing_records_preserved"
+            source.backup(dest)
+            return "sha_verified_restored"
+        finally:
+            dest.close()
+    finally:
+        source.close()
+
+
+def _hydrate_account_index_from_remote():
+    """Read small immutable index independently of the stalled post catalog.
+
+    A hard process group timeout bounds all descendant rclone calls. Neither
+    the gateway nor the private account index publishes its SQLite bytes.
+    """
+    if not INDEX_DB:
+        return "not_configured"
+    if account_index.status(INDEX_DB)["accounts"]:
+        return "existing_records_preserved"
+    with tempfile.TemporaryDirectory(prefix="intersection-index-") as directory:
+        candidate=Path(directory)/"verified.sqlite3"
+        worker=Path(__file__).resolve().parent/"account_index_restore.py"
+        proc=subprocess.Popen([sys.executable,str(worker),str(candidate)],
+                              stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
+                              start_new_session=True)
+        try:
+            try:
+                status=proc.wait(timeout=55)
+            except subprocess.TimeoutExpired:
+                return "remote_timeout"
+            if status:
+                return "remote_read_unavailable"
+            return _install_sha_verified_index(candidate)
+        except (OSError,ValueError,sqlite3.DatabaseError):
+            return "snapshot_validation_failed"
+        finally:
+            if proc.poll() is None:
+                try:
+                    os.killpg(proc.pid,signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                proc.wait()
+
+
 @app.on_event("startup")
 async def start_account_index():
     global _index_task
     if not INDEX_DB or not configured():
         return
     async def periodic():
+        global _index_snapshot_state
+        try:
+            _index_snapshot_state=await asyncio.to_thread(
+                _hydrate_account_index_from_remote)
+        except Exception:
+            _index_snapshot_state="snapshot_validation_failed"
+        print("PRIVATE_INDEX_VIEWER_HYDRATION",_index_snapshot_state,flush=True)
         while True:
-            try:
-                await refresh_account_index()
-            except Exception as error:
-                print("ACCOUNT_INDEX_REFRESH_FAILED",type(error).__name__,flush=True)
+            # Provider-wide catalog traversal has repeatedly stalled for
+            # 12+ minutes and triggered 512-MiB Render OOM restarts. The
+            # independent SHA-verified hourly index is our safe primary source.
+            # Only explicitly opted-in deployments use this legacy traversal.
+            if os.getenv("DEMAND_GATEWAY_DIRECT_CATALOG_SYNC","0")=="1":
+                try:
+                    await refresh_account_index()
+                except Exception as error:
+                    print("ACCOUNT_INDEX_REFRESH_FAILED",type(error).__name__,flush=True)
             if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
                 try:
                     result=await asyncio.to_thread(account_index_sources.run_batch,INDEX_DB)
@@ -468,7 +545,8 @@ async def accounts_status(request:Request):
     if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
         data["public_scan_windows"]=await asyncio.to_thread(account_index_sources.coverage,INDEX_DB)
     data.update({"refreshing":_index_lock.locked(),
-                 "refresh_error":_index_last_error,"persistent_db_configured":True})
+                 "refresh_error":_index_last_error,"persistent_db_configured":True,
+                 "verified_snapshot_state":_index_snapshot_state})
     return JSONResponse(data,headers={"Cache-Control":"private, no-store"})
 
 @app.get("/api/accounts")
