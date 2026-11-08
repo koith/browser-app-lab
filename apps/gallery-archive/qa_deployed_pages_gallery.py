@@ -139,8 +139,13 @@ def exercise(browser, model: str, rule: dict, engine: str):
               if (typeof stored === 'undefined' || !Array.isArray(stored)) return false;
               const total=stored.reduce((n,a)=>n+(a.images||[]).length,0);
               const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>!!p.ownerAlbum).length,0);
-              return total>=minimum && owner>=privateMinimum;
-            }""", arg=[rule["min_count"], rule["min_private"]], timeout=170000)
+              // Mimmi's owner originals can be served by byte-identical
+              // Pages files. SavedGalleryPhotoUnion then intentionally drops
+              // ownerAlbum on those rows. Requiring an old raw owner-flag count
+              // makes a healthy gallery time out; the full per-file/album
+              // SHA + dimensions + byte-count gate below proves coverage.
+              return total>=minimum && owner>0;
+            }""", arg=[rule["min_count"], rule["min_private"]], timeout=95000)
         except PlaywrightTimeoutError as exc:
             # An unlabelled timeout cannot tell a broken stored index from
             # a Pages/CDN fetch failure, blocked IndexedDB, or a JS error.
@@ -188,7 +193,12 @@ def exercise(browser, model: str, rule: dict, engine: str):
         }""")
         assert owner_raw["model"] == model, (model, owner_raw)
         assert owner_raw["physical"] >= rule["raw_owner_index"], (model, owner_raw)
+        # This is the real acceptance gate: every current owner record must
+        # have a SHA/bytes/dimensions-identical route in its correct work.
+        # A visible count or minimal bootstrap can never replace this proof.
         saved_routes = verify_saved_routes(context, page, model)
+        assert saved_routes["saved_rows_checked"] == owner_raw["physical"], (
+            model, "raw owner ledger and displayed exact routes diverged")
         assert "실제 저장본" in counts["banner"], (model, counts)
         duplicate_cuts=page.evaluate("""()=>stored.reduce((n,a)=>{
           const hashes=validImages(a).map(p=>p.sha256);
