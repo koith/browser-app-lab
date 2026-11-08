@@ -11,6 +11,7 @@ on:
       - "apps/demand-research/free_discovery.js"
       - "apps/demand-research/account_watch.js"
       - "apps/demand-research/account_auto_analysis.js"
+      - "apps/demand-research/account_index_client.js"
       - "apps/demand-research/test_account_watch_browser.py"
       - "apps/demand-research/test_free_discovery_browser.py"
       - ".github/workflows/demand-live-browser.yml"
@@ -21,6 +22,7 @@ on:
       - "apps/demand-research/test_private_social_browser.py"
       - "apps/demand-research/account_watch.js"
       - "apps/demand-research/account_auto_analysis.js"
+      - "apps/demand-research/account_index_client.js"
       - "apps/demand-research/test_account_watch_browser.py"
       - ".github/workflows/demand-live-browser.yml"
   workflow_dispatch:
@@ -42,6 +44,7 @@ jobs:
         run: |
           node --check apps/demand-research/account_watch.js
           node --check apps/demand-research/account_auto_analysis.js
+          node --check apps/demand-research/account_index_client.js
           python -m py_compile apps/demand-research/test_account_watch_browser.py
       - name: Install headless Chromium
         run: |
