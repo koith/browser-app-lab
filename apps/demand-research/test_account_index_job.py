@@ -117,3 +117,32 @@ def test_bounded_remote_read_preserves_exact_bytes_and_size_limit(monkeypatch):
     with pytest.raises(ValueError,match="private remote payload too large"):
         job.read_remote("private-synthetic-only",len(payload)-1,
                         max_seconds=3)
+
+
+
+def test_account_index_stage_audit_reports_success_without_private_data(capsys,monkeypatch):
+    values=iter([100.0,100.12])
+    monkeypatch.setattr(job.time,"monotonic",lambda:next(values))
+    with job.audit_stage("manifest_lookup"):
+        pass
+    output=capsys.readouterr().out
+    assert output.count("PRIVATE_ACCOUNT_INDEX_STAGE")==2
+    assert '"state": "begin"' in output
+    assert '"state": "pass"' in output
+    assert '"elapsed_ms": 120' in output
+    assert "archive:" not in output
+
+
+def test_account_index_stage_audit_redacts_exception_and_refuses_unknown_stage(capsys):
+    marker="SECRET_ACCOUNT_POST_AND_PROVIDER_URL_DO_NOT_PRINT"
+    with pytest.raises(RuntimeError,match="SECRET_ACCOUNT"):
+        with job.audit_stage("catalog_read"):
+            raise RuntimeError(marker)
+    output=capsys.readouterr().out
+    assert '"state": "failed"' in output
+    assert marker not in output
+    assert output.count("PRIVATE_ACCOUNT_INDEX_STAGE")==2
+    with pytest.raises(ValueError,match="unsupported"):
+        with job.audit_stage("account@private.example"):
+            pass
+    assert capsys.readouterr().out==""
