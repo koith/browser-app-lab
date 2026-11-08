@@ -1,0 +1,52 @@
+name: INTERSECTION - Signed Verified Account Index Delivery
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/intersection-index-live-repair.yml"
+      - "apps/demand-research/account_index_live_repair.py"
+  workflow_run:
+    workflows:
+      - "INTERSECTION — Private Public-Account Index Hourly Sync"
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: intersection-private-index-live-delivery
+  cancel-in-progress: false
+
+jobs:
+  delivery:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Prepare pinned TeraBox snapshot reader
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rm -rf /tmp/rclone.zip /tmp/rclone-extra
+          rclone help backends | grep -qi terabox
+          python -m pip install --disable-pip-version-check --quiet fastapi==0.115.12
+      - name: Transfer SHA-verified immutable private account index over signed HTTPS
+        env:
+          RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+          RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
+        run: |
+          set -euo pipefail
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE" || { echo "PRIVATE_INDEX_READER_NOT_CONFIGURED"; exit 1; }
+          cd apps/demand-research
+          python account_index_live_repair.py
