@@ -451,3 +451,70 @@ def test_account_status_background_refresh_is_singleflight_and_cooled_down(monke
         assert calls == ["refresh"]
 
     asyncio.run(exercise())
+
+
+
+def test_remote_account_index_snapshot_sha_checked_then_hydrated(tmp_path,monkeypatch):
+    import shutil
+    import account_index
+    import account_index_job
+    src=tmp_path/"verified_source.sqlite3"
+    target=tmp_path/"gateway.sqlite3"
+    account_index.sync_catalog(str(src),[{
+        "id":"synthetic-post","platform":"x",
+        "profile_url":"https://x.com/testsyn",
+        "text":"synthetic index only"}])
+    assert account_index.status(str(src))["accounts"]==1
+    monkeypatch.setattr(gateway,"INDEX_DB",str(target))
+    expected={"file":"snapshot-123456789.sqlite3",
+              "sha256":"b"*64,"catalog":"deferred_timeout"}
+    calls=[]
+    monkeypatch.setattr(account_index_job,"latest_manifest",lambda:expected)
+    def sha_verified_reader(path,manifest):
+        calls.append(manifest["sha256"])
+        shutil.copyfile(src,path)
+    monkeypatch.setattr(account_index_job,"load_snapshot",sha_verified_reader)
+    result=gateway._read_verified_account_index_snapshot()
+    assert result["accounts"]==1
+    assert result["catalog"]=="deferred_timeout"
+    assert result["unchanged"] is False
+    assert account_index.status(str(target))["accounts"]==1
+    assert gateway._read_verified_account_index_snapshot(expected["sha256"])["unchanged"] is True
+    assert calls==[expected["sha256"]]
+
+
+def test_unverified_remote_index_download_cannot_clobber_live_db(tmp_path,monkeypatch):
+    import account_index
+    import account_index_job
+    target=tmp_path/"gateway.sqlite3"
+    account_index.sync_catalog(str(target),[{
+        "id":"old-synthetic","platform":"x",
+        "profile_url":"https://x.com/verifyold",
+        "text":"Existing data must survive"}])
+    monkeypatch.setattr(gateway,"INDEX_DB",str(target))
+    monkeypatch.setattr(account_index_job,"latest_manifest",lambda:{
+        "file":"snapshot-123456790.sqlite3","sha256":"a"*64})
+    def unreadable(_path,_manifest):
+        raise RuntimeError("simulated checksum failure")
+    monkeypatch.setattr(account_index_job,"load_snapshot",unreadable)
+    with pytest.raises(RuntimeError,match="checksum"):
+        gateway._read_verified_account_index_snapshot()
+    assert account_index.status(str(target))["accounts"]==1
+
+
+def test_account_snapshot_refresh_metadata_only_after_success(monkeypatch):
+    import asyncio
+    calls=[]
+    monkeypatch.setattr(gateway,"INDEX_DB","fixture-not-used.sqlite3")
+    monkeypatch.setattr(gateway,"_index_snapshot_info",
+                        {"sha256":"","catalog":"not_checked","verified":False})
+    monkeypatch.setattr(gateway,"_index_synced_at",0.0)
+    monkeypatch.setattr(gateway,"_index_lock",asyncio.Lock())
+    monkeypatch.setattr(gateway,"_read_verified_account_index_snapshot",
+        lambda known:(calls.append(known) or {
+            "sha256":"c"*64,"catalog":"deferred_timeout","unchanged":False,
+            "accounts":2,"source_rows":6}))
+    asyncio.run(gateway.refresh_account_index())
+    assert calls==[""]
+    assert gateway._index_snapshot_info["verified"] is True
+    assert gateway._index_snapshot_info["catalog"]=="deferred_timeout"

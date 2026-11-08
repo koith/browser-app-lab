@@ -1,6 +1,6 @@
 """Private TeraBox post viewer gateway. Never expose cloud credentials in Pages."""
 from __future__ import annotations
-import asyncio, hashlib, hmac, json, os, re, secrets, time
+import asyncio, hashlib, hmac, json, os, re, secrets, sqlite3, tempfile, time
 from pathlib import Path
 from typing import AsyncIterator
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -210,9 +210,44 @@ _index_lock=asyncio.Lock()
 _index_synced_at=0.0
 _index_last_error=""
 _index_task=None
+_index_snapshot_info={"sha256":"","catalog":"not_checked","verified":False}
 _index_lazy_task=None
 _index_lazy_attempt_at=0.0
 INDEX_LAZY_RETRY_SECONDS=180
+
+def _read_verified_account_index_snapshot(previous_sha=""):
+    """Restore immutable SHA-checked account index without scanning every post.
+
+    The hourly GitHub worker performs source scanning, account grouping and
+    cloud checkpointing. Render free only reads its verified SQLite snapshot:
+    this avoids rescanning all remote journals inside a 512MiB web process.
+    A failed read never replaces the existing local SQLite database.
+    """
+    import account_index_job
+    manifest=account_index_job.latest_manifest()
+    if not manifest:
+        raise RuntimeError("verified account index snapshot unavailable")
+    if manifest["sha256"]==previous_sha:
+        return {"sha256":previous_sha,"unchanged":True}
+    with tempfile.TemporaryDirectory(prefix="intersection-index-view-") as d:
+        verified=Path(d)/"verified.sqlite3"
+        account_index_job.load_snapshot(verified,manifest)
+        source=sqlite3.connect(str(verified),timeout=20)
+        try:
+            if source.execute("PRAGMA integrity_check").fetchone()[0]!="ok":
+                raise RuntimeError("account index snapshot integrity check failed")
+            stats=account_index.status(str(verified))
+            destination=sqlite3.connect(INDEX_DB,timeout=25)
+            try:
+                source.backup(destination)
+            finally:
+                destination.close()
+        finally:
+            source.close()
+    return {"sha256":manifest["sha256"],"unchanged":False,
+            "catalog":str(manifest.get("catalog","not_checked"))[:60],
+            "accounts":stats["accounts"],"source_rows":stats["source_rows"]}
+
 
 async def refresh_account_index(force=False):
     global _index_synced_at,_index_last_error
@@ -222,8 +257,15 @@ async def refresh_account_index(force=False):
         if not force and _index_synced_at and time.monotonic()-_index_synced_at<INDEX_SECONDS:
             return
         try:
-            catalog=await get_catalog()
-            await asyncio.to_thread(account_index.sync_catalog,INDEX_DB,catalog)
+            result=await asyncio.to_thread(
+                _read_verified_account_index_snapshot,_index_snapshot_info["sha256"])
+            if not result["unchanged"]:
+                _index_snapshot_info.update(sha256=result["sha256"],
+                    catalog=result["catalog"],verified=True)
+                print("ACCOUNT_INDEX_VERIFIED_SNAPSHOT_LOADED",
+                    json.dumps({"accounts":result["accounts"],
+                                "source_rows":result["source_rows"],
+                                "catalog":result["catalog"]}),flush=True)
             _index_synced_at=time.monotonic()
             _index_last_error=""
         except Exception as error:
@@ -240,17 +282,11 @@ async def start_account_index():
             try:
                 await refresh_account_index()
             except Exception as error:
-                print("ACCOUNT_INDEX_REFRESH_FAILED",type(error).__name__,flush=True)
-            if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
-                try:
-                    result=await asyncio.to_thread(account_index_sources.run_batch,INDEX_DB)
-                    if result.get("requests"):
-                        print("ACCOUNT_INDEX_PUBLIC_WINDOW",json.dumps(result),flush=True)
-                    if os.getenv("DEMAND_ACCOUNT_SELF_LINKS_ENABLED","1")=="1":
-                        group_result=await asyncio.to_thread(account_groups.scan_known_profiles,INDEX_DB)
-                        print("ACCOUNT_GROUP_PUBLIC_CHECK",json.dumps(group_result),flush=True)
-                except Exception as error:
-                    print("ACCOUNT_INDEX_PUBLIC_FAILED",type(error).__name__,flush=True)
+                print("ACCOUNT_INDEX_SNAPSHOT_REFRESH_FAILED",
+                      type(error).__name__,flush=True)
+            # Collection, journal reconciliation and group scanning already
+            # run in the hourly GitHub job that publishes the immutable DB.
+            # Never do heavy full-catalog scans in the 512MiB web gateway.
             await asyncio.sleep(INDEX_SECONDS)
     _index_task=asyncio.create_task(periodic())
 
@@ -468,7 +504,9 @@ async def accounts_status(request:Request):
     if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
         data["public_scan_windows"]=await asyncio.to_thread(account_index_sources.coverage,INDEX_DB)
     data.update({"refreshing":_index_lock.locked(),
-                 "refresh_error":_index_last_error,"persistent_db_configured":True})
+                 "refresh_error":_index_last_error,"persistent_db_configured":True,
+                 "remote_snapshot_verified":_index_snapshot_info["verified"],
+                 "remote_catalog_state":_index_snapshot_info["catalog"]})
     return JSONResponse(data,headers={"Cache-Control":"private, no-store"})
 
 @app.get("/api/accounts")
