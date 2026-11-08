@@ -23,15 +23,15 @@ TARGET = {
     'yui': ('yuis-present33', 1),
 }
 P0_TARGETS = {
-    'mimmi': ['mimmi-indie-sana-sopmod2-2019', 'djawa-pop-kitty-party', 'djawa-rei-beyond-the-heart'],
-    'yui': ['yuis-present33', 'teddy-bear97', 'athletic-club104'],
+    'mimmi': ['mimmi-indie-sana-sopmod2-2019', 'djawa-pop-kitty-party', 'djawa-rei-beyond-the-heart', 'v2ph-azur-lane-tashkent'],
+    'yui': ['yuis-present33', 'teddy-bear97', 'athletic-club104', 'djawa-privaty-public-samples'],
 }
 
 
 def expected(model, album_override=None):
     owner = json.loads((ROOT / 'apps' / f'{model}-gallery' / 'owner-index.json').read_text())
     assert owner['model'] == model and owner['schema_version'] == 1
-    album, number = (album_override, 1) if album_override else TARGET[model]
+    album, number = (album_override, {'v2ph-azur-lane-tashkent': 11, 'djawa-privaty-public-samples': 8}.get(album_override, 1)) if album_override else TARGET[model]
     for a in owner['albums']:
         if a['id'] == album:
             for p in a['images']:
@@ -209,7 +209,7 @@ def main():
     parser.add_argument('--deployed', action='store_true',
                         help='no page interception: require real public Pages code and photos')
     parser.add_argument('--all-p0', action='store_true',
-                        help='verify six priority real owner albums after complete remote replica')
+                        help='verify eight priority real owner albums including screenshot failures after complete remote replica')
     args = parser.parse_args()
     with sync_playwright() as p:
         engine = getattr(p, args.browser)
