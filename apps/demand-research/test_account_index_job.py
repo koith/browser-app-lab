@@ -79,3 +79,108 @@ def test_immutable_manifest_corruption_does_not_replace_prior(tmp_path,monkeypat
     monkeypatch.setattr(job,"read_remote",lambda *a,**k:b"tampered")
     with pytest.raises(RuntimeError,match="readback mismatch"):
         job.publish_manifest(tmp_path,{"file":"snapshot-123456789.sqlite3","sha256":"a"*64},"123456789")
+
+
+def test_bounded_remote_read_times_out_even_before_stdout_eof(monkeypatch):
+    # A stalled child keeps stdout open; the old .read(65536) never reached
+    # proc.wait(timeout). Use a safe local child, not the real cloud provider.
+    import subprocess
+    import sys
+    import time
+    actual_popen=subprocess.Popen
+    children=[]
+    def stalled(_args,**kwargs):
+        proc=actual_popen([sys.executable,"-c",
+                           "import time; time.sleep(3)"],**kwargs)
+        children.append(proc)
+        return proc
+    monkeypatch.setattr(job.subprocess,"Popen",stalled)
+    started=time.monotonic()
+    with pytest.raises(RuntimeError,match="private remote read timed out"):
+        job.read_remote("private-synthetic-only",4096,max_seconds=0.08)
+    assert time.monotonic()-started<1.5
+    assert len(children)==1 and children[0].poll() is not None
+
+
+def test_bounded_remote_read_preserves_exact_bytes_and_size_limit(monkeypatch):
+    import subprocess
+    import sys
+    actual_popen=subprocess.Popen
+    payload=b"safe synthetic original bytes"
+    def process(_args,**kwargs):
+        return actual_popen([sys.executable,"-c",
+                             "import sys; sys.stdout.buffer.write("+
+                             repr(payload)+")"],**kwargs)
+    monkeypatch.setattr(job.subprocess,"Popen",process)
+    assert job.read_remote("private-synthetic-only",len(payload),
+                           max_seconds=3)==payload
+    with pytest.raises(ValueError,match="private remote payload too large"):
+        job.read_remote("private-synthetic-only",len(payload)-1,
+                        max_seconds=3)
+
+
+
+def test_account_index_stage_audit_reports_success_without_private_data(capsys,monkeypatch):
+    values=iter([100.0,100.12])
+    monkeypatch.setattr(job.time,"monotonic",lambda:next(values))
+    with job.audit_stage("manifest_lookup"):
+        pass
+    output=capsys.readouterr().out
+    assert output.count("PRIVATE_ACCOUNT_INDEX_STAGE")==2
+    assert '"state": "begin"' in output
+    assert '"state": "pass"' in output
+    assert '"elapsed_ms": 120' in output
+    assert "archive:" not in output
+
+
+def test_account_index_stage_audit_redacts_exception_and_refuses_unknown_stage(capsys):
+    marker="SECRET_ACCOUNT_POST_AND_PROVIDER_URL_DO_NOT_PRINT"
+    with pytest.raises(RuntimeError,match="SECRET_ACCOUNT"):
+        with job.audit_stage("catalog_read"):
+            raise RuntimeError(marker)
+    output=capsys.readouterr().out
+    assert '"state": "failed"' in output
+    assert marker not in output
+    assert output.count("PRIVATE_ACCOUNT_INDEX_STAGE")==2
+    with pytest.raises(ValueError,match="unsupported"):
+        with job.audit_stage("account@private.example"):
+            pass
+    assert capsys.readouterr().out==""
+
+
+
+def test_catalog_reader_timeout_preserves_checkpoint_budget(tmp_path):
+    import sys
+    import time
+    start=time.monotonic()
+    code=job.catalog_sync_bounded(
+        str(tmp_path/"accounts.sqlite3"),tmp_path,timeout_seconds=0.08,
+        worker=[sys.executable,"-c","import time; time.sleep(4)"])
+    assert code=="deferred_timeout"
+    assert time.monotonic()-start<2.0
+    assert not (tmp_path/"catalog-sync-result.json").exists()
+
+
+def test_catalog_reader_success_requires_bounded_verified_receipt(tmp_path):
+    import sys
+    marker=tmp_path/"catalog-sync-result.json"
+    script=("import pathlib,sys;pathlib.Path(sys.argv[1]).write_text("
+            "chr(123)+'\\\"accepted\\\": 2, \\\"has_posts\\\": true'+chr(125))")
+    assert job.catalog_sync_bounded(
+        tmp_path/"accounts.sqlite3",tmp_path,timeout_seconds=4,
+        worker=[sys.executable,"-c",script,str(marker)])=="verified_2"
+    assert marker.exists()
+
+
+def test_catalog_reader_never_claims_verified_without_receipt(tmp_path):
+    import sys
+    assert job.catalog_sync_bounded(
+        tmp_path/"accounts.sqlite3",tmp_path,timeout_seconds=4,
+        worker=[sys.executable,"-c","pass"])=="deferred_invalid_receipt"
+
+
+def test_catalog_worker_requires_private_cloud_config(tmp_path,monkeypatch):
+    monkeypatch.delenv("RCLONE_CONFIG_ARCHIVE_COOKIE",raising=False)
+    with pytest.raises(RuntimeError,match="credential"):
+        job.catalog_sync_child(tmp_path/"accounts.sqlite3",tmp_path/"catalog-sync-result.json")
+    assert not (tmp_path/"catalog-sync-result.json").exists()
