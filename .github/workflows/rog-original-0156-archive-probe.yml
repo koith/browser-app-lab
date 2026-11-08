@@ -205,7 +205,7 @@ jobs:
             'archiveCount':manifest['summary']['archiveCount'],
             'totalEntries':manifest['summary']['totalEntries'],
             'historicalModelsAuthenticated':not manifest.get('unverifiedGraphicsRole',True),
-            'sourceBinaries':len(manifest.get('sourceBinaries',[]))
+            'sourceBinaries':len(manifest.get('clientExecutableContainers',[]))
           }))
           PY
       - uses: actions/upload-artifact@v4
