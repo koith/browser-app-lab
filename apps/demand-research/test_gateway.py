@@ -417,3 +417,37 @@ def test_archive_key_oidc_authorizes_only_exact_main_account_or_mirror_workflow(
     assert bad.status_code==403
     assert gateway.COOKIE==""
     assert any(workflow==gateway.MIRROR_WORKFLOW for _,workflow in observed)
+
+
+
+def test_account_status_background_refresh_is_singleflight_and_cooled_down(monkeypatch):
+    import asyncio
+    calls=[]
+    async def fake_refresh():
+        calls.append("refresh")
+        await asyncio.sleep(0)
+
+    async def exercise():
+        monkeypatch.setattr(gateway,"_index_task",None)
+        monkeypatch.setattr(gateway,"_index_lazy_task",None)
+        monkeypatch.setattr(gateway,"_index_lazy_attempt_at",0.0)
+        monkeypatch.setattr(gateway,"_index_synced_at",0.0)
+        monkeypatch.setattr(gateway,"_index_lock",asyncio.Lock())
+        monkeypatch.setattr(gateway,"_background_account_index_refresh",fake_refresh)
+        assert gateway.schedule_lazy_account_index_refresh() is True
+        assert gateway.schedule_lazy_account_index_refresh() is False
+        await gateway._index_lazy_task
+        assert calls == ["refresh"]
+        # Even when a failed index leaves no successful checkpoint, a burst
+        # of page refreshes must not schedule another expensive cloud read.
+        assert gateway.schedule_lazy_account_index_refresh() is False
+
+        class RunningPeriodic:
+            def done(self):
+                return False
+        monkeypatch.setattr(gateway,"_index_lazy_attempt_at",0.0)
+        monkeypatch.setattr(gateway,"_index_task",RunningPeriodic())
+        assert gateway.schedule_lazy_account_index_refresh() is False
+        assert calls == ["refresh"]
+
+    asyncio.run(exercise())
