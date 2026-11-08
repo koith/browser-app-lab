@@ -210,6 +210,9 @@ _index_lock=asyncio.Lock()
 _index_synced_at=0.0
 _index_last_error=""
 _index_task=None
+_index_lazy_task=None
+_index_lazy_attempt_at=0.0
+INDEX_LAZY_RETRY_SECONDS=180
 
 async def refresh_account_index(force=False):
     global _index_synced_at,_index_last_error
@@ -422,6 +425,27 @@ async def _background_account_index_refresh():
     except Exception as error:
         print("ACCOUNT_INDEX_LAZY_REFRESH_FAILED",type(error).__name__,flush=True)
 
+
+def schedule_lazy_account_index_refresh():
+    """Coalesce status-triggered refreshes on memory-limited free instances.
+
+    Rapid GET /api/accounts/status requests previously queued many copies
+    before the first task acquired the lock. A failing remote catalog read
+    then started another expensive attempt immediately after each failure.
+    Never schedule a second copy while periodic/previous refresh is alive.
+    """
+    global _index_lazy_task,_index_lazy_attempt_at
+    now=time.monotonic()
+    if (_index_task is not None and not _index_task.done()
+            or _index_lazy_task is not None and not _index_lazy_task.done()
+            or _index_lock.locked()
+            or (_index_synced_at and now-_index_synced_at<INDEX_SECONDS)
+            or (_index_lazy_attempt_at and now-_index_lazy_attempt_at<INDEX_LAZY_RETRY_SECONDS)):
+        return False
+    _index_lazy_attempt_at=now
+    _index_lazy_task=asyncio.create_task(_background_account_index_refresh())
+    return True
+
 @app.get("/api/account-groups")
 async def account_groups_list(request:Request,
                               offset:int=Query(0,ge=0,le=10000000),
@@ -439,8 +463,7 @@ async def accounts_status(request:Request):
     if not INDEX_DB:
         raise HTTPException(503,"Private account-index storage not configured")
     # Indexing must not block the UI; the background refresh is also periodic.
-    if not _index_lock.locked() and (not _index_synced_at or time.monotonic()-_index_synced_at>INDEX_SECONDS):
-        asyncio.create_task(_background_account_index_refresh())
+    schedule_lazy_account_index_refresh()
     data=await asyncio.to_thread(account_index.status,INDEX_DB)
     if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
         data["public_scan_windows"]=await asyncio.to_thread(account_index_sources.coverage,INDEX_DB)
