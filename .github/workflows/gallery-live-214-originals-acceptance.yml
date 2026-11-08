@@ -10,9 +10,6 @@ on:
     paths:
       - 'apps/gallery-archive/qa_live_214_incident_originals.py'
       - '.github/workflows/gallery-live-214-originals-acceptance.yml'
-  workflow_run:
-    workflows: ["Keep both galleries connected to stored TeraBox originals"]
-    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,14 +39,7 @@ jobs:
           PY
   actual-live-owner-originals:
     needs: compile-contract
-    if: >-
-      github.event_name == 'pull_request' ||
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository)
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     name: real Cloudflare exact originals (${{ matrix.model }})
     runs-on: ubuntu-24.04
     timeout-minutes: 22
