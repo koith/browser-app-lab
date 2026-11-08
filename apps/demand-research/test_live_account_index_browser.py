@@ -8,6 +8,24 @@ from __future__ import annotations
 import re
 from playwright.sync_api import sync_playwright
 
+def safe_browser_error(value):
+    # Only finite error classes and known static filenames may reach CI logs.
+    # Never print the raw exception (which could contain source/post URLs).
+    raw=str(value)
+    kind=next((k for k in ("TypeError","ReferenceError","SyntaxError",
+                           "RangeError","SecurityError","NetworkError",
+                           "UnhandledPromiseRejection") if k in raw),"Other")
+    scripts=("account_index_client.js","account_group_client.js",
+             "account_auto_analysis.js","account_watch.js","archive_tab.js",
+             "target_archive_client.js","free_discovery.js",
+             "post_activity_ranking.js","public_video_trends.js",
+             "index.html")
+    src=next((n for n in scripts if n in raw),"unknown")
+    import re
+    pos=re.search(r"(?:"+re.escape(src)+r")(?:\\?[^\\s]*)?:(\\d+):\\d+",raw) if src!="unknown" else None
+    line=int(pos.group(1)) if pos else 0
+    return {"kind":kind,"source":src,"line":line}
+
 SITE="https://intersection-originals-free.onrender.com"
 
 def verify(engine,label,width,height):
@@ -16,7 +34,7 @@ def verify(engine,label,width,height):
         page=browser.new_page(viewport={"width":width,"height":height},
                              color_scheme="light")
         js_errors=[]
-        page.on("pageerror",lambda _:js_errors.append("pageerror"))
+        page.on("pageerror",lambda error:js_errors.append(safe_browser_error(error)))
         status=page.request.get(SITE+"/api/accounts/status",timeout=90000)
         assert status.status==200, "live account status HTTP failed"
         counts=status.json()
@@ -76,6 +94,8 @@ def verify(engine,label,width,height):
 
         size=page.evaluate("() => ({width:innerWidth,scroll:document.documentElement.scrollWidth})")
         assert size["scroll"]<=size["width"]+3, "horizontal overflow on live account page"
+        if js_errors:
+            print("LIVE_ACCOUNT_INDEX_JS_ERROR_SAFE",sorted(js_errors,key=lambda o:(o["source"],o["line"],o["kind"])),flush=True)
         assert not js_errors, "uncaught JavaScript error on account-index page"
         print("LIVE_ACCOUNT_INDEX_UI_PASS","client="+label,
               "accounts="+str(expected),"initial_page="+str(first_count),
