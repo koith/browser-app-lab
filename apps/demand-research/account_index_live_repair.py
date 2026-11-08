@@ -18,22 +18,25 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-from account_index_job import latest_manifest, load_snapshot
+from account_index_job import latest_manifest, latest_manifest_from_public_actions, load_snapshot
 
 GATEWAY="https://intersection-originals-free.onrender.com"
 AUDIENCE="intersection-originals-free/credential-v1"
 MAX_INDEX_BYTES=8*1024*1024
 
 def validated_index():
-    manifest=latest_manifest()
+    print("ACCOUNT_INDEX_LIVE_PHASE manifest_lookup",flush=True)
+    manifest=latest_manifest() or latest_manifest_from_public_actions()
     if not manifest:
         raise RuntimeError("private index manifest unavailable")
+    print("ACCOUNT_INDEX_LIVE_PHASE manifest_verified",flush=True)
     match=re.fullmatch(r"snapshot-([0-9]{6,30})\.sqlite3",manifest["file"])
     if not match:
         raise ValueError("unsafe immutable index revision")
     with tempfile.TemporaryDirectory(prefix="private-index-transfer-") as temp:
         path=Path(temp)/"index.sqlite3"
         load_snapshot(path,manifest)
+        print("ACCOUNT_INDEX_LIVE_PHASE snapshot_sha_verified",flush=True)
         size=path.stat().st_size
         if not 0<size<=MAX_INDEX_BYTES:
             raise ValueError("private index exceeds safe viewer bound")
@@ -47,6 +50,7 @@ def validated_index():
             rows=db.execute("SELECT count(*) FROM observed").fetchone()[0]
             if not (0<accounts and 0<rows):
                 raise ValueError("invalid empty index")
+        print("ACCOUNT_INDEX_LIVE_PHASE sqlite_integrity_verified",flush=True)
         return {"run_id":match.group(1),"sha":manifest["sha256"],
                 "payload":payload,"accounts":accounts,"source_rows":rows}
 
@@ -61,6 +65,7 @@ def signed_assertion():
 
 def push():
     candidate=validated_index()
+    print("ACCOUNT_INDEX_LIVE_PHASE viewer_warmup",flush=True)
     # Wake a sleeping free Render instance BEFORE issuing the short-lived JWT.
     for retry in range(3):
         try:
@@ -71,13 +76,16 @@ def push():
             if retry==2:
                 raise RuntimeError("free viewer unavailable")
             time.sleep(5)
+    print("ACCOUNT_INDEX_LIVE_PHASE viewer_ready",flush=True)
     token=signed_assertion()
+    print("ACCOUNT_INDEX_LIVE_PHASE oidc_issued",flush=True)
     req=Request(GATEWAY+"/api/bridge/index-snapshot",
         data=candidate["payload"],method="POST",headers={
             "Content-Type":"application/octet-stream",
             "Authorization":"Bearer "+token,
             "X-Index-SHA256":candidate["sha"],
             "X-Index-Source-Run":candidate["run_id"]})
+    print("ACCOUNT_INDEX_LIVE_PHASE signed_https_post",flush=True)
     with urlopen(req,timeout=70) as response:
         outcome=json.load(response)
     if (outcome.get("accepted") is not True
@@ -92,6 +100,11 @@ def push():
 if __name__=="__main__":
     try:
         push()
-    except Exception:
-        # Do not leak HTTP response bodies, credentials, source paths or tokens.
+    except Exception as error:
+        # Fixed exception classes only: no HTTP bodies, tokens or TeraBox paths.
+        safe=("RuntimeError","ValueError","TimeoutError","URLError","HTTPError",
+              "KeyError","OSError","OperationalError","DatabaseError")
+        category=type(error).__name__
+        print("ACCOUNT_INDEX_LIVE_IMPORT_FAILURE_CLASS",
+              category if category in safe else "Other",flush=True)
         raise SystemExit("ACCOUNT_INDEX_LIVE_IMPORT_UNVERIFIED") from None

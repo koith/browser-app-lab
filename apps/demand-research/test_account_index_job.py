@@ -184,3 +184,37 @@ def test_catalog_worker_requires_private_cloud_config(tmp_path,monkeypatch):
     with pytest.raises(RuntimeError,match="credential"):
         job.catalog_sync_child(tmp_path/"accounts.sqlite3",tmp_path/"catalog-sync-result.json")
     assert not (tmp_path/"catalog-sync-result.json").exists()
+
+
+def test_direct_manifest_fallback_uses_only_verified_private_candidate():
+    import json
+    run_id=42445680007
+    seen=[]
+    def source(path,cap,*,optional,max_seconds):
+        seen.append((path,cap,optional,max_seconds))
+        return json.dumps({"file":"snapshot-"+str(run_id)+".sqlite3",
+                           "sha256":"c"*64}).encode()
+    found=job.latest_manifest_from_public_actions(
+        get_runs=lambda:{"workflow_runs":[
+            {"id":run_id,"head_branch":"main","conclusion":"failure"}]},
+        remote_reader=source)
+    assert found["file"]=="snapshot-42445680007.sqlite3"
+    assert found["sha256"]=="c"*64
+    assert len(seen)==1 and seen[0][1:]==(4096,True,14)
+    assert seen[0][0].endswith("/manifests/manifest-42445680007.json")
+
+
+def test_direct_manifest_fallback_rejects_untrusted_branch_and_mismatched_file():
+    import json
+    calls=[]
+    def source(path,cap,*,optional,max_seconds):
+        calls.append(path)
+        return json.dumps({"file":"snapshot-123456789.sqlite3",
+                           "sha256":"c"*64}).encode()
+    result=job.latest_manifest_from_public_actions(
+        get_runs=lambda:{"workflow_runs":[
+            {"id":42445680007,"head_branch":"attacker-branch"},
+            {"id":42445680008,"head_branch":"main"}]},
+        remote_reader=source)
+    assert result is None
+    assert len(calls)==1

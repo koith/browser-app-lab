@@ -127,6 +127,53 @@ def _parse_manifest(raw):
     return info
 
 
+def latest_manifest_from_public_actions(*,get_runs=None,remote_reader=None):
+    """Locate immutable account snapshots when TeraBox nested listing is broken.
+
+    Public GitHub Actions metadata gives only candidate numeric run IDs;
+    it never supplies or authenticates backup bytes. Each *private* manifest
+    and SQLite payload still requires an independent remote SHA-256 readback.
+    """
+    if get_runs is None:
+        from urllib.request import Request,urlopen
+        url=("https://api.github.com/repos/koith/browser-app-lab/"
+             "actions/workflows/demand-account-index-sync.yml/runs?per_page=5")
+        req=Request(url,headers={
+            "Accept":"application/vnd.github+json",
+            "User-Agent":"intersection-private-index-manifest-fallback"})
+        try:
+            with urlopen(req,timeout=8) as response:
+                blob=response.read(100001)
+            if len(blob)>100000:
+                return None
+            data=json.loads(blob)
+        except (OSError,ValueError,json.JSONDecodeError):
+            return None
+    else:
+        data=get_runs()
+    if not isinstance(data,dict) or not isinstance(data.get("workflow_runs"),list):
+        return None
+    reader=read_remote if remote_reader is None else remote_reader
+    for run in data["workflow_runs"][:5]:
+        if not isinstance(run,dict) or run.get("head_branch")!="main":
+            continue
+        rid=run.get("id")
+        if type(rid) is not int or not 100000<=rid<=999999999999999999999999999999:
+            continue
+        name="manifest-"+str(rid)+".json"
+        try:
+            raw=reader(REMOTE+"/manifests/"+name,4096,
+                       optional=True,max_seconds=14)
+            if raw is None:
+                continue
+            info=_parse_manifest(raw)
+            if info["file"]=="snapshot-"+str(rid)+".sqlite3":
+                return info
+        except (RuntimeError,ValueError,TypeError,KeyError,json.JSONDecodeError,OSError):
+            continue
+    return None
+
+
 def latest_manifest():
     # Immutable, unique per-run manifests avoid the TeraBox rcat overwrite
     # failure observed on latest.json. Never delete previous verified snapshots.
