@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-07",
+  "updatedAt": "2026-11-08",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1878,6 +1878,34 @@
         "ACT-03",
         "P0-ACTOR",
         "QA-02"
+      ]
+    },
+    {
+      "id": "REQ-20261107-4LEAF-LIVE-R17-E2E-RECHECK",
+      "date": "2026-11-07",
+      "origin": "사용자: 직전 턴 처리 내역 명확화, 미완료 및 무검증 개발 기능의 실사용 QA 요청",
+      "text": "직전 완료 작업을 실제 PR·배포·실사용 검사로 확인하고 원작 복원의 미완료/미검증 영역을 개발·검증한다. 새 R17 원본 전투 결과 애니메이션이 공개 Pages Chromium/WebKit에서 자신의 CHR 몸체/액션 슬롯/원본 PNG SHA256을 사용함을 별도 수용한다. 완전 원작 일치로 오인하지 않는다.",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ]
+    },
+    {
+      "id": "REQ-20261108-4LEAF-QA-AND-LEDGER-CONTINUATION",
+      "date": "2026-11-08",
+      "origin": "사용자: 이번 턴 실제 처리 내용 명확 보고, 미완료 및 완료 후 무검증 기능 실사용 검증까지 진행",
+      "text": "직전 개발과 검증을 GitHub main/PR/Actions/공개 Pages 기준으로 재검증. R17 원본 피격·승리 동작 실사용 브라우저 증거를 원장에 보존한다. WebRTC 첫 연결 메시지 누락의 실제 공개 2인 테스트 결과를 보존한다. 공식 설치본 세 PAK에서 CHR 0156 1222.obs 부재를 원본 인덱스와 SHA 검증으로 확인하고, 다른 버전 원본 확보 가능성은 열어둔다. 전체 4LEAF 역사적 원작 동일성 및 iPhone 실기기 검사 미완료를 유지한다.",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "P0-CHAT",
+        "QA-02",
+        "QA-03"
       ]
     }
   ],
@@ -9296,6 +9324,84 @@
         "QA-03"
       ],
       "details": "PUBLIC BETA70 VERIFIED after R17 #822 merge 017519ac, release #844 merge 217a357493a5c633d9ed3fb66c215863455d0254 (v0.86.0-beta.70 / PWA v157), and public actual-game QA fix #850 merge c3abaa23b74298685ca037bc14efe2cf04115038. Same-revision release run 42367036982 SUCCESS, including exact public SHA256 byte identity for native-card-action-sequences.js, sw.js and archived battle podium PNG. Actual published Chromium + WebKit game run 42367392773 both SUCCESS: physical WorldMap pixel-hit -> channel -> hotseat start, 104 board tiles, real 3 dice land, c_0042 vs c_0045 original CHR bodies decode (naturalWidth 47/41), outcome/result button clickable and 0 transient asset errors. Public published ChatRoom run 42367346868 SUCCESS: all 46 real browser steps including 6 rooms, chat, PWA, dice and mobile WebKit. Published screenshot-vs-original browser run 42367346831 both Chromium and WebKit SUCCESS. Earlier public run 42367036979 FAILED due race: new version exposed before native images decoded; #850 adds exact source image readiness and awaits real decoded outcome (no asset substitution). APP FUNCTIONAL/BROWSER RELEASE acceptance VERIFIED for this tested scope. Historical EXE/3D MVE, CHR 0156, 98 source semantic roles, full original matching, physical iPhone remain OPEN; no task marked done from partial browser evidence."
+    },
+    {
+      "seq": 434,
+      "date": "2026-11-07",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261107-4LEAF-LIVE-R17-E2E-RECHECK",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ]
+    },
+    {
+      "seq": 435,
+      "date": "2026-11-07",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261107-4LEAF-LIVE-R17-E2E-RECHECK",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ],
+      "details": "R17 public browser acceptance hardening VERIFIED: PR #854 merged 782f79116f00fa04c3e26ab6f860ee3f43e4e0cc after original public Chromium/WebKit workflow 42368535404 success on head c5b6fa5fb132e102390d5917db88683a54bf868f. Actual published Pages v0.86.0-beta.70/PWA v157, WorldMap physical hit->game start->104 board cells->3 dice land->source CHR duel outcome. CHR 0042=OBS.pak/1026.obs native slot14 victory candidate (2760ms), 0045=OBS.pak/1029.obs native slot13 hurt candidate (960ms); both actual decoded pixel URLs obs-1026-032.png, obs-1029-033.png SHA256 equal committed original source, no transient HTTP errors. This proves public original SOURCE FRAMES and WEB-INFERRED slot mapping operational on Chromium and WebKit, NOT historical EXE action role equivalence, 0156 recovery, original 3D models/camera, physical iPhone or total project completion. No task statuses changed."
+    },
+    {
+      "seq": 436,
+      "date": "2026-11-08",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261108-4LEAF-QA-AND-LEDGER-CONTINUATION",
+      "taskIds": [
+        "P0-RELEASE",
+        "M09",
+        "ACT-03",
+        "P0-ACTOR",
+        "P0-CHAT",
+        "QA-02",
+        "QA-03"
+      ]
+    },
+    {
+      "seq": 437,
+      "date": "2026-11-08",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261108-4LEAF-QA-AND-LEDGER-CONTINUATION",
+      "taskIds": [
+        "P0-RELEASE",
+        "QA-03",
+        "P0-CHAT"
+      ],
+      "details": "VERIFIED: beta71/PWA v158 WebRTC early HELLO live fix PR #856 merged 8ba06e0baa95204340e09477b12a380978d2e767 after HEAD full browser suite 30 SUCCESS 1 SKIPPED and 0 failure (Chromium/WebKit 98 actors, 26 maps, 6 rooms, true WebRTC 2 peers). Public QA scheduling repair #866 merged 317c98ede6443862cc2055fbc3fd098c2fe5db60; public Pages version 0.86.0-beta.71 confirmed, deployed network.js source SHA256 a2b96488781fbfdabefdfcbb4e5d021312cdfd02706012371c64326ad647f242 exact match and real published 2-browser WebRTC malformed battle, state receipt, early HELLO, callback reset passed 1/1, fail 0, Actions run 42381566117. iPhone 15 Pro Max physical hardware NOT tested. Do not infer historical 4LEAF multiplayer protocol equivalence."
+    },
+    {
+      "seq": 438,
+      "date": "2026-11-08",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261108-4LEAF-QA-AND-LEDGER-CONTINUATION",
+      "taskIds": [
+        "P0-ACTOR",
+        "M09",
+        "ACT-03"
+      ],
+      "details": "VERIFIED: official 4LEAF v0.96d archive (2002-07-16) 4leaf.zip 64537476 bytes SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 was downloaded and verified in GitHub Actions. InstallShield data1.cab extracted using unshield (not 7z), obtaining original OBS.pak 166 members, OBS2.pak 53 members, OBS3.pak 26 members; all PAK native inverted 28-byte index parsers reported exact resource-length sum. Neither PAK has 1222.obs: OBS2 has 1221.obs and 1223.obs surrounding missing entry; 0156 source body ABSENT IN THIS SPECIFIC VERIFIED 2002 INSTALLER, not claimed absent in every possible later edition. Source probe PR #861 merged 9817f4654e9b022926a5a2a9b43ac71936b057fe; related workflow returned success. Do NOT invent or borrow another character's frames. 0156 STILL UNRECOVERED."
+    },
+    {
+      "seq": 439,
+      "date": "2026-11-08",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261108-4LEAF-QA-AND-LEDGER-CONTINUATION",
+      "taskIds": [
+        "P0-RELEASE",
+        "QA-03",
+        "P0-ACTOR"
+      ],
+      "details": "VERIFIED: published source native R17 outcome PR #854 merged 782f79116f00fa04c3e26ab6f860ee3f43e4e0cc with actual public Chromium/WebKit E2E 42368535404 success; CHR 0042 source member OBS/1026 and 0045 OBS/1029, candidate outcome slots 14 and 13, actual displayed PNG bytes match their original source SHA256. Source slot/frame integrity VERIFIED; hurt/victory semantic label WEB-INFERRED only. Remaining original 3D mesh/dice/podium, missing 0156, full 98 actor historical role equivalence, physical iPhone all remain OPEN. DO NOT close restoration statuses from browser subset evidence."
     }
   ],
   "restorationPriority": {
