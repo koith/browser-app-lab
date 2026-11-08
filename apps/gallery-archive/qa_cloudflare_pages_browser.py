@@ -153,14 +153,15 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
         page.wait_for_function('''q => {
             if(typeof available!=='function' || typeof photosFor!=='function')return false;
             return available().some(a => photosFor(a).some(p =>
-                p.ownerAlbum===q.ownerAlbum &&
+                (p.ownerAlbum===q.ownerAlbum || a.id===q.ownerAlbum) &&
                 (p.storageNumber ?? p.number)===q.number &&
                 p.sha256===q.sha256));
         }''', arg=photo, timeout=60000)
         target = page.evaluate('''q => {
            for(const album of available()) {
              const photos = photosFor(album);
-             const ix = photos.findIndex(p => p.ownerAlbum === q.ownerAlbum &&
+             const ix = photos.findIndex(p =>
+                  (p.ownerAlbum === q.ownerAlbum || album.id === q.ownerAlbum) &&
                   (p.storageNumber ?? p.number) === q.number && p.sha256 === q.sha256);
              if(ix >= 0) return {album: album.id, index: ix};
            } return null;
