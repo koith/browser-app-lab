@@ -187,6 +187,12 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
         if deployed and album_override in ('v2ph-azur-lane-tashkent', 'djawa-privaty-public-samples'):
             expected_tiles = {'v2ph-azur-lane-tashkent': 69,
                               'djawa-privaty-public-samples': 30}[album_override]
+            # The gallery renders 48 initially and appends the remaining
+            # photos on requestAnimationFrame. Wait for full DOM coverage
+            # before scanning visible native image loads.
+            page.wait_for_function("""n =>
+                document.querySelectorAll('#detailphotos .photo').length===n
+            """, arg=expected_tiles, timeout=20000)
             tiles = page.locator('#detailphotos .photo')
             assert tiles.count() == expected_tiles, ('SCREENSHOT_ALBUM_TILE_COUNT', model,
                                                        album_override, tiles.count())
