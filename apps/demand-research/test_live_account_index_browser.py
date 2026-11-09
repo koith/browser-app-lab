@@ -6,7 +6,7 @@ SHA-verified backend index is actually visible on desktop and mobile WebKit.
 """
 from __future__ import annotations
 import re
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 def safe_browser_error(value):
     # Only finite error classes and known static filenames may reach CI logs.
@@ -68,11 +68,37 @@ def verify(engine,label,width,height):
 
         source=page.locator("#privateAccountIndex select[aria-label='SNS 필터']")
         source.select_option("bluesky")
-        page.wait_for_function(
-            "() => {const rows=[...document.querySelectorAll('#privateAccountRows a')];"
-            "return rows.length>0 && rows.every(x => x.href.startsWith("
-            "'https://bsky.app/profile/'));}",
-            timeout=60000)
+        try:
+            page.wait_for_function(
+                "() => {const rows=[...document.querySelectorAll('#privateAccountRows a')];"
+                "return rows.length>0 && rows.every(x => x.href.startsWith("
+                "'https://bsky.app/profile/'));}",
+                timeout=30000)
+        except PlaywrightTimeoutError:
+            # Aggregate-only live diagnostic: no handles, URLs, post body,
+            # screenshots, user identifiers or private HTTP error details.
+            probe=page.evaluate("""() => {
+                const links=[...document.querySelectorAll('#privateAccountRows a')];
+                const summary=document.querySelector('#privateAccountSummary');
+                const more=document.querySelector('#privateAccountIndex button.account-auto-more');
+                return {
+                    selected:document.querySelector('#privateAccountIndex select')?.value,
+                    rows:links.length,
+                    bskyLinks:links.filter(a=>a.href.startsWith('https://bsky.app/profile/')).length,
+                    emptyMessage:document.querySelector('#privateAccountRows')?.textContent?.includes('일치하는 보관 계정이 없습니다.'),
+                    statusError:summary?.textContent?.startsWith('비공개 계정 DB:'),
+                    statusLoading:summary?.textContent?.includes('연결 확인 중'),
+                    moreHidden:more?.hidden
+                };
+            }""")
+            print("LIVE_ACCOUNT_FILTER_SAFE_DIAGNOSTIC",probe,flush=True)
+            backend=page.request.get(SITE+"/api/accounts?platform=bluesky&offset=0&limit=80",
+                                     timeout=30000)
+            print("LIVE_ACCOUNT_FILTER_BACKEND",
+                  {"status":backend.status,
+                   "returned":len(backend.json().get("items",[])) if backend.status==200 else 0},
+                  flush=True)
+            raise AssertionError("Live provider filter browser UI did not recover")
         links=page.locator("#privateAccountRows a")
         assert links.count()>0, "no real filtered Bluesky rows"
         assert all((links.nth(i).get_attribute("href") or "").startswith(
