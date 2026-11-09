@@ -48,10 +48,9 @@ def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False
             timeout=timeout_ms,
         )
         result["first_album_card_s"] = round(time.monotonic() - start, 2)
-        # Diagnostic only until the new HTML is deployed: a newly constructed
-        # <img> can cancel the prepaint image's in-flight download.
-        result["first_paint_image_nodes_reused"] = page.locator(
-            '#albumgrid img[data-fast-preserved="1"]').count()
+        # Do not count DOM handoff before the gallery has finished hydrating.
+        # The prepaint <a> cards can coexist with a defined owner catalog;
+        # measuring here would falsely report zero retained <img> elements.
         # A rendered card or image URL is NOT evidence that a thumbnail decoded.
         # Only count a decoded, viewport-visible image with real image dimensions.
         try:
@@ -101,6 +100,47 @@ def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False
             duplicate_sha_within_owner_work:repeatedInOwner};
         }""".replace("MODEL", model))
         result["coverage_verified_s"] = round(time.monotonic() - start, 2)
+        # Only after the final gallery buttons exist can we count actual
+        # in-flight prepaint <img> nodes that survived the exact-SHA handoff.
+        result["first_paint_image_nodes_reused"] = page.locator(
+            '#albumgrid button.album img[data-fast-preserved="1"]').count()
+        # Diagnose the actual prepaint-to-gallery transition before claiming
+        # a speed improvement. Only public Pages URLs and SHA labels are used.
+        import re
+        candidate_source = Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
+        fast_covers = [
+            {"id": m.group(2), "sha": m.group(1), "src": m.group(3)}
+            for m in re.finditer(
+                r'<a class="album" data-fast-cover="1" data-fast-sha="([a-f0-9]{64})" '
+                r'data-id="([^"]+)"[^>]*><img src="([^"]+)"',
+                candidate_source,
+            )
+        ]
+        result["fast_cover_handoff"] = page.evaluate("""covers => {
+          const cards=[...document.querySelectorAll('#albumgrid button.album')];
+          const seen={prepaint:covers.length, missing_album:0, sha_mismatch:0,
+            src_mismatch:0, eligible_identical:0, retained:0, examples:[]};
+          for(const c of covers){
+            const card=cards.find(b=>b.dataset.id===c.id);
+            if(!card){seen.missing_album++;if(seen.examples.length<5)seen.examples.push([c.id,'missing']);continue}
+            const img=card.querySelector('img');
+            const sha=card.dataset.coverSha===c.sha, src=img?.getAttribute('src')===c.src;
+            if(!sha)seen.sha_mismatch++;
+            if(!src)seen.src_mismatch++;
+            if(sha&&src){seen.eligible_identical++;if(img?.dataset.fastPreserved==='1')seen.retained++}
+            else if(seen.examples.length<5)seen.examples.push([c.id,sha?'URL':'SHA']);
+          }
+          return seen;
+        }""", fast_covers)
+        # Once the two SHA-verified paths are identical, the initial network
+        # image must survive the gallery's startup hydration, without a
+        # redundant DOM replacement / duplicate image fetch.
+        handoff = result["fast_cover_handoff"]
+        if handoff["eligible_identical"] > 0:
+            assert handoff["retained"] == handoff["eligible_identical"], (
+                model, "verified first-paint cover was needlessly replaced",
+                handoff,
+            )
         if verify_progressive:
             # Verify the deployed full-photo view actually paginates thousands
             # of saved photos instead of inserting every <img> on mobile load.
