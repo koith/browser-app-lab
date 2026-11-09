@@ -1,4 +1,4 @@
-name: 4LEAF published native 97 CHR original PNG source integrity
+name: 4LEAF published all native 97 CHR original frame PNG source integrity
 on:
   pull_request:
     branches: [main]
@@ -20,7 +20,7 @@ permissions:
 jobs:
   public-source-pixels:
     runs-on: ubuntu-24.04
-    timeout-minutes: 18
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,12 +48,12 @@ jobs:
               exit 1
             fi
           done
-      - name: 'Verify 97 bodies first/mid/last frames are identical published PNG bytes'
+      - name: 'Verify ALL original source frames of 97 CHR bodies on actual published Pages'
         run: node .github/scripts/check-4leaf-public-97-chr-pixels.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: fourleaf-public-97-source-pixel-sha
+          name: fourleaf-public-all-97-frames-pixel-sha
           path: 4leaf-public-97-source-pixel-audit.json
           if-no-files-found: ignore
           retention-days: 14
