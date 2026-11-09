@@ -308,6 +308,57 @@ def get_verified_media(archive,item,request):
                     headers={**CACHE_HEADERS,"Accept-Ranges":"bytes"})
 
 
+def account_picker_details(entry,archive=None):
+    """Return only source-verified nickname/handle for the private chooser.
+
+    Profile snapshot names live inside the already SHA-verified account ZIP.
+    This neither calls a live SNS API nor infers links between identities.
+    """
+    if not isinstance(entry,dict):
+        return {"display_name":"","handle":"","profile_snapshot_verified":False}
+    profile=None
+    if archive is not None:
+        try:
+            snapshot=latest_snapshot(archive,"profile/snapshots",PROFILE_FILE_RE)
+            if (isinstance(snapshot,dict)
+                    and snapshot.get("identity")==entry.get("identity")
+                    and snapshot.get("platform")==entry.get("platform")):
+                profile=snapshot
+        except (RuntimeError,ValueError,KeyError,TypeError):
+            pass
+    def short(value,limit):
+        return " ".join(str(value).split())[:limit] if isinstance(value,str) else ""
+    trusted=profile if profile is not None else entry
+    name=short(trusted.get("display_name"),100)
+    handle=short(trusted.get("handle"),200).lstrip("@")
+    if not handle:
+        url=sanitize_safe_link(entry.get("profile_url"))
+        part=urlsplit(url)
+        path=part.path.rstrip("/").split("/")
+        if part.hostname=="bsky.app" and len(path)>=3 and path[-2]=="profile":
+            candidate=path[-1]
+            if not candidate.startswith("did:") and len(candidate)<=200:
+                handle=candidate
+        elif part.hostname and path[-1].startswith("@"):
+            handle=path[-1].lstrip("@")+"@"+part.hostname
+    return {"display_name":name,"handle":handle,
+            "profile_snapshot_verified":profile is not None}
+
+
+def bundled_account_picker_row(bundle,account,*,temporary):
+    """Build label metadata from the exact verified ZIP already in memory."""
+    entry=bundle.accounts[account]
+    identity=account_picker_details(entry,BundleAccountCloud(bundle))
+    return {"key":account,"platform":entry["platform"],
+            "profile_url":sanitize_safe_link(entry.get("profile_url")),
+            "backup_kind":"github_temp_sha_verified" if temporary
+                          else "terabox_zip_sha_verified",
+            "posts_verified_in_bundle":bundle.post_count,
+            "objects_verified_in_bundle":bundle.object_count,
+            "source_state":bundle.source_state,
+            "temporary":bool(temporary),**identity}
+
+
 def create_router(auth):
     # CloudArchive uses blocking rclone subprocesses. FastAPI dispatches these
     # sync GET handlers to its worker pool, keeping health, receipts and queue
@@ -339,14 +390,8 @@ def create_router(auth):
             github_failed=False
             terabox_failed=False
             try:
-                data=[{"key":bundle.account,"platform":bundle.selected_platform,
-                       "profile_url":sanitize_safe_link(
-                           bundle.accounts[bundle.account].get("profile_url")),
-                       "backup_kind":"github_temp_sha_verified",
-                       "posts_verified_in_bundle":bundle.post_count,
-                       "objects_verified_in_bundle":bundle.object_count,
-                       "source_state":bundle.source_state,
-                       "temporary":True}
+                data=[bundled_account_picker_row(bundle,bundle.account,
+                                                temporary=True)
                       for bundle in github_temp_bundle.latest_bundles()]
             except (RuntimeError,ValueError,TypeError,BundleInvalid):
                 github_failed=True
@@ -361,14 +406,8 @@ def create_router(auth):
                         if (present is not None and bundle.post_count<=
                                 present["posts_verified_in_bundle"]):
                             continue
-                        row={"key":account,"platform":entry["platform"],
-                             "profile_url":sanitize_safe_link(
-                                 entry.get("profile_url")),
-                             "backup_kind":"terabox_zip_sha_verified",
-                             "posts_verified_in_bundle":bundle.post_count,
-                             "objects_verified_in_bundle":bundle.object_count,
-                             "source_state":bundle.source_state,
-                             "temporary":False}
+                        row=bundled_account_picker_row(bundle,account,
+                                                      temporary=False)
                         if present is None:
                             data.append(row)
                         else:
@@ -399,7 +438,8 @@ def create_router(auth):
                     if (entry.get("platform")+"-"+archive_key(entry)+".json")!=name:
                         continue
                     data.append({"key":name[:-5],"platform":entry["platform"],
-                                 "profile_url":sanitize_safe_link(entry.get("profile_url"))})
+                                 "profile_url":sanitize_safe_link(entry.get("profile_url")),
+                                 **account_picker_details(entry)})
                 except (RuntimeError,ValueError,KeyError,TypeError):
                     continue
             seen={item["key"] for item in data}
@@ -413,13 +453,12 @@ def create_router(auth):
                                 row["backup_kind"]="terabox_zip_sha_verified"
                                 row["posts_verified_in_bundle"]=bundle.post_count
                                 row["objects_verified_in_bundle"]=bundle.object_count
+                                row.update(account_picker_details(
+                                    bundle.accounts[account],BundleAccountCloud(bundle)))
                         continue
                     seen.add(account)
-                    data.append({"key":account,"platform":entry["platform"],
-                                 "profile_url":sanitize_safe_link(entry.get("profile_url")),
-                                 "backup_kind":"terabox_zip_sha_verified",
-                                 "posts_verified_in_bundle":bundle.post_count,
-                                 "objects_verified_in_bundle":bundle.object_count})
+                    data.append(bundled_account_picker_row(
+                        bundle,account,temporary=False))
             return JSONResponse({"accounts":data},headers=CACHE_HEADERS)
         except (RuntimeError,TypeError,ValueError,KeyError):
             raise HTTPException(502,"Private account index unavailable") from None
