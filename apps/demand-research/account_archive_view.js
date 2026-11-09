@@ -16,7 +16,7 @@ const params=new URLSearchParams(location.search);
 const embedded=params.get("embedded")==="1";
 if(embedded)document.body.classList.add("archive-embedded");
 function accountLabel(item){
-  const name=typeof item?.display_name==="string"?item.display_name.trim().replace(/\\s+/g," ").slice(0,100):"";
+  const name=typeof item?.display_name==="string"?item.display_name.trim().replace(/\s+/g," ").slice(0,100):"";
   const handle=typeof item?.handle==="string"?item.handle.trim().replace(/^@+/,"").slice(0,200):"";
   if(name&&handle)return name+"(@"+handle+")";
   if(name)return name+"(아이디 미보관)";
