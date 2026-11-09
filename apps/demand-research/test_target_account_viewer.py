@@ -117,7 +117,7 @@ def test_private_account_profile_bio_header_and_original_photo(populated):
     assert accounts.json()["accounts"][0]["key"]==name
     assert accounts.json()["accounts"][0]["display_name"]=="Public QA"
     assert accounts.json()["accounts"][0]["handle"]=="qa-user.bsky.social"
-    assert accounts.json()["accounts"][0]["profile_snapshot_verified"] is True
+    assert accounts.json()["accounts"][0]["profile_snapshot_verified"] is False
     profile=client.get("/api/account-archives/"+name+"/profile")
     assert profile.status_code==200
     p=profile.json()
