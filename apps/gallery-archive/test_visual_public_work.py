@@ -10,12 +10,40 @@ from visual_public_work import collect_work,visual_error,owner_reference
 
 class VisualWorkTests(unittest.TestCase):
     def test_count_alone_never_claims_complete_edition(self):
-        book={'id':'saved-work','source':'https://www.shypetal.com/albums/saved-work/',
-              'public_web_edition_photos':3}
-        previous=[{'sha256':str(i)*64} for i in (1,2,3)]
-        work,info=collect_work(book,previous,None,Path('/unused'),5,set(),'mimmi')
-        self.assertIsNone(work);self.assertTrue(info['deferred_for_source_coverage_review'])
-        self.assertNotIn('already_saved_web_edition',info)
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            # Five saved cuts and a five-photo public edition still have two
+            # DIFFERENT verified source cuts. No source-count shortcut is valid.
+            old={n:photo(seed) for n,seed in enumerate((0,40,80,100,250),1)}
+            public={n:old[n] for n in (1,2,3)}
+            public.update({4:photo(140),5:photo(210)})
+            prior=[{'number':n,'sha256':hashlib.sha256(raw).hexdigest(),
+                    'width':400,'height':600} for n,raw in old.items()]
+            page='https://www.shypetal.com/albums/mimmi-source-overlap/'
+            urls=[f'https://image.shypetal.com/images/mimmi/ShyPetal.com@-{n:03d}.webp'
+                  for n in range(1,6)]
+            class Client:
+                def get(self,url):
+                    if url==page:
+                        body=('<h1>Mimmi source overlap</h1><div data-images=\''+
+                              json.dumps(urls)+'\'></div>').encode()
+                    elif url in urls:
+                        body=public[urls.index(url)+1]
+                    else:raise AssertionError('Unregistered download')
+                    return type('Response',(),{'content':body})()
+            book={'id':'mimmi-source-overlap','title':'Mimmi source overlap',
+                  'source':page,'public_web_edition_photos':5}
+            work,info=collect_work(book,prior,Client(),Path(tmp),1,
+                {p['sha256'] for p in prior},'mimmi',
+                lambda url:old[int(url.split('/')[-2])])
+            self.assertTrue(info['stored_count_alone_is_not_completeness_proof'])
+            self.assertEqual(info['saved_reference_anchors'],3)
+            self.assertEqual(info['verified_missing_cuts_deferred'],1)
+            self.assertEqual(info['source_numbers_deferred_by_budget'],[5])
+            self.assertFalse(info['source_edition_all_files_accounted_for'])
+            self.assertEqual([p['source_photo_number'] for p in work['images']],[4])
+            self.assertFalse(work['complete'])
+            self.assertEqual(list(Path(tmp).rglob('*.zip')),[])
 
     def test_independent_declared_public_files_keep_numbers_without_bundle_download(self):
         import json
