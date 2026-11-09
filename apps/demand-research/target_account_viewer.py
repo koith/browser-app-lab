@@ -342,13 +342,18 @@ def account_picker_details(entry,archive=None):
         elif part.hostname and path[-1].startswith("@"):
             handle=path[-1].lstrip("@")+"@"+part.hostname
     return {"display_name":name,"handle":handle,
-            "profile_snapshot_verified":profile is not None}
+            "profile_snapshot_verified":profile is not None
+                   and isinstance(archive,BundleAccountCloud)}
 
 
 def bundled_account_picker_row(bundle,account,*,temporary):
     """Build label metadata from the exact verified ZIP already in memory."""
     entry=bundle.accounts[account]
-    identity=account_picker_details(entry,BundleAccountCloud(bundle))
+    # Historic partial receipts may expose only the signed account metadata.
+    # Real verified ZIPs always provide prefix/items; never invent a nickname.
+    archive=(BundleAccountCloud(bundle)
+             if hasattr(bundle,"prefix") and hasattr(bundle,"items") else None)
+    identity=account_picker_details(entry,archive)
     return {"key":account,"platform":entry["platform"],
             "profile_url":sanitize_safe_link(entry.get("profile_url")),
             "backup_kind":"github_temp_sha_verified" if temporary
