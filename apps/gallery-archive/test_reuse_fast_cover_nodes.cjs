@@ -30,7 +30,7 @@ for(const model of ['mimmi','yui']){
   const replacement=element({src:url,alt:'saved cover',loading:'lazy','data-owner':'owner:safe:1'});
   let swapped=null;
   replacement.replaceWith=img=>{swapped=img};
-  const card={dataset:{id:'safe'},querySelector:()=>replacement};
+  const card={dataset:{id:'safe',coverSha:newSha},querySelector:()=>replacement};
   const grid={querySelectorAll:()=>[card]};
   const context={stored:[{id:'safe',images:[{sha256:newSha}]}],
                  validImages:a=>a.images,albumCovers:{}};
@@ -44,8 +44,9 @@ for(const model of ['mimmi','yui']){
  assert.equal(valid.original.dataset.fastPreserved,'1');
  assert.equal(valid.original.getAttribute('src'),'stored-albums/safe/image.jpg');
  assert.equal(valid.original.getAttribute('data-owner'),'owner:safe:1','owner original route must survive');
- assert.equal(check({sha:'b'.repeat(64)}).swapped,null,'different SHA must not preserve');
+ assert.equal(check({sha:'b'.repeat(64)}).swapped,null,'different selected SHA must not preserve');
  assert.equal(check({url:'stored-albums/safe/another.jpg'}).swapped,null,'different URL must not preserve');
+ assert.ok(html.includes('data-cover-sha="'),model+' must disclose actual selected cover SHA on the rendered card');
  assert.ok(html.includes("data-owner-variant=\"local\""),model+' must keep local saved owner cover path');
  assert.ok(html.includes("adoptFastCoverImages(grid,fastCovers)"),model+' must use handoff in real render');
  console.log('GALLERY_FAST_COVER_DOM_NODE_IDENTITY_AND_SHA_HANDOFF_PASS',model);
