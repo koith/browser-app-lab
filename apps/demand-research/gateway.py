@@ -414,11 +414,11 @@ async def start_account_index():
                 if result["state"]=="restored":
                     _index_snapshot_info.update(sha256=result["sha256"],
                         catalog="encrypted_cold_boot",verified=True)
-                print("ACCOUNT_INDEX_ENCRYPTED_BOOT_SHA_VERIFIED",
-                      json.dumps({"accounts":result["accounts"],
-                                  "source_rows":result["source_rows"],
-                                  "cache_age_days":result["age_days"]}),
-                      flush=True)
+                    print("ACCOUNT_INDEX_ENCRYPTED_BOOT_SHA_VERIFIED",
+                          json.dumps({"accounts":result["accounts"],
+                                      "source_rows":result["source_rows"],
+                                      "cache_age_days":result["age_days"]}),
+                          flush=True)
         except Exception as error:
             # Never log private download addresses, encrypted bytes, tokens.
             print("ACCOUNT_INDEX_ENCRYPTED_BOOT_UNAVAILABLE",
