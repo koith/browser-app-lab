@@ -56,8 +56,8 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   assert.ok(original.emptyAction,'zero stored matches require visible real CREATE action');
   if(phone){
    assert.equal(original.source.zoomed,true,'phone waiting room must open ENLARGED');
-   assert.ok(original.source.scale>=original.source.fitScale*1.44);
-   assert.ok(original.source.actualStageWidth>original.source.availableWidth*1.35,
+   assert.ok(original.source.scale>=original.source.fitScale*1.80);
+   assert.ok(original.source.actualStageWidth>original.source.availableWidth*1.78,
     'native 794 source pixels must not shrink down to hard-to-read tiny text');
    assert.equal(await page.locator('#dice-room-zoom-toggle').getAttribute('aria-pressed'),'true');
   }else{
