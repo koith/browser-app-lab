@@ -649,3 +649,26 @@ def test_signed_index_receipt_rejects_unverified_or_corrupt_state(tmp_path):
     invalid=tmp_path/"corrupt.db"
     invalid.write_bytes(b"not-sqlite")
     assert gateway.verified_signed_import_receipt(str(invalid)) is False
+
+
+def test_exact_main_index_delivery_can_obtain_derived_boot_cipher_key(monkeypatch):
+    import base64
+    import github_temp_bundle
+    seen=[]
+    def verified_oidc(token,workflow=None):
+        seen.append(workflow)
+        if token!="synthetic-main-index" or workflow!=gateway.INDEX_IMPORT_WORKFLOW:
+            raise ValueError("not this exact workflow")
+        return {"repository":"koith/browser-app-lab","ref":"refs/heads/main"}
+    monkeypatch.setattr(gateway,"verify_bridge_token",verified_oidc)
+    monkeypatch.setattr(github_temp_bundle,"gateway_key",lambda:b"k"*32)
+    client=TestClient(gateway.app)
+    denied=client.get("/api/bridge/archive-key",
+                      headers={"Authorization":"Bearer untrusted-index"})
+    assert denied.status_code==403
+    assert "key" not in denied.text
+    accepted=client.get("/api/bridge/archive-key",
+                        headers={"Authorization":"Bearer synthetic-main-index"})
+    assert accepted.status_code==200
+    assert base64.b64decode(accepted.json()["key"],validate=True)==b"k"*32
+    assert gateway.INDEX_IMPORT_WORKFLOW in seen
