@@ -202,10 +202,13 @@ async def issue_temporary_archive_key(request:Request):
         try:
             verify_bridge_token(header[7:], workflow=ARCHIVE_WORKFLOW)
         except ValueError:
-            # This new main-only workflow reads a previously SHA-verified ZIP
-            # and needs the derived AES key for the same existing GH reader.
-            # It CANNOT call /api/bridge/credential or write provider cookie.
-            verify_bridge_token(header[7:], workflow=MIRROR_WORKFLOW)
+            try:
+                verify_bridge_token(header[7:], workflow=MIRROR_WORKFLOW)
+            except ValueError:
+                # Only this reviewed main-branch index-delivery job can
+                # obtain the derived encryption key for sealed boot recovery.
+                # No provider-cookie, backup-write, or broader permission.
+                verify_bridge_token(header[7:], workflow=INDEX_IMPORT_WORKFLOW)
     except (ValueError,TypeError,KeyError):
         raise HTTPException(403,"GitHub account runner rejected") from None
     except Exception:
@@ -419,6 +422,31 @@ async def start_account_index():
     if not INDEX_DB or not configured():
         return
     async def periodic():
+        # A free Render instance can lose its ephemeral SQLite when it sleeps.
+        # Restore only previously AES-GCM sealed, immutable GitHub ciphertext,
+        # using the existing viewer-token-derived key; never expose identities.
+        try:
+            import github_temp_bundle
+            import account_index_bootstrap
+            # Account status returns refreshing=True during cold boot,
+            # so the existing UI reloads automatically instead of freezing
+            # an initial empty account count at zero.
+            async with _index_lock:
+                result=await asyncio.to_thread(
+                    account_index_bootstrap.restore_local,INDEX_DB,
+                    github_temp_bundle.gateway_key())
+                if result["state"]=="restored":
+                    _index_snapshot_info.update(sha256=result["sha256"],
+                        catalog="encrypted_cold_boot",verified=True)
+                    print("ACCOUNT_INDEX_ENCRYPTED_BOOT_SHA_VERIFIED",
+                          json.dumps({"accounts":result["accounts"],
+                                      "source_rows":result["source_rows"],
+                                      "cache_age_days":result["age_days"]}),
+                          flush=True)
+        except Exception as error:
+            # Never log private download addresses, encrypted bytes, tokens.
+            print("ACCOUNT_INDEX_ENCRYPTED_BOOT_UNAVAILABLE",
+                  type(error).__name__,flush=True)
         while True:
             try:
                 await refresh_account_index()
