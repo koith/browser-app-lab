@@ -13,6 +13,8 @@ on:
     paths:
       - '.github/workflows/gallery-deployed-pages-photo-qa.yml'
       - 'apps/gallery-archive/qa_deployed_pages_gallery.py'
+      - 'apps/gallery-archive/pages_single_publisher.py'
+      - 'apps/gallery-archive/test_pages_deployment_identity.py'
       # A native Pages publish does not reliably deliver workflow_run.
       # Verify every changed gallery index/UI after its exact source is public.
       - 'apps/mimmi-gallery/**'
@@ -21,6 +23,8 @@ on:
     paths:
       - '.github/workflows/gallery-deployed-pages-photo-qa.yml'
       - 'apps/gallery-archive/qa_deployed_pages_gallery.py'
+      - 'apps/gallery-archive/pages_single_publisher.py'
+      - 'apps/gallery-archive/test_pages_deployment_identity.py'
 permissions:
   contents: read
   pages: read
@@ -34,7 +38,20 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
-      - run: python -m py_compile apps/gallery-archive/qa_deployed_pages_gallery.py
+      - run: |
+          python -m py_compile apps/gallery-archive/qa_deployed_pages_gallery.py apps/gallery-archive/pages_single_publisher.py
+          python apps/gallery-archive/test_pages_deployment_identity.py
+      - name: Verify actual cancelled gallery SHA is included unchanged in later native Pages source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PYTHONPATH=apps/gallery-archive python - <<'PY'
+          from pages_single_publisher import pages_gallery_equivalent
+          source='009952e206b838f49ea7dd28352dd186788aa608'
+          published='def5dcfe273dca350cf72ac58a008fd9f79fb1b5'
+          assert pages_gallery_equivalent(source,published), 'real gallery source parity failed'
+          print('ACTUAL_SUPERSEDED_NATIVE_GALLERY_SUBTREES_IDENTICAL_PASS')
+          PY
   gallery-deployed-visual:
     # PR script changes must pass against real, currently published galleries
     # before merge. The post-Pages workflow_run repeats the same live proof.
@@ -63,7 +80,7 @@ jobs:
         if: github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python apps/gallery-archive/pages_single_publisher.py --wait-native
+        run: python apps/gallery-archive/pages_single_publisher.py --wait-native-gallery-equivalent
       - name: Prove checkout matches the Pages deployment event
         if: github.event_name == 'workflow_run'
         run: |

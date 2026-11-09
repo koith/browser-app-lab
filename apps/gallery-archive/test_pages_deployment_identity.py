@@ -1,7 +1,8 @@
 import json
 import unittest
+from unittest.mock import patch
 from pages_deployment_identity import identity,validate
-from pages_single_publisher import publisher
+from pages_single_publisher import publisher,pages_gallery_equivalent
 
 class DeploymentIdentityTests(unittest.TestCase):
  def test_exact_deployment_source_is_accepted(self):
@@ -26,5 +27,32 @@ class DeploymentIdentityTests(unittest.TestCase):
   for config in [{'build_type':'unknown'},{'build_type':'legacy','source':{'branch':'other','path':'/'}},
                  {'build_type':'legacy','source':{'branch':'main','path':'/docs'}}]:
    with self.subTest(config=config),self.assertRaises(ValueError):publisher(config)
+
+class GallerySupersededPagesTests(unittest.TestCase):
+ def test_identical_source_is_valid_without_api(self):
+  self.assertTrue(pages_gallery_equivalent('a'*40,'a'*40))
+ def test_valid_descendant_identical_gallery_trees(self):
+  with patch('pages_single_publisher._github_api',return_value={'status':'ahead','behind_by':0}) as api,patch(
+       'pages_single_publisher._gallery_subtree_shas',
+       side_effect=[{'mimmi-gallery':'filetree1','yui-gallery':'filetree2'},
+                    {'mimmi-gallery':'filetree1','yui-gallery':'filetree2'}]) as trees:
+   self.assertTrue(pages_gallery_equivalent('a'*40,'b'*40))
+   api.assert_called_once_with('/compare/'+'a'*40+'...'+'b'*40+'?per_page=1')
+   self.assertEqual(trees.call_count,2)
+ def test_changed_gallery_must_never_pass(self):
+  with patch('pages_single_publisher._github_api',return_value={'status':'ahead','behind_by':0}),patch(
+       'pages_single_publisher._gallery_subtree_shas',
+       side_effect=[{'mimmi-gallery':'A','yui-gallery':'B'},
+                    {'mimmi-gallery':'A','yui-gallery':'CHANGED'}]):
+   self.assertFalse(pages_gallery_equivalent('a'*40,'b'*40))
+ def test_non_descendant_or_diverged_or_untrusted_ref_fails_closed(self):
+  for result in [{'status':'behind','behind_by':1},{'status':'diverged','behind_by':1},
+                 {'status':'ahead','behind_by':1}]:
+   with self.subTest(result=result),patch('pages_single_publisher._github_api',return_value=result),patch(
+        'pages_single_publisher._gallery_subtree_shas') as trees:
+    self.assertFalse(pages_gallery_equivalent('a'*40,'b'*40))
+    trees.assert_not_called()
+  self.assertFalse(pages_gallery_equivalent('main','b'*40))
+  self.assertFalse(pages_gallery_equivalent('a'*40,'https://not-a-commit'))
 
 if __name__=='__main__':unittest.main(verbosity=2)
