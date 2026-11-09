@@ -76,8 +76,11 @@ const {chromium}=require('playwright');
   });
   assert.equal(unavailable.rig,'original-card-portrait-fallback');
   assert.ok(unavailable.cardVisible);
-  assert.ok(unavailable.portrait.startsWith('./original/CardData/')||
-   unavailable.portrait==='./original/IMG/avatarback.png');
+  const trueSource=await page.evaluate(()=>window.__LEAF_CHR_BODY_MAP__.resolve('0059')
+   ?.frames?.find(f=>f.index===0)?.url||'./original/IMG/avatarback.png');
+  assert.ok(unavailable.portrait===trueSource||
+   unavailable.portrait==='./original/IMG/avatarback.png',
+   'failed front frame may only show OWN CHR source or original IMG cardback');
   assert.ok(failures0042>=1,'real CHR-linked source must be attempted');
   await page.unroute('**/original/OBS/action-full-ext/1042-22.png*');
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.recoverAvailableOriginals());
