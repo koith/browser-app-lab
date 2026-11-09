@@ -32,11 +32,24 @@ def is_target_owner_media(url, model, album):
     )
 
 
+def serve_candidate_owner_transport(page,model,root):
+    # PR's gallery HTML calls the new .renew() API. The live Pages
+    # owner-media.js and pages-client.mjs are intentionally still old, so
+    # overlay BOTH candidate scripts; real catalog and Worker bytes stay live.
+    owner=Path(f"apps/{model}-gallery/owner-media.js")
+    module=Path("apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs")
+    page.route(root+"owner-media.js",lambda route:route.fulfill(
+        status=200,content_type="application/javascript",body=owner.read_bytes()))
+    page.route(BASE+"/gallery-archive/cloudflare-owner-gateway/pages-client.mjs",
+        lambda route:route.fulfill(status=200,content_type="application/javascript",
+            body=module.read_bytes()))
+
 def exercise(browser,model,album,index):
     ctx=browser.new_context(viewport={"width":390,"height":844},
             is_mobile=True,has_touch=True,service_workers="block",locale="ko-KR")
     page=ctx.new_page()
     root=f"{BASE}/{model}-gallery/"
+    serve_candidate_owner_transport(page,model,root)
     html=Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
     png=io.BytesIO()
     Image.new("RGB",(320,480),(30,60,120)).save(png,format="PNG")
@@ -138,6 +151,7 @@ def exercise_real_owner_cover_after_failure(browser,model,failure_mode):
         is_mobile=True,has_touch=True,service_workers="block",locale="ko-KR")
     page=ctx.new_page()
     root=f"{BASE}/{model}-gallery/"
+    serve_candidate_owner_transport(page,model,root)
     html=Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
     state={"initial_503":0,"legacy_render_requests":0,"warm":False}
     def inject(route):
@@ -235,6 +249,7 @@ def exercise_real_pages_static_cover_after_two_503(browser,model):
         is_mobile=True,has_touch=True,service_workers="block",locale="ko-KR")
     page=ctx.new_page()
     root=f"{BASE}/{model}-gallery/"
+    serve_candidate_owner_transport(page,model,root)
     html=Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
     matched=re.search(r'data-fast-sha="([a-f0-9]{64})".*?<img src="(stored-albums/[^"]+)"',
                       html,re.S)
