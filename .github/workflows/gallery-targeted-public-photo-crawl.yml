@@ -196,3 +196,51 @@ jobs:
             ${{ runner.temp }}/stage/metadata/remote-verification.json
           retention-days: 14
           if-no-files-found: ignore
+  replicate-verified-new-photos:
+    # Run once for BOTH models, only after all original+preview copies were
+    # independently read back and both private catalog publications succeeded.
+    # Never launch the free Cloudflare replica from PR/unverified staging.
+    needs: acquire
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: targeted-source-crawl-audit-*
+          path: ${{ runner.temp }}/source-audits
+      - name: Determine real SHA-verified additions, not downloaded candidates
+        id: confirmed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          base=Path(os.environ['RUNNER_TEMP'])/'source-audits'
+          files=sorted(base.glob('*/incremental-merge.json'))
+          assert len(files)==2,('Missing model audit',list(map(str,files)))
+          total=0
+          for path in files:
+              row=json.loads(path.read_text(encoding='utf-8'))
+              fresh=int(row['new_photos'])+int(row['upgraded_photos'])
+              print('PRIVATE_OWNER_CATALOG_PHOTO_DELTA',path.parent.name,fresh)
+              assert fresh>=0
+              total+=fresh
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+              out.write('changed='+str(total>0).lower()+'\n')
+          print('REMOTE_READBACK_VERIFIED_NEW_OR_UPGRADED_SLOTS',total,flush=True)
+          PY
+      - name: Replicate exact owner originals to existing free Cloudflare Assets
+        if: steps.confirmed.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Existing cloud workflow separately checks account Free quotas and
+          # exact remote SHA/bytes/dimensions before any rollout. Only it may
+          # update the private Worker assets. It publishes no source archive.
+          gh workflow run gallery-cloudflare-free-assets.yml --ref main -f max_new_per_model=0
+          echo "Existing Free Cloudflare replica requested for verified owner additions; not yet a deployed photo PASS." >> "$GITHUB_STEP_SUMMARY"
