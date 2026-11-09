@@ -301,7 +301,10 @@ async function retryOwnerImagesIfReady(){
    if(!img.isConnected)return;
    img.hidden=false;
    img.removeAttribute('src');
-   img.src=url+(url.includes('?')?'&':'?')+'owner-retry='+s.attempts;
+   // Cloudflare media links are strictly signed: appending owner-retry
+   // invalidates their four-field signature. Removing and resetting src
+   // forces the native image retry without tampering with a verified URL.
+   img.src=url;
   }).catch(()=>queueOwnerImageRecovery(img));
  }
  // One bounded cooldown for visible failures; offscreen work waits for scroll.
