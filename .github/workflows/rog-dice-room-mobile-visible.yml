@@ -1,0 +1,65 @@
+name: 4LEAF Genesis native waiting-room mobile visibility and game entry
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/dice-native-stage.js'
+      - 'apps/4leaf/rog/dice-native-stage.css'
+      - 'apps/4leaf/rog/lobby-ui.js'
+      - 'apps/4leaf/rog/tests/dice-lobby-mobile-visible.cjs'
+      - '.github/workflows/rog-dice-room-mobile-visible.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/dice-native-stage.js'
+      - 'apps/4leaf/rog/dice-native-stage.css'
+      - 'apps/4leaf/rog/lobby-ui.js'
+      - 'apps/4leaf/rog/tests/dice-lobby-mobile-visible.cjs'
+      - '.github/workflows/rog-dice-room-mobile-visible.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-waiting-room:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - browser: chromium
+            mobile: '0'
+          - browser: chromium
+            mobile: '1'
+          - browser: webkit
+            mobile: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Serve exact app branch
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-dice-lobby.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-dice-lobby.log
+          exit 1
+      - name: Actual original Map ROOM SELECT and Room READY smartphone journey
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/dice-lobby-mobile-visible.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: leaf-dice-room-visible-${{ matrix.browser }}-${{ matrix.mobile }}
+          path: leaf-room-*.png
+          retention-days: 14
