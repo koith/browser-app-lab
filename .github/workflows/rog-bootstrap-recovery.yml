@@ -1,0 +1,42 @@
+name: 4LEAF cold bootstrap network failure recovery and honest capability labels
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/bootstrap-load-recovery.cjs'
+      - '.github/workflows/rog-bootstrap-recovery.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/bootstrap-load-recovery.cjs'
+      - '.github/workflows/rog-bootstrap-recovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recovery-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Serve exact commit as local 4LEAF origin
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/4leaf-boot-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/4leaf-boot-http.log
+          exit 1
+      - name: Inject one missing script then permanent failure and verify real mobile route
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/bootstrap-load-recovery.cjs
