@@ -1,0 +1,62 @@
+name: INTERSECTION — Archive Nickname Picker UI and API QA
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/intersection-archive-picker-qa.yml"
+      - "apps/demand-research/target_account_viewer.py"
+      - "apps/demand-research/account_archive_view.js"
+      - "apps/demand-research/account_archive_view.css"
+      - "apps/demand-research/account_archive_view.html"
+      - "apps/demand-research/archive_tab.js"
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/test_target_account_viewer.py"
+      - "apps/demand-research/test_archive_tab_browser.py"
+      - "apps/demand-research/test_account_archive_picker_browser.py"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/intersection-archive-picker-qa.yml"
+      - "apps/demand-research/target_account_viewer.py"
+      - "apps/demand-research/account_archive_view.js"
+      - "apps/demand-research/account_archive_view.css"
+      - "apps/demand-research/account_archive_view.html"
+      - "apps/demand-research/archive_tab.js"
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/test_archive_tab_browser.py"
+      - "apps/demand-research/test_account_archive_picker_browser.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intersection-archive-picker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  archive-picker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned private viewer test and browser dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet fastapi==0.115.12 httpx==0.28.1 pytest==8.4.2 PyJWT==2.10.1 cryptography==46.0.4 playwright==1.56.0
+          python -m playwright install --with-deps chromium webkit
+      - name: Verify private account metadata and source identity binding
+        run: |
+          set -euo pipefail
+          cd apps/demand-research
+          python -m pytest -q test_target_account_viewer.py
+      - name: Real synthetic Chromium and mobile WebKit UX
+        run: |
+          set -euo pipefail
+          node --check apps/demand-research/archive_tab.js
+          node --check apps/demand-research/account_archive_view.js
+          python apps/demand-research/test_archive_tab_browser.py
+          python apps/demand-research/test_account_archive_picker_browser.py
