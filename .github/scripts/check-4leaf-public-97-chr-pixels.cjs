@@ -1,7 +1,7 @@
 'use strict';
 /* Original image byte integrity, public Pages:
  * Every source-assigned CHR body must retain its own source sprite pixels.
- * This audits three distant native frames per body against ORIGINAL manifest
+ * This audits EVERY native source frame for all 97 restored bodies against ORIGINAL manifest
  * SHA256 locally AND on the actual published GitHub Pages, without rendering
  * a fake frame or copying a different card's body. It does not infer the
  * historical EXE's action roles, timing or 3D camera. */
@@ -42,8 +42,9 @@ for(const card of cards){
   ' expected '+original.originalMember);
  const frames=body.frames;
  assert.ok(Array.isArray(frames)&&frames.length>=3,'Missing source frame sequence: '+card);
- const targets=[frames[0],frames[Math.floor(frames.length/2)],frames.at(-1)];
- for(const frame of targets){
+ // Exhaustive source integrity: sample-only checking missed possible corrupt
+ // intermediate motion frames. Check all actual native frame entries.
+ for(const frame of frames){
   assert.match(frame.sha256,/^[a-f0-9]{64}$/);
   assert.ok(frame.url.startsWith('./original/OBS/')&&frame.url.endsWith('.png'));
   const relative=frame.url.slice(2);
@@ -58,18 +59,19 @@ for(const card of cards){
   recoveredOriginal20261103:body.recoveredOriginal20261103===true});
 }
 assert.equal(records.filter(x=>!x.missing).length,97);
+assert.ok(samples.length>=1000,'Full native audit unexpectedly small: '+samples.length);
 const report={source:'ARCHIVED_NATIVE_OBS_AND_2002_CHR_CARD_MAPPING',
- evidence:'ORIGINAL_PNG_BYTES_SHA256_PUBLIC_MATCH',
+ evidence:'ALL_DECLARED_NATIVE_FRAME_PNG_BYTES_SHA256_PUBLIC_MATCH',
  version:JSON.parse(fs.readFileSync(path.join(root,'app-version.json'),'utf8')).version,
  testedCards:records.length,recoveredCards:97,missing:['0156=OBS2.pak/1222.obs'],
- frameSamples:samples.length,
+ declaredSourceFrames:samples.length,
  failures:[],data:[],historicalPoseRolesVerified:false,
  realIphoneHardwareVerified:false
 };
 const concurrency=10;
 let pos=0;
 async function verify(item){
- const url=new URL(item.relative,base).href+'?native_sha_audit='+Date.now();
+ const url=new URL(item.relative,base).href+'?all_native_frames='+Date.now();
  let last;
  for(let attempt=0;attempt<3;attempt++){
   try{
@@ -106,14 +108,14 @@ async function verify(item){
  report.data.sort((a,b)=>a.card.localeCompare(b.card)||a.originalFrame.localeCompare(b.originalFrame));
  fs.writeFileSync('4leaf-public-97-source-pixel-audit.json',
   JSON.stringify(report,null,2)+'\n');
- console.log('4LEAF_PUBLISHED_97_ORIGINAL_PNG_SOURCE_SHA_AUDIT',JSON.stringify({
+ console.log('4LEAF_PUBLISHED_ALL_97_ORIGINAL_FRAMES_SOURCE_SHA_AUDIT',JSON.stringify({
   cards:report.checkedCards,frames:report.checkedFrames,failures:report.failures.slice(0,6),
   missing:report.missing,version:report.version}));
  assert.deepEqual(report.failures,[],'Every sampled displayed source must be byte-perfect');
  assert.equal(report.checkedCards,97);
  assert.equal(report.checkedFrames,samples.length);
- console.log('LIVE_PUBLIC_97_ORIGINAL_CHR_PNG_SHA256_PASS');
+ console.log('LIVE_PUBLIC_ALL_ORIGINAL_CHR_FRAMES_SHA256_PASS');
 })().catch(error=>{
- console.error('LIVE_PUBLIC_97_ORIGINAL_CHR_PNG_SHA256_FAIL',error.stack||error);
+ console.error('LIVE_PUBLIC_ALL_ORIGINAL_CHR_FRAMES_SHA256_FAIL',error.stack||error);
  process.exitCode=1;
 });
