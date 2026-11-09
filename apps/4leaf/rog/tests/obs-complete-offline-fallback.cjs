@@ -29,7 +29,7 @@ const path=require('node:path');
    return {id:m.players[0].id,active:m.active,position:m.players[0].position};
   });
   // Existing image retry path may retry 3 times. Once exhausted, preserve
-  // CardData's genuine portrait, not member 1043 from an unrelated CHR card.
+  // Never present an unsourced CardData face or another actor during outage.
   await page.waitForFunction(id=>{
    const p=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
    return p?.dataset.obsUnavailable==='true'&&
@@ -45,8 +45,15 @@ const path=require('node:path');
   },start.id);
   assert.ok(denied>=1,'exercise real failed 1043 asset download');
   assert.equal(after.card,'0060');assert.equal(after.rig,'original-card-portrait-fallback');
-  assert.ok((after.portrait?.startsWith('./original/CardData/')||
-    after.portrait==='./original/IMG/avatarback.png'));
+  await page.waitForFunction(id=>{
+   const p=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+   const fallback=p?.querySelector('img.leaf-chess-original-card-fallback');
+   return fallback?.complete&&fallback.naturalWidth>0&&
+    fallback.getAttribute('src')==='./original/IMG/avatarback.png';
+  },start.id,{timeout:18000});
+  assert.ok(after.portrait?.startsWith('./original/OBS/')||
+   after.portrait==='./original/IMG/avatarback.png',
+   'before IMG fallback completes, only the same card source or IMG cardback is allowed');
   assert.deepEqual({active:after.active,position:after.position},
    {active:start.active,position:start.position});
   await page.unroute(blocked);
