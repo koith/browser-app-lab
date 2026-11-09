@@ -9,6 +9,7 @@ import argparse
 import io
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
@@ -18,6 +19,18 @@ TARGET={
     "mimmi":[("v2ph-actor-a8n8n85a",10),("v2ph-actor-zo5n754z",16)],
 }
 BASE="https://koith.github.io/browser-app-lab/apps"
+
+def is_target_owner_media(url, model, album):
+    # The restored production transport uses /api/v1/media/MODEL/ALBUM/...
+    # while the legacy Render gateway used /api/MODEL/media/ALBUM/...
+    # Match only the requested model and album; never weaken the 503->200 gate.
+    path=urlsplit(url).path
+    return (
+        path.startswith(f"/api/v1/media/{model}/{album}/") or
+        path.startswith(f"/api/{model}/media/{album}/") or
+        path.startswith(f"/media/{album}/")
+    )
+
 
 def exercise(browser,model,album,index):
     ctx=browser.new_context(viewport={"width":390,"height":844},
@@ -31,7 +44,7 @@ def exercise(browser,model,album,index):
     phase={"warm":False,"errors":0,"recoveries":0,"readiness":0,"unnecessary_catalog":0}
     def mock_media(route):
         link=route.request.url
-        if f"/media/{album}/" not in link:
+        if not is_target_owner_media(link,model,album):
             route.continue_()
             return
         if phase["warm"] and "/original" in link:
@@ -106,6 +119,10 @@ def exercise(browser,model,album,index):
         ctx.close()
 
 if __name__=="__main__":
+    assert is_target_owner_media("https://archive.example/api/v1/media/yui/teddy-bear97/13/original?h=x","yui","teddy-bear97")
+    assert is_target_owner_media("https://archive.example/api/mimmi/media/v2ph-actor-a8n8n85a/11/original","mimmi","v2ph-actor-a8n8n85a")
+    assert not is_target_owner_media("https://archive.example/api/v1/media/yui/other/13/original","yui","teddy-bear97")
+    assert not is_target_owner_media("https://archive.example/api/v1/media/mimmi/teddy-bear97/13/original","yui","teddy-bear97")
     parser=argparse.ArgumentParser()
     parser.add_argument("--browser",choices=("chromium","webkit"),required=True)
     args=parser.parse_args()
