@@ -65,9 +65,10 @@ const path=require('node:path');
   assert.equal(snapshot.display,'contents','actor list creates no separate always-front stacking context');
   assert.equal(snapshot.actors.length,2,'only the two actual playing humans are displayed');
   for(const actor of snapshot.actors){
-   assert.ok(actor.originalImage.startsWith('./original/CardData/chm_'),
-    'Dice chessmen derive their portraits from the current team card, never 4LEAF chat avatars');
-   assert.ok(actor.natural[0]>15&&actor.natural[1]>15,'real archive CardData source portrait loaded');
+   assert.ok(actor.originalImage.includes('/original/OBS/')||
+     actor.originalImage==='./original/IMG/avatarback.png',
+    'Dice chessmen must use own original CHR body (or source cardback), never unverified CardData or chat avatars');
+   assert.ok(actor.natural[0]>15&&actor.natural[1]>15,'real archived source CHR body/cardback loaded');
    assert.ok(actor.actual-actor.anchor>=1&&actor.actual-actor.anchor<=7,'DMP own tile below its actor in reserved formation order');
    assert.equal(actor.actual,actor.recorded,'actual CSS z-index equals source DMP painter depth');
    assert.equal(actor.actual,Number(actor.variable),'source painter depth drives the live CSS variable');
