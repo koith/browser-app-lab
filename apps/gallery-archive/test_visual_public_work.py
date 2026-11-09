@@ -20,7 +20,7 @@ class VisualWorkTests(unittest.TestCase):
             prior=[{'number':n,'sha256':hashlib.sha256(raw).hexdigest(),
                     'width':400,'height':600} for n,raw in old.items()]
             page='https://www.shypetal.com/albums/mimmi-source-overlap/'
-            urls=[f'https://image.shypetal.com/images/mimmi/ShyPetal.com@-{n:03d}.webp'
+            urls=[f'https://image.shypetal.com/image/mimmi/ShyPetal.com@-{n:03d}.webp'
                   for n in range(1,6)]
             class Client:
                 def get(self,url):
