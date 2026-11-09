@@ -239,3 +239,37 @@
 #lobby .dice-native-stage #lobby-room-info>div[data-field="상태"]{
  display:none!important;
 }
+
+/* R18 mobile Room/roomback accessibility: original 794x404 PAK pixels are
+   uniformly magnified, never redrawn or replaced by a synthetic UI.
+   Controls stay outside the source stage; they do not cover the READY art. */
+#lobby .dice-room-view-controls{display:none}
+#lobby .lobby-room-empty-create{display:block;min-height:27px;
+ padding:4px 12px;border:1px solid #d2c48f;background:#364b90;
+ color:#fff4c8;font:11px Gulim,'굴림',sans-serif;cursor:pointer}
+#lobby .lobby-room-empty-create:is(:hover,:focus-visible){
+ outline:2px solid #fff0a3;outline-offset:-1px;background:#526bb7}
+@media(max-width:650px){
+ #lobby .dice-room-view-controls{position:absolute;right:7px;top:7px;
+  z-index:30;display:flex;align-items:flex-end;flex-direction:column;
+  gap:4px;pointer-events:none}
+ #lobby #dice-room-zoom-toggle{min-height:36px;min-width:108px;
+  max-width:164px;padding:5px 9px;border:2px ridge #c5d4ff;
+  background:#263f86f2;color:#fff4ca;
+  font:12px/20px Gulim,'굴림',sans-serif;cursor:pointer;
+  pointer-events:auto;touch-action:manipulation;
+  box-shadow:0 2px 8px #142251ac}
+ #lobby #dice-room-zoom-toggle:focus-visible{
+  outline:2px solid #ffe3a1;outline-offset:2px}
+ #lobby #dice-room-pan-hint{max-width:176px;padding:4px 6px;
+  border:1px solid #b8c8f5;background:#172950e8;
+  color:#f3edda;font:10px/1.3 Gulim,'굴림',sans-serif;
+  text-align:right}
+ #lobby #dice-room-pan-hint[hidden]{display:none}
+ #lobby .lobby-room-empty{margin:2px;min-height:113px;
+  gap:8px;padding:9px 7px;line-height:1.4}
+ #lobby .lobby-room-empty b{font-size:12px}
+ #lobby .lobby-room-empty small{font-size:11px}
+ #lobby .lobby-room-empty-create{min-height:36px;min-width:100px;
+  font-size:12px;touch-action:manipulation}
+}
