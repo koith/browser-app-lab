@@ -50,7 +50,7 @@ const {chromium}=require('playwright');
   const originalCardArts=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(p=>
    window.__ROG_TEST__.imageFor(p.team[0])));
   assert.deepEqual(initial.portraits.map(x=>x.src),originalCardArts,
-   'original board pawn portrait must belong to the actual player's CHR card');
+   'each rendered portrait must use its actual CHR card source');
   assert.ok(initial.portraits.every(x=>x.src.startsWith('./original/OBS/')||
     x.src==='./original/IMG/avatarback.png'),
    'no invented CardData facial-to-CHR identity may appear in game');
