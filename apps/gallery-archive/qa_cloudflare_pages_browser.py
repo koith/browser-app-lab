@@ -128,6 +128,52 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
         assert received.status == 200, f'Cloudflare original HTTP {received.status}'
         verify_bytes(received.body(), photo)
 
+        # G-11: reproduce one browser-native transient sign/CORS network failure
+        # while the second request, signed original bytes and native image
+        # decoding come from the LIVE Cloudflare Worker, not synthetic photos.
+        # Separate gateway instance avoids any pre-existing album-cover cache.
+        if album_override is None or album_override == P0_TARGETS[model][0]:
+            restored = page.evaluate("""async ({model,photo,endpoint}) => {
+              const mod=await import('../gallery-archive/cloudflare-owner-gateway/pages-client.mjs');
+              let requests=0,failures=0;
+              const client=mod.pagesGateway({endpoint,model,fetcher:async(url,opts)=>{
+                requests++;
+                if(requests===1){
+                  failures++;
+                  throw new TypeError('controlled one-shot browser network interruption');
+                }
+                return fetch(url,opts);
+              }});
+              const [one,two]=await Promise.all([
+                client.asset(photo,'original'),client.asset(photo,'cover')]);
+              return {requests,failures,url:one,identical:one===two};
+            }""", {"model": model, "photo": photo, "endpoint": WORKER})
+            assert restored['requests']==2 and restored['failures']==1 and restored['identical'], (
+                'TRANSIENT_SIGN_RETRY_NOT_BOUNDED', model, restored)
+            resume_url=restored['url']
+            assert urlsplit(resume_url).netloc == urlsplit(WORKER).netloc
+            assert urlsplit(resume_url).path == (
+                f'/api/v1/media/{model}/{photo["ownerAlbum"]}/{photo["number"]}/original')
+            original_response=ctx.request.get(resume_url,timeout=45000,
+                headers={'User-Agent':'gallery-archive-replica-qa/1.0'})
+            assert original_response.status==200
+            verify_bytes(original_response.body(),photo)
+            dimensions=page.evaluate("""async url => {
+              const image=new Image();image.src=url;
+              await Promise.race([image.decode(),
+                new Promise((_,reject)=>setTimeout(()=>reject(Error('decode timeout')),30000))]);
+              return [image.naturalWidth,image.naturalHeight];
+            }""",resume_url)
+            assert dimensions==[photo['width'],photo['height']], dimensions
+            print('LIVE_WORKER_BROWSER_TRANSIENT_SIGN_RETRY_EXACT_ORIGINAL_PASS',
+                json.dumps({'model':model,'browser':browser.browser_type.name,
+                  'deployed':deployed,'sign_calls':restored['requests'],
+                  'simulated_network_failures':restored['failures'],
+                  'actual_worker_original_sha_bytes_pixels':True,
+                  'native_browser_photo_decode':True,
+                  'physical_iphone_hardware':False},
+                  sort_keys=True),flush=True)
+
         # Independent native <img> decoding in actual engine, not Pillow alone.
         decoded = page.evaluate('''async ({url, width, height}) => {
             const im = document.createElement('img');
