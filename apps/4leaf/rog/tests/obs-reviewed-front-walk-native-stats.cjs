@@ -111,11 +111,13 @@ const {chromium,webkit}=require('playwright');
    assert.equal(stats.selected,'c_'+evidence.originalCard);
    assert.deepEqual(stats.actual,[164,125],'genuine original 164x125 stats bitmap');
    assert.equal(stats.original,'./original/IMG/stats.png');
-   // Portrait: a real original file, never the removed (id%59)+1 formula
-   // face. Without a sourced CHR portrait field the card back is honest.
-   assert.ok(stats.portrait?.includes('/original/CardData/')||
-    stats.portrait==='./original/IMG/avatarback.png',stats.portrait);
-   assert.notEqual(stats.portrait,'./original/CardData/chm_'+((Number(id)%59)+1)+'.png');
+   // The exact original CardData facial identity remains unknown. The
+   // displayed original CHR FULL BODY must belong to this card and member.
+   const expectedBody=await page.evaluate(card=>
+    window.__LEAF_CHR_BODY_MAP__?.resolve?.(card)?.frames?.find(f=>f.index===0)?.url||
+    './original/IMG/avatarback.png',evidence.originalCard);
+   assert.equal(stats.portrait,expectedBody,'source-owned CHR identity in stats panel');
+   assert.ok(!stats.portrait.includes('/CardData/chm_'),'no unsourced facial guess');
    for(const key of ['role','move','attack','defense','intellect','ability','point'])
     assert.ok(stats.fields[key]?.length,JSON.stringify(stats));
    if(id==='0044')await page.screenshot({path:'leaf-original-164x125-stats-'+engine.name()+(mobile?'-mobile':'')+'.png'});
