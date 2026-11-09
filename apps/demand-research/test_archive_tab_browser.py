@@ -108,8 +108,10 @@ def exercise(browser_type,label):
                 assert all("https://" not in text for text in labels)
                 assert requests.count("choices")==1, "account list must preload once"
                 page.locator("#archiveHubStatus").get_by_text(
-                    "ZIP 파일 후보 2개 발견",exact=False).wait_for(timeout=12000)
-                assert "overview" in requests
+                    "선택한 계정의 보관된 프로필",exact=False).wait_for(timeout=12000)
+                # The saved-account view no longer blocks on the expensive
+                # unrelated auto-post catalog overview.
+                assert "overview" not in requests
                 assert page.locator("#archiveHubActions").is_visible()
                 page.locator("#archiveModeAuto").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src")=="/auto-archive"
