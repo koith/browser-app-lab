@@ -1,0 +1,59 @@
+name: 4LEAF published native 97 CHR original PNG source integrity
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-public-97-pixel-sha.yml'
+      - '.github/scripts/check-4leaf-public-97-chr-pixels.cjs'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/app-version.json'
+      - 'apps/4leaf/rog/original/OBS/referenced/chr-bodies-manifest.js'
+      - 'apps/4leaf/rog/original/OBS/action-full/manifest.js'
+      - 'apps/4leaf/rog/original/OBS/action-full-ext/manifest.js'
+      - 'apps/4leaf/rog/original/OBS/obs23-actors/manifest.js'
+      - '.github/scripts/check-4leaf-public-97-chr-pixels.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-source-pixels:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 'Verify live manifest and release metadata exactly match checkout'
+        run: |
+          set -euo pipefail
+          base="https://koith.github.io/browser-app-lab/apps/4leaf/rog"
+          for item in app-version.json chr-body-source-map.js original/OBS/referenced/chr-bodies-manifest.js; do
+            file=$(mktemp)
+            ok=0
+            for attempt in $(seq 1 50); do
+              curl -fsSL --retry 1 --connect-timeout 10 --max-time 25 "$base/$item?sha_source=\${GITHUB_SHA}" -o "$file" || true
+              if cmp -s "$file" "apps/4leaf/rog/$item"; then
+                echo "LIVE_ORIGINAL_MANIFEST_SHA_PASS $item"
+                ok=1
+                break
+              fi
+              sleep 12
+            done
+            rm -f "$file"
+            if [ "$ok" != "1" ]; then
+              echo "::error::Published source is stale: $item"
+              exit 1
+            fi
+          done
+      - name: 'Verify 97 bodies first/mid/last frames are identical published PNG bytes'
+        run: node .github/scripts/check-4leaf-public-97-chr-pixels.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourleaf-public-97-source-pixel-sha
+          path: 4leaf-public-97-source-pixel-audit.json
+          if-no-files-found: ignore
+          retention-days: 14
