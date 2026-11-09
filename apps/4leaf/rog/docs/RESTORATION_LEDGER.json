@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-08",
+  "updatedAt": "2026-11-09",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1905,6 +1905,21 @@
         "P0-ACTOR",
         "P0-CHAT",
         "QA-02",
+        "QA-03"
+      ]
+    },
+    {
+      "id": "REQ-20261109-4LEAF-ALL-PENDING-LIVE-ACCEPTANCE",
+      "date": "2026-11-09",
+      "origin": "사용자: 이번 턴 완료·미완료 업무 체크리스트와 미검증 기능 실사용 검증 요구",
+      "text": "검증 완료 여부를 실제 main PR merge, CI, 공개 Pages 실행과 원본 픽셀 SHA로 증명하라. 97/98 체스맨의 원본 실제 화면과 소스 검증 결과를 원장에 추가하고 완전 원작 동일성으로 오인하지 않는다. 남은 전체 일감을 체크리스트로 보고한다.",
+      "taskIds": [
+        "M05",
+        "M09",
+        "P0-ACTOR",
+        "P0-RELEASE",
+        "SRC-01",
+        "ACT-03",
         "QA-03"
       ]
     }
@@ -9431,6 +9446,48 @@
         "SRC-01"
       ],
       "details": "NEW VERIFIED 2026-11-08: Official 2002 SHA1-verified 64537476-byte archive unshield Dice source: PR #877 merged 8f756f6a62b9b6c779fa8d8f98f6b963a77cd1ee and follow-up summary correction PR #882 merged c7347bcabc3fe4d820fd6af6feb9f63c54a2bc9b, all CI checks PASS. Read-only forensic audit enumerates 31 original Dice-related files, 713 packed PAK entries, authentic Dice.dll SHA256 0987e96cb2d954b98e5815396874488d3bd50560f364df3bcacb588024270060 PE32 with 3 sections, RT_ICON/RT_GROUP_ICON (2 resources) and DirectDrawCreateEx import hint. 1 original PE source binary, 26 possible 3D-name/extension candidates (including DMP board MVE; NOT decoded D4/D6). Exact original D4 and D6 mesh, 3D texture, and roll/fall/bounce timeline flags all FALSE. No executable run or historical binary committed; original 3D reconstruction remains OPEN."
+    },
+    {
+      "seq": 442,
+      "date": "2026-11-09",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261109-4LEAF-ALL-PENDING-LIVE-ACCEPTANCE",
+      "taskIds": [
+        "M05",
+        "M09",
+        "P0-ACTOR",
+        "P0-RELEASE",
+        "SRC-01",
+        "ACT-03",
+        "QA-03"
+      ]
+    },
+    {
+      "seq": 443,
+      "date": "2026-11-09",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261109-4LEAF-ALL-PENDING-LIVE-ACCEPTANCE",
+      "taskIds": [
+        "M05",
+        "M09",
+        "P0-ACTOR",
+        "P0-RELEASE",
+        "ACT-03"
+      ],
+      "details": "VERIFIED 2026-11-09: PR #901 merged 15155a0507d00b8b7407843a2f2d82f6e083b474; two real public Pages browsers Chromium/WebKit run 98 CHR actor board/duel both sides and 26 maps. Original source byte gate exact SHA for app-version.json, sw.js, chr-body-source-map.js, native-card-action-sequences.js, genesis-chessman-actors.js, original referenced manifest. Valid summary requires cards 98, source-recovered 97, unrecovered ['0156=null'], cardsWithDefects=[], defectCount=0, pageErrors=[]. This is a browser/runtime acceptance of restored 97 bodies and deliberate missing 0156, NOT original EXE role/timing or physical iPhone proof."
+    },
+    {
+      "seq": 444,
+      "date": "2026-11-09",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261109-4LEAF-ALL-PENDING-LIVE-ACCEPTANCE",
+      "taskIds": [
+        "M05",
+        "P0-ACTOR",
+        "SRC-01",
+        "P0-RELEASE"
+      ],
+      "details": "VERIFIED 2026-11-09: PR #903 merged ae653fc217bbeb0f5a76828a235fcc1fdd5e52a8. Source inventory 98 cards; all 97 restored cards' first/mid/last original native PNGs (291 public URLs) fetched from real GitHub Pages: each HTTP 200 PNG signature and SHA256 identical to local archived source and native manifest; originalMember unique ownership enforced; fails=0; 0156 OBS2/1222 remains missing. PR CI 6/6 success including real public pixel audit run 42538242512 (cards=97,frames=291,failures=[]), postmerge push exact SHA source audit run 42539174810 success. Sampled source PNG bytes and runtime mapping verified, not all historically correct action roles, no iPhone physical device. DO NOT mark whole actor restoration DONE."
     }
   ],
   "restorationPriority": {
