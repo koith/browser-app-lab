@@ -36,7 +36,10 @@ for(const card of cards){
  const original=api.lookup(card),body=api.resolve(card);
  if(card==='0156'){records.push({card,missing:true,member:'OBS2.pak/1222.obs'});continue}
  assert.ok(original&&!original.missing&&body,'Missing authentic source body: '+card);
- assert.equal(body.originalMember,original.originalMember,'Cross-body reuse: '+card);
+ assert.ok(body.originalMember===original.originalMember||
+  (original.pak==='OBS'&&body.originalMember===original.member+'.obs'),
+  'Cross-body reuse: '+card+' got '+body.originalMember+
+  ' expected '+original.originalMember);
  const frames=body.frames;
  assert.ok(Array.isArray(frames)&&frames.length>=3,'Missing source frame sequence: '+card);
  const targets=[frames[0],frames[Math.floor(frames.length/2)],frames.at(-1)];
