@@ -32,6 +32,11 @@ jobs:
             mobile: '1'
           - browser: webkit
             mobile: '1'
+          # A returning phone browser has a live service worker unlike CI's
+          # usual fresh, worker-blocked session. Catch stale-start regressions.
+          - browser: chromium
+            mobile: '1'
+            warm_pwa: '1'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -56,12 +61,13 @@ jobs:
         env:
           FOURLEAF_BROWSER: ${{ matrix.browser }}
           FOURLEAF_MOBILE: ${{ matrix.mobile }}
+          FOURLEAF_SW_ENABLED: ${{ matrix.warm_pwa || '0' }}
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/world-to-dice-real-user-start.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: original-4leaf-world-to-play-${{ matrix.browser }}-mobile-${{ matrix.mobile }}
+          name: original-4leaf-world-to-play-${{ matrix.browser }}-mobile-${{ matrix.mobile }}-warm-${{ matrix.warm_pwa || '0' }}
           path: |
             leaf-world-to-game-*.json
             leaf-world-to-game-failure-*.png
