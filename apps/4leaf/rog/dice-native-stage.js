@@ -43,9 +43,15 @@
  zoomButton.id='dice-room-zoom-toggle';
  zoomButton.setAttribute('aria-label','주잔 대기방 원본 화면 확대 또는 전체 보기');
  zoomButton.setAttribute('aria-pressed','false');
+ const settingsButton=document.createElement('button');
+ settingsButton.id='dice-room-settings-focus';settingsButton.type='button';
+ settingsButton.textContent='참가자·설정 보기';
+ const readyButton=document.createElement('button');
+ readyButton.id='dice-room-ready-focus';readyButton.type='button';
+ readyButton.textContent='체스맨·READY 보기';
  const panHint=document.createElement('span');panHint.id='dice-room-pan-hint';
  panHint.textContent='확대 시 빈 배경을 가로로 밀어 다른 영역 보기';
- controls.append(zoomButton,panHint);
+ controls.append(zoomButton,settingsButton,readyButton,panHint);
  wrap.append(controls);
  const view={scale:0,x:0,y:0,fitScale:0};
  function fit(){
@@ -69,6 +75,8 @@
   zoomButton.setAttribute('aria-pressed',String(zoom));
   zoomButton.textContent=zoom?'⊟ 전체 화면':'⊞ 확대 보기';
   panHint.hidden=!zoom;
+  settingsButton.hidden=!zoom||!wrap.classList.contains('config-open');
+  readyButton.hidden=!zoom||!wrap.classList.contains('config-open');
  }
  function focusPart(part){
   if(!narrow()||!zoomed){fit();return}
@@ -81,8 +89,10 @@
  }
  zoomButton.onclick=()=>{
   zoomed=!zoomed;panX=null;panY=null;
-  focusPart(wrap.classList.contains('config-open')?'ready':'list');
+  focusPart(wrap.classList.contains('config-open')?'settings':'list');
  };
+ settingsButton.onclick=()=>focusPart('settings');
+ readyButton.onclick=()=>focusPart('ready');
  // Zoom is the sensible mobile default. A one-tap whole-scene option
  // remains present for original 794x404 pixel-layout comparisons.
  zoomed=window.innerWidth<=650;
