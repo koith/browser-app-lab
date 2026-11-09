@@ -10,7 +10,6 @@ on:
       - "apps/demand-research/account_index_job.py"
       - "apps/demand-research/account_index_bootstrap.py"
       - "apps/demand-research/test_account_index_bootstrap.py"
-      - "apps/demand-research/account_index_live_repair.py"
       - "apps/demand-research/test_account_index_job.py"
       - "apps/demand-research/test_account_index_sources.py"
       - "apps/demand-research/gateway.py"
@@ -31,7 +30,6 @@ on:
       - "apps/demand-research/account_index_job.py"
       - "apps/demand-research/account_index_bootstrap.py"
       - "apps/demand-research/test_account_index_bootstrap.py"
-      - "apps/demand-research/account_index_live_repair.py"
       - "apps/demand-research/test_account_index_job.py"
       - "apps/demand-research/test_account_index_sources.py"
       - "apps/demand-research/gateway.py"
@@ -55,7 +53,7 @@ jobs:
           python-version: "3.12"
       - name: Python and browser module syntax
         run: |
-          python -m py_compile apps/demand-research/account_index.py apps/demand-research/account_groups.py apps/demand-research/test_account_groups.py apps/demand-research/account_index_sources.py apps/demand-research/account_index_job.py apps/demand-research/test_account_index_job.py apps/demand-research/gateway.py apps/demand-research/test_account_index.py apps/demand-research/test_account_index_sources.py apps/demand-research/account_index_bootstrap.py apps/demand-research/account_index_live_repair.py apps/demand-research/test_account_index_bootstrap.py
+          python -m py_compile apps/demand-research/account_index.py apps/demand-research/account_groups.py apps/demand-research/test_account_groups.py apps/demand-research/account_index_sources.py apps/demand-research/account_index_job.py apps/demand-research/test_account_index_job.py apps/demand-research/gateway.py apps/demand-research/test_account_index.py apps/demand-research/test_account_index_sources.py apps/demand-research/account_index_bootstrap.py apps/demand-research/test_account_index_bootstrap.py
           node --check apps/demand-research/account_index_client.js
           node --check apps/demand-research/account_group_client.js
           node --check apps/demand-research/account_auto_analysis.js
