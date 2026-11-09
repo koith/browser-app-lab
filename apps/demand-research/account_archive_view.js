@@ -11,6 +11,31 @@ const state={account:"",section:"posts",offset:0,more:false,loading:false,
 let detailRequestSeq=0;
 const base=()=>"/api/account-archives/"+encodeURIComponent(state.account);
 const sectionLabels={posts:"게시글·답글",followers:"팔로워",following:"팔로잉"};
+const ACCOUNT_KEY=/^(?:bluesky|mastodon)-[a-f0-9]{40}$/;
+const params=new URLSearchParams(location.search);
+const embedded=params.get("embedded")==="1";
+if(embedded)document.body.classList.add("archive-embedded");
+function accountLabel(item){
+  const name=typeof item?.display_name==="string"?item.display_name.trim().replace(/\\s+/g," ").slice(0,100):"";
+  const handle=typeof item?.handle==="string"?item.handle.trim().replace(/^@+/,"").slice(0,200):"";
+  if(name&&handle)return name+"(@"+handle+")";
+  if(name)return name+"(아이디 미보관)";
+  if(handle)return "닉네임 미보관(@"+handle+")";
+  return "이름 미보관 ("+(item?.platform==="mastodon"?"Mastodon":"Bluesky")+" 계정)";
+}
+function setAccountUrl(value){
+  if(!ACCOUNT_KEY.test(value))return;
+  if(params.get("account")!==value){
+    params.set("account",value);
+    history.replaceState(null,"",location.pathname+"?"+params.toString());
+  }
+  if(window.parent!==window)window.parent.postMessage(
+    {type:"intersection:archive-selected",account:value},location.origin);
+}
+function setAccountOption(item){
+  const opt=[...accountSelect.options].find(o=>o.value===item.key);
+  if(opt)opt.textContent=accountLabel(item);
+}
 function node(tag,className,text){
   const element=document.createElement(tag);
   if(className)element.className=className;
@@ -70,6 +95,12 @@ function renderProfile(profile){
     return;
   }
   state.profile=profile;
+  const current=state.accounts.find(item=>item.key===state.account);
+  if(current){
+    if(profile.display_name)current.display_name=profile.display_name;
+    if(profile.handle)current.handle=profile.handle;
+    setAccountOption(current);
+  }
   $("displayName").textContent=profile.display_name||profile.handle||"공개 프로필";
   $("handle").textContent=profile.handle?("@"+profile.handle):"계정 ID "+(profile.identity||"");
   $("biography").textContent=profile.description||"공개 자기소개가 저장되지 않았습니다.";
@@ -261,6 +292,7 @@ async function selectAccount(value){
   detailRequestSeq+=1;
   if(detail.open)detail.close();
   state.account=value||"";state.profile=null;state.offset=0;state.section="posts";
+  if(value)setAccountUrl(value);
   if(!value){
     resetProfile();$("displayName").textContent="계정을 선택하세요";
     showMessage("계정을 선택하세요.");setStatus("보관할 계정을 선택하세요.");
@@ -283,22 +315,48 @@ async function selectAccount(value){
   }
 }
 async function init(){
+  // The parent preloads labels once, and passes the selected verified key.
+  // Embedded views must not download and decrypt the same large ZIP again.
+  const selected=params.get("account")||"";
+  if(embedded){
+    if(ACCOUNT_KEY.test(selected)){
+      accountSelect.replaceChildren(node("option","","선택한 계정"));
+      accountSelect.firstChild.value=selected;
+      accountSelect.value=selected;
+      await selectAccount(selected);
+    }else{
+      setStatus("상단에서 보관된 계정을 선택하세요.");
+      showMessage("계정 목록을 불러오는 중…");
+    }
+    return;
+  }
   try{
     const data=await get("/api/account-archives");
-    state.accounts=Array.isArray(data.accounts)?data.accounts:[];
-    accountSelect.replaceChildren(node("option","",state.accounts.length?
-                                          "계정을 선택하세요":"아직 등록된 계정 없음"));
-    accountSelect.firstChild.value="";
+    state.accounts=Array.isArray(data.accounts)?data.accounts.filter(
+      item=>ACCOUNT_KEY.test(item.key)):[];
+    state.accounts.sort((a,b)=>accountLabel(a).localeCompare(accountLabel(b),"ko-KR"));
+    const count=$("accountCount");
+    if(count)count.textContent="보관된 계정 "+state.accounts.length+"개";
+    accountSelect.replaceChildren();
+    if(!state.accounts.length){
+      const opt=node("option","","아직 보관된 계정 없음");opt.value="";
+      accountSelect.append(opt);
+      setStatus("등록된 계정 보관본이 없습니다.");
+      showMessage("계정 분석에서 공개 계정을 지정해 백업을 시작하세요.");
+      return;
+    }
     for(const item of state.accounts){
-      const opt=node("option","",(item.platform==="bluesky"?"Bluesky":"Mastodon")+" · "+(item.profile_url||item.key));
+      const opt=node("option","",accountLabel(item));
       opt.value=item.key;accountSelect.append(opt);
     }
-    const selected=new URL(location.href).searchParams.get("account");
     const first=state.accounts.find(a=>a.key===selected)||state.accounts[0];
-    if(first){accountSelect.value=first.key;await selectAccount(first.key);}
-    else{setStatus("등록된 비공개 계정 아카이브가 없습니다.");showMessage("계정 분석에서 공개 계정을 지정해 백업을 시작하세요.");}
+    accountSelect.value=first.key;
+    setStatus("보관된 계정 "+state.accounts.length+"개 · 자동으로 최신 보관본을 표시합니다.");
+    await selectAccount(first.key);
   }catch(error){
-    setStatus("비공개 보관함을 불러오지 못했습니다.");
+    const count=$("accountCount");
+    if(count)count.textContent="불러오기 실패";
+    setStatus("계정 목록 연결에 실패했습니다. 다시 열면 자동 재시도합니다.");
     showMessage("개인용 아카이브 서버 인증 또는 저장 연결 상태를 확인하세요.");
   }
 }
