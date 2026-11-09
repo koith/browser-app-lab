@@ -425,7 +425,7 @@ function card(a,hasImages){
     ?'<img loading="lazy" referrerpolicy="no-referrer" data-owner="'+esc(cloudCover.url)+'" data-owner-variant="local" src="'+esc(localCopy.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">'
     :'<img data-owner="'+esc(cloudCover.url)+'"'+fallback+' style="'+style+'" alt="'+esc(label)+' 표지">')
   :cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">M</div>';
- return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
+ return '<button class="album"'+rotationAttributes(selected)+' data-cover-sha="'+esc(selected?.sha256||'')+'" data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
 }
 // Exact, same-album local archive bytes can paint detail tiles without waking
 // the remote TeraBox gateway. Every fallback keeps the owner media key.
@@ -467,10 +467,11 @@ function adoptFastCoverImages(grid,oldCards){
   if(!previous?.image||!previous.sha)continue;
   const next=card.querySelector('img'),old=previous.image;
   if(!next||!next.getAttribute('src')||next.getAttribute('src')!==old.getAttribute('src'))continue;
-  const a=stored.find(a=>a.id===card.dataset.id);
-  if(!a)continue;
-  const imgs=validImages(a),chosen=imgs.find(p=>p.sha256===albumCovers[a.id]?.sha256)||imgs[0];
-  if(chosen?.sha256!==previous.sha)continue;
+  // Compare the actual selected cover, not the pre-fallback preferred
+  // owner photo: an exact saved Pages copy can be a different valid SHA.
+  // Both the SHA and the real <img src> must match before any DOM reuse.
+  if(!/^[a-f0-9]{64}$/.test(card.dataset.coverSha||'')||
+     card.dataset.coverSha!==previous.sha)continue;
   for(const attr of [...old.attributes])if(attr.name!=='src')old.removeAttribute(attr.name);
   for(const attr of [...next.attributes])if(attr.name!=='src')old.setAttribute(attr.name,attr.value);
   old.dataset.fastPreserved='1';
