@@ -34,7 +34,7 @@ jobs:
             file=$(mktemp)
             ok=0
             for attempt in $(seq 1 50); do
-              curl -fsSL --retry 1 --connect-timeout 10 --max-time 25 "$base/$item?sha_source=\${GITHUB_SHA}" -o "$file" || true
+              curl -fsSL --retry 1 --connect-timeout 10 --max-time 25 "$base/$item?sha_source=${GITHUB_SHA}" -o "$file" || true
               if cmp -s "$file" "apps/4leaf/rog/$item"; then
                 echo "LIVE_ORIGINAL_MANIFEST_SHA_PASS $item"
                 ok=1
