@@ -59,10 +59,13 @@ const {chromium}=require('playwright');
 
   // Static status copy must match actual supported features and clearly
   // distinguish original-server matchmaking from WebRTC direct play.
-  const text=await broken.locator('body').textContent();
-  assert.ok(text.includes('WebRTC를 이용한 기기 간 2인 직접 대전을 지원합니다.'));
-  assert.ok(text.includes('채팅은 실제 서버 연결 시 다른 이용자에게 실시간으로 전달됩니다.'));
-  assert.ok(!text.includes('실제 접속자와 연결되지 않습니다.'));
+  // Social Chat dynamically replaces the original placeholder scene after
+  // boot; inspect the actual shipped HTML source rather than demanding
+  // deleted placeholders remain in the live post-render DOM.
+  const sourceHtml=await broken.evaluate(()=>fetch('./index.html').then(r=>r.text()));
+  assert.ok(sourceHtml.includes('WebRTC를 이용한 기기 간 2인 직접 대전을 지원합니다.'));
+  assert.ok(sourceHtml.includes('채팅은 실제 서버 연결 시 다른 이용자에게 실시간으로 전달됩니다.'));
+  assert.ok(!sourceHtml.includes('실제 접속자와 연결되지 않습니다.'));
   console.log('4LEAF_LIVE_CAPABILITY_COPY_PASS');
   await second.close();
  }finally{await browser.close()}
