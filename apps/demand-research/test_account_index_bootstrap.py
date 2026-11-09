@@ -181,3 +181,57 @@ def test_cold_boot_rejects_bad_tag_and_bad_immutable_cipher(monkeypatch):
     with pytest.raises(ValueError):
         boot.find_latest_cipher(b"q"*32,
             now=datetime(2026,11,9,tzinfo=timezone.utc),lookback_days=1)
+
+
+
+def test_offline_sealed_fallback_recovers_after_provider_network_failure(tmp_path,monkeypatch):
+    from urllib.error import URLError
+    plain=fixture_db(tmp_path).read_bytes()
+    key=b"d"*32
+    data=boot.encrypt_snapshot(plain,key,"42547929782",hashlib.sha256(plain).hexdigest())
+    cached=tmp_path/"cipher.enc"
+    cached.write_bytes(data)
+    monkeypatch.setattr(boot,"BUNDLED_PATH",cached)
+    monkeypatch.setattr(boot,"BUNDLED_CIPHER_SHA",hashlib.sha256(data).hexdigest())
+    monkeypatch.setattr(boot,"BUNDLED_TAG","intersection-index-boot-20261109")
+    monkeypatch.setattr(boot,"_direct_cipher",
+                        lambda tag:(_ for _ in ()).throw(URLError("provider offline")))
+    found=boot.find_latest_cipher(key,
+        now=datetime(2026,11,10,tzinfo=timezone.utc),lookback_days=2)
+    assert found["accounts"]==1
+    assert found["source_rows"]==1
+    assert found["age_days"]==1
+    assert found["payload"]==plain
+
+
+def test_offline_fallback_is_fail_closed_for_unpinned_or_wrong_key(tmp_path,monkeypatch):
+    from urllib.error import HTTPError
+    plain=fixture_db(tmp_path).read_bytes()
+    key=b"g"*32
+    data=boot.encrypt_snapshot(plain,key,"42547929782",hashlib.sha256(plain).hexdigest())
+    cached=tmp_path/"cipher.enc"
+    cached.write_bytes(data)
+    monkeypatch.setattr(boot,"BUNDLED_PATH",cached)
+    monkeypatch.setattr(boot,"BUNDLED_CIPHER_SHA","0"*64)
+    monkeypatch.setattr(boot,"_direct_cipher",
+        lambda tag:(_ for _ in ()).throw(HTTPError(tag,403,"rate limited",{},None)))
+    with pytest.raises(RuntimeError):
+        boot.find_latest_cipher(key,
+            now=datetime(2026,11,9,tzinfo=timezone.utc),lookback_days=2)
+    monkeypatch.setattr(boot,"BUNDLED_CIPHER_SHA",hashlib.sha256(data).hexdigest())
+    with pytest.raises(RuntimeError):
+        boot.find_latest_cipher(b"wrong-private-key!!!!".ljust(32,b"!"),
+            now=datetime(2026,11,9,tzinfo=timezone.utc),lookback_days=2)
+
+
+def test_remote_valid_cipher_is_preferred_over_older_build_snapshot(tmp_path,monkeypatch):
+    plain=fixture_db(tmp_path).read_bytes()
+    key=b"q"*32
+    data=boot.encrypt_snapshot(plain,key,"42547929782",hashlib.sha256(plain).hexdigest())
+    monkeypatch.setattr(boot,"_direct_cipher",lambda tag:data)
+    # No local bundle exists; a valid remote must still take precedence.
+    monkeypatch.setattr(boot,"BUNDLED_PATH",tmp_path/"not-here.enc")
+    found=boot.find_latest_cipher(key,
+        now=datetime(2026,11,9,tzinfo=timezone.utc),lookback_days=1)
+    assert found["accounts"]==1
+    assert found["age_days"]==0
