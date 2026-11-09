@@ -33,6 +33,44 @@ def verify(engine,label,width,height):
     try:
         page=browser.new_page(viewport={"width":width,"height":height},
                              color_scheme="light")
+        # Browser-native error events contain a reliable filename/line that
+        # WebKit's generic Python pageerror text can omit. Only emit known
+        # static script basenames and finite exception classes; never raw
+        # messages/stacks, profile URLs, post data or network response bodies.
+        page.add_init_script(r"""
+          (() => {
+            const scripts=new Set([
+              'index.html','account_index_client.js','account_group_client.js',
+              'account_auto_analysis.js','account_watch.js','archive_tab.js',
+              'target_archive_client.js','free_discovery.js',
+              'post_activity_ranking.js','public_video_trends.js'
+            ]);
+            const types=new Set(['TypeError','ReferenceError','SyntaxError',
+              'RangeError','SecurityError','NetworkError','Error',
+              'InvalidStateError','NotAllowedError']);
+            window.__intersectionSafePageErrors=[];
+            const capture=(name,file,line) => {
+              let base='unknown';
+              try { const u=new URL(String(file||''),location.href);
+                    const n=u.pathname.split('/').pop();
+                    if(scripts.has(n)) base=n;
+                    else if(u.pathname==='/') base='index.html';
+              } catch {}
+              window.__intersectionSafePageErrors.push({
+                kind:types.has(name)?name:'Other',
+                source:base,
+                line:Number.isSafeInteger(line)&&line>0&&line<100000?line:0
+              });
+            };
+            window.addEventListener('error',e=>{
+              if(e.error) capture(e.error.name,e.filename,e.lineno);
+            },true);
+            window.addEventListener('unhandledrejection',e=>{
+              // The reject reason may contain private URLs. Only record class.
+              capture(e.reason?.name,'',0);
+            },true);
+          })();
+        """)
         js_errors=[]
         page.on("pageerror",lambda error:js_errors.append(safe_browser_error(error)))
         status=page.request.get(SITE+"/api/accounts/status",timeout=90000)
@@ -127,8 +165,26 @@ def verify(engine,label,width,height):
               flush=True)
     finally:
         if js_errors:
+            # Capture only the finite, browser-native safe component tuple.
+            browser_events=[]
+            try:
+                browser_events=page.evaluate(
+                    "() => window.__intersectionSafePageErrors || []")
+            except Exception:
+                pass
+            def aggregate(items):
+                counts={}
+                for item in items[:250]:
+                    if type(item) is dict:
+                        identity=(item.get("kind","Other"),
+                                  item.get("source","unknown"),
+                                  item.get("line",0))
+                        if len(str(identity))<150:
+                            counts[identity]=counts.get(identity,0)+1
+                return [{"kind":k[0],"source":k[1],"line":k[2],"count":n}
+                        for k,n in sorted(counts.items(),key=lambda v:str(v[0]))]
             print("LIVE_ACCOUNT_INDEX_JS_ERROR_SAFE",
-                  sorted(js_errors,key=lambda o:(o["source"],o["line"],o["kind"])),
+                  aggregate(browser_events) or aggregate(js_errors),
                   flush=True)
         browser.close()
 
