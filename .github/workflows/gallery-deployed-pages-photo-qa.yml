@@ -41,6 +41,17 @@ jobs:
       - run: |
           python -m py_compile apps/gallery-archive/qa_deployed_pages_gallery.py apps/gallery-archive/pages_single_publisher.py
           python apps/gallery-archive/test_pages_deployment_identity.py
+      - name: Verify actual cancelled gallery SHA is included unchanged in later native Pages source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PYTHONPATH=apps/gallery-archive python - <<'PY'
+          from pages_single_publisher import pages_gallery_equivalent
+          source='009952e206b838f49ea7dd28352dd186788aa608'
+          published='def5dcfe273dca350cf72ac58a008fd9f79fb1b5'
+          assert pages_gallery_equivalent(source,published), 'real gallery source parity failed'
+          print('ACTUAL_SUPERSEDED_NATIVE_GALLERY_SUBTREES_IDENTICAL_PASS')
+          PY
   gallery-deployed-visual:
     # PR script changes must pass against real, currently published galleries
     # before merge. The post-Pages workflow_run repeats the same live proof.
