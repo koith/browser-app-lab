@@ -1,11 +1,8 @@
 'use strict';
-/* Card portrait integrity (audit 2026-11-01).
- * Checks a property of the RENDERED result, not a provenance label:
- *  1. no CardData face is shown for two different characters;
- *  2. the removed (sourceId%59)+1 formula can never come back silently;
- *  3. cards with no sourced portrait show the original IMG.pak card back.
- * Passing this does NOT mean portraits are correct: the 7 legacy entries are
- * unsourced until the CHR record dump provides a real portrait field. */
+/* Card portrait integrity, source-own-body audit 2026-11-09.
+ * None of the 2002 CardData/chm_N face mappings have confirmed CHR IDs.
+ * Require exact owned CHR source frame 0, or original IMG cardback for 0156.
+ * This does not claim a historical CardData facial-to-CHR mapping. */
 const assert=require('node:assert/strict');
 const path=require('node:path');
 const {chromium}=require('playwright');
@@ -22,24 +19,28 @@ const {chromium}=require('playwright');
    return (window.ORIGINAL_LEAF_CHESSMEN||[]).map(c=>({id:c.id,name:c.name,
     src:T.imageFor('c_'+c.id),evidence:T.portraitEvidence('c_'+c.id)}));
   });
-  assert.ok(rows.length>=90,'original CHR roster loaded');
-  const byFace=new Map();
+  assert.equal(rows.length,98,'genuine full CHR roster including missing 0156');
+  const mapped=await page.evaluate(()=>Object.fromEntries(
+   (window.ORIGINAL_LEAF_CHESSMEN||[]).map(card=>
+    [card.id,window.__LEAF_CHR_BODY_MAP__?.resolve?.(card.id)
+     ?.frames?.find(frame=>frame.index===0)?.url||null])));
+  const sourceOwners=new Map();
   for(const r of rows){
-   if(!r.src.includes('/CardData/'))continue;
-   const owners=byFace.get(r.src)||[];owners.push(r.id);byFace.set(r.src,owners);
+   const exact=mapped[r.id],expected=exact||'./original/IMG/avatarback.png';
+   assert.equal(r.src,expected,r.id+' card source must match its own original CHR member');
+   assert.ok(!r.src.includes('/CardData/chm_'),r.id+' unsourced CardData face is forbidden');
+   assert.equal(r.evidence,exact?
+    'verified-CHR-own-body-not-CardData-portrait':'no-verified-CardData-portrait');
+   if(exact){const owners=sourceOwners.get(r.src)||[];owners.push(r.id);
+    sourceOwners.set(r.src,owners);}
   }
-  const shared=[...byFace].filter(([,ids])=>ids.length>1);
-  assert.deepEqual(shared,[],'one CardData face must not be shown for two characters');
-  for(const r of rows){
-   const formula='./original/CardData/chm_'+((Number(r.id)%59)+1)+'.png';
-   if(r.evidence==='none')assert.equal(r.src,'./original/IMG/avatarback.png',
-    r.id+' has no sourced portrait and must show the original card back');
-   if(r.evidence==='none')assert.notEqual(r.src,formula,r.id+' uses the removed formula');
-  }
-  const legacy=rows.filter(r=>r.evidence!=='none').map(r=>r.id);
-  assert.ok(legacy.length<=7,'legacy unsourced portraits may only shrink: '+legacy);
+  assert.equal(sourceOwners.size,97,'97 unique original source-owned body thumbnail URLs');
+  assert.deepEqual([...sourceOwners].filter(([,ids])=>ids.length>1),[],
+   'each original body frame may belong to only one CHR card');
+  assert.deepEqual(rows.filter(r=>r.src==='./original/IMG/avatarback.png').map(r=>r.id),
+   ['0156'],'no fake body for absent OBS2/1222 source');
   assert.deepEqual(errors,[]);
-  console.log('CARD PORTRAIT INTEGRITY PASS',JSON.stringify({roster:rows.length,
-   legacyUnsourced:legacy,neutral:rows.length-legacy.length}));
+  console.log('CARD PORTRAIT CHR OWN-MEMBER SOURCE INTEGRITY PASS',JSON.stringify({
+   cards:rows.length,verifiedBodyCards:sourceOwners.size,missing:['0156']}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1);});
