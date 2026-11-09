@@ -48,6 +48,8 @@ for(const model of ['mimmi','yui']){
  assert.equal(check({url:'stored-albums/safe/another.jpg'}).swapped,null,'different URL must not preserve');
  assert.ok(html.includes('data-cover-sha="'),model+' must disclose actual selected cover SHA on the rendered card');
  assert.ok(html.includes("data-owner-variant=\"local\""),model+' must keep local saved owner cover path');
+ assert.ok(!/\n\s*render\(\);\s*\n\s*const raw=location\.hash\.slice/.test(html),
+   model+' must not discard prepaint covers with a redundant startup render');
  assert.ok(html.includes("adoptFastCoverImages(grid,fastCovers)"),model+' must use handoff in real render');
  console.log('GALLERY_FAST_COVER_DOM_NODE_IDENTITY_AND_SHA_HANDOFF_PASS',model);
 }
