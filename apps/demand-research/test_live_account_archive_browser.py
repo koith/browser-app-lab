@@ -62,7 +62,7 @@ def verify(engine, *, label, width, height):
         assert labels and all("https://" not in text for text in labels), (
             "archive account selector still displays raw profile URLs"
         )
-        selected_option=chooser.locator("option:checked").inner_text()
+        selected_option=chooser.locator("option:checked").text_content() or ""
         assert readable["display_name"].strip() in selected_option, (
             "saved nickname is missing from actual account picker"
         )
