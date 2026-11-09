@@ -47,8 +47,8 @@ const path=require('path');
   assert.ok(hud.empty.every(x=>!x.hasImg&&x.button==='DIV'),'unoccupied source pane cannot show a fake portrait');
   assert.deepEqual(hud.occupied.map(x=>x.id),hud.roster,'original displayed chessmen are actual match party, in role order');
   assert.ok(hud.occupied.every(x=>x.button==='BUTTON'&&
-   (x.source.startsWith('./original/CardData/chm_')||x.source.includes('/original/OBS/'))&&x.text.length>0),
-   'actual enrolled source CardData remains fallback while reviewed front OBS full bodies replace facial previews');
+   (x.source.includes('/original/IMG/avatarback.png')||x.source.includes('/original/OBS/'))&&x.text.length>0),
+   'source CHR bodies or authentic IMG card backs replace fabricated facial previews');
   assert.equal(hud.side,'flex','source 800x600 game shows its dedicated right side UI');
   assert.ok(hud.originalBackground.includes('original/IMG/avatarback.png'),'real source 4LEAF blue atlas used');
   assert.ok(hud.rect.x>=hud.sceneRect.right-194&&hud.rect.right<=hud.sceneRect.right+2, 'the original four chessmen overlay only the rightmost 193px of the 800px scene below the game field');
@@ -56,7 +56,7 @@ const path=require('path');
   assert.ok(hud.rect.bottom>hud.sidebarRect.bottom-22,'real four-up chessmen dock at bottom of game side rail');
   assert.equal(hud.itemPanel,'none','fabricated item-card strip no longer replaces source chessmen grid');
   await page.waitForFunction(()=>[...document.querySelectorAll('#dice-native-party .occupied img')].every(img=>img.complete&&img.naturalWidth>20),null,{timeout:20000});
-  assert.equal(await page.locator('#dice-native-party .occupied img').count(),hud.roster.length,'CardData images are real recovered files');
+  assert.equal(await page.locator('#dice-native-party .occupied img').count(),hud.roster.length,'verified source CHR or IMG cardback images decode');
 
   await page.locator('#dice-native-party .occupied').first().click();
   assert.ok(await page.locator('#modal:not(.hidden)').isVisible(),'clicking a real portrait shows its actual underlying card statistics');
