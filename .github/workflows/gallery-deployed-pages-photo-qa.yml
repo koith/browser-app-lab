@@ -13,12 +13,17 @@ on:
     paths:
       - '.github/workflows/gallery-deployed-pages-photo-qa.yml'
       - 'apps/gallery-archive/qa_deployed_pages_gallery.py'
+      # A native Pages publish does not reliably deliver workflow_run.
+      # Verify every changed gallery index/UI after its exact source is public.
+      - 'apps/mimmi-gallery/**'
+      - 'apps/yui-gallery/**'
   pull_request:
     paths:
       - '.github/workflows/gallery-deployed-pages-photo-qa.yml'
       - 'apps/gallery-archive/qa_deployed_pages_gallery.py'
 permissions:
   contents: read
+  pages: read
 concurrency:
   group: deployed-real-gallery-browser-check-${{ github.event_name }}-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
@@ -36,12 +41,13 @@ jobs:
     if: |
       (github.event_name == 'workflow_dispatch' ||
       github.event_name == 'pull_request' ||
+      github.event_name == 'push' ||
       (github.event_name == 'workflow_run' &&
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository)))
     runs-on: ubuntu-24.04
-    timeout-minutes: 29
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -53,6 +59,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - name: Wait for the exact native Pages source before testing the real site
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python apps/gallery-archive/pages_single_publisher.py --wait-native
       - name: Prove checkout matches the Pages deployment event
         if: github.event_name == 'workflow_run'
         run: |
