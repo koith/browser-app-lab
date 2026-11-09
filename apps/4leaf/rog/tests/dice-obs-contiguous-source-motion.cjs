@@ -113,8 +113,8 @@ const {chromium}=require('playwright');
      image:pawn.querySelector('.leaf-chess-original-card-fallback')?.getAttribute('src')};
    },card);
    assert.equal(bad.rig,'original-card-portrait-fallback');
-   assert.ok((bad.image?.startsWith('./original/CardData/chm_')||
-     bad.image==='./original/IMG/avatarback.png'));
+   assert.equal(bad.image,'./original/IMG/avatarback.png',
+    'missing OBS2/1222 card cannot borrow an unverified CardData face');
   }
   await page.screenshot({path:'leaf-chr-native-5-frame-rear-walk-real-game.png'});
   assert.deepEqual(errors,[]);
