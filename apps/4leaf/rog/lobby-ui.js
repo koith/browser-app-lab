@@ -271,7 +271,7 @@
   if(!$('map-select').value||$('map-select').selectedIndex<0)$('map-select').selectedIndex=0;
   $('lobby-create').blur();
   renderPlayerSeats();
-  window.__LEAF_DICE_NATIVE__?.focusPart?.('ready');
+  window.__LEAF_DICE_NATIVE__?.focusPart?.('settings');
  }
  function closeCreator(){
   window.__LEAF_DICE_NATIVE__?.closePicker();
