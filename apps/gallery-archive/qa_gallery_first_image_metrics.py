@@ -132,6 +132,15 @@ def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False
           }
           return seen;
         }""", fast_covers)
+        # Once the two SHA-verified paths are identical, the initial network
+        # image must survive the gallery's startup hydration, without a
+        # redundant DOM replacement / duplicate image fetch.
+        handoff = result["fast_cover_handoff"]
+        if handoff["eligible_identical"] > 0:
+            assert handoff["retained"] == handoff["eligible_identical"], (
+                model, "verified first-paint cover was needlessly replaced",
+                handoff,
+            )
         if verify_progressive:
             # Verify the deployed full-photo view actually paginates thousands
             # of saved photos instead of inserting every <img> on mobile load.
