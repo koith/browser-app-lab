@@ -47,7 +47,13 @@ const {chromium}=require('playwright');
    'default hotseat actor must match original CHR publication availability');
   assert.equal(initial.chatAvatar,0,'ChatTown avatars are NOT used on Genesis board');
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-portrait')].every(x=>x.complete&&x.naturalWidth>15),null,{timeout:13000});
-  assert.ok(initial.portraits.every(x=>x.src.startsWith('./original/CardData/chm_')));
+  const originalCardArts=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(p=>
+   window.__ROG_TEST__.imageFor(p.team[0])));
+  assert.deepEqual(initial.portraits.map(x=>x.src),originalCardArts,
+   'original board pawn portrait must belong to the actual player's CHR card');
+  assert.ok(initial.portraits.every(x=>x.src.startsWith('./original/OBS/')||
+    x.src==='./original/IMG/avatarback.png'),
+   'no invented CardData facial-to-CHR identity may appear in game');
   const rig=page.locator('#board-pawns .board-pawn').first();
   assert.equal(await rig.locator('.leaf-chess-head').count(),1);
   assert.equal(await rig.locator('.leaf-chess-arm').count(),2);
@@ -66,7 +72,7 @@ const {chromium}=require('playwright');
   // Genuine source 1096.obs was recovered using the 640-stride RGB RLE
   // decoder. The previous test expected a proxy at c_0096 and would now
   // reject the successful restoration. Only the SIX OBS/OBS2/OBS3 source-
-  // absent card IDs may use honest, labeled CardData static fallbacks.
+  // absent card IDs may use an honest, labeled original IMG cardback.
   const missing=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    const old=m.players[1].team[0];
