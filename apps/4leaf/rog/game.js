@@ -90,26 +90,35 @@ const MAPS={
 const BOT_NAMES=['티치엘','막시민','보리스','루시안','이스핀','시벨린','루시아'];
 const COLORS=['#fff3bf','#91f2d1','#ffb4c4','#abc3ff','#e9b8fb','#ffda80','#ff9bab','#d9efff'];
 const PAWNS=['♞','♜','♛','♝','♟','♙','♕','♗'];
-const PORTRAITS={soldier:12,joan:119,rashid:56,narcia:41,merza:45,iolyn:54,christian:25,saladin:31,damian:101,sherazard:33,ironmask:11,schwarz:22};
-/* CardData/chm_N <-> CHR card id has NO recovered source mapping yet.
-   Audit 2026-11-01: this table was carried over from the fictional roster in
-   ef3df072 (soldier->12, ironmask->11, schwarz->22 ...), not read from CHR.pak,
-   and every other card used the invented formula (sourceId%59)+1, which put
-   another character's face on ~87 cards. The formula is removed. Entries that
-   claimed ONE portrait for TWO different characters (chm_33: 0040/0088,
-   chm_31: 0087/0137) are removed because at least one side is provably wrong.
-   The 7 remaining entries are legacy and UNSOURCED; they stay only until the
-   full CHR record dump (tools/dump-original-dice-data.py) yields a real
-   portrait field. Unmapped cards show the original IMG.pak card back instead
-   of a stranger's face. */
-const SOURCE_PORTRAITS={'0096':12,'0078':48,'0045':8,'0090':23,'0091':11,'0127':40,'0170':22};
+/* CardData/chm_N is authentic art, but the original CHR-card to chm_N
+ * facial identity table has NOT been verified. Earlier seven guesses and
+ * demo-roster portraits MUST NOT impersonate the actual 2002 chessman.
+ * For a real CHR card, show frame 0 of its OWN SHA256-verified CHR +260
+ * original body instead. This is explicitly a full-BODY thumbnail, not
+ * a historically verified CardData face. Genuine missing 0156 stays blank
+ * with the authentic IMG cardback; never borrow another card's original. */
 const NEUTRAL_CARD_ART='./original/IMG/avatarback.png';
-const portraitEvidence=(id)=>{const sid=(CARD_MAP[id]||{}).sourceId;
- return Object.hasOwn(SOURCE_PORTRAITS,sid)?'legacy-roster-unsourced':
-  (Object.hasOwn(PORTRAITS,id)?'legacy-roster-unsourced':'none')};
-const imageFor=(id)=>{const sid=(CARD_MAP[id]||{}).sourceId;
- const n=Object.hasOwn(SOURCE_PORTRAITS,sid)?SOURCE_PORTRAITS[sid]:PORTRAITS[id];
- return n?'./original/CardData/chm_'+n+'.png':NEUTRAL_CARD_ART};
+const originalBodyCardArt=id=>{
+ const record=CARD_MAP[id];
+ if(!record?.sourceId)return null;
+ const body=window.__LEAF_CHR_BODY_MAP__?.resolve?.(record.sourceId);
+ return body?.frames?.find(f=>f.index===0)?.url||null;
+};
+const imageFor=id=>originalBodyCardArt(id)||NEUTRAL_CARD_ART;
+const portraitEvidence=id=>originalBodyCardArt(id)
+ ?'verified-CHR-own-body-not-CardData-portrait':'no-verified-CardData-portrait';
+function assignCardImage(image,id){
+ const src=imageFor(id);
+ image.dataset.cardArtEvidence=portraitEvidence(id);
+ image.onerror=()=>{
+  image.onerror=null;
+  if(src!==NEUTRAL_CARD_ART){
+   image.dataset.cardArtEvidence='original-CHR-image-unavailable/cardback-fallback';
+   image.src=NEUTRAL_CARD_ART;
+  }
+ };
+ image.src=src;
+}
 const townAvatar=(i)=>'./original/Registry/sava'+String([0,82,6,1,85][i%5]).padStart(2,'0')+'.png';
 let remoteAct=false,remoteBattle=null,remoteBattleSequence=0;
 let shopPage=0;
@@ -446,7 +455,7 @@ function drawShop(){
    b.dataset.owned=profile.owned.includes(c.id)?'true':'false';
    b.title=c.name+' · '+c.ability+' · '+c.price.toLocaleString()+'GP · '+(profile.owned.includes(c.id)?'보유':'미보유');
    const art=document.createElement('div');art.className='card-art';
-   const img=document.createElement('img');img.className='pixel-portrait';img.alt=c.name;img.src=imageFor(c.id);art.append(img);
+   const img=document.createElement('img');img.className='pixel-portrait';img.alt=c.name;assignCardImage(img,c.id);art.append(img);
    const name=document.createElement('b');name.textContent=c.name;
    const state=document.createElement('span');state.className='card-state';state.textContent=profile.owned.includes(c.id)?'OWN':'NEW';
    b.append(art,name,state);
@@ -461,7 +470,7 @@ function drawShop(){
    const c=CARD_MAP[id],b=document.createElement('button');b.className='shop-owned-entry';
    b.dataset.cardId=c.id;b.title=c.name+' ('+c.point+'pt)';
    const icon=document.createElement('img');icon.className='shop-owned-portrait';
-   icon.alt='';icon.src=imageFor(c.id);icon.loading='lazy';
+   icon.alt='';assignCardImage(icon,c.id);icon.loading='lazy';
    const name=document.createElement('span');name.className='shop-owned-name';name.textContent=c.name;
    const ability=document.createElement('small');ability.className='shop-owned-ability';ability.textContent=c.ability;
    b.append(icon,name,ability);
@@ -911,8 +920,8 @@ function drawNativeChessmen(){
   slot.className='dice-chessman-slot'+(source?' occupied':' vacant')+(i===3?' reserve':'');
   slot.dataset.teamIndex=String(i);
   slot.dataset.cardId=source?source.id:'';
-  // Original CardData info portrait is independent of the tiny source OBS
-  // actor now painted in the right-party thumbnail.
+  // CardData facial identity is not sourced; the thumbnail and detail may
+  // display the card's own verified source CHR body instead.
   slot.dataset.sourceCardArtwork=source?imageFor(source.id):'';
   slot.setAttribute('aria-label',source?(role+' '+source.name+' 체스맨 정보'):(role+' 비어 있음'));
   if(source){
@@ -982,7 +991,7 @@ function drawNativeChessmen(){
     originalStats.width=164;originalStats.height=125;
     originalStats.alt='원본 4LEAF 체스맨 능력치 패널';
     originalStats.dataset.originalSourceMember='Dice/IMG.pak:stats.png';
-    const portrait=document.createElement('img');portrait.src=imageFor(source.id);
+    const portrait=document.createElement('img');assignCardImage(portrait,source.id);
     portrait.className='dice-native-card-detail-portrait';
     portrait.alt=source.name;portrait.width=58;portrait.height=62;
     media.append(originalStats,portrait);
