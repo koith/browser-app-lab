@@ -404,12 +404,16 @@ async def start_account_index():
         try:
             import github_temp_bundle
             import account_index_bootstrap
-            result=await asyncio.to_thread(
-                account_index_bootstrap.restore_local,INDEX_DB,
-                github_temp_bundle.gateway_key())
-            if result["state"]=="restored":
-                _index_snapshot_info.update(sha256=result["sha256"],
-                    catalog="encrypted_cold_boot",verified=True)
+            # Account status returns refreshing=True during cold boot,
+            # so the existing UI reloads automatically instead of freezing
+            # an initial empty account count at zero.
+            async with _index_lock:
+                result=await asyncio.to_thread(
+                    account_index_bootstrap.restore_local,INDEX_DB,
+                    github_temp_bundle.gateway_key())
+                if result["state"]=="restored":
+                    _index_snapshot_info.update(sha256=result["sha256"],
+                        catalog="encrypted_cold_boot",verified=True)
                 print("ACCOUNT_INDEX_ENCRYPTED_BOOT_SHA_VERIFIED",
                       json.dumps({"accounts":result["accounts"],
                                   "source_rows":result["source_rows"],
