@@ -124,18 +124,30 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
     info={'id':aid,'source':book['source'],'known_web_edition_photos':claimed,
           'publisher_original_numbering_known':False,'individual_files_saved':0,
           'saved_reference_anchors':0,'failures':[],'engine':'public_pagination_with_verified_visual_references'}
-    if len({p['sha256'] for p in previous})>=claimed:
-        # Different public/publisher editions and resized duplicates can exceed
-        # this count without covering all source cuts. This is only a focused
-        # batch deferral, never evidence of a complete saved edition.
-        info['deferred_for_source_coverage_review']=True
-        info['stored_count_alone_is_not_completeness_proof']=True
-        return None,info
     previous_unique=len({p['sha256'] for p in previous})
-    if not previous or previous_unique>40:
-        info['failures'].append('Focused recovery requires an existing low-count saved work');return None,info
-    if claimed-previous_unique>budget:
-        info['failures'].append('Defer whole work to next bounded batch, do not publish a truncated edition');return None,info
+    # Different source/publisher editions may have the SAME number of pictures
+    # while containing DIFFERENT cuts. Stored count alone is never proof of
+    # coverage; use actual decoded same-photo anchors instead of deferring.
+    info['stored_count_alone_is_not_completeness_proof']=True
+    if not previous:
+        info['failures'].append('No saved same-work visual reference');return None,info
+    if budget<1:
+        info['failures'].append('No remaining bounded image budget');return None,info
+    # For very large existing works, read a bounded and deterministic subset
+    # of genuine SHA-verified originals as visual anchors. The complete old
+    # ledger is still used for global SHA deduplication, numbering and preview
+    # ambiguity. Subsampling may lower recall but NEVER reduces the required
+    # three independent positive matches, so it cannot cause mixed work media.
+    by_sha=list({p['sha256']:p for p in reversed(previous)}.values())[::-1]
+    if len(by_sha)>36:
+        spots=set(range(16))
+        spots.update(round(i*(len(by_sha)-1)/19) for i in range(20))
+        ref_photos=[by_sha[i] for i in sorted(spots)]
+    else:
+        ref_photos=by_sha
+    info['reference_photo_slots_total']=previous_unique
+    info['reference_photo_slots_checked']=len(ref_photos)
+    info['reference_sample_bounded']=len(ref_photos)<previous_unique
     refs=[];reference_hashes=set();reference_dir=out/'references'/aid;reference_dir.mkdir(parents=True,exist_ok=True)
     preview_origins={}
     for photo in previous:
@@ -143,7 +155,7 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             preview_origins.setdefault(photo['preview_sha256'],set()).add(photo['sha256'])
     active_reference=None
     try:
-        for photo in previous:
+        for photo in ref_photos:
             # Old ledgers sometimes assign one exact SHA to two numbers. Those
             # are one reference cut, not competing visual matches.
             if photo['sha256'] in reference_hashes:continue
@@ -254,8 +266,14 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
         info['failures'].append('Work withheld: fewer than 3 clear saved-cut anchors')
         return None,info
     if len(pending)>budget:
-        info['failures'].append('Verified missing files exceed remaining bounded batch; defer whole work')
-        return None,info
+        # Publishing a verified subset is safe: source filenames retain their
+        # observed numbers, SHA-verified old originals are never deleted, and
+        # the saved work is explicitly INCOMPLETE. The next run deduplicates
+        # all previously imported source photos by SHA and resumes the rest.
+        info['source_numbers_deferred_by_budget']=[
+            item[0] for item in pending[budget:]]
+        info['verified_missing_cuts_deferred']=len(pending)-budget
+        pending=pending[:budget]
     images=[];next_number=max(p['number'] for p in previous)+1
     for source_number,url,raw,meta,preview,replacement in pending:
         if meta['sha256'] in seen_sha:continue
@@ -275,5 +293,5 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
              'work_identity_saved_cut_anchors':len(anchors),'watermark_review':'site_watermarked_public_edition'}
         images.append(row);seen_sha.add(row['sha256'])
     info['individual_files_saved']=len(images);info['source_files_decoded']=len(decoded)
-    info['source_edition_all_files_accounted_for']=not info['unresolved_source_numbers']
+    info['source_edition_all_files_accounted_for']=(not info['unresolved_source_numbers'] and not info.get('verified_missing_cuts_deferred'))
     return ({'id':aid,'title':book['title'],'expected':None,'complete':False,'images':images} if images else None),info
