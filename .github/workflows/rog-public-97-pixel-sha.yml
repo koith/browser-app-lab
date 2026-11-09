@@ -5,20 +5,41 @@ on:
     paths:
       - '.github/workflows/rog-public-97-pixel-sha.yml'
       - '.github/scripts/check-4leaf-public-97-chr-pixels.cjs'
+      - 'apps/4leaf/rog/app-version.json'
+      - 'apps/4leaf/rog/chr-body-source-map.js'
+      - 'apps/4leaf/rog/original/OBS/**'
   push:
     branches: [main]
     paths:
-      - 'apps/4leaf/rog/app-version.json'
-      - 'apps/4leaf/rog/original/OBS/referenced/chr-bodies-manifest.js'
-      - 'apps/4leaf/rog/original/OBS/action-full/manifest.js'
-      - 'apps/4leaf/rog/original/OBS/action-full-ext/manifest.js'
-      - 'apps/4leaf/rog/original/OBS/obs23-actors/manifest.js'
+      - '.github/workflows/rog-public-97-pixel-sha.yml'
       - '.github/scripts/check-4leaf-public-97-chr-pixels.cjs'
+      - 'apps/4leaf/rog/app-version.json'
+      - 'apps/4leaf/rog/chr-body-source-map.js'
+      - 'apps/4leaf/rog/original/OBS/**'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  premerge-local-source-pixels:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify all archived native actor PNGs against their own manifest SHA256
+        env:
+          FOURLEAF_LOCAL_ONLY: '1'
+        run: node .github/scripts/check-4leaf-public-97-chr-pixels.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fourleaf-premerge-local-all-native-frame-shas
+          path: 4leaf-local-97-source-pixel-audit.json
+          retention-days: 14
   public-source-pixels:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:

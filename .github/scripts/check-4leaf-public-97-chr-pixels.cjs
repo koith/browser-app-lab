@@ -14,6 +14,7 @@ const root=path.resolve(__dirname,'../../apps/4leaf/rog');
 const base=process.env.FOURLEAF_TEST_URL||
  'https://koith.github.io/browser-app-lab/apps/4leaf/rog/';
 const digest=data=>crypto.createHash('sha256').update(data).digest('hex');
+const localOnly=process.env.FOURLEAF_LOCAL_ONLY==='1';
 const manifestPaths=[
  'original/OBS/action-full/manifest.js',
  'original/OBS/action-full-ext/manifest.js',
@@ -94,6 +95,22 @@ async function verify(item){
  throw last;
 }
 (async()=>{
+ if(localOnly){
+  // PR-only integrity check does not demand that unmerged artwork already
+  // appear on production Pages. The source body/frame/PNG checks above
+  // still covered EVERY native frame and enforce each per-frame SHA256.
+  report.checkedFrames=samples.length;
+  report.checkedCards=records.filter(x=>!x.missing).length;
+  report.localOnly=true;
+  fs.writeFileSync('4leaf-local-97-source-pixel-audit.json',
+   JSON.stringify({checkedFrames:report.checkedFrames,checkedCards:report.checkedCards,
+    source:report.source,missing:report.missing,version:report.version},null,2)+'\n');
+  assert.equal(report.checkedCards,97);
+  assert.ok(report.checkedFrames>=1000);
+  console.log('LOCAL_ALL_97_NATIVE_FRAMES_SOURCE_SHA256_PASS',JSON.stringify({
+   cards:report.checkedCards,frames:report.checkedFrames,missing:report.missing}));
+  return;
+ }
  const jobs=Array.from({length:concurrency},async()=>{
   while(pos<samples.length){
    const sample=samples[pos++];
