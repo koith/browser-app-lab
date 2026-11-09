@@ -8,18 +8,19 @@ on:
       - ".github/workflows/intersection-index-live-repair.yml"
       - "apps/demand-research/account_index_live_repair.py"
       - "apps/demand-research/account_index_bootstrap.py"
+  pull_request:
+    paths:
+      - ".github/workflows/intersection-index-live-repair.yml"
+      - "apps/demand-research/account_index_bootstrap.py"
+      - "apps/demand-research/account_index_live_repair.py"
+      - "apps/demand-research/test_account_index_bootstrap.py"
+      - "apps/demand-research/gateway.py"
   workflow_run:
     workflows:
       - "INTERSECTION — Private Public-Account Index Hourly Sync"
     types: [completed]
     branches: [main]
 
-pull_request:
-    paths:
-      - ".github/workflows/intersection-index-live-repair.yml"
-      - "apps/demand-research/account_index_bootstrap.py"
-      - "apps/demand-research/account_index_live_repair.py"
-      - "apps/demand-research/test_account_index_bootstrap.py"
 
 permissions:
   contents: read
