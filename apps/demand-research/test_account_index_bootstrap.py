@@ -129,3 +129,55 @@ def test_existing_sealed_daily_checkpoint_is_readback_verified_not_overwritten(
     result=boot.publish_daily(wrapped,key,token="synthetic-github-token")
     assert result["new_upload"] is False
     assert result["accounts"]==1 and result["remote_sha256"] is True
+
+
+
+def test_cold_boot_uses_only_fixed_encrypted_github_url_without_rest_metadata(
+        tmp_path,monkeypatch):
+    from urllib.error import HTTPError
+    raw=fixture_db(tmp_path).read_bytes()
+    key=b"z"*32
+    sealed=boot.encrypt_snapshot(raw,key,"42547929782",hashlib.sha256(raw).hexdigest())
+    today=datetime(2026,11,9,tzinfo=timezone.utc)
+    urls=[]
+    class Download:
+        def __enter__(self):
+            return self
+        def __exit__(self,*args):
+            pass
+        def read(self,limit):
+            assert limit<=boot.MAX_CIPHER+1
+            return sealed
+    def fake_open(request,timeout=30):
+        url=request.full_url
+        urls.append(url)
+        assert url.startswith(
+            "https://github.com/koith/browser-app-lab/releases/download/")
+        assert url.endswith("/index.enc")
+        if "20261109" in url:
+            raise HTTPError(url,404,"not yet present",{},None)
+        return Download()
+    monkeypatch.setattr(boot,"urlopen",fake_open)
+    monkeypatch.setattr(boot,"release_tag",lambda *args,**kwargs:
+                        pytest.fail("Cold boot must not use anonymous REST API"))
+    found=boot.find_latest_cipher(key,now=today,lookback_days=3)
+    assert found["accounts"]==1
+    assert found["age_days"]==1
+    assert found["source_rows"]==1
+    assert len(urls)==2
+
+
+def test_cold_boot_rejects_bad_tag_and_bad_immutable_cipher(monkeypatch):
+    with pytest.raises(ValueError):
+        boot._direct_cipher("https://evil.invalid/index.enc")
+    class Fake:
+        def __enter__(self):
+            return self
+        def __exit__(self,*args):
+            pass
+        def read(self,_):
+            return b"not ciphertext"
+    monkeypatch.setattr(boot,"urlopen",lambda *args,**kwargs:Fake())
+    with pytest.raises(ValueError):
+        boot.find_latest_cipher(b"q"*32,
+            now=datetime(2026,11,9,tzinfo=timezone.utc),lookback_days=1)
