@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'apps/gallery-archive/qa_cloudflare_pages_browser.py'
+      - 'apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs'
       - '.github/workflows/gallery-cloudflare-deployed-release.yml'
   push:
     branches: [main]
     paths:
       - 'apps/gallery-archive/qa_cloudflare_pages_browser.py'
+      - 'apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs'
       - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/yui-gallery/owner-media.js'
       - 'apps/mimmi-gallery/cloudflare-gateway.json'
@@ -38,4 +40,11 @@ jobs:
       - name: Verify exact deployed Pages gallery, original SHA, native image and lightbox
         run: |
           python -m py_compile apps/gallery-archive/qa_cloudflare_pages_browser.py
-          python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser '${{ matrix.browser }}'
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # PR changes are not deployed: overlay the candidate transport
+            # while still fetching original pixels from the real Worker.
+            python apps/gallery-archive/qa_cloudflare_pages_browser.py --all-p0 --browser '${{ matrix.browser }}'
+          else
+            # Postmerge: assert exact public Pages bytes before any claim of PASS.
+            python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser '${{ matrix.browser }}'
+          fi
