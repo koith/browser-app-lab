@@ -91,12 +91,50 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
+          # G-03/G-05/G-06: previously only two source works per model
+          # and 40 potential files were ever visited. Prioritize registered
+          # owner works with evidence of missing FULL public cuts, not
+          # unsourced titles or a crawler-created photo count.
+          # Each work ID below has a separately registered source page.
           if [[ "$MODEL" == "mimmi" ]]; then
-            focus=(--album-id v2ph-actor-a887785a --album-id v2ph-actor-a93xn3oa)
+            focus=(
+              --album-id v2ph-actor-z7exoo5z
+              --album-id v2ph-actor-z76xe74a
+              --album-id v2ph-actor-a8n8n85a
+              --album-id v2ph-actor-an65656a
+              --album-id v2ph-actor-z6exx6ma
+              --album-id v2ph-actor-z4ox65ea
+              --album-id v2ph-sukajan-gal
+              --album-id v2ph-actor-z63984ma
+              --album-id v2ph-actor-a54e445z
+              --album-id v2ph-actor-zo5n754z
+              --album-id djawa-your-panties
+              --album-id djawa-my-summer-vacation-vol-5
+            )
           else
-            focus=(--album-id djawa-privaty-public-samples --album-id public-yui-sns)
+            focus=(
+              --album-id yui-chinokun-illustar-2026-public
+              --album-id public-yui-sns
+              --album-id inven-public-photos
+              --album-id djawa-privaty-public-samples
+              --album-id artgravia-693-yui-public-samples
+              --album-id artgravia-639-yui-public-samples
+              --album-id artgravia-650-yui-public-samples
+              --album-id artgravia-670-yui-public-samples
+              --album-id artgravia-677-yui-public-samples
+              --album-id artgravia-684-yui-public-samples
+              --album-id yui-summer-public-samples
+              --album-id yui-meow-public-samples
+            )
           fi
-          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 40 --max-pages 4 "${focus[@]}"
+          # Rotate actual registered pagination, never guess protected URLs.
+          # Every candidate still needs real bytes, optical/person/work checks,
+          # safe same-work numbering, immutable owner writes, remote SHA and
+          # actual deployed photo decoding before it counts as acquired.
+          python apps/gallery-archive/direct_photo_pipeline.py \
+            --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" \
+            --out "$RUNNER_TEMP/stage" --max-new 120 --max-pages 8 \
+            --page-cycle "$((GITHUB_RUN_NUMBER % 7))" "${focus[@]}"
       - name: Merge independently decoded originals without replacing owner files
         id: delta
         shell: bash
