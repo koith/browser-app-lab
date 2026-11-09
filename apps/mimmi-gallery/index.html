@@ -329,16 +329,34 @@ async function retryOwnerImagesIfReady(){
   ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,OWNER_RECOVERY_COOLDOWN_MS);
 }
 function refreshOwnerFailuresOnFocus(){
- if(document.hidden||!ownerRecoveryPending.size)return;
+ if(document.hidden)return;
+ // A longer Worker outage can exhaust one bounded retry burst. On the
+ // user's next focus/scroll, permit a NEW burst for the same still-failed,
+ // visible original without any background polling or page reload.
+ const now=Date.now();
+ document.querySelectorAll('.album img[data-owner],.photo img[data-owner]').forEach(img=>{
+  if(!img.isConnected||img.naturalWidth>0||!ownerRetryVisible(img))return;
+  const s=ownerRecoveryState.get(img);
+  if(s?.attempts>=OWNER_RECOVERY_MAX_ATTEMPTS&&now-s.last>=15000){
+   ownerRecoveryState.delete(img);
+   queueOwnerImageRecovery(img);
+  }
+ });
+ if(!ownerRecoveryPending.size)return;
  if(ownerRecoveryTimer!==null)clearTimeout(ownerRecoveryTimer);
  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,150);
 }
 document.addEventListener('visibilitychange',refreshOwnerFailuresOnFocus);
 window.addEventListener('focus',refreshOwnerFailuresOnFocus);
 window.addEventListener('online',refreshOwnerFailuresOnFocus);
+let lastOwnerRecoveryScrollScan=0;
 window.addEventListener('scroll',()=>{
  if(ownerRecoveryPending.size&&ownerRecoveryTimer===null)
   ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,400);
+ if(Date.now()-lastOwnerRecoveryScrollScan>=3000){
+  lastOwnerRecoveryScrollScan=Date.now();
+  refreshOwnerFailuresOnFocus();
+ }
 },{passive:true});
 
 function registerImageHealth(url,ok){
