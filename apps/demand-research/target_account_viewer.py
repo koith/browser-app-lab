@@ -439,7 +439,7 @@ def create_router(auth):
                         continue
                     data.append({"key":name[:-5],"platform":entry["platform"],
                                  "profile_url":sanitize_safe_link(entry.get("profile_url")),
-                                 **account_picker_details(entry)})
+                                 **account_picker_details(entry,account_cloud(root,entry))})
                 except (RuntimeError,ValueError,KeyError,TypeError):
                     continue
             seen={item["key"] for item in data}
