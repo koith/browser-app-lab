@@ -693,7 +693,8 @@ Promise.all([
 
  const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=archivedCount+'장 · 실제 저장본';
- render();
+ // applyRoute() calls setMode() and renders once; a prior render would
+ // discard the prepaint <img> after exact-SHA handoff.
  const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={yui:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);
 
  // The versioned owner-index.json on Pages is the source of truth for
