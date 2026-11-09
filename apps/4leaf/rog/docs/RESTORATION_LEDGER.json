@@ -2104,7 +2104,7 @@
       "title": "동일 상태 원본 비교·배포 수용",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "2026-11-08 공개 beta71/v158 Pages 6종 체스맨 원본 2엔진 실제 브라우저 E2E PASS, 원본 JS/SW SHA256 일치. 98종 로컬 브라우저 전수 CI PASS. 동일 원작 외형/2004 역사적 행동·실기기 iPhone 최종 수용 미완료.\n[이전 작업 이력] Chromium/PWA/GitHub Pages 기능 QA 존재, 전체 원작 외형과 iOS 검증 미통과",
+      "current": "2026-11-08 공개 beta71/v158 Pages 6종 체스맨 원본 2엔진 실제 브라우저 E2E PASS, 원본 JS/SW SHA256 일치. 98종 로컬 브라우저 전수 CI PASS. 동일 원작 외형/2004 역사적 행동·실기기 iPhone 최종 수용 미완료.\n[이전 작업 이력] Chromium/PWA/GitHub Pages 기능 QA 존재, 전체 원작 외형과 iOS 검증 미통과\n2026-11-09: #920 original WorldMap→first real dice turn in four real browser journeys including PWA return PASS; #932 bounded cold-load recovery and public ChatRoom/WebRTC Pages QA PASS. Historical EXE pose, D4/D6 3D and physical iOS remain UNVERIFIED.",
       "acceptance": [
         "실물 2004년 캡처 동일 상태 800x600 정량 비교와 모바일/WebKit·Pages·온라인 회귀 통과"
       ],
@@ -2112,7 +2112,7 @@
         "apps/4leaf/rog/tests/dice-original-visual-qa.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-11-09",
       "verifiedAcceptance": null
     },
     {
@@ -2260,7 +2260,7 @@
       "title": "원작 복원 최종 화면·기능 수용 게이트",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.; 2026-10-19 웹앱 버전 0.84.0-beta.1 베타 식별, 오프라인 PWA v84 프리캐시, 역사적 2004 원본과 구분. 동일 SHA 전체 CI 배포 게이트 추가, 원작 모든 장면 동일성은 여전히 미완료.",
+      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.; 2026-10-19 웹앱 버전 0.84.0-beta.1 베타 식별, 오프라인 PWA v84 프리캐시, 역사적 2004 원본과 구분. 동일 SHA 전체 CI 배포 게이트 추가, 원작 모든 장면 동일성은 여전히 미완료.\n2026-11-09: #932 one-time automatic bootstrap retry vs permanent-failure manual retry verified via real mobile Chromium fault injection; original dynamic game and ChatRoom/WebRTC postmerge Pages CI PASS. Full historical/physical iOS gate pending.",
       "acceptance": [
         "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
       ],
@@ -2283,7 +2283,7 @@
         "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-11-02",
+      "lastReviewed": "2026-11-09",
       "verifiedAcceptance": null
     },
     {
@@ -3488,7 +3488,7 @@
       "title": "아이폰 Safari 세로·가로 4LEAF HUD 오버랩 재검증",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "2026-11-08 WebKit/iPhone 크기 자동 브라우저 QA와 공개 원본 체스맨 6종 WebKit 검증 PASS; 실제 물리 iPhone Safari/PWA 검증은 미수행.\n[이전 작업 이력] 2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.; WebKit 가상 iPhone 390x844->844x390 실제 회전 후 104개 DMP TIS(145x97), 2명 원본 OBS, 물리 ROLL 버튼 클릭, 턴 이동 미변경을 검증하는 E2E 추가. 실제 물리 iOS 단말/사파리 주소줄 환경은 미검증. | 2026-11-02 public beta.39 QA: chat scroll physical wheel retry test now actually retries four times before reporting failure; runtime chat code unchanged, public revalidation pending.",
+      "current": "2026-11-08 WebKit/iPhone 크기 자동 브라우저 QA와 공개 원본 체스맨 6종 WebKit 검증 PASS; 실제 물리 iPhone Safari/PWA 검증은 미수행.\n[이전 작업 이력] 2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.; WebKit 가상 iPhone 390x844->844x390 실제 회전 후 104개 DMP TIS(145x97), 2명 원본 OBS, 물리 ROLL 버튼 클릭, 턴 이동 미변경을 검증하는 E2E 추가. 실제 물리 iOS 단말/사파리 주소줄 환경은 미검증. | 2026-11-02 public beta.39 QA: chat scroll physical wheel retry test now actually retries four times before reporting failure; runtime chat code unchanged, public revalidation pending.\n2026-11-09: #920 WebKit mobile and Chromium mobile/PWA returning first-roll E2E verified in browsers. Physical iPhone Safari/PWA not accessed, no physical PASS claim.",
       "acceptance": [
         "실제 iOS 또는 공개 Safari 실행 증빙 포함; 390/430/768/800+ 화면의 조작/텍스트/버튼 가림 0건"
       ],
@@ -3505,7 +3505,7 @@
         "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-02",
+      "lastReviewed": "2026-11-09",
       "verifiedAcceptance": null,
       "dependencies": [
         "QA-02",
@@ -9503,6 +9503,19 @@
         "ACT-03"
       ],
       "details": "2026-11-09 VERIFIED: Native CHR all-frame public QA PR #908 merged dfe202c7611fc963befd16d2123371610cf0da67. HEAD real published GitHub Pages scan run 42539802998 success: source original 97 recovered CHR actors, all 3760 declared native PNG frames individually HTTP 200, valid PNG magic and source-manifest-local-live SHA256 byte identity, 0 failures. 0156 OBS2/1222 remains unrecovered. Main-push exact-source full scan 42540185789 success. Permanent CI regression trigger fix PR #910 merged c6cb86f9184a5eb5be2ac8a69ade3ba828c61c33: PR local-only 97 / 3760 native source SHA passed on run 42540986160, public Pages SHA run 42541381492 passed again (97,3760,failures=[]). On future source PNG/manifest modifications, premerge local source audit runs and postmerge public frame audit runs. This proves source-pixel fidelity, NOT historical EXE pose semantics or D4/D6 3D or physical iPhone real-hardware fidelity. All 60 canonical task states unchanged (13 done, 43 in progress, 4 todo) pending full original acceptance."
+    },
+    {
+      "seq": 446,
+      "date": "2026-11-09",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261109-4LEAF-ALL-PENDING-LIVE-ACCEPTANCE",
+      "taskIds": [
+        "M09",
+        "P0-RELEASE",
+        "QA-03",
+        "CHT-02"
+      ],
+      "details": "VERIFIED 2026-11-09: #911 merged 8221eb60dc9c9ca668fcb6e705e6ee87f9d82e75 with 97 original CHR and all 3760 original PNG published pixel SHA evidence committed (existing #908/#910 full public QA); #920 merged ada42772da2301d48c6696268814b2e67178414e after 23 CI success/1 skipped/0 failure and all four genuine real-click WorldMap→channel→room→READY→first native roll Chromium desktop/mobile, WebKit mobile, and service-worker-controlled returning mobile journeys PASS; #932 merged 3566e3c69627f8f9e6c8b996b437c9de8164e355 after 28 CI success/1 skipped/0 failure. #932 true mobile Playwright script failure injection recovered after one reload with real ChatTown click; persistent failure showed bounded Korean retry, no infinite reload; chat and WebRTC inaccurate static labels corrected. Postmerge source test 42605265374 PASS; public release and ChatRoom/WebRTC/screen source QA on latest common descendant main 95ed043ca1cdac257b60a23fc2f9775067bc470f success, e.g. 42607624944 ChatRoom, 42607624973 WebRTC, 42607625172 original stats. Does NOT establish historical original 2004 exact scene/animation/3D dice fidelity or physical iPhone Safari/PWA PASS. Retain 60 task states 13 done/43 in_progress/4 todo."
     }
   ],
   "restorationPriority": {
