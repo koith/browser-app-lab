@@ -226,6 +226,60 @@ def exercise_real_owner_cover_after_failure(browser,model,failure_mode):
         ctx.close()
 
 
+
+def exercise_real_pages_static_cover_after_two_503(browser,model):
+    """Two simulated Pages 503s, third GET and decoded pixels from actual Pages."""
+    import re
+    import hashlib
+    ctx=browser.new_context(viewport={"width":390,"height":844},
+        is_mobile=True,has_touch=True,service_workers="block",locale="ko-KR")
+    page=ctx.new_page()
+    root=f"{BASE}/{model}-gallery/"
+    html=Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
+    matched=re.search(r'data-fast-sha="([a-f0-9]{64})".*?<img src="(stored-albums/[^"]+)"',
+                      html,re.S)
+    assert matched,(model,'no SHA-tagged first-paint cover to retry')
+    sha,relative=matched.groups()
+    state={"failed":0,"served_real":0,"queries":[]}
+    def inject(route):
+        url=urlsplit(route.request.url)
+        if not url.path.endswith("/"+relative):
+            route.continue_()
+            return
+        state["queries"].append(url.query)
+        if state["failed"]<2:
+            state["failed"]+=1
+            route.fulfill(status=503,body="controlled local saved-cover 503",
+                headers={"Cache-Control":"no-store"})
+        else:
+            state["served_real"]+=1
+            route.continue_()
+    page.route(root,lambda route:route.fulfill(status=200,content_type="text/html",body=html))
+    page.route("**/stored-albums/**",inject)
+    try:
+        response=page.goto(root,wait_until="domcontentloaded",timeout=80000)
+        assert response and response.status==200
+        page.wait_for_function("""relative => {
+          const imgs=[...document.querySelectorAll('#albumgrid img')];
+          return imgs.some(img => img.complete && img.naturalWidth>100 &&
+            new URL(img.currentSrc||img.src,location.href).pathname.endsWith('/'+relative));
+        }""",arg=relative,timeout=45000)
+        assert state["failed"]==2 and state["served_real"]>=1,state
+        assert len(set(state["queries"]))>=3,("same-source cached error replay",state)
+        actual=ctx.request.get(root+relative,timeout=45000)
+        assert actual.status==200,(model,'real Pages committed cover unavailable',actual.status)
+        assert hashlib.sha256(actual.body()).hexdigest()==sha,(model,'committed cover SHA changed')
+        print('GALLERY_REAL_SAVED_PAGES_THUMBNAIL_RECOVERED_AFTER_TWO_503',json.dumps({
+          "model":model,"browser":browser.browser_type.name,
+          "real_image_SHA":sha[:12],"injected_HTTP_503":state["failed"],
+          "separate_local_cache_keys":len(set(state["queries"])),
+          "live_pages_file_sha_verified":True,
+          "native_browser_image_decoded":True,
+          "physical_iphone_hardware_tested":False},sort_keys=True),flush=True)
+    finally:
+        ctx.close()
+
+
 if __name__=="__main__":
     assert is_target_owner_media("https://archive.example/api/v1/media/yui/teddy-bear97/13/original?h=x","yui","teddy-bear97")
     assert is_target_owner_media("https://archive.example/api/mimmi/media/v2ph-actor-a8n8n85a/11/original","mimmi","v2ph-actor-a8n8n85a")
@@ -241,5 +295,6 @@ if __name__=="__main__":
                 for album,index in TARGET[model]:exercise(browser,model,album,index)
                 for failure_mode in ("sign503","config503"):
                     exercise_real_owner_cover_after_failure(browser,model,failure_mode)
+                exercise_real_pages_static_cover_after_two_503(browser,model)
         finally:
             browser.close()
