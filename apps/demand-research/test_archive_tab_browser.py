@@ -20,6 +20,13 @@ HTML="""<!doctype html><html lang="ko"><head><meta charset="utf-8">
   <button id="archiveModeAuto" role="tab" aria-selected="false">자동 저장 게시글</button>
   <button id="archiveModeAccounts" role="tab" aria-selected="false">지정 계정 백업</button>
  </div>
+ <div id="archiveAccountPicker" hidden>
+ <label for="archiveQuickSelect">보관된 계정</label>
+ <span id="archiveQuickCount"></span>
+ <select id="archiveQuickSelect" disabled><option value="">보관 목록 확인 중</option></select>
+ <input id="archiveQuickSearch" type="search" hidden>
+ <p id="archiveQuickStatus"></p>
+</div>
  <p id="archiveHubStatus"></p>
  <div id="archiveHubActions" hidden><button id="archiveHubReload">새로고침</button>
  <a id="archiveHubFullView"></a></div>
@@ -46,6 +53,15 @@ def exercise(browser_type,label):
                     route.fulfill(status=200 if allowed["value"] else 401,
                       content_type="application/json",
                       body='{"connected":true}' if allowed["value"] else '{"detail":"Private link required"}')
+                elif parsed.path=="/api/account-archives":
+                    requests.append("choices")
+                    route.fulfill(status=200,content_type="application/json",
+                      body='{"accounts":['
+                        '{"key":"'+KEY+'","platform":"bluesky","display_name":"코코",'
+                        '"handle":"coco.bsky.social","profile_snapshot_verified":true},'
+                        '{"key":"mastodon-'+('b'*40)+'","platform":"mastodon",'
+                        '"display_name":"마루","handle":"maru@example.test",'
+                        '"profile_snapshot_verified":true}]}')
                 elif parsed.path=="/api/archive-overview":
                     requests.append("overview")
                     route.fulfill(status=200,content_type="application/json",
@@ -74,14 +90,23 @@ def exercise(browser_type,label):
             if private:
                 page.locator("#archiveHubFrameBox").wait_for(state="visible",timeout=12000)
                 iframe=page.locator("#archiveHubFrame")
-                assert iframe.get_attribute("src")=="/account-archive?account="+KEY
+                assert iframe.get_attribute("src")=="/account-archive?embedded=1&account="+KEY
                 page.frame_locator("#archiveHubFrame").locator("#archived-posts").wait_for(
                     state="visible",timeout=12000)
                 page.evaluate("""() => window.INTERSECTION_openArchive('mastodon-'+('b'.repeat(40)))""")
                 assert page.locator("#archiveHubFrame").get_attribute("src")==(
-                    "/account-archive?account=mastodon-"+"b"*40)
+                    "/account-archive?embedded=1&account=mastodon-"+"b"*40)
                 assert "account=mastodon-" in page.url
                 assert "viewer" in requests
+                page.locator("#archiveQuickSelect option").first.wait_for(timeout=20000)
+                page.wait_for_function(
+                    "() => document.querySelector('#archiveQuickCount')"
+                    "?.textContent?.includes('2개')",timeout=20000)
+                labels=page.locator("#archiveQuickSelect option").all_text_contents()
+                assert "코코(@coco.bsky.social)" in labels
+                assert "마루(@maru@example.test)" in labels
+                assert all("https://" not in text for text in labels)
+                assert requests.count("choices")==1, "account list must preload once"
                 page.locator("#archiveHubStatus").get_by_text(
                     "ZIP 파일 후보 2개 발견",exact=False).wait_for(timeout=12000)
                 assert "overview" in requests
@@ -95,10 +120,15 @@ def exercise(browser_type,label):
                     "저널 파일 후보 3개 발견",exact=False).wait_for(timeout=12000)
                 assert page.locator("#archiveHubFullView").get_attribute("href")=="/auto-archive"
                 page.locator("#archiveModeAccounts").click()
-                assert page.locator("#archiveHubFrame").get_attribute("src")=="/account-archive"
+                assert page.locator("#archiveHubFrame").get_attribute("src")==(
+                    "/account-archive?embedded=1&account=mastodon-"+"b"*40)
                 page.evaluate("window.INTERSECTION_openArchive('bluesky-'+('a'.repeat(40)))")
                 assert page.locator("#archiveHubFrame").get_attribute("src")==(
-                  "/account-archive?account="+KEY)
+                  "/account-archive?embedded=1&account="+KEY)
+                page.locator("#archiveQuickSelect").select_option("mastodon-"+("b"*40))
+                assert page.locator("#archiveHubFrame").get_attribute("src")==(
+                    "/account-archive?embedded=1&account=mastodon-"+"b"*40)
+                assert requests.count("choices")==1
             else:
                 assert page.locator("#archiveHubFrameBox").is_hidden()
                 assert page.locator("#archiveHubFrame").get_attribute("src") is None
