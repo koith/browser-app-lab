@@ -1,0 +1,115 @@
+name: 4LEAF published 98 CHR real browser exhaustive acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-public-98-actor-sweep.yml'
+      - 'apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/app-version.json'
+      - 'apps/4leaf/rog/native-card-action-sequences.js'
+      - 'apps/4leaf/rog/chr-body-source-map.js'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/original/OBS/referenced/chr-bodies-manifest.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: published-98-actors-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  source-actors-real-pages:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 52
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require exact deployed beta and original CHR source bytes
+        env:
+          FOURLEAF_PUBLIC_BASE: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: |
+          node <<'JS'
+          const fs=require('node:fs');
+          const crypto=require('node:crypto');
+          const assert=require('node:assert/strict');
+          const root='apps/4leaf/rog/';
+          const base=process.env.FOURLEAF_PUBLIC_BASE;
+          const files=[
+            'app-version.json','sw.js','chr-body-source-map.js',
+            'native-card-action-sequences.js','genesis-chessman-actors.js',
+            'original/OBS/referenced/chr-bodies-manifest.js'
+          ];
+          const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
+          const expected=files.map(name=>({
+            name,sha:digest(fs.readFileSync(root+name))
+          }));
+          (async()=>{
+            const end=Date.now()+12*60*1000;
+            let last='not checked';
+            while(Date.now()<end){
+              try{
+                const checks=await Promise.all(expected.map(async ({name,sha})=>{
+                  const response=await fetch(base+name+'?source_audit='+Date.now(),{
+                    cache:'no-store',headers:{'Cache-Control':'no-cache'},
+                    signal:AbortSignal.timeout(20000)
+                  });
+                  if(!response.ok)throw Error(name+' HTTP '+response.status);
+                  const observed=digest(Buffer.from(await response.arrayBuffer()));
+                  return {name,matched:observed===sha,observed};
+                }));
+                if(checks.every(x=>x.matched)){
+                  const version=JSON.parse(fs.readFileSync(root+'app-version.json','utf8'));
+                  assert.match(version.version,/^0\.86\.0-beta\.\d+$/);
+                  console.log('PUBLISHED_98_CHR_SOURCES_EXACT_SHA_VERIFIED',
+                    version.version,version.pwaCache,JSON.stringify(checks));
+                  return;
+                }
+                last=checks.filter(x=>!x.matched).map(x=>x.name).join(',');
+              }catch(error){last=String(error?.message||error);}
+              console.log('PUBLISHED_98_CHR_NOT_READY',last);
+              await new Promise(resolve=>setTimeout(resolve,12000));
+            }
+            throw Error('Public Pages did not match all 6 original-source files: '+last);
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          JS
+      - name: Install real Chromium/WebKit
+        run: |
+          npm install --no-save playwright
+          npx playwright install "${{ matrix.engine }}" --with-deps
+      - name: 'Audit 98 cards: board poses, source frames, real duel both sides'
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          LEAF_AUDIT_OUT: fourleaf-public-98-${{ matrix.engine }}.json
+        run: node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
+      - name: Summarize complete 98-card public source acceptance
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+        run: |
+          node <<'JS'
+          const fs=require('node:fs'),assert=require('node:assert/strict');
+          const engine=process.env.FOURLEAF_BROWSER;
+          const report=JSON.parse(fs.readFileSync('fourleaf-public-98-'+engine+'.json','utf8'));
+          assert.equal(report.summary.cards,98);
+          assert.equal(report.summary.recoveredBodies,97);
+          assert.deepEqual(report.summary.unrecovered,['0156=null']);
+          assert.deepEqual(report.summary.cardsWithDefects,[]);
+          assert.equal(report.summary.defectCount,0);
+          assert.deepEqual(report.summary.pageErrors,[]);
+          console.log('LIVE_PUBLIC_98_CHR_FULL_ACCEPTANCE_PASS',engine,JSON.stringify(report.summary));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourleaf-public-98-evidence-${{ matrix.engine }}
+          path: fourleaf-public-98-${{ matrix.engine }}.json
+          if-no-files-found: ignore
+          retention-days: 14
