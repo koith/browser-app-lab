@@ -232,7 +232,7 @@ function retryCommittedImageError(event){
   if(img.complete&&img.naturalWidth>0)return;
   const fresh=new URL(canonical);
   fresh.searchParams.set('gtry',String(state.attempts));
-  img.removeAttribute('src');img.src=fresh.href;
+  img.hidden=false;img.removeAttribute('src');img.src=fresh.href;
  },[400,1200,3000,6500][attempts]);
 }
 document.addEventListener('error',retryCommittedImageError,true);
@@ -258,7 +258,7 @@ function retryCommittedVisibleOnFocus(){
   if(img.naturalWidth>0||!img.getAttribute('src'))return;
   const state=committedImageRetries.get(img);
   if(!state||state.attempts<4||now-state.last<10000)return;
-  const box=img.getBoundingClientRect();
+  const box=(img.closest('.album,.photo')||img).getBoundingClientRect();
   if(box.bottom<-120||box.top>innerHeight+200)return;
   committedImageRetries.delete(img);
   retryCommittedImageError({target:img,stopImmediatePropagation(){}});
@@ -375,7 +375,7 @@ function recoverSavedCover(img){
 document.addEventListener('load',e=>{
  const img=e.target;
  if(img instanceof HTMLImageElement&&img.closest('.album,.photo')&&img.naturalWidth>=100)
-  {registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo,.album')?.classList.remove('broken-source');ownerRecoveryPending.delete(img);ownerRecoveryState.delete(img);}
+  {img.hidden=false;registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo,.album')?.classList.remove('broken-source');ownerRecoveryPending.delete(img);ownerRecoveryState.delete(img);}
 },true);
 document.addEventListener('error',e=>{
  const img=e.target,container=img instanceof HTMLImageElement?img.closest('.album,.photo'):null;
