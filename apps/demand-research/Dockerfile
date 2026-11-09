@@ -28,6 +28,7 @@ COPY apps/demand-research/demand_archive.py /app/demand_archive.py
 COPY apps/demand-research/social_sources.py /app/social_sources.py
 COPY apps/demand-research/account_index.py /app/account_index.py
 COPY apps/demand-research/account_index_job.py /app/account_index_job.py
+COPY apps/demand-research/account_index_bootstrap.py /app/account_index_bootstrap.py
 COPY apps/demand-research/account_groups.py /app/account_groups.py
 COPY apps/demand-research/account_group_client.js /app/account_group_client.js
 COPY apps/demand-research/account_index_sources.py /app/account_index_sources.py
