@@ -8,6 +8,9 @@ on:
       - "apps/demand-research/test_account_groups.py"
       - "apps/demand-research/account_index_sources.py"
       - "apps/demand-research/account_index_job.py"
+      - "apps/demand-research/account_index_bootstrap.py"
+      - "apps/demand-research/test_account_index_bootstrap.py"
+      - "apps/demand-research/account_index_live_repair.py"
       - "apps/demand-research/test_account_index_job.py"
       - "apps/demand-research/test_account_index_sources.py"
       - "apps/demand-research/gateway.py"
@@ -26,6 +29,9 @@ on:
       - "apps/demand-research/test_account_groups.py"
       - "apps/demand-research/account_index_sources.py"
       - "apps/demand-research/account_index_job.py"
+      - "apps/demand-research/account_index_bootstrap.py"
+      - "apps/demand-research/test_account_index_bootstrap.py"
+      - "apps/demand-research/account_index_live_repair.py"
       - "apps/demand-research/test_account_index_job.py"
       - "apps/demand-research/test_account_index_sources.py"
       - "apps/demand-research/gateway.py"
@@ -49,12 +55,12 @@ jobs:
           python-version: "3.12"
       - name: Python and browser module syntax
         run: |
-          python -m py_compile apps/demand-research/account_index.py apps/demand-research/account_groups.py apps/demand-research/test_account_groups.py apps/demand-research/account_index_sources.py apps/demand-research/account_index_job.py apps/demand-research/test_account_index_job.py apps/demand-research/gateway.py apps/demand-research/test_account_index.py apps/demand-research/test_account_index_sources.py
+          python -m py_compile apps/demand-research/account_index.py apps/demand-research/account_groups.py apps/demand-research/test_account_groups.py apps/demand-research/account_index_sources.py apps/demand-research/account_index_job.py apps/demand-research/test_account_index_job.py apps/demand-research/gateway.py apps/demand-research/test_account_index.py apps/demand-research/test_account_index_sources.py apps/demand-research/account_index_bootstrap.py apps/demand-research/account_index_live_repair.py apps/demand-research/test_account_index_bootstrap.py
           node --check apps/demand-research/account_index_client.js
           node --check apps/demand-research/account_group_client.js
           node --check apps/demand-research/account_auto_analysis.js
       - name: Install only pinned test dependencies
-        run: python -m pip install --disable-pip-version-check fastapi==0.115.12 httpx==0.28.1 pytest==8.3.5
+        run: python -m pip install --disable-pip-version-check fastapi==0.115.12 httpx==0.28.1 pytest==8.3.5 cryptography==46.0.4
       - name: Private index and existing gateway regressions
         working-directory: apps/demand-research
-        run: python -m pytest -q test_account_groups.py test_account_index.py test_account_index_sources.py test_account_index_job.py test_gateway.py test_social_sources.py
+        run: python -m pytest -q test_account_groups.py test_account_index.py test_account_index_sources.py test_account_index_job.py test_gateway.py test_social_sources.py test_account_index_bootstrap.py
