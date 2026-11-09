@@ -7,11 +7,14 @@ const fs=require('node:fs');
 const {chromium,webkit}=require('playwright');
 const engine=(process.env.FOURLEAF_BROWSER||'chromium')==='webkit'?webkit:chromium;
 const phone=process.env.FOURLEAF_MOBILE==='1';
+// Verify the actual returning-visitor path through an installed PWA worker.
+// The default cold-entry test still blocks workers to isolate gameplay.
+const warmPwa=process.env.FOURLEAF_SW_ENABLED==='1';
 (async()=>{
  const browser=await engine.launch({headless:true,args:engine===chromium?['--no-sandbox']:[]});
  const page=await browser.newPage({
   viewport:phone?{width:390,height:844}:{width:1280,height:900},
-  isMobile:phone,hasTouch:phone,serviceWorkers:'block'});
+  isMobile:phone,hasTouch:phone,serviceWorkers:warmPwa?'allow':'block'});
  const errors=[],requests=[],steps=[];
  page.on('pageerror',e=>errors.push(e.stack||String(e)));
  page.on('console',m=>{if(m.type()==='error')errors.push('console '+m.text())});
@@ -54,6 +57,19 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
  try{
   await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
+  if(warmPwa){
+   // A service-worker-controlled *second visit*, not a synthetic test-only
+   // registration, must still allow a real touch through game creation.
+   await page.waitForFunction(()=>window.__LEAF_PWA__?.getState().registered===true,
+    null,{timeout:30000});
+   await page.evaluate(()=>navigator.serviceWorker.ready);
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),
+    null,{timeout:20000});
+   assert.equal(await page.evaluate(()=>window.__LEAF_PWA__?.getState().controlled),true,
+    'returning mobile visit must run under an active PWA controller');
+   await inspect('warm-pwa-controlled-return');
+  }
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_LOBBY__&&
    window.__LEAF_WORLD__&&window.__LEAF_DICE_NATIVE__,null,{timeout:20000});
   await inspect('world-initial');
@@ -103,7 +119,7 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
   state=await inspect('first-authentic-dice-turn');
   assert.ok(state.match?.players[0].position>before);
   console.log('USER_REAL_WORLD_TO_DICE_START_PASS',JSON.stringify({
-   engine:engine.name(),phone,map:state.match.map,board:state.board,
+   engine:engine.name(),phone,warmPwa,map:state.match.map,board:state.board,
    turn:state.match.players[0].position,steps:steps.length,errors}));
   assert.equal(errors.length,0,'browser must have no unhandled JS exceptions');
  }catch(error){
