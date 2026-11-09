@@ -24,9 +24,12 @@
   <p class="description">지정한 SNS 계정의 수집 당시 공개 프로필·게시글·답글·첨부 원본·공개 관계 목록을 별도로 보관해 조회합니다. GitHub 암호화 임시 백업은 영구 보관을 보장하지 않으며, 삭제·비공개 자료는 복원된 것으로 표시하지 않습니다.</p>
  </div>
  <div class="account-picker">
-  <label for="accountSelect">보관된 계정 선택</label>
-  <select id="accountSelect" aria-label="보관 계정 선택"><option value="">계정 불러오는 중…</option></select>
-  <span id="loadStatus" role="status" aria-live="polite">아카이브 서버에 연결 중입니다.</span>
+  <div class="account-picker-heading">
+    <label for="accountSelect">보관 계정</label>
+    <span id="accountCount" class="account-count">계정 목록 자동 준비 중…</span>
+  </div>
+  <select id="accountSelect" aria-label="보관 계정 선택"><option value="">보관된 계정 확인 중…</option></select>
+  <span id="loadStatus" role="status" aria-live="polite">저장된 계정과 게시글을 자동으로 불러옵니다.</span>
  </div>
  <section class="profile" aria-label="공개 프로필 보관본">
   <div id="cover" class="cover"><span>HEADER IMAGE · ARCHIVED ORIGINAL</span></div>

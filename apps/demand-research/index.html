@@ -481,6 +481,16 @@ main{padding-top:10px}
 
 .archive-hub-header p{font-size:12px;color:#596980;line-height:1.65;margin:0 0 16px}
 #archiveHubStatus{padding:15px;border:1px solid #d5dfea;background:#fff;border-radius:9px;font-size:13px;line-height:1.65;color:#3e506b}
+.archive-quick-picker{padding:13px 14px;border-radius:10px;border:1px solid #cbd6e9;background:#fff;margin-bottom:12px;display:grid;gap:7px}
+.archive-quick-picker[hidden]{display:none}
+.archive-quick-picker-head{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.archive-quick-picker-head label{font-size:13px;font-weight:850;color:#253c72}
+.archive-quick-picker-head span{font-size:11px;color:#4569a3}
+.archive-quick-picker-fields{display:flex;flex-wrap:wrap;gap:8px}
+.archive-quick-picker select{flex:1;min-width:0;width:100%;min-height:46px;border:1px solid #aabddd;border-radius:8px;padding:8px 11px;font-size:14px;font-weight:700;color:#15295a;background:white}
+.archive-quick-picker input{width:190px;max-width:100%;font-size:12px}
+.archive-quick-picker p{margin:0;font-size:11px;color:#5d6e8b;line-height:1.5}
+@media(max-width:720px){.archive-quick-picker{padding:11px}.archive-quick-picker-fields{flex-direction:column}.archive-quick-picker input{width:100%;max-width:none}.archive-quick-picker select{width:100%;font-size:14px}}
 .archive-hub-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
 .archive-hub-actions[hidden],#archiveHubFrameBox[hidden]{display:none}
 .archive-hub-actions button,.archive-hub-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border-radius:8px;border:1px solid #adc1e8;padding:9px 14px;font-size:12px;font-weight:800;background:#fff;color:#2c47a3;text-decoration:none;cursor:pointer}
@@ -934,6 +944,14 @@ main{padding-top:10px}
   <div class="archive-hub-modes" role="tablist" aria-label="보관 자료 종류">
     <button id="archiveModeAuto" type="button" role="tab" aria-selected="true">자동 저장 게시글</button>
     <button id="archiveModeAccounts" type="button" role="tab" aria-selected="false">지정 계정 백업</button>
+  </div>
+  <div id="archiveAccountPicker" class="archive-quick-picker" hidden>
+    <div class="archive-quick-picker-head"><label for="archiveQuickSelect">보관된 계정</label><span id="archiveQuickCount">계정 목록 자동 불러오는 중…</span></div>
+    <div class="archive-quick-picker-fields">
+      <select id="archiveQuickSelect" aria-label="보관 계정 바로 선택" disabled><option value="">보관 목록 확인 중…</option></select>
+      <input id="archiveQuickSearch" type="search" maxlength="100" placeholder="닉네임·아이디 찾기" aria-label="보관 계정 이름 검색" hidden>
+    </div>
+    <p id="archiveQuickStatus" role="status" aria-live="polite">계정을 선택하면 아래에 게시글과 프로필이 바로 나타납니다.</p>
   </div>
   <div id="archiveHubStatus" role="status" aria-live="polite">비공개 보관 서버의 연결 상태를 확인 중입니다.</div>
   <div id="archiveHubActions" class="archive-hub-actions" hidden>

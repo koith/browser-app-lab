@@ -9,7 +9,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 FREE_JS=Path(__file__).with_name("free_discovery.js").read_text(encoding="utf-8")
@@ -314,7 +314,7 @@ def run(live=False):
                     "document.querySelector('#discoveryCandidateList a[target=_blank]')",
                     timeout=20000)
                 page.locator("#discoveryCandidates").evaluate("(el) => el.open = true")
-                assert page.locator("#discoveryCandidateList a[target=_blank]").count()==1
+                expect(page.locator("#discoveryCandidateList a[target=_blank]")).to_have_count(1,timeout=12000)
 
             # Real canvas-alpha interaction: remove and restore at the pointer.
             def alpha():
