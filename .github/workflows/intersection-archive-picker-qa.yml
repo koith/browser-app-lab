@@ -13,6 +13,7 @@ on:
       - "apps/demand-research/test_target_account_viewer.py"
       - "apps/demand-research/test_archive_tab_browser.py"
       - "apps/demand-research/test_account_archive_picker_browser.py"
+      - "apps/demand-research/test_live_archive_picker_smoke.py"
   push:
     branches: [main]
     paths:
@@ -25,6 +26,7 @@ on:
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_archive_tab_browser.py"
       - "apps/demand-research/test_account_archive_picker_browser.py"
+      - "apps/demand-research/test_live_archive_picker_smoke.py"
   workflow_dispatch:
 
 permissions:
@@ -60,3 +62,8 @@ jobs:
           node --check apps/demand-research/account_archive_view.js
           python apps/demand-research/test_archive_tab_browser.py
           python apps/demand-research/test_account_archive_picker_browser.py
+      - name: Compile production archive picker smoke check
+        run: python -m py_compile apps/demand-research/test_live_archive_picker_smoke.py
+      - name: Verify ACTUAL deployed account picker in Chromium and mobile WebKit
+        if: github.event_name != 'pull_request'
+        run: python apps/demand-research/test_live_archive_picker_smoke.py
