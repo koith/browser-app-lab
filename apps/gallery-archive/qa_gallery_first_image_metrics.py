@@ -48,10 +48,9 @@ def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False
             timeout=timeout_ms,
         )
         result["first_album_card_s"] = round(time.monotonic() - start, 2)
-        # Diagnostic only until the new HTML is deployed: a newly constructed
-        # <img> can cancel the prepaint image's in-flight download.
-        result["first_paint_image_nodes_reused"] = page.locator(
-            '#albumgrid img[data-fast-preserved="1"]').count()
+        # Do not count DOM handoff before the gallery has finished hydrating.
+        # The prepaint <a> cards can coexist with a defined owner catalog;
+        # measuring here would falsely report zero retained <img> elements.
         # A rendered card or image URL is NOT evidence that a thumbnail decoded.
         # Only count a decoded, viewport-visible image with real image dimensions.
         try:
@@ -101,6 +100,10 @@ def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False
             duplicate_sha_within_owner_work:repeatedInOwner};
         }""".replace("MODEL", model))
         result["coverage_verified_s"] = round(time.monotonic() - start, 2)
+        # Only after the final gallery buttons exist can we count actual
+        # in-flight prepaint <img> nodes that survived the exact-SHA handoff.
+        result["first_paint_image_nodes_reused"] = page.locator(
+            '#albumgrid button.album img[data-fast-preserved="1"]').count()
         if verify_progressive:
             # Verify the deployed full-photo view actually paginates thousands
             # of saved photos instead of inserting every <img> on mobile load.
