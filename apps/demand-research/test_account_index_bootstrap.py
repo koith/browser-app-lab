@@ -100,3 +100,32 @@ def test_no_authenticated_snapshot_means_no_false_restore(tmp_path,monkeypatch):
     with pytest.raises(RuntimeError):
         boot.restore_local(str(path),b"z"*32)
     assert not path.exists()
+
+
+
+def test_encrypted_release_asset_rejects_wrong_origin_and_duplicate_name():
+    tag="intersection-index-boot-20261109"
+    url="https://github.com/koith/browser-app-lab/releases/download/"+tag+"/index.enc"
+    asset={"name":"index.enc","browser_download_url":url,"size":500}
+    release={"tag_name":tag,"draft":False,"prerelease":True,"assets":[asset]}
+    assert boot._asset(release,tag)==asset
+    with pytest.raises(ValueError):
+        boot._asset({**release,"assets":[{**asset,"browser_download_url":
+                    "https://untrusted.invalid/index.enc"}]},tag)
+    with pytest.raises(ValueError):
+        boot._asset({**release,"assets":[asset,asset]},tag)
+    with pytest.raises(ValueError):
+        boot._asset({**release,"prerelease":False},tag)
+
+
+def test_existing_sealed_daily_checkpoint_is_readback_verified_not_overwritten(
+        tmp_path,monkeypatch):
+    path=fixture_db(tmp_path)
+    raw=path.read_bytes()
+    key=b"x"*32
+    wrapped=boot.encrypt_snapshot(raw,key,"42547929782",hashlib.sha256(raw).hexdigest())
+    monkeypatch.setattr(boot,"release_tag",lambda tag,token=None:{"tag_name":tag})
+    monkeypatch.setattr(boot,"download_cipher",lambda release,tag:wrapped)
+    result=boot.publish_daily(wrapped,key,token="synthetic-github-token")
+    assert result["new_upload"] is False
+    assert result["accounts"]==1 and result["remote_sha256"] is True
