@@ -253,13 +253,14 @@
  #lobby .dice-room-view-controls{position:absolute;right:7px;top:7px;
   z-index:30;display:flex;align-items:flex-end;flex-direction:column;
   gap:4px;pointer-events:none}
- #lobby #dice-room-zoom-toggle{min-height:36px;min-width:108px;
+ #lobby .dice-room-view-controls>button{min-height:36px;min-width:108px;
   max-width:164px;padding:5px 9px;border:2px ridge #c5d4ff;
   background:#263f86f2;color:#fff4ca;
   font:12px/20px Gulim,'굴림',sans-serif;cursor:pointer;
   pointer-events:auto;touch-action:manipulation;
   box-shadow:0 2px 8px #142251ac}
- #lobby #dice-room-zoom-toggle:focus-visible{
+ #lobby .dice-room-view-controls>button[hidden]{display:none!important}
+ #lobby .dice-room-view-controls>button:focus-visible{
   outline:2px solid #ffe3a1;outline-offset:2px}
  #lobby #dice-room-pan-hint{max-width:176px;padding:4px 6px;
   border:1px solid #b8c8f5;background:#172950e8;
