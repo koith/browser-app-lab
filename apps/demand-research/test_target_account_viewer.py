@@ -115,6 +115,9 @@ def test_private_account_profile_bio_header_and_original_photo(populated):
     accounts=client.get("/api/account-archives")
     assert accounts.status_code==200
     assert accounts.json()["accounts"][0]["key"]==name
+    assert accounts.json()["accounts"][0]["display_name"]=="Public QA"
+    assert accounts.json()["accounts"][0]["handle"]=="qa-user.bsky.social"
+    assert accounts.json()["accounts"][0]["profile_snapshot_verified"] is True
     profile=client.get("/api/account-archives/"+name+"/profile")
     assert profile.status_code==200
     p=profile.json()
@@ -182,3 +185,48 @@ def test_browser_source_prevents_raw_html_execution(populated):
     assert "localStorage" not in script
     assert "sessionStorage" not in script
     assert "document.cookie" not in script
+
+
+
+def test_verified_bundle_choice_uses_archived_nickname_not_url(populated,monkeypatch):
+    from types import SimpleNamespace
+    client,root,archive,name=populated
+    prefix="account-archives/bluesky/"+archive_key(PROFILE)+"/"
+    snapshot={
+        "platform":"bluesky","identity":DID,
+        "handle":"qa-user.bsky.social","display_name":"Public QA"}
+    key=prefix+"profile/snapshots/snap-"+"0"*20+"-"+"a"*16+".json"
+    bundle=SimpleNamespace(
+        account=name,accounts={name:PROFILE},selected_platform="bluesky",
+        selected_account=DID,prefix=prefix,
+        items={key:canonical_json(snapshot)},post_count=6,
+        object_count=12,source_state="sha256_verified",temporary=True)
+    row=viewer.bundled_account_picker_row(bundle,name,temporary=True)
+    assert row["display_name"]=="Public QA"
+    assert row["handle"]=="qa-user.bsky.social"
+    assert row["profile_snapshot_verified"] is True
+    assert row["posts_verified_in_bundle"]==6
+    assert row["profile_url"]==PROFILE["profile_url"]
+
+    monkeypatch.setattr("github_temp_bundle.enabled",lambda:True)
+    monkeypatch.setattr("github_temp_bundle.latest_bundles",lambda:iter([bundle]))
+    monkeypatch.setattr(viewer,"_verified_account_bundles",lambda root:iter(()))
+    response=client.get("/api/account-archives")
+    assert response.status_code==200
+    assert response.json()["accounts"][0]["display_name"]=="Public QA"
+    assert response.json()["accounts"][0]["handle"]=="qa-user.bsky.social"
+
+
+def test_unmatched_snapshot_never_injects_another_account_name(populated):
+    _client,root,archive,name=populated
+    class WrongIdentity:
+        def names(self,prefix):
+            return ["snap-"+"0"*20+"-"+"b"*16+".json"]
+        def read(self,key,*,cap=300000,optional=True):
+            return json.dumps({"platform":"bluesky","identity":"did:plc:"+"b"*24,
+                               "display_name":"Another Account",
+                               "handle":"other.bsky.social"}).encode()
+    result=viewer.account_picker_details(PROFILE,WrongIdentity())
+    assert result["profile_snapshot_verified"] is False
+    assert result["display_name"]==""
+    assert result["handle"]==""
