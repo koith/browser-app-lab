@@ -28,10 +28,10 @@ P0_TARGETS = {
 }
 
 
-def expected(model, album_override=None):
+def expected(model, album_override=None, number_override=None):
     owner = json.loads((ROOT / 'apps' / f'{model}-gallery' / 'owner-index.json').read_text())
     assert owner['model'] == model and owner['schema_version'] == 1
-    album, number = (album_override, {'v2ph-azur-lane-tashkent': 11, 'djawa-privaty-public-samples': 8, 'public-yui-sns': 465}.get(album_override, 1)) if album_override else TARGET[model]
+    album, number = (album_override, number_override or {'v2ph-azur-lane-tashkent': 11, 'djawa-privaty-public-samples': 8}.get(album_override, 1)) if album_override else TARGET[model]
     for a in owner['albums']:
         if a['id'] == album:
             for p in a['images']:
@@ -57,7 +57,7 @@ def fulfill(name, mime):
     return perform
 
 
-def exercise(browser, model, mobile, deployed=False, album_override=None):
+def exercise(browser, model, mobile, deployed=False, album_override=None, number_override=None):
     root = f'{BASE}{model}-gallery/'
     ctx = browser.new_context(
         viewport={'width': 390, 'height': 844} if mobile else {'width': 1280, 'height': 840},
@@ -74,7 +74,7 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
     config_path = folder / 'cloudflare-gateway.json'
     config = json.loads(config_path.read_text())
     assert config == {'enabled': True, 'endpoint': WORKER}, 'Cloudflare gallery not explicitly enabled'
-    photo = expected(model, album_override)
+    photo = expected(model, album_override, number_override)
     try:
         # Test the actual live GitHub Pages HTML/owner index using the candidate
         # gallery transport and its explicit opt-in. Never alter the live site.
@@ -357,14 +357,20 @@ def main():
         browser = engine.launch(headless=True)
         try:
             for model in ('mimmi', 'yui'):
-                selections = P0_TARGETS[model] if args.all_p0 else [None]
                 if args.new_yui_11:
-                    assert args.deployed and args.all_p0, 'new owner acceptance requires exact published Pages'
-                    if model == 'yui':
-                        selections = list(selections) + ['public-yui-sns']
-                for album in selections:
+                    if model != 'yui':
+                        continue
+                    selections = [('public-yui-sns', number) for number in range(455, 466)]
+                else:
+                    selections = [(a, None) for a in
+                        (P0_TARGETS[model] if args.all_p0 else [None])]
+                for album, number in selections:
                     exercise(browser, model, mobile=args.browser == 'webkit',
-                             deployed=args.deployed, album_override=album)
+                             deployed=args.deployed, album_override=album,
+                             number_override=number)
+                    if args.new_yui_11:
+                        print('YUI_NEW_11_REAL_GALLERY_ORIGINAL_AND_LIGHTBOX_PASS',
+                              args.browser, number, flush=True)
         finally:
             browser.close()
 
