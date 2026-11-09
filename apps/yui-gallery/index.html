@@ -189,20 +189,48 @@ function retryCommittedImageError(event){
  const src=img.getAttribute('src');if(!src)return;
  let url;try{url=new URL(src,location.href)}catch{return}
  const prefix=new URL('stored-albums/',location.href);
- if(url.origin!==location.origin||!url.pathname.startsWith(prefix.pathname)||url.search||
+ // Query refresh is ONLY for immutable, same-origin committed photo files.
+ // Cloudflare owner URLs use four strictly signed fields and are NEVER touched.
+ const validRefresh=!url.search||(url.searchParams.size===1&&
+    /^[1-4]$/.test(url.searchParams.get('gtry')||''));
+ if(url.origin!==location.origin||!url.pathname.startsWith(prefix.pathname)||!validRefresh||
     !/\.(?:jpe?g|png|webp|avif)$/i.test(url.pathname))return;
+ const canonical=url.origin+url.pathname;
  const previous=committedImageRetries.get(img);
- const attempts=previous?.url===url.href?previous.attempts:0;
- if(attempts>=2)return;
- const state={url:url.href,attempts:attempts+1};committedImageRetries.set(img,state);
+ const attempts=previous?.url===canonical?previous.attempts:0;
+ if(attempts>=4)return;
+ const state={url:canonical,attempts:attempts+1,last:Date.now()};
+ committedImageRetries.set(img,state);
  event.stopImmediatePropagation();
  setTimeout(()=>{
   if(!img.isConnected||committedImageRetries.get(img)!==state||img.getAttribute('src')!==src)return;
   if(img.complete&&img.naturalWidth>0)return;
-  img.removeAttribute('src');img.src=src;
- },state.attempts===1?400:1200);
+  const fresh=new URL(canonical);
+  fresh.searchParams.set('gtry',String(state.attempts));
+  img.removeAttribute('src');img.src=fresh.href;
+ },[400,1200,3000,6500][attempts]);
 }
 document.addEventListener('error',retryCommittedImageError,true);
+
+// Once a bounded burst is exhausted, retry only visible failed committed
+// photos on a future user focus/online event. Never poll the global backend.
+function retryCommittedVisibleOnFocus(){
+ if(document.hidden||navigator.onLine===false)return;
+ const now=Date.now();
+ document.querySelectorAll('#albumgrid img,#detailphotos img,#photogrid img').forEach(img=>{
+  if(img.naturalWidth>0||!img.getAttribute('src'))return;
+  const state=committedImageRetries.get(img);
+  if(!state||state.attempts<4||now-state.last<10000)return;
+  const box=img.getBoundingClientRect();
+  if(box.bottom<-120||box.top>innerHeight+200)return;
+  committedImageRetries.delete(img);
+  retryCommittedImageError({target:img,stopImmediatePropagation(){}});
+ });
+}
+window.addEventListener('focus',retryCommittedVisibleOnFocus);
+window.addEventListener('online',retryCommittedVisibleOnFocus);
+document.addEventListener('visibilitychange',retryCommittedVisibleOnFocus);
+
 
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),localPreviewIndex=new Map(),detailRenderGeneration=0;
 function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
