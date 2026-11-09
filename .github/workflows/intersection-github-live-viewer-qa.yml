@@ -122,6 +122,9 @@ jobs:
           PY
 
   live-browser:
+    # Never overlap encrypted original ZIP readback with browser load on the
+    # same 512MiB free Render instance; observed OOM under concurrent QA.
+    needs: [live-verified-reader]
     if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-24.04
     timeout-minutes: 16

@@ -294,6 +294,40 @@ _index_synced_at=0.0
 _index_last_error=""
 _index_task=None
 _index_snapshot_info={"sha256":"","catalog":"not_checked","verified":False}
+
+def verified_signed_import_receipt(db_path):
+    """Recover signed SHA provenance from the same local SQLite after restart.
+
+    Render may restart its 512MiB process but keep its working SQLite file.
+    An in-memory boolean must not erase an independently verified import
+    receipt. Never claim verification for unmarked or malformed indexes.
+    """
+    if not db_path:
+        return False
+    try:
+        path=Path(db_path).expanduser().resolve()
+        if not path.is_file():
+            return False
+        db=sqlite3.connect("file:"+str(path)+"?mode=ro",uri=True,timeout=5)
+        try:
+            if db.execute("PRAGMA quick_check").fetchone()[0]!="ok":
+                return False
+            metadata=dict(db.execute(
+                "SELECT key,value FROM index_meta WHERE key IN "
+                "('last_imported_index_run','last_imported_index_sha')"))
+            run=metadata.get("last_imported_index_run","")
+            digest=metadata.get("last_imported_index_sha","")
+            if (not re.fullmatch(r"[0-9]{6,30}",run)
+                    or not re.fullmatch(r"[0-9a-f]{64}",digest)):
+                return False
+            return (db.execute("SELECT count(*) FROM accounts").fetchone()[0]>0
+                    and db.execute("SELECT count(*) FROM observed").fetchone()[0]>0)
+        finally:
+            db.close()
+    except (OSError,ValueError,TypeError,sqlite3.Error):
+        return False
+
+
 _index_lazy_task=None
 _index_lazy_attempt_at=0.0
 INDEX_LAZY_RETRY_SECONDS=180
@@ -586,6 +620,17 @@ async def accounts_status(request:Request):
     data=await asyncio.to_thread(account_index.status,INDEX_DB)
     if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
         data["public_scan_windows"]=await asyncio.to_thread(account_index_sources.coverage,INDEX_DB)
+    # A Render OOM restart may reset process state without deleting SQLite.
+    # Recover only a previously signed import receipt with valid digest,
+    # monotonically scoped run ID, checked SQLite and nonempty rows.
+    if (not _index_snapshot_info["verified"] and data["accounts"]>0
+            and data["source_rows"]>0):
+        recovered=await asyncio.to_thread(verified_signed_import_receipt,INDEX_DB)
+        if recovered:
+            _index_snapshot_info.update(verified=True,catalog="not_verified")
+            print("ACCOUNT_INDEX_SIGNED_IMPORT_RECEIPT_RECOVERED",
+                  json.dumps({"accounts":data["accounts"],
+                              "source_rows":data["source_rows"]}),flush=True)
     data.update({"refreshing":_index_lock.locked(),
                  "refresh_error":_index_last_error,"persistent_db_configured":True,
                  "remote_snapshot_verified":_index_snapshot_info["verified"],

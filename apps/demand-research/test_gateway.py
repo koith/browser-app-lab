@@ -587,3 +587,51 @@ def test_oidc_signed_snapshot_rejects_corrupted_sqlite_without_clobber(tmp_path,
     assert r.status_code==422
     assert account_index.status(str(viewer))["accounts"]==1
     assert "qa_test_b" not in r.text
+
+
+def test_verified_signed_index_receipt_recovers_after_process_restart(tmp_path,monkeypatch):
+    import account_index
+    path=tmp_path/"persisted.sqlite3"
+    account_index.sync_catalog(str(path),[{
+        "id":"synthetic-restart-1","platform":"x",
+        "profile_url":"https://x.com/qa_probe",
+        "text":"synthetic public row"}])
+    with account_index.connect(str(path)) as db:
+        db.execute("INSERT OR REPLACE INTO index_meta(key,value) VALUES(?,?)",
+                   ("last_imported_index_run","42547929782"))
+        db.execute("INSERT OR REPLACE INTO index_meta(key,value) VALUES(?,?)",
+                   ("last_imported_index_sha","a"*64))
+        db.commit()
+    assert gateway.verified_signed_import_receipt(str(path)) is True
+    monkeypatch.setattr(gateway,"INDEX_DB",str(path))
+    monkeypatch.setattr(gateway,"_index_snapshot_info",
+                        {"sha256":"","catalog":"not_checked","verified":False})
+    monkeypatch.setattr(gateway,"check_auth",lambda request:None)
+    monkeypatch.setattr(gateway,"schedule_lazy_account_index_refresh",lambda:False)
+    monkeypatch.setenv("DEMAND_AUTO_PUBLIC_INDEX","0")
+    r=TestClient(gateway.app).get("/api/accounts/status")
+    assert r.status_code==200
+    assert r.json()["accounts"]==1
+    assert r.json()["remote_snapshot_verified"] is True
+    assert r.json()["remote_catalog_state"]=="not_verified"
+
+
+def test_signed_index_receipt_rejects_unverified_or_corrupt_state(tmp_path):
+    import account_index
+    path=tmp_path/"unverified.sqlite3"
+    account_index.sync_catalog(str(path),[{
+        "id":"synthetic-restart-2","platform":"x",
+        "profile_url":"https://x.com/qa_probe",
+        "text":"synthetic unverified row"}])
+    assert gateway.verified_signed_import_receipt(str(path)) is False
+    with account_index.connect(str(path)) as db:
+        db.execute("INSERT OR REPLACE INTO index_meta(key,value) VALUES(?,?)",
+                   ("last_imported_index_run","42547929782"))
+        db.execute("INSERT OR REPLACE INTO index_meta(key,value) VALUES(?,?)",
+                   ("last_imported_index_sha","not-a-valid-sha"))
+        db.commit()
+    assert gateway.verified_signed_import_receipt(str(path)) is False
+    assert gateway.verified_signed_import_receipt(str(tmp_path/"missing.db")) is False
+    invalid=tmp_path/"corrupt.db"
+    invalid.write_bytes(b"not-sqlite")
+    assert gateway.verified_signed_import_receipt(str(invalid)) is False

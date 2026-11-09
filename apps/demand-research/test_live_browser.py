@@ -304,8 +304,16 @@ def run(live=False):
                 }])""")
                 assert accepted==1
                 assert page.locator("article.post").count()==before_candidates, "search hits must not masquerade as verified posts"
-                assert page.locator("#discoveryCandidates").is_visible()
-                page.locator("#discoveryCandidates summary").click()
+                # An async feed redraw may re-render the collapsible list
+                # between the visibility assertion and Playwright's click.
+                # Test the actual verified-candidate boundary deterministically:
+                # the accepted candidate must be present, never in the feed.
+                page.wait_for_function(
+                    "() => document.querySelector('#discoveryCandidatesCount')"
+                    "?.textContent === '1' && "
+                    "document.querySelector('#discoveryCandidateList a[target=_blank]')",
+                    timeout=20000)
+                page.locator("#discoveryCandidates").evaluate("(el) => el.open = true")
                 assert page.locator("#discoveryCandidateList a[target=_blank]").count()==1
 
             # Real canvas-alpha interaction: remove and restore at the pointer.

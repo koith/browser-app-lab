@@ -94,14 +94,16 @@ def verify(engine,label,width,height):
 
         size=page.evaluate("() => ({width:innerWidth,scroll:document.documentElement.scrollWidth})")
         assert size["scroll"]<=size["width"]+3, "horizontal overflow on live account page"
-        if js_errors:
-            print("LIVE_ACCOUNT_INDEX_JS_ERROR_SAFE",sorted(js_errors,key=lambda o:(o["source"],o["line"],o["kind"])),flush=True)
         assert not js_errors, "uncaught JavaScript error on account-index page"
         print("LIVE_ACCOUNT_INDEX_UI_PASS","client="+label,
               "accounts="+str(expected),"initial_page="+str(first_count),
               "pagination=PASS","filter=PASS","search=PASS","responsive=PASS",
               flush=True)
     finally:
+        if js_errors:
+            print("LIVE_ACCOUNT_INDEX_JS_ERROR_SAFE",
+                  sorted(js_errors,key=lambda o:(o["source"],o["line"],o["kind"])),
+                  flush=True)
         browser.close()
 
 if __name__=="__main__":
