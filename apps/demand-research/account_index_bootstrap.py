@@ -260,4 +260,5 @@ def restore_local(db_path:str, bridge_key:bytes):
                            ("last_imported_index_sha",source["sha"]))
                 dst.commit()
     return {"state":"restored","accounts":source["accounts"],
-            "source_rows":source["source_rows"],"age_days":source["age_days"]}
+            "source_rows":source["source_rows"],"age_days":source["age_days"],
+            "sha256":source["sha"],"run_id":source["run_id"]}
