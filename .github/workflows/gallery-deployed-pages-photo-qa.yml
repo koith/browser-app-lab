@@ -3,7 +3,10 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows:
+      # Current Pages publisher can be native rather than static.yml.
+      # A successful native deployment must run the same real-photo gate.
       - "Deploy static content to Pages"
+      - "pages build and deployment"
     types: [completed]
   push:
     branches: [main]
