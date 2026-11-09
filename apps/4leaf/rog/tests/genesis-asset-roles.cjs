@@ -81,9 +81,9 @@ const {chromium}=require('playwright');
    'board actor must render its own SHA-gated native CHR member: '+JSON.stringify(snap.board));
   assert.ok(snap.party.length>=1);
   for(const actor of snap.party){
-   assert.ok(actor.artwork.startsWith('./original/CardData/chm_')||
+   assert.ok(actor.artwork.startsWith('./original/OBS/')||
     actor.artwork==='./original/IMG/avatarback.png',
-    'party detail art is an original file (legacy CardData face or card back)');
+    'party detail art is own original CHR body or real IMG cardback');
    assert.ok(!actor.src.includes('/Registry/'),'player avatar cannot impersonate a party chessman');
    if(actor.source==='OBS.pak/verified-front'){
     assert.equal(actor.evidence,'visually-reviewed');
@@ -94,7 +94,7 @@ const {chromium}=require('playwright');
     // No reviewed OBS front: show the card's art slot. Since 2026-11-01 that is
     // either a legacy (unsourced) CardData face or the original card back,
     // never a face picked by the removed (id%59)+1 formula.
-    assert.ok(['IMG/avatarback/no-sourced-portrait','CardData/legacy-roster-unsourced'].includes(actor.source),actor.source);
+    assert.ok(['IMG/avatarback/no-sourced-portrait','CHR/verified-own-body-not-front'].includes(actor.source),actor.source);
     assert.equal(actor.src,actor.artwork,'unverified/missing OBS uses its card art slot');
    }
   }
