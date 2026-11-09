@@ -31,7 +31,7 @@ P0_TARGETS = {
 def expected(model, album_override=None):
     owner = json.loads((ROOT / 'apps' / f'{model}-gallery' / 'owner-index.json').read_text())
     assert owner['model'] == model and owner['schema_version'] == 1
-    album, number = (album_override, {'v2ph-azur-lane-tashkent': 11, 'djawa-privaty-public-samples': 8}.get(album_override, 1)) if album_override else TARGET[model]
+    album, number = (album_override, {'v2ph-azur-lane-tashkent': 11, 'djawa-privaty-public-samples': 8, 'public-yui-sns': 465}.get(album_override, 1)) if album_override else TARGET[model]
     for a in owner['albums']:
         if a['id'] == album:
             for p in a['images']:
@@ -127,6 +127,46 @@ def exercise(browser, model, mobile, deployed=False, album_override=None):
             headers={'User-Agent': 'gallery-archive-replica-qa/1.0'})
         assert received.status == 200, f'Cloudflare original HTTP {received.status}'
         verify_bytes(received.body(), photo)
+
+        if deployed and model == 'yui' and album_override == 'public-yui-sns':
+            # The 11 NEW originals are distinct published owner catalog slots,
+            # not an older preview or a third-party hotlink. Assert every byte
+            # in the actual LIVE Worker and native browser, plus presence in
+            # the actual gallery's available photo union. No sample-only PASS.
+            owner = json.loads((folder / 'owner-index.json').read_text())
+            sns = next(a for a in owner['albums'] if a['id'] == 'public-yui-sns')
+            fresh = [dict(p, ownerAlbum='public-yui-sns') for p in sns['images']
+                     if 455 <= p['number'] <= 465]
+            assert [p['number'] for p in fresh] == list(range(455, 466)), (
+                'EXPECTED_11_NEW_OWNER_SNS_ROWS_MISSING', [p['number'] for p in fresh])
+            page.wait_for_function("() => typeof available==='function' && typeof photosFor==='function'")
+            for row in fresh:
+                # Actual on-screen gallery state, NOT owner metadata alone.
+                visible = page.evaluate("""photo => {
+                    const album=available().find(a=>a.id==='public-yui-sns');
+                    return !!album && photosFor(album).some(p=>p.sha256===photo.sha256 &&
+                      p.bytes===photo.bytes && p.width===photo.width && p.height===photo.height);
+                }""", row)
+                assert visible, ('NEW_YUI_OWNER_PHOTO_ABSENT_FROM_PAGES_GALLERY', row['number'])
+                url = page.evaluate("""async photo =>
+                    await window.YuiPrivate.asset(photo,'original')""", row)
+                assert urlsplit(url).netloc == urlsplit(WORKER).netloc
+                r = ctx.request.get(url, timeout=45000,
+                    headers={'User-Agent': 'gallery-archive-replica-qa/1.0'})
+                assert r.status == 200, ('NEW_YUI_LIVE_ORIGINAL_HTTP', row['number'], r.status)
+                verify_bytes(r.body(), row)
+                pixels = page.evaluate("""async url => {
+                    const im=new Image();im.src=url;
+                    await Promise.race([im.decode(),new Promise((_,reject)=>
+                      setTimeout(()=>reject(Error('native image timeout')),30000))]);
+                    return [im.naturalWidth,im.naturalHeight];
+                }""", url)
+                assert pixels == [row['width'],row['height']], (
+                    'NEW_YUI_NATIVE_BROWSER_PHOTO_DECODE',row['number'],pixels)
+                print('YUI_NEW_SNS_OWNER_ORIGINAL_LIVE_GALLERY_PIXELS_PASS',
+                      row['number'], row['sha256'][:12], flush=True)
+            print('YUI_NEW_SNS_ALL_11_LIVE_SHA_NATIVE_BROWSER_DECODE_PASS',
+                  browser.browser_type.name, flush=True)
 
         # G-11: reproduce one browser-native transient sign/CORS network failure
         # while the second request, signed original bytes and native image
@@ -307,6 +347,8 @@ def main():
     parser.add_argument('--browser', choices=['chromium', 'webkit'], required=True)
     parser.add_argument('--deployed', action='store_true',
                         help='no page interception: require real public Pages code and photos')
+    parser.add_argument('--new-yui-11', action='store_true',
+                        help='require all eleven newly stored owner originals 455..465 in actual deployed Pages and Cloudflare')
     parser.add_argument('--all-p0', action='store_true',
                         help='verify eight priority real owner albums including screenshot failures after complete remote replica')
     args = parser.parse_args()
@@ -316,6 +358,10 @@ def main():
         try:
             for model in ('mimmi', 'yui'):
                 selections = P0_TARGETS[model] if args.all_p0 else [None]
+                if args.new_yui_11:
+                    assert args.deployed and args.all_p0, 'new owner acceptance requires exact published Pages'
+                    if model == 'yui':
+                        selections = list(selections) + ['public-yui-sns']
                 for album in selections:
                     exercise(browser, model, mobile=args.browser == 'webkit',
                              deployed=args.deployed, album_override=album)
