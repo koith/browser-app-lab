@@ -9,12 +9,12 @@ window.YuiPrivate=(()=>{
   if(location.hostname!=='koith.github.io')return Promise.resolve(null);
   if(!replicaPromise)replicaPromise=(async()=>{
    const response=await fetch('./cloudflare-gateway.json',{cache:'no-store',credentials:'omit'});
-   if(!response.ok)return null;
+   if(!response.ok)throw Error('GALLERY_REPLICA_CONFIG_HTTP_'+response.status);
    const config=await response.json();
    if(config?.enabled!==true)return null;
    const {pagesGateway}=await import('../gallery-archive/cloudflare-owner-gateway/pages-client.mjs');
    return pagesGateway({endpoint:config.endpoint,model:'yui'});
-  })().catch(()=>null);
+  })().catch(()=>{replicaPromise=null;return null});
   return replicaPromise;
  }
  function readSession(){
@@ -54,7 +54,7 @@ window.YuiPrivate=(()=>{
   session=readSession();if(!session)return [];
   // Pages already reads the complete, byte-identity-checked owner-index.json.
   // Do not request the suspended Render catalog when a verified replica is active.
-  if(await galleryReplica())return [];
+  if(location.hostname==='koith.github.io'||await galleryReplica())return [];
   return fromIndex(await (await request('/api/yui/catalog')).json());
  }
  async function asset(p,kind='original'){
@@ -62,14 +62,14 @@ window.YuiPrivate=(()=>{
   if(!session)throw Error('보관소 연결 없음');
   if(p?.ownerAlbum){
    const replica=await galleryReplica();
-   if(replica){
-    try {return await replica.asset(p,kind)}
-    catch(error){
-     // Missing (not-yet-replicated) originals or temporary worker unavailability
-     // can use the old source; never mask SHA/signature-validation errors.
-     if(!/^GALLERY_GATEWAY_HTTP_(?:404|429|500|502|503)$/.test(String(error?.message||'')))throw error;
-    }
+   // Never fall back from a temporary Cloudflare 503 to the suspended
+   // legacy Render origin while on Pages. Preserve the SAME verified owner
+   // photo and allow the image recovery queue to retry a fresh signature.
+   if(location.hostname==='koith.github.io'){
+    if(!replica)throw Error('GALLERY_REPLICA_TEMPORARILY_UNAVAILABLE');
+    return replica.asset(p,kind);
    }
+   if(replica)return replica.asset(p,kind);
   }
   if(kind==='cover'){
    const version=(p.preview_sha256||p.sha256||'').slice(0,24);
@@ -82,5 +82,13 @@ window.YuiPrivate=(()=>{
   return session.api+'/api/yui/media/'+encodeURIComponent(p.ownerAlbum)+'/'+(p.storageNumber??p.number)+'/'+selected+'?v='+(selected==='preview'?p.preview_sha256:p.sha256);
  }
 
- return {albums,asset,fromIndex,reconcile};
+ // Re-sign only the SAME verified original on a failed image response.
+ // This does not change picture order, album identity, or original bytes.
+ async function renew(p,kind='original'){
+  if(!p?.ownerAlbum)return asset(p,kind);
+  const replica=await galleryReplica();
+  if(!replica)throw Error('GALLERY_REPLICA_TEMPORARILY_UNAVAILABLE');
+  return replica.renew(p,kind);
+ }
+ return {albums,asset,renew,fromIndex,reconcile};
 })();
