@@ -207,7 +207,7 @@ function retryCommittedImageError(event){
   if(img.complete&&img.naturalWidth>0)return;
   const fresh=new URL(canonical);
   fresh.searchParams.set('gtry',String(state.attempts));
-  img.removeAttribute('src');img.src=fresh.href;
+  img.hidden=false;img.removeAttribute('src');img.src=fresh.href;
  },[400,1200,3000,6500][attempts]);
 }
 document.addEventListener('error',retryCommittedImageError,true);
@@ -233,7 +233,7 @@ function retryCommittedVisibleOnFocus(){
   if(img.naturalWidth>0||!img.getAttribute('src'))return;
   const state=committedImageRetries.get(img);
   if(!state||state.attempts<4||now-state.last<10000)return;
-  const box=img.getBoundingClientRect();
+  const box=(img.closest('.album,.photo')||img).getBoundingClientRect();
   if(box.bottom<-120||box.top>innerHeight+200)return;
   committedImageRetries.delete(img);
   retryCommittedImageError({target:img,stopImmediatePropagation(){}});
@@ -388,7 +388,7 @@ function updateImageNotice(){const count=$('detailphotos').querySelectorAll('.ph
 function imageState(image,failed){
  const container=image.closest('.photo,.album,.media-frame');if(!container)return;
  if(failed){container.dataset.imageState='failed';container.dataset.imageError='저장된 파일 로딩 실패';queueOwnerImageRecovery(image)}
- else{delete container.dataset.imageState;delete container.dataset.imageError;failedRestrictedImages.delete(image.src);container.classList.remove('broken-source');ownerRecoveryPending.delete(image);ownerRecoveryState.delete(image)}
+ else{image.hidden=false;delete container.dataset.imageState;delete container.dataset.imageError;failedRestrictedImages.delete(image.src);container.classList.remove('broken-source');ownerRecoveryPending.delete(image);ownerRecoveryState.delete(image)}
  if(image.id==='full')$('media-status').textContent=failed?imageFailureText(image.src):'';
  updateImageNotice();
 }
