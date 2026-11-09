@@ -7,11 +7,19 @@ on:
     paths:
       - ".github/workflows/intersection-index-live-repair.yml"
       - "apps/demand-research/account_index_live_repair.py"
+      - "apps/demand-research/account_index_bootstrap.py"
   workflow_run:
     workflows:
       - "INTERSECTION — Private Public-Account Index Hourly Sync"
     types: [completed]
     branches: [main]
+
+pull_request:
+    paths:
+      - ".github/workflows/intersection-index-live-repair.yml"
+      - "apps/demand-research/account_index_bootstrap.py"
+      - "apps/demand-research/account_index_live_repair.py"
+      - "apps/demand-research/test_account_index_bootstrap.py"
 
 permissions:
   contents: read
@@ -22,8 +30,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  offline-tests:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check AES-GCM sealed SQLite recovery and security invariants
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet pytest==8.4.2 cryptography==46.0.4
+          cd apps/demand-research
+          python -m py_compile account_index_bootstrap.py account_index_live_repair.py
+          python -m pytest -q test_account_index_bootstrap.py
+
   delivery:
-    if: github.event_name != 'workflow_run' || (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository)
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository))
+    permissions:
+      contents: write
+      id-token: write
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -40,9 +70,10 @@ jobs:
           find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
           rm -rf /tmp/rclone.zip /tmp/rclone-extra
           rclone help backends | grep -qi terabox
-          python -m pip install --disable-pip-version-check --quiet fastapi==0.115.12
+          python -m pip install --disable-pip-version-check --quiet fastapi==0.115.12 cryptography==46.0.4
       - name: Transfer SHA-verified immutable private account index over signed HTTPS
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           RCLONE_CONFIG_ARCHIVE_TYPE: terabox
           RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
         run: |
