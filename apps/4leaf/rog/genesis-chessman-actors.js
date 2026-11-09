@@ -583,11 +583,10 @@
    node.dataset.sourceAnimation=action;
   }else{
    sheet.hidden=true;
-   // No actual Dice/OBS.pak body exists for this card yet. Do NOT show
-   // an enormous invented eight-head grey stickman as if it were 4LEAF.
-   // The recovered CardData/chm_NN portrait is the only character-specific
-   // authentic artwork available. Display that small archival portrait
-   // honestly, while keeping the source identity and gameplay untouched.
+   // A temporary source-loading outage must NOT resurrect an unrelated
+   // CardData/chm_N facial guess. Retain the card's own verified CHR art
+   // when available and fall back to genuine IMG/avatarback if its pixels
+   // are unreachable. Never substitute a Registry avatar or another actor.
    let portrait=node.querySelector('.leaf-chess-original-card-fallback');
    if(!portrait){
     portrait=document.createElement('img');
@@ -597,15 +596,32 @@
     node.append(portrait);
    }
    const source=node.querySelector('.leaf-chess-portrait')?.getAttribute('src');
-   if(source&&portrait.getAttribute('src')!==source)portrait.src=source;
+   const cardback='./original/IMG/avatarback.png';
+   const image=source&&
+    (source.startsWith('./original/OBS/')||source===cardback)
+     ?source:cardback;
+   portrait.onerror=()=>{
+    portrait.onerror=null;
+    // The same original CHR member may be unavailable for the main actor
+    // and for its smaller thumbnail. A second 404 is not an infinite retry.
+    if(portrait.getAttribute('src')!==cardback){
+     portrait.src=cardback;
+     portrait.dataset.artEvidence='source-CHR-fetch-failed/IMG-cardback';
+     node.dataset.actorFallbackArt='IMG/avatarback/source-outage';
+    }
+   };
+   portrait.dataset.artEvidence=image===cardback
+    ?'IMG-cardback/no-verified-source':'CHR-own-source-body';
+   node.dataset.actorFallbackArt=image===cardback?'IMG/avatarback':'CHR/own-body';
+   if(portrait.getAttribute('src')!==image)portrait.src=image;
    portrait.hidden=false;
    node.dataset.actorRig='original-card-portrait-fallback';
-   node.dataset.actorSource='CardData (OBS full-body not recovered)';
+   node.dataset.actorSource=image===cardback?'Original-IMG/cardback-fallback':'Original-CHR/own-body-fallback';
    node.dataset.actorOriginalModelRecovered='false';
    node.dataset.sourceAnimation='unavailable';
    node.dataset.sourcePoseMapping=Object.hasOwn(NON_ACTOR_OBS,src)
-    ?'OBS-member-is-non-character-effect/CardData-fallback'
-    :'original-OBS-missing/CardData-original-portrait-only';
+    ?'OBS-member-is-non-character-effect/original-IMG-fallback'
+    :'source-OBS-unavailable/own-CHR-or-IMG-cardback';
    node.dataset.originalObsMemberRole='CHR-original-body-unpublished-or-unavailable';
   }
  }
