@@ -97,7 +97,16 @@ def run():
             assert "20,002" in page.locator("#privateAccountSummary").inner_text()
             page.locator("#privateAccountIndex .account-auto-more").click()
             page.wait_for_function("document.querySelectorAll('#privateAccountRows > div').length===160",timeout=15000)
+            # Real user click races: if "more" is clicked twice while the
+            # first GET is in flight, the second page request must be queued.
+            # Browser DOM click events are synchronous; the first async load
+            # holds busy=True before control returns to the next click.
+            page.locator("#privateAccountIndex .account-auto-more").evaluate(
+                "button => {button.click(); button.click();}")
+            page.wait_for_function(
+                "document.querySelectorAll('#privateAccountRows > div').length===320",
+                timeout=15000)
             assert not errors,errors
-            print("PRIVATE_SOCIAL_BROWSER_FIXTURE",json.dumps({"cards":1,"calls":len(requested),"indexed_account_rows":160,"total_accounts":20002,"self_declared_group_accounts":10,"source_badge":"X","errors":len(errors)}))
+            print("PRIVATE_SOCIAL_BROWSER_FIXTURE",json.dumps({"cards":1,"calls":len(requested),"indexed_account_rows":320,"queued_pagination":"PASS","total_accounts":20002,"self_declared_group_accounts":10,"source_badge":"X","errors":len(errors)}))
         finally: browser.close()
 if __name__=="__main__":run()
