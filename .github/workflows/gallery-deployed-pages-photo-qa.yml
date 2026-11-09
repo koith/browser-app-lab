@@ -42,6 +42,9 @@ jobs:
           python -m py_compile apps/gallery-archive/qa_deployed_pages_gallery.py apps/gallery-archive/pages_single_publisher.py
           python apps/gallery-archive/test_pages_deployment_identity.py
       - name: Verify actual cancelled gallery SHA is included unchanged in later native Pages source
+        # workflow_run checks out the historically published SHA, which may
+        # predate the new equivalence helper even though this workflow is newer.
+        if: github.event_name != 'workflow_run'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
