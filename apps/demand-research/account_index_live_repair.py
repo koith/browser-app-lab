@@ -6,6 +6,7 @@ SQLite index is transferred only over HTTPS and never written to repository
 artifacts or action logs.
 """
 from __future__ import annotations
+import base64
 import hashlib
 import json
 import os
@@ -95,6 +96,27 @@ def push():
     print("ACCOUNT_INDEX_LIVE_IMPORT_VERIFIED",json.dumps({
         "accounts":candidate["accounts"],"source_rows":candidate["source_rows"],
         "transport":"verified_https_oidc","snapshot_sha256":True
+    },sort_keys=True),flush=True)
+
+    # The live Render database is ephemeral. An immutable daily AES-GCM asset
+    # provides a no-fee, no-private-plaintext, authenticated cold-start copy.
+    # Obtain its derived key ONLY from the trusted OIDC viewer bridge.
+    import account_index_bootstrap
+    key_request=Request(GATEWAY+"/api/bridge/archive-key",headers={
+        "Authorization":"Bearer "+token})
+    with urlopen(key_request,timeout=30) as response:
+        key_payload=json.load(response)
+    try:
+        bridge_key=base64.b64decode(key_payload["key"],validate=True)
+    except (KeyError,TypeError,ValueError):
+        raise RuntimeError("private encrypted index key unavailable") from None
+    ciphertext=account_index_bootstrap.encrypt_snapshot(
+        candidate["payload"],bridge_key,candidate["run_id"],candidate["sha"])
+    result=account_index_bootstrap.publish_daily(ciphertext,bridge_key)
+    print("ACCOUNT_INDEX_ENCRYPTED_BOOT_RELEASE_VERIFIED",json.dumps({
+        "new_upload":result["new_upload"],
+        "accounts":result["accounts"],"source_rows":result["source_rows"],
+        "encrypted_remote_readback":result["remote_sha256"]
     },sort_keys=True),flush=True)
 
 if __name__=="__main__":
