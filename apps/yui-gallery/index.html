@@ -260,15 +260,15 @@ const failedRestrictedImages=new Set();
 const ownerRecoveryPending=new Set();
 const ownerRecoveryState=new WeakMap();
 let ownerRecoveryTimer=null;
-const OWNER_RECOVERY_MAX_ATTEMPTS=3;
-const OWNER_RECOVERY_COOLDOWN_MS=45000;
+const OWNER_RECOVERY_MAX_ATTEMPTS=4;
+const OWNER_RECOVERY_COOLDOWN_MS=4500;
 function queueOwnerImageRecovery(img){
  const p=ownerPhotoIndex.get(img?.dataset.owner||'');
- if(!p||!img.isConnected||!img.closest('.photo'))return;
+ if(!p||!img.isConnected||!img.closest('.photo,.album'))return;
  const s=ownerRecoveryState.get(img)||{attempts:0,last:0};
  if(s.attempts>=OWNER_RECOVERY_MAX_ATTEMPTS)return;
  ownerRecoveryPending.add(img);
- if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,20000);
+ if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,750);
 }
 function ownerRetryVisible(img){
  const box=img.getBoundingClientRect();
@@ -277,7 +277,7 @@ function ownerRetryVisible(img){
 async function retryOwnerImagesIfReady(){
  ownerRecoveryTimer=null;
  for(const img of ownerRecoveryPending)
-  if(!img.isConnected||!img.closest('.photo'))ownerRecoveryPending.delete(img);
+  if(!img.isConnected||!img.closest('.photo,.album'))ownerRecoveryPending.delete(img);
  if(!ownerRecoveryPending.size||document.hidden||navigator.onLine===false)return;
  let started=0,waiting=false;
  const now=Date.now();
@@ -296,8 +296,9 @@ async function retryOwnerImagesIfReady(){
   s.attempts++;s.last=now;ownerRecoveryState.set(img,s);
   // The existing image load/error listeners own the final visual status.
   // Never show a successful-looking card until naturalWidth proves decode.
-  img.dataset.ownerVariant='original';
-  YuiPrivate.asset(p,'original').then(url=>{
+  const kind=img.closest('.album')?'cover':'original';
+  img.dataset.ownerVariant=kind;
+  YuiPrivate.renew(p,kind).then(url=>{
    if(!img.isConnected)return;
    img.hidden=false;
    img.removeAttribute('src');
@@ -329,7 +330,7 @@ function updateImageNotice(){const count=$('detailphotos').querySelectorAll('.ph
 function imageState(image,failed){
  const container=image.closest('.photo,.album,.media-frame');if(!container)return;
  if(failed){container.dataset.imageState='failed';container.dataset.imageError='저장된 파일 로딩 실패';queueOwnerImageRecovery(image)}
- else{delete container.dataset.imageState;delete container.dataset.imageError;failedRestrictedImages.delete(image.src);ownerRecoveryPending.delete(image)}
+ else{delete container.dataset.imageState;delete container.dataset.imageError;failedRestrictedImages.delete(image.src);container.classList.remove('broken-source');ownerRecoveryPending.delete(image);ownerRecoveryState.delete(image)}
  if(image.id==='full')$('media-status').textContent=failed?imageFailureText(image.src):'';
  updateImageNotice();
 }
