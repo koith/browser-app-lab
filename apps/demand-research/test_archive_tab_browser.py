@@ -131,6 +131,18 @@ def exercise(browser_type,label):
                 assert page.locator("#archiveHubFrame").get_attribute("src")==(
                     "/account-archive?embedded=1&account=mastodon-"+"b"*40)
                 assert requests.count("choices")==1
+                # Opening the private archive without an explicit mode must
+                # show saved accounts automatically (not the auto-post tab).
+                page.goto(base+"?tab=archives",wait_until="domcontentloaded",timeout=30000)
+                page.wait_for_function(
+                    "() => document.querySelector('#archiveQuickCount')"
+                    "?.textContent?.includes('2개')",timeout=20000)
+                page.locator("#archiveHubFrameBox").wait_for(state="visible",timeout=20000)
+                assert page.locator("#archiveModeAccounts").get_attribute("aria-selected")=="true"
+                assert page.locator("#archiveHubFrame").get_attribute("src").startswith(
+                    "/account-archive?embedded=1&account=")
+                assert page.locator("#archiveAccountPicker").is_visible()
+                assert "보관된 계정" in page.locator("#archiveAccountPicker label").inner_text()
             else:
                 assert page.locator("#archiveHubFrameBox").is_hidden()
                 assert page.locator("#archiveHubFrame").get_attribute("src") is None
