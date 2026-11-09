@@ -60,7 +60,7 @@
   // Keep native source aspect ratio at every zoom/viewport size.
   const base=Math.max(.1,Math.min(x/W,y/H));
   const zoom=narrow()&&zoomed;
-  const scale=base*(zoom?1.48:1);
+  const scale=base*(zoom?1.85:1);
   const width=W*scale,height=H*scale;
   const minX=Math.min(0,x-width),minY=Math.min(0,y-height);
   const posX=width<=x?(x-width)/2:clamp(panX??0,minX,0);
@@ -81,7 +81,7 @@
  function focusPart(part){
   if(!narrow()||!zoomed){fit();return}
   const x=wrap.clientWidth;
-  const scale=Math.max(.1,Math.min(x/W,wrap.clientHeight/H))*1.48;
+  const scale=Math.max(.1,Math.min(x/W,wrap.clientHeight/H))*1.85;
   // On CREATE move the original 2002 READY sprite into the usable phone
   // viewport. Room list initially keeps CREATE visible on the left.
   panX=part==='ready'?clamp(x*.5-445*scale,Math.min(0,x-W*scale),0):0;
