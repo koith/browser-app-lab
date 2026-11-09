@@ -953,4 +953,33 @@ class DirectTests(unittest.TestCase):
             with self.assertRaises(ValueError):collect(root,'mimmi',owner,out,1,2,client)
 
 
+
+class TargetedPrivateCollectionScopeTests(unittest.TestCase):
+    def test_registered_24_works_bounded_and_write_only_after_merge(self):
+        """The actual real-file acquisition workflow must not shrink to two works."""
+        import re
+        root=Path(__file__).resolve().parents[2]
+        wf=(root/'.github/workflows/gallery-targeted-public-photo-crawl.yml').read_text()
+        pair=re.search(
+            r'if \[\[ "\$MODEL" == "mimmi" \]\]; then\s*focus=\((.*?)\)\s*else\s*focus=\((.*?)\)\s*fi',
+            wf,re.S)
+        self.assertIsNotNone(pair,'Actual 2-model acquisition list not found')
+        for model,part in zip(('mimmi','yui'),pair.groups()):
+            ids=re.findall(r'--album-id\s+([a-z0-9-]+)',part)
+            self.assertEqual(len(ids),12,(model,ids))
+            self.assertEqual(len(set(ids)),12,(model,'repeated ID'))
+            registered=json.loads(
+                (root/'apps'/(model+'-gallery')/'public-work-pages.json').read_text())['albums']
+            by_id={a['id']:a for a in registered}
+            for aid in ids:
+                self.assertIn(aid,by_id,(model,aid))
+                page=by_id[aid].get('source')
+                self.assertTrue(isinstance(page,str) and page.startswith('https://'),
+                                (model,aid,'no independently registered public page'))
+        self.assertIn('--max-new 120 --max-pages 8',wf)
+        self.assertIn("if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'",wf)
+        self.assertIn('python apps/gallery-archive/verify_terabox.py',wf)
+        self.assertIn('python apps/gallery-archive/commit_owner_index.py',wf)
+
+
 if __name__=='__main__':unittest.main(verbosity=2)

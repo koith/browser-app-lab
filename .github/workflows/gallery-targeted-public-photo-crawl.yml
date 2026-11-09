@@ -1,6 +1,12 @@
 name: Targeted Verified Public Photos to Private Gallery
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-targeted-public-photo-crawl.yml'
+      - 'apps/gallery-archive/direct_photo_pipeline.py'
+      - 'apps/gallery-archive/test_direct_photo_pipeline.py'
+      - 'apps/*-gallery/public-work-pages.json'
   push:
     branches: [main]
     paths:
@@ -26,6 +32,7 @@ jobs:
           (cd apps/gallery-archive && python test_owner_copyto_fallback.py)
   acquire:
     needs: offline
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 75
     permissions:
@@ -91,12 +98,50 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
+          # G-03/G-05/G-06: previously only two source works per model
+          # and 40 potential files were ever visited. Prioritize registered
+          # owner works with evidence of missing FULL public cuts, not
+          # unsourced titles or a crawler-created photo count.
+          # Each work ID below has a separately registered source page.
           if [[ "$MODEL" == "mimmi" ]]; then
-            focus=(--album-id v2ph-actor-a887785a --album-id v2ph-actor-a93xn3oa)
+            focus=(
+              --album-id v2ph-actor-z7exoo5z
+              --album-id v2ph-actor-z76xe74a
+              --album-id v2ph-actor-a8n8n85a
+              --album-id v2ph-actor-an65656a
+              --album-id v2ph-actor-z6exx6ma
+              --album-id v2ph-actor-z4ox65ea
+              --album-id v2ph-sukajan-gal
+              --album-id v2ph-actor-z63984ma
+              --album-id v2ph-actor-a54e445z
+              --album-id v2ph-actor-zo5n754z
+              --album-id djawa-your-panties
+              --album-id djawa-my-summer-vacation-vol-5
+            )
           else
-            focus=(--album-id djawa-privaty-public-samples --album-id public-yui-sns)
+            focus=(
+              --album-id yui-chinokun-illustar-2026-public
+              --album-id public-yui-sns
+              --album-id inven-public-photos
+              --album-id djawa-privaty-public-samples
+              --album-id artgravia-693-yui-public-samples
+              --album-id artgravia-639-yui-public-samples
+              --album-id artgravia-650-yui-public-samples
+              --album-id artgravia-670-yui-public-samples
+              --album-id artgravia-677-yui-public-samples
+              --album-id artgravia-684-yui-public-samples
+              --album-id yui-summer-public-samples
+              --album-id yui-meow-public-samples
+            )
           fi
-          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 40 --max-pages 4 "${focus[@]}"
+          # Rotate actual registered pagination, never guess protected URLs.
+          # Every candidate still needs real bytes, optical/person/work checks,
+          # safe same-work numbering, immutable owner writes, remote SHA and
+          # actual deployed photo decoding before it counts as acquired.
+          python apps/gallery-archive/direct_photo_pipeline.py \
+            --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" \
+            --out "$RUNNER_TEMP/stage" --max-new 120 --max-pages 8 \
+            --page-cycle "$((GITHUB_RUN_NUMBER % 7))" "${focus[@]}"
       - name: Merge independently decoded originals without replacing owner files
         id: delta
         shell: bash
@@ -151,3 +196,51 @@ jobs:
             ${{ runner.temp }}/stage/metadata/remote-verification.json
           retention-days: 14
           if-no-files-found: ignore
+  replicate-verified-new-photos:
+    # Run once for BOTH models, only after all original+preview copies were
+    # independently read back and both private catalog publications succeeded.
+    # Never launch the free Cloudflare replica from PR/unverified staging.
+    needs: acquire
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: targeted-source-crawl-audit-*
+          path: ${{ runner.temp }}/source-audits
+      - name: Determine real SHA-verified additions, not downloaded candidates
+        id: confirmed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          base=Path(os.environ['RUNNER_TEMP'])/'source-audits'
+          files=sorted(base.glob('*/incremental-merge.json'))
+          assert len(files)==2,('Missing model audit',list(map(str,files)))
+          total=0
+          for path in files:
+              row=json.loads(path.read_text(encoding='utf-8'))
+              fresh=int(row['new_photos'])+int(row['upgraded_photos'])
+              print('PRIVATE_OWNER_CATALOG_PHOTO_DELTA',path.parent.name,fresh)
+              assert fresh>=0
+              total+=fresh
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+              out.write('changed='+str(total>0).lower()+'\n')
+          print('REMOTE_READBACK_VERIFIED_NEW_OR_UPGRADED_SLOTS',total,flush=True)
+          PY
+      - name: Replicate exact owner originals to existing free Cloudflare Assets
+        if: steps.confirmed.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Existing cloud workflow separately checks account Free quotas and
+          # exact remote SHA/bytes/dimensions before any rollout. Only it may
+          # update the private Worker assets. It publishes no source archive.
+          gh workflow run gallery-cloudflare-free-assets.yml --ref main -f max_new_per_model=0
+          echo "Existing Free Cloudflare replica requested for verified owner additions; not yet a deployed photo PASS." >> "$GITHUB_STEP_SUMMARY"
