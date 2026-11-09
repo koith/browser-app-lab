@@ -114,8 +114,25 @@ async function load(reset){
  }
 }
 more.addEventListener("click",()=>{userPaged=true;load(false)});
-function apply(){query=term.value.trim().slice(0,80);platform=source.value;poll=0;userPaged=false;load(true)}
-term.addEventListener("change",apply);source.addEventListener("change",apply);
+// Mobile WebKit's search input can remain focused while its value is
+// cleared (including the native clear button). Relying only on "change"
+// meant no new request until blur and sometimes lost the reset entirely.
+let searchTimer=null;
+function apply(){
+ if(searchTimer!==null){clearTimeout(searchTimer);searchTimer=null}
+ const nextQuery=term.value.trim().slice(0,80);
+ const nextPlatform=source.value;
+ if(query===nextQuery&&platform===nextPlatform)return;
+ query=nextQuery;platform=nextPlatform;poll=0;userPaged=false;
+ load(true);
+}
+term.addEventListener("input",()=>{
+ if(searchTimer!==null)clearTimeout(searchTimer);
+ searchTimer=setTimeout(apply,220);
+});
+term.addEventListener("search",apply);
+term.addEventListener("change",apply);
+source.addEventListener("change",apply);
 $("viewAccounts")?.addEventListener("click",()=>{if(Date.now()-lastFetch>12000){poll=0;load(true)}});
 window.addEventListener("intersection:feed-updated",()=>{if(!data&&Date.now()-lastFetch>12000)load(true)});
 render();
