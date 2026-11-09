@@ -49,25 +49,60 @@ def verify(engine,label,width,height):
               'RangeError','SecurityError','NetworkError','Error',
               'InvalidStateError','NotAllowedError']);
             window.__intersectionSafePageErrors=[];
-            const capture=(name,file,line) => {
+            const safeClass=(reason) => {
+              if(reason===null)return 'null';
+              if(reason===undefined)return 'undefined';
+              const t=typeof reason;
+              if(t==='object' && reason instanceof Error)return 'Error';
+              if(t==='object')return 'object';
+              if(t==='string')return 'string';
+              if(t==='number')return 'number';
+              return 'other';
+            };
+            const classify=(reason) => {
+              // Inspect the message in this ephemeral browser memory only.
+              // Return a fixed category, never raw text or URLs.
+              let msg='';
+              try { msg=String(typeof reason==='string'?reason:reason?.message||'').slice(0,700); }
+              catch { return 'unknown'; }
+              if(/timeout|timed out/i.test(msg))return 'timeout';
+              if(/fetch|load failed|network/i.test(msg))return 'network';
+              if(/cross.origin|CORS|access.control/i.test(msg))return 'cors';
+              if(/storage|quota|database/i.test(msg))return 'storage';
+              if(/notallowed|not allowed|permission/i.test(msg))return 'permission';
+              if(/abort/i.test(msg))return 'abort';
+              if(/undefined|null|not a function/i.test(msg))return 'js_state';
+              if(/unsupported|not supported/i.test(msg))return 'unsupported';
+              return 'unclassified';
+            };
+            const capture=(event,reason,file,line) => {
               let base='unknown';
-              try { const u=new URL(String(file||''),location.href);
-                    const n=u.pathname.split('/').pop();
-                    if(scripts.has(n)) base=n;
-                    else if(u.pathname==='/') base='index.html';
+              try {
+                const u=new URL(String(file||''),location.href);
+                const n=u.pathname.split('/').pop();
+                if(scripts.has(n))base=n;
+                else if(file && u.pathname==='/')base='index.html';
               } catch {}
+              if(base==='unknown'){
+                let stack='';
+                try { stack=String(reason?.stack||'').slice(0,3000); } catch {}
+                for(const n of scripts)if(stack.includes(n)){base=n;break;}
+              }
+              const name=reason?.name;
               window.__intersectionSafePageErrors.push({
+                event,
                 kind:types.has(name)?name:'Other',
+                value_type:safeClass(reason),
+                category:classify(reason),
                 source:base,
                 line:Number.isSafeInteger(line)&&line>0&&line<100000?line:0
               });
             };
             window.addEventListener('error',e=>{
-              if(e.error) capture(e.error.name,e.filename,e.lineno);
+              if(e.error) capture('page_error',e.error,e.filename,e.lineno);
             },true);
             window.addEventListener('unhandledrejection',e=>{
-              // The reject reason may contain private URLs. Only record class.
-              capture(e.reason?.name,'',0);
+              capture('promise_rejection',e.reason,'',0);
             },true);
           })();
         """)
@@ -178,10 +213,15 @@ def verify(engine,label,width,height):
                     if type(item) is dict:
                         identity=(item.get("kind","Other"),
                                   item.get("source","unknown"),
-                                  item.get("line",0))
-                        if len(str(identity))<150:
+                                  item.get("line",0),
+                                  item.get("event","unknown"),
+                                  item.get("category","unclassified"),
+                                  item.get("value_type","other"))
+                        if len(str(identity))<200:
                             counts[identity]=counts.get(identity,0)+1
-                return [{"kind":k[0],"source":k[1],"line":k[2],"count":n}
+                return [{"kind":k[0],"source":k[1],"line":k[2],
+                         "event":k[3],"category":k[4],"value_type":k[5],
+                         "count":n}
                         for k,n in sorted(counts.items(),key=lambda v:str(v[0]))]
             print("LIVE_ACCOUNT_INDEX_JS_ERROR_SAFE",
                   aggregate(browser_events) or aggregate(js_errors),
