@@ -121,6 +121,23 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   const match=await page.evaluate(()=>window.__ROG_TEST__.getMatch());
   assert.equal(match.players.length,2);
   assert.equal(match.diceChannel,'ispin:1');
+  // The user must be able to RETURN to the same real ROOM SELECT and
+  // resume the preserved match. The previous old-client shortcut to game
+  // did not exercise these waiting-room lifetime transitions at all.
+  const startedAt=match.startedAt;
+  await tap(page.locator('#exit-game'));
+  await page.locator('#modal:not(.hidden)').waitFor();
+  await tap(page.locator('#modal-buttons button').filter({hasText:'나가기'}));
+  await page.locator('#lobby:not(.hidden)').waitFor();
+  const saved=page.locator('#lobby-room-list .lobby-room-row[data-match="saved"]');
+  assert.equal(await saved.count(),1,'leaving a real match restores ONE saved room entry');
+  assert.ok((await page.locator('#dice-native-stage').evaluate(e=>
+   getComputedStyle(e).backgroundImage)).includes('original/Map/mapback.png'),
+   'revisited waiting room must display the genuine 2002 Map room list');
+  await tap(saved);
+  await page.locator('#game:not(.hidden)').waitFor();
+  assert.equal(await page.evaluate(()=>window.__ROG_TEST__.getMatch()?.startedAt),
+   startedAt,'rejoining a saved room must not silently create a new match');
   assert.deepEqual(errors,[],'room UI must not throw browser JS errors');
   console.log('4LEAF_GENESIS_ROOM_VISUAL_ACCESS_PASS',JSON.stringify({
    engine:engine.name(),phone,source:'Map/mapback and Room/roomback originals',
