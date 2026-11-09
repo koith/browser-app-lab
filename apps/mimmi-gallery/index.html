@@ -237,6 +237,18 @@ function retryCommittedImageError(event){
 }
 document.addEventListener('error',retryCommittedImageError,true);
 
+function recoverFailedFirstPaintCovers(){
+ // Eager <img> requests begin before this inline bootstrap script executes.
+ // A very fast Pages 503 can finish before our captured error listener is
+ // installed. Repair any already failed first-paint cover on window load.
+ document.querySelectorAll('#albumgrid img[src^="stored-albums/"]').forEach(img=>{
+  if(img.complete&&img.naturalWidth===0&&!committedImageRetries.has(img))
+   retryCommittedImageError({target:img,stopImmediatePropagation(){}});
+ });
+}
+window.addEventListener('load',recoverFailedFirstPaintCovers,{once:true});
+
+
 // Once a bounded burst is exhausted, retry only visible failed committed
 // photos on a future user focus/online event. Never poll the global backend.
 function retryCommittedVisibleOnFocus(){
