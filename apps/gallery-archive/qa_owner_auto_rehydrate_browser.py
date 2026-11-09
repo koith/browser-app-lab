@@ -9,7 +9,7 @@ import argparse
 import io
 import json
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, parse_qs
 from PIL import Image
 from playwright.sync_api import sync_playwright
 
@@ -41,12 +41,22 @@ def exercise(browser,model,album,index):
     png=io.BytesIO()
     Image.new("RGB",(320,480),(30,60,120)).save(png,format="PNG")
     mock_bytes=png.getvalue()
-    phase={"warm":False,"errors":0,"recoveries":0,"readiness":0,"unnecessary_catalog":0}
+    phase={"warm":False,"errors":0,"recoveries":0,"readiness":0,"unnecessary_catalog":0,
+           "invalid_signed_queries":0}
     def mock_media(route):
         link=route.request.url
         if not is_target_owner_media(link,model,album):
             route.continue_()
             return
+        # The current Worker refuses additional query arguments on signed
+        # image routes. Never fake recovery for a URL production would reject.
+        if urlsplit(link).path.startswith("/api/v1/media/"):
+            keys=set(parse_qs(urlsplit(link).query,keep_blank_values=True))
+            if keys!={"h","b","e","s"}:
+                phase["invalid_signed_queries"]+=1
+                route.fulfill(status=403,body="invalid signed URL arguments",
+                    headers={"Cache-Control":"no-store"})
+                return
         if phase["warm"] and "/original" in link:
             phase["recoveries"]+=1
             route.fulfill(status=200,body=mock_bytes,content_type="image/png",
@@ -86,7 +96,8 @@ def exercise(browser,model,album,index):
         # retry. Prove restoration of the EXACT failed image, not a neighbor.
         retry_index=page.evaluate("""() => {
           const all=[...document.querySelectorAll('#detailphotos .photo img')];
-          return all.findIndex(im=>ownerRecoveryPending.has(im)&&im.dataset.owner);
+          return all.findIndex(im=>ownerRecoveryPending.has(im)&&
+            im.dataset.owner&&ownerRetryVisible(im));
         }""")
         assert retry_index>=0,(model,"no pending visible owner photo",phase)
         assert phase["errors"]>=1,(model,"mocked 503 not exercised",phase)
@@ -102,6 +113,7 @@ def exercise(browser,model,album,index):
                  im.closest('.photo')?.dataset.imageState!=='failed';
         }""",arg=retry_index,timeout=30000)
         assert phase["recoveries"]>=1,(model,"no original retry after healthy status",phase)
+        assert phase["invalid_signed_queries"]==0,(model,"tampered Cloudflare signed media URL",phase)
         assert phase["readiness"]==0,(model,"global readiness must not be polled",phase)
         assert phase["unnecessary_catalog"]==0,(model,"static owner manifest triggered optional Render catalog",phase)
         print("GALLERY_OWNER_AUTO_RECOVERY_503_TO_200_MOCK_UI_PASS",json.dumps({
@@ -111,6 +123,7 @@ def exercise(browser,model,album,index):
             "unnecessary_global_readiness_polls":phase["readiness"],
             "unnecessary_remote_catalog_requests":phase["unnecessary_catalog"],
             "original_mock_recoveries":phase["recoveries"],
+            "invalid_signed_queries":phase["invalid_signed_queries"],
             "same_page_no_reload":True,
             "real_owner_media_claimed":False,
             "real_iphone_hardware_claimed":False
