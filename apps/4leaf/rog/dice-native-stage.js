@@ -64,6 +64,7 @@
    posY.toFixed(2)+'px,0) scale('+scale+')';
   stage.dataset.scale=scale.toFixed(6);
   stage.dataset.viewMode=zoom?'mobile-enlarged':'whole-native-scene';
+  stage.style.touchAction=zoom?'none':'auto';
   view.scale=scale;view.x=posX;view.y=posY;view.fitScale=base;
   zoomButton.setAttribute('aria-pressed',String(zoom));
   zoomButton.textContent=zoom?'⊟ 전체 화면':'⊞ 확대 보기';
@@ -84,7 +85,7 @@
  };
  // Zoom is the sensible mobile default. A one-tap whole-scene option
  // remains present for original 794x404 pixel-layout comparisons.
- zoomed=narrow();
+ zoomed=window.innerWidth<=650;
  stage.addEventListener('pointerdown',event=>{
   if(!narrow()||!zoomed||event.button!==0||
    event.target.closest('button,input,select,textarea,a,label,[role="button"]'))return;
