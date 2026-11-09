@@ -37,7 +37,7 @@ class VisualWorkTests(unittest.TestCase):
                 {p['sha256'] for p in prior},'mimmi',
                 lambda url:old[int(url.split('/')[-2])])
             self.assertTrue(info['stored_count_alone_is_not_completeness_proof'])
-            self.assertEqual(info['saved_reference_anchors'],3)
+            self.assertEqual(info['saved_reference_anchors'],3,info)
             self.assertEqual(info['verified_missing_cuts_deferred'],1)
             self.assertEqual(info['source_numbers_deferred_by_budget'],[5])
             self.assertFalse(info['source_edition_all_files_accounted_for'])
