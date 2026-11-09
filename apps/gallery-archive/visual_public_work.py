@@ -9,7 +9,8 @@ from io import BytesIO
 import json
 from pathlib import Path
 import re
-from urllib.parse import urlsplit
+import time
+from urllib.parse import urlsplit,parse_qsl
 
 from PIL import Image,ImageChops,ImageStat
 import requests
@@ -36,6 +37,74 @@ def owner_reference(url):
             data.extend(chunk)
             if len(data)>35_000_000:raise ValueError('Owner reference exceeds bounded image size')
         return bytes(data)
+
+
+
+CLOUDFLARE_OWNER_ORIGIN='https://gallery-archive-free.gallery-9f7d03138f3f.workers.dev'
+PAGE_ORIGIN='https://koith.github.io'
+GALLERY_QA_AGENT='gallery-archive-replica-qa/1.0'
+
+
+def verified_cloudflare_owner_original(model,album,photo):
+    """Read an EXISTING owner original, not a third-party hotlink or guest bypass.
+
+    Strictly pin the signed Worker response to the owner catalog's original
+    SHA, byte length, filename slot, dimensions and expiry. Any missing Cloudflare
+    entry or invalid response fails closed; NEVER use old Render reference
+    failures as evidence that a photograph can be replaced blindly.
+    """
+    if (model not in ('mimmi','yui')
+            or not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,99}',album)):
+        raise ValueError('invalid_owner_reference_identity')
+    number=photo.get('number');sha=photo.get('sha256');size=photo.get('bytes')
+    if (type(number) is not int or not 1<=number<10000 or
+            type(size) is not int or not 100<=size<=8_000_000 or
+            not isinstance(sha,str) or not re.fullmatch(r'[a-f0-9]{64}',sha)):
+        raise ValueError('invalid_owner_reference_catalog')
+    identity={'model':model,'album':album,'number':number,
+              'variant':'original','sha256':sha}
+    response=requests.post(CLOUDFLARE_OWNER_ORIGIN+'/api/v1/sign',
+        json=identity,headers={'Origin':PAGE_ORIGIN,'User-Agent':GALLERY_QA_AGENT},
+        timeout=(12,45),allow_redirects=False)
+    response.raise_for_status()
+    if response.status_code!=200 or response.is_redirect:
+        raise ValueError('cloudflare_owner_sign_not_200')
+    signed=response.json()
+    if not isinstance(signed,dict) or signed.get('sha256')!=sha or signed.get('bytes')!=size:
+        raise ValueError('cloudflare_owner_wrong_photo_identity')
+    href=signed.get('url')
+    if not isinstance(href,str):raise ValueError('cloudflare_owner_signed_url_absent')
+    parsed=urlsplit(href)
+    expected='/api/v1/media/'+('/'.join((model,album,str(number),'original')))
+    qs=parse_qsl(parsed.query,keep_blank_values=True)
+    fields=dict(qs)
+    expiry=signed.get('expires_at')
+    if (parsed.scheme!='https' or parsed.netloc!=urlsplit(CLOUDFLARE_OWNER_ORIGIN).netloc
+            or parsed.path!=expected or parsed.fragment or parsed.username
+            or parsed.password or len(qs)!=4
+            or set(fields)!={'h','b','e','s'} or len(fields)!=4
+            or fields['h']!=sha or fields['b']!=str(size)
+            or type(expiry) is not int or fields['e']!=str(expiry)
+            or not re.fullmatch(r'[a-f0-9]{64}',fields['s'])
+            or not time.time()+25<expiry<time.time()+310):
+        raise ValueError('cloudflare_owner_invalid_signed_photo')
+    with requests.get(href,headers={'User-Agent':GALLERY_QA_AGENT},
+        timeout=(12,60),allow_redirects=False,stream=True) as origin:
+        origin.raise_for_status()
+        if origin.status_code!=200 or origin.is_redirect:
+            raise ValueError('cloudflare_owner_media_not_200')
+        data=bytearray()
+        for chunk in origin.iter_content(65536):
+            data.extend(chunk)
+            if len(data)>size:raise ValueError('cloudflare_owner_media_oversize')
+    if len(data)!=size or hashlib.sha256(data).hexdigest()!=sha:
+        raise ValueError('cloudflare_owner_media_sha_or_bytes_changed')
+    with Image.open(BytesIO(data)) as decoded:
+        expected_dims=(photo.get('width'),photo.get('height'))
+        if decoded.size!=expected_dims:
+            raise ValueError('cloudflare_owner_media_dimensions_changed')
+        decoded.verify()
+    return bytes(data)
 
 
 def visual_error(left,right):
@@ -100,9 +169,16 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
                 # A stale local convenience copy cannot poison the whole work.
                 # Read the owner's existing reference and retain the exact SHA
                 # gate; no changed bytes are accepted as the old photograph.
-                route='/api/yui' if model=='yui' else '/api'
-                kind='original' if original_required else 'preview'
-                raw=(reference_reader or owner_reference)(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/{kind}')
+                if reference_reader is not None:
+                    # Offline fixtures preserve the explicitly supplied test
+                    # transport, including legacy SHA-verified preview cases.
+                    route='/api/yui' if model=='yui' else '/api'
+                    kind='original' if original_required else 'preview'
+                    raw=reference_reader(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/{kind}')
+                else:
+                    # Production archive is already mirrored to a live free
+                    # Cloudflare SHA-bound Worker; Render is no longer reliable.
+                    raw=verified_cloudflare_owner_original(model,aid,photo)
             if hashlib.sha256(raw).hexdigest() not in (digest,photo['sha256']):
                 raise ValueError('Saved reference did not match declared SHA')
             # The gateway may return the verified original when a preview is
