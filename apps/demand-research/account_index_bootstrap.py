@@ -171,14 +171,45 @@ def download_cipher(release,tag):
     return ciphertext
 
 
+def _direct_cipher(tag:str):
+    """Read fixed public ciphertext URL, avoiding rate-limited GitHub REST.
+
+    Account details remain AES-GCM encrypted. Never request a configurable URL,
+    follow an untrusted source, or print the remote data or error message.
+    """
+    if not TAG.fullmatch(tag):
+        raise ValueError("invalid encrypted private index tag")
+    url="https://github.com/"+REPO+"/releases/download/"+tag+"/"+ASSET
+    with urlopen(Request(url,headers={
+            "User-Agent":"intersection-index-sealed-bootstrap"}),timeout=30) as response:
+        ciphertext=response.read(MAX_CIPHER+1)
+    if not 32<len(ciphertext)<=MAX_CIPHER:
+        raise ValueError("invalid encrypted private index download size")
+    return ciphertext
+
+
 def find_latest_cipher(bridge_key:bytes, now=None, *, lookback_days=7):
+    """Bounded direct immutable readback; SHA and AES verify authenticity.
+
+    Release metadata endpoints can fail or be delayed on unauthenticated
+    Render free instances even when the static encrypted asset exists.
+    Direct URL fetch is already used by the existing public ZIP reader.
+    """
     date=(now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE direct_cipher_lookup",flush=True)
     for offset in range(lookback_days):
         tag=tag_for_date(date-timedelta(days=offset))
-        release=release_tag(tag)
-        if release is None:
-            continue
-        result=decrypt_snapshot(download_cipher(release,tag),bridge_key)
+        try:
+            ciphertext=_direct_cipher(tag)
+        except HTTPError as e:
+            if e.code==404:
+                continue
+            raise RuntimeError("private index encrypted asset unreachable") from None
+        except (URLError,OSError,TimeoutError):
+            raise RuntimeError("private index encrypted download unavailable") from None
+        print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE cipher_downloaded",flush=True)
+        result=decrypt_snapshot(ciphertext,bridge_key)
+        print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE aes_sqlite_verified",flush=True)
         result["age_days"]=offset
         return result
     raise RuntimeError("no bounded encrypted private index checkpoint")
