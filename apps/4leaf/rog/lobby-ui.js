@@ -214,7 +214,12 @@
    const empty=document.createElement('div');empty.className='lobby-room-empty';
    const label=document.createElement('b');label.textContent='현재 입장 가능한 게임방이 없습니다.';
    const hint=document.createElement('small');hint.textContent='방 만들기로 새 경기를 시작하세요. 다른 이용자의 방을 찾으려면 별도의 로비 서버가 필요합니다.';
-   empty.append(label,hint);root.append(empty);
+   const create=document.createElement('button');
+   create.type='button';create.className='lobby-room-empty-create';
+   create.textContent='새 방 만들기';
+   create.setAttribute('aria-label','원본 ROOM 대기실에서 새 게임방 만들기');
+   create.addEventListener('click',openCreator);
+   empty.append(label,hint,create);root.append(empty);
    for(const [k,v] of [['방제','—'],['방장','—'],['인원','0명'],['MAP','—'],['소환수치','설정 전'],['방식','방 만들기에서 선택'],['상태','실제 서버 방 없음']])line(info,k,v);
    $('lobby-join')?.setAttribute('aria-disabled','true');
   }
@@ -266,6 +271,7 @@
   if(!$('map-select').value||$('map-select').selectedIndex<0)$('map-select').selectedIndex=0;
   $('lobby-create').blur();
   renderPlayerSeats();
+  window.__LEAF_DICE_NATIVE__?.focusPart?.('ready');
  }
  function closeCreator(){
   window.__LEAF_DICE_NATIVE__?.closePicker();
@@ -274,6 +280,7 @@
   $('dice-room-config')?.classList.add('hidden');
   $('lobby-config-back')?.classList.add('hidden');
   updateRooms();
+  window.__LEAF_DICE_NATIVE__?.focusPart?.('list');
  }
  function renderPlayerSeats(){
   const panel=$('dice-room-config');if(!panel)return;
