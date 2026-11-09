@@ -19,7 +19,11 @@ const query=()=>new URLSearchParams(location.search);
 const chosenAccount=()=>{const selected=query().get("account")||"";return ACCOUNT.test(selected)?selected:"";};
 function selectedMode(){
   const explicit=query().get("mode");
-  return explicit==="accounts"||(!explicit&&Boolean(chosenAccount()))?"accounts":"auto";
+  if(explicit==="accounts"||explicit==="auto")return explicit;
+  // In the signed private app, archived accounts are the quickest entry.
+  // Automatic keyword backups remain one tap away.
+  if(location.hostname!=="koith.github.io")return "accounts";
+  return chosenAccount()?"accounts":"auto";
 }
 function accountLabel(item){
   const name=typeof item?.display_name==="string"
