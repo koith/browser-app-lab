@@ -145,4 +145,33 @@ class VisualWorkTests(unittest.TestCase):
         self.assertGreater(visual_error(photo(0),photo(120)),9)
 
 
+    def test_cloudflare_owner_reference_contract_has_actual_bytes_and_strict_sha(self):
+        import time
+        from visual_public_work import verified_cloudflare_owner_original, CLOUDFLARE_OWNER_ORIGIN
+        raw=photo(12);sha=hashlib.sha256(raw).hexdigest();expiry=int(time.time())+300
+        p={'number':1,'sha256':sha,'bytes':len(raw),'width':400,'height':600}
+        href=CLOUDFLARE_OWNER_ORIGIN+'/api/v1/media/mimmi/test-album/1/original?'+f'h={sha}&b={len(raw)}&e={expiry}&s='+('a'*64)
+        class Sign:
+            status_code=200
+            is_redirect=False
+            def raise_for_status(self):pass
+            def json(self):return {'url':href,'sha256':sha,'bytes':len(raw),'expires_at':expiry}
+        class Media:
+            status_code=200
+            is_redirect=False
+            def __enter__(self):return self
+            def __exit__(self,*args):pass
+            def raise_for_status(self):pass
+            def iter_content(self,size):yield raw
+        with patch('visual_public_work.requests.post',return_value=Sign()) as sign,patch('visual_public_work.requests.get',return_value=Media()) as get:
+            self.assertEqual(verified_cloudflare_owner_original('mimmi','test-album',p),raw)
+            self.assertEqual(sign.call_args.kwargs['json']['sha256'],sha)
+            self.assertEqual(sign.call_args.kwargs['headers']['Origin'],'https://koith.github.io')
+            self.assertFalse(get.call_args.kwargs['allow_redirects'])
+            with self.assertRaises(ValueError):
+                verified_cloudflare_owner_original('mimmi','../bad',p)
+            with self.assertRaises(ValueError):
+                verified_cloudflare_owner_original('mimmi','test-album',{**p,'sha256':'0'*64})
+
+
 if __name__=='__main__':unittest.main(verbosity=2)
