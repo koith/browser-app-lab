@@ -80,7 +80,9 @@ async function check(browser,mobile){
   assert.equal(first.view.layoutVerified,false,
    'actual CardData values do NOT prove recovered 2002 information panel layout');
   assert.equal(first.view.card,first.chosen,'info always reads active genuine party selection');
-  assert.ok(first.source.includes('original/CardData/chm_'));
+  const firstExact=await page.evaluate(id=>window.__ROG_TEST__.imageFor(id),first.chosen);
+  assert.equal(first.source,firstExact,
+   'minipanel must show exact selected card own CHR art, not guessed CardData face');
   assert.ok(first.buttonArt.includes('minipanel-03.png'),
    'selected chessman info shows real original 2002 source frame 3');
   assert.ok(first.stats.includes('이동')&&first.stats.includes('공격'));
@@ -99,8 +101,9 @@ async function check(browser,mobile){
     source:el.dataset.sourceCardArtwork,info:el.querySelector('span').textContent};
   });
   assert.equal(second.card,'c_0042');
-  assert.ok(second.source.includes('original/CardData/chm_')||
-   second.source.endsWith('original/IMG/avatarback.png'),second.source);
+  const secondExact=await page.evaluate(id=>window.__ROG_TEST__.imageFor(id),second.card);
+  assert.equal(second.source,secondExact,
+   'on focus change, minipanel must follow the newly selected exact CHR identity');
   assert.ok(second.name.length>0&&second.info.includes('방어'));
   await page.locator('#board-mini .leaf-native-minipanel-tab[data-panel="map"]').click();
   const restored=await page.evaluate(()=>{
