@@ -9488,6 +9488,21 @@
         "P0-RELEASE"
       ],
       "details": "VERIFIED 2026-11-09: PR #903 merged ae653fc217bbeb0f5a76828a235fcc1fdd5e52a8. Source inventory 98 cards; all 97 restored cards' first/mid/last original native PNGs (291 public URLs) fetched from real GitHub Pages: each HTTP 200 PNG signature and SHA256 identical to local archived source and native manifest; originalMember unique ownership enforced; fails=0; 0156 OBS2/1222 remains missing. PR CI 6/6 success including real public pixel audit run 42538242512 (cards=97,frames=291,failures=[]), postmerge push exact SHA source audit run 42539174810 success. Sampled source PNG bytes and runtime mapping verified, not all historically correct action roles, no iPhone physical device. DO NOT mark whole actor restoration DONE."
+    },
+    {
+      "seq": 445,
+      "date": "2026-11-09",
+      "type": "TASK_EVIDENCE_UPDATED",
+      "requestId": "REQ-20261109-4LEAF-ALL-PENDING-LIVE-ACCEPTANCE",
+      "taskIds": [
+        "M05",
+        "M09",
+        "P0-ACTOR",
+        "P0-RELEASE",
+        "SRC-01",
+        "ACT-03"
+      ],
+      "details": "2026-11-09 VERIFIED: Native CHR all-frame public QA PR #908 merged dfe202c7611fc963befd16d2123371610cf0da67. HEAD real published GitHub Pages scan run 42539802998 success: source original 97 recovered CHR actors, all 3760 declared native PNG frames individually HTTP 200, valid PNG magic and source-manifest-local-live SHA256 byte identity, 0 failures. 0156 OBS2/1222 remains unrecovered. Main-push exact-source full scan 42540185789 success. Permanent CI regression trigger fix PR #910 merged c6cb86f9184a5eb5be2ac8a69ade3ba828c61c33: PR local-only 97 / 3760 native source SHA passed on run 42540986160, public Pages SHA run 42541381492 passed again (97,3760,failures=[]). On future source PNG/manifest modifications, premerge local source audit runs and postmerge public frame audit runs. This proves source-pixel fidelity, NOT historical EXE pose semantics or D4/D6 3D or physical iPhone real-hardware fidelity. All 60 canonical task states unchanged (13 done, 43 in progress, 4 todo) pending full original acceptance."
     }
   ],
   "restorationPriority": {
