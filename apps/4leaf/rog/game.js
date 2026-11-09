@@ -895,7 +895,7 @@ function drawMinimap(){
 /* Original archived board.jpg/battle.jpg place four CHESSMAN headshots in a
    genuine bottom-right 2x2 pane. Drive them from the SAME current party used
    by the 2002-era battle rules, not from fabricated preview characters.
-   CardData/chm_NN PNGs are the recovered source portrait images. */
+   CHR card to CardData facial mapping is not proven; use owned CHR art. */
 function drawNativeChessmen(){
  const root=$('dice-native-party'),toggle=$('dice-items-toggle');
  if(!root||!match)return;
@@ -929,10 +929,9 @@ function drawNativeChessmen(){
    slot.title=role+' · '+source.name+' / 이동 '+source.move+' 공격 '+source.atk+' 방어 '+source.def+' 지력 '+source.int;
    const img=document.createElement('img');
    img.className='dice-chessman-face';
-   // source.id is a genuine CardData ID e.g. c_0042. Keep the CardData
-   // artwork for modal details, but display an actual native source FRONT
-   // OBS full-body as the 2004 right 2x2 panel did when provenance is
-   // VERIFIED, with an automatic fallback if the source PNG is unavailable.
+   // This CHR card's own visually reviewed FRONT takes priority. Otherwise
+   // use the SAME card's source-verified original CHR body, never an
+   // unsourced CardData facial portrait or another card's OBS art.
    const obsId=source.id.startsWith('c_')?source.id.slice(2):'';
    const auditedIndex=Object.hasOwn(verifiedFront,obsId)
     ?verifiedFront[obsId]:null;
@@ -947,18 +946,17 @@ function drawNativeChessmen(){
     slot.dataset.rightPortraitSource='OBS.pak/verified-front';
     slot.dataset.rightPortraitFacingEvidence='visually-reviewed';
     img.onerror=()=>{
-     img.onerror=null;img.src=imageFor(source.id);
+     img.onerror=null;assignCardImage(img,source.id);
      img.classList.remove('dice-chessman-original-obs');
-     slot.dataset.rightPortraitSource='CardData/original-fallback-source-404';
+     slot.dataset.rightPortraitSource='CHR/verified-own-body-fallback';
      slot.dataset.rightPortraitFacingEvidence='source-load-failed';
     };
    }else{
-    img.src=imageFor(source.id);
-    // No sourced portrait -> original IMG.pak card back, never another
-    // character's CardData face (see SOURCE_PORTRAITS note).
+    assignCardImage(img,source.id);
+    // Source-owned frame 0 is a real BODY; front pose is not verified.
     slot.dataset.rightPortraitSource=img.src.endsWith(NEUTRAL_CARD_ART.slice(1))
      ?'IMG/avatarback/no-sourced-portrait'
-     :'CardData/legacy-roster-unsourced';
+     :'CHR/verified-own-body-not-front';
     slot.dataset.rightPortraitFacingEvidence='unknown';
    }
    slot.dataset.portraitEvidence=portraitEvidence(source.id);
