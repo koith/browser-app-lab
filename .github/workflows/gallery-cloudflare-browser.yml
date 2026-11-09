@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'apps/gallery-archive/qa_cloudflare_pages_browser.py'
+      - 'apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs'
+      - 'apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs'
       - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/yui-gallery/owner-media.js'
       - 'apps/mimmi-gallery/cloudflare-gateway.json'

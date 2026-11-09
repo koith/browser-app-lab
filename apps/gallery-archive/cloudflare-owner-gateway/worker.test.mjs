@@ -161,6 +161,57 @@ test('missing preview may use only its own verified original; bad auth never fal
   await assert.rejects(denied.asset(photo,'preview'),/GALLERY_GATEWAY_HTTP_401/);
 });
 
+test('Pages sign: one transient TypeError retries exact SHA request and returns real stored JPEG',async()=>{
+  resetCatalogCacheForTests();const {env}=makeEnv();
+  env.PAGES_READ_POLICY='existing-sha-pinned-gallery';
+  const photo={ownerAlbum:'example-photo-album',number:1,
+    sha256:digest(bytes),bytes:bytes.length};
+  for(const model of ['mimmi','yui']){
+    let calls=0;
+    const client=pagesGateway({endpoint,model,fetcher:async(url,init)=>{
+      calls++;
+      assert.equal(new URL(url).pathname,'/api/v1/sign');
+      assert.equal(init.credentials,'omit');
+      assert.equal(init.headers.Authorization,undefined);
+      const body=JSON.parse(init.body);
+      assert.equal(body.model,model);
+      assert.equal(body.sha256,digest(bytes));
+      if(calls===1)throw new TypeError('synthetic transient network interruption');
+      return worker.fetch(new Request(url,{...init,headers:{
+        ...init.headers,Origin:'https://koith.github.io'}}),env);
+    }});
+    const [a,b]=await Promise.all([client.asset(photo,'original'),client.asset(photo,'cover')]);
+    assert.equal(a,b,'same SHA requests must deduplicate despite transient network');
+    assert.equal(calls,2,'only one retry is permitted');
+    assert.deepEqual(new Uint8Array(await (await worker.fetch(request(a),env)).arrayBuffer()),bytes);
+    assert.equal((new URL(a)).searchParams.size,4,'never append retry query to signed media URL');
+  }
+});
+
+test('Pages sign: repeated network loss stops after one retry; 401 and bad signature are not retried',async()=>{
+  const photo={ownerAlbum:'example-photo-album',number:1,
+    sha256:digest(bytes),bytes:bytes.length};
+  let calls=0;
+  const offline=pagesGateway({endpoint,model:'yui',fetcher:async()=>{
+    calls++;throw new TypeError('network unavailable');
+  }});
+  await assert.rejects(offline.asset(photo),TypeError);
+  assert.equal(calls,2);
+  calls=0;
+  const denied=pagesGateway({endpoint,model:'yui',fetcher:async()=>{
+    calls++;return new Response('',{status:403});
+  }});
+  await assert.rejects(denied.asset(photo),/GALLERY_GATEWAY_HTTP_403/);
+  assert.equal(calls,1,'access-denied must not retry');
+  calls=0;
+  const malformed=pagesGateway({endpoint,model:'yui',fetcher:async()=>{
+    calls++;return Response.json({url:'https://untrusted.example/foo',sha256:digest(bytes),
+      bytes:bytes.length,expires_at:Math.floor(Date.now()/1000)+300});
+  }});
+  await assert.rejects(malformed.asset(photo),/INVALID_SIGNED_PHOTO/);
+  assert.equal(calls,1,'invalid signed response must not retry');
+});
+
 test('Pages client rejects an external, wrong-SHA or expired signed URL instead of exposing it',async()=>{
   const photo={ownerAlbum:'example-photo-album',number:1,sha256:digest(bytes),bytes:bytes.length};
   for(const mutation of ['host','sha','expiry']){

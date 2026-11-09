@@ -28,7 +28,15 @@ jobs:
           python -m pip install --quiet 'playwright==1.62.0' 'Pillow==11.3.0'
           python -m playwright install --with-deps webkit
       - name: Check actual deployed 8 albums and 99 screenshot tiles natively
-        run: python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser webkit
+        shell: bash
+        run: |
+          # PR source is not published yet. Use checked-out candidate JS
+          # on the real Pages origin, while Worker originals stay live.
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            python apps/gallery-archive/qa_cloudflare_pages_browser.py --all-p0 --browser webkit
+          else
+            python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser webkit
+          fi
   desktop-chromium:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
@@ -41,4 +49,10 @@ jobs:
           python -m pip install --quiet 'playwright==1.62.0' 'Pillow==11.3.0'
           python -m playwright install --with-deps chromium
       - name: Check actual deployed 8 albums and 99 screenshot tiles natively
-        run: python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser chromium
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            python apps/gallery-archive/qa_cloudflare_pages_browser.py --all-p0 --browser chromium
+          else
+            python apps/gallery-archive/qa_cloudflare_pages_browser.py --deployed --all-p0 --browser chromium
+          fi
