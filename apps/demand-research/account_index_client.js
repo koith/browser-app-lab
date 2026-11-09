@@ -47,7 +47,7 @@ style.textContent="#privateAccountIndex{background:white;border:2px solid #293eb
  "#privateAccountIndex button{border:0;background:#263dcc;color:white;padding:10px 16px;margin-top:12px;cursor:pointer}";
 document.head.append(style);
 const LIMIT=80;
-let data=null,rows=[],busy=false,lastFetch=0,query="",platform="",error="",poll=0;
+let data=null,rows=[],busy=false,pendingReset=false,lastFetch=0,query="",platform="",error="",poll=0;
 const option={credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}};
 function render(){
  if(!data){
@@ -73,7 +73,9 @@ function render(){
  more.textContent="더 보기 ("+Math.max(0,(data.filtered_total??data.accounts)-rows.length).toLocaleString("ko-KR")+"개 남음)";
 }
 async function load(reset){
- if(busy)return;
+ // Changing search/provider while an earlier GET is in flight must never
+ // silently discard the user's latest selection. Coalesce into one reload.
+ if(busy){if(reset)pendingReset=true;return;}
  busy=true;
  if(reset){rows=[];data=null}
  try{
@@ -90,7 +92,14 @@ async function load(reset){
    if(stats.refreshing&&poll++<6)setTimeout(()=>load(true),5000);
    // The local audit remains visible for independently verified reciprocal links.
  }catch(e){error=String(e.message||e).slice(0,90);lastFetch=Date.now()}
- finally{busy=false;render()}
+ finally{
+  busy=false;
+  render();
+  if(pendingReset){
+   pendingReset=false;
+   load(true);
+  }
+ }
 }
 more.addEventListener("click",()=>load(false));
 function apply(){query=term.value.trim().slice(0,80);platform=source.value;poll=0;load(true)}
