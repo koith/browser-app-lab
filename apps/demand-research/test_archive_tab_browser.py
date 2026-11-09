@@ -98,7 +98,7 @@ def exercise(browser_type,label):
                     "/account-archive?embedded=1&account=mastodon-"+"b"*40)
                 assert "account=mastodon-" in page.url
                 assert "viewer" in requests
-                page.locator("#archiveQuickSelect option").first.wait_for(timeout=20000)
+                page.locator("#archiveQuickSelect option").first.wait_for(state="attached",timeout=20000)
                 page.wait_for_function(
                     "() => document.querySelector('#archiveQuickCount')"
                     "?.textContent?.includes('2개')",timeout=20000)
