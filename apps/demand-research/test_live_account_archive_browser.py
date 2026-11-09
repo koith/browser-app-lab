@@ -38,11 +38,41 @@ def verify(engine, *, label, width, height):
                        "terabox_zip_sha_verified","github_temp_sha_verified")
                    and item.get("posts_verified_in_bundle",0)>=6]
         assert available, "six-post verified account ZIP not discoverable in webapp"
-        key=available[0]["key"]
+        # Only an authenticated SHA-read-back public profile snapshot can
+        # supply real account-picker names; do not invent a nickname from URL.
+        readable=next((item for item in available
+                       if item.get("profile_snapshot_verified") is True
+                       and isinstance(item.get("display_name"),str)
+                       and item["display_name"].strip()
+                       and isinstance(item.get("handle"),str)
+                       and item["handle"].strip()),None)
+        assert readable is not None, "verified account has no archived nickname/handle"
+        key=readable["key"]
         response = page.goto(SITE+"?account="+quote(key,safe=""),
                              wait_until="domcontentloaded", timeout=180000)
         assert response and response.status == 200, "live account-viewer HTML unavailable"
-        page.locator("#accountSelect").wait_for(timeout=20000)
+        chooser=page.locator("#accountSelect")
+        chooser.wait_for(timeout=20000)
+        page.wait_for_function(
+            "() => document.querySelector('#accountSelect')?.selectedOptions[0]"
+            "?.value?.startsWith('bluesky-') || "
+            "document.querySelector('#accountSelect')?.selectedOptions[0]"
+            "?.value?.startsWith('mastodon-')",timeout=120000)
+        labels=chooser.locator("option").all_text_contents()
+        assert labels and all("https://" not in text for text in labels), (
+            "archive account selector still displays raw profile URLs"
+        )
+        selected_option=chooser.locator("option:checked").inner_text()
+        assert readable["display_name"].strip() in selected_option, (
+            "saved nickname is missing from actual account picker"
+        )
+        assert readable["handle"].strip().lstrip("@") in selected_option, (
+            "saved handle is missing from actual account picker"
+        )
+        assert chooser.input_value()==key, "deep-linked saved account not selected"
+        print("LIVE_ARCHIVE_NICKNAME_PICKER_PASS","client="+label,
+              "auto_loaded=PASS","nickname_handle=PASS","no_raw_url=PASS",
+              flush=True)
         page.locator("#results article.post").first.wait_for(timeout=120000)
         posts=page.locator("#results article.post").count()
         assert posts>=6, "verified TeraBox six-post archive not rendered"
@@ -189,7 +219,47 @@ def verify(engine, *, label, width, height):
         browser.close()
 
 
+def verify_main_archive_hub(engine):
+    """Check actual signed web app preloads its picker without extra clicks."""
+    browser=engine.launch(headless=True)
+    try:
+        page=browser.new_page(viewport={"width":430,"height":932})
+        base=SITE.rsplit("/account-archive",1)[0]
+        response=page.goto(base+"/?tab=archives",wait_until="domcontentloaded",
+                           timeout=180000)
+        assert response and response.status==200
+        quick=page.locator("#archiveQuickSelect")
+        quick.wait_for(state="attached",timeout=20000)
+        page.wait_for_function(
+            "() => !document.querySelector('#archiveQuickSelect')?.disabled"
+            " && document.querySelector('#archiveQuickSelect')?.options?.length>=1"
+            " && document.querySelector('#archiveAccountPicker')?.hidden===false",
+            timeout=120000)
+        labels=quick.locator("option").all_text_contents()
+        assert labels and all("https://" not in name for name in labels), (
+            "main archive picker shows raw addresses or was not preloaded"
+        )
+        assert page.locator("#archiveModeAccounts").get_attribute(
+            "aria-selected")=="true", "saved account view not selected by default"
+        frame=page.locator("#archiveHubFrame")
+        page.wait_for_function(
+            "() => document.querySelector('#archiveHubFrame')?.getAttribute('src')"
+            "?.includes('embedded=1&account=')",timeout=120000)
+        assert frame.is_visible(), "saved account feed not shown immediately"
+        assert page.evaluate(
+            "() => document.documentElement.scrollWidth <= innerWidth+3"), (
+            "mobile archive page has horizontal overflow"
+        )
+        print("LIVE_MAIN_ARCHIVE_AUTO_PICKER_PASS",
+              "client=mobile-chromium","no_clicks=PASS",
+              "names=PASS","embedded_feed=PASS","responsive=PASS",
+              flush=True)
+    finally:
+        browser.close()
+
+
 if __name__ == "__main__":
     with sync_playwright() as playwright:
         verify(playwright.chromium, label="desktop-chromium", width=1200, height=900)
         verify(playwright.webkit, label="iphone-webkit", width=430, height=932)
+        verify_main_archive_hub(playwright.chromium)
