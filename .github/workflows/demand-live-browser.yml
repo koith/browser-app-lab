@@ -12,6 +12,7 @@ on:
       - "apps/demand-research/account_watch.js"
       - "apps/demand-research/account_auto_analysis.js"
       - "apps/demand-research/account_index_client.js"
+      - "apps/demand-research/test_account_index_search_browser.py"
       - "apps/demand-research/test_account_watch_browser.py"
       - "apps/demand-research/test_free_discovery_browser.py"
       - ".github/workflows/demand-live-browser.yml"
@@ -23,6 +24,7 @@ on:
       - "apps/demand-research/account_watch.js"
       - "apps/demand-research/account_auto_analysis.js"
       - "apps/demand-research/account_index_client.js"
+      - "apps/demand-research/test_account_index_search_browser.py"
       - "apps/demand-research/test_account_watch_browser.py"
       - ".github/workflows/demand-live-browser.yml"
   workflow_dispatch:
@@ -62,3 +64,19 @@ jobs:
         run: python apps/demand-research/test_free_discovery_browser.py --live
       - name: Real public API from browser with CORS (aggregate-only, no retained posts)
         run: python apps/demand-research/test_live_browser.py --live
+
+  account-search-mobile-webkit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deterministic Chromium and mobile WebKit
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check playwright==1.56.0
+          python -m playwright install --with-deps chromium webkit
+      - name: Test mobile search clear without blur and source filter
+        run: python apps/demand-research/test_account_index_search_browser.py
