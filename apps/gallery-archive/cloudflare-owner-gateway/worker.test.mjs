@@ -212,6 +212,55 @@ test('Pages sign: repeated network loss stops after one retry; 401 and bad signa
   assert.equal(calls,1,'invalid signed response must not retry');
 });
 
+
+
+test('Pages recovery re-signs same immutable owner original after a cached media 503',async()=>{
+  resetCatalogCacheForTests();const {env}=makeEnv();
+  env.PAGES_READ_POLICY='existing-sha-pinned-gallery';
+  const photo={ownerAlbum:'example-photo-album',number:1,
+    sha256:digest(bytes),bytes:bytes.length};
+  for(const model of ['mimmi','yui']){
+    let signs=0;
+    const client=pagesGateway({endpoint,model,fetcher:(url,init)=>{
+      signs++;
+      assert.equal(init.credentials,'omit');
+      assert.equal(JSON.parse(init.body).sha256,photo.sha256);
+      return worker.fetch(new Request(url,{...init,headers:{
+        ...init.headers,Origin:'https://koith.github.io'}}),env);
+    }});
+    const original=await client.asset(photo,'original');
+    assert.equal(await client.asset(photo,'original'),original);
+    assert.equal(signs,1,'regular reads should stay cached');
+    const refreshed=await client.renew(photo,'original');
+    assert.equal(signs,2,'recovery must contact Worker rather than reuse signed URL cache');
+    const signed=new URL(refreshed);
+    assert.deepEqual([...signed.searchParams.keys()].sort(),['b','e','h','s']);
+    assert.equal(signed.searchParams.get('h'),photo.sha256);
+    const response=await worker.fetch(request(refreshed),env);
+    assert.equal(response.status,200);
+    assert.deepEqual(new Uint8Array(await response.arrayBuffer()),bytes);
+  }
+});
+
+test('Pages recovery does not retry a denied or malicious signed response',async()=>{
+  const photo={ownerAlbum:'example-photo-album',number:1,sha256:digest(bytes),bytes:bytes.length};
+  let calls=0;
+  const denied=pagesGateway({endpoint,model:'yui',fetcher:async()=>{
+    calls++;return new Response('',{status:403});
+  }});
+  await assert.rejects(denied.renew(photo,'cover'),/GALLERY_GATEWAY_HTTP_403/);
+  assert.equal(calls,1);
+  await assert.rejects(denied.renew(photo,'not-variant'),/INVALID_PHOTO_VARIANT/);
+  assert.equal(calls,1);
+  let bad=0;
+  const malformed=pagesGateway({endpoint,model:'mimmi',fetcher:async()=>{
+    bad++;return Response.json({url:'https://different.example/forged',sha256:photo.sha256,
+      bytes:photo.bytes,expires_at:Math.floor(Date.now()/1000)+300});
+  }});
+  await assert.rejects(malformed.renew(photo,'original'),/INVALID_SIGNED_PHOTO/);
+  assert.equal(bad,1);
+});
+
 test('Pages client rejects an external, wrong-SHA or expired signed URL instead of exposing it',async()=>{
   const photo={ownerAlbum:'example-photo-album',number:1,sha256:digest(bytes),bytes:bytes.length};
   for(const mutation of ['host','sha','expiry']){
