@@ -274,6 +274,14 @@ def exercise_real_pages_static_cover_after_two_503(browser,model):
     try:
         response=page.goto(root,wait_until="domcontentloaded",timeout=80000)
         assert response and response.status==200
+        # A committed album cover can legitimately become lazy/offscreen after
+        # hydration (especially 2-column mobile WebKit). A native browser will
+        # not fetch its retried URL until it enters the viewport. Simulate
+        # the real user scrolling to the affected album, rather than treating
+        # an offscreen pending lazy image as a recovery failure.
+        target=page.locator('#albumgrid img[src*="'+relative+'"]').first
+        target.wait_for(state='attached',timeout=35000)
+        target.scroll_into_view_if_needed(timeout=35000)
         try:
             page.wait_for_function("""relative => {
               const imgs=[...document.querySelectorAll('#albumgrid img')];
