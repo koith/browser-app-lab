@@ -214,20 +214,67 @@ function retryCommittedImageError(event){
  const src=img.getAttribute('src');if(!src)return;
  let url;try{url=new URL(src,location.href)}catch{return}
  const prefix=new URL('stored-albums/',location.href);
- if(url.origin!==location.origin||!url.pathname.startsWith(prefix.pathname)||url.search||
+ // Query refresh is ONLY for immutable, same-origin committed photo files.
+ // Cloudflare owner URLs use four strictly signed fields and are NEVER touched.
+ const validRefresh=!url.search||(url.searchParams.size===1&&
+    /^[1-4]$/.test(url.searchParams.get('gtry')||''));
+ if(url.origin!==location.origin||!url.pathname.startsWith(prefix.pathname)||!validRefresh||
     !/\.(?:jpe?g|png|webp|avif)$/i.test(url.pathname))return;
+ const canonical=url.origin+url.pathname;
  const previous=committedImageRetries.get(img);
- const attempts=previous?.url===url.href?previous.attempts:0;
- if(attempts>=2)return;
- const state={url:url.href,attempts:attempts+1};committedImageRetries.set(img,state);
+ const attempts=previous?.url===canonical?previous.attempts:0;
+ if(attempts>=4)return;
+ const state={url:canonical,attempts:attempts+1,last:Date.now()};
+ committedImageRetries.set(img,state);
  event.stopImmediatePropagation();
  setTimeout(()=>{
   if(!img.isConnected||committedImageRetries.get(img)!==state||img.getAttribute('src')!==src)return;
   if(img.complete&&img.naturalWidth>0)return;
-  img.removeAttribute('src');img.src=src;
- },state.attempts===1?400:1200);
+  const fresh=new URL(canonical);
+  fresh.searchParams.set('gtry',String(state.attempts));
+  img.hidden=false;img.removeAttribute('src');img.src=fresh.href;
+ },[400,1200,3000,6500][attempts]);
 }
 document.addEventListener('error',retryCommittedImageError,true);
+
+function recoverFailedFirstPaintCovers(){
+ // Eager <img> requests begin before this inline bootstrap script executes.
+ // A very fast Pages 503 can finish before our captured error listener is
+ // installed. Repair any already failed first-paint cover on window load.
+ document.querySelectorAll('#albumgrid img[src^="stored-albums/"]').forEach(img=>{
+  if(img.complete&&img.naturalWidth===0&&!committedImageRetries.has(img))
+   retryCommittedImageError({target:img,stopImmediatePropagation(){}});
+ });
+}
+window.addEventListener('load',recoverFailedFirstPaintCovers,{once:true});
+// WebKit may delay the window load event while many other album covers are
+// requesting signed media. Restore already-failed Pages covers promptly at
+// DOM readiness, without a global poll or any Cloudflare URL mutation.
+if(document.readyState==='loading')
+ document.addEventListener('DOMContentLoaded',()=>setTimeout(recoverFailedFirstPaintCovers,250),{once:true});
+else setTimeout(recoverFailedFirstPaintCovers,250);
+setTimeout(recoverFailedFirstPaintCovers,1400);
+
+
+// Once a bounded burst is exhausted, retry only visible failed committed
+// photos on a future user focus/online event. Never poll the global backend.
+function retryCommittedVisibleOnFocus(){
+ if(document.hidden||navigator.onLine===false)return;
+ const now=Date.now();
+ document.querySelectorAll('#albumgrid img,#detailphotos img,#photogrid img').forEach(img=>{
+  if(img.naturalWidth>0||!img.getAttribute('src'))return;
+  const state=committedImageRetries.get(img);
+  if(!state||state.attempts<4||now-state.last<10000)return;
+  const box=(img.closest('.album,.photo')||img).getBoundingClientRect();
+  if(box.bottom<-120||box.top>innerHeight+200)return;
+  committedImageRetries.delete(img);
+  retryCommittedImageError({target:img,stopImmediatePropagation(){}});
+ });
+}
+window.addEventListener('focus',retryCommittedVisibleOnFocus);
+window.addEventListener('online',retryCommittedVisibleOnFocus);
+document.addEventListener('visibilitychange',retryCommittedVisibleOnFocus);
+
 
 const imageHealth={loaded:new Set(),failed:new Set()};
 // Automatic recovery is local-first and budgeted: retry only failed,
@@ -236,15 +283,15 @@ const imageHealth={loaded:new Set(),failed:new Set()};
 const ownerRecoveryPending=new Set();
 const ownerRecoveryState=new WeakMap();
 let ownerRecoveryTimer=null;
-const OWNER_RECOVERY_MAX_ATTEMPTS=3;
-const OWNER_RECOVERY_COOLDOWN_MS=45000;
+const OWNER_RECOVERY_MAX_ATTEMPTS=4;
+const OWNER_RECOVERY_COOLDOWN_MS=4500;
 function queueOwnerImageRecovery(img){
  const p=ownerPhotoIndex.get(img?.dataset.owner||'');
- if(!p||!img.isConnected||!img.closest('.photo'))return;
+ if(!p||!img.isConnected||!img.closest('.photo,.album'))return;
  const s=ownerRecoveryState.get(img)||{attempts:0,last:0};
  if(s.attempts>=OWNER_RECOVERY_MAX_ATTEMPTS)return;
  ownerRecoveryPending.add(img);
- if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,20000);
+ if(ownerRecoveryTimer===null)ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,750);
 }
 function ownerRetryVisible(img){
  const box=img.getBoundingClientRect();
@@ -253,7 +300,7 @@ function ownerRetryVisible(img){
 async function retryOwnerImagesIfReady(){
  ownerRecoveryTimer=null;
  for(const img of ownerRecoveryPending)
-  if(!img.isConnected||!img.closest('.photo'))ownerRecoveryPending.delete(img);
+  if(!img.isConnected||!img.closest('.photo,.album'))ownerRecoveryPending.delete(img);
  if(!ownerRecoveryPending.size||document.hidden||navigator.onLine===false)return;
  let started=0,waiting=false;
  const now=Date.now();
@@ -272,8 +319,9 @@ async function retryOwnerImagesIfReady(){
   s.attempts++;s.last=now;ownerRecoveryState.set(img,s);
   // The existing image load/error listeners own the final visual status.
   // Never show a successful-looking card until naturalWidth proves decode.
-  img.dataset.ownerVariant='original';
-  MimmiPrivate.asset(p,'original').then(url=>{
+  const kind=img.closest('.album')?'cover':'original';
+  img.dataset.ownerVariant=kind;
+  MimmiPrivate.renew(p,kind).then(url=>{
    if(!img.isConnected)return;
    img.hidden=false;
    img.removeAttribute('src');
@@ -288,16 +336,34 @@ async function retryOwnerImagesIfReady(){
   ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,OWNER_RECOVERY_COOLDOWN_MS);
 }
 function refreshOwnerFailuresOnFocus(){
- if(document.hidden||!ownerRecoveryPending.size)return;
+ if(document.hidden)return;
+ // A longer Worker outage can exhaust one bounded retry burst. On the
+ // user's next focus/scroll, permit a NEW burst for the same still-failed,
+ // visible original without any background polling or page reload.
+ const now=Date.now();
+ document.querySelectorAll('.album img[data-owner],.photo img[data-owner]').forEach(img=>{
+  if(!img.isConnected||img.naturalWidth>0||!ownerRetryVisible(img))return;
+  const s=ownerRecoveryState.get(img);
+  if(s?.attempts>=OWNER_RECOVERY_MAX_ATTEMPTS&&now-s.last>=15000){
+   ownerRecoveryState.delete(img);
+   queueOwnerImageRecovery(img);
+  }
+ });
+ if(!ownerRecoveryPending.size)return;
  if(ownerRecoveryTimer!==null)clearTimeout(ownerRecoveryTimer);
  ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,150);
 }
 document.addEventListener('visibilitychange',refreshOwnerFailuresOnFocus);
 window.addEventListener('focus',refreshOwnerFailuresOnFocus);
 window.addEventListener('online',refreshOwnerFailuresOnFocus);
+let lastOwnerRecoveryScrollScan=0;
 window.addEventListener('scroll',()=>{
  if(ownerRecoveryPending.size&&ownerRecoveryTimer===null)
   ownerRecoveryTimer=setTimeout(retryOwnerImagesIfReady,400);
+ if(Date.now()-lastOwnerRecoveryScrollScan>=3000){
+  lastOwnerRecoveryScrollScan=Date.now();
+  refreshOwnerFailuresOnFocus();
+ }
 },{passive:true});
 
 function registerImageHealth(url,ok){
@@ -316,7 +382,7 @@ function recoverSavedCover(img){
 document.addEventListener('load',e=>{
  const img=e.target;
  if(img instanceof HTMLImageElement&&img.closest('.album,.photo')&&img.naturalWidth>=100)
-  {registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo')?.classList.remove('broken-source');ownerRecoveryPending.delete(img);}
+  {img.hidden=false;registerImageHealth(img.currentSrc||img.src,true);img.closest('.photo,.album')?.classList.remove('broken-source');ownerRecoveryPending.delete(img);ownerRecoveryState.delete(img);}
 },true);
 document.addEventListener('error',e=>{
  const img=e.target,container=img instanceof HTMLImageElement?img.closest('.album,.photo'):null;
@@ -330,7 +396,7 @@ document.addEventListener('error',e=>{
    MimmiPrivate.asset(p,'cover').then(url=>{
     if(!img.isConnected)return;
     img.hidden=false;img.removeAttribute('src');img.src=url;
-   }).catch(()=>{if(img.isConnected){img.hidden=true;container.classList.add('broken-source')}});
+   }).catch(()=>{if(img.isConnected){img.hidden=true;container.classList.add('broken-source');queueOwnerImageRecovery(img)}});
    return;
   }
  }
@@ -343,7 +409,7 @@ document.addEventListener('error',e=>{
    MimmiPrivate.asset(p,'original').then(url=>{
     if(!img.isConnected)return;
     img.hidden=false;img.removeAttribute('src');img.src=url;
-   }).catch(()=>{if(img.isConnected&&!recoverSavedCover(img)){img.hidden=true;container.classList.add('broken-source')}});
+   }).catch(()=>{if(img.isConnected&&!recoverSavedCover(img)){img.hidden=true;container.classList.add('broken-source');queueOwnerImageRecovery(img)}});
    return;
   }
  }
@@ -469,7 +535,26 @@ function adoptFastCoverImages(grid,oldCards){
   const previous=oldCards.get(card.dataset.id);
   if(!previous?.image||!previous.sha)continue;
   const next=card.querySelector('img'),old=previous.image;
-  if(!next||!next.getAttribute('src')||next.getAttribute('src')!==old.getAttribute('src'))continue;
+  if(!next||!next.getAttribute('src'))continue;
+  const nextSrc=next.getAttribute('src'),oldSrc=old.getAttribute('src')||'';
+  // A 503 of the exact Pages cover may already have advanced its bounded
+  // local retry query before hydration. Keep that SAME downloading <img>
+  // rather than tearing it down merely because the generated card still
+  // has the pristine URL. Never strip or normalize signed Worker URLs.
+  let samePinnedPhoto=oldSrc===nextSrc;
+  if(!samePinnedPhoto&&/^stored-albums\/[^?#]+\.(?:jpe?g|png|webp|avif)$/i.test(nextSrc)){
+   try{
+    const wanted=new URL(nextSrc,location.href),actual=new URL(oldSrc,location.href);
+    const savedPrefix=new URL('stored-albums/',location.href).pathname;
+    samePinnedPhoto=wanted.origin===location.origin&&
+      wanted.pathname.startsWith(savedPrefix)&&
+      actual.origin===wanted.origin&&actual.pathname===wanted.pathname&&
+      !wanted.search&&!wanted.hash&&!actual.hash&&
+      actual.searchParams.size===1&&
+      /^[1-4]$/.test(actual.searchParams.get('gtry')||'');
+   }catch{samePinnedPhoto=false}
+  }
+  if(!samePinnedPhoto)continue;
   // Compare the actual selected cover, not the pre-fallback preferred
   // owner photo: an exact saved Pages copy can be a different valid SHA.
   // Both the SHA and the real <img src> must match before any DOM reuse.

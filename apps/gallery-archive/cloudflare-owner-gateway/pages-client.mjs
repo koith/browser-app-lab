@@ -59,10 +59,26 @@ export function pagesGateway({endpoint,model,fetcher=fetch,now=()=>Date.now()}) 
     inflight.set(key,pending);
     try{return await pending}finally{inflight.delete(key)}
   }
-  return {asset(photo,kind='original'){
+  const asset=(photo,kind='original')=>{
+
     if(!['cover','preview','original'].includes(kind))return Promise.reject(Error('INVALID_PHOTO_VARIANT'));
     const preview=kind!=='original'&&photo.preview&&SHA.test(photo.preview_sha256||'')&&
       Number.isSafeInteger(photo.preview_bytes)&&photo.preview_bytes>0;
     return sign(photo,preview?'preview':'original');
-  }};
+  };
+  // A fetched <img> can fail with a transient upstream 503 even after its
+  // sign request succeeded. Never reuse that possibly cached signed response
+  // on retry. Re-sign the SAME immutable SHA/album/number and keep h/b/e/s
+  // as the only media URL query fields. No cache-busting query injection.
+  const renew=(photo,kind='original')=>{
+    if(!['cover','preview','original'].includes(kind))
+      return Promise.reject(Error('INVALID_PHOTO_VARIANT'));
+    const number=photo?.storageNumber??photo?.number;
+    const album=photo?.ownerAlbum;
+    const key=(variant,digest,size)=>[album,number,variant,digest,size].join('|');
+    cache.delete(key('original',photo?.sha256,photo?.bytes));
+    cache.delete(key('preview',photo?.preview_sha256,photo?.preview_bytes));
+    return asset(photo,kind);
+  };
+  return {asset,renew};
 }

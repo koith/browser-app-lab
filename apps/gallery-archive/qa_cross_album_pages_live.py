@@ -166,8 +166,15 @@ def open_photo(page,root,target):
     card.locator('img').wait_for(state='visible',timeout=25000)
     page.wait_for_function('''q=>{
         const image=document.querySelector('#detailphotos .photo[data-i="'+q.index+'"] img');
-        return image?.complete && image.naturalWidth===q.width && image.naturalHeight===q.height &&
-            new URL(image.currentSrc||image.src,location.href).href===q.url;
+        if(!image?.complete || image.naturalWidth!==q.width || image.naturalHeight!==q.height)return false;
+        const actual=new URL(image.currentSrc||image.src,location.href),expected=new URL(q.url);
+        // The ONLY permitted variant is a bounded same-origin retry for the
+        // same immutable physical Pages photo. A signed Worker URL, unrelated
+        // album or arbitrary cache parameter never qualifies as a match.
+        return actual.origin===expected.origin &&
+            actual.pathname===expected.pathname &&
+            (!actual.search||(actual.searchParams.size===1 &&
+              /^[1-4]$/.test(actual.searchParams.get('gtry')||'')));
     }''',arg={**target,'url':root+target['url']},timeout=45000)
     # Lazy image loads and history restoration can change the viewport while
     # decoding. Reposition the actual decoded card before native touch.

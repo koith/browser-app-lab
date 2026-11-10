@@ -1,5 +1,18 @@
 name: Gallery Owner Auto Rehydrate Mobile UI Regression
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mimmi-gallery/index.html'
+      - 'apps/yui-gallery/index.html'
+      - 'apps/mimmi-gallery/owner-media.js'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs'
+      - 'apps/gallery-archive/qa_owner_auto_rehydrate_browser.py'
+      - 'apps/mimmi-gallery/owner-media.js'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/gallery-archive/cloudflare-owner-gateway/pages-client.mjs'
+      - '.github/workflows/gallery-owner-auto-rehydrate-ui-qa.yml'
   pull_request:
     paths:
       - 'apps/mimmi-gallery/index.html'
@@ -10,8 +23,8 @@ permissions:
   contents: read
 jobs:
   mobile-mock-503-to-200:
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    name: auto-recovery visible tiles (${{ matrix.browser }})
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    name: recover owner tiles and album covers (${{ matrix.browser }})
     runs-on: ubuntu-24.04
     timeout-minutes: 19
     strategy:
@@ -28,7 +41,7 @@ jobs:
           python -m pip install 'playwright==1.58.0' 'Pillow==11.3.0'
           python -m playwright install --with-deps '${{ matrix.browser }}'
           python -m py_compile apps/gallery-archive/qa_owner_auto_rehydrate_browser.py
-      - name: Test both screenshot albums 503 to exact-owner restored thumbnail without refresh
+      - name: Test 503 recovery for real owner covers and stored tiles without reload
         run: |
           python apps/gallery-archive/qa_owner_auto_rehydrate_browser.py --browser '${{ matrix.browser }}'
-          echo 'UI mocked 503-to-200 transition passed; NOT live 214 owner originals nor physical iPhone' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Mock tile 503-to-200 plus LIVE owner cover after an injected sign/config 503; same-SHA Cloudflare native decode, no Render fallback. Physical iPhone NOT tested' >> "$GITHUB_STEP_SUMMARY"

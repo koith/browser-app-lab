@@ -32,7 +32,9 @@ for(const model of ['mimmi','yui']){
   replacement.replaceWith=img=>{swapped=img};
   const card={dataset:{id:'safe',coverSha:newSha},querySelector:()=>replacement};
   const grid={querySelectorAll:()=>[card]};
-  const context={stored:[{id:'safe',images:[{sha256:newSha}]}],
+  const context={URL,location:{origin:'https://koith.github.io',
+                 href:'https://koith.github.io/browser-app-lab/apps/'+model+'-gallery/'},
+                 stored:[{id:'safe',images:[{sha256:newSha}]}],
                  validImages:a=>a.images,albumCovers:{}};
   vm.createContext(context);
   vm.runInContext(source+';globalThis.adopt=adoptFastCoverImages',context);
@@ -44,6 +46,23 @@ for(const model of ['mimmi','yui']){
  assert.equal(valid.original.dataset.fastPreserved,'1');
  assert.equal(valid.original.getAttribute('src'),'stored-albums/safe/image.jpg');
  assert.equal(valid.original.getAttribute('data-owner'),'owner:safe:1','owner original route must survive');
+ const after503=check({oldUrl:'stored-albums/safe/image.jpg?gtry=2'});
+ assert.equal(after503.swapped,after503.original,model+' must retain same pinned photo after Pages 503 retry');
+ assert.equal(after503.original.getAttribute('src'),'stored-albums/safe/image.jpg?gtry=2');
+ const absoluteRetry=check({oldUrl:'https://koith.github.io/browser-app-lab/apps/'+model+'-gallery/stored-albums/safe/image.jpg?gtry=2'});
+ assert.equal(absoluteRetry.swapped,absoluteRetry.original,
+   model+' must retain WebKit absolute same-SHA retried photo element');
+ assert.equal(check({oldUrl:'https://other.example/browser-app-lab/apps/'+model+'-gallery/stored-albums/safe/image.jpg?gtry=2'}).swapped,null,
+   'external host must never qualify as an exact source');
+
+ assert.equal(check({oldUrl:'stored-albums/safe/image.jpg?gtry=5'}).swapped,null,
+   'unbounded retry parameter must never qualify for SHA reuse');
+ assert.equal(check({oldUrl:'stored-albums/safe/image.jpg?gtry=2&other=1'}).swapped,null,
+   'unknown retry parameters must never qualify for SHA reuse');
+ assert.equal(check({oldUrl:'stored-albums/other/image.jpg?gtry=2'}).swapped,null,
+   'different saved path must not qualify for SHA reuse');
+ assert.equal(check({oldUrl:'https://other.example/api/v1/media/a?gtry=2'}).swapped,null,
+   'signed or external media must never be normalized into a different photo');
  assert.equal(check({sha:'b'.repeat(64)}).swapped,null,'different selected SHA must not preserve');
  assert.equal(check({url:'stored-albums/safe/another.jpg'}).swapped,null,'different URL must not preserve');
  assert.ok(html.includes('data-cover-sha="'),model+' must disclose actual selected cover SHA on the rendered card');
