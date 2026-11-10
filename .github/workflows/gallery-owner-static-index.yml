@@ -97,3 +97,8 @@ jobs:
             --silent || echo "Pages branch rebuild may already be scheduled by the metadata commit."
           gh workflow run gallery-deployed-pages-photo-qa.yml \
             --repo "$GITHUB_REPOSITORY" --ref main
+          # Actions GITHUB_TOKEN commits do not trigger ordinary push workflows.
+          # Dispatch free Cloudflare replication explicitly only when the
+          # verified owner index was actually changed; never bill or expose bytes.
+          gh workflow run gallery-cloudflare-free-assets.yml \
+            --repo "$GITHUB_REPOSITORY" --ref main --field max_new_per_model=0
