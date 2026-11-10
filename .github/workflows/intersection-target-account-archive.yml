@@ -112,6 +112,8 @@ jobs:
           node --check target_archive_client.js
           node --check account_archive_view.js
           node --check archive_tab.js
+          node --check intersection-sw.js
+          python -m py_compile gateway.py
           node --check auto_archive_view.js
           node --check account_watch.js
           python -m pytest -q test_archive_nonblocking.py test_target_account_archive.py test_target_account_bundle.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py test_backup_queue.py test_backup_queue_sqlite.py test_github_temp_bundle.py test_sealed_credentials.py test_demand_archive.py test_gateway.py
