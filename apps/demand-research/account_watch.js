@@ -559,8 +559,23 @@ window.addEventListener("intersection:feed-updated",scheduleRender);
 window.addEventListener("intersection:date-range-change",scheduleRender);
 window.addEventListener("storage",e=>{if(e.key===STORE){watches=read();render()}});
 render();
-const initialTab=new URLSearchParams(location.search).get("tab");
-if(initialTab==="archives"||initialTab==="accounts")setView(initialTab);
+// A user-initiated refresh must start on the first Posts tab, even if
+// a previous Archive selection left ?tab=archives in the address.
+// First visits through explicit deep links still open the requested panel.
+const navigation=performance.getEntriesByType?.("navigation")?.[0];
+const initialParams=new URLSearchParams(location.search);
+if(navigation?.type==="reload"){
+  if(initialParams.has("tab")){
+    initialParams.delete("tab");
+    const search=initialParams.toString();
+    history.replaceState(null,"",location.pathname+
+      (search?"?"+search:"")+location.hash);
+  }
+  setView("posts");
+}else{
+  const initialTab=initialParams.get("tab");
+  if(initialTab==="archives"||initialTab==="accounts")setView(initialTab);
+}
 // On page load, bounded refresh: no background monitoring or polling.
 Promise.resolve().then(async()=>{
   const initial=watches.filter(w=>["bluesky","mastodon","x"].includes(w.platform)).slice(0,4);
