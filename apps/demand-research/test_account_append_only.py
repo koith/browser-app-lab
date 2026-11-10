@@ -1,5 +1,6 @@
 """Synthetic append-only account archive integration tests (no live user data)."""
 from types import SimpleNamespace
+import pytest
 
 from target_account_bundle import BundleStore, LayeredBundleCloud
 from target_account_archive import run_one, resolve, archive_key
