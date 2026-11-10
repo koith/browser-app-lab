@@ -612,7 +612,7 @@
   sceneInit=true;
   if('ResizeObserver' in window){resize=new ResizeObserver(fit);resize.observe($stage())}
   window.addEventListener('resize',()=>{
-   if(state.view==='directory')renderMobileSpatialDirectory();
+   if(state.view==='directory')renderDirectory();
    const bar=$root()?.querySelector('.social-classic-toolbar');
    const frame=$('social-image-frame');
    const large=window.matchMedia('(min-width:801px) and (min-height:550px)').matches;
@@ -683,7 +683,6 @@
   if(state.view==='town')renderTown(frame);
   if(state.view==='knighttown')renderKnightTown(frame);
   if(state.view==='directory')renderDirectory(frame);
-  renderMobileSpatialDirectory();
   if(state.view==='room'){
    renderRoom(frame);
    // The original screenshot shows the EXIT sprite at (728,503) of 794x528.
@@ -832,6 +831,9 @@
  // Each room is an independent button; the map can pan on both axes.
  function renderDirectory(frame=$('social-image-frame')){
   if(state.view!=='directory')return;
+  // Refreshing from storage or server must remove previously reparented
+  // originals before rebinding the only real create and room buttons.
+  $('social-mobile-room-map')?.remove();
   frame.className='social-image-frame social-room-directory';
   frame.style.backgroundImage='url("./original/ChatTown/'+REGIONS[state.region].art+'.png")';
   frame.innerHTML='<section class="social-directory web-estate-open" data-default-room-entry="spatial-map"><header class="social-directory-heading"><b><span id="social-directory-name"></span> · 채팅방 지도</b><div class="social-directory-actions"><button id="social-web-estate-toggle" type="button" aria-pressed="true" title="보조 목록 보기. 방 입장은 맵의 마커를 직접 누르세요">목록</button><button id="social-new-room" type="button">+ 방 만들기</button></div></header><div id="social-map-viewport" class="social-map-viewport" tabindex="0" aria-label="맵의 채팅방 마커를 눌러 입장. 원작 정확한 방 좌표는 미확보"><div id="social-map-plane" class="social-map-plane"><div class="social-map-terrain" aria-hidden="true"></div><div id="social-directory-list" class="social-map-rooms"></div></div></div><footer class="social-map-toolbar"><span>맵의 방을 눌러 입장 · 드래그로 이동 · 원작 방 배치 좌표는 미확보</span><div class="social-map-directions"><button type="button" data-pan="left" aria-label="왼쪽 이동">◀</button><button type="button" data-pan="up" aria-label="위쪽 이동">▲</button><button type="button" data-pan="down" aria-label="아래쪽 이동">▼</button><button type="button" data-pan="right" aria-label="오른쪽 이동">▶</button></div></footer></section>';
@@ -885,6 +887,7 @@
   }
   setupRoomMap();
   updateCounts();
+  renderMobileSpatialDirectory();
  }
  // Exact native room-map pixel anchors are not extracted from the server.
  // Use distinct central-first positions for real browser-created rooms.
