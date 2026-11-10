@@ -53,6 +53,7 @@ const {chromium,webkit}=require('playwright');
   await page.locator('#game-mode').selectOption('hotseat');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#map-select').selectOption('4LEAF');
+  if(mobile)await page.locator('#dice-room-ready-focus').click();
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const inspected=[];

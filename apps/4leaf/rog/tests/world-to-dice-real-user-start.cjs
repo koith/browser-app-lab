@@ -103,6 +103,10 @@ const warmPwa=process.env.FOURLEAF_SW_ENABLED==='1';
   await page.locator('#point-limit').selectOption('12');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#map-select').selectOption('4LEAF');
+  // On a narrow phone the original 794px ROOM is enlarged for readability.
+  // READY lives in its real source pixel position; the user first taps
+  // the visible focus control, never a hidden route/game-start shortcut.
+  if(phone)await press(page.locator('#dice-room-ready-focus'));
   await press(page.locator('#start-game'));
   await page.waitForTimeout(350);state=await inspect('ready-tap-game-start');
   assert.equal(state.route,'game',
