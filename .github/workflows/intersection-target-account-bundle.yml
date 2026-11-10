@@ -26,13 +26,17 @@ on:
           - "3"
           - "4"
   schedule:
-    # Preserve reviewed public-account ZIP backup every six hours.
-    # This is complementary to the separate fast public-post capture.
+    # Every six hours, independently revisit a rotating saved PUBLIC account.
+    # New posts and amended versions are added to the older immutable ZIP.
     - cron: "43 */6 * * *"
   push:
     branches: [main]
     paths:
       - "apps/demand-research/target_account_bundle.py"
+      - "apps/demand-research/target_account_archive.py"
+      - "apps/demand-research/github_temp_bundle.py"
+      - "apps/demand-research/test_target_account_archive.py"
+      - "apps/demand-research/test_target_account_bundle.py"
       # Owner-reviewed one-time retry after fixing the public label filter.
       # This path is removed after verifying the encrypted cloud archive.
       - ".github/workflows/intersection-target-account-bundle.yml"
@@ -42,6 +46,10 @@ permissions:
 
 jobs:
   private-public-account-bundle:
+    # Ordinary merges modifying collector code must NEVER unexpectedly start a
+    # partial anonymous TeraBox crawl. A single explicit reviewed merge is
+    # allowed to exercise the actual automatic registered-account lane.
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[INT-AUTO-VERIFY-20261110]') || contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]')
     concurrency:
       # Independent immutable ZIP writes must not queue behind journal repair.
       group: intersection-target-zip-production
@@ -64,7 +72,8 @@ jobs:
       TARGET_PLATFORM: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'bluesky' || inputs.platform }}
       TARGET_ACCOUNT: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'liv0706-01.bsky.social' || inputs.account }}
       TARGET_MAX_PAGES: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'all' || inputs.max_pages }}
-      DEMAND_ACCOUNT_TEMP_STORAGE: ${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]'))) && 'github_release' || '' }}
+      DEMAND_ACCOUNT_TEMP_STORAGE: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (contains(github.event.head_commit.message, '[INT-AUTO-VERIFY-20261110]') || (github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]'))))) && 'github_release' || '' }}
+      DEMAND_SCHEDULED_ACCOUNTS: ${{ (github.event_name == 'schedule' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[INT-AUTO-VERIFY-20261110]'))) && '1' || '0' }}
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -96,4 +105,5 @@ jobs:
           umask 077
           timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py
           echo 'Only TARGET_ACCOUNT_GITHUB_TEMP_SHA_VERIFIED or TARGET_ACCOUNT_BUNDLE_REMOTE_VERIFIED with remote_sha256_verified=true confirms independent original readback.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Scheduled results must also emit TARGET_ACCOUNT_AUTO_REFRESH_VERIFIED; an upload acknowledgement alone is not a completed account refresh.' >> "$GITHUB_STEP_SUMMARY"
           echo 'GitHub temporary encrypted releases are not permanent archives; keep them until TeraBox migration succeeds.' >> "$GITHUB_STEP_SUMMARY"

@@ -482,3 +482,93 @@ def test_public_labelled_posts_reach_private_encrypted_bundle(monkeypatch):
             api=api,run_id="42399999999",cloud_check=False,uploader=fake_remote)
     assert result["public_posts_in_bundle"]==1
     assert any(name.endswith("/post.json") for name in stored)
+
+
+
+def test_public_post_edit_appends_revision_without_changing_original_or_media():
+    original=blue_row("edit-preserve01","Unchanged first authored text",
+                      assets=[("image/jpeg",PHOTO)])
+    edited=blue_row("edit-preserve01","New edited authored text",
+                    assets=[("image/jpeg",PHOTO),("video/mp4",VIDEO)])
+    removed=BlueAPI({None:([],None)})
+    first_api=BlueAPI({None:([original],None)})
+    first_api.blobs={cid(PHOTO):("image/jpeg",PHOTO)}
+    edited_api=BlueAPI({None:([edited],None)})
+    edited_api.blobs={cid(PHOTO):("image/jpeg",PHOTO),cid(VIDEO):("video/mp4",VIDEO)}
+    cloud=FakeCloud()
+    r1=job.run_one("bluesky",DID,root=cloud,api=first_api,max_pages=1,clock=lambda:0)
+    assert r1["posts_verified"]==1 and r1["revisions_appended"]==0
+    profile=job.resolve("bluesky",DID,first_api)
+    archive=job.account_cloud(cloud,profile)
+    pid=job.post_key("bluesky",original["uri"])
+    first_post=archive.read("posts/"+pid+"/post.json")
+    first_raw=archive.read("metadata/source-records/"+pid+".json")
+    original_media=json.loads(first_post)["media"][0]["key"]
+    original_bytes=archive.read(original_media)
+    assert not archive.names("revisions/"+pid)
+
+    r2=job.run_one("bluesky",DID,root=cloud,api=edited_api,max_pages=1,clock=lambda:0)
+    assert r2["posts_verified"]==0 and r2["revisions_appended"]==1
+    assert archive.read("posts/"+pid+"/post.json")==first_post
+    assert archive.read("metadata/source-records/"+pid+".json")==first_raw
+    assert archive.read(original_media)==original_bytes
+    versions=archive.names("revisions/"+pid)
+    assert len(versions)==1
+    revision=json.loads(archive.read("revisions/"+pid+"/"+versions[0]))
+    assert revision["text"]=="New edited authored text"
+    assert revision["archive_complete"] is True
+    assert revision["source_record"]["value"]["text"]=="New edited authored text"
+    assert len(revision["media"])==2
+    for item,payload in zip(revision["media"],[PHOTO,VIDEO]):
+        assert archive.read_verified(item["key"],item["sha256"],
+                                     cap=len(payload)+1)==payload
+
+    r3=job.run_one("bluesky",DID,root=cloud,api=edited_api,max_pages=1,clock=lambda:0)
+    assert r3["posts_verified"]==0 and r3["revisions_appended"]==0
+    assert archive.names("revisions/"+pid)==versions
+
+    # Source disappearance must not erase the old post or its revision.
+    job.run_one("bluesky",DID,root=cloud,api=removed,max_pages=1,clock=lambda:0)
+    assert archive.read("posts/"+pid+"/post.json")==first_post
+    assert archive.names("revisions/"+pid)==versions
+
+
+def test_modified_original_with_bad_blob_does_not_commit_partial_revision():
+    base=blue_row("edit-missing02","First verified version")
+    edited=blue_row("edit-missing02","Modified with missing image",
+                    assets=[("image/jpeg",PHOTO)])
+    cloud=FakeCloud()
+    old_api=BlueAPI({None:([base],None)})
+    job.run_one("bluesky",DID,root=cloud,api=old_api,max_pages=1,clock=lambda:0)
+    class BadMedia(BlueAPI):
+        def media(self,url,mime):
+            return mime,b"corrupt substituted bytes"
+    new_api=BadMedia({None:([edited],None)})
+    with pytest.raises(job.SourceUnavailable,match="edited original PDS blob CID mismatch"):
+        job.run_one("bluesky",DID,root=cloud,api=new_api,max_pages=1,clock=lambda:0)
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,old_api))
+    pid=job.post_key("bluesky",base["uri"])
+    assert not archive.names("revisions/"+pid)
+    original=json.loads(archive.read("posts/"+pid+"/post.json"))
+    assert original["text"]=="First verified version"
+
+
+def test_partial_historical_cursor_still_checks_newest_public_posts_and_edits():
+    first=blue_row("old-first03","Initial public post")
+    newer=blue_row("new-second03","Brand new public post")
+    edited=blue_row("old-first03","Original post edited while backfill pending")
+    page2=blue_row("history-third03","Older archival post")
+    cloud=FakeCloud()
+    first_api=BlueAPI({None:([first],"older-cursor"),"older-cursor":([page2],None)})
+    initial=job.run_one("bluesky",DID,root=cloud,api=first_api,max_pages=1,clock=lambda:0)
+    assert initial["status"]=="RESUME_NEEDED"
+    next_api=BlueAPI({None:([newer,edited],"next-cursor"),
+                      "older-cursor":([page2],None)})
+    second=job.run_one("bluesky",DID,root=cloud,api=next_api,max_pages=1,clock=lambda:0)
+    assert second["posts_verified"]==2
+    assert second["revisions_appended"]==1
+    assert any("cursor=older-cursor" in url for url in next_api.calls)
+    archive=job.account_cloud(cloud,job.resolve("bluesky",DID,next_api))
+    pid=job.post_key("bluesky",first["uri"])
+    assert json.loads(archive.read("posts/"+pid+"/post.json"))["text"]=="Initial public post"
+    assert len(archive.names("revisions/"+pid))==1

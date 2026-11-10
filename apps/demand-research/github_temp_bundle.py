@@ -190,7 +190,8 @@ def release_bundle(release, *, key=None):
 
 def releases(max_pages=2):
     for page in range(1, min(max_pages, 3) + 1):
-        data = _json(API + "/releases?per_page=100&page=" + str(page))
+        data = _json(API + "/releases?per_page=100&page=" + str(page),
+                     os.getenv("GITHUB_TOKEN") or None)
         if not isinstance(data, list):
             raise RuntimeError("Invalid GitHub temporary backup list")
         for item in data:
