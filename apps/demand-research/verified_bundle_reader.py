@@ -159,6 +159,57 @@ class BundleAccountCloud(CloudArchive):
         return raw if raw is not None and sha256(raw)==expected_digest else None
 
 
+class MergedBundleAccountCloud(BundleAccountCloud):
+    """Read-only union across separately SHA-verified immutable ZIP snapshots.
+
+    Never alter a previously saved ZIP. Older originals and all new
+    revisions remain individually addressable even when subsequent provider
+    history no longer includes them.
+    """
+
+    def __init__(self,bundles):
+        if not bundles or len(bundles)>50:
+            raise BundleInvalid("invalid verified account history length")
+        if len({bundle.account for bundle in bundles})!=1:
+            raise BundleInvalid("mixed public account history refused")
+        # Oldest first so the original observation wins on key collisions.
+        self.bundles=tuple(sorted(bundles,
+            key=lambda bundle:str(bundle.recorded_at or "")))
+        super().__init__(self.bundles[-1])
+
+    def read(self,key,*,cap=MAX_CATALOG,optional=False,domain=None):
+        if not isinstance(key,str) or key.startswith("/") or ".." in key or not re.fullmatch(r"[A-Za-z0-9_./-]+",key):
+            raise ValueError("unsafe archive key")
+        for bundle in self.bundles:
+            value=bundle.items.get(self.prefix+key)
+            if value is not None:
+                if len(value)>cap:
+                    raise ValueError("verified original exceeds reader bound")
+                return value
+        if optional:
+            return None
+        raise RuntimeError("verified history object unavailable")
+
+    def names(self,prefix):
+        if not isinstance(prefix,str) or prefix.startswith("/") or ".." in prefix:
+            raise ValueError("unsafe archive prefix")
+        head=self.prefix+prefix.rstrip("/")+"/"
+        return sorted({key[len(head):] for bundle in self.bundles
+                       for key in bundle.items if key.startswith(head)
+                       and "/" not in key[len(head):]})
+
+    def read_verified(self,key,expected_digest,*,cap=100_000):
+        if not re.fullmatch(r"[a-f0-9]{64}",str(expected_digest)):
+            raise ValueError("invalid expected SHA")
+        if not isinstance(key,str) or key.startswith("/") or ".." in key:
+            raise ValueError("unsafe archive key")
+        for bundle in self.bundles:
+            value=bundle.items.get(self.prefix+key)
+            if value is not None and len(value)<=cap and sha256(value)==expected_digest:
+                return value
+        return None
+
+
 def names_from_cloud(root):
     raw=root.command(["lsf",root.remote,"--files-only","--retries","2"],
                      timeout=90,allow_missing=True)
