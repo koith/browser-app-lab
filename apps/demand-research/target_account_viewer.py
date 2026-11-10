@@ -20,7 +20,7 @@ import github_temp_bundle
 from target_account_archive import REGISTRY_RE, archive_key, account_cloud
 from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
 from verified_bundle_reader import (
-    BundleAccountCloud, MergedBundleAccountCloud, available_bundles, latest_account_bundle, BundleInvalid,
+    VerifiedBundle, BundleAccountCloud, MergedBundleAccountCloud, available_bundles, latest_account_bundle, BundleInvalid,
 )
 
 HEX40=re.compile(r"^[a-f0-9]{40}$")
@@ -167,6 +167,8 @@ def open_account(account):
         except (RuntimeError,ValueError,TypeError,BundleInvalid):
             # A provider outage must not suppress already verified TeraBox.
             github=[]
+    # Never elevate an unverified inventory hint to source object bytes.
+    github=[bundle for bundle in github if isinstance(bundle,VerifiedBundle)]
     root=open_root()
     try:
         # A read-only union must include ALL available verified deltas.
