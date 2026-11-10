@@ -963,6 +963,15 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
 from target_account_viewer import create_router as create_account_viewer_router
 app.include_router(create_account_viewer_router(check_auth))
 
+# A previously loaded device can render a PUBLIC shell while Render wakes.
+# The worker does not cache private posts, account details or API responses.
+@app.get("/intersection-sw.js",include_in_schema=False)
+async def public_shell_worker():
+    return FileResponse(VIEW_FILE.parent/"intersection-sw.js",
+        media_type="application/javascript",
+        headers={"Cache-Control":"no-store","Service-Worker-Allowed":"/",
+                 "X-Content-Type-Options":"nosniff"})
+
 # Allow only the browser's three known scripts and fixed SVG assets. Never
 # expose the Python source tree, cloud files or private database via StaticFiles.
 @app.get("/{asset_name}",include_in_schema=False)
