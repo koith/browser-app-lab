@@ -274,13 +274,35 @@ def exercise_real_pages_static_cover_after_two_503(browser,model):
     try:
         response=page.goto(root,wait_until="domcontentloaded",timeout=80000)
         assert response and response.status==200
-        page.wait_for_function("""relative => {
-          const imgs=[...document.querySelectorAll('#albumgrid img')];
-          return imgs.some(img => img.complete && img.naturalWidth>100 &&
-            new URL(img.currentSrc||img.src,location.href).pathname.endsWith('/'+relative));
-        }""",arg=relative,timeout=45000)
+        try:
+            page.wait_for_function("""relative => {
+              const imgs=[...document.querySelectorAll('#albumgrid img')];
+              return imgs.some(img => img.complete && img.naturalWidth>100 &&
+                new URL(img.currentSrc||img.src,location.href).pathname.endsWith('/'+relative));
+            }""",arg=relative,timeout=45000)
+        except Exception:
+            diagnosis=page.evaluate("""relative => ({
+              galleryCards:document.querySelectorAll('#albumgrid .album').length,
+              matchingImages:[...document.querySelectorAll('#albumgrid img')].filter(
+                im => (im.currentSrc||im.src||'').includes(relative)).map(im=>({
+                  src:im.getAttribute('src'),width:im.naturalWidth,
+                  complete:im.complete,hidden:im.hidden,connected:im.isConnected,
+                  broken:im.closest('.album')?.classList.contains('broken-source')})),
+              pendingOwner:typeof ownerRecoveryPending!=='undefined'
+                ? ownerRecoveryPending.size : null,
+              loadState:document.readyState
+            })""",relative)
+            print('GALLERY_STATIC_503_RECOVERY_TIMEOUT_EVIDENCE',
+                  json.dumps({'model':model,'browser':browser.browser_type.name,
+                              'requests':state,'ui':diagnosis},sort_keys=True),flush=True)
+            raise
         assert state["failed"]==2 and state["served_real"]>=1,state
-        assert len(set(state["queries"]))>=3,("same-source cached error replay",state)
+        # Multiple first-paint <img> requests can independently hit the
+        # unmodified URL before the error listener runs. What matters is that
+        # a fresh same-origin gtry URL succeeded after both injected failures.
+        assert any(re.fullmatch(r'gtry=[1-4]',q) for q in state["queries"]),(
+            "No cache-busted same-origin Pages retry",state)
+        assert len(set(state["queries"]))>=2,("Only cached 503 URL reused",state)
         actual=ctx.request.get(root+relative,timeout=45000)
         assert actual.status==200,(model,'real Pages committed cover unavailable',actual.status)
         assert hashlib.sha256(actual.body()).hexdigest()==sha,(model,'committed cover SHA changed')
