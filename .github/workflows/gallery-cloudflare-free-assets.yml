@@ -20,6 +20,11 @@ on:
   push:
     branches: [main]
     paths:
+      # Human/installation-app index edits also request catch-up replication.
+      # The index Actions workflow uses explicit workflow_dispatch above,
+      # because its GITHUB_TOKEN commits cannot trigger push workflows.
+      - 'apps/mimmi-gallery/owner-index.json'
+      - 'apps/yui-gallery/owner-index.json'
       - 'apps/gallery-archive/cloudflare-owner-gateway/bound-assets*'
       - 'apps/gallery-archive/cloudflare_assets_snapshot.py'
       - 'apps/gallery-archive/deploy_cloudflare_assets.py'
