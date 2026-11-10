@@ -160,6 +160,10 @@ def open_account(account):
     if github_temp_bundle.enabled():
         try:
             github=github_temp_bundle.matching_bundles(account)
+            if not github:
+                legacy=github_temp_bundle.account_bundle(account)
+                if legacy is not None:
+                    github=[legacy]
         except (RuntimeError,ValueError,TypeError,BundleInvalid):
             # A provider outage must not suppress already verified TeraBox.
             github=[]
