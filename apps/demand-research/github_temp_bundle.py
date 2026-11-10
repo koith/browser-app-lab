@@ -105,6 +105,7 @@ def _make_bundle(tag, plain):
     name = "account-bundle-" + accounts[0][:16] + "-" + match.group(1) + "-" + digest[:16] + ".zip"
     bundle = VerifiedBundle(name, plain)
     bundle.temporary = True
+    bundle.archive_tag = tag
     return bundle
 
 
@@ -188,9 +189,9 @@ def release_bundle(release, *, key=None):
     return bundle
 
 
-def releases(max_pages=2):
-    for page in range(1, min(max_pages, 3) + 1):
-        data = _json(API + "/releases?per_page=100&page=" + str(page))
+def releases(max_pages=2, *, token=None):
+    for page in range(1, min(max_pages, 8) + 1):
+        data = _json(API + "/releases?per_page=100&page=" + str(page), token=token)
         if not isinstance(data, list):
             raise RuntimeError("Invalid GitHub temporary backup list")
         for item in data:
@@ -198,6 +199,64 @@ def releases(max_pages=2):
                 yield item
         if len(data) < 100:
             return
+
+
+def workflow_verified_bundles(max_scan=24):
+    """Actions-only inventory of authenticated, immutable account releases.
+
+    Read the GitHub release index with the job-scoped contents token, then
+    decrypt archives with the Render-derived OIDC key. Never trust only a
+    green workflow or the public release title as source proof. Returned
+    bundles are newest first, and each object SHA is verified on download.
+    """
+    token=os.getenv("GITHUB_TOKEN","")
+    if not token or os.getenv("GITHUB_REPOSITORY")!=REPO:
+        raise RuntimeError("authorized GitHub account inventory unavailable")
+    key=_oidc_key()
+    checked=0
+    for release in releases(max_pages=8,token=token):
+        if checked>=max_scan:
+            return
+        checked+=1
+        # An inaccessible or invalid encrypted release cannot silently
+        # become accepted source bytes; it is skipped but never overwritten.
+        try:
+            yield release_bundle(release,key=key)
+        except (BundleInvalid,RuntimeError,ValueError,zipfile.BadZipFile):
+            continue
+
+
+def matching_bundles(account, max_versions=500):
+    """Load the newest verified ZIP plus ALL signed immutable ancestor tags.
+
+    The public Atom feed holds only the most recent releases. The encrypted
+    ancestor chain keeps older originals directly readable long after they
+    age out of that feed; no historical release is edited or deleted.
+    """
+    if not re.fullmatch(r"(?:bluesky|mastodon)-[a-f0-9]{40}",str(account)):
+        return []
+    matches={}
+    for tag in atom_tags():
+        try:
+            bundle=tagged_bundle(tag)
+        except (BundleInvalid,RuntimeError,ValueError,zipfile.BadZipFile):
+            continue
+        if bundle.account!=account:
+            continue
+        matches[tag]=bundle
+        if len(matches)>=max_versions:
+            break
+        for old_tag in bundle.ancestor_tags:
+            if old_tag in matches:
+                continue
+            if len(matches)>=max_versions:
+                raise RuntimeError("verified history exceeds bounded reader")
+            old=tagged_bundle(old_tag)
+            if old is None or old.account!=account:
+                raise RuntimeError("signed immutable account history unavailable")
+            matches[old_tag]=old
+        break
+    return list(matches.values())
 
 
 def atom_tags():
