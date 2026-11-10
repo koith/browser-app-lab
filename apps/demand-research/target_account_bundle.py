@@ -277,7 +277,8 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     github_temp=os.getenv("DEMAND_ACCOUNT_TEMP_STORAGE","")=="github_release"
     if github_temp:
         from github_temp_bundle import upload_release
-        uploader=upload_release
+        if uploader is None or uploader is upload_verified_bundle:
+            uploader=upload_release
         cloud_check=False
         os.environ["DEMAND_TARGET_FULL_HISTORY"]="1"
     if cloud_check:
