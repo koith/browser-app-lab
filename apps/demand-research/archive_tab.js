@@ -61,8 +61,8 @@ function renderChoices(){
   }
   quick.disabled=!matching.length;
   if(matching.some(item=>item.key===current))quick.value=current;
-  else quick.value=matching.length?"":quick.options[0].value;
-  if(quickSearch)quickSearch.hidden=choices.length<5;
+  else quick.value=matching.length?matching[0].key:quick.options[0].value;
+  if(quickSearch)quickSearch.hidden=false;
   if(quickCount)quickCount.textContent=choices.length+"개 보관";
   if(quickStatus)quickStatus.textContent=choices.length
     ?"목록은 자동으로 불러왔습니다. 계정을 선택하면 아래 내용이 바로 바뀝니다."
