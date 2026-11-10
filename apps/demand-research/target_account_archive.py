@@ -205,8 +205,14 @@ def resolve(platform, raw, api):
     value = profile_input(platform, raw)
     if platform == "bluesky":
         actor = value
-        profile = api.json("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?" +
-                           urlencode({"actor":actor}))
+        # The public CDN can return a provider-specific 400 even while the
+        # official public app API serves the SAME DID. Retry there once,
+        # without changing the resolved identity or accessing private data.
+        lookup=urlencode({"actor":actor})
+        try:
+            profile=api.json("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?"+lookup)
+        except SourceUnavailable:
+            profile=api.json("https://api.bsky.app/xrpc/app.bsky.actor.getProfile?"+lookup)
         did = profile.get("did") if isinstance(profile,dict) else None
         handle = profile.get("handle") if isinstance(profile,dict) else None
         if not isinstance(did,str) or not DID_RE.fullmatch(did) or not isinstance(handle,str):
