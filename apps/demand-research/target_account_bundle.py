@@ -89,6 +89,74 @@ class BundleCloud(CloudArchive):
         return sorted(name for name in result if name)
 
 
+class LayeredBundleCloud(BundleCloud):
+    """Read old SHA-verified ZIPs, write ONLY newly observed immutable keys.
+
+    Historical media and posts remain in their original release files. A
+    new release is a small independently verified delta, never a replacement
+    or a mutable re-upload of prior records. The reader unions this chain.
+    """
+
+    def __init__(self,store,prefix="",prior=()):
+        self.prior=tuple(prior)
+        super().__init__(store,prefix)
+
+    def read(self,key,*,cap=MAX_CATALOG,optional=False,domain=None):
+        staged=super().read(key,cap=cap,optional=True,domain=domain)
+        if staged is not None:
+            return staged
+        full=self.key(key)
+        # Earliest captured byte sequence always wins an original-key
+        # collision. Changed source is written using a NEW revision key.
+        for bundle in reversed(self.prior):
+            data=bundle.items.get(full)
+            if data is not None:
+                if len(data)>cap:
+                    raise ValueError("verified prior object exceeds read bound")
+                return data
+        if optional:
+            return None
+        raise RuntimeError("verified previous archive object unavailable")
+
+    def names(self,prefix):
+        current=set(super().names(prefix))
+        root=self.key(prefix.rstrip("/")+"/")
+        for bundle in self.prior:
+            current.update(path[len(root):] for path in bundle.items
+                           if path.startswith(root) and
+                           "/" not in path[len(root):])
+        return sorted(current)
+
+    def read_verified(self,key,expected_digest,*,cap=100_000):
+        if not re.fullmatch(r"[a-f0-9]{64}",str(expected_digest)):
+            raise ValueError("invalid expected digest")
+        full=self.key(key)
+        # Older and newer verified ZIPs may share a path; never allow one
+        # mismatched version to hide a matching immutable predecessor.
+        staged=self.store.objects.get(full)
+        candidates=([staged] if staged is not None else [])+[
+            bundle.items[full] for bundle in reversed(self.prior)
+            if full in bundle.items]
+        for raw in candidates:
+            if len(raw)<=cap and sha256(raw)==expected_digest:
+                return raw
+        return None
+
+    def write_immutable(self,key,data):
+        if not isinstance(data,bytes):
+            raise ValueError("invalid immutable source data")
+        previous=self.read(key,cap=max(len(data)+1,MAX_CATALOG),
+                           optional=True)
+        if previous is not None:
+            if previous!=data:
+                raise RuntimeError("historical archive path collision")
+            # Every standalone delta must declare its exact one account,
+            # even if the registration already exists in an older ZIP.
+            if not (not self.prefix and key.startswith("metadata/target-accounts/")):
+                return False
+        return super().write_immutable(key,data)
+
+
 def bundle_factory(root,profile):
     prefix="account-archives/"+profile["platform"]+"/"+archive_key(profile)+"/"
     return BundleCloud(root.store,prefix)
@@ -217,21 +285,36 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     if cloud_check:
         CloudArchive().preflight()
     store=BundleStore(limit=80_000_000 if github_temp else MAX_BUNDLE)
-    root=BundleCloud(store)
+    prior=()
+    if github_temp:
+        from github_temp_bundle import workflow_verified_bundles
+        from target_account_archive import resolve
+        transport=api or Transport()
+        selected_profile=resolve(platform,account,transport)
+        selected_key=platform+"-"+archive_key(selected_profile)
+        # Job-scoped private inventory; failure to enumerate is not silently
+        # treated as a clean first archive. Never overwrite an older release.
+        prior=tuple(bundle for bundle in workflow_verified_bundles(max_scan=40)
+                    if bundle.account==selected_key)
+        api=transport
+    root=LayeredBundleCloud(store,prior=prior)
     result=None
     interrupted=None
     with redirect_stdout(io.StringIO()):
         try:
             result=run_one(platform,account,root=root,
                            api=api or Transport(),max_pages=pages,
-                           archive_factory=bundle_factory)
+                           archive_factory=lambda _root, profile:
+                               LayeredBundleCloud(store,
+                                   "account-archives/"+profile["platform"]+"/"+
+                                   archive_key(profile)+"/",prior=prior))
         except (RuntimeError,ValueError,TypeError,KeyError) as error:
             interrupted=type(error).__name__
     if not store.objects:
         raise RuntimeError("no verifiable public content staged")
     refs=[k for k in store.objects if k.endswith("/post.json")]
-    if not refs:
-        raise RuntimeError("no public post original staged in bundle")
+    if not refs and not prior:
+        raise RuntimeError("no public post original staged in first bundle")
     account_name=next((k.split("/")[2] for k in store.objects
                        if k.startswith("account-archives/"+platform+"/")),None)
     if not account_name:
