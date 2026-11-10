@@ -14,7 +14,9 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 BASE = 'https://gallery-archive-free.gallery-9f7d03138f3f.workers.dev'
-COUNTS = {'mimmi': 4658, 'yui': 3066}
+MIN_COUNTS = {'mimmi': 4660, 'yui': 3077}
+# Before the Mimmi owner index gained 2 physical rows on 2026-11-11.
+MIMMI_PRE_INCREMENT = 'b57ecc91bb5b0053046e764335bac1e60a1e4f1a'
 TARGETS = {('mimmi','djawa-asuna-the-maid',4), ('mimmi','djawa-asuna-the-maid',5),
            ('mimmi','mimmi-indie-sana-sopmod2-2019',1), ('yui','yuis-present33',1)}
 SCREENSHOT_ALBUMS = {('mimmi','v2ph-azur-lane-tashkent'):69,
@@ -58,7 +60,7 @@ def read_reliably(method,url,body=None):
 
 def indexed():
     result=[]
-    for model,count in COUNTS.items():
+    for model,min_count in MIN_COUNTS.items():
         p=ROOT/'apps'/(model+'-gallery')/'owner-index.json'
         index=json.loads(p.read_text())
         assert index['model']==model and index['schema_version']==1
@@ -72,8 +74,39 @@ def indexed():
                 assert key not in unique
                 unique.add(key)
                 result.append((model,a['id'],photo))
-        assert len(unique)==count, ('OWNER_INDEX_COUNT_MISMATCH',model,len(unique),count)
+        assert len(unique)>=min_count, ('OWNER_INDEX_BELOW_VERIFIED_FLOOR',model,len(unique),min_count)
     return result
+
+def recent_mimmi(all_items):
+    """Require actual new original bytes, not merely increased public count.
+
+    Compare exact album/number/SHA to public metadata from immediately
+    before the two new Mimmi rows. Neither endpoint contains secret URLs.
+    """
+    previous_url = (
+        'https://raw.githubusercontent.com/koith/browser-app-lab/'
+        f'{MIMMI_PRE_INCREMENT}/apps/mimmi-gallery/owner-index.json'
+    )
+    raw, _ = read_reliably('GET', previous_url)
+    before = json.loads(raw)
+    assert before.get('model') == 'mimmi' and before.get('physical_originals_indexed') == 4658, (
+        'UNEXPECTED_PRE_INCREMENT_BASELINE'
+    )
+    old = {(album['id'], p['number']): p['sha256']
+           for album in before['albums'] for p in album['images']}
+    old_hashes = set(old.values())
+    delta = [item for item in all_items if item[0] == 'mimmi'
+             and old.get((item[1], item[2]['number'])) != item[2]['sha256']]
+    assert len(delta) >= 2, ('NEW_MIMMI_RECORDS_NOT_PRESENT', len(delta))
+    assert all(item[2]['sha256'] not in old_hashes for item in delta), (
+        'NEW_MIMMI_ROW_REUSES_OLD_EXACT_SHA'
+    )
+    assert len({item[2]['sha256'] for item in delta}) == len(delta), (
+        'NEW_MIMMI_ROWS_ARE_NOT_UNIQUE_PHOTOS'
+    )
+    print('G03_MIMMI_NEW_PHYSICAL_RECORDS_TO_REMOTE_VERIFY', len(delta), flush=True)
+    return delta
+
 
 def check(item):
     model,album,p=item
@@ -103,16 +136,22 @@ def check(item):
 
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument('--scope',choices=('targeted','all'),default='targeted')
+    parser.add_argument('--scope',choices=('targeted','recent','all'),default='targeted')
     args=parser.parse_args()
     h,_=read_reliably('GET',BASE+'/api/v1/health')
     health=json.loads(h)
     assert health['transport']=='cloudflare-bound-assets'
     print('LIVE_WORKER_SOURCE',health.get('source_commit'),flush=True)
     all_items=indexed()
-    items=all_items if args.scope=='all' else [
-        item for item in all_items if ((item[0],item[1],item[2]['number']) in TARGETS
-        or (item[0],item[1]) in SCREENSHOT_ALBUMS)]
+    if args.scope == 'all':
+        items = all_items
+    elif args.scope == 'recent':
+        items = recent_mimmi(all_items)
+    else:
+        items = [
+            item for item in all_items if ((item[0],item[1],item[2]['number']) in TARGETS
+            or (item[0],item[1]) in SCREENSHOT_ALBUMS)
+        ]
     if args.scope=='targeted':
         assert len(items)==len(TARGETS)+sum(SCREENSHOT_ALBUMS.values()), 'INCIDENT_TARGET_COVERAGE'
     passed={'mimmi':0,'yui':0}
@@ -131,7 +170,11 @@ def main():
             'failed':len(failures),'failures_first_20':failures[:20],
             'new_uploads':0,'billing_changed':0}
     print('ACTUAL_CLOUDFLARE_SHA_BYTES_PIXELS',json.dumps(result,sort_keys=True),flush=True)
-    if failures or (args.scope=='all' and passed!=COUNTS):
+    expected = {model: sum(item[0] == model for item in all_items)
+                for model in MIN_COUNTS}
+    if failures or (args.scope=='all' and passed!=expected) or (
+        args.scope=='recent' and passed['mimmi']!=len(items)
+    ):
         raise SystemExit(1)
 
 if __name__=='__main__':
