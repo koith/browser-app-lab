@@ -105,6 +105,7 @@ def _make_bundle(tag, plain):
     name = "account-bundle-" + accounts[0][:16] + "-" + match.group(1) + "-" + digest[:16] + ".zip"
     bundle = VerifiedBundle(name, plain)
     bundle.temporary = True
+    bundle.archive_tag = tag
     return bundle
 
 
@@ -225,25 +226,37 @@ def workflow_verified_bundles(max_scan=24):
             continue
 
 
-def matching_bundles(account, max_versions=12):
-    """Read verified immutable releases from newest to oldest for a viewer.
+def matching_bundles(account, max_versions=500):
+    """Load the newest verified ZIP plus ALL signed immutable ancestor tags.
 
-    A delta snapshot need not repeat older originals. Each fetched ZIP is
-    independently AES-GCM authenticated and per-object SHA checked.
+    The public Atom feed holds only the most recent releases. The encrypted
+    ancestor chain keeps older originals directly readable long after they
+    age out of that feed; no historical release is edited or deleted.
     """
     if not re.fullmatch(r"(?:bluesky|mastodon)-[a-f0-9]{40}",str(account)):
         return []
-    matches=[]
+    matches={}
     for tag in atom_tags():
         try:
             bundle=tagged_bundle(tag)
         except (BundleInvalid,RuntimeError,ValueError,zipfile.BadZipFile):
             continue
-        if bundle.account==account:
-            matches.append(bundle)
+        if bundle.account!=account:
+            continue
+        matches[tag]=bundle
+        if len(matches)>=max_versions:
+            break
+        for old_tag in bundle.ancestor_tags:
+            if old_tag in matches:
+                continue
             if len(matches)>=max_versions:
-                break
-    return matches
+                raise RuntimeError("verified history exceeds bounded reader")
+            old=tagged_bundle(old_tag)
+            if old is None or old.account!=account:
+                raise RuntimeError("signed immutable account history unavailable")
+            matches[old_tag]=old
+        break
+    return list(matches.values())
 
 
 def atom_tags():
