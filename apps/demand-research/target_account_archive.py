@@ -552,6 +552,25 @@ def normalize_record(profile, raw):
             "blobs":refs,"raw":raw}
 
 
+def content_fingerprint(item):
+    """Hash author-controlled public content, not changing reaction counters.
+
+    One edited CID/text/media/alt/cw creates a new immutable revision; likes,
+    boosts and reply counts do not. Historical raw/source bytes are untouched.
+    """
+    raw=item["raw"]
+    if item.get("original_id","").startswith("at://"):
+        payload={"value":raw.get("value"),"cid":raw.get("cid")}
+    else:
+        payload={"content":raw.get("content"),"spoiler_text":raw.get("spoiler_text"),
+                 "edited_at":raw.get("edited_at"),
+                 "media_attachments":raw.get("media_attachments"),
+                 "poll":raw.get("poll") and
+                   {k:raw["poll"].get(k) for k in
+                    ("id","expires_at","multiple","hide_totals")}}
+    return sha256(canonical_json(payload))
+
+
 def save_public_record(cloud, profile, item, api):
     pid=item["id"]
     blobs=item["blobs"]
@@ -607,6 +626,9 @@ def save_public_record(cloud, profile, item, api):
           "media":media,"media_expected":len(blobs),"media_saved":len(media),
           "archive_complete":len(blobs)==len(media),
           "provenance":"selected_public_account","retention_review":"required_on_removal_request"}
+    if item.get("revision_of"):
+        post["revision_of"]=item["revision_of"]
+        post["revision_fingerprint"]=item["revision_fingerprint"]
     if not post["archive_complete"]:
         if media:
             cloud.stage_partial_media(post,payloads)
@@ -694,10 +716,41 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                             "posts/"+item["id"]+"/post.json",index["sha256"],
                             cap=100_000)
                         if posted is not None:
-                            duplicates+=1
-                            continue
-                    except (ValueError,KeyError,TypeError):
-                        pass
+                            # Preserve the first observation and all prior
+                            # revisions; compare only editable source fields.
+                            original=archive.read(
+                                "metadata/source-records/"+item["id"]+".json",
+                                cap=MAX_SOURCE_BYTES,optional=True)
+                            if original is None:
+                                duplicates+=1
+                                continue
+                            old=normalize_record(profile,json.loads(original))
+                            if old is None:
+                                raise SourceUnavailable("archived source record invalid")
+                            current_fp=content_fingerprint(item)
+                            if current_fp==content_fingerprint(old):
+                                duplicates+=1
+                                continue
+                            revision_id=post_key(platform,item["original_id"]+
+                                                 ":revision:"+current_fp)
+                            # A revision is a new immutable logical record.
+                            # Never write to the original source/entry/media.
+                            revision_marker=archive.read(
+                                "metadata/entries/"+revision_id+".json",
+                                cap=1024,optional=True)
+                            if revision_marker is not None:
+                                revision_index=json.loads(revision_marker)
+                                if archive.read_verified(
+                                    "posts/"+revision_id+"/post.json",
+                                    revision_index["sha256"],cap=100_000) is not None:
+                                    duplicates+=1
+                                    continue
+                                raise SourceUnavailable("archived revision cannot be verified")
+                            item={**item,"id":revision_id,
+                                  "revision_of":item["id"],
+                                  "revision_fingerprint":current_fp}
+                    except (ValueError,KeyError,TypeError) as error:
+                        raise SourceUnavailable("archived record verification failed") from error
                 try:
                     save_public_record(archive,profile,item,api)
                     saved+=1
