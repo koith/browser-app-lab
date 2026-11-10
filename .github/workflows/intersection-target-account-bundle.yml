@@ -29,6 +29,12 @@ on:
     # Revisit verified user-selected accounts every six hours, oldest first.
     # Only new revisions/deltas are written; old releases are untouched.
     - cron: "43 */6 * * *"
+  # One reviewed push to run the SAME authorized code path immediately.
+  # Remove this temporary trigger after remote SHA verification.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/intersection-target-account-bundle.yml"
 permissions:
   contents: read
 
@@ -64,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          if [ "${{ github.event_name }}" = "schedule" ]; then
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "push" ]; then
             timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py --scheduled
           else
             timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py
