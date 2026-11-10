@@ -748,6 +748,26 @@ main{padding-top:10px}
 .video-trend-review-actions button:disabled{opacity:.35;cursor:not-allowed}
 .video-trend-more{display:block;margin:0 12px 12px;padding:6px 10px;border-radius:0;background:#151829;color:white;font-size:11px}
 @media(max-width:720px){.video-trend-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:0 7px 9px}.video-trend-meta{padding:6px}.video-trend-meta b{font-size:11px}.video-trend-tools{padding:0 7px 8px}.video-trend-note{padding:0 7px 8px}}
+/* Compact archive controls, without oversized action buttons. */
+#archivesView.archive-hub{padding:12px}
+#archivesView .archive-hub-header h2{font-size:18px}
+#archivesView .archive-hub-header p{margin:0 0 9px}
+#archivesView .archive-hub-modes{gap:5px;margin:0 0 8px}
+#archivesView .archive-hub-modes button{min-height:34px;padding:6px 10px;font-size:12px;flex:0 1 auto}
+#archivesView .archive-quick-picker{padding:8px;gap:5px;margin-bottom:8px}
+#archivesView .archive-quick-picker-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(130px,1fr);gap:6px}
+#archivesView .archive-quick-picker select,#archivesView .archive-quick-picker input{min-height:34px;height:34px;width:100%;padding:5px 8px;font-size:12px}
+#archivesView #archiveHubStatus{padding:8px 10px;font-size:11px}
+#archivesView .archive-hub-actions{gap:6px;margin:7px 0}
+#archivesView .archive-hub-actions button,#archivesView .archive-hub-actions a{flex:0 1 auto;min-height:32px;padding:5px 9px;font-size:11px}
+#archivesView #archiveHubFrameBox{margin-top:7px}
+#archivesView #archiveHubFrame{height:min(80dvh,950px);min-height:380px}
+#accountBackupSection .target-archive button,#accountBackupSection .target-archive select,#accountBackupSection .target-archive input{min-height:34px;padding:6px 9px;font-size:12px}
+@media(max-width:720px){
+ #archivesView .archive-hub-modes button{flex:0 1 auto;padding:6px 8px;font-size:11px}
+ #archivesView .archive-quick-picker-fields{grid-template-columns:minmax(0,1fr)}
+ #archivesView #archiveHubFrame{height:calc(100dvh - 230px);min-height:360px}
+}
 </style>
 </head>
 <body>
@@ -942,14 +962,14 @@ main{padding-top:10px}
     <p>자동으로 저장한 키워드 게시글과 지정 계정의 백업본을 구분해 조회합니다. 실제 원본이 검증된 파일만 열람할 수 있습니다.</p>
   </header>
   <div class="archive-hub-modes" role="tablist" aria-label="보관 자료 종류">
-    <button id="archiveModeAuto" type="button" role="tab" aria-selected="true">자동 저장 게시글</button>
-    <button id="archiveModeAccounts" type="button" role="tab" aria-selected="false">지정 계정 백업</button>
+    <button id="archiveModeAuto" type="button" role="tab" aria-selected="true">해시태그 자동 백업</button>
+    <button id="archiveModeAccounts" type="button" role="tab" aria-selected="false">지정 계정 전체 기록</button>
   </div>
   <div id="archiveAccountPicker" class="archive-quick-picker" hidden>
     <div class="archive-quick-picker-head"><label for="archiveQuickSelect">보관된 계정</label><span id="archiveQuickCount">계정 목록 자동 불러오는 중…</span></div>
     <div class="archive-quick-picker-fields">
       <select id="archiveQuickSelect" aria-label="보관 계정 바로 선택" disabled><option value="">보관 목록 확인 중…</option></select>
-      <input id="archiveQuickSearch" type="search" maxlength="100" placeholder="닉네임·아이디 찾기" aria-label="보관 계정 이름 검색" hidden>
+      <input id="archiveQuickSearch" type="search" maxlength="100" placeholder="닉네임·아이디 검색" aria-label="보관 계정 이름 검색">
     </div>
     <p id="archiveQuickStatus" role="status" aria-live="polite">계정을 선택하면 아래에 게시글과 프로필이 바로 나타납니다.</p>
   </div>
@@ -2019,6 +2039,16 @@ if(cloudMode){
   if(reduced.addEventListener)reduced.addEventListener("change",redraw);
   makeAtlas();redraw();
 })();
+</script>
+<script>
+/* On sleeping Render Free servers, a previously loaded device can display
+   the cached PUBLIC app shell. Never cache archive API responses or media. */
+if(location.hostname==="intersection-originals-free.onrender.com" &&
+   "serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("/intersection-sw.js",{scope:"/"}).catch(()=>{});
+  },{once:true});
+}
 </script>
 <script src="post_activity_ranking.js" defer></script>
 <script src="public_video_trends.js" defer></script>
