@@ -501,10 +501,19 @@ function adoptFastCoverImages(grid,oldCards){
   // local retry query before hydration. Keep that SAME downloading <img>
   // rather than tearing it down merely because the generated card still
   // has the pristine URL. Never strip or normalize signed Worker URLs.
-  const samePinnedPhoto=oldSrc===nextSrc||
-   (/^stored-albums\/[^?#]+\.(?:jpe?g|png|webp|avif)$/i.test(nextSrc)&&
-    oldSrc.startsWith(nextSrc+'?gtry=')&&
-    /^[1-4]$/.test(oldSrc.slice(nextSrc.length+6)));
+  let samePinnedPhoto=oldSrc===nextSrc;
+  if(!samePinnedPhoto&&/^stored-albums\/[^?#]+\.(?:jpe?g|png|webp|avif)$/i.test(nextSrc)){
+   try{
+    const wanted=new URL(nextSrc,location.href),actual=new URL(oldSrc,location.href);
+    const savedPrefix=new URL('stored-albums/',location.href).pathname;
+    samePinnedPhoto=wanted.origin===location.origin&&
+      wanted.pathname.startsWith(savedPrefix)&&
+      actual.origin===wanted.origin&&actual.pathname===wanted.pathname&&
+      !wanted.search&&!wanted.hash&&!actual.hash&&
+      actual.searchParams.size===1&&
+      /^[1-4]$/.test(actual.searchParams.get('gtry')||'');
+   }catch{samePinnedPhoto=false}
+  }
   if(!samePinnedPhoto)continue;
   // Compare the actual selected cover, not the pre-fallback preferred
   // owner photo: an exact saved Pages copy can be a different valid SHA.
