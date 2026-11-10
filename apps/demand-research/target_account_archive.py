@@ -787,9 +787,49 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
         # Re-check newest public posts after historical backfill completed.
         cursor=None
         max_pages=min(max_pages,1)
-    saved=duplicates=restricted=media_pending=pages=0
+    saved=duplicates=restricted=media_pending=pages=revisions_added=0
     deadline=clock()+MAX_RUNTIME
+
+    def capture_public_rows(records):
+        nonlocal saved,duplicates,restricted,media_pending,revisions_added
+        for raw in records:
+            item=normalize_record(profile,raw)
+            if not item:
+                # Provider-restricted / hidden / removed records are NEVER
+                # interpreted as deletions of previously saved originals.
+                restricted+=1
+                continue
+            # Verify existing original from immutable SHA readback; a filename
+            # alone cannot establish that a previous capture was complete.
+            marker=archive.read("metadata/entries/"+item["id"]+".json",
+                                cap=1024,optional=True)
+            if marker is not None:
+                try:
+                    index=json.loads(marker)
+                    posted=archive.read_verified(
+                        "posts/"+item["id"]+"/post.json",index["sha256"],
+                        cap=100_000)
+                    if posted is not None:
+                        if save_public_revision(archive,profile,item,api):
+                            revisions_added+=1
+                        else:
+                            duplicates+=1
+                        continue
+                except (ValueError,KeyError,TypeError):
+                    pass
+            try:
+                save_public_record(archive,profile,item,api)
+                saved+=1
+            except SourceUnavailable:
+                media_pending+=1
+                raise
+
     try:
+        # A partial historical cursor must not starve NEW posts and edits.
+        # Always check the current first page before resuming older pages.
+        if cursor and not previously_complete and clock()<deadline:
+            fresh,_=page_records(profile,None,api)
+            capture_public_rows(fresh)
         for _ in range(max_pages):
             if clock()>=deadline:
                 break
@@ -797,32 +837,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
             records,next_cursor=page_records(profile,cursor,api)
             if records and next_cursor is not None and next_cursor==current_cursor:
                 raise SourceUnavailable("public provider cursor did not advance")
-            for raw in records:
-                item=normalize_record(profile,raw)
-                if not item:
-                    restricted+=1
-                    continue
-                # Existing original is read back, not deduplicated from an
-                # untrusted/possibly stale filename listing alone.
-                marker=archive.read("metadata/entries/"+item["id"]+".json",
-                                    cap=1024,optional=True)
-                if marker is not None:
-                    try:
-                        index=json.loads(marker)
-                        posted=archive.read_verified(
-                            "posts/"+item["id"]+"/post.json",index["sha256"],
-                            cap=100_000)
-                        if posted is not None:
-                            duplicates+=1
-                            continue
-                    except (ValueError,KeyError,TypeError):
-                        pass
-                try:
-                    save_public_record(archive,profile,item,api)
-                    saved+=1
-                except SourceUnavailable:
-                    media_pending+=1
-                    raise
+            capture_public_rows(records)
             seq+=1
             exhausted=not records or not next_cursor
             archive.write_immutable("metadata/checkpoints/page-"+str(seq).zfill(8)+".json",
@@ -850,6 +865,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
         print("TARGET_ACCOUNT_ARCHIVE_AGGREGATE",
               json.dumps({"platform":platform,"pages_verified":pages,
                           "posts_verified":saved,"previously_saved":duplicates,
+                          "revisions_appended":revisions_added,
                           "excluded_not_public":restricted,
                           "media_pending":media_pending,
                           "profile_verified":profile_stat["profile_verified"],
@@ -862,7 +878,8 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                           "state":locals().get("status","FAILED_RETRYABLE")},
                          sort_keys=True),flush=True)
     return {"platform":platform,"pages_verified":pages,"posts_verified":saved,
-            "previously_saved":duplicates,"status":status,
+            "previously_saved":duplicates,"revisions_appended":revisions_added,
+            "status":status,
             "profile":profile_stat,"graph":graph_stats,
             "threads":locals().get("thread_stats",{})}
 
