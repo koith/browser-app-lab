@@ -308,3 +308,21 @@ def test_mixed_verification_403_backoff_preserves_github_fallback(
     with pytest.raises(RuntimeError,match="temporarily unavailable"):
         viewer._verified_account_bundles(Remote())
     assert len(calls)==1
+
+
+def test_verified_original_zip_keeps_media_lazy_but_revalidates_sha(private_zip_client):
+    """Large original media is not duplicated in permanent Python dictionaries."""
+    _client,root,name,_post,_meta=private_zip_client
+    bundle=bundles.load_verified_bundle(root,name)
+    assert isinstance(bundle.items,bundles.VerifiedEntryMap)
+    media=[key for key in bundle.items
+           if "/media/" in key and key.endswith(".jpg")]
+    assert media,"synthetic public media present"
+    key=media[0]
+    first=bundle.items[key]
+    assert first==PHOTO
+    # No eager byte-valued media cache remains on the VerifiedBundle object.
+    assert not any(isinstance(value,bytes) and value==PHOTO
+                   for value in vars(bundle).values())
+    assert bundle.items.get(key)==PHOTO
+    assert bundle.items.get("posts/missing/post.json") is None
