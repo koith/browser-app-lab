@@ -289,7 +289,7 @@ def load_verified_bundle(root,name):
         raise BundleInvalid("private original ZIP missing")
     bundle=VerifiedBundle(name,raw)
     with _lock:
-        if len(_cache)>2:_cache.clear()
+        if len(_cache)>0:_cache.clear()
         _cache[name]=(time.monotonic(),bundle)
     return bundle
 
