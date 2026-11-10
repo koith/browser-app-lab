@@ -467,14 +467,14 @@
   if(name)name.textContent=state.view==='knighttown'?'레코르다블 · 원본 기사단 지역':
    state.view==='board'?('레코르다블 · '+(state.knightDistrict||'기사단 게시판')):
    state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
-   state.view==='directory'?(state.district+' · 채팅방 목록'):
+   state.view==='directory'?(state.district+' · 채팅방 지도'):
    (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
   if(bread)bread.textContent=state.view==='knighttown'?'RECORDABLE › 원본 지역 선택':
    state.view==='board'?('RECORDABLE › '+(state.knightDistrict||'기사단 게시판')+' › 웹 게시판'):
    (REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
   const back=$('social-back');
-  if(back)back.textContent=state.view==='board'&&state.knightBack?'← 레코르다블 지역':state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':'← 월드맵';
+  if(back)back.textContent=state.view==='board'&&state.knightBack?'← 레코르다블 지역':state.view==='room'?'← 채팅방 지도':state.view==='directory'?'← 채팅 지역':'← 월드맵';
   const note=$('chatroom-name');
   if(note)note.textContent=state.view==='knighttown'?'KNIGHT TOWN':state.view==='board'?'WEB BULLETIN':state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
  }
@@ -780,8 +780,8 @@
     b.style.setProperty('--town-sprite-left',(sx-x)+'px');
     b.style.setProperty('--town-sprite-top',(sy-y)+'px');
    }
-   b.title=name+' · 채팅방 입장';
-   b.setAttribute('aria-label',name+' 채팅 지역');
+   b.title=name+' · 채팅방 위치 지도 열기';
+   b.setAttribute('aria-label',name+' 채팅 지역 지도 열기');
    const count=onlinePeers('district:'+state.region+':'+name).length;
    if(count){const countLabel=document.createElement('span');countLabel.textContent=count+'명';b.append(countLabel)}
    b.onclick=()=>{
@@ -798,7 +798,7 @@
   if(state.view!=='directory')return;
   frame.className='social-image-frame social-room-directory';
   frame.style.backgroundImage='url("./original/ChatTown/'+REGIONS[state.region].art+'.png")';
-  frame.innerHTML='<section class="social-directory"><header class="social-directory-heading"><b><span id="social-directory-name"></span> · 채팅방</b><div class="social-directory-actions"><button id="social-web-estate-toggle" type="button" aria-pressed="false" title="복원되지 않은 배치 좌표를 사용하는 웹 지도를 선택적으로 열기">지도</button><button id="social-new-room" type="button">+ 방 만들기</button></div></header><div id="social-map-viewport" class="social-map-viewport" tabindex="0" aria-label="채팅방 지도. 방향키 또는 드래그로 사방 이동"><div id="social-map-plane" class="social-map-plane"><div class="social-map-terrain" aria-hidden="true"></div><div id="social-directory-list" class="social-map-rooms"></div></div></div><footer class="social-map-toolbar"><span>지도 드래그 · 방향키 / 휠 이동 · 표시 인원은 실제 연결 사용자</span><div class="social-map-directions"><button type="button" data-pan="left" aria-label="왼쪽 이동">◀</button><button type="button" data-pan="up" aria-label="위쪽 이동">▲</button><button type="button" data-pan="down" aria-label="아래쪽 이동">▼</button><button type="button" data-pan="right" aria-label="오른쪽 이동">▶</button></div></footer></section>';
+  frame.innerHTML='<section class="social-directory web-estate-open" data-default-view="map"><header class="social-directory-heading"><b><span id="social-directory-name"></span> · 채팅방 지도</b><div class="social-directory-actions"><button id="social-web-estate-toggle" type="button" aria-pressed="true" title="지도 대신 방 목록 보기">목록</button><button id="social-new-room" type="button">+ 방 만들기</button></div></header><div id="social-map-viewport" class="social-map-viewport" tabindex="0" aria-label="채팅방 지도. 방향키 또는 드래그로 사방 이동"><div id="social-map-plane" class="social-map-plane" data-terrain="unverified"><div class="social-map-terrain" aria-hidden="true"></div><div id="social-directory-list" class="social-map-rooms"></div></div></div><footer class="social-map-toolbar"><span>방을 눌러 입장 · 지도 드래그/방향키 이동 (원작 방 배치 좌표 미확보)</span><div class="social-map-directions"><button type="button" data-pan="left" aria-label="왼쪽 이동">◀</button><button type="button" data-pan="up" aria-label="위쪽 이동">▲</button><button type="button" data-pan="down" aria-label="아래쪽 이동">▼</button><button type="button" data-pan="right" aria-label="오른쪽 이동">▶</button></div></footer></section>';
   $('social-directory-name').textContent=state.district;
   $('social-new-room').onclick=showCreateRoom;
   // Original ChatTown background is recovered; the room-estate terrain and
@@ -812,10 +812,10 @@
    estateToggle.setAttribute('aria-pressed',String(opened));
    estateToggle.textContent=opened?'목록':'지도';
    estateToggle.title=opened?
-    '원본 배경 위 실제 방 목록으로 돌아가기':
-    '원본이 미확보된 추정 웹 지도 열기';
+    '지도에서 채팅방을 직접 클릭해 입장':
+    '대체 방 목록에서 지도 화면으로 돌아가기';
    $('social-map-viewport')?.setAttribute('aria-label',opened?
-    '원본 배치 미확보 · 웹 지도. 방향키 또는 드래그로 보기':
+    '원본 위치 미확보 · 방을 지도에서 눌러 입장. 방향키/드래그 이동':
     '복구한 ChatTown 배경 위 실제 서버 채팅방 목록. 클릭하여 입장');
   };
   $('social-map-viewport')?.setAttribute('aria-label',
