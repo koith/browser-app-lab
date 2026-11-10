@@ -64,3 +64,45 @@ def test_unchanged_public_source_never_writes_duplicate_post(monkeypatch):
     delta=_capture(BlueAPI({None:([source],None)}),(previous,))
     assert not any(k.endswith("/post.json") for k in delta.items)
     assert len(MergedBundleAccountCloud([previous,delta]).load_catalog())==1
+
+
+def test_scheduled_account_refresh_skips_missing_public_source(monkeypatch):
+    """One deleted provider account cannot stall a still-public other account."""
+    import target_account_bundle as bundle_job
+    import github_temp_bundle
+    from target_account_archive import SourceUnavailable
+
+    def item(account, stamp):
+        return SimpleNamespace(account=account,recorded_at=stamp,
+            accounts={account:{"platform":"bluesky",
+                               "profile_url":"https://bsky.app/profile/"+account}})
+    first=item("bluesky-"+"a"*40,"2026-11-01T00:00:00Z")
+    second=item("bluesky-"+"b"*40,"2026-11-02T00:00:00Z")
+    monkeypatch.setattr(github_temp_bundle,"workflow_verified_bundles",
+                        lambda max_scan: [second,first])
+    attempts=[]
+    def simulated(*,selected,prior_bundles):
+        attempts.append(selected["account"])
+        if len(attempts)==1:
+            raise SourceUnavailable("synthetic provider HTTP 400")
+        return {"remote_sha256_verified":True}
+    monkeypatch.setattr(bundle_job,"execute_bundle",simulated)
+    assert bundle_job.execute_scheduled()["remote_sha256_verified"] is True
+    assert attempts==[first.accounts[first.account]["profile_url"],
+                      second.accounts[second.account]["profile_url"]]
+
+
+def test_scheduled_account_refresh_never_marks_all_missing_as_success(monkeypatch):
+    import target_account_bundle as bundle_job
+    import github_temp_bundle
+    from target_account_archive import SourceUnavailable
+    old="bluesky-"+"c"*40
+    last=SimpleNamespace(account=old,recorded_at="2026-11-01T00:00:00Z",
+         accounts={old:{"platform":"bluesky","profile_url":"https://bsky.app/profile/did:plc:synthetic"}})
+    monkeypatch.setattr(github_temp_bundle,"workflow_verified_bundles",
+                        lambda max_scan:[last])
+    def denied(**kwargs):
+        raise SourceUnavailable("synthetic public profile unavailable")
+    monkeypatch.setattr(bundle_job,"execute_bundle",denied)
+    with pytest.raises(SourceUnavailable,match="all registered"):
+        bundle_job.execute_scheduled()
