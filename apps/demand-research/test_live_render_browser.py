@@ -1,0 +1,64 @@
+"""Read-only LIVE deployed Render smoke in real Chromium and mobile WebKit.
+
+No private session, no account backup dispatch, no raw archived data.
+"""
+from playwright.sync_api import sync_playwright
+
+BASE="https://intersection-originals-free.onrender.com/"
+
+def exercise(browser,label):
+    context=browser.new_context(viewport=(
+        {"width":390,"height":844} if "webkit" in label else
+        {"width":1200,"height":800}))
+    page=context.new_page()
+    errors=[]
+    page.on("pageerror",lambda exc: errors.append(str(exc)))
+    # First-time account-watch transfer redirects to GitHub Pages; skip the
+    # migration attempt for this disposable synthetic browser only.
+    page.add_init_script("""() => {
+      try {sessionStorage.setItem('intersection:watch-origin-migration-attempted:v1','1');}
+      catch(e) {}
+    }""")
+    try:
+        page.goto(BASE+"?liveqa=20261111",wait_until="domcontentloaded",
+                  timeout=85000)
+        page.locator("#viewPosts").wait_for(state="visible",timeout=30000)
+        assert page.title()=="INTERSECTION",page.title()
+        assert page.locator("#viewPosts").get_attribute("aria-selected")=="true"
+        assert page.locator("#postsView").is_visible()
+        page.locator("#viewArchives").click()
+        assert page.locator("#archivesView").is_visible()
+        assert page.locator("#viewArchives").get_attribute("aria-selected")=="true"
+        assert page.locator("#archiveModeAuto").inner_text()=="해시태그 자동 백업"
+        assert page.locator("#archiveModeAccounts").inner_text()=="지정 계정 전체 기록"
+        page.locator("#archiveModeAccounts").click()
+        assert page.locator("#archiveAccountPicker").is_visible()
+        assert page.locator("#archiveQuickSearch").is_visible()
+        # Reload with ?tab=archives still in address MUST restore first tab.
+        assert "tab=archives" in page.url,page.url
+        page.reload(wait_until="domcontentloaded",timeout=85000)
+        assert page.locator("#viewPosts").get_attribute("aria-selected")=="true"
+        assert page.locator("#postsView").is_visible()
+        assert page.locator("#archivesView").is_hidden()
+        assert "tab=archives" not in page.url,page.url
+        # New direct navigation is deliberately different from reload.
+        page.goto(BASE+"?tab=archives&mode=auto",wait_until="domcontentloaded",
+                  timeout=85000)
+        assert page.locator("#viewArchives").get_attribute("aria-selected")=="true"
+        assert page.locator("#archiveModeAuto").get_attribute("aria-selected")=="true"
+        worker=page.request.get(BASE+"intersection-sw.js",timeout=35000)
+        assert worker.status==200,worker.status
+        assert "intersection-public-shell-v1-20261110" in worker.text()
+        health=page.request.get(BASE+"health",timeout=35000)
+        assert health.status==200 and health.json().get("alive") is True
+        assert not errors,errors
+        print("LIVE_INTERSECTION_RENDER_BROWSER_PASS",label,
+              "reload_first_tab=yes","deep_link=yes","two_modes=yes",
+              "worker_http_200=yes","health=yes",flush=True)
+    finally:
+        context.close()
+
+if __name__=="__main__":
+    with sync_playwright() as p:
+        exercise(p.chromium.launch(headless=True),"chromium_desktop")
+        exercise(p.webkit.launch(headless=True),"webkit_mobile")
