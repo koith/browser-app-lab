@@ -559,8 +559,21 @@ window.addEventListener("intersection:feed-updated",scheduleRender);
 window.addEventListener("intersection:date-range-change",scheduleRender);
 window.addEventListener("storage",e=>{if(e.key===STORE){watches=read();render()}});
 render();
+// A real browser reload always returns to the first tab. Direct deep links
+// (?tab=archives) still open the requested archive on first navigation.
+const navigation=performance.getEntriesByType?.("navigation")?.[0];
+const isReload=navigation?.type==="reload"||
+  (performance.navigation&&performance.navigation.type===1);
+window.INTERSECTION_RELOAD_TO_POSTS=Boolean(isReload);
 const initialTab=new URLSearchParams(location.search).get("tab");
-if(initialTab==="archives"||initialTab==="accounts")setView(initialTab);
+if(isReload){
+  if(initialTab){
+    const next=new URL(location.href);
+    next.searchParams.delete("tab");
+    history.replaceState(null,"",next.pathname+next.search+next.hash);
+  }
+  setView("posts");
+}else if(initialTab==="archives"||initialTab==="accounts")setView(initialTab);
 // On page load, bounded refresh: no background monitoring or polling.
 Promise.resolve().then(async()=>{
   const initial=watches.filter(w=>["bluesky","mastodon","x"].includes(w.platform)).slice(0,4);
