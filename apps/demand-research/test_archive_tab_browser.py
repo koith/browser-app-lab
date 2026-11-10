@@ -24,7 +24,7 @@ HTML="""<!doctype html><html lang="ko"><head><meta charset="utf-8">
  <label for="archiveQuickSelect">보관된 계정</label>
  <span id="archiveQuickCount"></span>
  <select id="archiveQuickSelect" disabled><option value="">보관 목록 확인 중</option></select>
- <input id="archiveQuickSearch" type="search" hidden>
+ <input id="archiveQuickSearch" type="search">
  <p id="archiveQuickStatus"></p>
 </div>
  <p id="archiveHubStatus"></p>
