@@ -52,7 +52,7 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check playwright==1.56.0
           python -m playwright install --with-deps chromium webkit
-      - name: Read SHA-verified deployed Pages, Chromium desktop and mobile WebKit
-        run: |
-          python apps/demand-research/test_deployed_pages_browser.py
-          python apps/demand-research/test_live_render_browser.py
+      - name: Real Render LIVE Chromium + mobile WebKit first-tab and archives
+        run: python apps/demand-research/test_live_render_browser.py
+      - name: Separate deployed GitHub Pages Chromium and mobile WebKit QA
+        run: python apps/demand-research/test_deployed_pages_browser.py
