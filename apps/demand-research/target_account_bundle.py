@@ -179,7 +179,69 @@ def upload_verified_bundle(zip_path,*,run_id,account_hash):
     raise RuntimeError("TeraBox ZIP upload lacked independent remote SHA256 readback")
 
 
+def seed_verified_immutable_bundle(store,previous):
+    """Preserve all existing signed-verified originals in the new release."""
+    from verified_bundle_reader import VerifiedBundle
+    if not isinstance(previous,VerifiedBundle) or not previous.accounts:
+        raise ValueError("prior archive has no verified identity")
+    prefix=previous.prefix
+    for key,data in previous.items.items():
+        if not key.startswith(prefix) and not key.startswith("metadata/target-accounts/"):
+            raise ValueError("prior archive mixed accounts")
+        store.write(key,data)
+    return previous.account
+
+
+def latest_registered_github_bundles(crypto_key,*,max_accounts=24):
+    """Return only AES+whole-ZIP+entry-SHA verified registered accounts."""
+    from github_temp_bundle import releases, release_bundle
+    verified={}
+    for release in releases(max_pages=3):
+        try:
+            bundle=release_bundle(release,key=crypto_key)
+            if bundle.account not in verified:
+                verified[bundle.account]=bundle
+            if len(verified)>=max_accounts:
+                break
+        except (RuntimeError,ValueError,TypeError,KeyError,zipfile.BadZipFile):
+            continue
+    return sorted(verified.values(),key=lambda b:b.account)
+
+
+def execute_registered_schedule(*,api=None,run_id=None,choose=None,
+                                fetch_bundles=None,uploader=None):
+    """Revisit one verified registered account each 6-hour run."""
+    from github_temp_bundle import _oidc_key
+    secret=_oidc_key()
+    records=(fetch_bundles or latest_registered_github_bundles)(secret)
+    if not records:
+        bootstrap=read_bootstrap_request()
+        if bootstrap is None:
+            raise RuntimeError("no verified registered public target available")
+        return execute_bundle(selected=bootstrap,api=api,run_id=run_id,
+                              cloud_check=False,uploader=uploader)
+    slot=(int(time.time()//21600) if choose is None else choose)%len(records)
+    selected=records[slot]
+    entry=selected.accounts[selected.account]
+    platform=entry["platform"]
+    account=entry["identity"] if platform=="bluesky" else entry["profile_url"]
+    outcome=execute_bundle(selected={"platform":platform,"account":account,"max_pages":3},
+        api=api,run_id=run_id,cloud_check=False,uploader=uploader,
+        prior_bundle=selected)
+    print("TARGET_ACCOUNT_AUTO_REFRESH_VERIFIED",json.dumps({
+        "registered_accounts_in_verified_window":len(records),
+        "slot":slot,"prior_objects_preserved":len(selected.items),
+        "latest_objects_remote_verified":outcome["objects_remote_verified"],
+        "new_posts":outcome["new_posts"],"new_revisions":outcome["new_revisions"],
+        "remote_sha256_verified":outcome["remote_sha256_verified"]
+    },sort_keys=True),flush=True)
+    if outcome["source_partial"]:
+        raise RuntimeError("public account auto refresh incomplete after verified partial backup")
+    return outcome
+
+
 def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
+                   prior_bundle=None,
                    uploader=upload_verified_bundle):
     if selected is None:
         env_platform=os.getenv("TARGET_PLATFORM","").strip()
