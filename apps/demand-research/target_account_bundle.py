@@ -162,13 +162,14 @@ def bundle_factory(root,profile):
     return BundleCloud(root.store,prefix)
 
 
-def make_zip(store,destination,*,state,selected):
+def make_zip(store,destination,*,state,selected,ancestor_tags=()):
     objects=sorted(store.objects.items())
     manifest={"schema_version":1,"format":"immutable-public-account-bundle-v1",
               "selected_platform":selected["platform"],
               "selected_account":selected["account"],
               "recorded_at":datetime.now(timezone.utc).isoformat(),
               "capture_state":state,
+              "ancestor_tags":list(ancestor_tags),
               "objects":[{"key":key,"bytes":len(body),"sha256":sha256(body)}
                          for key,body in objects]}
     with zipfile.ZipFile(destination,"w",compression=zipfile.ZIP_STORED,
@@ -324,8 +325,15 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     run_id=run_id or os.getenv("GITHUB_RUN_ID","")
     with tempfile.TemporaryDirectory(prefix="int-bundle-stage-") as directory:
         package=Path(directory)/"public-account-immutable.zip"
+        ancestors=set()
+        for bundle in prior:
+            ancestors.update(bundle.ancestor_tags)
+            if getattr(bundle,"archive_tag",None):
+                ancestors.add(bundle.archive_tag)
+        if len(ancestors)>10000:
+            raise RuntimeError("immutable account history exceeds reference bound")
         manifest=make_zip(store,package,state=result["status"] if result else "SOURCE_PARTIAL",
-                          selected=selected)
+                          selected=selected,ancestor_tags=sorted(ancestors))
         remote=uploader(package,run_id=run_id,account_hash=account_name)
     totals={"platform":platform,"storage":"github_encrypted_temporary" if github_temp else "terabox",
             "objects_remote_verified":len(manifest["objects"]),
