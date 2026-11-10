@@ -454,7 +454,6 @@
      const arrow=row.lastElementChild;if(arrow)arrow.textContent=full?'정원 초과':'입장 ›';
     }
   }
-  refreshMobileSpatialRoomCounts();
   if(state.view==='room')renderOccupants();
  }
  function changeScope(next){
@@ -650,6 +649,9 @@
  }
  function render(){
   if(!sceneInit)return;
+  // Old phone map may own reparented buttons. Remove it BEFORE creating
+  // replacement canonical buttons, or getElementById would bind a stale one.
+  $('social-mobile-room-map')?.remove();
   window.__LEAF_NATIVE_EXPRESSIONS__?.close();
   window.__LEAF_NATIVE_ROOM_PANELS__?.beforeRender();
   if(state.view!=='room')setMobilePeersOpen(false);
@@ -795,54 +797,36 @@
    frame.append(b);
   });
  }
- // Native 794px map becomes unreadable when shrunk to a phone.
- // This responsive overlay uses the SAME live room IDs and real occupancy;
- // the historical room placement coordinates remain unverified.
+ // On a 390px phone the source-scaled map's button labels are ~5px.
+ // Reparent the EXISTING live room/map buttons and original create button
+ // into a readable responsive map. Never clone handlers or duplicate rooms:
+ // the original server admission, owner rights and occupancy stay intact.
  function renderMobileSpatialDirectory(){
   const stage=$stage();if(!stage)return;
   stage.querySelector('#social-mobile-room-map')?.remove();
   if(state.view!=='directory'||!window.matchMedia('(max-width:650px)').matches)return;
-  const overlay=document.createElement('section');
-  overlay.id='social-mobile-room-map';overlay.className='social-mobile-room-map';
+  const list=$('social-directory-list'),create=$('social-new-room');
+  if(!list||!create)return;
+  const overlay=document.createElement('section');overlay.id='social-mobile-room-map';
+  overlay.className='social-mobile-room-map';
   overlay.dataset.entryMode='tap-spatial-room-marker';
-  overlay.setAttribute('aria-label','채팅방 지도 · 맵의 방을 눌러 입장');
+  overlay.setAttribute('aria-label','채팅방 지도 · 맵의 방을 눌러 직접 입장');
   overlay.style.setProperty('--native-town-background',
-    'url("./original/ChatTown/'+REGIONS[state.region].art+'.png")');
+   'url("./original/ChatTown/'+REGIONS[state.region].art+'.png")');
   const heading=document.createElement('header');heading.className='social-mobile-room-heading';
   const title=document.createElement('strong');title.textContent=state.district+' · 채팅방 지도';
-  const create=document.createElement('button');create.type='button';
-  create.textContent='+ 방 만들기';create.onclick=showCreateRoom;
-  heading.append(title,create);
+  heading.append(title,create); // SAME #social-new-room and onclick
   const grid=document.createElement('div');grid.className='social-mobile-room-grid';
-  const rooms=catalogue();
-  rooms.forEach((room,index)=>{
-   const pin=document.createElement('button');pin.type='button';pin.className='social-mobile-room-pin';
-   pin.dataset.room=room.id;pin.dataset.mapSlot=String(index);
-   pin.setAttribute('aria-label',room.name+' · 맵의 채팅방 입장');
-   const number=document.createElement('span');number.className='social-mobile-room-number';
-   number.textContent=String(index+1).padStart(2,'0');
-   const name=document.createElement('b');name.textContent=room.name;
-   const occupancy=document.createElement('small');occupancy.className='social-mobile-room-occupancy';
-   occupancy.textContent=roomOccupancy(room.id)+'/'+allowedCapacity(room.capacity)+'명';
-   if(!roomHasSpace(room))pin.classList.add('social-room-full');
-   pin.append(number,name,occupancy);pin.onclick=()=>joinRoom(room.id);
-   grid.append(pin);
-  });
-  if(!rooms.length){const empty=document.createElement('p');
+  for(const row of list.querySelectorAll('button[data-room]')){
+   row.classList.add('social-mobile-room-pin'); // SAME real joinRoom callback
+  }
+  grid.append(list);
+  if(!list.children.length){const empty=document.createElement('p');
    empty.textContent='개설된 방이 없습니다. 방 만들기를 눌러 시작하세요.';
    grid.append(empty);}
   const hint=document.createElement('p');hint.className='social-mobile-room-hint';
   hint.textContent='맵의 방을 터치하세요 · 원작 방 좌표 미확보 · 실제 방/인원만 표시';
   overlay.append(heading,grid,hint);stage.append(overlay);
- }
- function refreshMobileSpatialRoomCounts(){
-  const overlay=$('social-mobile-room-map');if(!overlay)return;
-  for(const pin of overlay.querySelectorAll('.social-mobile-room-pin')){
-   const room=roomById(pin.dataset.room);if(!room)continue;
-   const count=roomOccupancy(room.id),full=count>=allowedCapacity(room.capacity);
-   pin.querySelector('.social-mobile-room-occupancy').textContent=count+'/'+allowedCapacity(room.capacity)+'명';
-   pin.classList.toggle('social-room-full',full);
-  }
  }
  // 4LEAF 0.9 expands the world-like room estate, not a linear HTML list.
  // Each room is an independent button; the map can pan on both axes.
