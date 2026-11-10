@@ -70,5 +70,37 @@ for(const model of ['mimmi','yui']){
  assert.ok(!/\n\s*render\(\);\s*\n\s*const raw=location\.hash\.slice/.test(html),
    model+' must not discard prepaint covers with a redundant startup render');
  assert.ok(html.includes("adoptFastCoverImages(grid,fastCovers)"),model+' must use handoff in real render');
+ // Exercise the real inline Pages 503 retry logic. A previously lazy
+ // WebKit image must become an eager single-SHA request on each failed retry.
+ const retryStart=html.indexOf('const committedImageRetries=new WeakMap();');
+ const retryEnd=html.indexOf("\ndocument.addEventListener('error',retryCommittedImageError,true);",retryStart);
+ assert.ok(retryStart>0&&retryEnd>retryStart,model+' must expose bounded static cover retry');
+ const retryCode=html.slice(retryStart,retryEnd);
+ class FakeImage {
+  constructor(url) {this.source=url;this.loading='lazy';this.isConnected=true;
+   this.hidden=true;this.complete=false;this.naturalWidth=0;}
+  getAttribute(name){return name==='src'?this.source:null;}
+  removeAttribute(name){if(name==='src')this.source=null;}
+  set src(value){this.source=value;}
+  get src(){return this.source;}
+ }
+ const retryContext={URL,HTMLImageElement:FakeImage,WeakMap,
+  location:{hostname:'koith.github.io',origin:'https://koith.github.io',
+    href:'https://koith.github.io/browser-app-lab/apps/'+model+'-gallery/'},
+  setTimeout:callback=>callback()};
+ vm.createContext(retryContext);
+ vm.runInContext(retryCode+';globalThis.retry=retryCommittedImageError',retryContext);
+ const retryImg=new FakeImage('stored-albums/safe/image.jpg');
+ retryContext.retry({target:retryImg,stopImmediatePropagation(){}});
+ assert.equal(retryImg.loading,'eager',model+' failed image must bypass WebKit lazy deferral');
+ assert.equal(retryImg.hidden,false);
+ assert.match(retryImg.src,/\/stored-albums\/safe\/image\.jpg\?gtry=1$/);
+ retryContext.retry({target:retryImg,stopImmediatePropagation(){}});
+ assert.match(retryImg.src,/\/stored-albums\/safe\/image\.jpg\?gtry=2$/);
+ const signed=new FakeImage('https://gallery-archive-free.example/api/v1/media/yui/a/1/original?h=h&b=123&e=555&s=xyz');
+ retryContext.retry({target:signed,stopImmediatePropagation(){}});
+ assert.equal(signed.loading,'lazy',model+' must not mutate signed Worker photos');
+ assert.equal(signed.src,'https://gallery-archive-free.example/api/v1/media/yui/a/1/original?h=h&b=123&e=555&s=xyz');
+ console.log('GALLERY_WEBKIT_FAILED_PAGES_IMAGE_EAGER_SAME_SHA_RETRY_PASS',model);
  console.log('GALLERY_FAST_COVER_DOM_NODE_IDENTITY_AND_SHA_HANDOFF_PASS',model);
 }

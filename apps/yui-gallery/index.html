@@ -207,6 +207,11 @@ function retryCommittedImageError(event){
   if(img.complete&&img.naturalWidth>0)return;
   const fresh=new URL(canonical);
   fresh.searchParams.set('gtry',String(state.attempts));
+  // A failed image may now be offscreen/lazy after the gallery hydrates.
+  // WebKit can defer a mutated lazy <img> indefinitely even after the user
+  // scrolls it into view. Retry ONLY this failed same-SHA committed asset as
+  // eager; do not eagerly load untouched albums or alter Worker signed URLs.
+  img.loading='eager';
   img.hidden=false;img.removeAttribute('src');img.src=fresh.href;
  },[400,1200,3000,6500][attempts]);
 }
