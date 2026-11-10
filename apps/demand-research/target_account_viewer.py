@@ -230,6 +230,8 @@ def feed_data(archive,account,offset,limit):
             "source_url":sanitize_safe_link(post.get("source_url")),
             "profile_url":sanitize_safe_link(post.get("profile_url")),
             "kind":post.get("kind","post"),
+            "revision_of":post.get("revision_of",""),
+            "captured_at":post.get("captured_at",""),
             "reply_to":post.get("reply_to",""),
             "media":media,"media_expected":post.get("media_expected",0),
             "media_saved":post.get("media_saved",0),
