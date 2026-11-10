@@ -558,6 +558,119 @@ def normalize_record(profile, raw):
             "blobs":refs,"raw":raw}
 
 
+# Revision records are always additional immutable objects. A provider edit
+# NEVER rewrites the first verified post, its media, or its original source JSON.
+REVISION_RE=re.compile(r"^[0-9]{8}T[0-9]{12}Z-[a-f0-9]{16}\\.json$")
+
+
+def visible_content_digest(item):
+    """Fingerprint public authored content, excluding volatile social counts.
+
+    Reply/repost counts are not edits to the author's own post. The provider's
+    content payload, text, attachments and edit timestamp ARE versioned.
+    """
+    source=item["raw"]
+    if item["platform"]=="bluesky":
+        content=source.get("value")
+        if not isinstance(content,dict):
+            raise SourceUnavailable("invalid public source content")
+    else:
+        content={name:source.get(name) for name in (
+            "content","spoiler_text","media_attachments","poll","card",
+            "edited_at","language","sensitive","visibility","in_reply_to_id")}
+    return sha256(canonical_json({
+        "platform":item["platform"],"original_id":item["original_id"],
+        "kind":item["kind"],"reply_to":item["reply_to"],"content":content}))
+
+
+def latest_verified_content_digest(cloud,profile,item):
+    """Read only immutable history; never infer edits from absent posts."""
+    pid=item["id"]
+    versions=[name for name in cloud.names("revisions/"+pid)
+              if REVISION_RE.fullmatch(name)]
+    if versions:
+        last=max(versions)
+        data=cloud.read("revisions/"+pid+"/"+last,cap=300_000)
+        record=json.loads(data)
+        digest=record.get("content_sha256")
+        if (not isinstance(digest,str)
+                or not re.fullmatch(r"[a-f0-9]{64}",digest)):
+            raise SourceUnavailable("invalid immutable revision index")
+        return digest
+    first=cloud.read("metadata/source-records/"+pid+".json",
+                     cap=MAX_SOURCE_BYTES,optional=True)
+    if first is not None:
+        try:
+            baseline=normalize_record(profile,json.loads(first))
+            if baseline is None:
+                raise SourceUnavailable("invalid immutable first source")
+            return visible_content_digest(baseline)
+        except (TypeError,ValueError,KeyError):
+            raise SourceUnavailable("invalid immutable first source") from None
+    # Legacy backups without the first source record cannot prove a change.
+    # Preserve their original bytes; never invent a historical revision.
+    return None
+
+
+def save_public_revision(cloud,profile,item,api):
+    """Append a changed PUBLIC version plus independently checked media.
+
+    The immutable first post, media, profile and source must not be touched.
+    A disappearance, deletion or newly restricted post is not interpreted as
+    an edit and therefore never destroys any previously stored version.
+    """
+    pid=item["id"]
+    current=visible_content_digest(item)
+    previous=latest_verified_content_digest(cloud,profile,item)
+    if previous is None or current==previous:
+        return False
+    blobs=item["blobs"]
+    if len(blobs)>MAX_MEDIA:
+        raise SourceUnavailable("too many public revision attachments")
+    captured=datetime.now(timezone.utc)
+    stamp=captured.strftime("%Y%m%dT%H%M%S%fZ")
+    version=stamp+"-"+current[:16]
+    media=[]
+    staged=[]
+    for idx,(ref,mime) in enumerate(blobs,1):
+        if profile["platform"]=="bluesky":
+            if mime not in MIMES:
+                raise SourceUnavailable("unsupported edited public media")
+            url=(profile["pds"]+"/xrpc/com.atproto.sync.getBlob?"+
+                 urlencode({"did":profile["identity"],"cid":ref}))
+            expected=cid_sha256(ref)
+            actual_mime,payload=api.media(url,mime)
+            if sha256(payload)!=expected:
+                raise SourceUnavailable("edited original PDS blob CID mismatch")
+        else:
+            url=ref
+            actual_mime,payload=api.media(url,None)
+        if (actual_mime not in MIMES or not isinstance(payload,bytes)
+                or not 0<len(payload)<=MAX_MEDIA_BYTES):
+            raise SourceUnavailable("edited original media unavailable")
+        key=("revision-media/"+pid+"/"+version+"/"+
+             str(idx).zfill(4)+MIMES[actual_mime])
+        staged.append((key,payload))
+        media.append({"key":key,"sha256":sha256(payload),
+                      "bytes":len(payload),"mime":actual_mime,
+                      "source_url":url,"remote_verified":True})
+    # Store all media FIRST. The version index is committed only after every
+    # payload's independent immutable remote readback has succeeded.
+    for key,payload in staged:
+        cloud.write_immutable(key,payload)
+    revision={"schema_version":1,"post_id":pid,"source_url":item["source_url"],
+              "original_id":item["original_id"],"platform":profile["platform"],
+              "captured_at":captured.isoformat(),"content_sha256":current,
+              "previous_content_sha256":previous,
+              "text":item["text"],"kind":item["kind"],
+              "reply_to":item["reply_to"],"source_record":item["raw"],
+              "media":media,"media_expected":len(blobs),
+              "media_saved":len(media),"archive_complete":True}
+    cloud.write_immutable("revisions/"+pid+"/"+version+".json",
+                          canonical_json(revision))
+    return True
+
+
 def save_public_record(cloud, profile, item, api):
     pid=item["id"]
     blobs=item["blobs"]
