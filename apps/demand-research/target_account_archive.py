@@ -560,7 +560,7 @@ def normalize_record(profile, raw):
 
 # Revision records are always additional immutable objects. A provider edit
 # NEVER rewrites the first verified post, its media, or its original source JSON.
-REVISION_RE=re.compile(r"^[0-9]{8}T[0-9]{12}Z-[a-f0-9]{16}\\.json$")
+REVISION_RE=re.compile(r"^[0-9]{8}T[0-9]{12}Z-[a-f0-9]{16}\.json$")
 
 
 def visible_content_digest(item):
