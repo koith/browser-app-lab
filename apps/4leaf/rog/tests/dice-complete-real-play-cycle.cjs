@@ -104,6 +104,45 @@ const fs=require('node:fs');
    assert.deepEqual(errors,[]);
    console.log('DICE_REAL_HUMAN_AI_COMPLETE_ROUND_PASS',JSON.stringify({
     engine:engine.name(),mobile,rolls,s,elapsed:Date.now()-start}));
+   // A normal reload intentionally pauses autonomous bot action. A human
+   // clicking the saved ROOM in the real lobby explicitly resumes the AI.
+   const oldRound=s.round;
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_LOBBY__&&window.__LEAF_WORLD__);
+   let afterReload=await get();
+   assert.equal(afterReload.botAutoplay,false,
+    'reloading alone must not silently run background bot dice turns');
+   const world2=page.locator('.world-location[data-region="dice"]');
+   const bounds=await world2.boundingBox();
+   for(const [rx,ry] of [[.5,.5],[.35,.42],[.6,.7]]){
+    if(await page.locator('#dice-channels:not(.hidden)').count())break;
+    await (mobile?world2.tap({position:{x:bounds.width*rx,y:bounds.height*ry}}):
+     world2.click({position:{x:bounds.width*rx,y:bounds.height*ry}}));
+   }
+   await page.locator('#dice-channels:not(.hidden)').waitFor();
+   await press(page.locator('#dice-channels [data-channel="ispin:1"]'));
+   await page.locator('#lobby:not(.hidden)').waitFor();
+   const saved=page.locator('#lobby-room-list .lobby-room-row[data-match="saved"]');
+   assert.equal(await saved.count(),1,'actual saved AI room must appear in same channel');
+   await press(saved);
+   await page.locator('#game:not(.hidden)').waitFor();
+   afterReload=await get();
+   assert.equal(afterReload.botAutoplay,true,
+    'actual user resume action must re-enable real computer opponent');
+   const resumeStart=Date.now();
+   await page.waitForFunction(()=>!document.querySelector('#roll-btn')?.disabled&&
+    window.__ROG_TEST__?.getMatch?.()?.active===0,null,{timeout:22000});
+   await press(page.locator('#roll-btn'));
+   await page.waitForFunction(prev=>{
+    const m=window.__ROG_TEST__?.getMatch?.();
+    return m?.finished||m?.round>prev&&m?.active===0;
+   },oldRound,{timeout:50000});
+   const resumed=await get();
+   assert.ok(resumed.round>oldRound||resumed.finished);
+   assert.deepEqual(errors,[]);
+   console.log('DICE_SAVED_AI_CLICK_RESUME_AUTO_NEXT_ROUND_PASS',JSON.stringify({
+    engine:engine.name(),mobile,oldRound,resumedRound:resumed.round,
+    botAutoplay:resumed.botAutoplay,elapsed:Date.now()-resumeStart}));
   }else{
    assert.equal(s.finished,true,'unmodified original DMP game must reach natural winner: '+JSON.stringify({rolls,s}));
    assert.ok(s.winner>=0&&s.winner<s.players.length);
