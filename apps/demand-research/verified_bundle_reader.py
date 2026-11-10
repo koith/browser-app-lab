@@ -65,6 +65,14 @@ class VerifiedBundle:
                 self.recorded_at=manifest.get("recorded_at")
                 self.selected_platform=manifest.get("selected_platform")
                 self.selected_account=manifest.get("selected_account")
+                history=manifest.get("ancestor_tags",[])
+                if not isinstance(history,list) or len(history)>10000 or (
+                    len(set(history))!=len(history)) or any(
+                    not isinstance(tag,str) or not re.fullmatch(
+                        r"intersection-github-archive-[0-9]{6,30}-a[1-9][0-9]{0,3}",tag)
+                    for tag in history):
+                    raise BundleInvalid("invalid immutable ancestor references")
+                self.ancestor_tags=tuple(history)
                 if (self.selected_platform not in ("bluesky","mastodon")
                         or not isinstance(self.selected_account,str)
                         or not 3<=len(self.selected_account)<=260):
