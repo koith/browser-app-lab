@@ -20,7 +20,7 @@ import github_temp_bundle
 from target_account_archive import REGISTRY_RE, archive_key, account_cloud
 from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
 from verified_bundle_reader import (
-    BundleAccountCloud, available_bundles, latest_account_bundle, BundleInvalid,
+    BundleAccountCloud, MergedBundleAccountCloud, available_bundles, latest_account_bundle, BundleInvalid,
 )
 
 HEX40=re.compile(r"^[a-f0-9]{40}$")
@@ -156,25 +156,25 @@ def open_account(account):
     match=REGISTRY_RE.fullmatch(account+".json")
     if not match:
         raise HTTPException(400,"Invalid archive account key")
-    github=None
+    github=[]
     if github_temp_bundle.enabled():
         try:
-            github=github_temp_bundle.account_bundle(account)
+            github=github_temp_bundle.matching_bundles(account)
         except (RuntimeError,ValueError,TypeError,BundleInvalid):
-            # A provider outage must not suppress a separately verified ZIP.
-            github=None
+            # A provider outage must not suppress already verified TeraBox.
+            github=[]
     root=open_root()
     try:
-        # Prefer the fully SHA-verified TeraBox source when it contains more
-        # public posts than a previously verified temporary GitHub snapshot.
-        # A denied/slow TeraBox lookup must NOT break the GitHub reader.
+        # A read-only union must include ALL available verified deltas.
+        # Picking only the latest ZIP previously hid earlier immutable posts.
         bundle=next((item for item in _verified_account_bundles(root)
                      if account in item.accounts),None)
-        if bundle is not None and (github is None
-                                   or bundle.post_count>github.post_count):
-            return root,bundle.accounts[account],BundleAccountCloud(bundle)
-        if github is not None:
-            return None,github.accounts[account],BundleAccountCloud(github)
+        combined=list(github)
+        if bundle is not None and all(b.digest!=bundle.digest for b in combined):
+            combined.append(bundle)
+        if combined:
+            return root if bundle is not None else None,combined[-1].accounts[account],(
+                MergedBundleAccountCloud(combined))
         raw=root.read("metadata/target-accounts/"+account+".json",
                       cap=4000,optional=True)
         if raw is None:
@@ -185,8 +185,8 @@ def open_account(account):
             raise HTTPException(404,"Archive identity mismatch")
         return root,meta,account_cloud(root,meta)
     except (RuntimeError,TypeError,ValueError,KeyError):
-        if github is not None:
-            return None,github.accounts[account],BundleAccountCloud(github)
+        if github:
+            return None,github[0].accounts[account],MergedBundleAccountCloud(github)
         raise HTTPException(502,"Private account archive read unavailable") from None
 
 
