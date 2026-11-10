@@ -16,6 +16,7 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+import time
 import zipfile
 
 from demand_archive import CloudArchive, canonical_json, sha256, MAX_CATALOG
