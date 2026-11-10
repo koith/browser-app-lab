@@ -26,8 +26,8 @@ on:
           - "3"
           - "4"
   schedule:
-    # Preserve reviewed public-account ZIP backup every six hours.
-    # This is complementary to the separate fast public-post capture.
+    # Revisit verified user-selected accounts every six hours, oldest first.
+    # Only new revisions/deltas are written; old releases are untouched.
     - cron: "43 */6 * * *"
   push:
     branches: [main]
@@ -64,7 +64,7 @@ jobs:
       TARGET_PLATFORM: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'bluesky' || inputs.platform }}
       TARGET_ACCOUNT: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'liv0706-01.bsky.social' || inputs.account }}
       TARGET_MAX_PAGES: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'all' || inputs.max_pages }}
-      DEMAND_ACCOUNT_TEMP_STORAGE: ${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]'))) && 'github_release' || '' }}
+      DEMAND_ACCOUNT_TEMP_STORAGE: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || (github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]'))) && 'github_release' || '' }}
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -94,6 +94,10 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py --scheduled
+          else
+            timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py
+          fi
           echo 'Only TARGET_ACCOUNT_GITHUB_TEMP_SHA_VERIFIED or TARGET_ACCOUNT_BUNDLE_REMOTE_VERIFIED with remote_sha256_verified=true confirms independent original readback.' >> "$GITHUB_STEP_SUMMARY"
           echo 'GitHub temporary encrypted releases are not permanent archives; keep them until TeraBox migration succeeds.' >> "$GITHUB_STEP_SUMMARY"
