@@ -8,6 +8,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import hashlib
 import io
+from collections.abc import Mapping
 import json
 import re
 import threading
@@ -31,6 +32,40 @@ class BundleInvalid(RuntimeError):
     pass
 
 
+class VerifiedEntryMap(Mapping):
+    """SHA-checked, read-on-demand view of an immutable uncompressed ZIP.
+
+    The verification pass still checks EVERY original entry before accepting
+    a bundle. The 512MiB free server no longer keeps a second full copy of
+    every photo/video/audio in Python dictionaries after verification.
+    """
+    def __init__(self,zipped,index):
+        self._zipped=zipped
+        self._index=index
+
+    def __len__(self):
+        return len(self._index)
+
+    def __iter__(self):
+        return iter(self._index)
+
+    def __contains__(self,key):
+        return key in self._index
+
+    def __getitem__(self,key):
+        try:
+            length,digest=self._index[key]
+        except KeyError:
+            raise KeyError(key) from None
+        try:
+            value=self._zipped.read(key)
+        except (RuntimeError,zipfile.BadZipFile,KeyError) as error:
+            raise BundleInvalid("verified original ZIP entry no longer readable") from error
+        if len(value)!=length or sha256(value)!=digest:
+            raise BundleInvalid("verified original ZIP content changed")
+        return value
+
+
 class VerifiedBundle:
     def __init__(self,name,blob):
         match=BUNDLE_RE.fullmatch(name)
@@ -44,9 +79,12 @@ class VerifiedBundle:
         if not self.digest.startswith(match.group(3)):
             raise BundleInvalid("remote ZIP checksum does not match immutable key")
         self.items={}
+        self._zip_source=io.BytesIO(blob)
+        zipped=None
         self.accounts={}
         try:
-            with zipfile.ZipFile(io.BytesIO(blob),"r") as zipped:
+            zipped=zipfile.ZipFile(self._zip_source,"r")
+            if zipped is not None:
                 info=zipped.infolist()
                 if (len(info)>MAX_OBJECTS+1 or len(info)<2
                         or any(i.is_dir() or i.flag_bits&1
@@ -82,6 +120,7 @@ class VerifiedBundle:
                 if stated!=set(names)-{"bundle-manifest.json"}:
                     raise BundleInvalid("ZIP entry/manifest mismatch")
                 total=0
+                verified_index={}
                 for item in entries:
                     key=item["key"]
                     if (not isinstance(key,str) or not 1<=len(key)<=240
@@ -97,13 +136,18 @@ class VerifiedBundle:
                     total+=len(value)
                     if total>MAX_VIEW_ZIP:
                         raise BundleInvalid("ZIP extracted size exceeds memory bound")
-                    self.items[key]=value
+                    verified_index[key]=(len(value),item["sha256"])
+                    del value
+                # Retain the ONE original ZIP buffer; bytes for huge video
+                # entries are only read and hashed when an owner opens them.
+                self.items=VerifiedEntryMap(zipped,verified_index)
         except (ValueError,KeyError,TypeError,zipfile.BadZipFile,RuntimeError) as error:
             raise BundleInvalid("private ZIP cannot be independently verified") from error
         # Registry entries bind this ZIP to one exact public SNS identity.
-        for key,value in self.items.items():
+        for key in self.items:
             if not key.startswith("metadata/target-accounts/"):
                 continue
+            value=self.items[key]
             filename=key.rsplit("/",1)[-1]
             if not REGISTRY_RE.fullmatch(filename):
                 continue
