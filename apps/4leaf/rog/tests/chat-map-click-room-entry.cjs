@@ -50,9 +50,28 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   assert.ok(directory.button.width>15&&directory.button.height>15);
   assert.ok(directory.caption.includes('원작 방 배치 좌표는 미확보'),
    'do not claim inferred geography is historically proven');
+  if(mobile){
+   const pins=page.locator('#social-mobile-room-map .social-mobile-room-pin');
+   assert.equal(await pins.count(),directory.rooms,'mobile map uses same room entities');
+   const mobileReadable=await pins.first().evaluate(el=>{
+    const rect=el.getBoundingClientRect();
+    const label=el.querySelector('b');
+    const labelSize=Number.parseFloat(getComputedStyle(label).fontSize);
+    const occupancySize=Number.parseFloat(getComputedStyle(el.querySelector('small')).fontSize);
+    const hit=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
+    return {width:rect.width,height:rect.height,labelSize,occupancySize,
+     clickReachable:hit===el||el.contains(hit)};
+   });
+   assert.ok(mobileReadable.width>=130&&mobileReadable.height>=70,
+    'real map rooms need 70px+ visible touch markers');
+   assert.ok(mobileReadable.labelSize>=12&&mobileReadable.occupancySize>=10,
+    'room names and occupancy must actually be readable on a phone');
+   assert.ok(mobileReadable.clickReachable,'pin must be topmost at its real touch center');
+  }
   await page.screenshot({path:'leaf-chat-map-primary-'+engine.name()+(mobile?'-mobile':'')+'.png'});
   // A direct map ROOM marker is an actual user click, never a text list choice.
-  const first=page.locator('#social-directory-list .social-directory-row').first();
+  const first=mobile?page.locator('#social-mobile-room-map .social-mobile-room-pin').first():
+    page.locator('#social-directory-list .social-directory-row').first();
   await first.scrollIntoViewIfNeeded();
   await press(first);
   await page.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='room',null,{timeout:20000});
@@ -65,7 +84,10 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   await page.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='directory');
   assert.ok(await page.locator('#social-image-frame .social-directory.web-estate-open').count(),
    'EXIT must go BACK to spatial map by default, not a list');
-  const next=page.locator('#social-directory-list .social-directory-row').nth(1);
+  if(mobile)assert.ok(await page.locator('#social-mobile-room-map .social-mobile-room-pin').count(),
+    'after EXIT mobile should return to readable original-style map markers');
+  const next=mobile?page.locator('#social-mobile-room-map .social-mobile-room-pin').nth(1):
+    page.locator('#social-directory-list .social-directory-row').nth(1);
   const secondId=await next.getAttribute('data-room');
   await next.scrollIntoViewIfNeeded();await press(next);
   await page.waitForFunction(id=>window.__LEAF_SOCIAL__?.getState().roomId===id,secondId,
