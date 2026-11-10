@@ -502,7 +502,7 @@ function adoptFastCoverImages(grid,oldCards){
   // rather than tearing it down merely because the generated card still
   // has the pristine URL. Never strip or normalize signed Worker URLs.
   const samePinnedPhoto=oldSrc===nextSrc||
-   (/^stored-albums\\/[^?#]+\\.(?:jpe?g|png|webp|avif)$/i.test(nextSrc)&&
+   (/^stored-albums\/[^?#]+\.(?:jpe?g|png|webp|avif)$/i.test(nextSrc)&&
     oldSrc.startsWith(nextSrc+'?gtry=')&&
     /^[1-4]$/.test(oldSrc.slice(nextSrc.length+6)));
   if(!samePinnedPhoto)continue;
