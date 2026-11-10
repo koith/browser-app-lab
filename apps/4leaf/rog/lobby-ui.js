@@ -254,7 +254,8 @@
    catch(error){console.warn('4LEAF legacy match channel save unavailable; current game remains playable',error)}
   }
   closeCreator();
-  window.__ROG_TEST__?.go('game');
+  if(!window.__ROG_TEST__?.resumeGameFromUserAction?.())
+   window.__ROG_TEST__?.go('game');
  }
  function openCreator(){
   const scene=$('dice-lobby-scene');if(!scene)return;
