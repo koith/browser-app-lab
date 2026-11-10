@@ -183,7 +183,7 @@ def release_bundle(release, *, key=None):
     source = _download(asset)
     bundle = _make_bundle(release["tag_name"], decrypt(source, key or gateway_key()))
     with _guard:
-        if len(_cache) >= 2:
+        if len(_cache) >= 1:
             _cache.clear()
         _cache[artifact_id] = (time.monotonic(), bundle)
     return bundle
@@ -328,7 +328,7 @@ def tagged_bundle(tag, *, missing_ok=False):
     # original integrity even without the rate-limited GitHub REST metadata.
     bundle=_make_bundle(tag,decrypt(raw,gateway_key()))
     with _guard:
-        if len(_cache)>=2:_cache.clear()
+        if len(_cache)>=1:_cache.clear()
         _cache[tag]=(time.monotonic(),bundle)
     return bundle
 
