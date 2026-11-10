@@ -20,9 +20,7 @@ const chosenAccount=()=>{const selected=query().get("account")||"";return ACCOUN
 function selectedMode(){
   const explicit=query().get("mode");
   if(explicit==="accounts"||explicit==="auto")return explicit;
-  // In the signed private app, archived accounts are the quickest entry.
-  // Automatic keyword backups remain one tap away.
-  if(location.hostname!=="koith.github.io")return "accounts";
+  // Start with hashtag snapshots unless an account is explicitly selected.
   return chosenAccount()?"accounts":"auto";
 }
 function accountLabel(item){
@@ -289,5 +287,5 @@ if(location.hostname!=="koith.github.io"){
   // Warm the private picker when the page opens, not when the user clicks it.
   void preloadChoices();
 }
-if(query().get("tab")==="archives")void loadArchive();
+if(query().get("tab")==="archives"&&!window.INTERSECTION_RELOAD_TO_POSTS)void loadArchive();
 })();
