@@ -222,6 +222,13 @@ function recoverFailedFirstPaintCovers(){
  });
 }
 window.addEventListener('load',recoverFailedFirstPaintCovers,{once:true});
+// WebKit may delay the window load event while many other album covers are
+// requesting signed media. Restore already-failed Pages covers promptly at
+// DOM readiness, without a global poll or any Cloudflare URL mutation.
+if(document.readyState==='loading')
+ document.addEventListener('DOMContentLoaded',()=>setTimeout(recoverFailedFirstPaintCovers,250),{once:true});
+else setTimeout(recoverFailedFirstPaintCovers,250);
+setTimeout(recoverFailedFirstPaintCovers,1400);
 
 
 // Once a bounded burst is exhausted, retry only visible failed committed
