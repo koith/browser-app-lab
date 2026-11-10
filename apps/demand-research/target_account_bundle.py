@@ -283,6 +283,16 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
         os.environ["DEMAND_TARGET_FULL_HISTORY"]="1"
     if cloud_check:
         CloudArchive().preflight()
+    if github_temp and prior_bundle is None and uploader is upload_release:
+        # The manual one-click path also MUST preserve existing history:
+        # never publish a fresh ZIP that accidentally hides previously
+        # verified posts just because the user requested an update.
+        from github_temp_bundle import _oidc_key
+        from target_account_archive import resolve
+        verified=latest_registered_github_bundles(_oidc_key())
+        resolved=resolve(platform,account,api or Transport())
+        expected_account=platform+"-"+archive_key(resolved)
+        prior_bundle=next((b for b in verified if b.account==expected_account),None)
     store=BundleStore(limit=80_000_000 if github_temp else MAX_BUNDLE)
     prior_identity=(seed_verified_immutable_bundle(store,prior_bundle)
                     if prior_bundle is not None else None)
