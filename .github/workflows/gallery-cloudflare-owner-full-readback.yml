@@ -10,6 +10,11 @@ on:
       - 'apps/gallery-archive/qa_cloudflare_full_remote.py'
       - '.github/workflows/gallery-cloudflare-owner-full-readback.yml'
   workflow_dispatch:
+  # Only a successful main replica triggers this strict post-replication gate.
+  workflow_run:
+    workflows:
+      - "Gallery Free Bound Assets Replica"
+    types: [completed]
 permissions:
   contents: read
 concurrency:
@@ -17,6 +22,11 @@ concurrency:
   cancel-in-progress: false
 jobs:
   exact-owner-originals:
+    if: |
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -33,6 +43,11 @@ jobs:
           set -euo pipefail
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
             python apps/gallery-archive/qa_cloudflare_full_remote.py --scope targeted
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            # New Mimmi entries require independent exact-byte/pixel proof
+            # before the broader full-owner verification is accepted.
+            python apps/gallery-archive/qa_cloudflare_full_remote.py --scope recent
+            python apps/gallery-archive/qa_cloudflare_full_remote.py --scope all
           else
             python apps/gallery-archive/qa_cloudflare_full_remote.py --scope all
           fi
