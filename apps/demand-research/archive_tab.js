@@ -20,9 +20,7 @@ const chosenAccount=()=>{const selected=query().get("account")||"";return ACCOUN
 function selectedMode(){
   const explicit=query().get("mode");
   if(explicit==="accounts"||explicit==="auto")return explicit;
-  // In the signed private app, archived accounts are the quickest entry.
-  // Automatic keyword backups remain one tap away.
-  if(location.hostname!=="koith.github.io")return "accounts";
+  // Start with hashtag snapshots unless an account is explicitly selected.
   return chosenAccount()?"accounts":"auto";
 }
 function accountLabel(item){
@@ -63,8 +61,8 @@ function renderChoices(){
   }
   quick.disabled=!matching.length;
   if(matching.some(item=>item.key===current))quick.value=current;
-  else quick.value=matching.length?"":quick.options[0].value;
-  if(quickSearch)quickSearch.hidden=choices.length<5;
+  else quick.value=matching.length?matching[0].key:quick.options[0].value;
+  if(quickSearch)quickSearch.hidden=false;
   if(quickCount)quickCount.textContent=choices.length+"개 보관";
   if(quickStatus)quickStatus.textContent=choices.length
     ?"목록은 자동으로 불러왔습니다. 계정을 선택하면 아래 내용이 바로 바뀝니다."
@@ -289,5 +287,5 @@ if(location.hostname!=="koith.github.io"){
   // Warm the private picker when the page opens, not when the user clicks it.
   void preloadChoices();
 }
-if(query().get("tab")==="archives")void loadArchive();
+if(query().get("tab")==="archives"&&!window.INTERSECTION_RELOAD_TO_POSTS)void loadArchive();
 })();
