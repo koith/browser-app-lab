@@ -781,7 +781,7 @@
     b.style.setProperty('--town-sprite-top',(sy-y)+'px');
    }
    b.title=name+' · 채팅방 위치 지도 열기';
-   b.setAttribute('aria-label',name+' 채팅 지역 지도 열기');
+   b.setAttribute('aria-label',name+' 채팅 지역');
    const count=onlinePeers('district:'+state.region+':'+name).length;
    if(count){const countLabel=document.createElement('span');countLabel.textContent=count+'명';b.append(countLabel)}
    b.onclick=()=>{
@@ -819,7 +819,7 @@
     '복구한 ChatTown 배경 위 실제 서버 채팅방 목록. 클릭하여 입장');
   };
   $('social-map-viewport')?.setAttribute('aria-label',
-   '복구한 ChatTown 배경 위 실제 서버 채팅방 목록. 클릭하여 입장');
+   '채팅방 지도 · 방을 눌러 입장 (원작 배치 좌표 미확보)');
   const list=$('social-directory-list'),rooms=catalogue();
   // A vacant original-era server is not permission to invent rooms.
   if(!rooms.length){

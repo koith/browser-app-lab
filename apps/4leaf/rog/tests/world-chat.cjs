@@ -572,8 +572,8 @@ const path=require('path');
  });
  assert.ok(nativeDirectory.background.includes('original/ChatTown/northback.png'),
   'permanent-room selector must expose recovered native ChatTown landscape');
- assert.equal(nativeDirectory.projectedMap,false,
-  'unknown historical estate coordinates must NOT replace the source art by default');
+ assert.equal(nativeDirectory.projectedMap,true,
+  'map-click room entry is the default; historical coordinates remain unverified');
  // DOM rectangles are POST scene scaling (404px source is often enlarged
  // to ~455px by the browser). Compare the source-normalized dimensions:
  // otherwise an authentic native 328x289 overlay falsely fails at 370x326.
@@ -585,15 +585,18 @@ const path=require('path');
   nativePanelWidth,nativePanelHeight,
   sourceVisible:nativeDirectory.visibleSourceRatio,
   projectedPanel:nativeDirectory.panel,projectedFrame:nativeDirectory.frame}));
- assert.ok(nativePanelWidth<=350&&nativePanelHeight<=330&&
-  nativeDirectory.visibleSourceRatio>.7,
-  'source-sized room list must leave most original ChatTown background visible');
- assert.ok(nativeDirectory.list.every(r=>r[2]>180&&r[3]>=34),
-  'eight actual room links are readable full-width instead of tiny scattered gray cards');
- assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'false');
+ assert.ok(nativePanelWidth>=700&&nativePanelHeight>=350&&
+  nativeDirectory.visibleSourceRatio<.3,
+  'the room map occupies the native frame instead of a modern list sidebar');
+ assert.ok(nativeDirectory.list.every(r=>r[2]>=110&&r[3]>=34),
+  'eight canonical chat rooms remain separately clickable on the room map');
+ assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'true');
+ await host.locator('#social-web-estate-toggle').click();
+ assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'false',
+  'optional modern list mode does not replace original map-first entry');
  await host.locator('#social-web-estate-toggle').click();
  assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'true',
-  'inferred web-map is an accessible opt-in, never mistaken for original geography');
+  'map is restored before native pan and genuine room creation');
  const mapBefore=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
  await host.locator('#social-map-viewport').focus();
  await host.keyboard.press('ArrowRight');
