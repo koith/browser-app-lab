@@ -13,3 +13,15 @@
 .archive-embedded .profile{margin-bottom:10px}
 .archive-embedded .profile,.archive-embedded .archive-content{border-radius:10px}
 @media(max-width:650px){.account-picker{border-radius:8px;margin:0 10px 12px;padding:10px 11px}.archive-embedded .profile,.archive-embedded .archive-content{border-radius:0}}
+
+/* Compact account browsing controls. */
+.account-picker{padding:7px 10px;gap:5px}
+.account-picker select{height:36px;font-size:13px}
+.archive-content .tabs button{min-height:34px;padding:6px 10px;font-size:12px}
+.archive-embedded .profile{margin-bottom:6px}
+.archive-embedded .cover{height:110px}
+.archive-embedded .profile-content{padding-top:45px;padding-bottom:12px}
+@media(max-width:650px){
+ .account-picker{padding:8px}
+ .archive-content .tabs button{padding:7px;font-size:11px}
+}
