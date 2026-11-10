@@ -243,6 +243,9 @@ def execute_registered_schedule(*,api=None,run_id=None,choose=None,
 def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
                    prior_bundle=None,
                    uploader=upload_verified_bundle):
+    if selected is None and os.getenv("DEMAND_SCHEDULED_ACCOUNTS")=="1":
+        return execute_registered_schedule(api=api,run_id=run_id,
+                  uploader=None if uploader is upload_verified_bundle else uploader)
     if selected is None:
         env_platform=os.getenv("TARGET_PLATFORM","").strip()
         env_account=os.getenv("TARGET_ACCOUNT","").strip()
@@ -279,6 +282,8 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     if cloud_check:
         CloudArchive().preflight()
     store=BundleStore(limit=80_000_000 if github_temp else MAX_BUNDLE)
+    prior_identity=(seed_verified_immutable_bundle(store,prior_bundle)
+                    if prior_bundle is not None else None)
     root=BundleCloud(store)
     result=None
     interrupted=None
@@ -298,6 +303,8 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
                        if k.startswith("account-archives/"+platform+"/")),None)
     if not account_name:
         raise RuntimeError("public account identity unresolved")
+    if prior_identity is not None and prior_identity!=platform+"-"+account_name:
+        raise RuntimeError("append-only archive identity changed")
     run_id=run_id or os.getenv("GITHUB_RUN_ID","")
     with tempfile.TemporaryDirectory(prefix="int-bundle-stage-") as directory:
         package=Path(directory)/"public-account-immutable.zip"
@@ -310,7 +317,10 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
             "remote_sha256_verified":True,
             "remote_zip_bytes":remote["bytes"],
             "source_state":manifest["capture_state"],
-            "source_partial":interrupted is not None}
+            "source_partial":interrupted is not None,
+            "new_posts":result["posts_verified"] if result else 0,
+            "new_revisions":result.get("revisions_appended",0) if result else 0,
+            "prior_objects_preserved":len(prior_bundle.items) if prior_bundle else 0}
     marker="TARGET_ACCOUNT_GITHUB_TEMP_SHA_VERIFIED" if github_temp else "TARGET_ACCOUNT_BUNDLE_REMOTE_VERIFIED"
     print(marker+" "+json.dumps(totals,sort_keys=True),flush=True)
     if interrupted and not github_temp:
