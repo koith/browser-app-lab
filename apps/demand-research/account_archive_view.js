@@ -160,8 +160,13 @@ function postCard(post,inDetail=false){
   const metadata=node("div","post-meta");
   metadata.append(node("strong","",state.profile?.display_name||state.profile?.handle||"보관 계정"));
   const timestamp=node("time","",date(post.posted_at));metadata.append(timestamp);
-  head.append(metadata,node("span","post-type",post.kind==="reply"?"답글":"게시글"));
+  head.append(metadata,node("span","post-type",
+    post.revision_of?"수정 이력":post.kind==="reply"?"답글":"게시글"));
   card.append(head,node("p","post-body",post.text||"(텍스트 없음)"));
+  if(post.revision_of){
+    card.append(node("p","notice","이전 원문은 그대로 보관 · 변경본 추가 저장 "+
+      (date(post.captured_at)||"")));
+  }
   if(post.media&&post.media.length){
     const grid=node("div","post-media");
     for(const item of post.media)grid.append(mediaElement(item));
