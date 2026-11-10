@@ -46,6 +46,10 @@ permissions:
 
 jobs:
   private-public-account-bundle:
+    # Ordinary merges modifying collector code must NEVER unexpectedly start a
+    # partial anonymous TeraBox crawl. A single explicit reviewed merge is
+    # allowed to exercise the actual automatic registered-account lane.
+    if: github.event_name != 'push' || contains(github.event.head_commit.message, '[INT-AUTO-VERIFY-20261110]') || contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]')
     concurrency:
       # Independent immutable ZIP writes must not queue behind journal repair.
       group: intersection-target-zip-production
@@ -68,8 +72,8 @@ jobs:
       TARGET_PLATFORM: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'bluesky' || inputs.platform }}
       TARGET_ACCOUNT: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'liv0706-01.bsky.social' || inputs.account }}
       TARGET_MAX_PAGES: ${{ github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]') && 'all' || inputs.max_pages }}
-      DEMAND_ACCOUNT_TEMP_STORAGE: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]'))) && 'github_release' || '' }}
-      DEMAND_SCHEDULED_ACCOUNTS: ${{ github.event_name == 'schedule' && '1' || '0' }}
+      DEMAND_ACCOUNT_TEMP_STORAGE: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (contains(github.event.head_commit.message, '[INT-AUTO-VERIFY-20261110]') || (github.actor == 'koith' && contains(github.event.head_commit.message, '[INT-LIVE-RETRY-20261107]'))))) && 'github_release' || '' }}
+      DEMAND_SCHEDULED_ACCOUNTS: ${{ (github.event_name == 'schedule' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[INT-AUTO-VERIFY-20261110]'))) && '1' || '0' }}
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
