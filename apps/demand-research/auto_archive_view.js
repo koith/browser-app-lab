@@ -94,8 +94,9 @@ function params(){
     offset:String(state.offset),limit:"20",q:$("query").value.trim(),
     platform:$("platform").value,media_status:$("mediaStatus").value});
 }
+let pendingReset=false,searchTimer=null;
 async function load(reset){
-  if(state.busy)return;
+  if(state.busy){if(reset)pendingReset=true;return;}
   if(reset){state.generation++;state.offset=0;state.total=0;list.replaceChildren();}
   const version=state.generation,offset=state.offset;
   state.busy=true;more.disabled=true;more.hidden=true;
@@ -121,9 +122,24 @@ async function load(reset){
     if(!state.offset)list.replaceChildren(node("p","empty",String(error.message)));
     status.textContent="보관본 조회 실패 · 새로 검색하거나 다시 시도해 주세요.";
     more.hidden=false;more.textContent="다시 시도";
-  }finally{state.busy=false;more.disabled=false;}
+  }finally{
+    state.busy=false;more.disabled=false;
+    if(pendingReset){pendingReset=false;void load(true);}
+  }
 }
-$("search").addEventListener("submit",event=>{event.preventDefault();void load(true);});
+function filterChanged(){
+  if(searchTimer!==null)clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{searchTimer=null;void load(true);},240);
+}
+$("search").addEventListener("submit",event=>{
+  event.preventDefault();
+  if(searchTimer!==null){clearTimeout(searchTimer);searchTimer=null;}
+  void load(true);
+});
+$("query").addEventListener("input",filterChanged);
+$("query").addEventListener("search",filterChanged);
+$("platform").addEventListener("change",filterChanged);
+$("mediaStatus").addEventListener("change",filterChanged);
 more.addEventListener("click",()=>void load(false));
 void load(true);
 })();

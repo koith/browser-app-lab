@@ -42,6 +42,7 @@ COPY apps/demand-research/public_video_trends.js /app/public_video_trends.js
 COPY apps/demand-research/target_archive_client.js /app/target_archive_client.js
 COPY apps/demand-research/assets /app/assets
 COPY apps/demand-research/index.html /app/index.html
+COPY apps/demand-research/intersection-shell-sw.js /app/intersection-shell-sw.js
 RUN useradd --create-home --uid 10001 appuser && chown -R appuser:appuser /app
 USER appuser
 EXPOSE 10000

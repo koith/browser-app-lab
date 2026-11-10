@@ -41,6 +41,8 @@ def run():
             page.on("pageerror",lambda e:errors.append(str(e)[:220]))
             page.route(PAGE,lambda route:route.fulfill(
                 status=200,content_type="text/html",body=HTML))
+            page.route(PAGE+"?tab=archives",lambda route:route.fulfill(
+                status=200,content_type="text/html",body=HTML))
             page.route(PAGE+"free_discovery.js",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=FREE))
             page.route(PAGE+"account_watch.js*",lambda route:route.fulfill(
@@ -233,8 +235,15 @@ def run():
             assert page.locator("#targetArchiveAccount").input_value()==(
                 "https://mastodon.social/@qa")
             assert page.locator("#targetArchiveSubmit").is_enabled()
-            # Persistence: only profile URLs survive refresh. No content text.
+            # A stale Archive tab in the URL must not reselect the third tab
+            # after a user-initiated reload. Deep links still work on first load.
+            page.evaluate("history.replaceState(null,'','?tab=archives')")
             page.reload(wait_until="domcontentloaded",timeout=30000)
+            assert page.locator("#postsView").is_visible()
+            assert not page.locator("#archivesView").is_visible()
+            assert page.locator("#viewPosts").get_attribute("aria-selected")=="true"
+            assert "tab=archives" not in page.url
+            # Persistence: only public profile URLs survive refresh, not posts.
             page.locator("#viewAccounts").click()
             assert page.locator("#accountMetricTracked").text_content()=="3"
             saved=page.evaluate("JSON.parse(localStorage.getItem('intersection:public-account-watch:v1'))")

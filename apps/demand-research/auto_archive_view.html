@@ -12,9 +12,9 @@
 <body>
 <main class="wrap">
  <header class="page-head">
-  <div class="eyebrow">TERABOX · 자동 수집 보관본</div>
-  <h1>자동 수집 원본</h1>
-  <p>설정된 공개 키워드가 포함된 게시글을 보관한 목록입니다. 원본 파일은 저장 당시의 바이트가 검증된 경우에만 표시합니다. 비공개 전환 전 보관됐더라도 원본 제공에는 보관 정책과 권리 요청이 적용됩니다.</p>
+  <div class="eyebrow">광고 제외 · 공개 해시태그 수집</div>
+  <h1>해시태그 자동 수집</h1>
+  <p>검증된 공개 게시글과 원본을 날짜순으로 표시합니다. 삭제·숨김 이후에도 기존 보관본을 자동으로 덮어쓰지 않습니다.</p>
  </header>
  <form id="search" autocomplete="off">
   <label>게시글 검색<input id="query" maxlength="100" type="search" placeholder="보관된 본문에서 검색"></label>
@@ -32,7 +32,7 @@
     <option value="partial">일부 미보관</option>
    </select>
   </label>
-  <button type="submit">검색</button>
+  <button type="submit" class="manual-search" aria-label="필터 다시 적용">조회</button>
  </form>
  <p id="status" class="status" role="status" aria-live="polite">테라박스 원본 확인 중…</p>
  <section id="posts" class="posts" aria-label="자동 수집 게시글">
