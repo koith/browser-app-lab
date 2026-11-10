@@ -963,6 +963,16 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
 from target_account_viewer import create_router as create_account_viewer_router
 app.include_router(create_account_viewer_router(check_auth))
 
+# Static shell worker is intentionally unauthenticated, but has no API,
+# account data, media or cloud credentials. It only caches verified app HTML.
+@app.get("/intersection-shell-sw.js",include_in_schema=False)
+async def intersection_shell_worker():
+    return FileResponse(VIEW_FILE.parent/"intersection-shell-sw.js",
+                        media_type="application/javascript",
+                        headers={"Cache-Control":"no-store",
+                                 "Service-Worker-Allowed":"/",
+                                 "X-Content-Type-Options":"nosniff"})
+
 # Allow only the browser's three known scripts and fixed SVG assets. Never
 # expose the Python source tree, cloud files or private database via StaticFiles.
 @app.get("/{asset_name}",include_in_schema=False)
