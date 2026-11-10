@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "apps/demand-research/test_deployed_pages_browser.py"
+      - "apps/demand-research/test_live_render_browser.py"
       - "apps/demand-research/public_video_trends.js"
       - "apps/demand-research/target_archive_client.js"
       - ".github/workflows/intersection-deployed-pages-qa.yml"
@@ -36,7 +37,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Validate read-only deployment QA syntax
-        run: python -m py_compile apps/demand-research/test_deployed_pages_browser.py
+        run: python -m py_compile apps/demand-research/test_deployed_pages_browser.py apps/demand-research/test_live_render_browser.py
 
   deployed-browser:
     if: github.event_name != 'pull_request'
@@ -52,4 +53,6 @@ jobs:
           python -m pip install --disable-pip-version-check playwright==1.56.0
           python -m playwright install --with-deps chromium webkit
       - name: Read SHA-verified deployed Pages, Chromium desktop and mobile WebKit
-        run: python apps/demand-research/test_deployed_pages_browser.py
+        run: |
+          python apps/demand-research/test_deployed_pages_browser.py
+          python apps/demand-research/test_live_render_browser.py
