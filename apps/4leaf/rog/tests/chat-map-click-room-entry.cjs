@@ -46,11 +46,21 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   assert.equal(directory.toggle,'목록');
   assert.equal(directory.togglePressed,'true');
   assert.ok(directory.rooms>=8,'canonical joinable rooms must be spatial entities');
-  assert.equal(directory.position,'absolute','room buttons occupy map positions');
+  assert.equal(directory.position,mobile?'relative':'absolute',
+   'desktop keeps source-map coordinates; phone uses native room buttons in readable map grid');
   assert.ok(directory.button.width>15&&directory.button.height>15);
   assert.ok(directory.caption.includes('원작 방 배치 좌표는 미확보'),
    'do not claim inferred geography is historically proven');
   if(mobile){
+   assert.equal(await page.locator('#social-new-room').count(),1,
+    'mobile map reuses exactly ONE original create button, not an obstructed clone');
+   assert.equal(await page.locator('#social-mobile-room-map #social-new-room').count(),1);
+   const createHit=await page.locator('#social-new-room').evaluate(el=>{
+    const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+    return {width:r.width,height:r.height,reachable:hit===el||el.contains(hit)};
+   });
+   assert.ok(createHit.width>=40&&createHit.height>=30&&createHit.reachable,
+    'real create button must not be intercepted by mobile marker overlay');
    const pins=page.locator('#social-mobile-room-map .social-mobile-room-pin');
    assert.equal(await pins.count(),directory.rooms,'mobile map uses same room entities');
    const mobileReadable=await pins.first().evaluate(el=>{
