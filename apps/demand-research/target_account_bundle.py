@@ -248,7 +248,7 @@ def upload_verified_bundle(zip_path,*,run_id,account_hash):
 
 
 def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
-                   uploader=upload_verified_bundle):
+                   uploader=upload_verified_bundle,prior_bundles=None):
     if selected is None:
         env_platform=os.getenv("TARGET_PLATFORM","").strip()
         env_account=os.getenv("TARGET_ACCOUNT","").strip()
@@ -294,7 +294,9 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
         selected_key=platform+"-"+archive_key(selected_profile)
         # Job-scoped private inventory; failure to enumerate is not silently
         # treated as a clean first archive. Never overwrite an older release.
-        prior=tuple(bundle for bundle in workflow_verified_bundles(max_scan=40)
+        candidates=(workflow_verified_bundles(max_scan=40)
+                    if prior_bundles is None else prior_bundles)
+        prior=tuple(bundle for bundle in candidates
                     if bundle.account==selected_key)
         api=transport
     root=LayeredBundleCloud(store,prior=prior)
@@ -339,5 +341,37 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     return totals
 
 
+def execute_scheduled():
+    """Select the least-recently-updated verified account on every cron run.
+
+    No browser click is needed after its first verified registration. Earlier
+    releases remain intact even if their source is deleted/hidden later.
+    """
+    from github_temp_bundle import workflow_verified_bundles
+    inventory=tuple(workflow_verified_bundles(max_scan=40))
+    latest={}
+    for bundle in inventory:  # newest first from GitHub's release index
+        if bundle.account not in latest:
+            latest[bundle.account]=bundle
+    if latest:
+        # Oldest archived account first; the selected account rotates once a
+        # fresh immutable ZIP is published for it.
+        chosen=min(latest.values(),key=lambda b:str(b.recorded_at or ""))
+        metadata=chosen.accounts[chosen.account]
+        selected={"platform":metadata["platform"],
+                  "account":metadata["profile_url"],
+                  "max_pages":2}
+    else:
+        selected=read_bootstrap_request()
+        if selected is None:
+            raise RuntimeError("no verified registered public account")
+    return execute_bundle(selected=selected,prior_bundles=inventory)
+
+
 if __name__=="__main__":
-    execute_bundle()
+    if "--scheduled" in os.sys.argv[1:]:
+        if os.sys.argv[1:]!=["--scheduled"]:
+            raise ValueError("invalid scheduled account options")
+        execute_scheduled()
+    else:
+        execute_bundle()
