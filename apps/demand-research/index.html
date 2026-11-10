@@ -748,6 +748,35 @@ main{padding-top:10px}
 .video-trend-review-actions button:disabled{opacity:.35;cursor:not-allowed}
 .video-trend-more{display:block;margin:0 12px 12px;padding:6px 10px;border-radius:0;background:#151829;color:white;font-size:11px}
 @media(max-width:720px){.video-trend-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:0 7px 9px}.video-trend-meta{padding:6px}.video-trend-meta b{font-size:11px}.video-trend-tools{padding:0 7px 8px}.video-trend-note{padding:0 7px 8px}}
+
+/* Compact two-source archive library — controls should not dominate posts. */
+.archive-hub{padding:12px 14px;border-radius:9px}
+.archive-hub-header h2{font-size:18px;margin:0 0 2px}
+.archive-hub-header p{font-size:11px;margin:0 0 9px;line-height:1.4}
+.archive-hub-modes{display:inline-flex;gap:3px;padding:3px;margin:0 0 10px;
+  background:#e6ebf6;border-radius:9px;flex-wrap:nowrap;max-width:100%}
+.archive-hub-modes button{min-height:32px;padding:5px 10px;font-size:12px;
+  border-radius:7px;border:none;white-space:nowrap;background:transparent}
+.archive-hub-modes button[aria-selected=true]{box-shadow:0 1px 3px #1a2b5b22}
+.archive-quick-picker{padding:9px 11px;margin:0 0 7px;border-radius:8px;gap:5px}
+.archive-quick-picker select{min-height:36px;font-size:13px}
+.archive-quick-picker-head span{font-size:10px}
+.archive-quick-picker p{font-size:10px}
+#archiveHubStatus{padding:6px 9px;font-size:11px;line-height:1.4;background:#f8faff}
+.archive-hub-actions{margin:6px 0;gap:5px;justify-content:flex-end}
+.archive-hub-actions button,.archive-hub-actions a{min-height:28px;padding:4px 8px;
+  font-size:11px;border-radius:6px;border-color:transparent;background:transparent}
+.archive-hub-actions button:hover,.archive-hub-actions a:hover{background:#e4ebf9}
+#archiveHubFrameBox{margin-top:7px;border-radius:8px}
+#archiveHubFrame{height:min(1180px,90dvh);min-height:480px}
+@media(max-width:720px){
+  .archive-hub{padding:10px 8px}
+  .archive-hub-modes{display:flex;width:100%}
+  .archive-hub-modes button{flex:1;min-height:33px;padding:4px 5px;font-size:11px}
+  .archive-hub-actions>*{flex:0 0 auto}
+  #archiveHubFrame{height:calc(100dvh - 190px);min-height:440px}
+  .archive-quick-picker{padding:8px;margin-bottom:6px}
+}
 </style>
 </head>
 <body>
@@ -938,12 +967,12 @@ main{padding-top:10px}
 </section>
 <section id="archivesView" class="archive-hub hidden" role="tabpanel" aria-labelledby="viewArchives">
   <header class="archive-hub-header">
-    <h2>백업 보관함</h2>
-    <p>자동으로 저장한 키워드 게시글과 지정 계정의 백업본을 구분해 조회합니다. 실제 원본이 검증된 파일만 열람할 수 있습니다.</p>
+    <h2>보관함</h2>
+    <p>해시태그 자동 수집 기록과 지정 계정의 누적 보관 기록을 각각 확인합니다.</p>
   </header>
   <div class="archive-hub-modes" role="tablist" aria-label="보관 자료 종류">
-    <button id="archiveModeAuto" type="button" role="tab" aria-selected="true">자동 저장 게시글</button>
-    <button id="archiveModeAccounts" type="button" role="tab" aria-selected="false">지정 계정 백업</button>
+    <button id="archiveModeAuto" type="button" role="tab" aria-selected="true">해시태그 자동 수집</button>
+    <button id="archiveModeAccounts" type="button" role="tab" aria-selected="false">지정 계정 기록</button>
   </div>
   <div id="archiveAccountPicker" class="archive-quick-picker" hidden>
     <div class="archive-quick-picker-head"><label for="archiveQuickSelect">보관된 계정</label><span id="archiveQuickCount">계정 목록 자동 불러오는 중…</span></div>
@@ -955,8 +984,8 @@ main{padding-top:10px}
   </div>
   <div id="archiveHubStatus" role="status" aria-live="polite">비공개 보관 서버의 연결 상태를 확인 중입니다.</div>
   <div id="archiveHubActions" class="archive-hub-actions" hidden>
-    <button type="button" id="archiveHubReload">목록 새로고침</button>
-    <a href="/account-archive" id="archiveHubFullView">보관함 크게 보기</a>
+    <button type="button" id="archiveHubReload" aria-label="보관 목록 다시 확인">새로고침</button>
+    <a href="/account-archive" id="archiveHubFullView">전체 화면</a>
   </div>
   <div id="archiveHubFrameBox" hidden>
     <iframe id="archiveHubFrame" title="저장된 SNS 계정과 게시글·미디어 보관함" loading="lazy" referrerpolicy="no-referrer"></iframe>
@@ -2029,4 +2058,15 @@ if(cloudMode){
 <script src="account_auto_analysis.js?v=20261105-account-ui-3" defer></script>
 <script src="account_index_client.js?v=20261105-account-ui-3" defer></script>
 <script src="account_group_client.js?v=20261105-account-ui-3" defer></script>
+<script>
+// Only the public HTML shell is cached. API, login and originals remain online
+// and continue to require the existing authenticated private gateway.
+if(location.hostname==="intersection-originals-free.onrender.com"&&
+   "serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("/intersection-shell-sw.js",{scope:"/"})
+      .catch(()=>{}); // Safari private mode may deny offline shell storage.
+  },{once:true});
+}
+</script>
 </body></html>
