@@ -15,10 +15,10 @@ def exercise(browser,label):
     page.on("pageerror",lambda exc: errors.append(str(exc)))
     # First-time account-watch transfer redirects to GitHub Pages; skip the
     # migration attempt for this disposable synthetic browser only.
-    page.add_init_script("""() => {
+    page.add_init_script("""(() => {
       try {sessionStorage.setItem('intersection:watch-origin-migration-attempted:v1','1');}
       catch(e) {}
-    }""")
+    })()""")
     try:
         page.goto(BASE+"?liveqa=20261111",wait_until="domcontentloaded",
                   timeout=85000)
