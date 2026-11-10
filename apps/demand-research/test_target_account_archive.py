@@ -482,3 +482,16 @@ def test_public_labelled_posts_reach_private_encrypted_bundle(monkeypatch):
             api=api,run_id="42399999999",cloud_check=False,uploader=fake_remote)
     assert result["public_posts_in_bundle"]==1
     assert any(name.endswith("/post.json") for name in stored)
+
+
+def test_bluesky_profile_public_cdn_400_uses_same_did_official_fallback():
+    class FirstCdnFailed(BlueAPI):
+        def json(self,url,body=None):
+            if url.startswith("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile"):
+                raise job.SourceUnavailable("public CDN returned 400")
+            return super().json(url,body)
+    api=FirstCdnFailed({None:([],None)})
+    profile=job.resolve("bluesky","qa-example.bsky.social",api)
+    assert profile["identity"]==DID
+    assert any(x.startswith("https://api.bsky.app/xrpc/app.bsky.actor.getProfile")
+               for x in api.calls)

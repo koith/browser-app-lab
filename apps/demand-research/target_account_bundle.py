@@ -350,31 +350,50 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
 
 
 def execute_scheduled():
-    """Select the least-recently-updated verified account on every cron run.
+    """Refresh one registered public account without sacrificing old records.
 
-    No browser click is needed after its first verified registration. Earlier
-    releases remain intact even if their source is deleted/hidden later.
+    If the oldest registered source is now unavailable, try another verified
+    account rather than starving the entire schedule. Historical ZIPs are
+    NEVER deleted or changed when a provider returns HTTP 400/404.
     """
     from github_temp_bundle import workflow_verified_bundles
+    from target_account_archive import SourceUnavailable
     inventory=tuple(workflow_verified_bundles(max_scan=40))
     latest={}
-    for bundle in inventory:  # newest first from GitHub's release index
+    for bundle in inventory:
         if bundle.account not in latest:
             latest[bundle.account]=bundle
-    if latest:
-        # Oldest archived account first; the selected account rotates once a
-        # fresh immutable ZIP is published for it.
-        chosen=min(latest.values(),key=lambda b:str(b.recorded_at or ""))
-        metadata=chosen.accounts[chosen.account]
-        selected={"platform":metadata["platform"],
-                  "account":metadata["profile_url"],
-                  "max_pages":2}
-    else:
+    if not latest:
         selected=read_bootstrap_request()
         if selected is None:
             raise RuntimeError("no verified registered public account")
-    return execute_bundle(selected=selected,prior_bundles=inventory)
-
+        return execute_bundle(selected=selected,prior_bundles=inventory)
+    # New successful deltas move their account to the end of this queue,
+    # while an unavailable account never prevents the next public account.
+    unavailable=0
+    for bundle in sorted(latest.values(),
+                         key=lambda b:(str(b.recorded_at or ""),b.account)):
+        metadata=bundle.accounts[bundle.account]
+        selected={"platform":metadata["platform"],
+                  "account":metadata["profile_url"],
+                  "max_pages":2}
+        try:
+            result=execute_bundle(selected=selected,prior_bundles=inventory)
+        except (SourceUnavailable,ValueError):
+            unavailable+=1
+            continue
+        print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",
+              json.dumps({"registered":len(latest),"source_unavailable":unavailable,
+                          "state":"REMOTE_READBACK_COMPLETED"},
+                         sort_keys=True),flush=True)
+        return result
+    # Never produce a green run or synthetic backup if every public account
+    # is no longer queryable. The previous encrypted sources remain intact.
+    print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",
+          json.dumps({"registered":len(latest),"source_unavailable":unavailable,
+                      "state":"NO_CURRENT_PUBLIC_SOURCE"},
+                     sort_keys=True),flush=True)
+    raise SourceUnavailable("all registered public accounts unavailable; historical ZIPs retained")
 
 if __name__=="__main__":
     if "--scheduled" in os.sys.argv[1:]:
