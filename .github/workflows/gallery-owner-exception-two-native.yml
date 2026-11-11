@@ -29,9 +29,9 @@ jobs:
           - {model: yui, album: v04, number: 1, browser: chromium}
           - {model: yui, album: v04, number: 1, browser: webkit}
     env:
-      ${{ matrix.model }}: ${{ matrix.model }}
-      ${{ matrix.album }}: ${{ matrix.album }}
-      ${{ matrix.number }}: ${{ matrix.number }}
+      MODEL: ${{ matrix.model }}
+      ALBUM: ${{ matrix.album }}
+      NUMBER: ${{ matrix.number }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -46,7 +46,7 @@ jobs:
           python - <<'PY'
           import json, os, requests
           from pathlib import Path
-          model, album, number = os.environ['${{ matrix.model }}'], os.environ['${{ matrix.album }}'], int(os.environ['${{ matrix.number }}'])
+          model, album, number = os.environ['MODEL'], os.environ['ALBUM'], int(os.environ['NUMBER'])
           ref='e1f6f4f5bff07c2b8eaa80e93bb4f5425dd1a6aa'
           url=f'https://raw.githubusercontent.com/koith/browser-app-lab/{ref}/apps/{model}-gallery/owner-index.json'
           response=requests.get(url,timeout=(12,45));response.raise_for_status()
