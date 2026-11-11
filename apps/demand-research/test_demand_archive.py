@@ -1105,8 +1105,13 @@ def test_public_warnings_are_not_private_or_takedown(monkeypatch):
               "labels":[{"val":"!takedown"}]}
     record_hidden={**base,"uri":base["uri"].replace("public01","recordhidden01"),
         "record":{**base["record"],"labels":{"values":[{"val":"!hide"}]}}}
+    operator_excluded={
+        **base,
+        "uri":"at://did:plc:kqwzwtujwjh5lmss6erzpaid/app.bsky.feed.post/campaign123",
+        "author":{"did":"did:plc:kqwzwtujwjh5lmss6erzpaid"}
+    }
     monkeypatch.setattr(job,"bluesky_public_search",lambda *a:{
-        "posts":[public_warning,withheld,record_hidden]})
+        "posts":[public_warning,withheld,record_hidden,operator_excluded]})
     rows=list(job.bluesky("섹트",start,now))
     assert len(rows)==1 and rows[0]["original_id"]==base["uri"]
     assert job.sensitive_labels([{"val":"porn"}]) is False
