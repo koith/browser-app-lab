@@ -257,7 +257,15 @@ document.addEventListener('visibilitychange',retryCommittedVisibleOnFocus);
 
 
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),localPreviewIndex=new Map(),detailRenderGeneration=0;
-function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
+function canonicalId(id){
+ // An alias is a catalog grouping hint, not permission to replace a distinct
+ // SHA-verified physical album. Preserve exact photos, including same-SHA Pages copies.
+ const exact=stored.find(a=>a.id===id);
+ if(exact&&validImages(exact).length)return id;
+ const original=id,seen=new Set();
+ while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}
+ return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original;
+}
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
