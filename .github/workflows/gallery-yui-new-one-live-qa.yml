@@ -1,0 +1,75 @@
+name: Gallery Yui New Actual Original After Free Replica Native QA
+on:
+  workflow_run:
+    workflows: ["Gallery Free Bound Assets Replica"]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gallery-yui-recent-original-20261111
+  cancel-in-progress: false
+jobs:
+  recent-yui-real-browser:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install real native browser and exact public download validator
+        run: |
+          python -m pip install --quiet 'playwright==1.58.0' requests
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Require real newly saved Yui SHA in the two pinned public catalogs
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from urllib.request import urlopen
+          repo='https://raw.githubusercontent.com/koith/browser-app-lab/'
+          path='/apps/yui-gallery/owner-index.json'
+          before=json.load(urlopen(repo+'97ee68e2e567c8b0823358a8ecb28b5dce8bc5ed'+path,timeout=40))
+          after=json.load(urlopen(repo+'d4b36153c918e28d6f3974a2510f00cd47db68df'+path,timeout=40))
+          assert before['model']==after['model']=='yui'
+          assert before['physical_originals_indexed']==3077 and after['physical_originals_indexed']==3078
+          old={(a['id'],p['number']):p['sha256']
+               for a in before['albums'] for p in a['images']}
+          new=[(a['id'],p['number']) for a in after['albums'] for p in a['images']
+               if old.get((a['id'],p['number']))!=p['sha256']]
+          assert len(new)==1,('EXACT_NEW_YUI_PHOTO_NOT_ONE',len(new))
+          print('YUI_RECENT_ONE_PUBLIC_INDEX_SHA_DELTA_VERIFIED',len(new))
+          PY
+      - name: Read real published Pages Yui thumbnail, lightbox and original SHA in native browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/qa_new_physical_photos.py \
+            --model yui --browser ${{ matrix.browser }} \
+            --since-commit 97ee68e2e567c8b0823358a8ecb28b5dce8bc5ed \
+            --current-commit d4b36153c918e28d6f3974a2510f00cd47db68df \
+            --out "$RUNNER_TEMP/yui-new-one-${{ matrix.browser }}.json"
+      - name: Report native photo display and download as verified only on real success
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          for f in Path(os.environ['RUNNER_TEMP']).glob('yui-new-one-*.json'):
+              d=json.loads(f.read_text())
+              print('YUI_NEW_ONE_BROWSER_SHA',json.dumps({
+                'browser':d.get('browser'),'new_rows':d.get('all_new_or_upgraded_rows'),
+                'verified_photos':len(d.get('photos',[])),
+                'success':d.get('success',False),'reload':d.get('reload_pass',False),
+                'actual_iPhone':False
+              }))
+          PY
