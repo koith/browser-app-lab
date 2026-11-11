@@ -39,7 +39,7 @@ ALLOWED_MEDIA = (
 )
 # Public self-labels/content warnings are not access restrictions. Exclude only
 # provider-hide/takedown evidence; do not defeat provider access controls.
-RESTRICTED_LABELS = {"!hide", "!takedown"}
+RESTRICTED_LABELS = {"!hide", "!takedown", "csam", "graphic-media", "gore", "self-harm"}
 MIMES_LIMITS = {"image/jpeg": MAX_IMAGE, "image/png": MAX_IMAGE,
                 "image/webp": MAX_IMAGE, "image/avif": MAX_IMAGE,
                 "video/mp4": MAX_VIDEO, "video/webm": MAX_VIDEO,
