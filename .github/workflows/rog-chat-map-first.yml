@@ -1,0 +1,28 @@
+name: 4LEAF ChatTown map-first room entry
+on:
+  pull_request:
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/tests/chat-map-first-entry.cjs'
+      - '.github/workflows/rog-chat-map-first.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chat-map-entry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - name: Serve source branch
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/4leaf-chat-map.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsSI http://127.0.0.1:8765/index.html && exit 0; sleep 1; done
+          exit 1
+      - name: Real ChatTown map-first room create and re-enter
+        run: node apps/4leaf/rog/tests/chat-map-first-entry.cjs
