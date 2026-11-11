@@ -1054,3 +1054,34 @@ def test_unobservable_nested_parent_only_counts_sha_verified_shallow_original():
     assert cloud.objects[cloud.flat_storage_key(original)]==canonical_json(p)
     assert cloud.read_verified(original,sha256(canonical_json(p)))==canonical_json(p)
     assert cloud.load_catalog()==[p]
+
+
+def test_bounded_rclone_listing_succeeds_for_small_verified_name_set():
+    """No network: a short process writes bytes to stdout and stderr."""
+    import sys
+    import demand_archive
+    script="import os; os.write(1,b'a.json\\nb.json\\n'); os.write(2,b'notice')"
+    result=demand_archive._bounded_list_output(
+        [sys.executable,"-c",script],timeout=5,cap=256)
+    assert result.returncode==0
+    assert result.stdout==b"a.json\nb.json\n"
+    assert result.stderr==b"notice"
+
+
+def test_bounded_rclone_listing_rejects_huge_output_before_allocating_it():
+    import sys
+    import demand_archive
+    script="import os; os.write(1,b'x'*16384)"
+    with pytest.raises(RuntimeError,match="listing exceeds memory bound"):
+        demand_archive._bounded_list_output(
+            [sys.executable,"-c",script],timeout=5,cap=1024)
+
+
+def test_bounded_rclone_listing_timeout_terminates_child():
+    import sys
+    import subprocess
+    import demand_archive
+    script="import time; time.sleep(2)"
+    with pytest.raises(subprocess.TimeoutExpired):
+        demand_archive._bounded_list_output(
+            [sys.executable,"-c",script],timeout=0.1,cap=1024)

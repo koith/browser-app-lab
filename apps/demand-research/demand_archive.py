@@ -10,8 +10,10 @@ import hashlib
 import json
 import os
 import re
+import selectors
 import subprocess
 import tempfile
+import threading
 import time
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -29,6 +31,58 @@ MAX_POST = 100_000
 MAX_MEDIA_BYTES = 80_000_000
 MAX_ENTRIES = 150_000
 PLATFORMS = {"bluesky", "mastodon", "misskey", "lemmy", "reddit", "x", "threads", "instagram"}
+
+# Per-process guard is opt-in ONLY on the 512MiB Render gateway. The external
+# archive producer and its immutable storage writes retain their prior behavior.
+_REMOTE_RCLONE_GATE = threading.Lock()
+MAX_REMOTE_LIST_BYTES = 12_000_000
+
+
+def _bounded_list_output(command, timeout=120, cap=MAX_REMOTE_LIST_BYTES):
+    """Drain rclone's stdout and stderr without allocating an unlimited pipe.
+
+    Large unofficial TeraBox directory listings previously grew entirely in
+    subprocess.run(stdout=PIPE) memory. Fail this one request before it can
+    kill the web server; do not truncate a listing or mark it verified.
+    """
+    deadline=time.monotonic()+timeout
+    chunks=[]
+    errors=[]
+    size=0
+    with subprocess.Popen(command,stdin=subprocess.DEVNULL,
+                          stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+                          bufsize=0) as proc:
+        with selectors.DefaultSelector() as selector:
+            selector.register(proc.stdout, selectors.EVENT_READ,"out")
+            selector.register(proc.stderr, selectors.EVENT_READ,"err")
+            try:
+                while selector.get_map():
+                    remaining=deadline-time.monotonic()
+                    if remaining<=0:
+                        raise subprocess.TimeoutExpired(command,timeout)
+                    ready=selector.select(remaining)
+                    if not ready:
+                        raise subprocess.TimeoutExpired(command,timeout)
+                    for key,_ in ready:
+                        block=os.read(key.fileobj.fileno(),65536)
+                        if not block:
+                            selector.unregister(key.fileobj)
+                            continue
+                        if key.data=="out":
+                            size+=len(block)
+                            if size>cap:
+                                raise RuntimeError("private cloud listing exceeds memory bound")
+                            chunks.append(block)
+                        elif sum(map(len,errors))<65536:
+                            errors.append(block[:max(0,65536-sum(map(len,errors)))])
+                return subprocess.CompletedProcess(
+                    command,proc.wait(timeout=max(0.1,deadline-time.monotonic())),
+                    b"".join(chunks),b"".join(errors))
+            finally:
+                if proc.poll() is None:
+                    proc.kill()
+                    proc.wait(timeout=5)
+
 
 
 def canonical_json(obj):
@@ -133,9 +187,22 @@ class CloudArchive:
 
     @staticmethod
     def _run(args, data=None, timeout=150, allow_missing=False):
+        if os.getenv("DEMAND_RCLONE_SERIALIZED","0")=="1":
+            with _REMOTE_RCLONE_GATE:
+                return CloudArchive._run_unlocked(
+                    args,data=data,timeout=timeout,allow_missing=allow_missing)
+        return CloudArchive._run_unlocked(
+            args,data=data,timeout=timeout,allow_missing=allow_missing)
+
+    @staticmethod
+    def _run_unlocked(args, data=None, timeout=150, allow_missing=False):
         try:
-            r = subprocess.run(["rclone", *args], input=data, stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE, timeout=timeout, check=False)
+            if (args and args[0]=="lsf" and data is None
+                    and os.getenv("DEMAND_RCLONE_BOUNDED_LIST","0")=="1"):
+                r = _bounded_list_output(["rclone",*args],timeout=timeout)
+            else:
+                r = subprocess.run(["rclone", *args], input=data, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, timeout=timeout, check=False)
         except (OSError, subprocess.TimeoutExpired) as e:
             raise RuntimeError("private cloud command could not execute") from e
         if r.returncode:
