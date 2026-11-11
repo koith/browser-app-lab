@@ -97,3 +97,19 @@ def test_authenticated_workflow_rejects_unsafe_account_before_upload(monkeypatch
     monkeypatch.setenv("TARGET_MAX_PAGES","2")
     with pytest.raises(ValueError):
         execute_bundle(cloud_check=False)
+
+
+def test_hourly_account_refresh_only_runs_authorized_main_or_schedule():
+    """Regression: no fork PR can run the secret-bearing immutable writer."""
+    workflow=(Path(__file__).resolve().parents[2]/
+              ".github/workflows/intersection-target-account-bundle.yml").read_text()
+    assert 'cron: "43 * * * *"' in workflow
+    assert 'branches: [main]' in workflow
+    assert '" .github/' not in workflow
+    assert '      - ".github/workflows/intersection-target-account-bundle.yml"' in workflow
+    assert 'if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then' in workflow
+    assert 'python target_account_bundle.py --scheduled' in workflow
+    assert 'DEMAND_ACCOUNT_TEMP_STORAGE: github_release' in workflow
+    assert 'id-token: write' in workflow
+    assert 'cancel-in-progress: false' in workflow
+    assert 'queue: max' in workflow
