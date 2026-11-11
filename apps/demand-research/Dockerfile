@@ -33,6 +33,15 @@ COPY apps/demand-research/social_sources.py /app/social_sources.py
 COPY apps/demand-research/account_index.py /app/account_index.py
 COPY apps/demand-research/account_index_job.py /app/account_index_job.py
 COPY apps/demand-research/account_index_bootstrap.py /app/account_index_bootstrap.py
+# This is PUBLIC AES-256-GCM ciphertext, not a secret or account data in
+# plaintext. Pin immutable asset SHA at BUILD time; no external CDN is needed
+# for the free Render instance to rehydrate after it sleeps.
+RUN curl --fail --silent --show-error --location --retry 6 --retry-all-errors \
+    --retry-delay 3 --connect-timeout 20 --max-time 100 \
+    https://github.com/koith/browser-app-lab/releases/download/intersection-index-boot-20261109/index.enc \
+    -o /app/account-index-boot.enc \
+ && echo 'a3aafe2a9dfe1cf4e02488c8039a52723e925b1719310faf91fcb76e3e998650  /app/account-index-boot.enc' | sha256sum -c - \
+ && chmod 0444 /app/account-index-boot.enc
 COPY apps/demand-research/account_groups.py /app/account_groups.py
 COPY apps/demand-research/account_group_client.js /app/account_group_client.js
 COPY apps/demand-research/account_index_sources.py /app/account_index_sources.py
