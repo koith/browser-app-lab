@@ -81,6 +81,7 @@ def exercise(browser,label):
         if "webkit" in label:
             page.wait_for_timeout(42000)
             subsequent=page.request.get(BASE+"health",timeout=35000)
+            print("LIVE_RENDER_WEBKIT_POSTLOAD_HEALTH",subsequent.status,flush=True)
             assert subsequent.status==200 and subsequent.json().get("alive") is True
             accounts=page.request.get(BASE+"api/accounts/status",timeout=35000)
             assert accounts.status==200,accounts.status
