@@ -16,6 +16,7 @@ on:
       - "apps/demand-research/public_video_trends.js"
       - "apps/demand-research/target_archive_client.js"
       - "apps/demand-research/test_deployed_pages_browser.py"
+      - "apps/demand-research/test_live_render_browser.py"
       - ".github/workflows/intersection-deployed-pages-qa.yml"
   workflow_dispatch:
 
