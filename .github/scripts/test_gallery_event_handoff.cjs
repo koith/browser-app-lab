@@ -4,6 +4,20 @@ const run=require('./gallery_event_handoff.cjs');
 const SHA='a'.repeat(40);
 const ledger=(done=[1,2,4])=>Array.from({length:11},(_,i)=>
   '- ['+(done.includes(i+1)?'x':' ')+'] **G-'+String(i+1).padStart(2,'0')+'** work').join('\n');
+// Reproduce #605's LIVE 2026-11-11 dashboard table: completed subtasks
+// inside an incomplete G-03 must not count as top-level completion.
+const tableLedger=(done=[1,2,4])=>'<!-- GALLERY_DASHBOARD_START -->\n'+
+  '# 화보 갤러리 — 실제 개발 원장\n'+
+  Array.from({length:11},(_,i)=>{
+    const n=i+1,id='G-'+String(n).padStart(2,'0');
+    const status=done.includes(n)?'[x]':'[ ]';
+    const desc=n===3?'[x] 밈미 신규 2장 실화면 완료 · 전체 수집은 [ ]':'보관·실증';
+    return '| '+(done.includes(n)?'완료':'P0')+' | '+id+
+      ' | '+desc+' | '+status+' 전체 작업 '+(n===3?'새 2장 [x]':'')+' |';
+  }).join('\n')+
+  '\n<!-- GALLERY_DASHBOARD_END -->\n'+
+  '\n## Old history: must NEVER overwrite current dashboard status\n'+
+  '- [x] **G-10** old entry\n';
 const item=(status='completed',conclusion='success',sha=SHA)=>({
   id:42,head_sha:sha,head_branch:'main',status,conclusion,event:'workflow_dispatch'
 });
@@ -71,5 +85,19 @@ async function simulate({event='push',body=ledger(),history={},pages=[item()],
   for(const name of ['gallery-direct-individual-archive.yml',
     'gallery-targeted-public-photo-crawl.yml','mimmi-official-archive.yml'])
     assert.ok(!r.dispatched.includes(name),'collection stays paused');
-  console.log('PASS: 13 independent quick-feature handoff, trust and no-duplicate tests');
+  r=await simulate({body:tableLedger()});
+  assert.deepEqual(r.dispatched,[g10],
+    'real dashboard table should be read instead of blocking handoff');
+  assert.ok(r.logs.some(x=>x.includes('GALLERY_DASHBOARD_PARSED_DONE 3/11')),
+    'global task count must stay 3/11 despite G03 two-photo subtask being done');
+  r=await simulate({body:tableLedger([1,2,4,10])});
+  assert.deepEqual(r.dispatched,[g09],'table-form completed G10 advances to G09');
+  r=await simulate({body:tableLedger([1,2,4,9,10,11])});
+  assert.deepEqual(r.dispatched,[g08],'table-form G08 remains separately actionable');
+  r=await simulate({body:tableLedger([1,2,4,8,9,10,11])});
+  assert.deepEqual(r.dispatched,[],'fully completed feature rows must not re-run');
+  r=await simulate({body:tableLedger().replace('| G-11 |','| OTHER |')});
+  assert.deepEqual(r.dispatched,[],
+    'missing critical global row must fail closed, not dispatch unknown work');
+  console.log('PASS: legacy 13 + current dashboard 5 table-first safe handoff cases');
 })().catch(e=>{console.error(e);process.exitCode=1;});
