@@ -699,12 +699,82 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
         except (RuntimeError,ValueError,TypeError,KeyError):
             graph_stats[graph_kind]={"pages":0,"members":0,"more_public_pages":None}
     if previously_complete:
-        # Re-check newest public posts after historical backfill completed.
+        # Re-check recent public posts after a historical cursor exhausted.
         cursor=None
-        max_pages=min(max_pages,1)
+        max_pages=min(max_pages,2)
     saved=duplicates=restricted=media_pending=pages=0
     deadline=clock()+MAX_RUNTIME
+    head_pages=0
+
+    def save_observed(records):
+        nonlocal saved,duplicates,restricted,media_pending
+        for raw in records:
+            item=normalize_record(profile,raw)
+            if not item:
+                restricted+=1
+                continue
+            marker=archive.read("metadata/entries/"+item["id"]+".json",
+                                cap=1024,optional=True)
+            if marker is not None:
+                try:
+                    index=json.loads(marker)
+                    posted=archive.read_verified("posts/"+item["id"]+"/post.json",
+                                                 index["sha256"],cap=100_000)
+                    if posted is not None:
+                        original=archive.read(
+                            "metadata/source-records/"+item["id"]+".json",
+                            cap=MAX_SOURCE_BYTES,optional=True)
+                        if original is None:
+                            duplicates+=1
+                            continue
+                        old=normalize_record(profile,json.loads(original))
+                        if old is None:
+                            raise SourceUnavailable("archived source record invalid")
+                        current_fp=content_fingerprint(item)
+                        if current_fp==content_fingerprint(old):
+                            duplicates+=1
+                            continue
+                        revision_id=post_key(platform,item["original_id"]+
+                                             ":revision:"+current_fp)
+                        revision_marker=archive.read(
+                            "metadata/entries/"+revision_id+".json",
+                            cap=1024,optional=True)
+                        if revision_marker is not None:
+                            revision_index=json.loads(revision_marker)
+                            if archive.read_verified("posts/"+revision_id+"/post.json",
+                                                     revision_index["sha256"],cap=100_000) is not None:
+                                duplicates+=1
+                                continue
+                            raise SourceUnavailable("archived revision cannot be verified")
+                        item={**item,"id":revision_id,"revision_of":item["id"],
+                              "revision_fingerprint":current_fp}
+                except (ValueError,KeyError,TypeError) as error:
+                    raise SourceUnavailable("archived record verification failed") from error
+            try:
+                save_public_record(archive,profile,item,api)
+                saved+=1
+            except SourceUnavailable:
+                media_pending+=1
+                raise
+
     try:
+        # A historical backfill cursor can last many runs. Scan the newest
+        # public page FIRST on every revisit so new or edited posts are not
+        # missed while continuing to backfill old pages. Do not advance the
+        # historical cursor from this independent head scan.
+        if cursor is not None and not previously_complete:
+            latest_cursor=None
+            for _ in range(min(max_pages,2)):
+                if clock()>=deadline:
+                    break
+                head_records,following=page_records(profile,latest_cursor,api)
+                if head_records and following is not None and following==latest_cursor:
+                    raise SourceUnavailable("recent public cursor did not advance")
+                save_observed(head_records)
+                head_pages+=1
+                if not following:
+                    break
+                latest_cursor=following
         for _ in range(max_pages):
             if clock()>=deadline:
                 break
@@ -712,63 +782,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
             records,next_cursor=page_records(profile,cursor,api)
             if records and next_cursor is not None and next_cursor==current_cursor:
                 raise SourceUnavailable("public provider cursor did not advance")
-            for raw in records:
-                item=normalize_record(profile,raw)
-                if not item:
-                    restricted+=1
-                    continue
-                # Existing original is read back, not deduplicated from an
-                # untrusted/possibly stale filename listing alone.
-                marker=archive.read("metadata/entries/"+item["id"]+".json",
-                                    cap=1024,optional=True)
-                if marker is not None:
-                    try:
-                        index=json.loads(marker)
-                        posted=archive.read_verified(
-                            "posts/"+item["id"]+"/post.json",index["sha256"],
-                            cap=100_000)
-                        if posted is not None:
-                            # Preserve the first observation and all prior
-                            # revisions; compare only editable source fields.
-                            original=archive.read(
-                                "metadata/source-records/"+item["id"]+".json",
-                                cap=MAX_SOURCE_BYTES,optional=True)
-                            if original is None:
-                                duplicates+=1
-                                continue
-                            old=normalize_record(profile,json.loads(original))
-                            if old is None:
-                                raise SourceUnavailable("archived source record invalid")
-                            current_fp=content_fingerprint(item)
-                            if current_fp==content_fingerprint(old):
-                                duplicates+=1
-                                continue
-                            revision_id=post_key(platform,item["original_id"]+
-                                                 ":revision:"+current_fp)
-                            # A revision is a new immutable logical record.
-                            # Never write to the original source/entry/media.
-                            revision_marker=archive.read(
-                                "metadata/entries/"+revision_id+".json",
-                                cap=1024,optional=True)
-                            if revision_marker is not None:
-                                revision_index=json.loads(revision_marker)
-                                if archive.read_verified(
-                                    "posts/"+revision_id+"/post.json",
-                                    revision_index["sha256"],cap=100_000) is not None:
-                                    duplicates+=1
-                                    continue
-                                raise SourceUnavailable("archived revision cannot be verified")
-                            item={**item,"id":revision_id,
-                                  "revision_of":item["id"],
-                                  "revision_fingerprint":current_fp}
-                    except (ValueError,KeyError,TypeError) as error:
-                        raise SourceUnavailable("archived record verification failed") from error
-                try:
-                    save_public_record(archive,profile,item,api)
-                    saved+=1
-                except SourceUnavailable:
-                    media_pending+=1
-                    raise
+            save_observed(records)
             seq+=1
             exhausted=not records or not next_cursor
             archive.write_immutable("metadata/checkpoints/page-"+str(seq).zfill(8)+".json",
@@ -794,7 +808,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
     finally:
         # Never print account/profile URL, post IDs, text, raw API errors or media.
         print("TARGET_ACCOUNT_ARCHIVE_AGGREGATE",
-              json.dumps({"platform":platform,"pages_verified":pages,
+              json.dumps({"platform":platform,"pages_verified":pages,"latest_pages_scanned":head_pages,
                           "posts_verified":saved,"previously_saved":duplicates,
                           "excluded_not_public":restricted,
                           "media_pending":media_pending,
@@ -807,7 +821,8 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                           "threads_pending":locals().get("thread_stats",{}).get("threads_pending",True),
                           "state":locals().get("status","FAILED_RETRYABLE")},
                          sort_keys=True),flush=True)
-    return {"platform":platform,"pages_verified":pages,"posts_verified":saved,
+    return {"platform":platform,"pages_verified":pages,"latest_pages_scanned":head_pages,
+            "posts_verified":saved,
             "previously_saved":duplicates,"status":status,
             "profile":profile_stat,"graph":graph_stats,
             "threads":locals().get("thread_stats",{})}
