@@ -53,7 +53,7 @@ async function simulate({event='push',body=ledger(),history={},pages=[item()],
   }};
   await run({github,context:{repo:{owner:'koith',repo:'browser-app-lab'},
     eventName:event,ref,payload:p},
-    core:{info:x=>logs.push(x),notice:x=>logs.push(x)}});
+    core:{info:x=>logs.push(x),notice:x=>logs.push(x),warning:x=>logs.push(x)}});
   return {dispatched,logs};
 }
 (async()=>{
