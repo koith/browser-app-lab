@@ -40,6 +40,7 @@ on:
       - "apps/demand-research/verified_bundle_reader.py"
       - "apps/demand-research/test_verified_bundle_reader.py"
       - "apps/demand-research/test_target_account_bundle.py"
+      - "apps/demand-research/requirements-ci.txt"
       - "apps/demand-research/test_account_append_only.py"
       - "apps/demand-research/target_account_enrichment.py"
       - "apps/demand-research/target_account_viewer.py"
@@ -105,10 +106,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: apps/demand-research/requirements-ci.txt
       - name: Check isolated public-account archive, original PDS blobs, audio and replay
         run: |
           set -euo pipefail
-          python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4 fastapi==0.115.12 httpx==0.28.1
+          python -m pip install --disable-pip-version-check -r apps/demand-research/requirements-ci.txt
           cd apps/demand-research
           python -m py_compile github_temp_bundle.py test_github_temp_bundle.py test_backup_queue_sqlite.py target_account_archive.py target_account_bundle.py verified_bundle_reader.py target_account_enrichment.py target_account_viewer.py target_archive_api.py backup_queue.py backup_bridge_poller.py sealed_credentials.py test_sealed_credentials.py test_backup_queue.py test_target_account_archive.py test_target_account_bundle.py test_account_append_only.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py gateway.py
           node --check target_archive_client.js
@@ -119,14 +122,46 @@ jobs:
           node --check auto_archive_view.js
           node --check account_watch.js
           python -m pytest -q test_archive_nonblocking.py test_target_account_archive.py test_target_account_bundle.py test_account_append_only.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py test_backup_queue.py test_backup_queue_sqlite.py test_github_temp_bundle.py test_sealed_credentials.py test_demand_archive.py test_gateway.py
-          python -m pip install --disable-pip-version-check playwright==1.56.0
-          python -m playwright install --with-deps chromium webkit
+
+  # Two independently isolated browser suites run at the same time as the
+  # unit/SHA/security checks. Both are REQUIRED; no test is skipped.
+  browser-tests:
+    name: browser-tests (Chromium and WebKit)
+    if: github.event_name == 'pull_request'
+    concurrency:
+      group: intersection-target-browser-${{ github.head_ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-24.04
+    # Official signed/version-pinned Microsoft image includes Chromium,
+    # WebKit and system libraries. Avoid downloading them on every PR.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble@sha256:a7f6cf3ae520c9d670ad956572c13747ed5abdbba5123a01526f873ed1662528
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
+    timeout-minutes: 11
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research
+          persist-credentials: false
+      - name: Install pinned browser dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check -r apps/demand-research/requirements-ci.txt
+          python -m playwright --version
+      - name: Run independent Chromium + WebKit archive flows
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
           python test_account_archive_browser.py
           python test_target_archive_button_browser.py
+          python test_auto_archive_view_browser.py
           python test_watch_migration_browser.py
           python test_archive_tab_browser.py
           python test_tab_reload_browser.py
-          python test_auto_archive_view_browser.py
 
   private-account-history:
     if: github.event_name != 'pull_request'

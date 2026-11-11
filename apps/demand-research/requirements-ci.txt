@@ -1,0 +1,7 @@
+# CI-only pinned dependencies. Browser binaries remain installed by Playwright
+# on GitHub-hosted runners; never cache large browser downloads as pip wheels.
+pytest==8.4.2
+cryptography==46.0.4
+fastapi==0.115.12
+httpx==0.28.1
+playwright==1.56.0
