@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-09",
+  "updatedAt": "2026-11-11",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -2964,9 +2964,9 @@
       "id": "DIE-04",
       "priority": "P0",
       "title": "전투 주사위 개수·눈·점수·결과 정렬",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-11-01 전투 주사위 원본 면과 원본 점수 숫자(0-7) 적용. 8/9 숫자 미추출; 2026-11-01 1167.obs frames 8 and 9 visually reviewed as original large 8/9 numerals; all 0..9 exist (25 source frames total). Browser source provenance now labels 0..9 as visually checked and preloads 1223 D4 sprite frames to prevent cold-first-roll blanks. Original 3D physics/timing still unresolved.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-11-01 전투 주사위 원본 면과 원본 점수 숫자(0-7) 적용. 8/9 숫자 미추출; 2026-11-01 1167.obs frames 8 and 9 visually reviewed as original large 8/9 numerals; all 0..9 exist (25 source frames total). Browser source provenance now labels 0..9 as visually checked and preloads 1223 D4 sprite frames to prevent cold-first-roll blanks. Original 3D physics/timing still unresolved. | 2026-11-11: DIE-04 narrow acceptance: original OBS 1171 face 1–6 and OBS 1167 numeral 0–9 in real battle; actual dynamic attacker/defender die count and scores agree with live party rule calculations in PR #987 (Chromium browser workflow #42951964237 SUCCESS). Public Pages beta.72 deployment source SHA b2e9ed88c15a18e96501e020fe1956b515e516cd verified; core combat rendering of game.js (21668-char showBattleScene-through-combat section), dice-native-battle-dice.css, dice-fall.js and original/OBS/ui/manifest.js are byte-identical between public commit and current main. Latest beta.73 full Pages deployment is separately pending, not claimed. Original D4/D6 3D bodies/kinematics remain DIE-01/02 P0 open.",
       "acceptance": [
         "가변 주사위 개수·각 면 1–6값/합계가 게임 판정과 일치하고 원본형 배열이 화면 밖으로 잘리지 않음"
       ],
@@ -2975,11 +2975,20 @@
         "dice-native-battle-dice.css",
         "tests/dice-native-battle-dice.cjs",
         "apps/4leaf/rog/original/OBS/ui/manifest.js",
-        "apps/4leaf/rog/tests/actor-direction-attack-score.cjs"
+        "apps/4leaf/rog/tests/actor-direction-attack-score.cjs",
+        "https://github.com/koith/browser-app-lab/pull/987",
+        "https://github.com/koith/browser-app-lab/actions/runs/42951964237",
+        "https://github.com/koith/browser-app-lab/actions/runs/42951960336",
+        "https://koith.github.io/browser-app-lab/gallery-deployment.json"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-01",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-ARCHIVED-OBS-2D-FACES/SCORES; VERIFIED-LIVE-BROWSER-RULE-CALC; VERIFIED-PUBLIC-TASK-SCOPED-SOURCE-EQUIVALENCE; ORIGINAL-3D-UNVERIFIED",
+      "lastReviewed": "2026-11-11",
+      "verifiedAcceptance": {
+        "sourceComparison": "2004 battle.jpg original pip/score reference, source Dice/OBS.pak 1171.obs faces 1–6 by real pip counts, and 1167.obs original numerals 0–9 (SHA-backed 2D frames). The unextracted 2002/2004 3D dice mesh/physics are tracked separately by DIE-01/DIE-02, not claimed here.",
+        "implementation": "apps/4leaf/rog/game.js genuine showBattleScene/combat dice arrays and totals, apps/4leaf/rog/dice-native-battle-dice.css, dice-fall.js and original/OBS/ui/manifest.js. Audited comparison public b2e9ed88 vs post-#987 main: CSS blob b64c1f2c, fall blob f4fac518, OBS manifest blob c0c8726b identical; 21,668-character game.js showBattleScene-through-combat segment byte-identical.",
+        "runtimeTest": "PR #987 merged commit d5f8e077; real Chromium browser world-and-chat job in GitHub Actions run #42951964237 SUCCESS. apps/4leaf/rog/tests/dice-native-battle-dice.cjs checks actual original 1171 face, 46x49 desktop and 23x25 mobile, source score count and true attacker/defender rolled values + party bonuses; result dialog click returns to playable board.",
+        "deployment": "Public live GitHub Pages gallery-deployment.json was fetched and identifies published source b2e9ed88c15a18e96501e020fe1956b515e516cd (beta.72/PWA v159), with native Pages workflow #42951960336 SUCCESS; the DIE-04 runtime implementation on that published source is audited byte-equivalent to PR #987-tested main as detailed above. This is task-scoped feature deployment evidence ONLY; latest beta.73/PWA v160 app rollout is still unverified and not claimed."
+      },
       "dependencies": [
         "BTL-02",
         "DIE-02"
@@ -9516,6 +9525,16 @@
         "CHT-02"
       ],
       "details": "VERIFIED 2026-11-09: #911 merged 8221eb60dc9c9ca668fcb6e705e6ee87f9d82e75 with 97 original CHR and all 3760 original PNG published pixel SHA evidence committed (existing #908/#910 full public QA); #920 merged ada42772da2301d48c6696268814b2e67178414e after 23 CI success/1 skipped/0 failure and all four genuine real-click WorldMap→channel→room→READY→first native roll Chromium desktop/mobile, WebKit mobile, and service-worker-controlled returning mobile journeys PASS; #932 merged 3566e3c69627f8f9e6c8b996b437c9de8164e355 after 28 CI success/1 skipped/0 failure. #932 true mobile Playwright script failure injection recovered after one reload with real ChatTown click; persistent failure showed bounded Korean retry, no infinite reload; chat and WebRTC inaccurate static labels corrected. Postmerge source test 42605265374 PASS; public release and ChatRoom/WebRTC/screen source QA on latest common descendant main 95ed043ca1cdac257b60a23fc2f9775067bc470f success, e.g. 42607624944 ChatRoom, 42607624973 WebRTC, 42607625172 original stats. Does NOT establish historical original 2004 exact scene/animation/3D dice fidelity or physical iPhone Safari/PWA PASS. Retain 60 task states 13 done/43 in_progress/4 todo."
+    },
+    {
+      "seq": 447,
+      "date": "2026-11-11",
+      "type": "STATUS_CHANGED",
+      "taskId": "DIE-04",
+      "from": "in_progress",
+      "to": "done",
+      "details": "DIE-04 original 2D battle dice eye count/score narrowly accepted: real browser PR #987, original OBS 1171/1167 sources, and public Pages beta.72 task-scoped exact runtime code equivalence; historical 3D model/physics remains DIE-01/02 open.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/42951964237"
     }
   ],
   "restorationPriority": {
