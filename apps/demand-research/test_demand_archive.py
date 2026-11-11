@@ -1110,6 +1110,8 @@ def test_public_warnings_are_not_private_or_takedown(monkeypatch):
     assert job.sensitive_labels([{"val":"porn"}]) is False
     assert job.sensitive_labels([{"val":"!hide"}]) is True
     assert job.sensitive_labels([{"val":"!takedown"}]) is True
+    assert job.sensitive_labels([{"val":"csam"}]) is True
+    assert job.sensitive_labels([{"val":"graphic-media"}]) is True
 
     mastodon_public={
         "visibility":"public","sensitive":True,
