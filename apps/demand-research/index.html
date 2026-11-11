@@ -1456,8 +1456,17 @@ function isAutomatedTrendDigest(post){
   return /Trending Tags\s*\(Beta\)/i.test(text)||
          /(?:BlueSky|Bluesky)\s+trending\s+hashtags/i.test(text);
 }
+// Public account identifiers explicitly reported for exclusion by the app
+// operator. Exact DID match only: never infer other linked/alternate accounts.
+// This affects presentation/ranking, not the original immutable archive bytes.
+const OPERATOR_EXCLUDED_AD_ACTORS=new Set([
+  "did:plc:kqwzwtujwjh5lmss6erzpaid",
+  "did:plc:uhvj2kaf4z3ovdyvzks3ui2v"
+]);
 function suspectedAd(post){
-  return (post.adEvidence?.score||0)>=4||isAutomatedTrendDigest(post);
+  return (post.platform==="bluesky"&&
+          OPERATOR_EXCLUDED_AD_ACTORS.has(String(post.authorDid||"")))||
+         (post.adEvidence?.score||0)>=4||isAutomatedTrendDigest(post);
 }
 
 function matchesText(p){return !needle||p.text.toLowerCase().includes(needle)}
