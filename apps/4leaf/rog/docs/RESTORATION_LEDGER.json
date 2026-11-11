@@ -2583,9 +2583,9 @@
       "id": "ACT-02",
       "priority": "P0",
       "title": "OBS 행 X좌표·원점 인코딩 완전 해독",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 64종의 색/팔레트 픽셀은 원본이지만 일부 horizontal scanline X 위치를 중앙 추정으로 복원함 | 구현 목표: 일부 프레임 raw 4byte 헤더의 run origin을 실제 클라이언트/SPR 640-stride와 교차 검증; 2026-10-20 IMG.pak roll.spr에 이미 검증된 640-video-buffer RLE 패킷 형식(2byte runCount/initialOffset/skip, 4*n+rem run size)을 OBS에도 적용해 가짜 중앙 정렬 제거. 원본 프레임의 X/Y 패킷 좌표가 실제 게임 원본 PNG로 반영됨. source-native frame originX/Y 프레임별 manifest 자동 기록. 추정 행동 구간/실루엣 방향표는 ACT-03 미완료.; 2026-10-20 PR152 source 640-stride and SHA manifest, PR153 verified source X geometry, original normal RGBA and canvas scaleY(-1) visible upright in real Chromium browser. Historical action-specific 3D pivot/facing remains unverified; do not mark full ACT-02 done.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 64종의 색/팔레트 픽셀은 원본이지만 일부 horizontal scanline X 위치를 중앙 추정으로 복원함 | 구현 목표: 일부 프레임 raw 4byte 헤더의 run origin을 실제 클라이언트/SPR 640-stride와 교차 검증; 2026-10-20 IMG.pak roll.spr에 이미 검증된 640-video-buffer RLE 패킷 형식(2byte runCount/initialOffset/skip, 4*n+rem run size)을 OBS에도 적용해 가짜 중앙 정렬 제거. 원본 프레임의 X/Y 패킷 좌표가 실제 게임 원본 PNG로 반영됨. source-native frame originX/Y 프레임별 manifest 자동 기록. 추정 행동 구간/실루엣 방향표는 ACT-03 미완료.; 2026-10-20 PR152 source 640-stride and SHA manifest, PR153 verified source X geometry, original normal RGBA and canvas scaleY(-1) visible upright in real Chromium browser. Historical action-specific 3D pivot/facing remains unverified; do not mark full ACT-02 done. | 2026-11-11 verified narrow ACT-02 archived OBS 2002 VIDEO-RLE 640-stride 2D per-frame XY: 45 original 37-frame members, 1665 SHA-backed source PNGs; 0/10/18/25 ×45=180 manifest entries independently cross-checked against actor-frame-audit.json for signed source originX/Y, dimensions, URLs and SHA, 150/180 X not equal WEB-centered -(width/2). Added full 180-byte PNG SHA test merged PR #998 (CI new gate pending; do not claim it passed); preceding original archive decode CI #41320435231 and actual playable Chromium source 640stride QA #42950959932 SUCCESS. Source manifests and real Genesis 2D actor pose code byte-identical to published Pages SHA 55a66a28. Historic EXE action/FPS/2004 MVE 3D foot/camera are NOT ACT-02 and stay ACT-03/ACT-04/BRD-01 open.",
       "acceptance": [
         "샘플 프레임 0/10/18/25의 물체 실루엣·팔/다리·원점 좌표가 원본 바이트 수식으로 일치"
       ],
@@ -2598,11 +2598,24 @@
         "https://github.com/koith/browser-app-lab/pull/153",
         "https://github.com/koith/browser-app-lab/actions/runs/39443928060",
         "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
-        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs",
+        "apps/4leaf/rog/tests/obs-native-origin-45-source-audit.cjs",
+        "apps/4leaf/rog/tests/original-actor-census.cjs",
+        "apps/4leaf/rog/original/OBS/action-full/provenance.json",
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "https://github.com/koith/browser-app-lab/pull/998",
+        "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
+        "https://github.com/koith/browser-app-lab/actions/runs/42950959932",
+        "https://github.com/koith/browser-app-lab/actions/runs/42979743455"
       ],
-      "evidenceLevel": "VERIFIED-SOURCE-X-Y-PALETTE/ALL-PNG-SHA/DIMENSIONS; HISTORICAL-EXE-ACTION-CAMERA-OPEN",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2002-OBS-NATIVE-640-STRIDE-SIGNED-XY/45-SOURCE-ACTORS/180-SAMPLED-FRAME-CROSSCHECK; VERIFIED-ARCHIVED-SOURCE-DECODE-AND-LIVE-CHROMIUM; NEW-180-PNG-CI-GATE-PENDING; HISTORIC-EXE-3D-PIVOT-UNVERIFIED",
+      "lastReviewed": "2026-11-11",
+      "verifiedAcceptance": {
+        "sourceComparison": "Original archived 2002 Dice/OBS.pak source SHA 49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514, 640-screen VIDEO RLE decode, signed per-frame originX/Y (OBS IHHhh source headers) and original member SHA-256 in action-full provenance. All 45×4 sample frames [0,10,18,25] had exact frame index/PNG URL/width/height/signed originX/originY/SHA256 agreement with an independently archived 98-card actor-frame audit; 150 of 180 real X anchors are not WEB-centered. This is original 2D packet coordinate decoding, NOT the unextracted historic 3D MVE foot pivot.",
+        "implementation": "tools/decode-original-obs-bulk.py native per-run 640-stride exact-source XY decoder; original/OBS/action-full/manifest.js + provenance.json with 45 members ×37 original indexed frames; genesis-chessman-actors.js consumes frame.originX and frame.originY+height to render genuine OBS visual coordinates. All three source/runtime blob SHAs and decoder match the successfully published 55a66a28 source. New independent 180 PNG hash/source-origin gate test merged in PR #998; do not claim its current queued CI already passed.",
+        "runtimeTest": "Source extractor Actions #41320435231 successfully verified exact archived-client SHA1 and decoded genuine original actor frames. Real Chromium board-layout Actions #42950959932 SUCCESS including 'Audit source-authentic 640-stride recovered OBS chessmen in live desktop/mobile DMP game' and native visual frame/geometry checks. Independently inspected 45 native action manifest members and 180 0/10/18/25 frame audit records for zero origin/SHA/dimension mismatches. PR #998 introduced 180 PNG SHA regression; this new CI run is queued, not misrepresented as a completed test.",
+        "deployment": "GitHub Pages native build #42979743455 SUCCESS on source SHA 55a66a28d08994060b5e9d01c8815a1020d2856e. OBS full action manifest blob 0de77833, provenance blob ec6fc50b, native actor runtime 28c587e4 and source decoder f36ecf05 match main exact Git blob SHAs; already published 2D source renderer contains accepted per-frame origin implementation. No 2004 EXE 3D camera or true action FPS is claimed."
+      },
       "dependencies": [
         "ACT-01"
       ],
@@ -9576,6 +9589,16 @@
       "to": "done",
       "details": "Narrow native 2D CHT-04 acceptance: all six 794x528 original room frames, Registry 75x141, actual two-browser instantaneous teleport in 12 room slots, remote collision sync, six genuine source expression buttons, WebKit phone QA; deployed script blobs identical. Historic EXE pixel-perfect seat anchor and foreground remain P0-CHAT/CHT-05 open.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/42950959866"
+    },
+    {
+      "seq": 450,
+      "date": "2026-11-11",
+      "type": "STATUS_CHANGED",
+      "taskId": "ACT-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "45 source OBS bodies, sample 0/10/18/25 (180 original frame origins) 0 metadata mismatches; 150 native X anchors not WEB-center; original source SHA decode CI and live Chromium 640stride game QA success; deployed sprite runtime unchanged. Historical 3D pivot/action mapping remain ACT-03/04/BRD-01, new 180-PNG CI queued.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/42950959932"
     }
   ],
   "restorationPriority": {
