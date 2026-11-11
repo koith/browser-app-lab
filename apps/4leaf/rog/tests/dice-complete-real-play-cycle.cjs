@@ -105,7 +105,7 @@ const fs=require('node:fs');
    console.log('DICE_REAL_HUMAN_AI_COMPLETE_ROUND_PASS',JSON.stringify({
     engine:engine.name(),mobile,rolls,s,elapsed:Date.now()-start}));
    // Reload and room resume must BOTH leave saved AI opponents paused.
-    // The visible in-game toggle is the sole explicit opt-in for autoplay.
+   // The visible in-game toggle is the sole explicit opt-in for autoplay.
    const oldRound=s.round;
    await page.reload({waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_LOBBY__&&window.__LEAF_WORLD__);
@@ -141,11 +141,22 @@ const fs=require('node:fs');
    await page.waitForFunction(()=>!document.querySelector('#roll-btn')?.disabled&&
     window.__ROG_TEST__?.getMatch?.()?.active===0,null,{timeout:22000});
    await press(page.locator('#roll-btn'));
-   await page.waitForFunction(prev=>{
-    const m=window.__ROG_TEST__?.getMatch?.();
-    return m?.finished||m?.round>prev&&m?.active===0;
-   },oldRound,{timeout:50000});
-   const resumed=await get();
+   // A genuinely random source DMP tile may open battle, ability, event or
+   // other user-decision dialogs. The first round already handles these.
+   // Do the same after reload: never call internal game-state shortcuts.
+   const nextRoundDeadline=Date.now()+60000;
+   let resumed=await get();
+   while(!resumed.finished&&!(resumed.round>oldRound&&resumed.active===0)&&Date.now()<nextRoundDeadline){
+    const popup=page.locator('#modal:not(.hidden)');
+    if(await popup.count()){
+     const option=page.locator('#modal-buttons button').first();
+     if(await option.isVisible()){await press(option);modalChoices++}
+    }
+    await page.waitForTimeout(100);
+    resumed=await get();
+   }
+   assert.ok(resumed.finished||(resumed.round>oldRound&&resumed.active===0),
+    'a real resumed match must resolve any original DMP choice dialog and finish another human+AI turn: '+JSON.stringify({resumed,modalChoices}));
    assert.ok(resumed.round>oldRound||resumed.finished);
    assert.deepEqual(errors,[]);
    console.log('DICE_SAVED_AI_EXPLICIT_TOGGLE_NEXT_ROUND_PASS',JSON.stringify({
