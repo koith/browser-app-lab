@@ -1,6 +1,12 @@
 name: Yui Mimmi Full Stored-Photo Gap Audit and Backfill
 on:
   workflow_dispatch:
+  # One-time restart requested on 2026-11-11: this workflow file itself is
+  # the sole push path; ordinary gallery/user data commits cannot fan-out scans.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-comprehensive-backfill.yml'
   pull_request:
     paths:
       - '.github/workflows/gallery-comprehensive-backfill.yml'
@@ -117,7 +123,7 @@ jobs:
 
   launch-safely-deduplicated-captures:
     needs: audit-both-models
-    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'push')
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
@@ -155,7 +161,7 @@ jobs:
 
   serialize-committing-source-discoveries:
     needs: audit-both-models
-    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'push')
     runs-on: ubuntu-24.04
     timeout-minutes: 260
     env:
