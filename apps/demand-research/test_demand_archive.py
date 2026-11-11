@@ -1103,8 +1103,10 @@ def test_public_warnings_are_not_private_or_takedown(monkeypatch):
                                               {"val":"nudity"}]}
     withheld={**base,"uri":base["uri"].replace("public01","hidden01"),
               "labels":[{"val":"!takedown"}]}
+    record_hidden={**base,"uri":base["uri"].replace("public01","recordhidden01"),
+        "record":{**base["record"],"labels":{"values":[{"val":"!hide"}]}}}
     monkeypatch.setattr(job,"bluesky_public_search",lambda *a:{
-        "posts":[public_warning,withheld]})
+        "posts":[public_warning,withheld,record_hidden]})
     rows=list(job.bluesky("섹트",start,now))
     assert len(rows)==1 and rows[0]["original_id"]==base["uri"]
     assert job.sensitive_labels([{"val":"porn"}]) is False
