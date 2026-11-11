@@ -15,8 +15,9 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[2]
 BASE = 'https://gallery-archive-free.gallery-9f7d03138f3f.workers.dev'
 MIN_COUNTS = {'mimmi': 4660, 'yui': 3077}
-# Before the Mimmi owner index gained 2 physical rows on 2026-11-11.
-MIMMI_PRE_INCREMENT = 'b57ecc91bb5b0053046e764335bac1e60a1e4f1a'
+# Historical public owner index from 2026-11-02 (4,658 rows), before the two
+# later 2026-11-09 additions. Previous b57ecc already held 4,660: invalid baseline.
+MIMMI_PRE_INCREMENT = 'cda1fb7946b9ff7db2d08875c26886f4a28a5f78'
 TARGETS = {('mimmi','djawa-asuna-the-maid',4), ('mimmi','djawa-asuna-the-maid',5),
            ('mimmi','mimmi-indie-sana-sopmod2-2019',1), ('yui','yuis-present33',1)}
 SCREENSHOT_ALBUMS = {('mimmi','v2ph-azur-lane-tashkent'):69,
@@ -97,7 +98,11 @@ def recent_mimmi(all_items):
     old_hashes = set(old.values())
     delta = [item for item in all_items if item[0] == 'mimmi'
              and old.get((item[1], item[2]['number'])) != item[2]['sha256']]
-    assert len(delta) >= 2, ('NEW_MIMMI_RECORDS_NOT_PRESENT', len(delta))
+    current = sum(model == 'mimmi' for model, _, _ in all_items)
+    assert current - before['physical_originals_indexed'] == 2, (
+        'MIMMI_BASELINE_COUNT_DELTA_NOT_2', current, before['physical_originals_indexed']
+    )
+    assert len(delta) == 2, ('MIMMI_EXPECTED_EXACTLY_TWO_NEW_RECORDS', len(delta))
     assert all(item[2]['sha256'] not in old_hashes for item in delta), (
         'NEW_MIMMI_ROW_REUSES_OLD_EXACT_SHA'
     )
@@ -136,7 +141,7 @@ def check(item):
 
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument('--scope',choices=('targeted','recent','all'),default='targeted')
+    parser.add_argument('--scope',choices=('targeted','recent','incident','all'),default='targeted')
     args=parser.parse_args()
     h,_=read_reliably('GET',BASE+'/api/v1/health')
     health=json.loads(h)
@@ -147,6 +152,11 @@ def main():
         items = all_items
     elif args.scope == 'recent':
         items = recent_mimmi(all_items)
+    elif args.scope == 'incident':
+        items = [item for item in all_items
+                 if item[0] == 'mimmi' and item[1] == 'djawa-rudy-the-wolf-of-midnight'
+                 and item[2]['number'] == 59]
+        assert len(items) == 1, 'RUDY_59_NOT_IN_INDEX'
     else:
         items = [
             item for item in all_items if ((item[0],item[1],item[2]['number']) in TARGETS

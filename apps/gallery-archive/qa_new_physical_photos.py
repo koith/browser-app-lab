@@ -178,10 +178,13 @@ async def run(args):
                         return im?.complete&&im.naturalWidth>=160}''',timeout=105000)
                     tab_size=await original_page.locator('img').first.evaluate('im=>[im.naturalWidth,im.naturalHeight]')
                     assert tab_size==[expected['width'],expected['height']],(aid,number,'original tab',tab_size)
-                    # Chromium already supports this attachment from the
-                    # gallery; preserve its verified path. WebKit needs the
-                    # same-origin image tab for its native download attribute.
-                    download_page=original_page if args.browser=='webkit' else page
+                    # Use the already-opened actual original image tab for
+                    # both engines.  From the gallery origin Chromium may
+                    # navigate instead of emitting a download event on a
+                    # cross-origin signed media URL; the original tab is the
+                    # exact same Worker origin as the download URL. WebKit
+                    # already proved this path with real bytes and SHA.
+                    download_page=original_page
                     await download_page.bring_to_front()
                     diagnostic={'album':aid,'number':number,'browser':args.browser,'responses':[]}
                     def attachment_response(response,item=diagnostic):
