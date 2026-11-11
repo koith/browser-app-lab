@@ -1,0 +1,26 @@
+name: Gallery Yui Exact Owner Alias Regression
+on:
+  pull_request:
+    paths:
+      - 'apps/yui-gallery/index.html'
+      - 'apps/yui-gallery/test_canonical_owner_alias.cjs'
+      - '.github/workflows/gallery-yui-owner-alias-regression.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/yui-gallery/index.html'
+      - 'apps/yui-gallery/test_canonical_owner_alias.cjs'
+      - '.github/workflows/gallery-yui-owner-alias-regression.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-owner-alias:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node apps/yui-gallery/test_canonical_owner_alias.cjs
