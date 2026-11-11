@@ -26,9 +26,16 @@ on:
           - "3"
           - "4"
   schedule:
-    # Revisit verified user-selected accounts every six hours, oldest first.
-    # Only new revisions/deltas are written; old releases are untouched.
-    - cron: "43 */6 * * *"
+    # Check one oldest verified public account each hour to bound staleness.
+    # Immutable ZIP updates are written only when new verified content exists;
+    # original releases are never edited, removed or replaced.
+    - cron: "43 * * * *"
+  # A reviewed main workflow change triggers the same SAFE scheduled path now,
+  # without waiting for a timer. No fork/PR or public client can run this job.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/intersection-target-account-bundle.yml"
 permissions:
   contents: read
 
@@ -64,7 +71,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 077
-          if [ "${{ github.event_name }}" = "schedule" ]; then
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
             timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py --scheduled
           else
             timeout --signal=TERM --kill-after=10s 1170s python target_account_bundle.py
