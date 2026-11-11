@@ -41,4 +41,13 @@ context.setData([album('v04',[{...owner('v04'),ownerAlbum:'teddy-bear97'}]),targ
 assert.equal(context.resolve('v04'),'teddy-bear97','wrong ownerAlbum must not authorize independent album');
 context.setData([exact],aliases);
 assert.equal(context.resolve('v04'),'v04','exact owner album must work without alias target');
-console.log('G05_CANONICAL_OWNER_ALIAS_REGRESSION_PASS 6/6');
+// SavedGalleryPhotoUnion may replace an owner route with a byte-identical
+// committed Pages file. The album still owns that exact SHA and must win.
+const local=(id)=>({number:1,url:'stored-albums/'+id+'/0001.jpg',sha256:sha,bytes:62786,width:512,height:776});
+context.setData([album('v04',[local('v04')]),target],aliases);
+assert.equal(context.resolve('v04'),'v04','committed exact Pages album must not be redirected to an alias');
+context.setData([album('v04',[{...local('v04'),url:'stored-albums/teddy-bear97/0011.jpg',originalAlbumId:'teddy-bear97',shaPinnedLocalCopy:true}]),target],aliases);
+assert.equal(context.resolve('v04'),'v04','SHA-pinned owner original replicated under a different physical album must stay in its exact logical album');
+context.setData([album('v04',[{...local('v04'),url:'stored-albums/other/0001.jpg'}]),target],aliases);
+assert.equal(context.resolve('v04'),'teddy-bear97','wrong unpinned physical URL must not preserve a distinct album');
+console.log('G05_CANONICAL_OWNER_ALIAS_REGRESSION_PASS 9/9');
