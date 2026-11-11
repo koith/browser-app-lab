@@ -19,6 +19,11 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+# Cancel superseded PR test runs but never cancel published main/SHA checks.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   real-waiting-room:
     runs-on: ubuntu-latest
