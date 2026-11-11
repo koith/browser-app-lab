@@ -3104,9 +3104,9 @@
       "id": "CHT-04",
       "priority": "P0",
       "title": "아바타 즉시 이동·원본 슬롯·표정·동작",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 좌석 클릭 순간이동은 구현했으나 각 좌석·아바타 투명 경계·원본 동작/감정표현 1:1 검증 미완료 | 구현 목표: 6개 실내 좌석/앞뒤 레이어에 실제 Registry 아바타 원본 크기/위치/표정/메뉴를 정확히 연결; 2026-10-19 실제 Chromium 두 브라우저 x6 원본 실내 배경, Registry 75x141 전신, 가구 원본 room3t/4t/5t, 방마다 채팅 실 2명, 원본 12슬롯 중 즉시 이동/원격 복제/좌석 충돌없음/클릭 방향전환 및 표정 스프라이트 회귀 성공. 사진 상 좌석 1:1 앵커는 추정으로 미완료.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 좌석 클릭 순간이동은 구현했으나 각 좌석·아바타 투명 경계·원본 동작/감정표현 1:1 검증 미완료 | 구현 목표: 6개 실내 좌석/앞뒤 레이어에 실제 Registry 아바타 원본 크기/위치/표정/메뉴를 정확히 연결; 2026-10-19 실제 Chromium 두 브라우저 x6 원본 실내 배경, Registry 75x141 전신, 가구 원본 room3t/4t/5t, 방마다 채팅 실 2명, 원본 12슬롯 중 즉시 이동/원격 복제/좌석 충돌없음/클릭 방향전환 및 표정 스프라이트 회귀 성공. 사진 상 좌석 1:1 앵커는 추정으로 미완료. | 2026-11-11 verified narrow CHT-04 2D interactive acceptance: actual six original 794x528 ChatRoom source rooms, 75x141 Registry sprite, 12 available room slots with click-to-seat instantaneous 0s tween, 2 independent Chromium clients and remote collision/rejoin sync; real original 196x267 source expdialogbtn expression palette and live remote facial emote, six WebKit phone room toolbar hits. Exact historical EXE seat coordinates/foreground layer pixel-for-pixel mapping remain WEB-INFERRED in P0-CHAT and CHT-05, and cannot be claimed as 2004 exact.",
       "acceptance": [
         "원본 좌석 클릭시 즉시 슬롯 교체, 좌표 보간 0회, 2인 상태에서 위치/표정/히트박스 수용"
       ],
@@ -3116,11 +3116,21 @@
         "tests/world-chat.cjs",
         "apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39214210565",
-        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs"
+        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs",
+        "apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs",
+        "apps/4leaf/rog/tests/chatroom-native-expressions.cjs",
+        "apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/42950959866",
+        "https://github.com/koith/browser-app-lab/actions/runs/42979743455"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-NATIVE-2D-CHATROOM/REGISTRY/EXPRESSIONS; REAL-TWO-CLIENT-INSTANT-SEAT/REMOTE-SYNC; NATIVE-PAGES-PUBLISHED; HISTORICAL-EXE-SEAT-COORDS-WEB-INFERRED",
+      "lastReviewed": "2026-11-11",
+      "verifiedAcceptance": {
+        "sourceComparison": "Six original 2002-2004 ChatRoom backgrounds (room0..5, all source frame 794x528), genuine Registry 75x141 full-body pixels and original ChatRoom/expdialogbtn.png 196x267 expression atlas. Archived 2004 794x528 chat.jpg and chat_ref.jpg show same room chrome; exact historic EXE seat X/Y table was never extracted and is NOT claimed identical, retained as P0-CHAT/CHT-05 open.",
+        "implementation": "Actual social-chat.js plus world-social.css, chatroom-native-expressions.js and chatroom-native-expressions.css. Four exact Git blob SHAs compared between current main and already published 55a66a28 Pages build and ALL four identical (ab1a65ab,37226716,2a1df076,0fdf9cae), with original Registry/ChatRoom background and expression textures. No synthetic occupants or fabricated historical coordinates.",
+        "runtimeTest": "GitHub Actions #42950959866 world map and social chat integration SUCCESS: Chromium steps chatroom-six-live-original-seats.cjs and chatroom-native-expressions.cjs both SUCCESS; actual two separate browser participants × all six original rooms, 12 seat slots, physically clicked teleport changing seats with transitionDuration=0s, second browser verifies moved guest and collision-free rejoin, actor flips face on click, 6 native tool actions. Expression atlas 196x267, six source Korean expression buttons, emote replicated to second real browser. WebKit mobile source ChatRoom toolbar x6 SUCCESS.",
+        "deployment": "Native Pages build #42979743455 SUCCESS for SHA 55a66a28d08994060b5e9d01c8815a1020d2856e. All four active CHT-04 implementation script/CSS Git blobs match published deployed source exactly. Independent live published chat QA #42955950046 SUCCESS (public ChatRoom evidence). Historical 1:1 original 2004 seat coordinate table and front-furniture 3D occlusion remain separate P0-CHAT and CHT-05, not represented as verified."
+      },
       "dependencies": [
         "CHT-01"
       ],
@@ -9556,6 +9566,16 @@
       "to": "done",
       "details": "Native TIS 32/32 full alpha original source pixels and upright orientation accepted in actual Chromium desktop/mobile with 0/341961 pixel clips, 13440 true pointer probes; same JS/CSS and indexed PNG Git blobs on successfully built Pages source 55a66a28. Source 3D camera/mesh stays separate OPEN.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/42950959932"
+    },
+    {
+      "seq": 449,
+      "date": "2026-11-11",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-04",
+      "from": "in_progress",
+      "to": "done",
+      "details": "Narrow native 2D CHT-04 acceptance: all six 794x528 original room frames, Registry 75x141, actual two-browser instantaneous teleport in 12 room slots, remote collision sync, six genuine source expression buttons, WebKit phone QA; deployed script blobs identical. Historic EXE pixel-perfect seat anchor and foreground remain P0-CHAT/CHT-05 open.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/42950959866"
     }
   ],
   "restorationPriority": {
