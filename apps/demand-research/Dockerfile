@@ -5,6 +5,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 ENV GOMEMLIMIT=160MiB GOGC=40 RCLONE_TRANSFERS=1 RCLONE_CHECKERS=1
 # Preserve OIDC signed index delivery and embedded AES cold-boot only.
 ENV DEMAND_ACCOUNT_INDEX_REMOTE_POLL=0
+# Serialize and bound unofficial TeraBox directory enumeration in this 512MiB instance.
+ENV DEMAND_RCLONE_SERIALIZED=1 DEMAND_RCLONE_BOUNDED_LIST=1
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl unzip && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip \
  && echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip" | sha256sum -c - \
