@@ -659,3 +659,15 @@ def test_exact_main_index_delivery_can_obtain_derived_boot_cipher_key(monkeypatc
     assert accepted.status_code==200
     assert base64.b64decode(accepted.json()["key"],validate=True)==b"k"*32
     assert gateway.INDEX_IMPORT_WORKFLOW in seen
+
+
+def test_archive_overview_default_does_not_spawn_full_terabox_inventory(monkeypatch):
+    """A read-only tab opening must not start a large rclone listing on 512MiB."""
+    monkeypatch.delenv("DEMAND_ARCHIVE_OVERVIEW_REMOTE_LIST",raising=False)
+    def forbidden_cloud(*args,**kwargs):
+        raise AssertionError("passive archive tab must not open TeraBox root")
+    monkeypatch.setattr(gateway,"CloudArchive",forbidden_cloud)
+    details=gateway._archive_inventory()
+    assert details["account_bundles_state"]=="listing_deferred_memory_guard"
+    assert details["post_journal_state"]=="listing_deferred_memory_guard"
+    assert details["account_zip_read_verified"] is None
