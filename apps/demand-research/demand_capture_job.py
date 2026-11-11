@@ -23,7 +23,7 @@ from account_index_sources import fetch_public as bluesky_public_search
 
 TERMS = ("뒷계", "섹트", "섹블", "일탈계")
 WINDOW_MINUTES = 16
-MAX_CATCHUP_MINUTES = 360  # bounded missed-schedule window; current 16m always comes first
+MAX_CATCHUP_MINUTES = 1440  # bounded 24h missed-schedule window; current 16m always comes first
 # The outer workflow sends TERM after 1,080s. Stop scheduling new records
 # earlier so encrypted buffers and aggregate SHA counters can be emitted.
 FAST_SOFT_BUDGET_SECONDS = 720

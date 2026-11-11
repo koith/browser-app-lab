@@ -15,7 +15,7 @@ import subprocess
 
 NAME = "INTERSECTION — Fast Private Public-Post Capture"
 MIN_LOOKBACK = 16
-MAX_LOOKBACK = 360
+MAX_LOOKBACK = 1440
 
 
 def parse_utc(value):
