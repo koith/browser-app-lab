@@ -22,7 +22,7 @@ const item=(status='completed',conclusion='success',sha=SHA)=>({
   id:42,head_sha:sha,head_branch:'main',status,conclusion,event:'workflow_dispatch'
 });
 async function simulate({event='push',body=ledger(),history={},pages=[item()],
-  payload,ref='refs/heads/main'}={}) {
+  payload,ref='refs/heads/main',galleryTreesEqual=false,graphQlFails=false}={}) {
   const dispatched=[],logs=[];
   const p=payload||(event==='push'
     ?{repository:{full_name:'koith/browser-app-lab'}}
@@ -30,7 +30,18 @@ async function simulate({event='push',body=ledger(),history={},pages=[item()],
     :{action:'completed',workflow_run:{
       name:'Deploy static content to Pages',head_branch:'main',
       head_repository:{full_name:'koith/browser-app-lab'},event:'push'}});
-  const github={rest:{
+  const github={
+    graphql:async query=>{
+      if(graphQlFails)throw new Error('GRAPHQL_TEMPORARY_UNAVAILABLE');
+      assert.match(query,/sourceMimmi: object/);
+      const result={};
+      for(const [i,name] of ['Mimmi','Yui','Archive'].entries()) {
+        result['source'+name]={oid:String(i+1).repeat(40)};
+        result['published'+name]={oid:String(i+1+(galleryTreesEqual?0:1)).repeat(40)};
+      }
+      return {repository:result};
+    },
+    rest:{
     issues:{get:async()=>({data:{body}})},
     git:{getRef:async()=>({data:{object:{sha:SHA}}})},
     actions:{
@@ -99,5 +110,27 @@ async function simulate({event='push',body=ledger(),history={},pages=[item()],
   r=await simulate({body:tableLedger().replace('| G-11 |','| OTHER |')});
   assert.deepEqual(r.dispatched,[],
     'missing critical global row must fail closed, not dispatch unknown work');
-  console.log('PASS: legacy 13 + current dashboard 5 table-first safe handoff cases');
+  const oldPublished='b'.repeat(40);
+  r=await simulate({pages:[item('completed','success',oldPublished)],
+                    galleryTreesEqual:true});
+  assert.deepEqual(r.dispatched,[g10],
+    'same gallery tree OIDs should unlock QA despite unrelated monorepo commits');
+  assert.ok(r.logs.some(x=>x.includes('GALLERY_PAGES_TREE_EQUIVALENT')));
+  r=await simulate({pages:[item('completed','success',oldPublished)],
+                    galleryTreesEqual:false});
+  assert.deepEqual(r.dispatched,[],
+    'changed gallery tree must require an actual new Pages deployment');
+  r=await simulate({pages:[item('completed','success',oldPublished)],
+                    galleryTreesEqual:true,graphQlFails:true});
+  assert.deepEqual(r.dispatched,[],
+    'GitHub tree identity request failure cannot imply same Pages');
+  r=await simulate({pages:[item('in_progress',null),
+                    item('completed','success',oldPublished)],galleryTreesEqual:true});
+  assert.deepEqual(r.dispatched,[],
+    'an exact-source deploy in progress must not be bypassed by old Pages');
+  r=await simulate({pages:[{...item('completed','success',oldPublished),
+                    head_branch:'dev'}],galleryTreesEqual:true});
+  assert.deepEqual(r.dispatched,[],
+    'non-main Pages success may not authorize gallery QA');
+  console.log('PASS: legacy 13 + table-first 5 + gallery-tree parity 5 handoff cases');
 })().catch(e=>{console.error(e);process.exitCode=1;});
