@@ -55,5 +55,24 @@ jobs:
           python -m playwright install --with-deps chromium webkit
       - name: Real Render LIVE Chromium + mobile WebKit first-tab and archives
         run: python apps/demand-research/test_live_render_browser.py
-      - name: Separate deployed GitHub Pages Chromium and mobile WebKit QA
+
+
+  # Do not make a broken GitHub Pages UI check hide an otherwise good
+  # production Render deployment. Parallel suites report distinct failures.
+  pages-browser:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned browser QA
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.56.0
+          python -m playwright install --with-deps chromium webkit
+      - name: Verify GitHub Pages Chromium + mobile WebKit separately
         run: python apps/demand-research/test_deployed_pages_browser.py
