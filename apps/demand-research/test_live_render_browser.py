@@ -51,6 +51,26 @@ def exercise(browser,label):
         assert "intersection-public-shell-v1-20261110" in worker.text()
         health=page.request.get(BASE+"health",timeout=35000)
         assert health.status==200 and health.json().get("alive") is True
+        if "chromium" in label:
+            # Reproduce the important user scenario: a previously opened
+            # browser must show INTERSECTION's public app shell when the
+            # sleeping free backend cannot answer a page refresh.
+            installed=page.evaluate("""async () => {
+                if (!('serviceWorker' in navigator)) return false;
+                const worker=await navigator.serviceWorker.ready;
+                return Boolean(worker.active);
+            }""")
+            assert installed,"live public-shell service worker never activated"
+            context.set_offline(True)
+            try:
+                page.reload(wait_until="domcontentloaded",timeout=35000)
+                assert page.title()=="INTERSECTION"
+                assert page.locator("#viewPosts").is_visible()
+                assert page.locator("#viewPosts").get_attribute("aria-selected")=="true"
+                print("LIVE_RENDER_CACHED_SHELL_OFFLINE_PASS",label,
+                      "offline_reload=posts","render_placeholder=no",flush=True)
+            finally:
+                context.set_offline(False)
         # Source hosts can reject browser CORS requests without breaking UI.
         # Report those separately, but require no local JavaScript crashes.
         blocked=[e for e in errors if "due to access control checks" in e]
