@@ -136,6 +136,14 @@ jobs:
       group: intersection-target-browser-${{ github.head_ref }}-${{ matrix.suite }}
       cancel-in-progress: true
     runs-on: ubuntu-24.04
+    # Official signed/version-pinned Microsoft image includes Chromium,
+    # WebKit and system libraries. Avoid downloading them on every PR.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble@sha256:a7f6cf3ae520c9d670ad956572c13747ed5abdbba5123a01526f873ed1662528
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 11
     steps:
       - uses: actions/checkout@v4
@@ -143,16 +151,11 @@ jobs:
           sparse-checkout: |
             apps/demand-research
           persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: apps/demand-research/requirements-ci.txt
       - name: Install pinned browser dependencies
         run: |
           set -euo pipefail
           python -m pip install --disable-pip-version-check -r apps/demand-research/requirements-ci.txt
-          python -m playwright install --with-deps chromium webkit
+          python -m playwright --version
       - name: Run independent Chromium + WebKit archive flows
         working-directory: apps/demand-research
         run: |
