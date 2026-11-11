@@ -40,6 +40,12 @@ ALLOWED_MEDIA = (
 # Public self-labels/content warnings are not access restrictions. Exclude only
 # provider-hide/takedown evidence; do not defeat provider access controls.
 RESTRICTED_LABELS = {"!hide", "!takedown", "csam", "graphic-media", "gore", "self-harm"}
+# Exact PUBLIC Bluesky DIDs reported by the operator as unwanted campaigns.
+# This source filter never deletes prior archives or affects explicit backups.
+OPERATOR_EXCLUDED_AD_ACTORS = frozenset({
+    "did:plc:kqwzwtujwjh5lmss6erzpaid",
+    "did:plc:uhvj2kaf4z3ovdyvzks3ui2v",
+})
 MIMES_LIMITS = {"image/jpeg": MAX_IMAGE, "image/png": MAX_IMAGE,
                 "image/webp": MAX_IMAGE, "image/avif": MAX_IMAGE,
                 "video/mp4": MAX_VIDEO, "video/webm": MAX_VIDEO,
@@ -107,6 +113,7 @@ def bluesky(term, start, end):
             record_values=(record_labels.get("values") if isinstance(record_labels,dict)
                            else None)
             if (not match or match.group(1) != author.get("did")
+                    or match.group(1) in OPERATOR_EXCLUDED_AD_ACTORS
                     or sensitive_labels(item.get("labels"))
                     or sensitive_labels(author.get("labels"))
                     or sensitive_labels(record_values)):
