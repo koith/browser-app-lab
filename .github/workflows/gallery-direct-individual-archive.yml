@@ -1,7 +1,13 @@
 name: Gallery Direct Individual Photo Collection and Verified Storage
 on:
   workflow_dispatch:
-  # Source collection paused by user (2026-11-04); no scheduled scans.
+  # Single explicitly user-requested restart on this workflow file's main merge.
+  # Ordinary photo/index pushes and schedules cannot launch new collectors.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-direct-individual-archive.yml'
+  # Source collection was paused on 2026-11-04; no scheduled scans.
   pull_request:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
@@ -124,7 +130,7 @@ jobs:
           python apps/mimmi-gallery/cloud/test_cover_cache.py
   collect-store-readback:
     needs: offline-regressions
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.GALLERY_COLLECTION_ENABLED == 'true'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && (vars.GALLERY_COLLECTION_ENABLED == 'true' || github.event_name == 'push')
     runs-on: ubuntu-24.04
     timeout-minutes: 110
     permissions:
