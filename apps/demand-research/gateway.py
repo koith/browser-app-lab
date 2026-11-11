@@ -794,11 +794,13 @@ _archive_probe={"at":0.0,"value":None}
 _archive_probe_lock=asyncio.Lock()
 
 def _archive_inventory():
-    # Fast root inventory only: the prior implementation synchronously ran
-    # full per-post replay and 17MB+ ZIP SHA readback on every UI diagnostic,
-    # timing out at 85 s even though the storage credential was valid.
-    # Object existence is never misrepresented as remote SHA verification.
-    root=CloudArchive(REMOTE)
+    # A free 512MiB Render instance must NEVER enumerate the entire TeraBox
+    # root merely to paint a status label. Even a shallow rclone lsf can load
+    # many remote items and trigger OOM while multiple browser tabs reload.
+    # Actual verified posts and account ZIPs remain browsable via their own
+    # authenticated API. This diagnostic listing is opt-in only.
+    # Object existence is never represented as remote SHA verification.
+    remote_list=os.getenv("DEMAND_ARCHIVE_OVERVIEW_REMOTE_LIST","0")=="1"
     result={"automated_posts":None,"post_journal_candidates":None,
             "account_zip_candidates":None,"account_zip_read_verified":None,
             "account_registry_count":None,
@@ -810,6 +812,12 @@ def _archive_inventory():
     if cached is not None:
         result["automated_posts"]=len(cached)
         result["automated_posts_state"]="cached_verified"
+    if not remote_list:
+        result["post_journal_state"]="listing_deferred_memory_guard"
+        result["account_bundles_state"]="listing_deferred_memory_guard"
+        result["account_registry_state"]="listing_deferred_memory_guard"
+        return result
+    root=CloudArchive(REMOTE)
     try:
         raw=root.command(["lsf",root.remote,"--files-only",
                           "--retries","1"],timeout=28)
