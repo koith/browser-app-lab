@@ -18,7 +18,7 @@ import account_index
 # public api.bsky.app search endpoint is available. Try both official hosts.
 APIS=("https://api.bsky.app/xrpc/app.bsky.feed.searchPosts",
       "https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts")
-TERMS=("뒷계","섹트","일탈계")
+TERMS=("뒷계","섹트","섹블","일탈계")
 HOUR=3600
 DAY=86400
 LOOKBACK_DAYS=365

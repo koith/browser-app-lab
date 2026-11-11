@@ -159,3 +159,26 @@ def test_queued_five_minute_capture_is_not_silently_replaced():
     assert 'cancel-in-progress: false' in concurrency
     assert "pull_request" in concurrency and "production" in concurrency
     assert 'cron: "3-58/5 * * * *"' in workflow
+
+
+def test_24_original_budget_rotates_fresh_public_provider_and_tag_priority():
+    """A fixed first keyword previously starved later sources every 5 minutes."""
+    fresh=("bluesky","mastodon","misskey","lemmy")
+    old=tuple(x+"-catchup" for x in fresh)
+    starts=[]
+    for slot in range(len(fresh)*len(job.TERMS)):
+        items=job.ordered_capture_batches(
+            fresh+old,job.TERMS,slot*300,fresh_count=4,rotate=True)
+        assert len(items)==len(fresh)*len(job.TERMS)*2
+        # All live/fresh terms MUST precede older backfill queries.
+        assert all(g in fresh for g,_ in items[:16])
+        assert all(g in old for g,_ in items[16:])
+        assert sorted((g,ts[0]) for g,ts in items[:16])==sorted(
+            (g,t) for g in fresh for t in job.TERMS)
+        starts.append((items[0][0],items[0][1][0]))
+    assert len(set(starts))==16,"all four providers and four tags get a first slot"
+
+    old_behavior=job.ordered_capture_batches(
+        fresh,job.TERMS,1000,fresh_count=4,rotate=False)
+    assert old_behavior[0]==("bluesky",(job.TERMS[0],))
+    assert old_behavior[1]==("bluesky",(job.TERMS[1],))

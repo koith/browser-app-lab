@@ -91,3 +91,26 @@ def test_public_search_falls_back_to_second_official_host(monkeypatch):
     assert len(called)==2
     assert called[0].startswith("https://api.bsky.app/")
     assert called[1].startswith("https://public.api.bsky.app/")
+
+
+def test_all_four_requested_hashtags_searchable_and_ingestible(monkeypatch):
+    """Regression: 섹블 used to fail fast with invalid bounded search window."""
+    import json
+    from demand_capture_job import TERMS as CAPTURE_TERMS
+    assert sources.TERMS == CAPTURE_TERMS
+    class Response:
+        def __enter__(self):return self
+        def __exit__(self,*args):return False
+        def read(self,n):return b'{"posts":[]}'
+    requests=[]
+    def official(request,timeout):
+        requests.append(request.full_url)
+        return Response()
+    monkeypatch.setattr(sources,"urlopen",official)
+    for term in CAPTURE_TERMS:
+        assert sources.fetch_public(term,NOW-900,NOW)=={"posts":[]}
+        assert len(sources.validated_rows(fake_result(term,NOW-900,NOW),
+                                          term,NOW-900,NOW))==1
+    assert len(requests)==4
+    # Only public search URLs were exercised; no real web or private account.
+    assert all(url.startswith("https://api.bsky.app/") for url in requests)

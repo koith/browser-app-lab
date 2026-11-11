@@ -37,7 +37,15 @@ ALLOWED_MEDIA = (
     "static.mstdn.social", "media.mstdn.social", "media.twingyeo.kr",
     "planet.moe", "twingyeo.kr", "media.planet.moe",
 )
-SENSITIVE_LABELS = {"!hide", "!takedown", "porn", "sexual", "nudity", "graphic-media"}
+# Public self-labels/content warnings are not access restrictions. Exclude only
+# provider-hide/takedown evidence; do not defeat provider access controls.
+RESTRICTED_LABELS = {"!hide", "!takedown", "csam", "graphic-media", "gore", "self-harm"}
+# Exact PUBLIC Bluesky DIDs reported by the operator as unwanted campaigns.
+# This source filter never deletes prior archives or affects explicit backups.
+OPERATOR_EXCLUDED_AD_ACTORS = frozenset({
+    "did:plc:kqwzwtujwjh5lmss6erzpaid",
+    "did:plc:uhvj2kaf4z3ovdyvzks3ui2v",
+})
 MIMES_LIMITS = {"image/jpeg": MAX_IMAGE, "image/png": MAX_IMAGE,
                 "image/webp": MAX_IMAGE, "image/avif": MAX_IMAGE,
                 "video/mp4": MAX_VIDEO, "video/webm": MAX_VIDEO,
@@ -77,7 +85,7 @@ def sensitive_labels(labels):
     if not isinstance(labels, list):
         return False
     return any(isinstance(x, dict) and
-               str(x.get("val", "")).lower() in SENSITIVE_LABELS for x in labels)
+               str(x.get("val", "")).lower() in RESTRICTED_LABELS for x in labels)
 
 
 def normalized(platform, original_id, url, text, published, media_urls=(), profile_url=''):
@@ -101,9 +109,14 @@ def bluesky(term, start, end):
             uri = item.get("uri") or ""
             match = re.fullmatch(
                 r"at://(did:(?:plc|web):[A-Za-z0-9.:-]{6,150})/app\.bsky\.feed\.post/([A-Za-z0-9]+)", uri)
+            record_labels=rec.get("labels")
+            record_values=(record_labels.get("values") if isinstance(record_labels,dict)
+                           else None)
             if (not match or match.group(1) != author.get("did")
+                    or match.group(1) in OPERATOR_EXCLUDED_AD_ACTORS
                     or sensitive_labels(item.get("labels"))
-                    or sensitive_labels(author.get("labels"))):
+                    or sensitive_labels(author.get("labels"))
+                    or sensitive_labels(record_values)):
                 continue
             posted = at_date(rec.get("createdAt"), start, end)
             if not posted:
@@ -184,7 +197,7 @@ def mastodon(term, start, end):
         if not isinstance(data, list):
             continue
         for item in data:
-            if not isinstance(item, dict) or item.get("visibility") != "public" or item.get("sensitive"):
+            if not isinstance(item, dict) or item.get("visibility") != "public":
                 continue
             if sensitive_labels(item.get("labels")):
                 continue
@@ -214,7 +227,7 @@ def misskey(term, start, end):
         for note in data:
             if not isinstance(note, dict) or note.get("visibility") != "public":
                 continue
-            if note.get("localOnly") or note.get("cw") or note.get("sensitive"):
+            if note.get("localOnly"):
                 continue
             posted = at_date(note.get("createdAt"), start, end)
             user = note.get("user") or {}
@@ -223,7 +236,7 @@ def misskey(term, start, end):
             if not posted or not re.fullmatch(r"[A-Za-z0-9_.-]{1,70}", uid) or not re.fullmatch(r"[A-Za-z0-9_-]{5,100}", nid):
                 continue
             media = [m.get("url") for m in (note.get("files") or [])
-                     if isinstance(m, dict) and not m.get("isSensitive")]
+                     if isinstance(m, dict)]
             link = "https://" + host + "/notes/" + nid
             row = normalized("misskey", host + ":" + nid, link,
                              str(note.get("text") or ""), posted, media,
@@ -242,7 +255,7 @@ def lemmy(term, start, end):
         if not isinstance(item, dict):
             continue
         p = item.get("post") or {}
-        if p.get("nsfw") or p.get("removed") or p.get("deleted"):
+        if p.get("removed") or p.get("deleted"):
             continue
         posted = at_date(p.get("published"), start, end)
         if not posted:
@@ -385,6 +398,28 @@ def public_error_class(err):
     return "unclassified_failure"
 
 
+def ordered_capture_batches(sources,terms,now,*,fresh_count,rotate):
+    """Alternate fresh query priority between SNS/hashtags across cron slots.
+
+    The previous fixed order exhausted a 24-original offline spool on the
+    first Bluesky keyword, leaving every later SNS/keyword unvisited.
+    Every fresh query stays AHEAD of historical catchup, while each 5-minute
+    slot starts with another verified-public source/keyword. This improves
+    candidate coverage; it does not claim complete platform enumeration.
+    """
+    if not 0 <= fresh_count <= len(sources):
+        raise ValueError("invalid source stage boundary")
+    fresh=[(getter,(term,)) for getter in sources[:fresh_count] for term in terms]
+    older=[(getter,(term,)) for getter in sources[fresh_count:] for term in terms]
+    if rotate and fresh:
+        shift=(int(now)//300)%len(fresh)
+        fresh=fresh[shift:]+fresh[:shift]
+        if older:
+            shift_old=(int(now)//300)%len(older)
+            older=older[shift_old:]+older[:shift_old]
+    return fresh+older
+
+
 def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False,
         elapsed_clock=time.monotonic, max_fast_seconds=FAST_SOFT_BUDGET_SECONDS):
     started_at=elapsed_clock()
@@ -419,6 +454,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         raise ValueError("an immutable numeric run ID is required")
     start = now - WINDOW_MINUTES * 60
     sources = tuple(fetchers or (bluesky, mastodon, misskey, lemmy))
+    fresh_count=len(sources)
     lookback_minutes=WINDOW_MINUTES
     if fast_mode and spool is not None:
         # Capture recent originals FIRST. Only then backfill still-public
@@ -513,10 +549,12 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     seen_this_scan = set()
     budget_exhausted = False
     soft_time_budget_exhausted = False
-    for getter in sources:
+    for getter,ordered_terms in ordered_capture_batches(
+            sources,TERMS,now,fresh_count=fresh_count,
+            rotate=(fast_mode and fetchers is None)):
         if budget_exhausted or capture_interrupted:
             break
-        for term in TERMS:
+        for term in ordered_terms:
             if budget_exhausted or capture_interrupted:
                 break
             try:
