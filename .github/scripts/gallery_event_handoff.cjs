@@ -35,15 +35,37 @@ module.exports = async function featureHandoff({github, context, core}) {
     return log('IGNORE_OTHER_EVENT');
   }
   const issue=(await github.rest.issues.get({owner,repo,issue_number:605})).data;
+  // #605 is now a Markdown table, not the old "- [ ] **G-xx**" list.
+  // Parse only the authoritative dashboard, never historical entries or
+  // completed subtasks embedded inside the main task description.
+  const body=issue.body||'';
+  const begin='<!-- GALLERY_DASHBOARD_START -->';
+  const end='<!-- GALLERY_DASHBOARD_END -->';
+  const start=body.indexOf(begin), stop=body.indexOf(end);
+  const dashboard=start>=0&&stop>start
+    ?body.slice(start+begin.length,stop):body;
   const states=new Map();
-  for(const line of (issue.body||'').split('\n')) {
-    const m=/^- \[([ xX])\] \*\*(G-\d\d)\*\*(?:\s|$)/.exec(line);
-    if(m&&!states.has(m[2])) states.set(m[2],m[1].toLowerCase()==='x');
+  for(const line of dashboard.split('\n')) {
+    const item=/^- \[([ xX])\] \*\*(G-\d\d)\*\*(?:\s|$)/.exec(line);
+    if(item&&!states.has(item[2])) {
+      states.set(item[2],item[1].toLowerCase()==='x');
+      continue;
+    }
+    if(!line.trim().startsWith('|')) continue;
+    const cells=line.trim().split('|').slice(1,-1).map(x=>x.trim());
+    if(cells.length<4||!/^G-\d\d$/.test(cells[1])) continue;
+    // The fourth column is the global decision. E.g.
+    // "[ ] new Mimmi collection [x] two-photo proof": still NOT DONE.
+    const gate=/\[([ xX])\]/.exec(cells[3]);
+    if(gate&&!states.has(cells[1])) {
+      states.set(cells[1],gate[1].toLowerCase()==='x');
+    }
   }
   for(let i=1;i<=11;i++) {
     if(!states.has('G-'+String(i).padStart(2,'0')))
-      return log('BLOCK_INCOMPLETE_LEDGER');
+      return log('BLOCK_INCOMPLETE_LEDGER G-'+String(i).padStart(2,'0'));
   }
+  core.info('GALLERY_DASHBOARD_PARSED_DONE '+[...states].filter(([,done])=>done).length+'/11');
   const remaining=featureStages.filter(x=>!states.get(x.id));
   if(!remaining.length) return log('FEATURES_CHECKED_COLLECTION_STILL_PAUSED');
 
