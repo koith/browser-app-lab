@@ -24,8 +24,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: intersection-deployed-pages-production
+  # A new PR syntax check must not evict a pending production LIVE browser QA.
+  # Production runs are serialized; each PR gets an independent fast lane.
+  group: ${{ github.event_name == 'pull_request' && format('intersection-deployed-pages-pr-{0}', github.head_ref) || 'intersection-deployed-pages-production' }}
   cancel-in-progress: false
+  # Since May 2026 GitHub can retain up to 100 pending runs instead of
+  # silently cancelling the previous pending QA on every main push.
+  queue: max
 
 jobs:
   code-check:
