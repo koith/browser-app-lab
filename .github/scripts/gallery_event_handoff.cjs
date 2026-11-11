@@ -2,6 +2,31 @@
 
 // #605: feature-first handoff. Image discovery, crawling and TeraBox writes
 // are paused until the user explicitly reauthorizes them. No timer or chats.
+// A busy monorepo often supersedes Pages for unrelated apps. Reuse a
+// successfully published Pages revision ONLY when all gallery subtrees have
+// identical Git tree OIDs; the stronger real image/browser checks stay intact.
+// One lightweight GraphQL query returns six tree identities (no file download).
+async function samePublishedGalleryTrees(github,owner,repo,source,published) {
+  if(!/^[a-f0-9]{40}$/.test(source)||!/^[a-f0-9]{40}$/.test(published))
+    return false;
+  const dirs=[
+    ['Mimmi','apps/mimmi-gallery'],
+    ['Yui','apps/yui-gallery'],
+    ['Archive','apps/gallery-archive']
+  ];
+  const fields=dirs.flatMap(([label,path])=>[
+    'source'+label+': object(expression:"'+source+':'+path+'") { ... on Tree { oid } }',
+    'published'+label+': object(expression:"'+published+':'+path+'") { ... on Tree { oid } }'
+  ]).join('\n');
+  const query='query($owner:String!,$repo:String!){repository(owner:$owner,name:$repo){'+fields+'}}';
+  const result=await github.graphql(query,{owner,repo});
+  const trees=result?.repository;
+  return !!trees && dirs.every(([label])=>{
+    const a=trees['source'+label]?.oid, b=trees['published'+label]?.oid;
+    return typeof a==='string'&&/^[a-f0-9]{40}$/.test(a)&&a===b;
+  });
+}
+
 module.exports = async function featureHandoff({github, context, core}) {
   const owner=context.repo.owner, repo=context.repo.repo;
   const full=owner+'/'+repo, ev=context.eventName, p=context.payload;
@@ -78,8 +103,26 @@ module.exports = async function featureHandoff({github, context, core}) {
   if(pages.some(r=>r.head_sha===sha&&
     ['queued','pending','in_progress','waiting','requested'].includes(r.status)))
     return log('WAIT_PAGES');
-  const published=pages.some(r=>r.head_sha===sha&&r.conclusion==='success');
-  if(!published) return log('WAIT_SUCCESSFUL_PAGES');
+  let published=pages.some(r=>r.head_sha===sha&&r.conclusion==='success');
+  if(!published) {
+    // Native Pages may skip/cancel intermediary commits while another app
+    // pushes. Never wait for an exact repository SHA when the deployed gallery
+    // trees are literally unchanged. Never accept only a similar version label.
+    for(const candidate of pages.filter(r=>r.conclusion==='success'&&
+        r.head_branch==='main'&&r.head_sha!==sha).slice(0,3)) {
+      try {
+        if(await samePublishedGalleryTrees(github,owner,repo,sha,candidate.head_sha)) {
+          published=true;
+          core.info('GALLERY_PAGES_TREE_EQUIVALENT '+candidate.head_sha+' '+sha);
+          break;
+        }
+      } catch(error) {
+        core.warning('GALLERY_PAGES_EQUIVALENCE_UNAVAILABLE '+error.name);
+        break; // fail closed; no invented deployed gallery equivalence
+      }
+    }
+  }
+  if(!published) return log('WAIT_SUCCESSFUL_PAGES_OR_SAME_GALLERY_TREES');
   // A verified audit at this same revision is evidence that this STAGE
   // was attempted, not that its entire G-xx issue is complete. Move to the
   // next unfinished independent feature instead of waiting for a checkbox.
