@@ -12,6 +12,7 @@ import sys
 import time
 import re
 import requests
+from urllib.parse import urljoin, urlsplit, parse_qs
 from native_qa_checkpoint import in_partition
 
 from playwright.async_api import async_playwright,Error as PlaywrightError
@@ -163,9 +164,56 @@ async def run(args):
                     await page.wait_for_function('''()=>{const im=document.querySelector('#full');
                         return im?.complete&&im.naturalWidth>=160}''',timeout=105000)
                     size=await page.locator('#full').evaluate('im=>[im.naturalWidth,im.naturalHeight]')
-                    assert size==[expected['width'],expected['height']],(aid,number,size)
+                    if size != [expected['width'], expected['height']]:
+                        # Do not hide a real wrong-photo or wrong-variant defect.
+                        # Diagnose the actual decoded image separately from the
+                        # SHA-bound owner metadata, never logging signed tokens.
+                        current_src=await page.locator('#full').get_attribute('src') or ''
+                        parsed_src=urlsplit(urljoin(report['deployed_url'],current_src))
+                        diagnosis={'album':aid,'number':number,'model':args.model,
+                            'browser':args.browser,'expected_size':[expected['width'],expected['height']],
+                            'decoded_size':size,'decoded_host':parsed_src.netloc,
+                            'decoded_path':parsed_src.path}
+                        try:
+                            response=await context.request.get(urljoin(report['deployed_url'],current_src),
+                                                              timeout=12000)
+                            if response.ok:
+                                raw=await response.body()
+                                diagnosis['actual_decoded_file_SHA_matches_expected']=(
+                                    hashlib.sha256(raw).hexdigest()==expected['sha256'])
+                                diagnosis['actual_decoded_file_bytes_matches_expected']=(
+                                    len(raw)==expected['bytes'])
+                            else:diagnosis['decoded_http_status']=response.status
+                        except Exception as error:
+                            diagnosis['independent_read_error']=type(error).__name__
+                        report['dimension_mismatch']=diagnosis
+                        print('DEPLOYED_EXACT_ORIGINAL_DIMENSION_MISMATCH',
+                              json.dumps(diagnosis,ensure_ascii=False),flush=True)
+                        raise AssertionError(('deployed exact original size mismatch',diagnosis))
                     original=await page.locator('#original').get_attribute('href')
-                    assert original and '/api/' in original,(aid,number,'not owner storage media')
+                    url=urljoin(report['deployed_url'],original or '')
+                    parsed=urlsplit(url)
+                    local_prefix=(SITE+'/'+args.model+'-gallery/stored-albums/')
+                    same_sha_static=(url.startswith(local_prefix) and
+                        parsed.query in ('',) and
+                        parsed.path.lower().endswith(('.jpg','.jpeg','.png','.webp','.avif')))
+                    signed_media=(parsed.scheme=='https' and
+                        parsed.netloc=='gallery-archive-free.gallery-9f7d03138f3f.workers.dev'
+                        and '/api/' in parsed.path)
+                    assert original and (same_sha_static or signed_media),(
+                        aid,number,'neither signed owner media nor exact local stored original')
+                    if same_sha_static:
+                        # Pages holds a byte-identical copy of the SAME work.
+                        # Accept only if an independent download matches both
+                        # the owner ledger's hash and byte count.
+                        response=await context.request.get(url,timeout=45000)
+                        assert response.ok,(aid,number,'local original HTTP',response.status)
+                        raw=await response.body()
+                        assert len(raw)==expected['bytes'] and (
+                            hashlib.sha256(raw).hexdigest()==expected['sha256']),(
+                            aid,number,'local Pages original is not byte-identical')
+                        print('DEPLOYED_LOCAL_EXACT_OWNER_ORIGINAL_PASS',args.model,aid,number,
+                              flush=True)
                     # Use the actual photo-open control. WebKit ignores the
                     # download attribute across origins and can show an image
                     # inline despite Content-Disposition. In the original tab,
@@ -193,7 +241,7 @@ async def run(args):
                                 'content_type':response.headers.get('content-type'),
                                 'attachment':response.headers.get('content-disposition','').lower().startswith('attachment;')})
                     download_page.on('response',attachment_response)
-                    download_url=original+('&' if '?' in original else '?')+'download=true'
+                    download_url=url+('&' if '?' in url else '?')+'download=true'
                     received=asyncio.get_running_loop().create_future()
                     def exact_download(download):
                         # WebKit can attribute an image-tab download to its
@@ -206,7 +254,7 @@ async def run(args):
                             a.id='qa-original-download';a.textContent='검증용 원본 저장';
                             a.style='position:fixed;top:80px;left:12px;z-index:999999';
                             a.href=url+(url.includes('?')?'&':'?')+'download=true';a.download='photo';
-                            document.body.append(a)}''',original)
+                            document.body.append(a)}''',url)
                     try:
                         await download_page.locator('#qa-original-download').click()
                         download=await asyncio.wait_for(received,timeout=105)
@@ -227,6 +275,7 @@ async def run(args):
                         'byte_identical_existing_display':expected['byte_identical_existing_display'],
                         'thumbnail_decoded':True,'lightbox_decoded':True,'original_tab_decoded':True,
                         'download_event_page':'original_tab' if download.page==original_page else 'gallery',
+                        'storage_route':'static_same_SHA' if same_sha_static else 'signed_owner',
                         'download_sha256_verified':True})
                     print('DEPLOYED_EXACT_ORIGINAL_PASS',args.model,args.browser,aid,number,flush=True)
                     if len(report['photos'])==1:await page.screenshot(path=str(args.out.with_suffix('.png')))
