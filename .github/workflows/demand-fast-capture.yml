@@ -38,6 +38,9 @@ concurrency:
   # Both schedule + main push share the same production serialization group.
   group: intersection-fast-private-capture-${{ github.event_name == 'pull_request' && github.head_ref || 'production' }}
   cancel-in-progress: false
+  # Avoid dropping queued five-minute source checks when GitHub runners are busy.
+  # Production remains serialized; PR regressions use a separate group.
+  queue: max
 jobs:
   offline-tests:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
