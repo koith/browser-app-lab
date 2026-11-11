@@ -126,14 +126,10 @@ jobs:
   # Two independently isolated browser suites run at the same time as the
   # unit/SHA/security checks. Both are REQUIRED; no test is skipped.
   browser-tests:
-    name: browser-tests (${{ matrix.suite }})
+    name: browser-tests (Chromium and WebKit)
     if: github.event_name == 'pull_request'
-    strategy:
-      fail-fast: false
-      matrix:
-        suite: [archive, navigation]
     concurrency:
-      group: intersection-target-browser-${{ github.head_ref }}-${{ matrix.suite }}
+      group: intersection-target-browser-${{ github.head_ref }}
       cancel-in-progress: true
     runs-on: ubuntu-24.04
     # Official signed/version-pinned Microsoft image includes Chromium,
@@ -160,15 +156,12 @@ jobs:
         working-directory: apps/demand-research
         run: |
           set -euo pipefail
-          if [ "${{ matrix.suite }}" = "archive" ]; then
-            python test_account_archive_browser.py
-            python test_target_archive_button_browser.py
-            python test_auto_archive_view_browser.py
-          else
-            python test_watch_migration_browser.py
-            python test_archive_tab_browser.py
-            python test_tab_reload_browser.py
-          fi
+          python test_account_archive_browser.py
+          python test_target_archive_button_browser.py
+          python test_auto_archive_view_browser.py
+          python test_watch_migration_browser.py
+          python test_archive_tab_browser.py
+          python test_tab_reload_browser.py
 
   private-account-history:
     if: github.event_name != 'pull_request'
