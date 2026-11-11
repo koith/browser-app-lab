@@ -23,6 +23,8 @@ jobs:
         engine: [chromium, webkit]
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/4leaf/rog
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
