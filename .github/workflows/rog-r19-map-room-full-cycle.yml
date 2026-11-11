@@ -1,0 +1,83 @@
+name: 4LEAF actual ChatTown map-room entry and Dice complete turn-to-result QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/lobby-ui.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/chat-map-click-room-entry.cjs'
+      - 'apps/4leaf/rog/tests/dice-complete-real-play-cycle.cjs'
+      - '.github/workflows/rog-r19-map-room-full-cycle.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/lobby-ui.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/chat-map-click-room-entry.cjs'
+      - 'apps/4leaf/rog/tests/dice-complete-real-play-cycle.cjs'
+      - '.github/workflows/rog-r19-map-room-full-cycle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-map-and-game:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - browser: chromium
+            mobile: '0'
+            cycle: round
+          - browser: webkit
+            mobile: '1'
+            cycle: round
+          - browser: chromium
+            mobile: '0'
+            cycle: finish
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install actual browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Serve exactly the checked-out source commit
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-r19-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-r19-server.log
+          exit 1
+      - name: Click real original ChatTown district and spatial room map
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chat-map-click-room-entry.cjs
+      - name: Play real 2002 DMP dice from lobby to finished round or real victory
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+          FOURLEAF_CYCLE_MODE: ${{ matrix.cycle }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/dice-complete-real-play-cycle.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-r19-map-game-${{ matrix.browser }}-${{ matrix.mobile }}-${{ matrix.cycle }}
+          path: |
+            leaf-chat-map-primary-*.png
+            leaf-dice-full-game-result-*.png
+            leaf-dice-cycle-fail-*.png
+          if-no-files-found: ignore
+          retention-days: 14
