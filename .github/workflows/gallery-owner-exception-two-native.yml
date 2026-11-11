@@ -1,0 +1,90 @@
+name: Gallery Owner Two Incident Exact Native Image QA
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_new_physical_photos.py'
+      - '.github/workflows/gallery-owner-exception-two-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/qa_new_physical_photos.py'
+      - '.github/workflows/gallery-owner-exception-two-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gallery-two-incident-native-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-native-photo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {model: mimmi, album: djawa-nikke-alice, number: 187, browser: chromium}
+          - {model: mimmi, album: djawa-nikke-alice, number: 187, browser: webkit}
+          - {model: yui, album: v04, number: 1, browser: chromium}
+          - {model: yui, album: v04, number: 1, browser: webkit}
+    env:
+      ${{ matrix.model }}: ${{ matrix.model }}
+      ${{ matrix.album }}: ${{ matrix.album }}
+      ${{ matrix.number }}: ${{ matrix.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install real native browser
+        run: |
+          python -m pip install --quiet 'playwright==1.58.0' requests
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Prepare exact immutable owner-ledger photo selection
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, requests
+          from pathlib import Path
+          model, album, number = os.environ['${{ matrix.model }}'], os.environ['${{ matrix.album }}'], int(os.environ['${{ matrix.number }}'])
+          ref='e1f6f4f5bff07c2b8eaa80e93bb4f5425dd1a6aa'
+          url=f'https://raw.githubusercontent.com/koith/browser-app-lab/{ref}/apps/{model}-gallery/owner-index.json'
+          response=requests.get(url,timeout=(12,45));response.raise_for_status()
+          inventory=response.json()
+          assert inventory['model']==model and inventory['storage']=='sha-verified-owner-metadata-only'
+          matched=[{'id':a['id'],'images':[p for p in a['images'] if p['number']==number]}
+                   for a in inventory['albums'] if a['id']==album]
+          assert len(matched)==1 and len(matched[0]['images'])==1, ('EXACT_OWNER_PHOTO_MISSING',model,album,number)
+          chosen={'selection':{'mimmi':[],'yui':[]}}
+          chosen['selection'][model]=matched
+          path=Path(os.environ['RUNNER_TEMP'])/'target-photo.json'
+          path.write_text(json.dumps(chosen),encoding='utf-8')
+          print('EXACT_OWNER_INCIDENT_SELECTED',model,album,number)
+          PY
+      - name: Open real deployed card, full-size original and download SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/qa_new_physical_photos.py \
+            --model ${{ matrix.model }} --browser ${{ matrix.browser }} \
+            --selection "$RUNNER_TEMP/target-photo.json" \
+            --out "$RUNNER_TEMP/incident-qa-${{ matrix.model }}-${{ matrix.browser }}.json"
+      - name: Report honest dimension and storage route outcomes
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          for p in Path(os.environ['RUNNER_TEMP']).glob('incident-qa-*.json'):
+            d=json.loads(p.read_text())
+            print('INCIDENT_REAL_NATIVE_RESULT',json.dumps({
+              'model':d['model'],'browser':d['browser'],
+              'photos':[{'album':x['album'],'number':x['number'],
+                         'storage_route':x.get('storage_route'),
+                         'download_sha256_verified':x.get('download_sha256_verified')}
+                        for x in d.get('photos',[])],
+              'dimension_mismatch':d.get('dimension_mismatch'),
+              'failed_download':d.get('failed_download'),
+              'success':d.get('success',False)},ensure_ascii=False))
+          PY
