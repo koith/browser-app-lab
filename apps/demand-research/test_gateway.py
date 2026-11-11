@@ -671,3 +671,25 @@ def test_archive_overview_default_does_not_spawn_full_terabox_inventory(monkeypa
     assert details["account_bundles_state"]=="listing_deferred_memory_guard"
     assert details["post_journal_state"]=="listing_deferred_memory_guard"
     assert details["account_zip_read_verified"] is None
+
+
+def test_low_memory_render_skips_background_remote_index_refresh(monkeypatch):
+    """An idle page status call must not launch remote scanning on a 512MiB app."""
+    import asyncio
+    monkeypatch.setenv("DEMAND_ACCOUNT_INDEX_REMOTE_POLL","0")
+    monkeypatch.setattr(gateway,"_index_task",None)
+    monkeypatch.setattr(gateway,"_index_lazy_task",None)
+    monkeypatch.setattr(gateway,"_index_lazy_attempt_at",0.0)
+    monkeypatch.setattr(gateway,"_index_synced_at",0.0)
+    monkeypatch.setattr(asyncio,"create_task",
+        lambda *args,**kwargs: (_ for _ in ()).throw(
+            AssertionError("automatic network scan must not be created")))
+    assert gateway.remote_index_poll_enabled() is False
+    assert gateway.schedule_lazy_account_index_refresh() is False
+
+
+def test_index_poll_feature_flag_retains_default_for_non_render(monkeypatch):
+    monkeypatch.delenv("DEMAND_ACCOUNT_INDEX_REMOTE_POLL",raising=False)
+    assert gateway.remote_index_poll_enabled() is True
+    monkeypatch.setenv("DEMAND_ACCOUNT_INDEX_REMOTE_POLL","1")
+    assert gateway.remote_index_poll_enabled() is True

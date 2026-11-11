@@ -335,6 +335,13 @@ _index_lazy_task=None
 _index_lazy_attempt_at=0.0
 INDEX_LAZY_RETRY_SECONDS=180
 
+def remote_index_poll_enabled():
+    """The signed OIDC bridge updates this index; free Render must not run
+    concurrent remote index fetches on every wake-up or account status poll.
+    Explicit owner-triggered /api/accounts/sync is unaffected.
+    """
+    return os.getenv("DEMAND_ACCOUNT_INDEX_REMOTE_POLL","1")=="1"
+
 def _read_verified_account_index_snapshot(previous_sha=""):
     """Restore immutable SHA-checked account index without scanning every post.
 
@@ -424,11 +431,12 @@ async def start_account_index():
             print("ACCOUNT_INDEX_ENCRYPTED_BOOT_UNAVAILABLE",
                   type(error).__name__,flush=True)
         while True:
-            try:
-                await refresh_account_index()
-            except Exception as error:
-                print("ACCOUNT_INDEX_SNAPSHOT_REFRESH_FAILED",
-                      type(error).__name__,flush=True)
+            if remote_index_poll_enabled():
+                try:
+                    await refresh_account_index()
+                except Exception as error:
+                    print("ACCOUNT_INDEX_SNAPSHOT_REFRESH_FAILED",
+                          type(error).__name__,flush=True)
             # Collection, journal reconciliation and group scanning already
             # run in the hourly GitHub job that publishes the immutable DB.
             # Never do heavy full-catalog scans in the 512MiB web gateway.
@@ -616,6 +624,8 @@ def schedule_lazy_account_index_refresh():
     Never schedule a second copy while periodic/previous refresh is alive.
     """
     global _index_lazy_task,_index_lazy_attempt_at
+    if not remote_index_poll_enabled():
+        return False
     now=time.monotonic()
     if (_index_task is not None and not _index_task.done()
             or _index_lazy_task is not None and not _index_lazy_task.done()
