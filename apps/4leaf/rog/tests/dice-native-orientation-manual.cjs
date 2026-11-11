@@ -11,8 +11,11 @@ const {chromium}=require('playwright');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__);
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
+  assert.equal(await page.locator('#game-mode').inputValue(),'ai',
+   'solo play defaults to AI so one person can start and complete a game');
+  await page.locator('#game-mode').selectOption('hotseat');
   assert.equal(await page.locator('#game-mode').inputValue(),'hotseat',
-   'manual, not AI auto-turn, is the default gameplay mode');
+   'manual hotseat mode stays available when the user explicitly selects it');
   assert.equal(await page.locator('#bot-count').inputValue(),'1',
    'default has exactly one additional human slot');
   await page.locator('#map-select').selectOption('4LEAF');
