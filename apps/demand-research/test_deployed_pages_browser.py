@@ -74,10 +74,6 @@ def inspect_browser(browser_type, label, width, height):
                   parsed.path=="/" and route.request.method=="GET"):
                 # Intercept only the destination HTML; no private API/cookie or
                 # real archive data is used by the Pages UI acceptance test.
-                query=parse_qs(parsed.query)
-                assert query.get("tab")==["accounts"]
-                assert query.get("archive_platform")==["bluesky"]
-                assert query.get("archive_account")==["synthetic-qa.bsky.social"]
                 route.fulfill(status=200,content_type="text/html",
                               body='<html><body><p id="gateway-opened">Simulated private gateway</p></body></html>')
             else:
@@ -124,11 +120,17 @@ def inspect_browser(browser_type, label, width, height):
             "https://bsky.app/profile/synthetic-qa.bsky.social")
         assert page.locator("#targetArchiveSubmit").is_enabled()
         page.locator("#targetArchiveSubmit").click()
-        page.wait_for_url(
-            "https://intersection-originals-free.onrender.com/?tab=accounts"
-            "&archive_platform=bluesky&archive_account=synthetic-qa.bsky.social",
-            timeout=15000)
-        assert page.locator("#gateway-opened").is_visible()
+        page.locator("#gateway-opened").wait_for(state="visible",timeout=15000)
+        navigated=urlparse(page.url)
+        query=parse_qs(navigated.query)
+        assert (navigated.scheme,navigated.hostname,navigated.path)==(
+            "https","intersection-originals-free.onrender.com","/")
+        assert query.get("tab")==["accounts"]
+        assert query.get("archive_platform")==["bluesky"]
+        # The live client preserves full validated public profile URLs
+        # rather than discarding the original user-selected source.
+        assert query.get("archive_account")==[
+            "https://bsky.app/profile/synthetic-qa.bsky.social"]
         print("PAGES_BACKUP_REDIRECT_ENABLED_PASS:",label,
               "empty_input_feedback=PASS private_gateway=SIMULATED"
               " same_tab_navigation=PASS no_credential_or_POST=PASS")
