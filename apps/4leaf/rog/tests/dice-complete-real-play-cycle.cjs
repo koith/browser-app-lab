@@ -104,8 +104,8 @@ const fs=require('node:fs');
    assert.deepEqual(errors,[]);
    console.log('DICE_REAL_HUMAN_AI_COMPLETE_ROUND_PASS',JSON.stringify({
     engine:engine.name(),mobile,rolls,s,elapsed:Date.now()-start}));
-   // A normal reload intentionally pauses autonomous bot action. A human
-   // clicking the saved ROOM in the real lobby explicitly resumes the AI.
+   // Reload and room resume must BOTH leave saved AI opponents paused.
+    // The visible in-game toggle is the sole explicit opt-in for autoplay.
    const oldRound=s.round;
    await page.reload({waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_LOBBY__&&window.__LEAF_WORLD__);
@@ -127,9 +127,17 @@ const fs=require('node:fs');
    await press(saved);
    await page.locator('#game:not(.hidden)').waitFor();
    afterReload=await get();
-   assert.equal(afterReload.botAutoplay,true,
-    'actual user resume action must re-enable real computer opponent');
-   const resumeStart=Date.now();
+   assert.equal(afterReload.botAutoplay,false,
+     'entering saved room must not restart computer rolls without distinct consent');
+    const aiToggle=page.locator('#dice-ai-autoplay-toggle');
+    assert.equal(await aiToggle.getAttribute('aria-pressed'),'false',
+     'restored AI opponent is visibly paused');
+    await press(aiToggle);
+    afterReload=await get();
+    assert.equal(afterReload.botAutoplay,true,
+     'explicit user toggle click resumes computer opponent autonomy');
+    assert.equal(await aiToggle.getAttribute('aria-pressed'),'true');
+    const resumeStart=Date.now();
    await page.waitForFunction(()=>!document.querySelector('#roll-btn')?.disabled&&
     window.__ROG_TEST__?.getMatch?.()?.active===0,null,{timeout:22000});
    await press(page.locator('#roll-btn'));
@@ -140,7 +148,7 @@ const fs=require('node:fs');
    const resumed=await get();
    assert.ok(resumed.round>oldRound||resumed.finished);
    assert.deepEqual(errors,[]);
-   console.log('DICE_SAVED_AI_CLICK_RESUME_AUTO_NEXT_ROUND_PASS',JSON.stringify({
+   console.log('DICE_SAVED_AI_EXPLICIT_TOGGLE_NEXT_ROUND_PASS',JSON.stringify({
     engine:engine.name(),mobile,oldRound,resumedRound:resumed.round,
     botAutoplay:resumed.botAutoplay,elapsed:Date.now()-resumeStart}));
   }else{
