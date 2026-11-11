@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-11-02T11:00:23.053243+00:00",
+  "generated_at": "2026-11-11T02:45:19.861301+00:00",
   "source": "only public DJAWA-linked Gumroad promo HTML, never paid files",
   "summary": {
     "albums_checked": 32,
-    "promotional_image_urls_verified": 46,
-    "fresh_promotional_urls_verified": 21,
+    "promotional_image_urls_verified": 50,
+    "fresh_promotional_urls_verified": 25,
     "private_cloud_saved": 0
   },
   "albums": [
@@ -125,8 +125,8 @@
           "url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
           "width": 1005,
           "height": 1005,
-          "bytes": 15916,
-          "sha256": "1319f4609cc2fdfab01d8be79a91fa8275d72f3ac21db880177fbcd7f1ad56c9",
+          "bytes": 169265,
+          "sha256": "be1f13845b7eab8e1e57ce10f60fe11d3cdaaaba7a081864251bc6f248ce7584",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -134,8 +134,8 @@
           "url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
           "width": 1005,
           "height": 1005,
-          "bytes": 169265,
-          "sha256": "be1f13845b7eab8e1e57ce10f60fe11d3cdaaaba7a081864251bc6f248ce7584",
+          "bytes": 15916,
+          "sha256": "1319f4609cc2fdfab01d8be79a91fa8275d72f3ac21db880177fbcd7f1ad56c9",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -227,8 +227,8 @@
           "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
           "width": 1005,
           "height": 1005,
-          "bytes": 14258,
-          "sha256": "d88b4f975f485bb6fb5f3a90d1b9769f429db1d40d4951ef6b93351cf33f7448",
+          "bytes": 152457,
+          "sha256": "1438f697cad2a9a2f807ab4981fab44fe4a9726eaeabec8caf63fd43fa7ec8cc",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -236,8 +236,8 @@
           "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
           "width": 1005,
           "height": 1005,
-          "bytes": 152457,
-          "sha256": "1438f697cad2a9a2f807ab4981fab44fe4a9726eaeabec8caf63fd43fa7ec8cc",
+          "bytes": 14258,
+          "sha256": "d88b4f975f485bb6fb5f3a90d1b9769f429db1d40d4951ef6b93351cf33f7448",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -329,8 +329,8 @@
           "url": "https://public-files.gumroad.com/bx4j2gnbx3y3a262dxjwef3bfm8k",
           "width": 1005,
           "height": 1005,
-          "bytes": 14786,
-          "sha256": "2b2381f191d38b2f9453bec3933dafdee8bbfdedf22bb8800aa5d07afeeac6a3",
+          "bytes": 154181,
+          "sha256": "1573ae8267d83fb4c9163c74bcfddc3072929f1726679a2ca791e6b5603cb0ca",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -338,8 +338,8 @@
           "url": "https://public-files.gumroad.com/bx4j2gnbx3y3a262dxjwef3bfm8k",
           "width": 1005,
           "height": 1005,
-          "bytes": 154181,
-          "sha256": "1573ae8267d83fb4c9163c74bcfddc3072929f1726679a2ca791e6b5603cb0ca",
+          "bytes": 14786,
+          "sha256": "2b2381f191d38b2f9453bec3933dafdee8bbfdedf22bb8800aa5d07afeeac6a3",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -431,8 +431,8 @@
           "url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
           "width": 1005,
           "height": 1005,
-          "bytes": 8508,
-          "sha256": "c0a37864a8c89a9625ef1f9ddde637d8d45d71220ed5e6f9b4074e88c1e4bfec",
+          "bytes": 78051,
+          "sha256": "2b621e54d1012c6b6a5ed34a163c165e89e0487c9fbaa19c4090c5a96a982850",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -440,8 +440,8 @@
           "url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
           "width": 1005,
           "height": 1005,
-          "bytes": 78051,
-          "sha256": "2b621e54d1012c6b6a5ed34a163c165e89e0487c9fbaa19c4090c5a96a982850",
+          "bytes": 8508,
+          "sha256": "c0a37864a8c89a9625ef1f9ddde637d8d45d71220ed5e6f9b4074e88c1e4bfec",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -499,8 +499,8 @@
           "url": "https://public-files.gumroad.com/9b951rv11cubq2e46g78cfc4k7nf",
           "width": 1005,
           "height": 1005,
-          "bytes": 39042,
-          "sha256": "2bd9b6c2735855e3f9d75c1761dfd5bafea283ce1b12eec2c46d7c765892e567",
+          "bytes": 279545,
+          "sha256": "686aa1e1d7c5a9ebe9c5efc45fc67230e6dc4204ae1b34494804d283ba2a86c1",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -508,8 +508,8 @@
           "url": "https://public-files.gumroad.com/9b951rv11cubq2e46g78cfc4k7nf",
           "width": 1005,
           "height": 1005,
-          "bytes": 279545,
-          "sha256": "686aa1e1d7c5a9ebe9c5efc45fc67230e6dc4204ae1b34494804d283ba2a86c1",
+          "bytes": 39042,
+          "sha256": "2bd9b6c2735855e3f9d75c1761dfd5bafea283ce1b12eec2c46d7c765892e567",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -635,8 +635,8 @@
           "url": "https://public-files.gumroad.com/tphm1pli1wf43s3eyu063vpovz27",
           "width": 1005,
           "height": 1005,
-          "bytes": 17232,
-          "sha256": "a16bff569edb1913e4f3e5867716029cc08da675d58ad9449b90d27f99a45a72",
+          "bytes": 173710,
+          "sha256": "3668ec9231ac874d0b6ede4b033db7f1450c7d37a4c396e2a66c824d4cd8a69c",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -644,8 +644,8 @@
           "url": "https://public-files.gumroad.com/tphm1pli1wf43s3eyu063vpovz27",
           "width": 1005,
           "height": 1005,
-          "bytes": 173710,
-          "sha256": "3668ec9231ac874d0b6ede4b033db7f1450c7d37a4c396e2a66c824d4cd8a69c",
+          "bytes": 17232,
+          "sha256": "a16bff569edb1913e4f3e5867716029cc08da675d58ad9449b90d27f99a45a72",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -722,13 +722,21 @@
       "product_urls": [
         "https://djawaphoto.gumroad.com/l/bxafrmimmi"
       ],
-      "samples": [],
-      "images": [],
-      "fresh_http_verified": 0,
-      "errors": [
-        "HTTPError"
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/gpf5zad0d3zi8vr7v6gg191g1cl6",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 1007371,
+          "sha256": "ef5716194637e0c76d0bad406cb0951c672d41cc01665e2fcc5d91afe197d7fc",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
       ],
-      "status": "no_public_promo_photo"
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
     },
     {
       "id": "djawa-your-fishe-gawr-gura",
@@ -738,13 +746,21 @@
       "product_urls": [
         "https://djawaphoto.gumroad.com/l/heupqjmimmi"
       ],
-      "samples": [],
-      "images": [],
-      "fresh_http_verified": 0,
-      "errors": [
-        "HTTPError"
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/inxoo2q402apsm94lah0uap3pzu3",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 240102,
+          "sha256": "64a547ad8e6b80213363917fd2f0819717ac2ff3ecb283a172600e81e1b0f7cd",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
       ],
-      "status": "no_public_promo_photo"
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
     },
     {
       "id": "djawa-your-panties",
@@ -754,13 +770,21 @@
       "product_urls": [
         "https://djawaphoto.gumroad.com/l/zqbqjitzmimmi"
       ],
-      "samples": [],
-      "images": [],
-      "fresh_http_verified": 0,
-      "errors": [
-        "HTTPError"
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/2imiarm0rz17belds2qepyyxupd0",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 155868,
+          "sha256": "48a2e1be386cc0b37c19ff42ce7f32b5ec2f5c4b99777f8c2f7bd63177e5da7d",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
       ],
-      "status": "no_public_promo_photo"
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
     },
     {
       "id": "djawa-nikke-alice",
@@ -904,6 +928,15 @@
           "url": "https://public-files.gumroad.com/0cdvgvzc6wi7y4oi5agmh99xmt4l",
           "width": 1005,
           "height": 1005,
+          "bytes": 206921,
+          "sha256": "d4be66ed232416f38b9d082dc1e3e5bbaf993fa580e8a964e1980959025b772c",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://public-files.gumroad.com/0cdvgvzc6wi7y4oi5agmh99xmt4l",
+          "width": 1005,
+          "height": 1005,
           "bytes": 21744,
           "sha256": "7da030738da9db990bc27cfc28a941137ecc2c8b7863d1e887efdb7c02d4e663",
           "source_kind": "public_publisher_promo",
@@ -912,10 +945,8 @@
         }
       ],
       "images": [],
-      "fresh_http_verified": 0,
-      "errors": [
-        "HTTPError"
-      ],
+      "fresh_http_verified": 1,
+      "errors": [],
       "status": "verified_public_promo_only"
     },
     {
