@@ -21,8 +21,11 @@ jobs:
       fail-fast: false
       matrix:
         engine: [chromium, webkit]
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/4leaf
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -35,17 +38,24 @@ jobs:
           nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/r14-http.log 2>&1 &
           for i in $(seq 1 30); do curl -fsSI http://127.0.0.1:8765/index.html >/dev/null && exit 0; sleep 1; done; exit 1
       - name: R14-B original D6 roll on the battle podium (800x600, iPhone portrait/landscape)
+        if: ${{ matrix.shard == 0 }}
         env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
         run: node apps/4leaf/rog/tests/r14-battle-original-roll.cjs
       - name: R14-D six-room chat concurrency, duplicate names, burst, EXIT, room switch, reconnect
+        if: ${{ matrix.shard == 0 }}
         env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
         run: node apps/4leaf/rog/tests/r14-chatroom-concurrency.cjs
       - name: R14-A all 98 CHR cards, every board state and both duel sides
-        env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
+        env:
+          FOURLEAF_BROWSER: '${{ matrix.engine }}'
+          LEAF_AUDIT_SHARD_COUNT: '4'
+          LEAF_AUDIT_SHARD_INDEX: '${{ matrix.shard }}'
         run: node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
       - name: R13/R14-C all 26 maps and 1920 cells
+        if: ${{ matrix.shard == 0 }}
         env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
         run: node apps/4leaf/rog/tests/dmp-26-map-render-audit.cjs
       - name: Battle podium geometry (feet, own bodies, unobstructed, result -> board)
+        if: ${{ matrix.shard == 0 }}
         env: {FOURLEAF_BROWSER: '${{ matrix.engine }}'}
         run: node apps/4leaf/rog/tests/battle-podium-geometry-audit.cjs
