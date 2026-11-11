@@ -387,6 +387,28 @@ def public_error_class(err):
     return "unclassified_failure"
 
 
+def ordered_capture_batches(sources,terms,now,*,fresh_count,rotate):
+    """Alternate fresh query priority between SNS/hashtags across cron slots.
+
+    The previous fixed order exhausted a 24-original offline spool on the
+    first Bluesky keyword, leaving every later SNS/keyword unvisited.
+    Every fresh query stays AHEAD of historical catchup, while each 5-minute
+    slot starts with another verified-public source/keyword. This improves
+    candidate coverage; it does not claim complete platform enumeration.
+    """
+    if not 0 <= fresh_count <= len(sources):
+        raise ValueError("invalid source stage boundary")
+    fresh=[(getter,(term,)) for getter in sources[:fresh_count] for term in terms]
+    older=[(getter,(term,)) for getter in sources[fresh_count:] for term in terms]
+    if rotate and fresh:
+        shift=(int(now)//300)%len(fresh)
+        fresh=fresh[shift:]+fresh[:shift]
+        if older:
+            shift_old=(int(now)//300)%len(older)
+            older=older[shift_old:]+older[:shift_old]
+    return fresh+older
+
+
 def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False,
         elapsed_clock=time.monotonic, max_fast_seconds=FAST_SOFT_BUDGET_SECONDS):
     started_at=elapsed_clock()
@@ -421,6 +443,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         raise ValueError("an immutable numeric run ID is required")
     start = now - WINDOW_MINUTES * 60
     sources = tuple(fetchers or (bluesky, mastodon, misskey, lemmy))
+    fresh_count=len(sources)
     lookback_minutes=WINDOW_MINUTES
     if fast_mode and spool is not None:
         # Capture recent originals FIRST. Only then backfill still-public
@@ -515,10 +538,12 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     seen_this_scan = set()
     budget_exhausted = False
     soft_time_budget_exhausted = False
-    for getter in sources:
+    for getter,ordered_terms in ordered_capture_batches(
+            sources,TERMS,now,fresh_count=fresh_count,
+            rotate=(fast_mode and fetchers is None)):
         if budget_exhausted or capture_interrupted:
             break
-        for term in TERMS:
+        for term in ordered_terms:
             if budget_exhausted or capture_interrupted:
                 break
             try:
