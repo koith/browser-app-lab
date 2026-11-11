@@ -2388,9 +2388,9 @@
       "id": "BRD-02",
       "priority": "P0",
       "title": "실제 TIS 알파·윗면·하단 림 상태 복원",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.; 2026-10-20 원본 145x97 TIS 투명 픽셀에서 game.js tile click은 거부해도 독립적 부모 DMP 탐색기가 bubbled click을 받아 잘못된 정보창·카메라 이동을 유발하는 문제 확인. source-alpha.hitPoint를 부모에서도 검증해 원본 투명 픽셀은 두 계층 모두 무시. 키보드 Enter/Space 접근성 및 실제 불투명 타일 검사는 유지. 원작 MVE 메시 투영은 미완료.; 2026-10-20 PR154 squash main@d443cb5380ad51bfe9a1be1d2637cac48bb6bac8 original TIS source pixel hit applies BOTH target game tile and bubbling DMP terrain inspector. Previously source-transparent click could open fake DMP inspector and pan camera despite tile rejection. Fixed actual code, same-origin HTTP physical-browser/synthetic-ghost regression, keyboard Enter/Space preserved. Original MVE camera 3D geometry still open.; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.; 2026-10-20 원본 145x97 TIS 투명 픽셀에서 game.js tile click은 거부해도 독립적 부모 DMP 탐색기가 bubbled click을 받아 잘못된 정보창·카메라 이동을 유발하는 문제 확인. source-alpha.hitPoint를 부모에서도 검증해 원본 투명 픽셀은 두 계층 모두 무시. 키보드 Enter/Space 접근성 및 실제 불투명 타일 검사는 유지. 원작 MVE 메시 투영은 미완료.; 2026-10-20 PR154 squash main@d443cb5380ad51bfe9a1be1d2637cac48bb6bac8 original TIS source pixel hit applies BOTH target game tile and bubbling DMP terrain inspector. Previously source-transparent click could open fake DMP inspector and pan camera despite tile rejection. Fixed actual code, same-origin HTTP physical-browser/synthetic-ghost regression, keyboard Enter/Space preserved. Original MVE camera 3D geometry still open.; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown. | 2026-11-11 scope-limited BRD-02 accepted: all 32 original TIS.pak-derived 145×97 source PNGs preserved with correct upright live 2D orientation; 32/32 alpha polygon clips preserve 341,961 opaque original pixels with 0 clipped, 0 synthetic overlays, 104 live 4LEAF board cells, 13,440 physical pointer probes incl mobile. Source archive/manifest and six TIS renderer CSS/JS Git blobs unchanged in successfully published native Pages SHA 55a66a28. 3D MVE mesh, historical camera projection and lighting are NOT BRD-02 and remain BRD-01/BRD-03/M04 open.",
       "acceptance": [
         "32개 원본 타일의 원화 픽셀/방향/원본 클립 경계 유지, 타일 외곽 잘림·상하 오인 0건"
       ],
@@ -2414,11 +2414,22 @@
         "https://github.com/koith/browser-app-lab/pull/167",
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977",
         "https://github.com/koith/browser-app-lab/actions/runs/39562851108",
-        "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405"
+        "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405",
+        "apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs",
+        "apps/4leaf/rog/tests/dice-native-tis-alpha.cjs",
+        "apps/4leaf/rog/tests/dice-native-orientation-manual.cjs",
+        "apps/4leaf/rog/original/Tiles/manifest.json",
+        "https://github.com/koith/browser-app-lab/actions/runs/42950959932",
+        "https://github.com/koith/browser-app-lab/actions/runs/42979743455"
       ],
-      "evidenceLevel": "VERIFIED-SOURCE-TIS-ALPHA-EVENT-PROPAGATION/REAL-BROWSER-DMP/26-MAP-REGRESSION; HISTORICAL-MVE-CAMERA-OPEN",
-      "lastReviewed": "2026-10-21",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-ALL-32-ORIGINAL-TIS-2D-PIXELS/ALPHA/ORIENTATION; REAL-CHROMIUM-DESKTOP-MOBILE-POINTER; NATIVE-PAGES-DEPLOYED; ORIGINAL-3D-PERSPECTIVE-UNVERIFIED",
+      "lastReviewed": "2026-11-11",
+      "verifiedAcceptance": {
+        "sourceComparison": "Source 2002 Dice/TIS.pak-derived original/Tiles/manifest.json enumerates precisely 32 indexed PNGs 145×97 with original palette/art. Historical 2004 references establish source image upright display; all native source pixels are kept, no fabricated per-cell number overlays. This does not certify unextracted historical MVE 3D perspective (separate BRD-01/03).",
+        "implementation": "apps/4leaf/rog/original/Tiles/{0000..0046 indexed source PNGs,art.js,manifest.json}; apps/4leaf/rog/dice-native-tis-alpha.js, dice-native-tis-clean.css, dice-native-tis-depth.css, dice-native-tis-orientation.css, dice-source-tile-pitch.css, original-tiles.css. Exact same 34 source directory blobs plus six renderer CSS/JS blob SHAs compared against published source 55a66a28; all identical.",
+        "runtimeTest": "GitHub Actions #42950959932 board-layout Chromium real browser 9 related checks SUCCESS. Test dice-native-tis-full-outline: 32/32 source sprites, 341961 real opaque pixels, 0 source pixels clipped, 0 synthetic overlays, 104 genuine DMP board cells. Alpha-pointer test: 13440 real source pixel probes, 0 errors, physical desktop, zoom and mobile pointer hits. Source orientation test asserts correct Y-mirrored upright original 145x97 art.",
+        "deployment": "Native GitHub Pages 'pages build and deployment' #42979743455 SUCCESS for source commit 55a66a28d08994060b5e9d01c8815a1020d2856e, whose original/Tiles 32 PNGs + metadata and all six TIS runtime CSS/JS files were independently confirmed to have identical Git blobs to current main. Only BRD-02 2D platform-source pixel/alpha/orientation is accepted; same-state source 3D projection remains explicitly open."
+      },
       "dependencies": [
         "BRD-01"
       ],
@@ -9535,6 +9546,16 @@
       "to": "done",
       "details": "DIE-04 original 2D battle dice eye count/score narrowly accepted: real browser PR #987, original OBS 1171/1167 sources, and public Pages beta.72 task-scoped exact runtime code equivalence; historical 3D model/physics remains DIE-01/02 open.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/42951964237"
+    },
+    {
+      "seq": 448,
+      "date": "2026-11-11",
+      "type": "STATUS_CHANGED",
+      "taskId": "BRD-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "Native TIS 32/32 full alpha original source pixels and upright orientation accepted in actual Chromium desktop/mobile with 0/341961 pixel clips, 13440 true pointer probes; same JS/CSS and indexed PNG Git blobs on successfully built Pages source 55a66a28. Source 3D camera/mesh stays separate OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/42950959932"
     }
   ],
   "restorationPriority": {
