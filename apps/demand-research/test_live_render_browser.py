@@ -51,10 +51,23 @@ def exercise(browser,label):
         assert "intersection-public-shell-v1-20261110" in worker.text()
         health=page.request.get(BASE+"health",timeout=35000)
         assert health.status==200 and health.json().get("alive") is True
-        assert not errors,errors
+        # Source hosts can reject browser CORS requests without breaking UI.
+        # Report those separately, but require no local JavaScript crashes.
+        blocked=[e for e in errors if "due to access control checks" in e]
+        fatal=[e for e in errors if "due to access control checks" not in e]
+        assert not fatal,fatal
+        # Archive-overview once spawned an expensive remote root listing and
+        # crashed the 512MiB instance tens of seconds after navigating.
+        if "webkit" in label:
+            page.wait_for_timeout(42000)
+            subsequent=page.request.get(BASE+"health",timeout=35000)
+            assert subsequent.status==200 and subsequent.json().get("alive") is True
+            accounts=page.request.get(BASE+"api/accounts/status",timeout=35000)
+            assert accounts.status==200,accounts.status
         print("LIVE_INTERSECTION_RENDER_BROWSER_PASS",label,
               "reload_first_tab=yes","deep_link=yes","two_modes=yes",
-              "worker_http_200=yes","health=yes",flush=True)
+              "worker_http_200=yes","health=yes",
+              "external_access_denials="+str(len(blocked)),flush=True)
     finally:
         context.close()
 
