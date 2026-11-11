@@ -7,17 +7,19 @@ export function pagesGateway({endpoint,model,fetcher=fetch,now=()=>Date.now()}) 
   if(api.protocol!=='https:'||api.username||api.password||api.port||api.pathname!=='/'||
      api.search||api.hash||!['mimmi','yui'].includes(model))throw Error('INVALID_GALLERY_GATEWAY');
   const cache=new Map(),inflight=new Map();
-  // A temporary network/CORS transport failure can occur even when the
-  // Worker is reachable. One bounded retry is safe for this idempotent
-  // signing lookup; HTTP 401/403, invalid signatures and malformed responses
-  // must NEVER retry or fall through to an unrelated photo source.
+  // Browser networking may briefly reject a valid CORS request as a
+  // TypeError while the free Worker route is propagating. Reissue ONLY this
+  // idempotent signing request with bounded delay (0ms / 180ms / 650ms).
+  // Never retry HTTP 401/403, non-network exceptions, invalid signatures,
+  // or fall back to another host, model, photo, or SHA.
   async function fetchSignOnceMoreOnNetworkFailure(init) {
     const target=new URL('/api/v1/sign',api);
-    try {
-      return await fetcher(target,init);
-    } catch(error) {
-      if(!(error instanceof TypeError))throw error;
-      return fetcher(target,init);
+    for(let attempt=0;attempt<3;attempt++){
+      try{return await fetcher(target,init)}
+      catch(error){
+        if(!(error instanceof TypeError)||attempt===2)throw error;
+        await new Promise(resolve=>setTimeout(resolve,attempt===0?180:650));
+      }
     }
   }
   async function sign(photo,variant) {
