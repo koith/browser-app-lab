@@ -259,9 +259,9 @@ document.addEventListener('visibilitychange',retryCommittedVisibleOnFocus);
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),localPreviewIndex=new Map(),detailRenderGeneration=0;
 function canonicalId(id){
  // An alias is a catalog grouping hint, not permission to replace a distinct
- // SHA-verified owner album. Preserve the exact album when it has originals.
+ // SHA-verified physical album. Preserve exact photos, including same-SHA Pages copies.
  const exact=stored.find(a=>a.id===id);
- if(exact&&validImages(exact).some(p=>p.ownerAlbum===id))return id;
+ if(exact&&validImages(exact).length)return id;
  const original=id,seen=new Set();
  while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}
  return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original;
