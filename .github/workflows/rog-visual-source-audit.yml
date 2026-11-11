@@ -35,6 +35,8 @@ jobs:
     timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/4leaf/rog
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
