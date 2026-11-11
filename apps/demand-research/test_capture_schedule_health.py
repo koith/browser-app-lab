@@ -1,5 +1,6 @@
 """Synthetic schedule gap telemetry and bounded fresh-first catch-up QA."""
 from datetime import datetime,timezone,timedelta
+from pathlib import Path
 
 import pytest
 from capture_schedule_health import NAME,assess
@@ -134,3 +135,18 @@ def test_time_budget_with_no_cloud_failure_must_not_claim_capture_complete(
     assert out[0]["saved_verified"]==0
 
 
+
+
+def test_queued_five_minute_capture_is_not_silently_replaced():
+    """The queue preserves scheduled runs that GitHub did create.
+
+    GitHub may still drop schedule events before job creation; never assert a
+    strict five-minute SLA merely because YAML contains a cron expression.
+    """
+    workflow=(Path(__file__).resolve().parents[2]/
+              ".github/workflows/demand-fast-capture.yml").read_text()
+    concurrency=workflow.split("concurrency:",1)[1].split("\njobs:",1)[0]
+    assert 'queue: max' in concurrency
+    assert 'cancel-in-progress: false' in concurrency
+    assert "pull_request" in concurrency and "production" in concurrency
+    assert 'cron: "3-58/5 * * * *"' in workflow
