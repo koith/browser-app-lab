@@ -104,6 +104,33 @@ const cells={
   await page.waitForFunction(()=>document.querySelector('#battle-visual')?.dataset.battleDice!=='rolling',null,{timeout:8000});
   const state=await readDice();
   verify(state,[46,49]);
+  // DIE-04 acceptance: tie every VISIBLE original OBS face count and score
+  // to the exact real party statistics used by combat(), not a screenshot,
+  // fabricated test dice array, or a visual-only pixel assertion.
+  const sourceOracle=await page.evaluate(()=>{
+   const game=window.__ROG_TEST__,match=game.getMatch();
+   const [attacker,defender]=match.players;
+   const atk=game.teamStats(attacker.team),def=game.teamStats(defender.team);
+   return {
+    attackerDice:Math.max(1,atk.atk),
+    defenderDice:Math.max(1,def.def),
+    attackerBonus:(atk.int||0)+game.elementalModifier(attacker.team,'attack')+
+     game.elementalModifier(attacker.team,'support'),
+    defenderBonus:(def.int||0)+game.elementalModifier(defender.team,'defense')+
+     game.elementalModifier(defender.team,'support'),
+    effects:[attacker.effects,defender.effects]
+   };
+  });
+  assert.equal(state.sides[0].values.length,sourceOracle.attackerDice,
+   'attacker renders precisely the number of real original-rule attack dice');
+  assert.equal(state.sides[1].values.length,sourceOracle.defenderDice,
+   'defender renders precisely the number of real original-rule defense dice');
+  for(let sideIndex=0;sideIndex<2;sideIndex++){
+   const side=state.sides[sideIndex];
+   const bonus=sideIndex===0?sourceOracle.attackerBonus:sourceOracle.defenderBonus;
+   assert.equal(Number(side.total),side.values.reduce((sum,d)=>sum+d.eye,bonus),
+    'original OBS score digits must equal the same actual dice eyes + party modifiers');
+  }
   assert.deepEqual(await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(x=>x.position)),
    originalPositions,'displaying actual dice never moves real chessmen');
   await page.screenshot({path:'leaf-source-reference-physical-battle-dice.png'});
@@ -117,7 +144,7 @@ const cells={
    'real game is still playable after closing the actual battle result');
   assert.deepEqual(errors,[],'native reconstructed die faces generate no browser errors');
   console.log('NATIVE INDEPENDENT BATTLE PIP DICE PASS',JSON.stringify({
-   desktop:state.sides.map(s=>({score:s.total,dice:s.values.map(x=>x.eye)})),
+   sourceOracle,desktop:state.sides.map(s=>({score:s.total,dice:s.values.map(x=>x.eye)})),
    mobile:mobile.sides.map(s=>({score:s.total,dice:s.values.map(x=>x.eye)}))
   }));
  }finally{await browser.close()}
