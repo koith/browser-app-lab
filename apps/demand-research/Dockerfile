@@ -4,6 +4,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 # subprocess inherits these Go GC/checker limits, while FastAPI stays responsive.
 # A denied/heavy source read must fail as a request, not OOM-kill the webapp.
 ENV GOMEMLIMIT=160MiB GOGC=40 RCLONE_TRANSFERS=1 RCLONE_CHECKERS=1
+# Zero automatic cloud-index reads inside free web worker. OIDC hourly bridge
+# + pinned AES snapshot restore still refresh user data without full rclone scans.
+ENV DEMAND_ACCOUNT_INDEX_REMOTE_POLL=0
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl unzip && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip \
  && echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip" | sha256sum -c - \
