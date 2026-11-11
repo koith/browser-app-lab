@@ -73,7 +73,16 @@ function readState(sel){
   const all=await page.evaluate(()=>Object.keys(window.__LEAF_CHR_BODY_MAP__.cards).sort());
   assert.equal(all.length,98,'98 CHR cards');
   const only=process.env.LEAF_CARDS?process.env.LEAF_CARDS.split(','):null;
-  for(const card of all){
+  // Exact, disjoint four-way coverage. Every one of the 98 card indices is
+  // assigned once across the matrix; no card, state or duel side is skipped.
+  const shardCount=Number(process.env.LEAF_AUDIT_SHARD_COUNT||1);
+  const shardIndex=Number(process.env.LEAF_AUDIT_SHARD_INDEX||0);
+  assert.ok(Number.isSafeInteger(shardCount)&&shardCount>=1&&shardCount<=98,
+   'valid bounded full-audit shard count');
+  assert.ok(Number.isSafeInteger(shardIndex)&&shardIndex>=0&&shardIndex<shardCount,
+   'valid full-audit shard index');
+  for(const [cardIndex,card] of all.entries()){
+   if(cardIndex%shardCount!==shardIndex)continue;
    if(only&&!only.includes(card))continue;
    const rec={card,states:{},duel:{},defects:[]};
    await page.evaluate(card=>{const T=window.__ROG_TEST__,m=T.getMatch();
@@ -148,14 +157,22 @@ function readState(sel){
    if(rec.defects.length)console.log(card,rec.defects.length,'defects:',rec.defects.slice(0,4).join(' | '));
   }
   const recovered=out.cards.filter(c=>c.body.recovered);
-  out.summary={cards:out.cards.length,recoveredBodies:recovered.length,
+  out.summary={shardIndex,shardCount,cards:out.cards.length,recoveredBodies:recovered.length,
    unrecovered:out.cards.filter(c=>!c.body.recovered).map(c=>c.card+'='+c.body.member),
    cardsWithDefects:out.cards.filter(c=>c.defects.length).map(c=>c.card),
    defectCount:out.cards.reduce((s,c)=>s+c.defects.length,0),pageErrors:errors};
   if(process.env.LEAF_AUDIT_OUT)fs.writeFileSync(process.env.LEAF_AUDIT_OUT,JSON.stringify(out,null,1)+'\n');
   console.log(JSON.stringify(out.summary));
   assert.deepEqual(errors,[]);
-  if(!only){assert.equal(out.cards.length,98);assert.deepEqual(out.summary.unrecovered,['0156=null']);}
+  if(!only){
+   assert.equal(out.cards.length,Math.ceil((98-shardIndex)/shardCount),
+    'complete shard of the canonical sorted 98-body source roster');
+   const missingIndex=all.indexOf('0156');
+   assert.ok(missingIndex>=0,'known original source gap stays registered');
+   assert.deepEqual(out.summary.unrecovered,
+    missingIndex%shardCount===shardIndex?['0156=null']:[],
+    'the source-absent body must appear in exactly its owning shard');
+  }
   assert.deepEqual(out.summary.cardsWithDefects,[],'actor defects');
   console.log('R14 CHR 98 ACTOR AUDIT PASS',engine);
  }finally{await browser.close()}
