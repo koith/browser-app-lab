@@ -75,7 +75,7 @@ jobs:
           set -euo pipefail
           python apps/gallery-archive/qa_new_physical_photos.py \
             --model mimmi --browser '${{ matrix.browser }}' \
-            --since-commit b57ecc91bb5b0053046e764335bac1e60a1e4f1a \
+            --since-commit cda1fb7946b9ff7db2d08875c26886f4a28a5f78 \
             --current-commit e7ca381c2cae28b5cda7e986966a2b495ad92a4a \
             --out "$RUNNER_TEMP/mimmi-recent-${{ matrix.browser }}.json"
       - name: Report actual displayed/decode/download photos, not index counts
