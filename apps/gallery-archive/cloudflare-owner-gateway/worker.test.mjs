@@ -188,7 +188,7 @@ test('Pages sign: one transient TypeError retries exact SHA request and returns 
   }
 });
 
-test('Pages sign: repeated network loss stops after one retry; 401 and bad signature are not retried',async()=>{
+test('Pages sign: repeated network loss stops after two bounded retries; 401 and bad signature are not retried',async()=>{
   const photo={ownerAlbum:'example-photo-album',number:1,
     sha256:digest(bytes),bytes:bytes.length};
   let calls=0;
@@ -196,7 +196,7 @@ test('Pages sign: repeated network loss stops after one retry; 401 and bad signa
     calls++;throw new TypeError('network unavailable');
   }});
   await assert.rejects(offline.asset(photo),TypeError);
-  assert.equal(calls,2);
+  assert.equal(calls,3,'at most two bounded network retries');
   calls=0;
   const denied=pagesGateway({endpoint,model:'yui',fetcher:async()=>{
     calls++;return new Response('',{status:403});
