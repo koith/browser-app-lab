@@ -34,7 +34,7 @@ def test_missed_schedule_expands_bounded_catchup():
     assert info["lookback_minutes"]==153
     older=assess([event(98,t-timedelta(days=2))],
                  current_id=99,current_time=t,event_name="schedule")
-    assert older["lookback_minutes"]==360
+    assert older["lookback_minutes"]==1440
     # The real scheduled capture showed a 273.8-minute gap: the previous
     # 180-minute cap missed a public window of ~94 minutes before this run.
     delayed=assess([event(98,t-timedelta(minutes=274))],
@@ -44,6 +44,15 @@ def test_missed_schedule_expands_bounded_catchup():
     assert job.MAX_CATCHUP_MINUTES>=delayed["lookback_minutes"], "job must not silently re-cap the observed gap"
     assert delayed["lookback_minutes"]>=delayed["observed_gap_minutes"], (
         "the actually observed 274-minute delay must fit inside catch-up")
+    # Actual 2026-11-11 scheduled gap was 461.9 minutes, but previous
+    # 360m lookback silently omitted over 100m of eligible source time.
+    actual=assess([event(98,t-timedelta(seconds=27714))],
+                  current_id=99,current_time=t,event_name="schedule")
+    assert actual["observed_gap_minutes"]==461.9
+    assert actual["lookback_minutes"]==478
+    assert actual["lookback_minutes"]>actual["observed_gap_minutes"]
+    assert job.MAX_CATCHUP_MINUTES>=actual["lookback_minutes"]
+    assert actual["lookback_minutes"]<=1440
 
 
 def test_insufficient_evidence_never_labels_cron_healthy():
