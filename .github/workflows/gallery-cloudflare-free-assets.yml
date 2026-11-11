@@ -50,6 +50,7 @@ jobs:
       - run: python apps/gallery-archive/test_cloudflare_recovery_audit.py
       - run: node apps/gallery-archive/cloudflare-owner-gateway/bound-assets.test.mjs
       - run: node apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs
+      - run: node apps/gallery-archive/cloudflare-owner-gateway/pages-client-network.test.mjs
       - name: Validate actual Workers bundling and private Text modules without a cloud account
         env:
           WRANGLER_SEND_METRICS: 'false'
