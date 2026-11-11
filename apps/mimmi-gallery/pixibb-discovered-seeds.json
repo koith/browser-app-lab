@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-11-03T08:46:38.978540+00:00",
+  "generated_at": "2026-11-11T02:40:27.964353+00:00",
   "source": "actual public PixiBB search results in six model-language variants",
   "summary": {
     "search_terms": [
@@ -19,11 +19,20 @@
       "ミンミ DJAWA",
       "Mimmi 写真"
     ],
-    "candidates": 14,
-    "verified_mimmi_album_pages": 14,
+    "candidates": 15,
+    "verified_mimmi_album_pages": 15,
     "verified_photo_files": 0
   },
   "albums": [
+    {
+      "id": "pixibb-auto-djawa-photo-mimmi-asuna-the-maid-125-photos",
+      "title": "DJAWA Photo: Mimmi (밈미) – Asuna the Maid (125 photos)",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-asuna-the-maid-125-photos/",
+      "pages": 15,
+      "advertised_photos": 125,
+      "publisher": "DJAWA",
+      "source_evidence": "search_link_and_live_article_heading"
+    },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-nikke-elegg-154-photos",
       "title": "DJAWA Photo: Mimmi (밈미) – Nikke Elegg (154 photos)",
@@ -155,7 +164,7 @@
     {
       "term": "Mimmi",
       "page": 1,
-      "found_links": 4
+      "found_links": 5
     },
     {
       "term": "Mimmi",
@@ -175,7 +184,7 @@
     {
       "term": "밈미",
       "page": 1,
-      "found_links": 4
+      "found_links": 5
     },
     {
       "term": "밈미",
