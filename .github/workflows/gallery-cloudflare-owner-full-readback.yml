@@ -10,6 +10,11 @@ on:
       - 'apps/gallery-archive/qa_cloudflare_full_remote.py'
       - '.github/workflows/gallery-cloudflare-owner-full-readback.yml'
   workflow_dispatch:
+  # Only a successful main replica triggers this strict post-replication gate.
+  workflow_run:
+    workflows:
+      - "Gallery Free Bound Assets Replica"
+    types: [completed]
 permissions:
   contents: read
 concurrency:
@@ -17,6 +22,11 @@ concurrency:
   cancel-in-progress: false
 jobs:
   exact-owner-originals:
+    if: |
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -33,9 +43,57 @@ jobs:
           set -euo pipefail
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
             python apps/gallery-archive/qa_cloudflare_full_remote.py --scope targeted
+          elif [ "$GITHUB_EVENT_NAME" = "workflow_run" ]; then
+            # New Mimmi entries require independent exact-byte/pixel proof
+            # before the broader full-owner verification is accepted.
+            python apps/gallery-archive/qa_cloudflare_full_remote.py --scope recent
+            python apps/gallery-archive/qa_cloudflare_full_remote.py --scope all
           else
             python apps/gallery-archive/qa_cloudflare_full_remote.py --scope all
           fi
+  recent-mimmi-native-browser:
+    # Actual remote storage proof must pass before either real public browser.
+    needs: exact-owner-originals
+    if: github.event_name == 'workflow_run'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install real native browser and exact original download verifier
+        run: |
+          python -m pip install --quiet 'playwright==1.58.0' 'requests' 'Pillow==11.3.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Verify precisely the two newly indexed Mimmi original photos in live gallery
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/qa_new_physical_photos.py \
+            --model mimmi --browser '${{ matrix.browser }}' \
+            --since-commit b57ecc91bb5b0053046e764335bac1e60a1e4f1a \
+            --current-commit e7ca381c2cae28b5cda7e986966a2b495ad92a4a \
+            --out "$RUNNER_TEMP/mimmi-recent-${{ matrix.browser }}.json"
+      - name: Report actual displayed/decode/download photos, not index counts
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          for p in Path(os.environ['RUNNER_TEMP']).glob('mimmi-recent-*.json'):
+              d=json.loads(p.read_text())
+              print('G03_LIVE_EXACT_NATIVE', json.dumps({
+                  'browser':d.get('browser'), 'all_new_or_upgraded_rows':d.get('all_new_or_upgraded_rows'),
+                  'individual_saved_photo_verified':len(d.get('photos',[])),
+                  'success':d.get('success',False), 'reload':d.get('reload_pass',False)
+              }))
+          PY
+
   six-real-albums:
     needs: exact-owner-originals
     if: github.event_name != 'pull_request'
