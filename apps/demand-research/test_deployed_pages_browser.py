@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 import time
 from urllib.request import Request, urlopen
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 from playwright.sync_api import sync_playwright
 from test_live_browser import assert_rank_rows_centered
@@ -69,10 +69,17 @@ def inspect_browser(browser_type, label, width, height):
                     and parsed.hostname == "koith.github.io"
                     and parsed.path.startswith("/browser-app-lab/apps/demand-research/")):
                 route.continue_()
-            elif (parsed.scheme == "https" and parsed.hostname=="github.com"
-                    and parsed.path=="/koith/browser-app-lab/actions/workflows/intersection-target-account-bundle.yml"):
+            elif (parsed.scheme=="https" and
+                  parsed.hostname=="intersection-originals-free.onrender.com" and
+                  parsed.path=="/" and route.request.method=="GET"):
+                # Intercept only the destination HTML; no private API/cookie or
+                # real archive data is used by the Pages UI acceptance test.
+                query=parse_qs(parsed.query)
+                assert query.get("tab")==["accounts"]
+                assert query.get("archive_platform")==["bluesky"]
+                assert query.get("archive_account")==["synthetic-qa.bsky.social"]
                 route.fulfill(status=200,content_type="text/html",
-                              body='<html><body><p id="workflow-opened">Owner GitHub workflow</p></body></html>')
+                              body='<html><body><p id="gateway-opened">Simulated private gateway</p></body></html>')
             else:
                 route.abort()
         page.route("**/*", restrict_network)
@@ -106,26 +113,25 @@ def inspect_browser(browser_type, label, width, height):
         assert page.locator("#accountMoreOptions").evaluate("(el)=>el.open") is False
         assert page.locator("#accountBackupSection").is_visible()
         assert page.locator("#accountWatchForm").is_visible()
-        page.locator("#targetArchiveStatus").get_by_text("공개 페이지",exact=False).wait_for(timeout=12000)
-        page.locator("#targetArchiveAccount").fill(
-            "https://bsky.app/profile/synthetic-qa.bsky.social")
-        assert page.locator("#targetArchiveSubmit").is_enabled()
-        assert page.locator("#targetArchiveSubmit").inner_text()=="GitHub에서 백업 실행"
+        page.locator("#targetArchiveStatus").get_by_text(
+            "교집합 전용 보관함",exact=False).wait_for(timeout=12000)
+        assert page.locator("#targetArchiveWorkflow").is_hidden()
+        assert page.locator("#targetArchiveSubmit").inner_text()=="교집합에서 계정 백업"
         page.locator("#targetArchiveAccount").fill("")
         page.locator("#targetArchiveSubmit").click()
         assert "먼저 공개 SNS 계정" in page.locator("#targetArchiveStatus").inner_text()
         page.locator("#targetArchiveAccount").fill(
             "https://bsky.app/profile/synthetic-qa.bsky.social")
-        assert page.locator("#targetArchiveWorkflow").get_attribute("href")==(
-            "https://github.com/koith/browser-app-lab/actions/workflows/"
-            "intersection-target-account-bundle.yml")
+        assert page.locator("#targetArchiveSubmit").is_enabled()
         page.locator("#targetArchiveSubmit").click()
         page.wait_for_url(
-            "https://github.com/koith/browser-app-lab/actions/workflows/"
-            "intersection-target-account-bundle.yml",timeout=15000)
-        assert page.locator("#workflow-opened").is_visible()
-        print("PAGES_BACKUP_BUTTON_ENABLED_PASS:",label,
-              "empty_input_feedback=PASS same_tab_mobile_navigation=PASS private_dispatch=NOT_CLAIMED")
+            "https://intersection-originals-free.onrender.com/?tab=accounts"
+            "&archive_platform=bluesky&archive_account=synthetic-qa.bsky.social",
+            timeout=15000)
+        assert page.locator("#gateway-opened").is_visible()
+        print("PAGES_BACKUP_REDIRECT_ENABLED_PASS:",label,
+              "empty_input_feedback=PASS private_gateway=SIMULATED"
+              " same_tab_navigation=PASS no_credential_or_POST=PASS")
         page.goto(URL + "?qa=return",wait_until="domcontentloaded",timeout=45000)
         page.locator("#viewPosts").click()
 
