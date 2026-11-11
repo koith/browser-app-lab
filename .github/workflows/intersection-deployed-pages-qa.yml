@@ -43,16 +43,18 @@ jobs:
   deployed-browser:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
+    # Prebuilt version-pinned Chromium/WebKit and system dependencies.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble@sha256:a7f6cf3ae520c9d670ad956572c13747ed5abdbba5123a01526f873ed1662528
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install pinned browser QA
-        run: |
-          python -m pip install --disable-pip-version-check playwright==1.56.0
-          python -m playwright install --with-deps chromium webkit
+      - name: Install pinned Python Playwright API (browser is preinstalled)
+        run: python -m pip install --disable-pip-version-check playwright==1.56.0
       - name: Real Render LIVE Chromium + mobile WebKit first-tab and archives
         run: python apps/demand-research/test_live_render_browser.py
 
@@ -62,17 +64,18 @@ jobs:
   pages-browser:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble@sha256:a7f6cf3ae520c9d670ad956572c13747ed5abdbba5123a01526f873ed1662528
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install pinned browser QA
-        run: |
-          python -m pip install --disable-pip-version-check playwright==1.56.0
-          python -m playwright install --with-deps chromium webkit
+      - name: Install pinned Python Playwright API (browser is preinstalled)
+        run: python -m pip install --disable-pip-version-check playwright==1.56.0
       - name: Verify GitHub Pages Chromium + mobile WebKit separately
         run: python apps/demand-research/test_deployed_pages_browser.py
