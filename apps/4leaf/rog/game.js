@@ -197,6 +197,16 @@ function playerCanAct(){
  return true;
 }
 function refreshResume(){if(!$('resume-game'))return;$('resume-game').classList.toggle('hidden',!(match&&!match.finished&&MAPS[match.map]))}
+ // Resuming never silently re-enables AI autoplay; only the visible AI
+ // autoplay control can opt in after a saved game is restored.
+ function resumeGameFromUserAction(){
+  if(!match||match.finished||!MAPS[match.map])return false;
+  busy=false;
+  if(match.mode==='ai'){match.botAutoplay=false;persist()}
+  navigate('game');
+  chat('SYSTEM','기존 경기를 이어합니다.'+(match.mode==='ai'?' 컴퓨터 상대의 자동 진행은 일시정지 상태입니다. AI 자동진행 버튼으로 다시 켤 수 있습니다.':''),'system');
+  return true;
+ }
 function archiveUnreadableSavedMatch(){
  if(unreadableSavedMatchRaw===null)return true;
  try{
@@ -2133,7 +2143,7 @@ function toggleBotAutoplay(){
 }
 function init(){installBoardControls();installNativeDiceMenu();
  const botToggle=$('dice-ai-autoplay-toggle');if(botToggle)botToggle.onclick=toggleBotAutoplay;
- installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;shopPage=0;drawShop()}));$('shop-prev').onclick=()=>{shopPage--;drawShop()};$('shop-next').onclick=()=>{shopPage++;drawShop()};$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{
+ installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;shopPage=0;drawShop()}));$('shop-prev').onclick=()=>{shopPage--;drawShop()};$('shop-next').onclick=()=>{shopPage++;drawShop()};$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=resumeGameFromUserAction;$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{
  const c=CARD_MAP[chosenCard];if(!c)return;
  if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);
  if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);
@@ -2221,5 +2231,5 @@ function init(){installBoardControls();installNativeDiceMenu();
      else if(action==='ability')await useAbility();
      else await useItem(index,steps);
    }finally{remoteAct=false}
- }};window.__ROG_TEST__={imageFor,portraitEvidence,startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ }};window.__ROG_TEST__={imageFor,portraitEvidence,startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,resumeGameFromUserAction,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

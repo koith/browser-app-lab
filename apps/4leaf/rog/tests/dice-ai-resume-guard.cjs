@@ -1,6 +1,6 @@
 'use strict';
 /* Protect old saved AI games from involuntary autoplay on reload, while
-   preserving explicit opt-in AI versus default human hotseat semantics.
+   preserving explicit user control over resumed AI turns.
    The original binary AI protocol is NOT claimed restored here. */
 const assert=require('node:assert/strict');
 const path=require('node:path');
@@ -17,9 +17,8 @@ const {chromium}=require('playwright');
   await page.waitForFunction(()=>window.__ROG_TEST__);
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
-  assert.equal(await page.locator('#game-mode').inputValue(),'hotseat',
-   'fresh game is MANUAL by default; do not choose computer players silently');
-  await page.locator('#game-mode').selectOption('ai');
+  assert.equal(await page.locator('#game-mode').inputValue(),'ai',
+   'new solo game defaults to an AI opponent so a single user can complete a match');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
@@ -29,7 +28,7 @@ const {chromium}=require('playwright');
    return {mode:m.mode,autoplay:m.botAutoplay,bots:m.players.map(p=>p.bot)};
   });
   assert.deepEqual(created,{mode:'ai',autoplay:true,bots:[false,true]},
-   'AI auto-roll only enabled when a player explicitly selects computer mode');
+   'new solo AI match has one human and one computer with visible autoplay control');
   assert.equal(await page.locator('#dice-ai-autoplay-toggle').isVisible(),true,
    'AI control must be visibly available during real AI matches');
   assert.equal(await page.locator('#dice-ai-autoplay-toggle').getAttribute('aria-pressed'),'true');

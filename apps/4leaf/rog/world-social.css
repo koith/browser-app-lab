@@ -735,3 +735,143 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  .social-map-viewport{
  cursor:grab;
 }
+
+/* R19: touch-readable map markers for the SAME canonical chat rooms.
+   Original 794px ChatTown scenery stays underneath this presentation
+   layer. These room positions are WEB approximations, not a claim that
+   the missing historic room-estate atlas was reconstructed. */
+#rooms .social-mobile-room-map{display:none}
+@media(max-width:650px){
+ #rooms .social-mobile-room-map{
+  position:absolute;inset:0;z-index:28;display:flex;flex-direction:column;
+  min-height:0;overflow:hidden;
+  background:linear-gradient(165deg,#14284ecb,#1b3456df),
+   var(--native-town-background,none) center/cover no-repeat;
+  color:#f7f1dd;font:12px Gulim,'굴림',sans-serif;
+ }
+ #rooms .social-mobile-room-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  flex:none;min-height:50px;gap:5px;padding:7px 10px;
+  border-bottom:2px ridge #9eb7dc;background:#203968eb;
+ }
+ #rooms .social-mobile-room-heading strong{
+  min-width:0;font-size:14px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+ }
+ #rooms .social-mobile-room-heading button{
+  flex:none;min-height:38px;padding:6px 10px;
+  border:2px ridge #c5d1ed;background:#45619d;color:#fff6d0;
+  font:12px Gulim,'굴림',sans-serif;touch-action:manipulation;
+ }
+ #rooms .social-mobile-room-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  align-content:start;grid-auto-rows:minmax(82px,auto);
+  gap:10px;padding:16px 12px;min-height:0;flex:1;
+  overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;
+ }
+ #rooms .social-mobile-room-pin{
+  position:relative;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;gap:5px;
+  width:100%;min-height:82px;margin:0;padding:8px 6px;
+  border:2px ridge #adc9e8;border-radius:6px;
+  background:linear-gradient(145deg,#5676abec,#2c456eeb);
+  color:#fff2c4;box-shadow:0 3px 8px #10213eb8;
+  text-align:center;touch-action:manipulation;
+  font:12px Gulim,'굴림',sans-serif;cursor:pointer;
+ }
+ #rooms .social-mobile-room-pin::before{
+  content:'⌂';position:absolute;top:-11px;right:7px;
+  background:#2e4c73;color:#f5d99c;
+  font:bold 24px/20px Georgia,serif;
+  width:30px;height:24px;border:1px solid #b6cee6;border-radius:3px;
+ }
+ #rooms .social-mobile-room-number{
+  position:absolute;top:4px;left:6px;
+  font:bold 12px Gulim,'굴림',sans-serif;color:#e4eeff;
+ }
+ #rooms .social-mobile-room-pin b{
+  max-width:100%;overflow:hidden;white-space:nowrap;
+  text-overflow:ellipsis;font:bold 13px Gulim,'굴림',sans-serif;
+ }
+ #rooms .social-mobile-room-occupancy{color:#d9f4e3;font-size:11px}
+ #rooms .social-mobile-room-pin.social-room-full{
+  opacity:.66;border-color:#bd8c91;
+ }
+ #rooms .social-mobile-room-pin:is(:hover,:focus-visible){
+  outline:2px solid #fff4aa;outline-offset:1px;
+  background:#617db8;
+ }
+ #rooms .social-mobile-room-hint{
+  flex:none;margin:0;padding:7px 10px;
+  font-size:10px;line-height:1.4;
+  color:#e5e9f9;background:#1b2f53ec;
+  border-top:1px solid #829dbf;
+ }
+}
+
+/* Source-owned DOM: mobile spatial map contains the SAME #social-directory-list
+   and #social-new-room controls, not a second fake list of click targets.
+   Override old 794px absolute-marker positions ONLY inside this overlay. */
+@media(max-width:650px){
+ #rooms #social-mobile-room-map .social-mobile-room-grid{
+  display:block!important;overflow:auto!important;padding:12px!important;
+ }
+ #rooms #social-mobile-room-map #social-directory-list{
+  box-sizing:border-box!important;position:static!important;
+  inset:auto!important;display:grid!important;width:100%!important;
+  height:auto!important;min-height:0!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-auto-rows:minmax(82px,auto)!important;gap:10px!important;
+  overflow:visible!important;transform:none!important;
+ }
+ #rooms #social-mobile-room-map #social-directory-list .social-directory-row{
+  box-sizing:border-box!important;position:relative!important;
+  left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;
+  width:100%!important;min-width:0!important;height:82px!important;
+  min-height:82px!important;max-height:none!important;
+  margin:0!important;padding:10px 6px!important;
+  display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:center!important;gap:5px!important;
+  text-align:center!important;
+  background:linear-gradient(145deg,#5676abed,#2c456ef0)!important;
+  color:#fff3cf!important;border:2px ridge #adc9e8!important;
+  border-radius:6px!important;
+  box-shadow:0 3px 8px #10213eb8!important;
+  cursor:pointer!important;touch-action:manipulation;
+ }
+ #rooms #social-mobile-room-map .social-directory-row .social-room-number{
+  display:block!important;position:absolute!important;
+  left:6px!important;top:4px!important;right:auto!important;bottom:auto!important;
+  width:auto!important;height:auto!important;background:none!important;
+  border:0!important;font:bold 12px/16px Gulim,'굴림',sans-serif!important;
+ }
+ #rooms #social-mobile-room-map .social-directory-row small{
+  display:block!important;position:absolute!important;
+  top:3px!important;right:4px!important;left:auto!important;bottom:auto!important;
+  width:18px!important;height:17px!important;
+  font:12px/16px Gulim,'굴림',sans-serif!important;
+  background:#203b68!important;border:0!important;
+ }
+ #rooms #social-mobile-room-map .social-directory-row b{
+  box-sizing:border-box!important;position:static!important;
+  max-width:100%!important;width:auto!important;height:auto!important;
+  flex:none!important;padding:0!important;margin:0!important;
+  border:0!important;background:none!important;color:#fff0cd!important;
+  font:bold 13px/18px Gulim,'굴림',sans-serif!important;
+  overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
+ }
+ #rooms #social-mobile-room-map .social-directory-row .social-room-users{
+  box-sizing:border-box!important;position:static!important;
+  display:block!important;width:auto!important;height:auto!important;
+  flex:none!important;padding:0!important;margin:0!important;
+  border:0!important;background:none!important;color:#d9f4e3!important;
+  font:11px/15px Gulim,'굴림',sans-serif!important;
+ }
+ #rooms #social-mobile-room-map .social-directory-row .social-room-action{
+  display:none!important
+ }
+ #rooms #social-mobile-room-map .social-directory-row:is(:hover,:focus-visible){
+  outline:2px solid #fff4aa!important;outline-offset:1px!important;
+  background:#617db8!important;
+ }
+}
