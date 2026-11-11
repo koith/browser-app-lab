@@ -113,10 +113,6 @@ async function handle(request, env) {
   // photo reads. Default private bearer policy is unchanged. Bucket credentials
   // and canonical object keys stay on the Worker under either policy.
   const pagesRead=env.PAGES_READ_POLICY==='existing-sha-pinned-gallery';
-  if (!env.ARCHIVE_BUCKET || typeof env.SIGNING_KEY !== 'string' ||
-      env.SIGNING_KEY.length < 32 || (!pagesRead&&!isHex(env.VIEWER_TOKEN_SHA256, 64))) {
-    return response(request, env, 503, 'NOT_CONFIGURED');
-  }
   if (request.method === 'OPTIONS') {
     if (origin !== (env.PAGE_ORIGIN || 'https://koith.github.io'))
       return response(request, env, 403, 'ORIGIN_DENIED');
@@ -125,6 +121,13 @@ async function handle(request, env) {
       'Access-Control-Allow-Headers': 'Authorization, Content-Type',
       'Access-Control-Max-Age': '3600'
     }});
+  }
+  // Preflight must be answered before storage/signing configuration checks.
+  // Otherwise a transient backend misconfiguration becomes an opaque browser
+  // CORS failure rather than an observable 503 from the actual POST.
+  if (!env.ARCHIVE_BUCKET || typeof env.SIGNING_KEY !== 'string' ||
+      env.SIGNING_KEY.length < 32 || (!pagesRead&&!isHex(env.VIEWER_TOKEN_SHA256, 64))) {
+    return response(request, env, 503, 'NOT_CONFIGURED');
   }
   if (path === '/api/v1/sign' && request.method === 'POST') {
     if (origin !== (env.PAGE_ORIGIN || 'https://koith.github.io'))
