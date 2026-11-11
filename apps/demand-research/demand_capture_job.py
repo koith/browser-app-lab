@@ -103,9 +103,13 @@ def bluesky(term, start, end):
             uri = item.get("uri") or ""
             match = re.fullmatch(
                 r"at://(did:(?:plc|web):[A-Za-z0-9.:-]{6,150})/app\.bsky\.feed\.post/([A-Za-z0-9]+)", uri)
+            record_labels=rec.get("labels")
+            record_values=(record_labels.get("values") if isinstance(record_labels,dict)
+                           else None)
             if (not match or match.group(1) != author.get("did")
                     or sensitive_labels(item.get("labels"))
-                    or sensitive_labels(author.get("labels"))):
+                    or sensitive_labels(author.get("labels"))
+                    or sensitive_labels(record_values)):
                 continue
             posted = at_date(rec.get("createdAt"), start, end)
             if not posted:
