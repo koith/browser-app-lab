@@ -137,7 +137,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: apps/4leaf/rog
+          sparse-checkout: apps/4leaf
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -275,7 +275,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: apps/4leaf/rog
+          sparse-checkout: apps/4leaf
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
