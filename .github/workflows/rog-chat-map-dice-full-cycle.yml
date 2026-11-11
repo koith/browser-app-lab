@@ -1,0 +1,92 @@
+name: 4LEAF map-first ChatTown and full real Dice match lifecycle
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/chat-map-first-real-user.cjs'
+      - 'apps/4leaf/rog/tests/dice-real-complete-match.cjs'
+      - '.github/workflows/rog-chat-map-dice-full-cycle.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/chat-map-first-real-user.cjs'
+      - 'apps/4leaf/rog/tests/dice-real-complete-match.cjs'
+      - '.github/workflows/rog-chat-map-dice-full-cycle.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chat-map-real-user:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - browser: chromium
+            mobile: '0'
+          - browser: webkit
+            mobile: '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Serve actual commit
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/rog-e2e.log 2>&1 &
+          for i in $(seq 1 35); do
+            if curl -fsSI http://127.0.0.1:8765/index.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/rog-e2e.log
+          exit 1
+      - name: Map-based room click -> actual chat -> room exit -> map
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chat-map-first-real-user.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourleaf-chat-map-${{ matrix.browser }}-${{ matrix.mobile }}
+          path: chat-map-first-*.png
+          retention-days: 14
+  dice-finish-real-match:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Serve actual commit
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/rog-dice-full.log 2>&1 &
+          for i in $(seq 1 35); do
+            if curl -fsSI http://127.0.0.1:8765/index.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/rog-dice-full.log
+          exit 1
+      - name: Real world -> room -> AI round -> GOAL -> winResult -> replay
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/dice-real-complete-match.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourleaf-dice-full-cycle
+          path: leaf-dice-*.png
+          retention-days: 14
