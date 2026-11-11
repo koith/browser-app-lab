@@ -84,7 +84,7 @@ def inspect_browser(browser_type, label, width, height):
         page.locator("#viewArchives").click()
         assert page.locator("#archivesView").is_visible()
         page.locator("#archiveHubStatus").get_by_text(
-            "비공개 원본",exact=False).wait_for(timeout=12000)
+            "교집합 전용 웹앱",exact=False).wait_for(timeout=12000)
         assert page.locator("#archiveHubFrame").get_attribute("src") is None
         page.locator("#viewPosts").click()
         assert page.locator("#feed").count() == 1, "feed missing"
