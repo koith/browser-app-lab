@@ -28,9 +28,11 @@ on:
 permissions:
   contents: read
 
+# A flood of main Pages/QA completion events must not starve a PR's small
+# regression test. Keep main handoff serial, but isolate PR fast-path by PR ID.
 concurrency:
-  group: gallery-event-driven-safe-handoff
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('gallery-handoff-pr-{0}', github.event.pull_request.number) || 'gallery-event-driven-safe-handoff-main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   regressions:
