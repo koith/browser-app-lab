@@ -102,6 +102,7 @@ jobs:
         with:
           sparse-checkout: |
             apps/demand-research
+            .github/workflows
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
