@@ -75,6 +75,15 @@ for(const p of legitimate){
   assert.equal(f.suspectedAd(p),false,
     "ordinary commentary and benign repeated media should not be blocked");
 }
+for(const a of identities){
+  assert.equal(f.suspectedAd({platform:"bluesky",authorDid:a.did,
+    text:"Sparse public profile with just one bland post",media:[]}),true,
+    "operator-excluded observed public actor cannot bypass filter with 1 sample");
+}
+assert.equal(f.suspectedAd({platform:"bluesky",
+  authorDid:"did:plc:ordinarypublicdid123",text:"ordinary personal note",media:[]}),false,
+  "one unrelated account cannot inherit another actor's exclusion");
+
 assert.equal(context.posts.filter(f.suspectedAd).length,100);
 const withoutAlt={text:six[0]+"\n\n#섹블 #섹트",media:[]};
 context.posts=[withoutAlt,...legitimate];
