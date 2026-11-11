@@ -572,36 +572,34 @@ const path=require('path');
  });
  assert.ok(nativeDirectory.background.includes('original/ChatTown/northback.png'),
   'permanent-room selector must expose recovered native ChatTown landscape');
- assert.equal(nativeDirectory.projectedMap,false,
-  'unknown historical estate coordinates must NOT replace the source art by default');
- // DOM rectangles are POST scene scaling (404px source is often enlarged
- // to ~455px by the browser). Compare the source-normalized dimensions:
- // otherwise an authentic native 328x289 overlay falsely fails at 370x326.
- const nativePanelWidth=nativeDirectory.panel[2]*
-  (794/nativeDirectory.frame[0]);
- const nativePanelHeight=nativeDirectory.panel[3]*
-  (404/nativeDirectory.frame[1]);
- console.log('SOURCE_NATIVE_DIRECTORY_PANEL '+JSON.stringify({
-  nativePanelWidth,nativePanelHeight,
-  sourceVisible:nativeDirectory.visibleSourceRatio,
-  projectedPanel:nativeDirectory.panel,projectedFrame:nativeDirectory.frame}));
- assert.ok(nativePanelWidth<=350&&nativePanelHeight<=330&&
-  nativeDirectory.visibleSourceRatio>.7,
-  'source-sized room list must leave most original ChatTown background visible');
- assert.ok(nativeDirectory.list.every(r=>r[2]>180&&r[3]>=34),
-  'eight actual room links are readable full-width instead of tiny scattered gray cards');
- assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'false');
- await host.locator('#social-web-estate-toggle').click();
- assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'true',
-  'inferred web-map is an accessible opt-in, never mistaken for original geography');
+ assert.equal(nativeDirectory.projectedMap,true,
+  'user-requested spatial room click must be DEFAULT, not directory-only navigation');
+ assert.equal(await host.locator('.social-directory').getAttribute('data-default-room-entry'),
+  'spatial-map','map-first state is explicit');
+ const mapButtons=host.locator('#social-directory-list .social-directory-row');
+ assert.equal(await mapButtons.count(),8,'eight genuine server rooms must appear on the spatial map');
+ assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'true');
  const mapBefore=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
  await host.locator('#social-map-viewport').focus();
  await host.keyboard.press('ArrowRight');
  const horizontalPan=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
- assert.notEqual(horizontalPan,mapBefore,'direction keys pan the estate horizontally');
+ assert.notEqual(horizontalPan,mapBefore,'direction keys pan the room map horizontally');
  await host.keyboard.press('ArrowDown');
  const mapAfter=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
- assert.notEqual(mapAfter,horizontalPan,'direction keys pan the estate vertically');
+ assert.notEqual(mapAfter,horizontalPan,'direction keys pan the room map vertically');
+ // Recovered ChatTown background is verified; spatial room coordinates remain inferred.
+ // The non-default list is retained solely as an accessibility fallback.
+ await host.locator('#social-web-estate-toggle').click();
+ assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'false',
+  'optional accessible directory works');
+ const listFallback=await mapButtons.evaluateAll(nodes=>nodes.map(el=>{
+  const r=el.getBoundingClientRect();return {w:r.width,h:r.height};
+ }));
+ assert.ok(listFallback.every(r=>r.w>180&&r.h>=34),
+  'fallback retains readable full-width actual room controls');
+ await host.locator('#social-web-estate-toggle').click();
+ assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'true',
+  'return to map-first navigation');
  const actualRoomId=await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('실제 개설 채팅방',2,12));
  assert.ok(actualRoomId,'room created by a genuine participant');
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'room');
