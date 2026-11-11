@@ -107,3 +107,45 @@ def test_scheduled_account_refresh_never_marks_all_missing_as_success(monkeypatc
     monkeypatch.setattr(bundle_job,"execute_bundle",denied)
     with pytest.raises(SourceUnavailable,match="all registered"):
         bundle_job.execute_scheduled()
+
+
+def test_latest_public_posts_are_captured_during_older_page_backfill(monkeypatch):
+    """A saved historical pagination cursor must never hide newly posted text."""
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","synthetic-unit-only")
+    monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
+    old=blue_row("old001","first page in prior run")
+    earlier=blue_row("old000","older history in remaining cursor")
+    new=blue_row("new001","newly posted while older history is incomplete")
+    first=_capture(BlueAPI({None:([old],"older"),"older":([earlier],None)}))
+    second=_capture(BlueAPI({None:([new,old],"older"),
+                             "older":([earlier],None)}),(first,))
+    merged=MergedBundleAccountCloud([first,second])
+    posts=merged.load_catalog()
+    assert {p["text"] for p in posts}=={
+        "first page in prior run",
+        "newly posted while older history is incomplete",
+        "older history in remaining cursor",
+    }
+    assert second.items[first.prefix+"posts/"+post_key("bluesky",new["uri"])+"/post.json"]
+    assert first.items[first.prefix+"posts/"+post_key("bluesky",old["uri"])+"/post.json"]
+    assert not any(key in second.items for key in first.items
+                   if key.endswith("/post.json"))
+
+
+def test_modified_public_post_is_revised_during_older_page_backfill(monkeypatch):
+    """An edited head post creates a separate immutable revision, not a replacement."""
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","synthetic-unit-only")
+    monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
+    before=blue_row("same001","first immutable public text")
+    older=blue_row("older001","historical original")
+    after=blue_row("same001","newly edited public text")
+    first=_capture(BlueAPI({None:([before],"next"),"next":([older],None)}))
+    second=_capture(BlueAPI({None:([after],"next"),"next":([older],None)}),
+                    (first,))
+    merged=MergedBundleAccountCloud([second,first])
+    records=merged.load_catalog()
+    assert len(records)==3
+    assert [p["text"] for p in records if p.get("revision_of")]==[
+        "newly edited public text"]
+    assert "first immutable public text" in {p["text"] for p in records}
+    assert "historical original" in {p["text"] for p in records}
