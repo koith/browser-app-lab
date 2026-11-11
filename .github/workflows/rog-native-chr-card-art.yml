@@ -15,6 +15,11 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+# Cancel superseded PR test runs but never cancel published main/SHA checks.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   source-owned-card-art:
     strategy:
@@ -25,6 +30,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/4leaf/rog
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

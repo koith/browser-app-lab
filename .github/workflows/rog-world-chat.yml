@@ -136,6 +136,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/4leaf
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -161,6 +163,10 @@ jobs:
             cat /tmp/4leaf-http.log
             exit 1
           fi
+      # Run the real game resume/AI consent regression before 40+ slower browser scenarios.
+      # A previous failing run waited 107s between first E2E and this guard.
+      - name: Verify saved AI turns pause on reload and remain manually rollable
+        run: node apps/4leaf/rog/tests/dice-ai-resume-guard.cjs
       - name: Prove original ChatTown make-room entry creates a real source UI room instead of dead WEB modal
         run: node apps/4leaf/rog/tests/chat-original-create-entry.cjs
       - name: Prove installed phone PWA replaces stale dice scripts online and stays functional offline
@@ -245,8 +251,6 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
       - name: Verify native 145x97 TIS and independently depth-sorted original DMP cells in live Chromium
         run: node apps/4leaf/rog/tests/dice-native-tis-depth.cjs
-      - name: Verify saved AI turns pause on reload and remain manually rollable
-        run: node apps/4leaf/rog/tests/dice-ai-resume-guard.cjs
       - name: Verify corrected hex orientation and manual player turns
         run: node apps/4leaf/rog/tests/dice-native-orientation-manual.cjs
       - name: Validate real original Genesis dialog and game event message in Chromium
@@ -270,6 +274,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/4leaf
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
