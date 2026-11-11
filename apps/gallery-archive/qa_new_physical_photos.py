@@ -170,10 +170,34 @@ async def run(args):
                         # SHA-bound owner metadata, never logging signed tokens.
                         current_src=await page.locator('#full').get_attribute('src') or ''
                         parsed_src=urlsplit(urljoin(report['deployed_url'],current_src))
+                        selection_state=await page.evaluate("""([id,selected_index]) => {
+                            const expectedAlbum=stored.find(a=>a.id===id);
+                            const sourcePhoto=photosFor(expectedAlbum)[selected_index]||null;
+                            const viewer=viewerList[viewerIndex]||null;
+                            const target= document.querySelector('#detailphotos .photo[data-i="'+selected_index+'"]');
+                            const normalize=p=>p?{
+                                albumId:p.albumId||null,
+                                ownerAlbum:p.ownerAlbum||null,
+                                number:p.number,storageNumber:p.storageNumber??null,
+                                width:p.width,height:p.height,bytes:p.bytes,
+                                sha256:p.sha256||null,
+                                url_kind:typeof p.url==='string'
+                                    ?(p.url.startsWith('owner:')?'owner':p.url.startsWith('stored-albums/')?'static':'other')
+                                    :null
+                            }:null;
+                            return {detailAlbum:detailAlbum?.id||null,
+                                selected_index, target_data_i:target?.dataset.i||null,
+                                viewerIndex, viewerListLength:viewerList.length,
+                                photo_at_selected_index:normalize(sourcePhoto),
+                                active_viewer_photo:normalize(viewer),
+                                positionLabel:document.querySelector('#position')?.textContent||null};
+                        }""",[aid,position])
                         diagnosis={'album':aid,'number':number,'model':args.model,
                             'browser':args.browser,'expected_size':[expected['width'],expected['height']],
+                            'expected_sha256':expected['sha256'],'expected_display_number':expected['display_number'],
                             'decoded_size':size,'decoded_host':parsed_src.netloc,
-                            'decoded_path':parsed_src.path}
+                            'decoded_path':parsed_src.path,
+                            'viewer_selection':selection_state}
                         try:
                             response=await context.request.get(urljoin(report['deployed_url'],current_src),
                                                               timeout=12000)
