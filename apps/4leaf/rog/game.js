@@ -197,14 +197,14 @@ function playerCanAct(){
  return true;
 }
 function refreshResume(){if(!$('resume-game'))return;$('resume-game').classList.toggle('hidden',!(match&&!match.finished&&MAPS[match.map]))}
- // Only a real user click on Resume re-enables an AI opponent. Merely
- // refreshing a page never starts hidden background AI turns.
+ // Resuming never silently re-enables AI autoplay; only the visible AI
+ // autoplay control can opt in after a saved game is restored.
  function resumeGameFromUserAction(){
   if(!match||match.finished||!MAPS[match.map])return false;
   busy=false;
-  if(match.mode==='ai'){match.botAutoplay=true;persist()}
+  if(match.mode==='ai'){match.botAutoplay=false;persist()}
   navigate('game');
-  chat('SYSTEM','기존 경기를 이어합니다.'+(match.mode==='ai'?' 컴퓨터 상대 턴은 자동 진행됩니다.':''),'system');
+  chat('SYSTEM','기존 경기를 이어합니다.'+(match.mode==='ai'?' 컴퓨터 상대의 자동 진행은 일시정지 상태입니다. AI 자동진행 버튼으로 다시 켤 수 있습니다.':''),'system');
   return true;
  }
 function archiveUnreadableSavedMatch(){
