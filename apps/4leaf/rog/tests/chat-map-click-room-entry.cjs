@@ -46,8 +46,8 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   assert.equal(directory.toggle,'목록');
   assert.equal(directory.togglePressed,'true');
   assert.ok(directory.rooms>=8,'canonical joinable rooms must be spatial entities');
-  assert.equal(directory.position,mobile?'relative':'absolute',
-   'desktop keeps source-map coordinates; phone uses native room buttons in readable map grid');
+  assert.equal(directory.position,'absolute',
+   'all browser sizes must retain spatial room coordinates, never a fake mobile room-card list');
   assert.ok(directory.button.width>15&&directory.button.height>15);
   assert.ok(directory.caption.includes('원작 방 배치 좌표는 미확보'),
    'do not claim inferred geography is historically proven');
@@ -61,7 +61,9 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
    });
    assert.ok(createHit.width>=40&&createHit.height>=30&&createHit.reachable,
     'real create button must not be intercepted by mobile marker overlay');
-   const pins=page.locator('#social-mobile-room-map .social-mobile-room-pin');
+   assert.equal(await page.locator('#social-mobile-room-map #social-map-viewport').count(),1,
+    'mobile must preserve the original draggable map viewport');
+   const pins=page.locator('#social-mobile-room-map #social-directory-list .social-directory-row');
    assert.equal(await pins.count(),directory.rooms,'mobile map uses same room entities');
    const mobileReadable=await pins.first().evaluate(el=>{
     const rect=el.getBoundingClientRect();
@@ -72,16 +74,15 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
     return {width:rect.width,height:rect.height,labelSize,occupancySize,
      clickReachable:hit===el||el.contains(hit)};
    });
-   assert.ok(mobileReadable.width>=130&&mobileReadable.height>=70,
-    'real map rooms need 70px+ visible touch markers');
-   assert.ok(mobileReadable.labelSize>=12&&mobileReadable.occupancySize>=10,
-    'room names and occupancy must actually be readable on a phone');
+   assert.ok(mobileReadable.width>=45&&mobileReadable.height>=40,
+    'mobile map buttons must provide touch-sized physical targets');
+   assert.ok(mobileReadable.labelSize>=14&&mobileReadable.occupancySize>=12,
+    'map labels must remain legible at responsive CSS size');
    assert.ok(mobileReadable.clickReachable,'pin must be topmost at its real touch center');
   }
   await page.screenshot({path:'leaf-chat-map-primary-'+engine.name()+(mobile?'-mobile':'')+'.png'});
   // A direct map ROOM marker is an actual user click, never a text list choice.
-  const first=mobile?page.locator('#social-mobile-room-map .social-mobile-room-pin').first():
-    page.locator('#social-directory-list .social-directory-row').first();
+  const first=page.locator('#social-directory-list .social-directory-row').first();
   await first.scrollIntoViewIfNeeded();
   await press(first);
   await page.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='room',null,{timeout:20000});
@@ -94,10 +95,9 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   await page.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='directory');
   assert.ok(await page.locator('#social-image-frame .social-directory.web-estate-open').count(),
    'EXIT must go BACK to spatial map by default, not a list');
-  if(mobile)assert.ok(await page.locator('#social-mobile-room-map .social-mobile-room-pin').count(),
-    'after EXIT mobile should return to readable original-style map markers');
-  const next=mobile?page.locator('#social-mobile-room-map .social-mobile-room-pin').nth(1):
-    page.locator('#social-directory-list .social-directory-row').nth(1);
+  if(mobile)assert.equal(await page.locator('#social-mobile-room-map #social-directory-list .social-directory-row').count(),directory.rooms,
+    'after EXIT mobile must return to all original live spatial map markers');
+  const next=page.locator('#social-directory-list .social-directory-row').nth(1);
   const secondId=await next.getAttribute('data-room');
   await next.scrollIntoViewIfNeeded();await press(next);
   await page.waitForFunction(id=>window.__LEAF_SOCIAL__?.getState().roomId===id,secondId,

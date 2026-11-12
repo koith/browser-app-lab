@@ -809,6 +809,23 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  }
 }
 
+/* Phone room-map uses the same draggable geographic plane, not detached
+   room cards. Increase actual marker hit targets and typography without
+   inventing original room positions or breaking the optional list view. */
+@media(max-width:650px){
+ #rooms .social-directory.web-estate-open #social-mobile-room-map .social-directory-row{
+  box-sizing:border-box!important;
+  height:92px!important;min-height:92px!important;
+  width:112px!important;min-width:112px!important;
+ }
+ #rooms .social-directory.web-estate-open #social-mobile-room-map .social-directory-row b{
+  font-size:16px!important;line-height:17px!important;
+ }
+ #rooms .social-directory.web-estate-open #social-mobile-room-map .social-directory-row .social-room-users{
+  font-size:13px!important;line-height:16px!important;
+ }
+}
+
 /* Source-owned DOM: mobile spatial map contains the SAME #social-directory-list
    and #social-new-room controls, not a second fake list of click targets.
    Override old 794px absolute-marker positions ONLY inside this overlay. */
