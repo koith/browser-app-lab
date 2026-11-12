@@ -785,7 +785,10 @@ Promise.all([
  function rebuildStored(){
   // The static Pages archive and TeraBox index can number the same volume
   // differently. Preserve all distinct SHA-verified saved files.
-  stored=SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored]);
+  // SHA-identical legacy Pages previews belong to the canonical work; preserve
+   // a different, independently verified owner photo under its exact album.
+   stored=SavedGalleryPhotoUnion.dedupeAliasedPhysicalCopies(
+    SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored]),albumAliases);
   rebuildLocalPreviewIndex();
   ownerPhotoIndex=new Map(stored.flatMap(a=>a.images).filter(p=>p.ownerAlbum||p.vaultAlbum).map(p=>[p.url,p]));
   catalog=stored.slice();
