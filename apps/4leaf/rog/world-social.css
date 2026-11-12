@@ -431,7 +431,7 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 #rooms .social-map-viewport:active{cursor:grabbing}
 #rooms .social-map-viewport:focus-visible{outline:2px solid #f7e2ac}
 #rooms .social-map-plane{
- position:absolute;left:0;top:0;width:1480px;height:1840px;
+ position:absolute;left:0;top:0;width:1480px;height:2220px;
  transform-origin:0 0;will-change:transform;
  /* Original ChatTown terrain coordinates are not recovered. Avoid
     misidentifying the Dice IMG/bgtile as historical chat geography. */
@@ -759,9 +759,9 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
   overflow:hidden;text-overflow:ellipsis;
  }
  #rooms .social-mobile-room-heading button{
-  flex:none;min-height:38px;padding:6px 10px;
+  flex:none;min-height:68px;min-width:105px;padding:12px 10px;
   border:2px ridge #c5d1ed;background:#45619d;color:#fff6d0;
-  font:12px Gulim,'굴림',sans-serif;touch-action:manipulation;
+  font:15px Gulim,'굴림',sans-serif;touch-action:manipulation;
  }
  #rooms .social-mobile-room-grid{
   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));

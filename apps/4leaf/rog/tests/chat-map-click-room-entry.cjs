@@ -60,7 +60,7 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
     return {width:r.width,height:r.height,reachable:hit===el||el.contains(hit)};
    });
    assert.ok(createHit.width>=40&&createHit.height>=30&&createHit.reachable,
-    'real create button must not be intercepted by mobile marker overlay');
+    'real create must have a reachable physical mobile touch target: '+JSON.stringify(createHit));
    assert.equal(await page.locator('#social-mobile-room-map #social-map-viewport').count(),1,
     'mobile must preserve the original draggable map viewport');
    const pins=page.locator('#social-mobile-room-map #social-directory-list .social-directory-row');

@@ -61,7 +61,7 @@
  };
  const canonicalRooms=(region,district)=>Array.from({length:8},(_,slot)=>
   canonicalRoom(canonicalRoomId(region,district,slot))).filter(Boolean);
- const ROOM_MAP={width:1480,height:1840};
+ const ROOM_MAP={width:1480,height:2220};
  // A historic 2-person chat-room event is documented. Other limits are
  // restoration controls, not claims about the original server's room menu.
  const allowedCapacity=n=>[2,4,8,12].includes(Number(n))?Number(n):12;
@@ -904,7 +904,7 @@
  })();
  function realRoomPosition(index){
   const cell=liveRoomCells[index%liveRoomCells.length];
-  return {x:70+cell.col*130,y:70+cell.row*85};
+  return {x:70+cell.col*130,y:70+cell.row*100};
  }
  function setupRoomMap(){
   const viewport=$('social-map-viewport'),plane=$('social-map-plane');
