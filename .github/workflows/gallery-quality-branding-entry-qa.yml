@@ -11,6 +11,12 @@ on:
       - 'apps/yui-gallery/publishers.json'
       - 'apps/mimmi-gallery/publishers.json'
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
+      - 'apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs'
+      - 'apps/gallery-archive/test_g10_real_album_covers.cjs'
+      - 'apps/yui-gallery/gallery-labels.js'
+      - 'apps/mimmi-gallery/gallery-labels.js'
+      - 'apps/mimmi-gallery/test_gallery_labels.cjs'
+      - 'apps/yui-gallery/test_gallery_labels.cjs'
       - 'apps/gallery-archive/test_publisher_logo_fallback.cjs'
       - 'apps/gallery-archive/test_curated_cover_manifest.cjs'
       - 'apps/gallery-archive/test_cross_model_saved_sha.cjs'
@@ -30,6 +36,12 @@ on:
       - 'apps/yui-gallery/publishers.json'
       - 'apps/mimmi-gallery/publishers.json'
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
+      - 'apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs'
+      - 'apps/gallery-archive/test_g10_real_album_covers.cjs'
+      - 'apps/yui-gallery/gallery-labels.js'
+      - 'apps/mimmi-gallery/gallery-labels.js'
+      - 'apps/mimmi-gallery/test_gallery_labels.cjs'
+      - 'apps/yui-gallery/test_gallery_labels.cjs'
       - 'apps/gallery-archive/test_publisher_logo_fallback.cjs'
       - 'apps/gallery-archive/test_curated_cover_manifest.cjs'
       - 'apps/gallery-archive/test_cross_model_saved_sha.cjs'
@@ -46,7 +58,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Check photo variant and publisher identity unit tests
+      - name: Verify all 119 SHA-pinned work covers, real producer labels and optical quality guards
         run: |
           node --check apps/yui-gallery/image-quality.js
           node --check apps/mimmi-gallery/image-quality.js
@@ -54,6 +66,10 @@ jobs:
           node apps/gallery-archive/test_publisher_logo_fallback.cjs
           node apps/gallery-archive/test_curated_cover_manifest.cjs
           node apps/gallery-archive/test_cross_model_saved_sha.cjs
+          node apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs
+          node apps/gallery-archive/test_g10_real_album_covers.cjs
+          node apps/mimmi-gallery/test_gallery_labels.cjs
+          node apps/yui-gallery/test_gallery_labels.cjs
       - name: Verify both embedded gallery scripts parse
         run: |
           python - <<'PY'

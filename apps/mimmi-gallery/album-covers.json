@@ -1,4 +1,1196 @@
 {
-  "schema_version": 1,
-  "covers": {}
+  "schema_version": 2,
+  "source_pixels_unchanged": true,
+  "not_identity_recognition": true,
+  "source_is_same_work_sha_metadata": true,
+  "covers": {
+    "djawa-asuna-the-maid": {
+      "sha256": "3c2d2a509e19a59085ed3e42d0abd2bcaec6e4412803f6aecd53d6dc27134c9d",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-blossom-reverie": {
+      "sha256": "15be8810cc52b860bdbec0b31a7e0e62c5678fadcdcc41205b151d15dc3f0321",
+      "number": 2,
+      "width": 1200,
+      "height": 1600,
+      "face": [
+        480,
+        668,
+        188,
+        188
+      ],
+      "position": [
+        50,
+        48.25
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 6.597,
+      "not_identity_recognition": true
+    },
+    "djawa-christmas-special-2021-mimmi": {
+      "sha256": "877c1388f4e2c3448050d9f272f7c5339f245bb32d038880f523b94faff09eec",
+      "number": 2,
+      "width": 1000,
+      "height": 1500,
+      "face": [
+        422,
+        249,
+        196,
+        196
+      ],
+      "position": [
+        50,
+        4.04
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 7.664,
+      "not_identity_recognition": true
+    },
+    "djawa-christmas-special-2023-mimmi": {
+      "sha256": "305b0dc1e43939b1271137dbec975d7921e9c59380467394e2475545192b8656",
+      "number": 2,
+      "width": 1200,
+      "height": 1800,
+      "face": [
+        119,
+        235,
+        353,
+        354
+      ],
+      "position": [
+        50,
+        3.6
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 7.156,
+      "not_identity_recognition": true
+    },
+    "djawa-christmas-special-2024-mimmi-santa-on-the-street": {
+      "sha256": "f37ab3c74c52583ebe23190597ec2981ca0db6ea463fdd10677c07df2003024b",
+      "number": 8,
+      "width": 1200,
+      "height": 1800,
+      "face": [
+        449,
+        290,
+        233,
+        233
+      ],
+      "position": [
+        50,
+        3.05
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 6.201,
+      "not_identity_recognition": true
+    },
+    "djawa-christmas-special-2025-mimmi-the-christmas-witch": {
+      "sha256": "f8c65513c88d5128d3ec0536dfcd03b25b7e41f986d2264f22b76705daafb6fa",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-full-bloom-yamashiiro": {
+      "sha256": "b39e553f54fca0a142f9832ce2b0aa36910470a82b87c0a010911430acc046ff",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-grin-and-fire": {
+      "sha256": "95b5d35d4368a0b6f3538dcb9b70d38b1c5b43d0e1d68a5e0224205ee37dda68",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-holstein-jobs": {
+      "sha256": "70585dadaafd7ad29aff09fb6171cdb906f5e7d4fb8636dda490568b10f72970",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "face": [
+        548,
+        320,
+        307,
+        307
+      ],
+      "position": [
+        50,
+        9.75
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 5.806,
+      "not_identity_recognition": true
+    },
+    "djawa-in-the-summer-sunshine-part-1": {
+      "sha256": "084770f01fdd620315289201a6ec6f9a3b7c25fa6ef206619d6bc6bec4b41a95",
+      "number": 7,
+      "width": 1200,
+      "height": 1600,
+      "face": [
+        477,
+        318,
+        237,
+        237
+      ],
+      "position": [
+        50,
+        7.562
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 6.128,
+      "not_identity_recognition": true
+    },
+    "djawa-in-the-summer-sunshine-part-2": {
+      "sha256": "d1ac453d65bccae7e9d6d49f9a570289f73a4c9ec7c23e06377af6114ca6429f",
+      "number": 1,
+      "width": 1200,
+      "height": 1600,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-janus-scary-lantern-night": {
+      "sha256": "d9edeb402018e5515a1fb02ccce35f62d1853fd06e0514aedc268ba43470f88e",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-janus-scary-lantern-night-vol-2": {
+      "sha256": "cacac735af9e3fdcf2db7cce2e212d41d54229b88c4e740ff5ba372de22a177e",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-le-malin-listless-lapin": {
+      "sha256": "c77df28d805f03dce1dab6983c9a805cd433c327f6845187458be970ff2ffa51",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-mademoiselle-mimmi": {
+      "sha256": "494bcba2244b938af4b984de2fb84ba883328d8bcf5ae43fe58332c08b4098c1",
+      "number": 1,
+      "width": 1000,
+      "height": 1512,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-maid-for-mayhem": {
+      "sha256": "482aaa477caaa770de818a87ff2cc168c5662a6f6fc21f83d0be474e6ac49940",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-my-summer-vacation": {
+      "sha256": "3b0db9a2ce7c0134b7b56d54f827fb90fc0ff40943244019064bb19cb6184954",
+      "number": 6,
+      "width": 1200,
+      "height": 1800,
+      "face": [
+        265,
+        116,
+        370,
+        371
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 8.78,
+      "not_identity_recognition": true
+    },
+    "djawa-my-summer-vacation-vol-2": {
+      "sha256": "6e0c3a6747703371bd95d7443a70dd2377f26b487ee7fbd9a59a513f62210cce",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-my-summer-vacation-vol-3": {
+      "sha256": "35e50faec4360f6865950360e92f6c5f2549d63d5aa7388ffccf6850b5dfce24",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "face": [
+        383,
+        172,
+        476,
+        476
+      ],
+      "position": [
+        50,
+        3.4
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 10.154,
+      "not_identity_recognition": true
+    },
+    "djawa-my-summer-vacation-vol-4": {
+      "sha256": "0e59d2b60a1855b0c0919837d4a9bba3a33cce883fb430885fc84421192e1194",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-my-summer-vacation-vol-5": {
+      "sha256": "7839a15ee0c70150ade3c82db21cef28812d76cc7b55575e10c189ca7716d4d0",
+      "number": 21,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-nikke-alice": {
+      "sha256": "e1257dbd23b2ea27427027177f589d86e07481ce2f04cf681a31460194fdccc2",
+      "number": 1,
+      "width": 912,
+      "height": 1368,
+      "face": [
+        341,
+        266,
+        241,
+        241
+      ],
+      "position": [
+        50,
+        13.255
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 9.504,
+      "not_identity_recognition": true
+    },
+    "djawa-nikke-elegg": {
+      "sha256": "ff6987795692664a16503f35e5f6b7e8f1f61dd79e426ea9965261115959d9b7",
+      "number": 26,
+      "width": 912,
+      "height": 1368,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-nikke-yuni": {
+      "sha256": "f78e1910c61407c8a9e98225239a3b659db9dafbbe8228d5d0251154a561dd3b",
+      "number": 6,
+      "width": 1000,
+      "height": 1500,
+      "face": [
+        508,
+        413,
+        192,
+        192
+      ],
+      "position": [
+        50,
+        23.48
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 5.112,
+      "not_identity_recognition": true
+    },
+    "djawa-pop-kitty-party": {
+      "sha256": "9bdc607c57355baaa7313230dc87066166ede80e4b97bf69758007d552827139",
+      "number": 1,
+      "width": 1200,
+      "height": 1683,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "djawa-rei-beyond-the-heart": {
+      "sha256": "5d81c0beebc157a344595718f625e7c62ec0093bdbb3052baba6d6efca03b614",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-retrospection": {
+      "sha256": "cbc248764a67d63795df411f45e64e54fc7277e39bc2c35a6a0d198e010f0813",
+      "number": 1,
+      "width": 1600,
+      "height": 1600,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-rudy-the-wolf-of-midnight": {
+      "sha256": "71002b0af0de66475ac2bc6281e92f2dfa792145764a5248cdc42429d51e90c3",
+      "number": 1,
+      "width": 1000,
+      "height": 1500,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-rudy2-codename-wolfgirl-9b4e68": {
+      "sha256": "18b015ea5b05c7648487657479c39d32391c39ed8605f9bdf09d510cfff45a36",
+      "number": 1,
+      "width": 1000,
+      "height": 1500,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "djawa-twin-bunnies-affair": {
+      "sha256": "1eaaa6883ea652015d0040303a07d6142e8625e0c1f53a33995d42aba8cd40d0",
+      "number": 1,
+      "width": 1000,
+      "height": 1500,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-your-fishe-gawr-gura": {
+      "sha256": "8107600b93fb2496d1accdb8f5e523aee8f5f0fcb97f5496071e527343715e57",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "djawa-your-panties": {
+      "sha256": "f463e6545199a4b94f166ce0f49d5b2c6063e7c78b8f680e10eb635e3b472af6",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "mimmi-indie-sana-sopmod2-2019": {
+      "sha256": "ce39e23bb094068b43791544367522a168f66aec78af9c7d93154a3380727ed5",
+      "number": 1,
+      "width": 1400,
+      "height": 2043,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay": {
+      "sha256": "236452641d42655507baf1a7c82f5ff39678e5c295f4e6fdd06bce74bfe547dc",
+      "number": 1,
+      "width": 912,
+      "height": 1368,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay": {
+      "sha256": "bb9f70f38b55657ca5e3065079798d3a192d5aa997da91ab05ecb4b6b59a32fb",
+      "number": 6,
+      "width": 912,
+      "height": 1368,
+      "face": [
+        281,
+        344,
+        286,
+        286
+      ],
+      "position": [
+        50,
+        26.479
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 8.334,
+      "not_identity_recognition": true
+    },
+    "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay": {
+      "sha256": "25dec1e42025c600189f4cbfb6bcf0849590719675a3e4a1648475fa1a3786e9",
+      "number": 1,
+      "width": 912,
+      "height": 1368,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a54385nz": {
+      "sha256": "9d6ed3dad4c6162fdd93c923c0e2a0583f7cfb9e7f473d5a212fa0f111469832",
+      "number": 1,
+      "width": 2700,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a54e445z": {
+      "sha256": "8ffc9cc1ba41fdb3345cffb52331dae840d27392a588265742cad2808452bab0",
+      "number": 1,
+      "width": 2401,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a584e85z": {
+      "sha256": "887678d284e5a8b37fdedf984f0f48a41ee9be55175814502bcdca617e572779",
+      "number": 1,
+      "width": 2700,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a5e78m5a": {
+      "sha256": "6cd51e28aafe4745b469a8dcd31d33849d5bcfdd6413fb03853f578a42401ae8",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a5eenena": {
+      "sha256": "23e8c11ff280482f1f783600baa46b5131952550b818773b49204118e5e6c45d",
+      "number": 5,
+      "width": 1800,
+      "height": 2700,
+      "face": [
+        241,
+        388,
+        971,
+        972
+      ],
+      "position": [
+        50,
+        20.667
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 13.251,
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a884435a": {
+      "sha256": "ac1e9eeaac8a3e9a6488ac85d90e22f804f8627b1827a9ccc574b7ba794c3cf4",
+      "number": 6,
+      "width": 2700,
+      "height": 1800,
+      "face": [
+        1617,
+        254,
+        334,
+        333
+      ],
+      "position": [
+        50,
+        50
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 6.201,
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a8847m5a": {
+      "sha256": "9a8a6afbc21b8ccdc049dc399717d4ce2f10e7f495792b01bdbe465187932522",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a8856noa": {
+      "sha256": "5fca6772fa2fb0b3c83e27d1c2f15417ccaae62d7d9e2246bdc0be9737ca1c13",
+      "number": 4,
+      "width": 2700,
+      "height": 1800,
+      "face": [
+        1090,
+        333,
+        270,
+        270
+      ],
+      "position": [
+        50,
+        50
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 10.318,
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a88763oa": {
+      "sha256": "fbfc9bb919caa228fc41742c1ad2415b308a572f8d3bb47feb022d68989d941f",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a8n7me7a": {
+      "sha256": "24c32720998f683168c4b87b462a9149d4c9301001cc8a7dec689f39b2ebddd4",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a8n8n85a": {
+      "sha256": "6394b22bcae38a154776b69b28c958ccb7eb2f445484a02a81aebe9fae14caa0",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a8n96x7a": {
+      "sha256": "30243ded0aa7845d2264dd95a487d98f36941295415924226111f89376fb8998",
+      "number": 1,
+      "width": 2701,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a93xn3oa": {
+      "sha256": "91668c950c677e85e20c7bc80a8d48950e641dd8a8c86390ecd27874211cf8f0",
+      "number": 1,
+      "width": 400,
+      "height": 600,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-a9nxx64z": {
+      "sha256": "00c4b4a4e4c5992035c62973e68d4d34fe157c54f60391f9cae28108d5ae5150",
+      "number": 1,
+      "width": 2000,
+      "height": 3001,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-ae57484a": {
+      "sha256": "ab15803aeaa57c2674cae271c0edf79210799b892b791cc395e98a8ceb9e024f",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-am8o3e7z": {
+      "sha256": "b887da828818b9181a31fdabccf46c580d92ceb2f42520357c03c82e76366daf",
+      "number": 8,
+      "width": 1802,
+      "height": 2700,
+      "face": [
+        817,
+        486,
+        559,
+        559
+      ],
+      "position": [
+        50,
+        13.403
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 6.978,
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-amn8o34z": {
+      "sha256": "a51645656bb4aa5a60461b15dd0b0a3ecb9f9f178cb0258ad967e6f8c4b630c4",
+      "number": 1,
+      "width": 2696,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-amno754z": {
+      "sha256": "3f66bc2b0dff867456a4679287e402952400112697e52f07fbdee731639ba5be",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-an5o93ez": {
+      "sha256": "e85e937533e32c624d78a7c577ff426168cfba4a49b01f86b4a7377d26adb4b1",
+      "number": 1,
+      "width": 512,
+      "height": 776,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-an65656a": {
+      "sha256": "ca520a97ae272a3f5f1a153d28a07389163ffd30c604cf3847a51245dd8a2b01",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-axm7n43z": {
+      "sha256": "3d2cf22a8d317792c59f5537795c0ba91a1e740d841dae3636a636deebdaeaed",
+      "number": 1,
+      "width": 512,
+      "height": 776,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z4m985xa": {
+      "sha256": "ddda494d590c0a7ddbe8a9714c2d42854b524902fcefa4de99ffe87363d5ae35",
+      "number": 1,
+      "width": 400,
+      "height": 600,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z4m9x9xa": {
+      "sha256": "097478fbd6aa093346d725b1be02048f548b77018c5736cc3486e2a622f8cc32",
+      "number": 1,
+      "width": 512,
+      "height": 776,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z4ox65ea": {
+      "sha256": "9cb159899bcc9620cc669756b609965b7395b9b346f8833998c553d0b768df30",
+      "number": 1,
+      "width": 1100,
+      "height": 1649,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z4x6o3nz": {
+      "sha256": "5682107c84e15408352c3061a9b64f1e72c6dfd8a4c4398e8d780a33b699928b",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z4xoo5nz": {
+      "sha256": "887678d284e5a8b37fdedf984f0f48a41ee9be55175814502bcdca617e572779",
+      "number": 1,
+      "width": 2700,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z63984ma": {
+      "sha256": "d6c63cc87802be624f2751274c83dc2d06dce307d32bf5269f8bf04eb29f5948",
+      "number": 1,
+      "width": 1800,
+      "height": 2401,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z6exx6ma": {
+      "sha256": "1b62cac1a6d1f6f4d10c8867c97a5ed79f9b1fb838b2882b08fe56a34b896c37",
+      "number": 3,
+      "width": 1800,
+      "height": 2700,
+      "face": [
+        787,
+        410,
+        343,
+        343
+      ],
+      "position": [
+        50,
+        1.167
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 7.686,
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z76xe74a": {
+      "sha256": "2828519cbfb85b5e59b7046129a446b1ea3b9e0c20437cd4429ac23e67842dd8",
+      "number": 8,
+      "width": 1800,
+      "height": 2700,
+      "face": [
+        581,
+        368,
+        813,
+        813
+      ],
+      "position": [
+        50,
+        14.033
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 10.659,
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z7e396nz": {
+      "sha256": "067525bb48f165bf248b71789b875cd0a8ff4ae481857e164f381e85440a01dc",
+      "number": 1,
+      "width": 2700,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z7e69mnz": {
+      "sha256": "bfca96b3297bf1dd9deafaeab6b36f63982bac6969c59873d29960475282af1e",
+      "number": 1,
+      "width": 512,
+      "height": 776,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-z7exoo5z": {
+      "sha256": "0d5898a4a719398a6d84345ff58933425db09e09159342ced4d1db2e2aca4db8",
+      "number": 1,
+      "width": 2700,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-zo555x4z": {
+      "sha256": "edb878708fdf7a85405c9539752f0ade71cfab4a9e2a030b09fdc97eb3f876e6",
+      "number": 1,
+      "width": 512,
+      "height": 776,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-zo5n754z": {
+      "sha256": "a7a66fb86081e75002c1eb32e1be6ca0db3cda8b696f5687673937875b51ddc9",
+      "number": 2,
+      "width": 1800,
+      "height": 2700,
+      "face": [
+        692,
+        454,
+        502,
+        502
+      ],
+      "position": [
+        50,
+        9.4
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 9.68,
+      "not_identity_recognition": true
+    },
+    "v2ph-actor-zo799eez": {
+      "sha256": "f9acad7ce88443c99b77621ea4d8233811bc4ee546333a6a1d1b8bb690a6190f",
+      "number": 1,
+      "width": 2000,
+      "height": 3001,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-azur-lane-tashkent": {
+      "sha256": "cbd9efb62e03adcea99103d2e3871c3faf06cf22cd39b73c6df970b2de6fb2bb",
+      "number": 1,
+      "width": 1800,
+      "height": 2400,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "v2ph-cream-cow-milk": {
+      "sha256": "5b592b1f76a6be4b15c93f135fcc797f5e1c046e30050ac7899a0fdd9a5bd11d",
+      "number": 2,
+      "width": 1800,
+      "height": 2700,
+      "face": [
+        822,
+        480,
+        378,
+        378
+      ],
+      "position": [
+        50,
+        7.0
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 10.252,
+      "not_identity_recognition": true
+    },
+    "v2ph-girls-frontline-hk416": {
+      "sha256": "3c3863c85ea2087f8877addda6d94b9f002be9b81b0a64af7cbc75f9bad07b01",
+      "number": 7,
+      "width": 1800,
+      "height": 2700,
+      "face": [
+        654,
+        318,
+        403,
+        403
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "verified_same_work_local_face_and_eye_region",
+      "confidence": 6.218,
+      "not_identity_recognition": true
+    },
+    "v2ph-sukajan-gal": {
+      "sha256": "2a5598de148a87733e5e4a41923372f527adc47fb9329e6d8ab289fb92160211",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "xiutu-public-1190145": {
+      "sha256": "f0129611872ae772ccd5cb3d4d8a6b43a3b36af5247d49f2f9c247b006156922",
+      "number": 1,
+      "width": 2700,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "xiutu-public-1190154": {
+      "sha256": "887678d284e5a8b37fdedf984f0f48a41ee9be55175814502bcdca617e572779",
+      "number": 1,
+      "width": 2700,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "sha_verified_same_work_local_no_face_proven",
+      "not_identity_recognition": true
+    },
+    "xiutu-public-1190156": {
+      "sha256": "d9a25f3ed5f8c5cf1577271d8c8b553fe5419dec607e30eee039555fd37b7c0b",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "xiutu-public-1190158": {
+      "sha256": "d61e19c21136a909f72cb5137bb7f3d8ec6c4c74734e062d96b481aa892691b4",
+      "number": 1,
+      "width": 1800,
+      "height": 2700,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    },
+    "xiutu-public-1190160": {
+      "sha256": "9d4291b7689e87011192da46ea92813e0f949aeb057c977b2c4d25af376e20b2",
+      "number": 1,
+      "width": 2700,
+      "height": 1800,
+      "position": [
+        50,
+        20
+      ],
+      "fit": "cover",
+      "method": "owner_index_same_work_sha_only_no_pixel_decode",
+      "not_identity_recognition": true
+    }
+  },
+  "coverage": {
+    "manual_kept": 0,
+    "face_selected": 20,
+    "same_work_local_fallback": 44,
+    "owner_sha_only_fallback": 16,
+    "total_visible_source_works": 80,
+    "refused_incorrect_sha": 0
+  }
 }
