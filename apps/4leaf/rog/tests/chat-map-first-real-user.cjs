@@ -38,6 +38,16 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
      .map(e=>e.getAttribute('aria-label'))};
   });
   assert.equal(state.terrain,'unverified','room coords are NOT original EXE source');
+  if(phone){
+   const mobile=await page.evaluate(()=>({
+    viewportInOverlay:!!document.querySelector('#social-mobile-room-map #social-map-viewport'),
+    markerOnMap:getComputedStyle(document.querySelector('.social-directory-row')).position,
+    toggleInOverlay:!!document.querySelector('#social-mobile-room-map #social-web-estate-toggle')
+   }));
+   assert.equal(mobile.viewportInOverlay,true,'phone must show live draggable map, not a detached two-column room grid');
+   assert.equal(mobile.markerOnMap,'absolute','phone room markers must occupy spatial positions in the map');
+   assert.equal(mobile.toggleInOverlay,true,'map/list toggle must be reachable above the phone overlay');
+  }
   assert.ok(state.roomNames.every(x=>x.includes('채팅방 입장')));
   assert.ok(!state.roomNames.some(x=>!x),'all real destinations must be keyboard accessible');
   await page.screenshot({path:'chat-map-first-'+engine.name()+(phone?'-phone':'-desktop')+'.png'});
