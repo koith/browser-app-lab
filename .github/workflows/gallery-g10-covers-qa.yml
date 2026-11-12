@@ -46,12 +46,18 @@ jobs:
               result=json.loads((Path('gallery-g10-cover-review')/(model+'-album-covers.json')).read_text())
               src={a['id']:a for a in local['albums']+owner['albums']}
               for aid,cover in result['covers'].items():
-                  photos=[p for a in local['albums']+owner['albums'] if a['id']==aid
-                          for p in a['images']]
-                  exact=[p for p in photos if p.get('sha256')==cover['sha256']]
+                  photos=[(p,p.get('number') or i+1) for a in local['albums']+owner['albums']
+                          if a['id']==aid for i,p in enumerate(a['images'])]
+                  exact=[(p,n) for p,n in photos if p.get('sha256')==cover['sha256']]
                   assert exact, ('not a same-work saved original',model,aid)
                   assert any(p.get('width')==cover['width'] and p.get('height')==cover['height']
-                             and p.get('number',1)==cover['number'] for p in exact),('bad photo metadata',model,aid)
+                             and n==cover['number'] for p,n in exact),('bad photo metadata',model,aid)
+                  other_owners={a['id'] for a in owner['albums'] if a['id']!=aid
+                      for p in a['images'] if p.get('sha256')==cover['sha256']}
+                  same_owner=any(a['id']==aid and
+                      any(p.get('sha256')==cover['sha256'] for p in a['images'])
+                      for a in owner['albums'])
+                  assert not other_owners or same_owner,('other-work owner SHA used as cover',model,aid,other_owners)
                   assert all(0<=x<=100 for x in cover['position']),('invalid crop',model,aid)
                   assert cover.get('not_identity_recognition') is True or result['not_identity_recognition'] is True
               print('G10_ACTUAL_SAVED_COVER_SHA_EXACT_OWNER_AND_LOCAL_PASS',
