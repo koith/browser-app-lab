@@ -272,6 +272,71 @@ const path=require('path');
     'unknown WebRTC role cannot mutate the authoritative match');
   console.log('WEBRTC TURN AUTHORIZATION PASS: guest-only, disconnected-host, unknown-role state unchanged');
 
+  // M08: finish an actual connected two-client match, not merely a
+  // mocked internal finishGame call. Ensure the authoritative host's
+  // real dice animation moves the pawn into source GOAL, persists a
+  // winner and broadcasts the exact result to the remote guest.
+  await host.evaluate(()=>{
+    window.__LEAF_NET__.role='host';window.__LEAF_NET__.connected=true;
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    m.mode='network';m.finished=false;m.winner=-1;m.active=0;
+    m.players[0].position=m.tiles.length-2;
+    m.players[0].jail=0;m.players[0].effects={};
+    m.players[1].position=0;
+    m.tiles[m.tiles.length-2]='normal';
+    window.__LEAF_BRIDGE__.onState(m);
+    window.__ROG_TEST__.drawGame();
+  });
+  await guest.waitForFunction(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return m?.active===0&&m.players[0].position===m.tiles.length-2&&
+      m.finished===false;
+  },null,{timeout:12000});
+  assert.equal(await host.locator('#roll-btn').isEnabled(),true,
+    'connected authoritative host can make the last genuine GOAL move');
+  await host.locator('#roll-btn').click();
+  await host.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.finished===true,
+    null,{timeout:20000});
+  await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.finished===true,
+    null,{timeout:12000});
+  await host.waitForFunction(()=>document.querySelector(
+    '#leaf-original-match-result')?.dataset.nativeResult==='ready',
+    null,{timeout:12000});
+  const fullState=await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch(),panel=document.querySelector(
+      '#leaf-original-match-result');
+    return {map:m.map,finished:m.finished,winner:m.winner,round:m.round,
+      active:m.active,dice:m.lastRoll,history:m.history,
+      positions:m.players.map(p=>p.position),
+      tileCount:m.tiles.length,realResultArt:panel?.dataset.originalMember,
+      realHeader:panel?.querySelector('.leaf-original-result-heading')?.naturalWidth,
+      players:panel?.querySelectorAll('tbody tr').length};
+  });
+  const guestState=await guest.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return {map:m.map,finished:m.finished,winner:m.winner,round:m.round,
+      active:m.active,dice:m.lastRoll,history:m.history,
+      positions:m.players.map(p=>p.position),tileCount:m.tiles.length};
+  });
+  assert.equal(fullState.winner,0);
+  assert.equal(fullState.positions[0],fullState.tileCount-1);
+  assert.equal(fullState.realResultArt,'Dice/IMG.pak:winResult.spr');
+  assert.equal(fullState.realHeader,452,'full real match ends with original IMG source result header');
+  assert.equal(fullState.players,2);
+  for(const key of ['map','finished','winner','round','active','dice','history',
+    'positions','tileCount'])
+    assert.deepEqual(guestState[key],fullState[key],
+      'second physical browser viewport must receive same completed '+key);
+  await host.screenshot({path:'rog-online-real-finished-match.png'});
+  console.log('WEBRTC REAL TWO-BROWSER FULL GOAL AND SOURCE RESULT PASS',
+    JSON.stringify({winner:fullState.winner,positions:fullState.positions,
+      lastRoll:fullState.dice,originalResult:fullState.realResultArt,
+      remoteCompleted:true}));
+  await host.locator('#modal-buttons button').filter({hasText:'다시 시작'}).click();
+  assert.ok(await host.locator('#lobby:not(.hidden),#dice-channels:not(.hidden)').count(),
+    'source victory result must offer a usable return to real Dice lobby');
+  console.log('WEBRTC REAL WIN -> REPLAY LOBBY PASS');
+
   assert.deepEqual(errors,[],'no client JavaScript errors');
   await guest.screenshot({path:'rog-online-guest.png'});
   await host.screenshot({path:'rog-online-host.png'});
