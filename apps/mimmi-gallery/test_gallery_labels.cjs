@@ -33,7 +33,13 @@ const owner=JSON.parse(fs.readFileSync(path.join(__dirname,'owner-index.json')))
 const local=JSON.parse(fs.readFileSync(path.join(__dirname,'stored-albums.json')));
 let mapped=0,unmapped=[];
 const byId=new Map();
-for(const a of [...local.albums,...owner.albums])byId.set(a.id,a);
+// The production SHA-union uses the committed local work description first;
+// owner-index stores only photo identity/bytes and can omit publisher/title.
+for(const a of [...local.albums,...owner.albums]){
+ const prior=byId.get(a.id);
+ if(!prior)byId.set(a.id,a);
+ // Never erase a known first-party publisher with empty owner-index metadata.
+}
 for(const a of byId.values()){
  if(publishers.key(a,registry,describe)==='unknown')unmapped.push(a.id);
  else mapped++;
