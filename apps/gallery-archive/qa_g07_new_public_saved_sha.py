@@ -50,7 +50,7 @@ def live(browser_type,p):
         page.wait_for_function("""sha=>{
           const a=stored.find(x=>x.id==='public-yui-sns');
           return a&&a.images.some(p=>p.sha256===sha);
-        }""",PHOTO_SHA,timeout=60000)
+        }""",arg=PHOTO_SHA,timeout=60000)
         evidence=page.evaluate("""sha=>{
           const a=stored.find(x=>x.id==='public-yui-sns');
           const p=a.images.find(x=>x.sha256===sha);
@@ -77,7 +77,7 @@ def live(browser_type,p):
         page.wait_for_function("""sha=>{
           const a=stored.find(x=>x.id==='public-yui-sns');
           return a&&a.images.some(p=>p.sha256===sha);
-        }""",PHOTO_SHA,timeout=45000)
+        }""",arg=PHOTO_SHA,timeout=45000)
         print('G07_ACTUAL_NEW_PUBLIC_SAVED_PHOTO_LIVE_BROWSER_PASS',json.dumps({
           'browser':browser_type,'sha256':PHOTO_SHA,'nativeDecoded':native,
           'albumDetailTileExists':evidence['tileInActualAlbumDetail'],
