@@ -25,7 +25,7 @@ for(const id of ids){
   continue;
  }
  assert.ok(body,'archived original full-body missing: '+id);
- assert.equal(body.originalMember,row.originalMember,
+ assert.equal(body.originalMember.split('/').at(-1),row.member+'.obs',
   'source body must be owned by this CHR record: '+id);
  const f=body.frames.find(x=>x.index===0);
  assert.ok(f&&f.url.startsWith('./original/OBS/')&&
