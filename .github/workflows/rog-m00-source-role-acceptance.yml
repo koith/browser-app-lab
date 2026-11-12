@@ -1,0 +1,36 @@
+name: 4LEAF M00 original archive source-role evidence acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/m00-original-client-source-role-audit.cjs'
+      - '.github/workflows/rog-m00-source-role-acceptance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/m00-original-client-source-role-audit.cjs'
+      - '.github/workflows/rog-m00-source-role-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-binaries-and-live-role:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source archive hash, image signatures and active screen consumers
+        env:
+          LEAF_SOURCE_REPORT: 4leaf-m00-original-source-role-report.json
+        run: node apps/4leaf/rog/tests/m00-original-client-source-role-audit.cjs
+      - name: Original native CHR source identity cross-check
+        run: node apps/4leaf/rog/tests/chr-body-source-map.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-original-client-roles-and-digests
+          path: 4leaf-m00-original-source-role-report.json
+          retention-days: 14
