@@ -11,6 +11,9 @@ on:
       - 'apps/yui-gallery/publishers.json'
       - 'apps/mimmi-gallery/publishers.json'
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
+      - 'apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs'
+      - 'apps/yui-gallery/gallery-labels.js'
+      - 'apps/mimmi-gallery/gallery-labels.js'
       - 'apps/gallery-archive/test_publisher_logo_fallback.cjs'
       - 'apps/gallery-archive/test_curated_cover_manifest.cjs'
       - 'apps/gallery-archive/test_cross_model_saved_sha.cjs'
@@ -30,6 +33,9 @@ on:
       - 'apps/yui-gallery/publishers.json'
       - 'apps/mimmi-gallery/publishers.json'
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
+      - 'apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs'
+      - 'apps/yui-gallery/gallery-labels.js'
+      - 'apps/mimmi-gallery/gallery-labels.js'
       - 'apps/gallery-archive/test_publisher_logo_fallback.cjs'
       - 'apps/gallery-archive/test_curated_cover_manifest.cjs'
       - 'apps/gallery-archive/test_cross_model_saved_sha.cjs'
@@ -54,6 +60,7 @@ jobs:
           node apps/gallery-archive/test_publisher_logo_fallback.cjs
           node apps/gallery-archive/test_curated_cover_manifest.cjs
           node apps/gallery-archive/test_cross_model_saved_sha.cjs
+          node apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs
       - name: Verify both embedded gallery scripts parse
         run: |
           python - <<'PY'
