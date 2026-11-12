@@ -1,0 +1,85 @@
+name: G07 Actual New Public Photo Bytes into Free Gallery Pages
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
+      - '.github/workflows/gallery-g07-public-pages-acquire.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: g07-one-free-public-publisher-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: false
+jobs:
+  collect-actual-saved-photos:
+    # Only this repository's owned PR is permitted to publish committed bytes.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
+      - name: Verify SHA/physical-file publisher parsing in existing source collector
+        run: |
+          python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/publish_new_public_photos_to_pages.py
+          (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
+      - name: Scan actual Mimmi registered work pages without authentication
+        run: |
+          python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
+            --owner apps/mimmi-gallery/owner-index.json --out "$RUNNER_TEMP/g07-mimmi" \
+            --max-new 18 --max-pages 4 --render-budget 0 --focused-only \
+            --album-id v2ph-actor-z7exoo5z \
+            --album-id v2ph-actor-z76xe74a \
+            --album-id v2ph-actor-a8n8n85a \
+            --album-id v2ph-actor-an65656a \
+            --album-id djawa-your-panties \
+            --album-id djawa-my-summer-vacation-vol-5
+      - name: Scan actual Yui registered work pages without authentication
+        run: |
+          python apps/gallery-archive/direct_photo_pipeline.py --model yui \
+            --owner apps/yui-gallery/owner-index.json --out "$RUNNER_TEMP/g07-yui" \
+            --max-new 18 --max-pages 4 --render-budget 0 --focused-only \
+            --album-id yui-chinokun-illustar-2026-public \
+            --album-id artgravia-677-yui-public-samples \
+            --album-id yui-summer-public-samples \
+            --album-id yui-meow-public-samples \
+            --album-id inven-public-photos \
+            --album-id public-yui-sns
+      - name: Independently verify and preserve new real static Pages photo bytes
+        run: |
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model mimmi --stage "$RUNNER_TEMP/g07-mimmi" --limit 18 --budget 14000000
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model yui --stage "$RUNNER_TEMP/g07-yui" --limit 18 --budget 14000000
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          node apps/gallery-archive/test_curated_cover_manifest.cjs
+      - name: Commit only verifiable actual originals and exact manifests to own PR branch
+        if: github.event_name == 'pull_request'
+        env:
+          TARGET_BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/mimmi-gallery/stored-albums.json apps/yui-gallery/stored-albums.json
+          git add apps/mimmi-gallery/stored-albums apps/yui-gallery/stored-albums
+          if git diff --cached --quiet; then
+            echo 'G07_NO_NEW_PUBLIC_IMAGE_BYTES_VERIFIED' >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m "feat(G07): commit new SHA-verified real public gallery original files"
+            git push origin "HEAD:refs/heads/$TARGET_BRANCH"
+            echo 'G07_NEW_REAL_SHA_FILES_COMMITTED_TO_PR' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g07-real-public-photos-evidence
+          path: |
+            ${{ runner.temp }}/g07-mimmi/metadata/collection-audit.json
+            ${{ runner.temp }}/g07-mimmi/metadata/pages-publication.json
+            ${{ runner.temp }}/g07-yui/metadata/collection-audit.json
+            ${{ runner.temp }}/g07-yui/metadata/pages-publication.json
+          retention-days: 7
+          if-no-files-found: warn
