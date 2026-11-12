@@ -143,8 +143,8 @@ for(const model of ['mimmi','yui']){
   'committed original local bytes remain reachable in the canonical album');
  assert.equal(after.reduce((n,a)=>n+a.images.length,0),beforeTotal-repeated.length,
   'only provably duplicated alias rows removed from viewer, not files');
- assert.equal(sandbox.window.SavedGalleryPhotoUnion.dedupeAliasedPhysicalCopies(after,aliases),after,
-  'alias correction should be idempotent');
+ assert.deepEqual(sandbox.window.SavedGalleryPhotoUnion.dedupeAliasedPhysicalCopies(after,aliases),after,
+  'alias correction should be idempotent in album and image contents');
  console.log('YUI_V04_REAL_SHA_OWNER_ALBUM_EXACT_COPY_REASSIGN_PASS',JSON.stringify({
   aliased_local_copies_removed:repeated.length,owner_originals_preserved:v04.images.length,
   canonical_originals_preserved:teddy.images.length
