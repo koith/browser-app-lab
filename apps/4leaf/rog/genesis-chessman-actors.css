@@ -126,3 +126,14 @@
   animation:none!important;
  }
 }
+
+/* ACT-01 original-body acceptance (2026-11-12):
+   A source OBS body renders as a separate authentic PNG sibling, not inside
+   the old CSS limbs. Hide all fabricated WEB cape/torso/legs in both states:
+   - original source present -> only the source body is displayed;
+   - source absent (0156) -> only genuine IMG/avatarback is displayed.
+   Keep source-animation rig for source verified keyframe sheets. */
+#game :is(#board-pawns,#battle-visual) :is(
+ [data-actor-rig="original-obs-sprite"],
+ [data-actor-rig="original-card-portrait-fallback"]
+) > .leaf-chess-actor {display:none!important}
