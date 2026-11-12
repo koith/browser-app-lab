@@ -431,7 +431,7 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 #rooms .social-map-viewport:active{cursor:grabbing}
 #rooms .social-map-viewport:focus-visible{outline:2px solid #f7e2ac}
 #rooms .social-map-plane{
- position:absolute;left:0;top:0;width:1480px;height:1120px;
+ position:absolute;left:0;top:0;width:1480px;height:1840px;
  transform-origin:0 0;will-change:transform;
  /* Original ChatTown terrain coordinates are not recovered. Avoid
     misidentifying the Dice IMG/bgtile as historical chat geography. */

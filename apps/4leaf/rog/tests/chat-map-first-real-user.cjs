@@ -33,11 +33,12 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
    const v=document.getElementById('social-map-viewport');
    const p=document.getElementById('social-map-plane');
    return {viewport:v.getBoundingClientRect().toJSON(),transform:getComputedStyle(p).transform,
-    terrain:p.dataset.terrain,background:getComputedStyle(p).backgroundImage,
+    terrain:p.dataset.terrain,capacity:Number(p.dataset.roomCapacity),background:getComputedStyle(p).backgroundImage,
     roomNames:[...document.querySelectorAll('#social-directory-list .social-directory-row')]
      .map(e=>e.getAttribute('aria-label'))};
   });
   assert.equal(state.terrain,'unverified','room coords are NOT original EXE source');
+  assert.equal(state.capacity,200,'2002 v0.9 announced up to 200 distinct rooms per ChatTown');
   if(phone){
    const mobile=await page.evaluate(()=>({
     viewportInOverlay:!!document.querySelector('#social-mobile-room-map #social-map-viewport'),

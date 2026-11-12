@@ -61,7 +61,7 @@
  };
  const canonicalRooms=(region,district)=>Array.from({length:8},(_,slot)=>
   canonicalRoom(canonicalRoomId(region,district,slot))).filter(Boolean);
- const ROOM_MAP={width:1480,height:1120};
+ const ROOM_MAP={width:1480,height:1840};
  // A historic 2-person chat-room event is documented. Other limits are
  // restoration controls, not claims about the original server's room menu.
  const allowedCapacity=n=>[2,4,8,12].includes(Number(n))?Number(n):12;
@@ -898,13 +898,13 @@
  // Use distinct central-first positions for real browser-created rooms.
  const liveRoomCells=(()=>{
   const cells=[];
-  for(let row=0;row<12;row++)for(let col=0;col<7;col++)
-   cells.push({col,row,distance:Math.abs(col-3)+Math.abs(row-5.5)});
+  for(let row=0;row<20;row++)for(let col=0;col<10;col++)
+   cells.push({col,row,distance:Math.abs(col-4.5)+Math.abs(row-9.5)});
   return cells.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.col-b.col);
  })();
  function realRoomPosition(index){
   const cell=liveRoomCells[index%liveRoomCells.length];
-  return {x:70+cell.col*188,y:70+cell.row*81};
+  return {x:70+cell.col*130,y:70+cell.row*85};
  }
  function setupRoomMap(){
   const viewport=$('social-map-viewport'),plane=$('social-map-plane');
@@ -913,6 +913,7 @@
   // ChatTown backdrops are district selectors, while IMG/bgtile belongs
   // to Genesis Dice. Do not inject either as a fake native room-map tile.
   plane.dataset.terrain='unverified';
+  plane.dataset.roomCapacity=String(liveRoomCells.length);
   const key=state.region+':'+state.district;
   const saved=state.roomMapOffsets[key];
   let x=saved?.x??-(ROOM_MAP.width-viewport.clientWidth)/2;
