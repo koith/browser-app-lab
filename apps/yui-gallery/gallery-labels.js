@@ -5,6 +5,18 @@
   let publisher=explicit||({'cn-wantuzhi-everyday':'Yo-U'}[a.id]||'');
   const brands=[[/sweetbox|\bSWTB\b/i,'SWEETBOX'],[/artgravia|\bAG\.\s*663\b/i,'ArtGravia'],[/milkybomb/i,'MilkyBomb'],[/\bYo[-_ ]U\b/i,'Yo-U'],[/pussylet/i,'PUSSYLET'],[/movie fantasy|\[(?:M|H)\.F\]/i,'MOVIE FANTASY']];
   if(!publisher)publisher=brands.find(([pattern])=>pattern.test(title))?.[1]||'';
+  // Only named, traceable official work prefixes establish publisher credit.
+  // Mirrored sources (V2PH, Pixibb, Huantuji) are never publisher identities.
+  if(!publisher&&/^crazygiant-(?:player5|yui-may2023)-public$/.test(String(a.id||'')))
+   publisher='CRAZY GIANT';
+  if(!publisher&&/^djawa-privaty-public-samples$/.test(String(a.id||'')))
+   publisher='DJAWA';
+  // Event/report/SNS albums are public documents, not a mystery "publisher".
+  if(!publisher&&(/-public(?:-samples)?$/.test(String(a.id||''))||
+     /^public-yui-sns$/.test(String(a.id||''))||
+     /^yui-indie-photographer-/.test(String(a.id||''))))
+   publisher='공개 자료';
+
   if(!publisher){
    let host='';try{host=new URL(a.source||'').hostname}catch{}
    if(host==='ctee.kr')publisher='크티';
@@ -20,7 +32,7 @@
  }
  function coverTitle(a){
   const original=String(a.title||''),publisher=describe(a).publisher;
-  const aliases={SWEETBOX:['SWEETBOX','SWTB'],ArtGravia:['ArtGravia','AG.'],MilkyBomb:['MilkyBomb'],'Yo-U':['Yo-U','Yo U','Yo_U'],PUSSYLET:['PUSSYLET'],'MOVIE FANTASY':['MOVIE FANTASY','M.F','H.F'],'크티':['크티','CTEE'],'B컷':['B컷','BCUT']};
+  const aliases={DJAWA:['DJAWA'],'CRAZY GIANT':['CRAZY GIANT'],SWEETBOX:['SWEETBOX','SWTB'],ArtGravia:['ArtGravia','AG.'],MilkyBomb:['MilkyBomb'],'Yo-U':['Yo-U','Yo U','Yo_U'],PUSSYLET:['PUSSYLET'],'MOVIE FANTASY':['MOVIE FANTASY','M.F','H.F'],'크티':['크티','CTEE'],'B컷':['B컷','BCUT']};
   const tokens=aliases[publisher]||(publisher!=='미확인'?[publisher]:[]);
   let title=original;
   for(const token of tokens){
