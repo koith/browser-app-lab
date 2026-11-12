@@ -36,7 +36,12 @@ def main():
                 per_member[card]=per_member.get(card,0)+int(lost.sum())
             pairs+=1
     assert pairs>=540,pairs
-    assert "ORIGINAL_LEAF_FULL_ACTION_FRAMES" in (ROOT/"genesis-chessman-actors.js").read_text()
+    actor=(ROOT/"genesis-chessman-actors.js").read_text()
+    mapping=(ROOT/"chr-body-source-map.js").read_text()
+    # The live renderer now uses CHR+260 indirection. Requiring it to
+    # reference old full-action frames directly was a stale pre-CHR test.
+    assert "window.__LEAF_CHR_BODY_MAP__?.resolve(id)" in actor
+    assert "ORIGINAL_LEAF_FULL_ACTION_FRAMES" in mapping
     print("SRC04 PALETTE0 PAIR AUDIT PASS",json.dumps({"pairs":pairs,"pairsWithLegacyIndex0Loss":lost_pairs,"lostPixels":lost_total,"members":per_member}))
 if __name__=="__main__":
     main()
