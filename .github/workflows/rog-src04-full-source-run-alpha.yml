@@ -1,0 +1,74 @@
+name: 4LEAF SRC-04 actual original PAK run-alpha re-extraction (97 source bodies)
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tools/src04-reextract-run-alpha-audit.py'
+      - 'apps/4leaf/rog/tests/test_src04_palette0_pairs.py'
+      - '.github/workflows/rog-src04-full-source-run-alpha.yml'
+      - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tools/src04-reextract-run-alpha-audit.py'
+      - 'apps/4leaf/rog/tests/test_src04_palette0_pairs.py'
+      - '.github/workflows/rog-src04-full-source-run-alpha.yml'
+      - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-actual-original-native-run-alpha:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prepare read-only source decompression
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y unshield
+          python -m pip install pillow numpy
+      - name: Verify old palette-index-zero loss against already corrected published actor files
+        run: python apps/4leaf/rog/tests/test_src04_palette0_pairs.py
+      - name: Download SHA1-verified 2002 installer and extract PAK originals (no Windows code executed)
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/leaf-src04 /tmp/leaf-src04-unpacked
+          python - <<'PY'
+          import urllib.request,hashlib
+          from pathlib import Path
+          dest=Path('/tmp/leaf-src04/original.zip')
+          good='86526d89679ae39b85fe9808da97ad871b7888d9'
+          request=urllib.request.Request('https://archive.org/download/4leaf/4leaf.zip',
+            headers={'User-Agent':'Mozilla/5.0 (4LEAF archival source pixel verification)'})
+          for attempt in range(3):
+            try:
+              h=hashlib.sha1()
+              with urllib.request.urlopen(request,timeout=125) as stream,dest.open('wb') as f:
+                while chunk:=stream.read(1048576):
+                  f.write(chunk);h.update(chunk)
+                  assert f.tell()<95*1048576,'original installer exceeded bound'
+              assert h.hexdigest()==good,(h.hexdigest(),good)
+              print('SRC04_ORIGINAL_INSTALLER_SHA1_VERIFIED',good,dest.stat().st_size)
+              break
+            except Exception:
+              if attempt==2:raise
+          PY
+          unzip -q /tmp/leaf-src04/original.zip data1.cab data1.hdr -d /tmp/leaf-src04
+          unshield x -d /tmp/leaf-src04-unpacked /tmp/leaf-src04/data1.cab >/dev/null
+          find /tmp/leaf-src04-unpacked -iname '*.pak' | head -30
+      - name: Re-extract all 97 source CHR body PNG pixels with native written-run alpha
+        run: |
+          python apps/4leaf/rog/tools/src04-reextract-run-alpha-audit.py \
+            --pak-dir /tmp/leaf-src04-unpacked \
+            --report 4leaf-src04-original-run-alpha-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-src04-run-alpha-original-pak-evidence
+          path: 4leaf-src04-original-run-alpha-report.json
+          if-no-files-found: ignore
+          retention-days: 14
