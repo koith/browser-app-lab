@@ -705,10 +705,10 @@
     }
   },
   "coverage": {
-    "manual_kept": 39,
+    "manual_kept": 34,
     "face_selected": 0,
     "same_work_local_fallback": 0,
-    "owner_sha_only_fallback": 0,
+    "owner_sha_only_fallback": 5,
     "total_visible_source_works": 39,
     "refused_incorrect_sha": 0
   }

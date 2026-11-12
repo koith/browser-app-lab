@@ -322,7 +322,7 @@
     },
     "djawa-my-summer-vacation-vol-5": {
       "sha256": "7839a15ee0c70150ade3c82db21cef28812d76cc7b55575e10c189ca7716d4d0",
-      "number": 1,
+      "number": 21,
       "width": 1200,
       "height": 1800,
       "position": [
@@ -355,7 +355,7 @@
     },
     "djawa-nikke-elegg": {
       "sha256": "ff6987795692664a16503f35e5f6b7e8f1f61dd79e426ea9965261115959d9b7",
-      "number": 1,
+      "number": 26,
       "width": 912,
       "height": 1368,
       "position": [
@@ -1186,10 +1186,10 @@
     }
   },
   "coverage": {
-    "manual_kept": 80,
-    "face_selected": 0,
-    "same_work_local_fallback": 0,
-    "owner_sha_only_fallback": 0,
+    "manual_kept": 0,
+    "face_selected": 20,
+    "same_work_local_fallback": 44,
+    "owner_sha_only_fallback": 16,
     "total_visible_source_works": 80,
     "refused_incorrect_sha": 0
   }
