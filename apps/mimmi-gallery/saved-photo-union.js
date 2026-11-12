@@ -87,5 +87,55 @@ window.SavedGalleryPhotoUnion=(()=>{
   }
   return [...albums.values()];
  }
- return Object.freeze({join});
+
+ // A legacy local preview can be filed under an alias even while the actual
+ // owner index has a DISTINCT SHA-verified original at that alias route.
+ // Remove only local, byte+dimension-identical copies already represented in
+ // the canonical target album. Never remove an independently indexed owner
+ // original, and never delete the underlying committed file.
+ function dedupeAliasedPhysicalCopies(albums,aliases){
+  if(!Array.isArray(albums))throw new TypeError('Expected merged albums');
+  if(!aliases||typeof aliases!=='object')return albums;
+  const byId=new Map(albums.map(a=>[a.id,a]));
+  for(const [alias,targetId] of Object.entries(aliases)){
+   if(typeof targetId!=='string'||alias===targetId)continue;
+   const source=byId.get(alias),target=byId.get(targetId);
+   if(!source||!target)continue;
+   const canonicalFingerprints=new Set(target.images.map(p=>[
+    p.sha256,p.bytes,p.width,p.height
+   ].join('|')));
+   const before=source.images.length;
+   source.images=source.images.filter(p=>{
+    // A validated owner/vault original (including a pinned owner copy) must
+    // stay in its actual album even if another work also shares its bytes.
+    if(p.ownerAlbum||p.vaultAlbum||p.shaPinnedLocalCopy)return true;
+    if(typeof p.url!=='string'||
+       !p.url.startsWith('stored-albums/'+alias+'/')||
+       !/^stored-albums\/[a-z0-9-]{2,110}\/[a-zA-Z0-9._-]+\.(?:jpe?g|png|webp|avif)$/.test(p.url))
+     return true;
+    return !canonicalFingerprints.has([p.sha256,p.bytes,p.width,p.height].join('|'));
+   });
+   if(source.images.length===before)continue;
+   // The main join assigned a new display number to an owner photo that
+   // collided with the incorrectly aliased local preview. Restore its true
+   // immutable owner number now that the duplicate previews are absent.
+   const occupied=new Set();
+   for(const p of source.images){
+    const original=p.ownerAlbum===alias?p.storageNumber:null;
+    if(Number.isSafeInteger(original)&&original>0&&!occupied.has(original)){
+     p.number=original;
+     occupied.add(original);
+    }
+   }
+   let next=Math.max(0,...source.images.map(p=>Number(p.number)||0));
+   for(const p of source.images){
+    if(!Number.isSafeInteger(p.number)||p.number<1||occupied.has(p.number)&&p.ownerAlbum!==alias)
+     p.number=++next;
+    occupied.add(p.number);
+   }
+   source.images.sort((a,b)=>a.number-b.number);
+  }
+  return albums.filter(a=>a.images.length);
+ }
+ return Object.freeze({join,dedupeAliasedPhysicalCopies});
 })();

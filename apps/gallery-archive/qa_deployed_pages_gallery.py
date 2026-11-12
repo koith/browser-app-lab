@@ -172,6 +172,38 @@ def exercise(browser, model: str, rule: dict, engine: str):
             print("DEPLOYED_GALLERY_BOOTSTRAP_TIMEOUT",
                   json.dumps(diagnostic, ensure_ascii=False), flush=True)
             raise AssertionError(("gallery bootstrap did not reach physical count", diagnostic)) from exc
+        # Confirm the exact deployed gallery actually displays the distinct
+        # v04 owner original instead of legacy same-SHA Teddy Bear preview rows.
+        # During PR checks, the public Pages may still serve the previous main;
+        # after deployment the new union helper is required to run this gate.
+        if model == "yui":
+            v04_live = page.evaluate("""() => {
+              if(typeof SavedGalleryPhotoUnion.dedupeAliasedPhysicalCopies !== 'function')
+                return {release_has_fix:false};
+              const source=stored.find(a=>a.id==='v04');
+              const canonical=stored.find(a=>a.id==='teddy-bear97');
+              const physical=ownerStored.find(a=>a.id==='v04');
+              const actual=source?validImages(source):[];
+              const owner=physical?validImages(physical):[];
+              const card=document.querySelector('#albumgrid .album[data-id="v04"]');
+              return {release_has_fix:true,
+                distinct_originals:actual.length,
+                owner_originals:owner.length,
+                original_sha_matches:!!actual[0]&&!!owner[0]&&actual[0].sha256===owner[0].sha256,
+                original_number:actual[0]?.number??null,
+                canonical_originals:canonical?validImages(canonical).length:0,
+                preserved_card:!!card,
+                displayed_card_sha:card?.dataset.coverSha||null,
+                original_sha:owner[0]?.sha256||null};
+            }""")
+            if v04_live["release_has_fix"]:
+                assert v04_live["distinct_originals"] == v04_live["owner_originals"] == 1, v04_live
+                assert v04_live["original_sha_matches"] and v04_live["original_number"] == 1, v04_live
+                assert v04_live["canonical_originals"] >= 97, v04_live
+                assert v04_live["preserved_card"] and v04_live["displayed_card_sha"] == v04_live["original_sha"], v04_live
+                print("DEPLOYED_YUI_V04_SHA_ALIAS_CORRECT_PASS",
+                      json.dumps({**v04_live, "real_pixels_decoded": False},
+                                 ensure_ascii=False), flush=True)
         # Mimmi's old raw threshold included 481 repeated SHA rows. Require
         # every baseline distinct original plus the unchanged raw owner ledger;
         # duplicate rows can no longer make this test pass.

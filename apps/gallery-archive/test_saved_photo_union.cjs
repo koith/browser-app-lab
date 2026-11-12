@@ -110,4 +110,63 @@ for(const model of ['mimmi','yui']){
  console.log('GALLERY_JANUS_SHA_IDENTICAL_LOCAL_ORIGINALS_SURVIVE_PASS');
 }
 
+
+{
+ // Real regression: legacy v04 public previews are the exact same ten SHA
+ // originals that the Teddy Bear owner index already provides, but v04 also
+ // has an independently SHA-pinned owner original that MUST remain visible.
+ const yui=indexed('yui');
+ const aliases=JSON.parse(fs.readFileSync(path.join(ROOT,'apps/yui-gallery/album-aliases.json'))).aliases;
+ const ownerV04=yui[1].find(a=>a.id==='v04');
+ const ownerTeddy=yui[1].find(a=>a.id==='teddy-bear97');
+ const localV04=yui[0].find(a=>a.id==='v04');
+ assert.equal(aliases.v04,'teddy-bear97');
+ assert.ok(ownerV04?.images.length>=1&&ownerTeddy?.images.length>=10&&localV04?.images.length>=10);
+ const targetProofs=new Map(ownerTeddy.images.map(p=>[p.sha256,p]));
+ const repeated=localV04.images.filter(p=>{
+  const proof=targetProofs.get(p.sha256);
+  return proof&&proof.bytes===p.bytes&&proof.width===p.width&&proof.height===p.height;
+ });
+ assert.equal(repeated.length,10,'the ten actual previews must match real canonical owner metadata');
+ const merged=join(yui);
+ const beforeTotal=merged.reduce((n,a)=>n+a.images.length,0);
+ const after=sandbox.window.SavedGalleryPhotoUnion.dedupeAliasedPhysicalCopies(merged,aliases);
+ const v04=after.find(a=>a.id==='v04'),teddy=after.find(a=>a.id==='teddy-bear97');
+ assert.ok(v04&&teddy);
+ assert.equal(v04.images.length,ownerV04.images.length,'no wrong Teddy Bear duplicate photos inside v04');
+ assert.equal(v04.images[0].sha256,ownerV04.images[0].sha256,'exact owner original not hidden by legacy local previews');
+ assert.equal(v04.images[0].number,1,'physical owner display number restored');
+ assert.equal(v04.images[0].storageNumber,1,'actual owner route still points to original #1');
+ assert.ok(teddy.images.every(p=>targetProofs.has(p.sha256)),'canonical album contains its owner originals');
+ assert.equal(teddy.images.length,ownerTeddy.images.length,'canonical original photos stay viewable');
+ assert.ok(teddy.images.some(p=>p.shaPinnedLocalCopy&&p.originalAlbumId==='v04'),
+  'committed original local bytes remain reachable in the canonical album');
+ assert.equal(after.reduce((n,a)=>n+a.images.length,0),beforeTotal-repeated.length,
+  'only provably duplicated alias rows removed from viewer, not files');
+ assert.deepEqual(sandbox.window.SavedGalleryPhotoUnion.dedupeAliasedPhysicalCopies(after,aliases),after,
+  'alias correction should be idempotent in album and image contents');
+ console.log('YUI_V04_REAL_SHA_OWNER_ALBUM_EXACT_COPY_REASSIGN_PASS',JSON.stringify({
+  aliased_local_copies_removed:repeated.length,owner_originals_preserved:v04.images.length,
+  canonical_originals_preserved:teddy.images.length
+ }));
+}
+{
+ // Do not erase independent local/owner files or mismatched byte/dimension
+ // records even when an alias name happens to match.
+ const sha=x=>x.repeat(64);
+ const row=(n,x,bytes,url)=>({number:n,sha256:sha(x),bytes,width:640,height:960,url});
+ const owner={...row(1,'d',120,'owner:alias:1'),ownerAlbum:'alias',storageNumber:1};
+ const alias={id:'alias',images:[row(1,'a',100,'stored-albums/alias/a.jpg'),
+  row(2,'b',101,'stored-albums/alias/b.jpg'),owner]};
+ const target={id:'target',images:[{...row(1,'a',100,'owner:target:1'),ownerAlbum:'target'},
+  {...row(2,'b',999,'owner:target:2'),ownerAlbum:'target'}]};
+ const raw=join([[alias],[target]]);
+ const filtered=sandbox.window.SavedGalleryPhotoUnion.dedupeAliasedPhysicalCopies(raw,{alias:'target'});
+ const separate=filtered.find(a=>a.id==='alias');
+ assert.equal(separate.images.length,2,'different bytes and true owner SHA must not disappear');
+ assert.ok(separate.images.some(p=>p.sha256===sha('b')));
+ assert.ok(separate.images.some(p=>p.sha256===sha('d')&&p.ownerAlbum==='alias'));
+ console.log('YUI_ALIAS_DEDUPE_PROTECTS_DISTINCT_STORAGE_AND_OWNER_PASS');
+}
+
 console.log('GALLERY_NUMBER_COLLISION_EXACT_SHA_STORAGE_ROUTING_PASS');

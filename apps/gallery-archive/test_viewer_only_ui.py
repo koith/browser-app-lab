@@ -35,6 +35,9 @@ class ViewerOnlyTest(unittest.TestCase):
                 self.assertIn('src="saved-photo-union.js"', html)
                 self.assertTrue(
                     "stored=SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored])" in html
+                    or ("stored=SavedGalleryPhotoUnion.dedupeAliasedPhysicalCopies(" in html
+                        and "SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored])" in html
+                        and "albumAliases" in html)
                     or ("const merged=SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored])" in html
                         and "stored=joined.albums" in html),
                     "Gallery must render only the SHA-verified saved-photo union")
