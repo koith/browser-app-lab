@@ -1085,3 +1085,65 @@ def test_bounded_rclone_listing_timeout_terminates_child():
     with pytest.raises(subprocess.TimeoutExpired):
         demand_archive._bounded_list_output(
             [sys.executable,"-c",script],timeout=0.1,cap=1024)
+
+
+def test_public_content_warnings_do_not_hide_accessible_posts(monkeypatch):
+    """Public labels/CWs aren't deletions; access restrictions remain excluded.
+
+    Fake provider data only. Provider API, auth, and archive bytes aren't read.
+    """
+    from datetime import datetime, timezone
+    at=int(datetime(2026,11,12,22,0,tzinfo=timezone.utc).timestamp())
+    start,end=at-3600,at+3600
+    timestamp="2026-11-12T22:00:00Z"
+    did="did:plc:abcdefghijk"
+    base={"uri":"at://"+did+"/app.bsky.feed.post/visible001",
+          "author":{"did":did},"record":{"text":"섹트 synthetic",
+          "createdAt":timestamp}}
+    warning={**base,"labels":[{"val":"porn"},{"val":"sexual"},{"val":"nudity"}]}
+    removed={**base,"uri":"at://"+did+"/app.bsky.feed.post/removed001",
+             "labels":[{"val":"!takedown"}]}
+    hidden={**base,"uri":"at://"+did+"/app.bsky.feed.post/hidden001",
+            "record":{**base["record"],"labels":{"values":[{"val":"!hide"}]}}}
+    monkeypatch.setattr(job,"bluesky_public_search",
+                        lambda *args:{"posts":[warning,removed,hidden]})
+    rows=list(job.bluesky("섹트",start,end))
+    assert len(rows)==1 and rows[0]["original_id"]==base["uri"]
+    assert job.sensitive_labels([{"val":"sexual"}]) is False
+    assert job.sensitive_labels([{"val":"!hide"}]) is True
+    assert job.sensitive_labels([{"val":"graphic-media"}]) is True
+    assert job.sensitive_labels([{"val":"csam"}]) is True
+
+    mastodon={"visibility":"public","sensitive":True,
+              "created_at":timestamp,"content":"<p>섹트 public CW</p>",
+              "uri":"https://mastodon.social/users/sample/statuses/1234",
+              "url":"https://mastodon.social/@sample/1234",
+              "account":{"url":"https://mastodon.social/@sample"},
+              "media_attachments":[]}
+    mastodon_private={**mastodon,"visibility":"private"}
+    monkeypatch.setattr(job,"get_json",
+        lambda url,*args:[mastodon,mastodon_private]
+          if "/timelines/tag/" in url and "mastodon.social" in url else [])
+    mrows=list(job.mastodon("섹트",start,end))
+    assert len(mrows)==1 and mrows[0]["platform"]=="mastodon"
+
+    misskey={"visibility":"public","localOnly":False,"cw":"Public CW",
+             "createdAt":timestamp,"id":"samplePost001",
+             "user":{"username":"sample"},"text":"섹트 public CW",
+             "files":[{"url":"https://media.misskey.io/sample.png",
+                       "isSensitive":True}]}
+    misskey_private={**misskey,"visibility":"followers"}
+    monkeypatch.setattr(job,"get_json",
+        lambda url,*args:[misskey,misskey_private] if "misskey.io" in url else [])
+    krows=list(job.misskey("섹트",start,end))
+    assert len(krows)==1
+    assert krows[0]["media_urls"]==["https://media.misskey.io/sample.png"]
+
+    lemmy={"post":{"nsfw":True,"removed":False,"deleted":False,
+                   "published":timestamp,"name":"섹트 public",
+                   "ap_id":"https://lemmy.world/post/12345","body":"sample"}}
+    lemmy_deleted={"post":{**lemmy["post"],"deleted":True}}
+    monkeypatch.setattr(job,"get_json",
+                        lambda url,*args:{"posts":[lemmy,lemmy_deleted]})
+    lrows=list(job.lemmy("섹트",start,end))
+    assert len(lrows)==1 and lrows[0]["platform"]=="lemmy"
