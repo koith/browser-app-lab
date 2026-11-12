@@ -91,3 +91,30 @@ def test_public_search_falls_back_to_second_official_host(monkeypatch):
     assert len(called)==2
     assert called[0].startswith("https://api.bsky.app/")
     assert called[1].startswith("https://public.api.bsky.app/")
+
+
+def test_all_requested_terms_accepted_by_public_index_and_capture(monkeypatch):
+    """Regression: 섹블 was in fast capture TERMS but rejected by its search adapter.
+
+    All four requests remain bounded, use only official public API hosts and
+    validate the original DID/URI and the posted timestamp.
+    """
+    import demand_capture_job as capture
+    assert tuple(sources.TERMS)==tuple(capture.TERMS)
+    calls=[]
+    class Response:
+        def __enter__(self): return self
+        def __exit__(self,*unused): return False
+        def read(self,n): return b'{"posts":[]}'
+    def mock(request,timeout):
+        calls.append(request.full_url)
+        return Response()
+    monkeypatch.setattr(sources,"urlopen",mock)
+    for term in capture.TERMS:
+        assert sources.fetch_public(term,NOW-900,NOW)=={"posts":[]}
+        valid=sources.validated_rows(fake_result(term,NOW-900,NOW),
+                                     term,NOW-900,NOW)
+        assert len(valid)==1
+        assert valid[0]["source_url"].startswith("https://bsky.app/profile/")
+    assert len(calls)==4
+    assert all(url.startswith("https://api.bsky.app/xrpc/") for url in calls)
