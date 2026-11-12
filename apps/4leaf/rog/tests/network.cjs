@@ -178,6 +178,71 @@ const path=require('path');
   assert.deepEqual(await snapshot(),beforeForeignTurn,
     'host cannot mutate guest turn through a stale or direct JS roll handler');
 
+  // RULE-03: actual connected RTCDataChannel must ignore guest-forged state.
+  // The subsequent chat message is a real ordered-channel barrier; this is
+  // not a stub of net.onmessage or a timeout-based absence assertion.
+  const beforeForgery=await snapshot();
+  const injected=await guest.evaluate(()=>{
+    const fake=structuredClone(window.__LEAF_BRIDGE__.getMatch());
+    fake.players[0].position=999;fake.active=0;fake.history=['INJECTED_FAKE_GUEST_STATE'];
+    return [window.__LEAF_NET__.send({type:'state',match:fake}),
+      window.__LEAF_NET__.send({type:'chat',who:'guest',text:'STATE_FORGERY_BARRIER_712'})];
+  });
+  assert.deepEqual(injected,[true,true],'real guest RTC writes reached host channel');
+  await host.waitForFunction(()=>document.querySelector('#chat-log')
+    ?.textContent.includes('STATE_FORGERY_BARRIER_712'),null,{timeout:10000});
+  assert.deepEqual(await snapshot(),beforeForgery,
+    'a peer-originated state packet cannot override the authoritative host match');
+
+  // Put the real guest in a guaranteed source-normal DMP corridor, then fire
+  // TWO legitimate roll commands through the same connected RTCDataChannel.
+  // busy/remoteAct must gate the second; one pair of dice, one move, one turn
+  // result must be identically persisted by both browser clients.
+  await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    m.active=1;m.players[1].position=50;m.players[1].jail=0;
+    m.players[1].effects={};m.players[1].items=[];
+    for(let i=51;i<=70&&i<m.tiles.length-1;i++)m.tiles[i]='normal';
+    window.__LEAF_BRIDGE__.onState(m);window.__ROG_TEST__.drawGame();
+  });
+  await guest.waitForFunction(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return m?.active===1&&m.players[1].position===50;
+  },null,{timeout:10000});
+  const beforeDouble=await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return {turn:m.active,rolls:m.history.filter(x=>x.includes('이동 주사위')).length};
+  });
+  assert.equal(beforeDouble.turn,1);
+  const doubleSent=await guest.evaluate(()=>[
+    window.__LEAF_NET__.send({type:'command',action:'roll'}),
+    window.__LEAF_NET__.send({type:'command',action:'roll'})
+  ]);
+  assert.deepEqual(doubleSent,[true,true],'two commands delivered over real RTC channel');
+  await host.waitForFunction(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return m?.active===0&&m.players[1].position>50;
+  },null,{timeout:20000});
+  const afterDouble=await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return {active:m.active,round:m.round,positions:m.players.map(p=>p.position),
+      dice:m.lastRoll,history:m.history,
+      rolls:m.history.filter(x=>x.includes('이동 주사위')).length};
+  });
+  assert.equal(afterDouble.rolls,beforeDouble.rolls+1,
+    'two guest roll commands must produce exactly ONE source dice movement');
+  await guest.waitForFunction(expected=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return m?.active===expected.active&&m.round===expected.round&&
+      JSON.stringify(m.players.map(p=>p.position))===JSON.stringify(expected.positions)&&
+      JSON.stringify(m.lastRoll)===JSON.stringify(expected.dice)&&
+      JSON.stringify(m.history)===JSON.stringify(expected.history);
+  },afterDouble,{timeout:12000});
+  console.log('WEBRTC RULE03 DOUBLE_ROLL_FORGED_STATE_AND_EXACT_SYNC_PASS',
+    JSON.stringify({historyRollDelta:afterDouble.rolls-beforeDouble.rolls,
+      positions:afterDouble.positions,lastRoll:afterDouble.dice,
+      guestAndHostIdentical:true,forgedGuestStateBlocked:true}));
+
   // Losing connectivity while it is the host's turn must both disable the
   // visible button and protect the authoritative match state from mutation.
   await host.evaluate(()=>{
