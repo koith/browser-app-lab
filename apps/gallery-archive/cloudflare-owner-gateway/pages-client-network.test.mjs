@@ -43,6 +43,37 @@ async function run(){
  calls=0;
  await assert.rejects(gallery(async()=>{calls++;throw new TypeError('permanent network failure')}).asset(photo,'original'),TypeError);
  assert.equal(calls,3,'permanent network failure must be bounded');
+ // Actual HTTP response error is not a browser TypeError. Perform one
+ // bounded attempt after a temporary 503, keeping the EXACT JSON body.
+ calls=0;let firstBody;
+ const g503=gallery(async(url,init)=>{
+   calls++;
+   if(!firstBody)firstBody=init.body;
+   assert.equal(init.body,firstBody,'retries must not change photo identity');
+   return calls===1?{status:503,redirected:false}:ok;
+ });
+ assert.equal(await g503.asset(photo,'original'),media.href);
+ assert.equal(calls,2,'503 gets one and only one idempotent retry');
+ calls=0;
+ await assert.rejects(gallery(async()=>{calls++;return {status:503,redirected:false};})
+   .asset(photo,'original'),/GALLERY_GATEWAY_HTTP_503/);
+ assert.equal(calls,2,'permanent 503 must not trigger unbounded requests');
+ calls=0;
+ assert.equal(await gallery(async()=>{
+   calls++;return calls===1?{status:429,redirected:false,headers:{get:()=> '1'}}:ok;
+ }).asset(photo,'original'),media.href);
+ assert.equal(calls,2,'429 with short Retry-After retries only once');
+ calls=0;
+ await assert.rejects(gallery(async()=>{
+   calls++;return {status:429,redirected:false,headers:{get:()=> '120'}};
+ }).asset(photo,'original'),/GALLERY_GATEWAY_HTTP_429/);
+ assert.equal(calls,1,'long Retry-After must fail closed, no rate-limit bypass');
+ calls=0;
+ await assert.rejects(gallery(async()=>{
+   calls++;return {status:429,redirected:false,headers:{get:()=> '1'}};
+ }).asset(photo,'original'),/GALLERY_GATEWAY_HTTP_429/);
+ assert.equal(calls,2,'repeat 429 must stop after one deferred retry');
+ console.log('G09_REAL_HTTP_429_503_RETRY_AFTER_LIMITED_AUTH_FAIL_CLOSED_PASS');
  console.log('G09_SIGN_RETRY_NETWORK_ONLY_BOUNDED_CACHED_NO_HTTP_AUTH_BYPASS_PASS');
 }
 run().catch(error=>{console.error(error);process.exitCode=1});
