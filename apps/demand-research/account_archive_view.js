@@ -196,7 +196,11 @@ function postCard(post,inDetail=false){
     btn.addEventListener("click",()=>openDetail(post));
     bottom.append(btn);
   }
-  if(post.source_url)bottom.append(anchor(post.source_url,"SNS 원문 ↗","post-action post-action-source"));
+  if(post.source_url){
+    const sourceLink=anchor(post.source_url,"SNS 원문 ↗","post-action post-action-source");
+    sourceLink.setAttribute("aria-label","SNS 원문");
+    bottom.append(sourceLink);
+  }
   bottom.append(node("span","media-state",
     post.archive_complete?"첨부 "+fmt(post.media_saved)+"/"+fmt(post.media_expected)+"개 검증":
       "첨부 "+fmt(post.media_saved)+"/"+fmt(post.media_expected)+"개 · 일부 미보관"));
