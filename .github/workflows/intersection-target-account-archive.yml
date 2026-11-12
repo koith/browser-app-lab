@@ -59,6 +59,7 @@ on:
       - "apps/demand-research/test_target_account_viewer.py"
       - "apps/demand-research/test_archive_nonblocking.py"
       - "apps/demand-research/test_account_archive_browser.py"
+      - "apps/demand-research/test_account_archive_picker_browser.py"
       - "apps/demand-research/test_target_archive_button_browser.py"
       - "apps/demand-research/account_archive_view.html"
       - "apps/demand-research/account_archive_view.css"
@@ -158,6 +159,7 @@ jobs:
         run: |
           set -euo pipefail
           python test_account_archive_browser.py
+          python test_account_archive_picker_browser.py
           python test_target_archive_button_browser.py
           python test_auto_archive_view_browser.py
           python test_watch_migration_browser.py
