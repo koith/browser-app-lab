@@ -1,0 +1,66 @@
+name: Gallery G-10 Actual Saved Cover SHA and Face-Framing Review
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/generate_verified_album_covers.py'
+      - 'apps/yui-gallery/album-covers.json'
+      - 'apps/mimmi-gallery/album-covers.json'
+      - 'apps/mimmi-gallery/gallery-labels.js'
+      - 'apps/yui-gallery/gallery-labels.js'
+      - '.github/workflows/gallery-g10-covers-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/generate_verified_album_covers.py'
+      - 'apps/yui-gallery/album-covers.json'
+      - 'apps/mimmi-gallery/album-covers.json'
+      - 'apps/mimmi-gallery/gallery-labels.js'
+      - 'apps/yui-gallery/gallery-labels.js'
+      - '.github/workflows/gallery-g10-covers-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-actual-saved-album-covers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install free local image decoders and facial region detector
+        run: python -m pip install 'Pillow==11.2.1' 'opencv-python-headless==4.11.0.86'
+      - name: Select SHA-pinned same-work cover and crop from actual saved pixels
+        run: |
+          python -m py_compile apps/gallery-archive/generate_verified_album_covers.py
+          python apps/gallery-archive/generate_verified_album_covers.py --out gallery-g10-cover-review
+      - name: Verify every selected cover belongs to its real saved album
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for model in ('mimmi','yui'):
+              base=Path('apps')/(model+'-gallery')
+              local=json.loads((base/'stored-albums.json').read_text())
+              owner=json.loads((base/'owner-index.json').read_text())
+              result=json.loads((Path('gallery-g10-cover-review')/(model+'-album-covers.json')).read_text())
+              src={a['id']:a for a in local['albums']+owner['albums']}
+              for aid,cover in result['covers'].items():
+                  photos=[p for a in local['albums']+owner['albums'] if a['id']==aid
+                          for p in a['images']]
+                  exact=[p for p in photos if p.get('sha256')==cover['sha256']]
+                  assert exact, ('not a same-work saved original',model,aid)
+                  assert any(p.get('width')==cover['width'] and p.get('height')==cover['height']
+                             and p.get('number',1)==cover['number'] for p in exact),('bad photo metadata',model,aid)
+                  assert all(0<=x<=100 for x in cover['position']),('invalid crop',model,aid)
+                  assert cover.get('not_identity_recognition') is True or result['not_identity_recognition'] is True
+              print('G10_ACTUAL_SAVED_COVER_SHA_EXACT_OWNER_AND_LOCAL_PASS',
+                    model,len(result['covers']),flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gallery-g10-actual-saved-cover-manifests
+          path: gallery-g10-cover-review/
+          if-no-files-found: error
+          retention-days: 7
