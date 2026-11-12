@@ -1186,10 +1186,10 @@
     }
   },
   "coverage": {
-    "manual_kept": 0,
-    "face_selected": 20,
-    "same_work_local_fallback": 44,
-    "owner_sha_only_fallback": 16,
+    "manual_kept": 80,
+    "face_selected": 0,
+    "same_work_local_fallback": 0,
+    "owner_sha_only_fallback": 0,
     "total_visible_source_works": 80,
     "refused_incorrect_sha": 0
   }
