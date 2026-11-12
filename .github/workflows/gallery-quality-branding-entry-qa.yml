@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Check photo variant and publisher identity unit tests
+      - name: Verify all 119 SHA-pinned work covers, real producer labels and optical quality guards
         run: |
           node --check apps/yui-gallery/image-quality.js
           node --check apps/mimmi-gallery/image-quality.js
