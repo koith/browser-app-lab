@@ -251,10 +251,20 @@ def exercise_real_pages_static_cover_after_two_503(browser,model):
     root=f"{BASE}/{model}-gallery/"
     serve_candidate_owner_transport(page,model,root)
     html=Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
-    matched=re.search(r'data-fast-sha="([a-f0-9]{64})".*?<img src="(stored-albums/[^"]+)"',
-                      html,re.S)
-    assert matched,(model,'no SHA-tagged first-paint cover to retry')
-    sha,relative=matched.groups()
+    # The prepaint HTML may retain a historically aliased local photo.
+    # A former Yui/v04 fast card used a Teddy Bear SHA that now correctly
+    # belongs only to Teddy Bear after the exact-owner routing fix. Do not
+    # assume the FIRST prepaint card survives hydration! Select an actual
+    # committed SHA which still matches the SAME work's curated album cover.
+    cover_config=json.loads(Path(f"apps/{model}-gallery/album-covers.json").read_text())
+    curated=cover_config.get("covers",{})
+    matches=re.findall(
+        r'data-fast-sha="([a-f0-9]{64})" data-id="([a-z0-9-]+)".*?<img src="(stored-albums/[^"]+)"',
+        html,re.S)
+    chosen=next(((sha,relative) for sha,album_id,relative in matches
+        if curated.get(album_id,{}).get("sha256")==sha),None)
+    assert chosen,(model,'no canonical SHA-pinned fast-paint cover survives hydration',matches)
+    sha,relative=chosen
     state={"failed":0,"served_real":0,"queries":[]}
     def inject(route):
         url=urlsplit(route.request.url)
