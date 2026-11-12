@@ -1980,20 +1980,28 @@
       "id": "M00",
       "priority": "P1",
       "title": "원본 클라이언트·근거 자료 수집",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M00",
-      "current": "원본 자료/스크린샷을 확보했으나 MVE 메시·주사위 키프레임·원본 EXE 프로토콜은 미확보; 2026-10-18: Strict source IMG.pak unused 12 original UI SPR entries recovered as 100 SHA-checked PNGs and original PAK source report (OBS2/OBS3 strict body recovery 0). Remaining EXE 3D/actor mapping unresolved.",
+      "current": "원본 자료/스크린샷을 확보했으나 MVE 메시·주사위 키프레임·원본 EXE 프로토콜은 미확보; 2026-10-18: Strict source IMG.pak unused 12 original UI SPR entries recovered as 100 SHA-checked PNGs and original PAK source report (OBS2/OBS3 strict body recovery 0). Remaining EXE 3D/actor mapping unresolved. | 2026-11-13 M00 original-file provenance acceptance DONE: 2002 original installer SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 verified via independent PAK re-extraction; original resource manifest indexed 259 real PNGs with native dimensions; six source UI/art asset signatures/SHA and active screen consumers proved; source CHR 98 cards/97 real bodies/0156 exception, source IMG.pak SHA, original DMP 26/1920 and event sets 25 validated. Missing 2004 MVE 3D meshes, EXE commands and original timeline explicitly UNVERIFIED; those remain separate restoration tasks.",
       "acceptance": [
         "원본 바이너리 추적과 SHA/파일 형식·역할을 검증하고 출처·사용 위치를 기록"
       ],
       "evidence": [
         "apps/4leaf/rog/original/manifest.json",
         "https://github.com/koith/browser-app-lab/actions/runs/39127703411",
-        "apps/4leaf/rog/original/SourceSPRExtra/manifest.json"
+        "apps/4leaf/rog/original/SourceSPRExtra/manifest.json",
+        "https://github.com/koith/browser-app-lab/pull/1031",
+        "https://github.com/koith/browser-app-lab/actions/runs/43323122857",
+        "apps/4leaf/rog/tests/m00-original-client-source-role-audit.cjs"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-2002-INSTALLER-SHA1/259-PNG-SIGNATURE/6-LIVE-ROLES/98-CHR/26-DMP-AND-25-EVENTS; 2004-EXE-MVE-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Exact 2002 original installer archive https://archive.org/details/4leaf SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 independently downloaded/extracted in SRC-04 Actions #43190547471. `original/manifest.json` index records verified PNG dimensions for 259 actual files. `docs/evidence/source-maps/card-body-map.json` ties 98 original CHR member hashes and PAK names to same installer, with 97 available bodies and only 0156 source gap. `original/SourceSPRExtra/manifest.json` holds verified 2002 Dice/IMG.pak SHA256, and original DMP path/event data remains tied to recovered source.",
+        "implementation": "PR #1031 merged main 3bff49cec402d5895ebf5eb8075210ac091f7df7 adds tests/m00-original-client-source-role-audit.cjs and rog-m00-source-role-acceptance.yml. It audits real original PNG signatures/dimensions/hash for MainFrame toolbar and panel, WorldMap notice, CardShop native button, 2002 TIS start tile and missing-CHR original IMG cardback, and checks each actual CSS/JS consumer. Reproducible JSON report artifact stored by Actions. Source PNG bytes never altered.",
+        "runtimeTest": "GitHub Actions run 43323122857 original-binaries-and-live-role SUCCESS. 259 indexed source images passed file and dimension validation, six source-to-screen roles passed image SHA + actual consumer path tests, 98 original CHR identities passed +260 native provenance cross-regression, 26 source DMP routes total 1920 cells and 25 source event maps passed; no fabricated 2004 3D model claim.",
+        "deployment": "Main commit 3bff49cec402d5895ebf5eb8075210ac091f7df7 already merged source-role audit tool and workflow; public web source assets remain unchanged from previously deployed beta.75/v162, so no gameplay runtime change required. Original resource provenance manifest remains browsable in main repository. MainFrame/WorldMap/Dice/Shop consumers confirmed from production code. Exact historical 2004 EXE controls/3D meshes remain separate unverified tasks M05/M06/M07/M09."
+      }
     },
     {
       "id": "M01",
@@ -9801,6 +9809,16 @@
       "to": "done",
       "details": "Actual independent Chromium host/guest WebRTC DataChannels: synchronized original-board position/turn/dice/history, card item+ability, battle choice and bidirectional live chat; real reconnect restored same match; duplicate guest roll => exactly one move; forged guest match state rejected, disconnected/unknown role/host-on-guest-turn direct handler rejected. Genuine full two-browser CI passed, no page errors. Historical proprietary 2002 server protocol and physical iPhone client remain UNVERIFIED and are not implied.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43193238465"
+    },
+    {
+      "seq": 458,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "M00",
+      "from": "in_progress",
+      "to": "done",
+      "details": "2002 original installer SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 verified via independent PAK re-extraction; original resource manifest indexed 259 real PNGs with native dimensions; six source UI/art asset signatures/SHA and active screen consumers proved; source CHR 98 cards/97 real bodies/0156 exception, source IMG.pak SHA, original DMP 26/1920 and event sets 25 validated. Missing 2004 MVE 3D meshes, EXE commands and original timeline explicitly UNVERIFIED; those remain separate restoration tasks.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43323122857"
     }
   ],
   "restorationPriority": {
