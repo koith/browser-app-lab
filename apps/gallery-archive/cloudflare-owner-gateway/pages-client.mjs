@@ -7,19 +7,32 @@ export function pagesGateway({endpoint,model,fetcher=fetch,now=()=>Date.now()}) 
   if(api.protocol!=='https:'||api.username||api.password||api.port||api.pathname!=='/'||
      api.search||api.hash||!['mimmi','yui'].includes(model))throw Error('INVALID_GALLERY_GATEWAY');
   const cache=new Map(),inflight=new Map();
-  // Browser networking may briefly reject a valid CORS request as a
-  // TypeError while the free Worker route is propagating. Reissue ONLY this
-  // idempotent signing request with bounded delay (0ms / 180ms / 650ms).
-  // Never retry HTTP 401/403, non-network exceptions, invalid signatures,
-  // or fall back to another host, model, photo, or SHA.
-  async function fetchSignOnceMoreOnNetworkFailure(init) {
+  // A temporary 429/502/503/504 may be issued *by* a healthy Worker
+  // without the browser throwing TypeError. Retry an idempotent SHA-bound
+  // POST only once on those statuses and honor a short Retry-After for 429.
+  // Long Retry-After intentionally fails closed to avoid rate-limit hammering.
+  // Never retry HTTP 401/403/404, redirects, invalid signatures, or alter
+  // immutable model/album/number/SHA or signed media URL query fields.
+  async function fetchSignWithBoundedTransientRecovery(init) {
     const target=new URL('/api/v1/sign',api);
-    for(let attempt=0;attempt<3;attempt++){
-      try{return await fetcher(target,init)}
+    let transportFailures=0,httpRetryUsed=false;
+    while(true){
+      let result;
+      try{result=await fetcher(target,init)}
       catch(error){
-        if(!(error instanceof TypeError)||attempt===2)throw error;
-        await new Promise(resolve=>setTimeout(resolve,attempt===0?180:650));
+        if(!(error instanceof TypeError)||transportFailures>=2)throw error;
+        const wait=transportFailures++===0?180:650;
+        await new Promise(resolve=>setTimeout(resolve,wait));
+        continue;
       }
+      if(result.redirected||httpRetryUsed||
+         ![429,502,503,504].includes(result.status))return result;
+      const retryAfter=result.headers?.get?.('Retry-After')||'';
+      if(result.status===429&&retryAfter&&(!/^[1-4]$/.test(retryAfter)))
+        return result;
+      httpRetryUsed=true;
+      const wait=result.status===429?(retryAfter?Number(retryAfter)*1000:1200):350;
+      await new Promise(resolve=>setTimeout(resolve,wait));
     }
   }
   async function sign(photo,variant) {
@@ -34,7 +47,7 @@ export function pagesGateway({endpoint,model,fetcher=fetch,now=()=>Date.now()}) 
     if(previous&&previous.expires>now()+30_000)return previous.url;
     if(inflight.has(key))return inflight.get(key);
     const pending=(async()=>{
-      const response=await fetchSignOnceMoreOnNetworkFailure({
+      const response=await fetchSignWithBoundedTransientRecovery({
         method:'POST',credentials:'omit',cache:'no-store',redirect:'error',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({model,album,number,variant,sha256:digest})
