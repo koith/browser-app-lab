@@ -15,6 +15,16 @@ const ACCOUNT_KEY=/^(?:bluesky|mastodon)-[a-f0-9]{40}$/;
 const params=new URLSearchParams(location.search);
 const embedded=params.get("embedded")==="1";
 if(embedded)document.body.classList.add("archive-embedded");
+function setPlatformTheme(accountKey){
+  const provider=String(accountKey||"").startsWith("mastodon-")?"mastodon":"bluesky";
+  document.documentElement.dataset.platform=provider;
+  $("snsProviderSymbol").textContent=provider==="mastodon"?"M":"🦋";
+  $("snsProviderTitle").textContent=provider==="mastodon"?"Mastodon 스타일 보관함":"Bluesky 스타일 보관함";
+  $("snsProviderSubtitle").textContent=provider==="mastodon"
+    ?"Mastodon 공개 계정 보관본 · 실시간 타임라인 아님"
+    :"Bluesky 공개 계정 보관본 · 실시간 피드 아님";
+  $("detailTitle").textContent=provider==="mastodon"?"보관된 게시물 · 대화":"게시글 · 대화";
+}
 function accountLabel(item){
   const name=typeof item?.display_name==="string"?item.display_name.trim().replace(/\s+/g," ").slice(0,100):"";
   const handle=typeof item?.handle==="string"?item.handle.trim().replace(/^@+/,"").slice(0,200):"";
@@ -153,15 +163,21 @@ function mediaElement(item){
 }
 function postCard(post,inDetail=false){
   const card=node("article","post");
+  card.dataset.kind=post.revision_of?"revision":post.kind==="reply"?"reply":"post";
   const head=node("header","post-head");
   const icon=node("span","post-avatar",
                   (state.profile?.display_name||state.profile?.handle||"A").charAt(0));
+  const savedAvatar=state.profile?.assets?.avatar||"";
+  if(typeof savedAvatar==="string"&&savedAvatar.startsWith("/api/account-archives/")){
+    icon.style.backgroundImage='url("'+savedAvatar+'")';icon.textContent="";
+  }
   head.append(icon);
-  const metadata=node("div","post-meta");
-  metadata.append(node("strong","",state.profile?.display_name||state.profile?.handle||"보관 계정"));
-  const timestamp=node("time","",date(post.posted_at));metadata.append(timestamp);
+  const metadata=node("div","post-meta"),byline=node("div","post-byline");
+  byline.append(node("strong","",state.profile?.display_name||state.profile?.handle||"보관 계정"));
+  if(state.profile?.handle)byline.append(node("span","post-handle","@"+state.profile.handle));
+  metadata.append(byline,node("time","post-date",date(post.posted_at)));
   head.append(metadata,node("span","post-type",
-    post.revision_of?"수정 이력":post.kind==="reply"?"답글":"게시글"));
+    post.revision_of?"수정 이력":post.kind==="reply"?"↳ 답글":"보관 게시글"));
   card.append(head,node("p","post-body",post.text||"(텍스트 없음)"));
   if(post.revision_of){
     card.append(node("p","notice","이전 원문은 그대로 보관 · 변경본 추가 저장 "+
@@ -169,16 +185,18 @@ function postCard(post,inDetail=false){
   }
   if(post.media&&post.media.length){
     const grid=node("div","post-media");
+    grid.dataset.count=String(post.media.length);
     for(const item of post.media)grid.append(mediaElement(item));
     card.append(grid);
   }
   const bottom=node("div","post-bottom");
   if(!inDetail){
-    const btn=node("button","", "댓글·상세 보기");
-    btn.type="button";btn.addEventListener("click",()=>openDetail(post));
+    const btn=node("button","post-action post-action-reply","댓글·상세 보기");
+    btn.type="button";btn.setAttribute("aria-label","댓글·상세 보기");
+    btn.addEventListener("click",()=>openDetail(post));
     bottom.append(btn);
   }
-  if(post.source_url)bottom.append(anchor(post.source_url,"SNS 원문",""));
+  if(post.source_url)bottom.append(anchor(post.source_url,"SNS 원문 ↗","post-action post-action-source"));
   bottom.append(node("span","media-state",
     post.archive_complete?"첨부 "+fmt(post.media_saved)+"/"+fmt(post.media_expected)+"개 검증":
       "첨부 "+fmt(post.media_saved)+"/"+fmt(post.media_expected)+"개 · 일부 미보관"));
@@ -198,19 +216,22 @@ function personCard(person){
 }
 function commentCard(item){
   const itemNode=node("section","comment");
+  const commentIcon=node("span","comment-avatar",(item.display_name||item.author||"?").charAt(0).toUpperCase());
+  const content=node("div","comment-content");
   const header=node("header");
   header.append(node("b","",item.display_name||item.author||"공개 댓글"));
   if(item.author&&item.display_name&&item.author!==item.display_name)
     header.append(node("span","muted","@"+item.author));
   header.append(node("time","",date(item.posted_at)));
-  itemNode.append(header,node("p","",item.text||"(텍스트 없음)"));
-  if(item.source_url)itemNode.append(anchor(item.source_url,"댓글 원문"));
+  content.append(header,node("p","",item.text||"(텍스트 없음)"));
+  if(item.source_url)content.append(anchor(item.source_url,"댓글 원문 ↗","comment-source"));
   if(item.media_source_links?.length){
-    const text=node("p","muted","댓글 첨부는 현재 원본 링크만 확인됨 (테라박스 검증본 아님). ");
-    itemNode.append(text);
+    const text=node("p","muted","댓글 첨부는 원본 링크만 확인됨 · 검증 보관 파일이 아닙니다.");
+    content.append(text);
     for(const link of item.media_source_links.slice(0,8))
-      itemNode.append(anchor(link,"원본 첨부 링크"));
+      content.append(anchor(link,"첨부 원본 링크 ↗","comment-source"));
   }
+  itemNode.append(commentIcon,content);
   return itemNode;
 }
 async function openDetail(post){
@@ -297,6 +318,7 @@ async function selectAccount(value){
   detailRequestSeq+=1;
   if(detail.open)detail.close();
   state.account=value||"";state.profile=null;state.offset=0;state.section="posts";
+  setPlatformTheme(state.account);
   if(value)setAccountUrl(value);
   if(!value){
     resetProfile();$("displayName").textContent="계정을 선택하세요";

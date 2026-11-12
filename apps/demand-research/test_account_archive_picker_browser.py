@@ -76,12 +76,24 @@ def verify(browser_type,label):
                 else "?account="+KEY_B)
             page.goto(url,wait_until="domcontentloaded",timeout=20000)
             page.locator("#results article.post").first.wait_for(timeout=20000)
+            expected_provider="bluesky" if embedded else "mastodon"
+            assert page.locator("html").get_attribute("data-platform")==expected_provider
+            assert page.locator("#snsProviderTitle").inner_text().startswith(
+                "Bluesky" if embedded else "Mastodon")
+            assert page.locator("#snsProviderSubtitle").is_visible()
+            assert page.locator("#results .post-byline strong").count()==1
+            assert page.locator("#results .post-action-reply").count()==1
+            assert page.locator("#results article.post").first.get_attribute("data-kind")=="post"
+            background=page.locator("body").evaluate(
+                "el => getComputedStyle(el).backgroundColor")
+            assert background=="rgb(25, 27, 35)" if expected_provider=="mastodon" else background=="rgb(245, 248, 251)", background
             if embedded:
                 assert "/api/account-archives" not in hits, (
                     "embedded viewer must reuse parent's preloaded account choices")
                 assert not page.locator(".account-picker").is_visible()
                 assert not page.locator(".page-lead").is_visible()
                 assert page.locator("#displayName").inner_text()=="코코"
+                assert page.locator("#snsProviderSymbol").inner_text()=="🦋"
             else:
                 page.wait_for_function(
                     "() => document.querySelector('#accountCount')"
@@ -98,6 +110,12 @@ def verify(browser_type,label):
                 page.wait_for_function(
                     "() => document.querySelector('#displayName')?.textContent==='코코'",
                     timeout=15000)
+                assert page.locator("html").get_attribute("data-platform")=="bluesky"
+                assert page.locator("#snsProviderTitle").inner_text()=="Bluesky 스타일 보관함"
+                assert page.locator("#snsProviderSymbol").inner_text()=="🦋"
+                # Data switch cannot leave Mastodon's dark canvas behind.
+                assert page.locator("body").evaluate(
+                    "el => getComputedStyle(el).backgroundColor")=="rgb(245, 248, 251)"
                 assert page.locator("#results article.post").count()==1
                 assert "account="+KEY_A in page.url
                 # One list load across changing accounts; all responses re-use the choice cache.
