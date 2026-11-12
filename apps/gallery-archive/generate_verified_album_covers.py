@@ -78,6 +78,17 @@ def run(out):
         local_by={a['id']:a for a in local['albums']}
         owner_by={a['id']:a for a in owner['albums']}
         union={**local_by,**owner_by}
+        # A local legacy folder can be mislabeled: Yui/v04 has ten JPEGs that
+        # exactly belong to the Teddy Bear owner original, not to v04's
+        # distinct SHA-verified owner #1. Do not reuse cross-owner bytes merely
+        # because the file physically sits in an old album directory.
+        owner_sha_album={}
+        for origin_id,owner_work in owner_by.items():
+            for item in owner_work.get('images',[]):
+                owner_sha_album.setdefault(item.get('sha256'),set()).add(origin_id)
+        def local_is_correct_work(album_id,photo):
+            owners=owner_sha_album.get(photo.get('sha256'),set())
+            return not owners or album_id in owners
         covers={}
         counts={'manual_kept':0,'face_selected':0,'same_work_local_fallback':0,
           'owner_sha_only_fallback':0,'total_visible_source_works':0,'refused_incorrect_sha':0}
@@ -98,7 +109,7 @@ def run(out):
                 continue
             eligible=[]
             for num,photo in enumerate(persisted[:8]):
-                if photo.get('sha256') in deny_sha:continue
+                if photo.get('sha256') in deny_sha or not local_is_correct_work(album_id,photo):continue
                 file=secure_local_record(root,local_album,photo)
                 if file is None:
                     counts['refused_incorrect_sha']+=1
@@ -123,8 +134,9 @@ def run(out):
             # A real saved physical same-work file is safer than choosing an
             # album's borrowed cover from a similarly named mirror entry.
             local_first=next(((idx,p) for idx,p in enumerate(persisted)
-                              if p.get('sha256') not in deny_sha and
-                                 secure_local_record(root,local_album,p)),None) if local_album else None
+                              if p.get('sha256') not in deny_sha
+                                 and local_is_correct_work(album_id,p)
+                                 and secure_local_record(root,local_album,p)),None) if local_album else None
             if local_first is not None:
                 idx,photo=local_first
                 counts['same_work_local_fallback']+=1
