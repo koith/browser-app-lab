@@ -192,7 +192,8 @@ function postCard(post,inDetail=false){
   const bottom=node("div","post-bottom");
   if(!inDetail){
     const btn=node("button","post-action post-action-reply","댓글·상세 보기");
-    btn.type="button";btn.addEventListener("click",()=>openDetail(post));
+    btn.type="button";btn.setAttribute("aria-label","댓글·상세 보기");
+    btn.addEventListener("click",()=>openDetail(post));
     bottom.append(btn);
   }
   if(post.source_url)bottom.append(anchor(post.source_url,"SNS 원문 ↗","post-action post-action-source"));
