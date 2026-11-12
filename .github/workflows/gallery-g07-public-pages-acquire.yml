@@ -31,7 +31,7 @@ jobs:
         run: |
           python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
             --owner apps/mimmi-gallery/owner-index.json --out "$RUNNER_TEMP/g07-mimmi" \
-            --max-new 18 --max-pages 4 --render-budget 0 --focused-only \
+            --max-new 18 --max-pages 4 --render-budget 0 \
             --album-id v2ph-actor-z7exoo5z \
             --album-id v2ph-actor-z76xe74a \
             --album-id v2ph-actor-a8n8n85a \
@@ -42,7 +42,7 @@ jobs:
         run: |
           python apps/gallery-archive/direct_photo_pipeline.py --model yui \
             --owner apps/yui-gallery/owner-index.json --out "$RUNNER_TEMP/g07-yui" \
-            --max-new 18 --max-pages 4 --render-budget 0 --focused-only \
+            --max-new 18 --max-pages 4 --render-budget 0 \
             --album-id yui-chinokun-illustar-2026-public \
             --album-id artgravia-677-yui-public-samples \
             --album-id yui-summer-public-samples \
