@@ -93,6 +93,31 @@ function resetProfile(){
   $("profileStatus").textContent="프로필 보관본 확인 중";
   $("sourceProfile").hidden=true;
 }
+function syncVisiblePostIdentity(){
+  // The feed loads independently of remote profile verification. When posts
+  // arrive first, update their bylines after the saved profile arrives rather
+  // than leaving a generic author on an otherwise faithful SNS-style feed.
+  const name=state.profile?.display_name||state.profile?.handle||"보관 계정";
+  const handle=state.profile?.handle?"@"+state.profile.handle:"";
+  const avatar=state.profile?.assets?.avatar||"";
+  for(const card of document.querySelectorAll("#results .post,#detailBody .post")){
+    const heading=card.querySelector(".post-byline strong");
+    if(heading)heading.textContent=name;
+    const byline=card.querySelector(".post-byline");
+    let handleNode=byline?.querySelector(".post-handle");
+    if(handle&&!handleNode&&byline){
+      handleNode=node("span","post-handle");byline.append(handleNode);
+    }
+    if(handleNode)handleNode.textContent=handle;
+    const icon=card.querySelector(".post-avatar");
+    if(icon&&typeof avatar==="string"&&avatar.startsWith("/api/account-archives/")){
+      icon.style.backgroundImage='url("'+avatar+'")';icon.textContent="";
+    }else if(icon){
+      icon.style.backgroundImage="";
+      icon.textContent=name.charAt(0).toUpperCase();
+    }
+  }
+}
 function renderProfile(profile){
   if(!profile.available){
     $("displayName").textContent="아직 프로필 보관본 없음";
@@ -137,6 +162,7 @@ function renderProfile(profile){
                 banner?"헤더 원본 SHA 검증됨":"헤더 사진 미보관"];
   $("profileStatus").textContent="PROFILE SNAPSHOT · "+date(profile.captured_at)+
      " · "+assets.join(" · ")+" · 관계 목록/게시글 완전성 별도 확인 필요";
+  syncVisiblePostIdentity();
 }
 function mediaElement(item){
   const mime=String(item.mime||"");
