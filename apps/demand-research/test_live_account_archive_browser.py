@@ -22,22 +22,22 @@ def verify(engine, *, label, width, height):
         )
         javascript_errors = []
         page.on("pageerror", lambda _error: javascript_errors.append("pageerror"))
-        # Select an independently verified six-post TeraBox ZIP upfront.
-        # An arbitrary first account may have incomplete legacy records, and
-        # waiting on every such profile masked the actual usable archive.
+        # Select an independently SHA-verified account bundle, not an arbitrary
+        # legacy entry. Incremental append-only releases can contain ONE new
+        # post even when the combined verified feed has hundreds of records.
         account_api=page.request.get(
             SITE.rsplit("/",1)[0]+"/api/account-archives",timeout=120000,
         )
         assert account_api.status==200, "live verified account index unavailable"
         sources=account_api.json().get("accounts",[])
         # Direct TeraBox reads may be provider-denied on the free viewer host.
-        # An AES-GCM GitHub mirror of a TeraBox SHA-verified six-post ZIP is
-        # an acceptable *temporary* readback, never a claim of TeraBox access.
+        # An AES-GCM GitHub mirror of an SHA-verified saved ZIP is acceptable
+        # temporary readback, never proof of TeraBox permanent storage.
         available=[item for item in sources
                    if item.get("backup_kind") in (
                        "terabox_zip_sha_verified","github_temp_sha_verified")
-                   and item.get("posts_verified_in_bundle",0)>=6]
-        assert available, "six-post verified account ZIP not discoverable in webapp"
+                   and item.get("posts_verified_in_bundle",0)>=1]
+        assert available, "no SHA-verified account ZIP with saved posts discoverable"
         # Only an authenticated SHA-read-back public profile snapshot can
         # supply real account-picker names; do not invent a nickname from URL.
         readable=next((item for item in available
@@ -75,7 +75,18 @@ def verify(engine, *, label, width, height):
               flush=True)
         page.locator("#results article.post").first.wait_for(timeout=120000)
         posts=page.locator("#results article.post").count()
-        assert posts>=6, "verified TeraBox six-post archive not rendered"
+        assert posts>=1, "SHA-verified saved account has no rendered posts"
+        provider="mastodon" if key.startswith("mastodon-") else "bluesky"
+        assert page.locator("html").get_attribute("data-platform")==provider, (
+            "saved account is not displayed in its original SNS-style theme")
+        expected="Mastodon" if provider=="mastodon" else "Bluesky"
+        assert page.locator("#snsProviderTitle").inner_text().startswith(expected)
+        assert page.locator("#results article.post .post-byline strong").count()>=1
+        page.wait_for_function(
+            "(name) => document.querySelector('#results article.post .post-byline strong')?.textContent===name",
+            arg=readable["display_name"],timeout=20000)
+        assert page.locator("#results article.post .post-handle").count()>=1, (
+            "archived actor handle not rendered on social card")
         assert page.locator("#displayName").inner_text().strip(), "profile display missing"
         assert "미확인" not in page.locator("#displayName").inner_text(), "profile not loaded"
         assert page.locator("#results article.post").first.get_by_role(
@@ -84,7 +95,7 @@ def verify(engine, *, label, width, height):
 
         # Check a real archived original and its source binding in the browser,
         # not merely an API JSON response or a synthetic Playwright fixture.
-        for _ in range(12):
+        for _ in range(26):
             image = page.locator("#results .post-media img")
             video = page.locator("#results .post-media video")
             audio = page.locator("#results .post-media audio")
@@ -137,7 +148,7 @@ def verify(engine, *, label, width, height):
                     timeout=30000,
                 )
         tab_elapsed=time.monotonic()-tabs_started
-        assert tab_elapsed<40, "verified six-post archive tab round-trip too slow"
+        assert tab_elapsed<40, "verified account archive tab round-trip too slow"
         print("LIVE_VERIFIED_ACCOUNT_TAB_ROUNDTRIP_PASS",
               "client="+label, "elapsed_seconds="+str(round(tab_elapsed,1)),
               flush=True)
@@ -146,8 +157,8 @@ def verify(engine, *, label, width, height):
         )
         assert doc["scroll"] <= doc["width"] + 2, "horizontal overflow on live page"
         assert not javascript_errors, "deployed browser JavaScript errors occurred"
-        # Verify that the same selected archive still shows its six posts.
-        assert page.locator("#results article.post").count()>=6
+        # Verify the selected SHA-verified archive still renders its posts after tab switch.
+        assert page.locator("#results article.post").count()>=1
         assert page.locator("#displayName").inner_text().strip()
         # Some independently verified source posts contain video or audio
         # rather than images. Validate the exact *actual* HTML media element,
@@ -199,10 +210,10 @@ def verify(engine, *, label, width, height):
         page.get_by_role("button",name="닫기").click()
         assert page.locator("#postDetail[open]").count()==0
         assert not javascript_errors, "TeraBox browser raised a JavaScript error"
-        print("LIVE_VERIFIED_SIX_POST_BROWSER_PASS",
+        print("LIVE_NATIVE_SNS_ACCOUNT_BROWSER_PASS",
               "client="+label,"post_cards="+str(
                   page.locator("#results article.post").count()),
-              "source="+available[0]["backup_kind"],
+              "source="+readable["backup_kind"],"theme="+provider,
               "original_media=PASS","range206=PASS","detail=PASS",
               flush=True)
         print(
