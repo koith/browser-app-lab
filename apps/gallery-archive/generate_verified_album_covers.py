@@ -97,7 +97,7 @@ def run(out):
                 counts['manual_kept']+=1
                 continue
             eligible=[]
-            for num,photo in enumerate(persisted[:24]):
+            for num,photo in enumerate(persisted[:8]):
                 if photo.get('sha256') in deny_sha:continue
                 file=secure_local_record(root,local_album,photo)
                 if file is None:
