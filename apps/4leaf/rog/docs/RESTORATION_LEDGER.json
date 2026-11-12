@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-12",
+  "updatedAt": "2026-11-13",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -3461,19 +3461,27 @@
       "id": "RULE-03",
       "priority": "P1",
       "title": "실제 멀티플레이 경기 권한·동기화 실환경 검증",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M08",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: WebRTC/중앙 채팅과 임시 로컬 경기 구현이 있지만 서버 권한·이탈/재접속·기록이 원작 흐름과 동일한지 미검증 | 구현 목표: 두 브라우저+휴대전화 2인, 원격 턴/주사위/전투 승인/중도 이탈·복귀/replay와 권한검사 실행 | 2026-11-02 GPT: stale WebRTC RTCPeerConnection/datachannel events and delayed SDP promises isolated by active peer/channel identity; disconnected channels cannot forward gameplay commands. Independent simulated host/guest race runtime PASS; committed regression and CI workflow. Full 2-device reconnect acceptance and native-original protocol remain open.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: WebRTC/중앙 채팅과 임시 로컬 경기 구현이 있지만 서버 권한·이탈/재접속·기록이 원작 흐름과 동일한지 미검증 | 구현 목표: 두 브라우저+휴대전화 2인, 원격 턴/주사위/전투 승인/중도 이탈·복귀/replay와 권한검사 실행 | 2026-11-02 GPT: stale WebRTC RTCPeerConnection/datachannel events and delayed SDP promises isolated by active peer/channel identity; disconnected channels cannot forward gameplay commands. Independent simulated host/guest race runtime PASS; committed regression and CI workflow. Full 2-device reconnect acceptance and native-original protocol remain open. | 2026-11-13 scoped WebRTC browser-game authority acceptance DONE: Actual independent Chromium host/guest WebRTC DataChannels: synchronized original-board position/turn/dice/history, card item+ability, battle choice and bidirectional live chat; real reconnect restored same match; duplicate guest roll => exactly one move; forged guest match state rejected, disconnected/unknown role/host-on-guest-turn direct handler rejected. Genuine full two-browser CI passed, no page errors. Historical proprietary 2002 server protocol and physical iPhone client remain UNVERIFIED and are not implied.",
       "acceptance": [
         "다중 클라이언트 동일 턴/눈/카드/채팅 표시; 롤 중복/치트 요청·재접속 상태 불일치 0건"
       ],
       "evidence": [
         "tests/network.cjs",
-        "tests/central-browser.cjs"
+        "tests/central-browser.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1027",
+        "https://github.com/koith/browser-app-lab/actions/runs/43193238465",
+        "apps/4leaf/rog/tests/network.cjs"
       ],
-      "evidenceLevel": "VERIFIED-DETERMINISTIC-WEBRTC-RACE-TEST; CI-AND-REAL-TWO-DEVICE-PENDING; HISTORICAL-PROTOCOL-UNVERIFIED",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-REAL-TWO-CHROMIUM-PEER-TRANSPORT-STATE/CARD/ROLL/CHAT/RECONNECT; WEB-GAME-RULES; ORIGINAL-SERVER-PROTOCOL-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Genuine WebRTC RTCPeerConnection RTCDataChannel rather than a simulated peer, with actual game state in two independent Chromium browser contexts. Source 2002 proprietary server protocol remains UNVERIFIED; original rule equivalence is tracked separately under RULE-01 and RULE-02.",
+        "implementation": "PR #1027 squash-merged main ffb074e7b9a796c67a22f478716905ea5bb98321. apps/4leaf/rog/tests/network.cjs E2E now sends forged match state and two legitimate 'roll' packets through real WebRTC channel, uses ordered real guest-chat barrier to prove host rejection, checks exactly one movement and cross-client identical lastRoll/history/round/player positions. Existing test also invokes unauthorized host roll, disconnected host, and unknown role direct handler; real reconnect+battle/card/chat are exercised.",
+        "runtimeTest": "GitHub Actions 43193238465 two-browsers SUCCESS. Also real-world/chat/board/dice integration jobs for PR head 1782e42805cfddff9eeef670d4ab9a21e812068e SUCCESS. Test includes actual two-browser SDP exchange, connected RTCDataChannel, item/ability, remote battle-choice, chat, exit/reconnect, restored state, game turn with exactly one accepted duplicate roll and one seed-actual lastRoll shown identically in both browsers, forged guest state rejection.",
+        "deployment": "PR #1027 merged to main SHA ffb074e7b9a796c67a22f478716905ea5bb98321. Production network.js/game.js serverless peer runtime already deployed in public beta.75/PWA v162; no behavior bytes changed in PR, only new regression tests. Existing public real WebRTC source test CI 43189441030 SUCCESS and corresponding published browser E2E workflow. No native 2002 online server emulation claim."
+      },
       "dependencies": [
         "RULE-02"
       ],
@@ -9783,6 +9791,16 @@
       "to": "done",
       "details": "98 original CHR identities audited: 97 genuine source-owned OBS bodies with SHA256 PNG frame0/XY, 0156 absent in SHA1-proven OBS2/1222 and rendered using original IMG avatarback; no synthetic CSS humanoid for all 98 in actual Chromium game. Public beta.75/PWA v162 and original-body-only CSS rule confirmed live. Historic direction/FPS/3D action fidelity is separate ACT-03/ACT-04/M05.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43189440570"
+    },
+    {
+      "seq": 457,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "RULE-03",
+      "from": "in_progress",
+      "to": "done",
+      "details": "Actual independent Chromium host/guest WebRTC DataChannels: synchronized original-board position/turn/dice/history, card item+ability, battle choice and bidirectional live chat; real reconnect restored same match; duplicate guest roll => exactly one move; forged guest match state rejected, disconnected/unknown role/host-on-guest-turn direct handler rejected. Genuine full two-browser CI passed, no page errors. Historical proprietary 2002 server protocol and physical iPhone client remain UNVERIFIED and are not implied.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43193238465"
     }
   ],
   "restorationPriority": {
