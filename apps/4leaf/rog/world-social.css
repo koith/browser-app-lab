@@ -813,10 +813,10 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
    and #social-new-room controls, not a second fake list of click targets.
    Override old 794px absolute-marker positions ONLY inside this overlay. */
 @media(max-width:650px){
- #rooms #social-mobile-room-map .social-mobile-room-grid{
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map .social-mobile-room-grid{
   display:block!important;overflow:auto!important;padding:12px!important;
  }
- #rooms #social-mobile-room-map #social-directory-list{
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map #social-directory-list{
   box-sizing:border-box!important;position:static!important;
   inset:auto!important;display:grid!important;width:100%!important;
   height:auto!important;min-height:0!important;
@@ -824,7 +824,7 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
   grid-auto-rows:minmax(82px,auto)!important;gap:10px!important;
   overflow:visible!important;transform:none!important;
  }
- #rooms #social-mobile-room-map #social-directory-list .social-directory-row{
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map #social-directory-list .social-directory-row{
   box-sizing:border-box!important;position:relative!important;
   left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;
   width:100%!important;min-width:0!important;height:82px!important;
@@ -839,20 +839,20 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
   box-shadow:0 3px 8px #10213eb8!important;
   cursor:pointer!important;touch-action:manipulation;
  }
- #rooms #social-mobile-room-map .social-directory-row .social-room-number{
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map .social-directory-row .social-room-number{
   display:block!important;position:absolute!important;
   left:6px!important;top:4px!important;right:auto!important;bottom:auto!important;
   width:auto!important;height:auto!important;background:none!important;
   border:0!important;font:bold 12px/16px Gulim,'굴림',sans-serif!important;
  }
- #rooms #social-mobile-room-map .social-directory-row small{
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map .social-directory-row small{
   display:block!important;position:absolute!important;
   top:3px!important;right:4px!important;left:auto!important;bottom:auto!important;
   width:18px!important;height:17px!important;
   font:12px/16px Gulim,'굴림',sans-serif!important;
   background:#203b68!important;border:0!important;
  }
- #rooms #social-mobile-room-map .social-directory-row b{
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map .social-directory-row b{
   box-sizing:border-box!important;position:static!important;
   max-width:100%!important;width:auto!important;height:auto!important;
   flex:none!important;padding:0!important;margin:0!important;
@@ -860,17 +860,17 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
   font:bold 13px/18px Gulim,'굴림',sans-serif!important;
   overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;
  }
- #rooms #social-mobile-room-map .social-directory-row .social-room-users{
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map .social-directory-row .social-room-users{
   box-sizing:border-box!important;position:static!important;
   display:block!important;width:auto!important;height:auto!important;
   flex:none!important;padding:0!important;margin:0!important;
   border:0!important;background:none!important;color:#d9f4e3!important;
   font:11px/15px Gulim,'굴림',sans-serif!important;
  }
- #rooms #social-mobile-room-map .social-directory-row .social-room-action{
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map .social-directory-row .social-room-action{
   display:none!important
  }
- #rooms #social-mobile-room-map .social-directory-row:is(:hover,:focus-visible){
+ #rooms .social-directory:not(.web-estate-open) #social-mobile-room-map .social-directory-row:is(:hover,:focus-visible){
   outline:2px solid #fff4aa!important;outline-offset:1px!important;
   background:#617db8!important;
  }
