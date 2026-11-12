@@ -4,6 +4,7 @@ on:
     paths:
       - 'apps/gallery-archive/collect_new_creator_public_shas.py'
       - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
+      - 'apps/gallery-archive/qa_g07_new_public_saved_sha.py'
       - '.github/workflows/gallery-g07-current-official-sns-qa.yml'
 permissions:
   contents: write
@@ -11,6 +12,16 @@ concurrency:
   group: g07-author-public-sns-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 jobs:
+  verify-committed-public-photo:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'Pillow==11.3.0' 'playwright==1.56.0'
+      - name: Verify committed actual JPEG, SHA, bytes, decoded pixels and owner nonduplication
+        run: python apps/gallery-archive/qa_g07_new_public_saved_sha.py
   fetch-and-stage-current-author-photo-bytes:
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
