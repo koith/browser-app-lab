@@ -1,0 +1,45 @@
+name: 4LEAF DIE-01 original D4/D6 source-member integrity
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/die01-original-source-evidence.cjs'
+      - '.github/workflows/rog-die01-native-source-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/die01-original-source-evidence.cjs'
+      - '.github/workflows/rog-die01-native-source-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-d4-d6-pixels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit real 2002 OBS 1171 D6 and 1223 D4 source PNG and block keyframes
+        run: node apps/4leaf/rog/tests/die01-original-source-evidence.cjs
+  actual-dice-result:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.engine }} --with-deps
+      - name: Original D4 x4 and D6 x6 live roll animation result validation
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+        run: node apps/4leaf/rog/tests/dice-original-roll-tables.cjs
