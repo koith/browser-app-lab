@@ -1,4 +1,4 @@
-"""Resolution remains primary; only reviewed clean copies win resolution ties."""
+"""Only SHA-paired optical evidence can select a superior saved edition."""
 import hashlib,json,tempfile
 from pathlib import Path
 from PIL import Image,ImageDraw
@@ -19,8 +19,23 @@ with tempfile.TemporaryDirectory() as temp:
  clean,cp=edition('clean',(600,900),False,'absent')
  lower,lp=edition('small-clean',(400,600),False,'absent')
  larger,hp=edition('large-marked',(1200,1800),True,'present')
- assert replacement_reason(cp,mp)=='same_resolution_without_site_watermark'
- assert replacement_reason(hp,cp)=='higher_resolution'
+ assert replacement_reason(cp,mp) is None,'Unmeasured watermark claim cannot replace without paired quality'
+ assert replacement_reason(hp,cp) is None,'Larger pixels alone do not prove higher optical resolution'
+ # Simulate a verified paired optical measurement. The real merger derives
+ # comparable evidence by decoding both physical source files.
+ paired={'method':'paired-decoded-pixel-v1','candidate_sha256':cp['sha256'],
+         'compared_to_sha256':mp['sha256'],'same_photo_verified':True,
+         'confidence':'measured','relation':'comparable'}
+ cp['visual_quality']=paired
+ (clean/'manifest.json').write_text(json.dumps({'id':'work','title':'work','expected':1,'images':[cp]}))
+ assert replacement_reason(cp,mp)=='comparable_verified_without_site_watermark'
+ wrong={**cp,'visual_quality':{**paired,'compared_to_sha256':'f'*64}}
+ assert replacement_reason(wrong,mp) is None,'Wrong comparator SHA must never cause replacement'
+ proven={**hp,'visual_quality':{**paired,'candidate_sha256':hp['sha256'],
+            'compared_to_sha256':cp['sha256'],'relation':'higher'}}
+ assert replacement_reason(proven,cp)=='measured_higher_optical_detail'
+ blocked={**proven,'ai_enhanced':True}
+ assert replacement_reason(blocked,cp) is None,'AI enlargement cannot displace original'
  assert replacement_reason(lp,mp) is None
  assert replacement_reason(mp,cp) is None
  unknown={**mp,'site_watermark_review':{'status':'absent'}}
@@ -37,5 +52,5 @@ with tempfile.TemporaryDirectory() as temp:
  build([marked],gallery);selected=json.loads(gallery.read_text())['albums'][0]['images'][0]
  assert selected['sha256']==cp['sha256'] and watermark_status(selected)=='absent'
  build([lower],gallery);assert json.loads(gallery.read_text())['albums'][0]['images'][0]['sha256']==cp['sha256']
- build([larger],gallery);assert json.loads(gallery.read_text())['albums'][0]['images'][0]['sha256']==hp['sha256']
-print('RESOLUTION_FIRST_VERIFIED_WATERMARK_TIEBREAK_AND_NO_DOWNGRADE_PASS')
+ build([larger],gallery);assert json.loads(gallery.read_text())['albums'][0]['images'][0]['sha256']==cp['sha256']
+print('MEASURED_OPTICAL_FIRST_VERIFIED_WATERMARK_TIEBREAK_AND_NO_BLIND_UPSCALE_PASS')
