@@ -37,7 +37,9 @@ ALLOWED_MEDIA = (
     "static.mstdn.social", "media.mstdn.social", "media.twingyeo.kr",
     "planet.moe", "twingyeo.kr", "media.planet.moe",
 )
-SENSITIVE_LABELS = {"!hide", "!takedown", "porn", "sexual", "nudity", "graphic-media"}
+# Content warnings on otherwise public posts are not account privacy controls.
+# Retain hard provider hide/takedown, illegal/violent-content exclusion.
+RESTRICTED_LABELS = {"!hide", "!takedown", "csam", "graphic-media", "gore", "self-harm"}
 MIMES_LIMITS = {"image/jpeg": MAX_IMAGE, "image/png": MAX_IMAGE,
                 "image/webp": MAX_IMAGE, "image/avif": MAX_IMAGE,
                 "video/mp4": MAX_VIDEO, "video/webm": MAX_VIDEO,
@@ -77,7 +79,7 @@ def sensitive_labels(labels):
     if not isinstance(labels, list):
         return False
     return any(isinstance(x, dict) and
-               str(x.get("val", "")).lower() in SENSITIVE_LABELS for x in labels)
+               str(x.get("val", "")).lower() in RESTRICTED_LABELS for x in labels)
 
 
 def normalized(platform, original_id, url, text, published, media_urls=(), profile_url=''):
@@ -101,9 +103,13 @@ def bluesky(term, start, end):
             uri = item.get("uri") or ""
             match = re.fullmatch(
                 r"at://(did:(?:plc|web):[A-Za-z0-9.:-]{6,150})/app\.bsky\.feed\.post/([A-Za-z0-9]+)", uri)
+            record_labels=rec.get("labels")
+            record_values=(record_labels.get("values") if isinstance(record_labels,dict)
+                           else None)
             if (not match or match.group(1) != author.get("did")
                     or sensitive_labels(item.get("labels"))
-                    or sensitive_labels(author.get("labels"))):
+                    or sensitive_labels(author.get("labels"))
+                    or sensitive_labels(record_values)):
                 continue
             posted = at_date(rec.get("createdAt"), start, end)
             if not posted:
@@ -184,7 +190,7 @@ def mastodon(term, start, end):
         if not isinstance(data, list):
             continue
         for item in data:
-            if not isinstance(item, dict) or item.get("visibility") != "public" or item.get("sensitive"):
+            if not isinstance(item, dict) or item.get("visibility") != "public":
                 continue
             if sensitive_labels(item.get("labels")):
                 continue
@@ -214,7 +220,7 @@ def misskey(term, start, end):
         for note in data:
             if not isinstance(note, dict) or note.get("visibility") != "public":
                 continue
-            if note.get("localOnly") or note.get("cw") or note.get("sensitive"):
+            if note.get("localOnly"):
                 continue
             posted = at_date(note.get("createdAt"), start, end)
             user = note.get("user") or {}
@@ -223,7 +229,7 @@ def misskey(term, start, end):
             if not posted or not re.fullmatch(r"[A-Za-z0-9_.-]{1,70}", uid) or not re.fullmatch(r"[A-Za-z0-9_-]{5,100}", nid):
                 continue
             media = [m.get("url") for m in (note.get("files") or [])
-                     if isinstance(m, dict) and not m.get("isSensitive")]
+                     if isinstance(m, dict)]
             link = "https://" + host + "/notes/" + nid
             row = normalized("misskey", host + ":" + nid, link,
                              str(note.get("text") or ""), posted, media,
@@ -242,7 +248,7 @@ def lemmy(term, start, end):
         if not isinstance(item, dict):
             continue
         p = item.get("post") or {}
-        if p.get("nsfw") or p.get("removed") or p.get("deleted"):
+        if p.get("removed") or p.get("deleted"):
             continue
         posted = at_date(p.get("published"), start, end)
         if not posted:
