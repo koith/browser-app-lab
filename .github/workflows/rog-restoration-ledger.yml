@@ -5,6 +5,8 @@ on:
       - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
       - 'apps/4leaf/rog/tools/restoration-ledger.cjs'
       - 'apps/4leaf/rog/tests/restoration-ledger.cjs'
+      - 'apps/4leaf/rog/tests/fl-workstream-coverage.cjs'
+      - 'apps/4leaf/rog/docs/FL_WORKSTREAM_RECONCILIATION_2026-10-20.md'
       - '.github/workflows/rog-restoration-ledger.yml'
       - 'apps/4leaf/rog/docs/evidence/source-maps/**'
       - 'apps/4leaf/rog/tools/*source-evidence*.py'
@@ -17,6 +19,8 @@ on:
       - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
       - 'apps/4leaf/rog/tools/restoration-ledger.cjs'
       - 'apps/4leaf/rog/tests/restoration-ledger.cjs'
+      - 'apps/4leaf/rog/tests/fl-workstream-coverage.cjs'
+      - 'apps/4leaf/rog/docs/FL_WORKSTREAM_RECONCILIATION_2026-10-20.md'
       - '.github/workflows/rog-restoration-ledger.yml'
       - 'apps/4leaf/rog/docs/evidence/source-maps/**'
       - 'apps/4leaf/rog/tools/*source-evidence*.py'
@@ -52,6 +56,8 @@ jobs:
           fi
       - name: Regression-test false completion and truncated history
         run: node apps/4leaf/rog/tests/restoration-ledger.cjs
+      - name: Verify 16 historical FL requirements and 60 canonical ledger IDs
+        run: node apps/4leaf/rog/tests/fl-workstream-coverage.cjs
       - name: Surface exact remaining original restoration work
         run: node apps/4leaf/rog/tools/restoration-ledger.cjs open
 
