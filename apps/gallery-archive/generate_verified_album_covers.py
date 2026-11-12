@@ -103,10 +103,24 @@ def run(out):
             if not candidates:continue
             counts['total_visible_source_works']+=1
             curated=existing.get(album_id)
-            if curated and any(p.get('sha256')==curated.get('sha256') for p in candidates):
+            # Preserve independent/older reviewed curation only. Newly
+            # generated machine decisions must be recalculated when the
+            # owner original numbering changes or cross-owner metadata moves.
+            generated={'sha_verified_same_work_local_no_face_proven',
+              'verified_same_work_local_face_and_eye_region',
+              'owner_index_same_work_sha_only_no_pixel_decode'}
+            if curated and curated.get('method') not in generated and any(
+               p.get('sha256')==curated.get('sha256') for p in candidates):
                 covers[album_id]=curated
                 counts['manual_kept']+=1
                 continue
+            def display_number(photo,default):
+                # Same byte SHA may have one number in a legacy local scrape,
+                # and a different original number in the owner catalogue.
+                # The original publisher-facing owner number wins where known.
+                exact=next((q for q in originals
+                            if q.get('sha256')==photo.get('sha256')),None)
+                return (exact or photo).get('number') or default
             eligible=[]
             for num,photo in enumerate(persisted[:8]):
                 if photo.get('sha256') in deny_sha or not local_is_correct_work(album_id,photo):continue
@@ -124,7 +138,7 @@ def run(out):
                 confidence,num,photo,box,position=max(
                    eligible,key=lambda x:(x[0],-x[1]))
                 covers[album_id]={
-                   'sha256':photo['sha256'],'number':photo.get('number',num+1),
+                   'sha256':photo['sha256'],'number':display_number(photo,num+1),
                    'width':photo['width'],'height':photo['height'],
                    'face':box,'position':position,'fit':'cover',
                    'method':'verified_same_work_local_face_and_eye_region',
@@ -147,7 +161,7 @@ def run(out):
                 counts['owner_sha_only_fallback']+=1
                 method='owner_index_same_work_sha_only_no_pixel_decode'
             covers[album_id]={
-               'sha256':photo['sha256'],'number':photo.get('number',idx+1),
+               'sha256':photo['sha256'],'number':display_number(photo,idx+1),
                'width':photo['width'],'height':photo['height'],
                'position':[50,20],'fit':'cover',
                'method':method,'not_identity_recognition':True}
