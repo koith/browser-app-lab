@@ -12,6 +12,7 @@ on:
       - 'apps/mimmi-gallery/publishers.json'
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
       - 'apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs'
+      - 'apps/gallery-archive/test_g10_real_album_covers.cjs'
       - 'apps/yui-gallery/gallery-labels.js'
       - 'apps/mimmi-gallery/gallery-labels.js'
       - 'apps/mimmi-gallery/test_gallery_labels.cjs'
@@ -36,6 +37,7 @@ on:
       - 'apps/mimmi-gallery/publishers.json'
       - 'apps/gallery-archive/test_gallery_visual_quality.cjs'
       - 'apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs'
+      - 'apps/gallery-archive/test_g10_real_album_covers.cjs'
       - 'apps/yui-gallery/gallery-labels.js'
       - 'apps/mimmi-gallery/gallery-labels.js'
       - 'apps/mimmi-gallery/test_gallery_labels.cjs'
@@ -65,6 +67,7 @@ jobs:
           node apps/gallery-archive/test_curated_cover_manifest.cjs
           node apps/gallery-archive/test_cross_model_saved_sha.cjs
           node apps/gallery-archive/audit_gallery_publisher_cover_corpus.cjs
+          node apps/gallery-archive/test_g10_real_album_covers.cjs
           node apps/mimmi-gallery/test_gallery_labels.cjs
           node apps/yui-gallery/test_gallery_labels.cjs
       - name: Verify both embedded gallery scripts parse
