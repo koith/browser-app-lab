@@ -61,7 +61,7 @@
  };
  const canonicalRooms=(region,district)=>Array.from({length:8},(_,slot)=>
   canonicalRoom(canonicalRoomId(region,district,slot))).filter(Boolean);
- const ROOM_MAP={width:1480,height:1120};
+ const ROOM_MAP={width:1480,height:2220};
  // A historic 2-person chat-room event is documented. Other limits are
  // restoration controls, not claims about the original server's room menu.
  const allowedCapacity=n=>[2,4,8,12].includes(Number(n))?Number(n):12;
@@ -804,28 +804,33 @@
   const stage=$stage();if(!stage)return;
   stage.querySelector('#social-mobile-room-map')?.remove();
   if(state.view!=='directory'||!window.matchMedia('(max-width:650px)').matches)return;
-  const list=$('social-directory-list'),create=$('social-new-room');
-  if(!list||!create)return;
-  const overlay=document.createElement('section');overlay.id='social-mobile-room-map';
-  overlay.className='social-mobile-room-map';
+  const directory=$('social-image-frame')?.querySelector('.social-directory');
+  const viewport=$('social-map-viewport'),create=$('social-new-room');
+  const toggle=$('social-web-estate-toggle');
+  const toolbar=directory?.querySelector('.social-map-toolbar');
+  if(!directory||!viewport||!create||!toggle||!toolbar)return;
+  // Keep the ONE live, draggable spatial room map on phones as well as desktop.
+  // The previous mobile two-column overlay reparented only its buttons;
+  // it intercepted the real map/list toggle and hid map panning entirely.
+  // Reparent the actual viewport and its already-bound room buttons; do not
+  // clone admission handlers, manufacture rooms, or fake original coordinates.
+  const overlay=document.createElement('section');
+  overlay.id='social-mobile-room-map';overlay.className='social-mobile-room-map';
   overlay.dataset.entryMode='tap-spatial-room-marker';
-  overlay.setAttribute('aria-label','채팅방 지도 · 맵의 방을 눌러 직접 입장');
+  overlay.setAttribute('aria-label','채팅방 공간 지도 · 방 마커를 눌러 입장');
   overlay.style.setProperty('--native-town-background',
    'url("./original/ChatTown/'+REGIONS[state.region].art+'.png")');
-  const heading=document.createElement('header');heading.className='social-mobile-room-heading';
-  const title=document.createElement('strong');title.textContent=state.district+' · 채팅방 지도';
-  heading.append(title,create); // SAME #social-new-room and onclick
-  const grid=document.createElement('div');grid.className='social-mobile-room-grid';
-  for(const row of list.querySelectorAll('button[data-room]')){
-   row.classList.add('social-mobile-room-pin'); // SAME real joinRoom callback
-  }
-  grid.append(list);
-  if(!list.children.length){const empty=document.createElement('p');
-   empty.textContent='개설된 방이 없습니다. 방 만들기를 눌러 시작하세요.';
-   grid.append(empty);}
+  const heading=document.createElement('header');
+  heading.className='social-mobile-room-heading';
+  const title=document.createElement('strong');
+  title.textContent=state.district+' · 채팅방 지도';
+  heading.append(title,toggle,create);
   const hint=document.createElement('p');hint.className='social-mobile-room-hint';
-  hint.textContent='맵의 방을 터치하세요 · 원작 방 좌표 미확보 · 실제 방/인원만 표시';
-  overlay.append(heading,grid,hint);stage.append(overlay);
+  hint.textContent='지도 속 방을 터치하거나 드래그로 이동 · 목록은 선택 사항 · 원작 방 좌표 미확보';
+  overlay.append(heading,viewport,toolbar,hint);
+  // Preserve closest('.social-directory') so live pan/drag and optional
+  // list-mode listeners continue to work after the DOM reparent.
+  directory.append(overlay);
  }
  // 4LEAF 0.9 expands the world-like room estate, not a linear HTML list.
  // Each room is an independent button; the map can pan on both axes.
@@ -893,13 +898,13 @@
  // Use distinct central-first positions for real browser-created rooms.
  const liveRoomCells=(()=>{
   const cells=[];
-  for(let row=0;row<12;row++)for(let col=0;col<7;col++)
-   cells.push({col,row,distance:Math.abs(col-3)+Math.abs(row-5.5)});
+  for(let row=0;row<20;row++)for(let col=0;col<10;col++)
+   cells.push({col,row,distance:Math.abs(col-4.5)+Math.abs(row-9.5)});
   return cells.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.col-b.col);
  })();
  function realRoomPosition(index){
   const cell=liveRoomCells[index%liveRoomCells.length];
-  return {x:70+cell.col*188,y:70+cell.row*81};
+  return {x:70+cell.col*130,y:70+cell.row*100};
  }
  function setupRoomMap(){
   const viewport=$('social-map-viewport'),plane=$('social-map-plane');
@@ -908,6 +913,7 @@
   // ChatTown backdrops are district selectors, while IMG/bgtile belongs
   // to Genesis Dice. Do not inject either as a fake native room-map tile.
   plane.dataset.terrain='unverified';
+  plane.dataset.roomCapacity=String(liveRoomCells.length);
   const key=state.region+':'+state.district;
   const saved=state.roomMapOffsets[key];
   let x=saved?.x??-(ROOM_MAP.width-viewport.clientWidth)/2;

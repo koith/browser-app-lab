@@ -722,11 +722,20 @@ const path=require('path');
  assert.equal(await host.locator('#social-peer-panel').evaluate(el=>el.parentElement.classList.contains('social-layout')),true,'the single real roster returns to its ordinary town layout');
  assert.equal(await host.locator('.social-public-room').count(),0,'no fabricated preset rooms after leaving');
  assert.equal(await host.locator('.social-directory-row').count(),9,'eight permanent server rooms plus the actual user-created room persist');
- const realMarker=await host.locator('.social-directory-row[data-permanent="false"]').first().evaluate(el=>({
-  x:Number.parseFloat(el.style.left),y:Number.parseFloat(el.style.top),count:el.querySelector('.social-room-users').textContent
- }));
- assert.ok(realMarker.x>=70&&realMarker.x<=1380&&realMarker.y>=70&&realMarker.y<=1050,
-  'actual room has a distinct spatial position (not claimed as original)');
+ const realMarker=await host.locator('.social-directory-row[data-permanent="false"]').first().evaluate(el=>{
+  const plane=document.getElementById('social-map-plane');
+  const markers=[...plane.querySelectorAll('.social-directory-row')];
+  const positions=markers.map(node=>node.style.left+','+node.style.top);
+  return {x:Number.parseFloat(el.style.left),y:Number.parseFloat(el.style.top),
+   width:el.offsetWidth,height:el.offsetHeight,
+   planeWidth:plane.offsetWidth,planeHeight:plane.offsetHeight,
+   distinctPositions:new Set(positions).size,totalRooms:markers.length,
+   count:el.querySelector('.social-room-users').textContent};
+ });
+ assert.ok(realMarker.x>=0&&realMarker.x+realMarker.width<=realMarker.planeWidth&&
+   realMarker.y>=0&&realMarker.y+realMarker.height<=realMarker.planeHeight&&
+   realMarker.distinctPositions===realMarker.totalRooms,
+  'live room markers require unique spatial positions inside the current responsive map: '+JSON.stringify(realMarker));
  assert.equal(realMarker.count,'0/12명','leaving a real room clears its occupancy');
  assert.equal(await host.locator('#social-map-plane').evaluate(el=>el.style.transform),mapAfter,'the original room terrain camera resumes its prior position after returning from a room');
  await host.locator('#social-new-room').click();
