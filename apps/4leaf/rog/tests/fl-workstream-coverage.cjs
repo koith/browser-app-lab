@@ -10,7 +10,7 @@ const ledger=JSON.parse(fs.readFileSync(path.join(root,'docs/RESTORATION_LEDGER.
 const taskIds=new Set(ledger.tasks.map(task=>task.id));
 assert.equal(taskIds.size,ledger.tasks.length,'duplicate ledger task IDs');
 assert.ok(taskIds.size>=60,'preserve original 60 tasks, never shrink the canonical backlog');
-const rows=doc.split(/\\r?\\n/).filter(line=>/^\\|\\s*\\*\\*FL-\\d{2}\\*\\*\\s*\\|/.test(line));
+const rows=doc.split(/\r?\n/).filter(line=>/^\|\s*\*\*FL-\d{2}\*\*\s*\|/.test(line));
 assert.equal(rows.length,16,'exactly 16 historical FL workstream titles');
 const covered=new Set();
 for(let n=1;n<=16;n++){
