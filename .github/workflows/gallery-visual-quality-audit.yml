@@ -4,12 +4,18 @@ on:
   pull_request:
     paths:
       - 'apps/gallery-archive/audit_stored_image_quality.py'
+      - 'apps/gallery-archive/review_real_quality_suspects.py'
+      - 'apps/yui-gallery/test_merge_higher_resolution.py'
+      - 'apps/yui-gallery/test_photo_quality_policy.py'
+      - 'apps/yui-gallery/merge_higher_resolution.py'
+      - 'apps/yui-gallery/photo_quality_policy.py'
       - 'apps/gallery-archive/test_stored_image_quality_integrity.py'
       - '.github/workflows/gallery-visual-quality-audit.yml'
   push:
     branches: [main]
     paths:
       - 'apps/gallery-archive/audit_stored_image_quality.py'
+      - 'apps/gallery-archive/review_real_quality_suspects.py'
       - 'apps/gallery-archive/test_stored_image_quality_integrity.py'
       - '.github/workflows/gallery-visual-quality-audit.yml'
 permissions:
@@ -25,12 +31,22 @@ jobs:
         run: |
           python -m py_compile apps/gallery-archive/audit_stored_image_quality.py
           python apps/gallery-archive/test_stored_image_quality_integrity.py
+      - name: Verify actual photo merger never selects fake upscale
+        run: |
+          python -m py_compile apps/yui-gallery/photo_quality_policy.py apps/yui-gallery/merge_higher_resolution.py
+          (cd apps/yui-gallery && python test_photo_quality_policy.py && python test_merge_higher_resolution.py)
       - name: Decode actual pixels and emit review-only quality flags
         run: python apps/gallery-archive/audit_stored_image_quality.py --out gallery-visual-quality-audit.json
+      - name: Compare saved candidate pixels against the full 2266-file corpus
+        run: |
+          python -m py_compile apps/gallery-archive/review_real_quality_suspects.py
+          python apps/gallery-archive/review_real_quality_suspects.py --audit gallery-visual-quality-audit.json --out gallery-g08-physical-review
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: gallery-visual-quality-audit
-          path: gallery-visual-quality-audit.json
+          path: |
+            gallery-visual-quality-audit.json
+            gallery-g08-physical-review/
           if-no-files-found: warn
           retention-days: 14

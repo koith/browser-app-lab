@@ -8,6 +8,26 @@ from identity_policy import ensure_allowed
 from photo_quality_policy import replacement_reason,watermark_review,watermark_status
 
 ALLOWED=re.compile(r'^(?:pic1\.imgdb\.cn|image\.huantuji\.com|image\.ajunews\.com|cdn\.imweb\.me|t1\.daumcdn\.net|blogger\.googleusercontent\.com|cdn\.imgcup\.com|cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn[12]\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com|www\.girl-atlas\.com|pbs\.twimg\.com|djawaphoto\.com|blog\.hacosta\.co\.jp|img1\.gamersky\.com|upload3\.inven\.co\.kr|pub-376e2756f81341f087a414464f9a25ec\.r2\.dev)$')
+def verified_optical_evidence(photo):
+    """Carry through only SHA-pinned measured comparisons from the physical
+    decoded-pixel merger. Opaque scores or another photo's SHA cannot win."""
+    q=photo.get('visual_quality')
+    sha=photo.get('sha256','')
+    if not isinstance(q,dict):return {}
+    other=q.get('compared_to_sha256')
+    if (q.get('method')!='paired-decoded-pixel-v1'
+            or q.get('candidate_sha256')!=sha
+            or not isinstance(sha,str) or not re.fullmatch(r'[0-9a-f]{64}',sha)
+            or not isinstance(other,str) or not re.fullmatch(r'[0-9a-f]{64}',other)
+            or q.get('same_photo_verified') is not True
+            or q.get('confidence')!='measured'
+            or q.get('relation') not in ('higher','lower','comparable')):
+        return {}
+    return {'visual_quality':{key:q[key] for key in (
+        'method','candidate_sha256','compared_to_sha256','same_photo_verified',
+        'confidence','relation')}}
+
+
 def build(folders,out,replace=False):
     albums=[]
     for folder in folders:
@@ -27,7 +47,8 @@ def build(folders,out,replace=False):
             if p.get('display_rotation',0) not in (0,90,270):raise ValueError('Unreviewed display rotation')
             seen.add(digest);images.append({**{k:p[k] for k in ['number','url','sha256','bytes','width','height']},
                                            **{k:p[k] for k in ['origin_page','discovery_page','source_country','source_attribute','published_at','published_at_text','photographer_credit','sample_label','alternative_sources','display_rotation'] if k in p},
-                                           'site_watermark_review':watermark_review(p)})
+                                           'site_watermark_review':watermark_review(p),
+                                           **verified_optical_evidence(p)})
         numbers=[p['number'] for p in images]
         if len(set(numbers))!=len(numbers) or any(not isinstance(n,int) or n<1 or n>m['expected'] for n in numbers):raise ValueError('Invalid or duplicate photo sequence')
         public_subset=bool(m.get('not_complete_photobook'))
