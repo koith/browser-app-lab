@@ -1,0 +1,68 @@
+name: 4LEAF ACT-01 98-source-body and BRD-04 26-source-map final acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/genesis-chessman-actors.css'
+      - 'apps/4leaf/rog/tests/act01-real-98-source-body-acceptance.cjs'
+      - 'apps/4leaf/rog/tests/brd04-original-map-event-acceptance.cjs'
+      - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
+      - '.github/workflows/rog-actor-map-final-acceptance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/genesis-chessman-actors.css'
+      - 'apps/4leaf/rog/tests/act01-real-98-source-body-acceptance.cjs'
+      - 'apps/4leaf/rog/tests/brd04-original-map-event-acceptance.cjs'
+      - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
+      - '.github/workflows/rog-actor-map-final-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actor-98-source-no-css:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Serve real source on localhost
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/4leaf-act.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsSI http://127.0.0.1:8765/ >/dev/null && exit 0 || sleep 1; done
+          cat /tmp/4leaf-act.log
+          exit 1
+      - name: Verify all 97 source body SHA digests and live 98 actors without CSS fakes
+        run: node apps/4leaf/rog/tests/act01-real-98-source-body-acceptance.cjs
+      - name: Existing CHR +260 exact-body identity regression
+        run: node apps/4leaf/rog/tests/chr-body-source-map.cjs
+  dmp-26-source-25-event:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify original 26 routes and 25 event tables (including 0170 gap)
+        env:
+          LEAF_MAP_REPORT: 4leaf-brd04-26-map-source-audit.json
+        run: node apps/4leaf/rog/tests/brd04-original-map-event-acceptance.cjs
+      - run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Prove 26 maps and all 1920 route cells can be navigated on desktop and phone
+        run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
+      - name: Original 0170 135-cell map in a real game; no invented events/title
+        run: node apps/4leaf/rog/tests/dice-source-map0170-registration.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourleaf-26-dmp-source-events-and-exception
+          path: 4leaf-brd04-26-map-source-audit.json
+          retention-days: 14
