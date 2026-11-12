@@ -18,13 +18,18 @@ on:
       - ".github/workflows/intersection-github-live-viewer-qa.yml"
       - "apps/demand-research/test_live_account_archive_browser.py"
       - "apps/demand-research/test_live_account_index_browser.py"
+      - "apps/demand-research/account_archive_view.html"
+      - "apps/demand-research/account_archive_view.css"
+      - "apps/demand-research/account_archive_view.js"
 
 permissions:
   contents: read
 
 concurrency:
-  group: intersection-github-live-viewer-qa
+  # The earlier single pending slot was replaced during rapid app commits.
+  group: ${{ github.event_name == 'pull_request' && format('intersection-github-live-viewer-pr-{0}', github.head_ref) || 'intersection-github-live-viewer-production' }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   syntax-check:
@@ -127,17 +132,20 @@ jobs:
     needs: [live-verified-reader]
     if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble@sha256:a7f6cf3ae520c9d670ad956572c13747ed5abdbba5123a01526f873ed1662528
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install pinned real-browser drivers
-        run: |
-          python -m pip install --disable-pip-version-check playwright==1.56.0
-          python -m playwright install --with-deps chromium webkit
-      - name: Verify verified account-index UI in real desktop Chromium and mobile WebKit
-        run: python apps/demand-research/test_live_account_index_browser.py
+      - name: Install pinned Playwright API (Chromium and WebKit preinstalled)
+        run: python -m pip install --disable-pip-version-check playwright==1.56.0
+      # User-facing archived SNS playback is P0, so its result is reported
+      # independently before any unrelated account-index JS errors.
       - name: Exercise real stored posts, original media, detail, tabs and responsive layout
         run: python apps/demand-research/test_live_account_archive_browser.py
+      - name: Verify verified account-index UI in real desktop Chromium and mobile WebKit
+        run: python apps/demand-research/test_live_account_index_browser.py
