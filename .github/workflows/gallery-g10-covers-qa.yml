@@ -77,6 +77,11 @@ jobs:
           TARGET_BRANCH: ${{ github.head_ref }}
         run: |
           set -euo pipefail
+          # The model may have applied a separate test fix while the face
+          # detector was scanning. Fetch the NEWEST PR head before writing;
+          # never force-push or overwrite concurrent developer commits.
+          git fetch origin "refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"
+          git checkout -B "$TARGET_BRANCH" "refs/remotes/origin/$TARGET_BRANCH"
           cp gallery-g10-cover-review/mimmi-album-covers.json apps/mimmi-gallery/album-covers.json
           cp gallery-g10-cover-review/yui-album-covers.json apps/yui-gallery/album-covers.json
           git config user.name "github-actions[bot]"
