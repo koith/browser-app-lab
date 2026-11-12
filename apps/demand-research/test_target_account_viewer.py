@@ -230,3 +230,48 @@ def test_unmatched_snapshot_never_injects_another_account_name(populated):
     assert result["profile_snapshot_verified"] is False
     assert result["display_name"]==""
     assert result["handle"]==""
+
+
+def test_free_render_account_bundle_singleflight(monkeypatch):
+    """Eight concurrent profile/feed calls verify the same ZIP ancestry ONCE."""
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    import time
+    monkeypatch.setenv("DEMAND_ACCOUNT_VIEWER_SESSION_CACHE","1")
+    monkeypatch.setattr(viewer,"_ARCHIVE_SESSION_CACHE",None)
+    calls=[]
+    guard=threading.Lock()
+    def fake_verified_archive(account):
+        with guard:
+            calls.append(account)
+        time.sleep(.015)
+        return (None,{"platform":"bluesky","identity":"synthetic"},object())
+    monkeypatch.setattr(viewer,"_open_account_uncached",fake_verified_archive)
+    account="bluesky-"+"a"*40
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results=list(pool.map(viewer.open_account,[account]*8))
+    assert len(calls)==1,"duplicate immutable ZIP loads exceeded free instance RAM"
+    assert all(item is results[0] for item in results)
+    # A different verified account NEVER borrows another account's ZIP.
+    other="bluesky-"+"b"*40
+    assert viewer.open_account(other) is not results[0]
+    assert calls==[account,other]
+    # Expiry ensures hour-by-hour append-only incremental ZIPs are discovered.
+    old=viewer._ARCHIVE_SESSION_CACHE
+    monkeypatch.setattr(viewer,"_ARCHIVE_SESSION_CACHE",
+                        (old[0],time.monotonic()-viewer.ARCHIVE_SESSION_SECONDS-1,old[2]))
+    assert viewer.open_account(other) is not old[2]
+    assert len(calls)==3
+
+
+def test_singleflight_optin_does_not_change_existing_archive_contract(monkeypatch):
+    """Default synthetic/Actions paths keep existing uncached behavior."""
+    monkeypatch.delenv("DEMAND_ACCOUNT_VIEWER_SESSION_CACHE",raising=False)
+    calls=[]
+    def fake_verified_archive(account):
+        calls.append(account)
+        return object()
+    monkeypatch.setattr(viewer,"_open_account_uncached",fake_verified_archive)
+    account="bluesky-"+"c"*40
+    assert viewer.open_account(account) is not viewer.open_account(account)
+    assert calls==[account,account]
