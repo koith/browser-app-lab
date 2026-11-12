@@ -48,7 +48,8 @@ for(const [model,total] of [['mimmi',80],['yui',39]]){
     model+' '+id+' incorrect face/crop coordinates');
    cropped++;
   }else assert.ok(method==='owner_index_same_work_sha_only_no_pixel_decode'||
-      method==='sha_verified_same_work_local_no_face_proven',
+      method==='sha_verified_same_work_local_no_face_proven'||
+      method==='same_album_saved_sha_verified_no_identity_inference',
       model+' '+id+' must not claim a verified face region without decoded pixels');
  }
  if(model==='yui'){
