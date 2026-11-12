@@ -82,6 +82,15 @@ def verify(browser_type,label):
                 "Bluesky" if embedded else "Mastodon")
             assert page.locator("#snsProviderSubtitle").is_visible()
             assert page.locator("#results .post-byline strong").count()==1
+            # Profile can finish after the feed: social cards must show the
+            # saved author nickname and handle instead of generic "보관 계정".
+            expected_name="코코" if embedded else "마루"
+            expected_handle="@coco.bsky.social" if embedded else "@maru@test.example"
+            page.wait_for_function(
+                "([name,handle]) => { const card=document.querySelector('#results article.post');"
+                " return card?.querySelector('.post-byline strong')?.textContent===name"
+                " && card?.querySelector('.post-handle')?.textContent===handle; }",
+                arg=[expected_name,expected_handle],timeout=12000)
             assert page.locator("#results .post-action-reply").count()==1
             assert page.locator("#results article.post").first.get_attribute("data-kind")=="post"
             background=page.locator("body").evaluate(
@@ -113,6 +122,10 @@ def verify(browser_type,label):
                 assert page.locator("html").get_attribute("data-platform")=="bluesky"
                 assert page.locator("#snsProviderTitle").inner_text()=="Bluesky 스타일 보관함"
                 assert page.locator("#snsProviderSymbol").inner_text()=="🦋"
+                page.wait_for_function(
+                    "() => document.querySelector('#results .post-byline strong')?.textContent==='코코'"
+                    " && document.querySelector('#results .post-handle')?.textContent==='@coco.bsky.social'",
+                    timeout=12000)
                 # Data switch cannot leave Mastodon's dark canvas behind.
                 assert page.locator("body").evaluate(
                     "el => getComputedStyle(el).backgroundColor")=="rgb(245, 248, 251)"
