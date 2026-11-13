@@ -1,0 +1,26 @@
+name: 4LEAF SRC-02 original 2002 time-key provenance and missing 2004 motion evidence
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/docs/evidence/source-maps/original-motion-timeline-register.json'
+      - 'apps/4leaf/rog/tests/r21-source-timeline-register.cjs'
+      - '.github/workflows/rog-r21-original-timeline.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/docs/evidence/source-maps/original-motion-timeline-register.json'
+      - 'apps/4leaf/rog/tests/r21-source-timeline-register.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-time-key-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node apps/4leaf/rog/tests/r21-source-timeline-register.cjs

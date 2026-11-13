@@ -1,0 +1,122 @@
+{
+  "schema": "4leaf-original-motion-source-timeline-v1",
+  "scope": "2002 installer authentic 2D source chronology vs 2004 static screenshots",
+  "compiledAt": "2026-11-13",
+  "sourceInstallerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+  "evidentiaryRules": [
+    "VERIFY image hashes and frame indices from original installer; never guess original FPS",
+    "A static screenshot does not establish chronological action timing or 3D camera transform",
+    "2D source animation slot numbers, key order and ticks VERIFIED; slot action meaning may be INFERRED",
+    "No recovered native MVE physics/camera/geometry; mark explicitly UNVERIFIED",
+    "R21 archive omits sound 2125 until original audio file is recovered"
+  ],
+  "states": [
+    {
+      "id": "idle",
+      "human": "대기",
+      "sourceMember": "OBS/1025",
+      "sourceRecords": [
+        "native-card-action-sequences.js:CHR 0040 slots 0,1,2",
+        "original/OBS/referenced/chr-bodies-manifest.js:obs/1025"
+      ],
+      "recordedKeys": "VERIFIED-2002-SOURCE-KEY-ORDER",
+      "relativeTicks": "VERIFIED-2002-SOURCE-TICK-COUNT",
+      "stateLabel": "INFERRED-IDLE-FROM-VISUAL-POSE",
+      "original2004MotionVideo": null,
+      "original2004Timecode": "UNVERIFIED",
+      "historicalShot": "../assets/board.jpg",
+      "observedTimeSequence": "2002-OBS-CHR-0040-native-slot-0/1/2; exact idle FPS UNVERIFIED"
+    },
+    {
+      "id": "movement",
+      "human": "이동",
+      "sourceMember": "OBS/1025",
+      "sourceRecords": [
+        "native-card-action-sequences.js:CHR 0040 slots 3,4,5",
+        "original/maps.js:2002 DMP XY positions"
+      ],
+      "recordedKeys": "VERIFIED-2002-SOURCE-KEY-ORDER",
+      "relativeTicks": "VERIFIED-2002-SOURCE-TICK-COUNT",
+      "stateLabel": "INFERRED-REAR-SIDE-FRONT-WALK",
+      "original2004MotionVideo": null,
+      "original2004Timecode": "UNVERIFIED",
+      "historicalShot": "../assets/board.jpg",
+      "observedTimeSequence": "2002-OBS-CHR-0040-native-slot-3/4/5; source DMP cardinal path stepping; original movement speed UNVERIFIED"
+    },
+    {
+      "id": "D4",
+      "human": "4면체 결과별 굴림",
+      "sourceMember": "OBS/1223",
+      "sourceRecords": [
+        "original/OBS/dice-blocks/manifest.js:1223 20 tumble 12 impact",
+        "original/OBS/ui/manifest.js:1223 0..3 result faces"
+      ],
+      "recordedKeys": "VERIFIED-2002-OBS-RECORDS",
+      "relativeTicks": "VERIFIED-2002-KEY-OFFSETS",
+      "stateLabel": "INFERRED-TUMBLE-AND-IMPACT-ROLE",
+      "original2004MotionVideo": null,
+      "original2004Timecode": "UNVERIFIED",
+      "historicalShot": "../assets/battle.jpg",
+      "observedTimeSequence": "block source slot20 native keys -> slot12 native keys -> UI result frame 0..3; 2004 physical bounce/seconds unknown"
+    },
+    {
+      "id": "D6",
+      "human": "6면체 결과별 굴림",
+      "sourceMember": "OBS/1171",
+      "sourceRecords": [
+        "original/OBS/dice-blocks/manifest.js:1171 20 tumble 12 impact",
+        "original/OBS/ui/manifest.js:1171 0..5 result faces"
+      ],
+      "recordedKeys": "VERIFIED-2002-OBS-RECORDS",
+      "relativeTicks": "VERIFIED-2002-KEY-OFFSETS",
+      "stateLabel": "INFERRED-TUMBLE-AND-IMPACT-ROLE",
+      "original2004MotionVideo": null,
+      "original2004Timecode": "UNVERIFIED",
+      "historicalShot": "../assets/battle.jpg",
+      "observedTimeSequence": "block source slot20 native keys -> slot12 native keys -> UI result frame 0..5; original effect sound2125 bytes unavailable"
+    },
+    {
+      "id": "battle",
+      "human": "전투·공격·결과",
+      "sourceMember": "OBS/1025 and IMG/winBattle.spr",
+      "sourceRecords": [
+        "native-card-action-sequences.js:CHR 0040 source slot12 (role inferred)",
+        "original/SourceSPRExtra/manifest.json:winBattle.spr",
+        "../assets/battle.jpg"
+      ],
+      "recordedKeys": "VERIFIED-2002-SOURCE-OBS-SLOT12",
+      "relativeTicks": "VERIFIED-2002-KEY-OFFSETS",
+      "stateLabel": "INFERRED-HIT-VICTORY-HURT-EXE-ROLES",
+      "original2004MotionVideo": null,
+      "original2004Timecode": "UNVERIFIED",
+      "historicalShot": "../assets/battle.jpg",
+      "observedTimeSequence": "historic still 800x600 with native 2D podium and source actor; actual 2004 battle transition/FPS UNVERIFIED"
+    },
+    {
+      "id": "room-entry",
+      "human": "채팅방 지도 클릭·입장",
+      "sourceMember": "ChatRoom.pak native room1..room6 backgrounds",
+      "sourceRecords": [
+        "original/ChatRoom/room4.png",
+        "../assets/chat.jpg",
+        "../assets/chat_ref.jpg",
+        "social-chat.js"
+      ],
+      "recordedKeys": "STATIC-BACKGROUND-ONLY",
+      "relativeTicks": "UNVERIFIED",
+      "stateLabel": "VERIFIED-2004-STATIC-ROOM-FOOTPRINT",
+      "original2004MotionVideo": null,
+      "original2004Timecode": "UNVERIFIED",
+      "historicalShot": "../assets/chat.jpg",
+      "observedTimeSequence": "spatial world->district->native room map->actual room stage; historical entry visual/time/effects UNVERIFIED"
+    }
+  ],
+  "originalNative3DAssetsRecovered": false,
+  "original2004TimedVideoRecovered": false,
+  "missingEvidence": [
+    "2004 original EXE gameplay video with known timestamps and synchronized native sounds",
+    "2004 source 3D MVE dice/camera/mesh frames and original collision timeline",
+    "Source EXE animation role mapping and ticks-to-milliseconds constants",
+    "2004 ChatRoom native enter/exit transition timing"
+  ]
+}
