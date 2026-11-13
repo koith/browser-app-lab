@@ -290,3 +290,25 @@ def test_dead_public_source_only_consumes_one_outage_not_all_hashtag_windows():
     assert len([v for v in actual if v is None])==1
     assert [v["text"] for v in actual if v is not None]==[
         "tag-one","tag-two","tag-three","tag-four"]
+
+
+def test_sns_failure_report_identifies_only_fixed_provider_source_labels():
+    observed=[]
+    def mastodon(term,start,end):
+        def unavailable():
+            raise RuntimeError("mastodon public source endpoints unavailable")
+            yield None
+        return unavailable()
+    def custom_leaky_name(term,start,end):
+        raise TimeoutError("private.account@example.org")
+    def bluesky(term,start,end):
+        return [{"platform":"bluesky","text":"test"}]
+    sources=(mastodon,custom_leaky_name,bluesky)
+    rows=list(job.round_robin_public_rows(
+        sources,("term-one","term-two"),0,1,
+        on_failure=observed.append))
+    assert observed.count("mastodon")==1
+    assert observed.count("other")==2
+    assert len([v for v in rows if isinstance(v,dict)])==2
+    assert "private.account@example.org" not in str(observed)
+    assert set(observed)=={"mastodon","other"}

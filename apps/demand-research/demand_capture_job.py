@@ -408,7 +408,7 @@ def public_error_class(err):
     return "unclassified_failure"
 
 
-def round_robin_public_rows(getters,terms,start,end):
+def round_robin_public_rows(getters,terms,start,end,*,on_failure=None):
     """Bound repeated unavailable-provider retries while preserving fairness.
 
     Exhausting one dead Fediverse instance once must not consume the remaining
@@ -417,12 +417,22 @@ def round_robin_public_rows(getters,terms,start,end):
     Other public providers and their cursors keep running. No raw errors log.
     """
     from collections import deque
+    # Only fixed, predetermined source names enter aggregate counters.
+    # Arbitrary caller names, personal account IDs and backend paths are
+    # always reported as "other" and never exposed.
+    def report(getter):
+        if on_failure is None:
+            return
+        label=getattr(getter,"__name__","")
+        on_failure(label if label in ("bluesky","mastodon","misskey","lemmy")
+                   else "other")
     pending=deque()
     for term in terms:
         for getter in getters:
             try:
                 pending.append((getter,iter(getter(term,start,end))))
             except Exception:
+                report(getter)
                 yield None
     unavailable=set()
     while pending:
@@ -441,6 +451,7 @@ def round_robin_public_rows(getters,terms,start,end):
                 isinstance(error,RuntimeError) and
                 "public source" in str(error)):
                 unavailable.add(getter)
+            report(getter)
             yield None
             continue
         pending.append((getter,iterator))
@@ -577,6 +588,10 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     budget_exhausted = False
     soft_time_budget_exhausted = False
     platform_candidates={"bluesky":0,"mastodon":0,"misskey":0,"lemmy":0}
+    platform_query_failures={"bluesky":0,"mastodon":0,
+                             "misskey":0,"lemmy":0,"other":0}
+    def register_public_source_failure(platform):
+        platform_query_failures[platform]+=1
     # Query current-period sources BEFORE catch-up history, but interleave
     # providers inside each period. A busy Bluesky cursor cannot prevent
     # Mastodon/Misskey/Lemmy first-sighting attempts.
@@ -584,7 +599,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                          sources[current_source_count:]):
         if budget_exhausted or capture_interrupted:
             break
-        for row in round_robin_public_rows(source_group,TERMS,start,now):
+        for row in round_robin_public_rows(
+                source_group,TERMS,start,now,
+                on_failure=register_public_source_failure):
             if budget_exhausted or capture_interrupted:
                 break
             if (fast_mode and elapsed_clock()-started_at>=max_fast_seconds):
@@ -856,6 +873,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     result = {"fetched": fetched, "saved_verified": saved, "partial_media": partial,
               "pending_media_retry": partial + failed_early_recoveries,
               "duplicates": duplicates, "source_platform_candidates":platform_candidates,
+              "source_platform_failures":platform_query_failures,
               "recovered_entries": recovered, "recovered_early_snapshots": early_recovered,
               "repaired_archive_markers": cloud.repaired_entries,
               "unrecoverable_markers": cloud.unrecoverable_entries,
