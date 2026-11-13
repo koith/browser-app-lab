@@ -72,7 +72,8 @@ def acquire(root=ROOT, max_new=75, max_bytes=60_000_000, pages=2,accounts=ACCOUN
     owner=json.loads((base/'owner-index.json').read_text())
     manifest_path=base/'stored-albums.json'
     manifest=json.loads(manifest_path.read_text())
-    if owner.get('model')!='yui' or manifest.get('model')!='yui':
+    # Historical Yui static manifests predate the optional model field.
+    if owner.get('model')!='yui' or manifest.get('model') not in (None,'yui'):
         raise ValueError('Yui source model mismatch')
     saved={p['sha256'] for a in owner['albums'] for p in a.get('images',[])}
     saved.update(p['sha256'] for a in manifest['albums'] for p in a.get('images',[]))
