@@ -1,0 +1,26 @@
+name: Gallery Published Source Photo Provenance Regression
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
+      - 'apps/gallery-archive/test_publish_photo_provenance.py'
+      - '.github/workflows/gallery-public-photo-provenance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
+      - 'apps/gallery-archive/test_publish_photo_provenance.py'
+      - '.github/workflows/gallery-public-photo-provenance.yml'
+permissions:
+  contents: read
+jobs:
+  provenance-and-sha:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'Pillow==11.3.0'
+      - name: Verify real JPEG SHA, unchanged originals, source numbering and idempotency
+        run: python apps/gallery-archive/test_publish_photo_provenance.py
