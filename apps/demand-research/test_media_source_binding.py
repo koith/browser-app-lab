@@ -225,3 +225,109 @@ def test_unrelated_lemmy_thumbnail_cannot_become_first_original_attachment(monke
     assert post["media"]==[]
     assert blobs==[]
 
+
+
+def test_public_bluesky_video_original_is_accepted_only_when_pds_cid_sha_matches(
+        monkeypatch):
+    """One original MP4, not the HLS playlist or its thumbnail."""
+    import base64
+    import hashlib
+    import demand_capture_job as capture
+    from urllib.parse import urlsplit,parse_qs
+    did="did:plc:abcdefghijklmnopqrstuvwx"
+    raw=b"SYNTHETIC original authored mp4 bytes for hash verification"
+    cid="b"+base64.b32encode(
+        bytes([1,85,18,32])+hashlib.sha256(raw).digest()).decode().lower().rstrip("=")
+    assert capture.blob_sha256_from_cid(cid)==hashlib.sha256(raw).digest()
+    assert capture.blob_sha256_from_cid("baf-not-a-real-cid") is None
+    playlist="https://video.bsky.app/watch/"+did+"/"+cid+"/playlist.m3u8"
+    monkeypatch.setenv("DEMAND_BSKY_PDS_BLOB_ORIGINALS","1")
+    class Response:
+        def __init__(self,payload,mime):
+            self.data=payload
+            self.headers={"Content-Type":mime}
+        def __enter__(self):return self
+        def __exit__(self,*args):return False
+        def read(self,limit):return self.data[:limit]
+    class PublicPDS:
+        def __init__(self,blob):
+            self.blob=blob
+            self.requests=[]
+        def open(self,request,timeout):
+            url=request.full_url
+            self.requests.append(url)
+            if url.startswith("https://plc.directory/"):
+                return Response(json.dumps({"id":did,"service":[{
+                    "type":"AtprotoPersonalDataServer",
+                    "serviceEndpoint":"https://bsky.social"}]}).encode(),"application/json")
+            if url.startswith("https://bsky.social/xrpc/com.atproto.sync.getBlob"):
+                qs=parse_qs(urlsplit(url).query)
+                assert qs=={"did":[did],"cid":[cid]}
+                return Response(self.blob,"video/mp4")
+            raise AssertionError("unsafe provider URL attempted")
+    remote=PublicPDS(raw)
+    monkeypatch.setattr(capture,"MEDIA_OPENER",remote)
+    now=1793667900
+    row={"uri":"at://"+did+"/app.bsky.feed.post/abc123",
+         "author":{"did":did},
+         "record":{"text":"섹트 synthetic public test",
+                   "createdAt":"2026-11-03T00:55:00Z",
+                   "embed":{"$type":"app.bsky.embed.video",
+                            "video":{"ref":{"$link":cid}}}},
+         "embed":{"$type":"app.bsky.embed.video#view",
+                  "cid":cid,"playlist":playlist}}
+    monkeypatch.setattr(capture,"bluesky_public_search",lambda *_:{"posts":[row]})
+    results=list(capture.bluesky("섹트",now-3600,now))
+    assert len(results)==1
+    video_url=results[0]["media_urls"][0]
+    assert video_url.startswith("https://bsky.social/xrpc/com.atproto.sync.getBlob?")
+    assert capture.media_allowed(video_url)
+    p,blobs=capture.make_post(results[0],now)
+    assert p["archive_complete"] is True and p["media_saved"]==p["media_expected"]==1
+    assert p["media"][0]["mime"]=="video/mp4"
+    assert blobs==[raw]
+    assert p["media"][0]["sha256"]==hashlib.sha256(raw).hexdigest()
+    assert capture.download_media(video_url)==("video/mp4",raw)
+    # If the PDS serves the wrong bytes for a correct CID, never count it.
+    remote.blob=b"different-transcoded-video-not-original"
+    assert capture.download_media(video_url) is None
+    assert not capture.media_allowed(video_url.replace("bsky.social","evil.example"))
+    assert len(remote.requests)>=3
+
+
+def test_bluesky_video_untrusted_or_unreachable_pds_remains_incomplete(
+        monkeypatch):
+    import base64
+    import hashlib
+    import demand_capture_job as capture
+    did="did:plc:abcdefghijklmnopqrstuvwx"
+    cid="b"+base64.b32encode(
+        bytes([1,85,18,32])+hashlib.sha256(b"qa").digest()).decode().lower().rstrip("=")
+    monkeypatch.setenv("DEMAND_BSKY_PDS_BLOB_ORIGINALS","1")
+    class Response:
+        def __init__(self,payload):self.payload=payload
+        def __enter__(self):return self
+        def __exit__(self,*args):return False
+        def read(self,limit):return self.payload[:limit]
+    class Untrusted:
+        def open(self,*args,**kwargs):
+            return Response(json.dumps({"id":did,"service":[{
+                "type":"AtprotoPersonalDataServer",
+                "serviceEndpoint":"https://127.0.0.1"}]}).encode())
+    monkeypatch.setattr(capture,"MEDIA_OPENER",Untrusted())
+    playlist="https://video.bsky.app/watch/"+did+"/"+cid+"/playlist.m3u8"
+    row={"uri":"at://"+did+"/app.bsky.feed.post/abc123",
+         "author":{"did":did},
+         "record":{"text":"섹트 synthetic public test",
+                   "createdAt":"2026-11-03T00:55:00Z",
+                   "embed":{"$type":"app.bsky.embed.video",
+                            "video":{"ref":{"$link":cid}}}},
+         "embed":{"$type":"app.bsky.embed.video#view",
+                  "cid":cid,"playlist":playlist}}
+    monkeypatch.setattr(capture,"bluesky_public_search",lambda *_:{"posts":[row]})
+    now=1793667900
+    results=list(capture.bluesky("섹트",now-3600,now))
+    assert len(results)==1 and results[0]["media_urls"]==[playlist]
+    p,blobs=capture.make_post(results[0],now)
+    assert p["archive_complete"] is False
+    assert p["media_expected"]==1 and p["media_saved"]==0 and blobs==[]
