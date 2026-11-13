@@ -962,7 +962,12 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
                         "media_expected":post.get("media_expected",len(post["media"])),
                         "media_saved":len(post["media"]),
                         "capture_status":"remote_verified" if post.get("archive_complete",True) else "partial_media"})
-    return {"total":len(posts),"offset":offset,"limit":limit,"posts":output,"storage":"TeraBox"}
+    age=max(0,int(time.time()-_cache["at"])) if _cache["posts"] is not None else None
+    return {"total":len(posts),"offset":offset,"limit":limit,"posts":output,
+            "storage":"TeraBox",
+            "verified_catalog_cache_age_seconds":age,
+            "verified_catalog_refresh_pending":bool(_catalog_task is not None
+                                                  and not _catalog_task.done())}
 
 async def remote_stream(path,start,length)->AsyncIterator[bytes]:
     proc=await asyncio.create_subprocess_exec("rclone","cat",REMOTE+"/"+path,"--offset",str(start),"--count",str(length),
