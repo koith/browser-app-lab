@@ -1,0 +1,37 @@
+name: G03 G06 Eight New Mimmi Rudy2 Real Deployed Photo Acceptance
+on:
+  pull_request:
+    paths:
+      - "apps/gallery-archive/qa_rudy2_eight_live.py"
+      - ".github/workflows/gallery-rudy2-eight-live.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/gallery-archive/qa_rudy2_eight_live.py"
+      - ".github/workflows/gallery-rudy2-eight-live.yml"
+permissions:
+  contents: read
+jobs:
+  real-rudy2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install Pillow==11.3.0 playwright==1.58.0
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Verify newly saved physical photo bytes and all live Pages originals
+        run: |
+          python apps/gallery-archive/qa_rudy2_eight_live.py --browser ${{ matrix.browser }}
+      - name: Record exact-new-8 user-visible SHA evidence
+        if: success()
+        run: |
+          echo "RUDY2_8_STATIC_ORIGINALS_AND_REAL_LIGHTBOX_PASS ${{ matrix.browser }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "This does not certify all 200 paid edition shots." >> "$GITHUB_STEP_SUMMARY"
