@@ -280,10 +280,48 @@
   const picks=(map[action]||[0]).map(at).filter(Boolean);
   return picks.length?picks:(front?[front]:all.slice(0,1));
  }
+ // Native OBS pose rendering: never cancel the only visible source frame's
+ // download by switching its URL again every 40-120ms. Source bytes stay
+ // immutable; display the most recent decoded ORIGINAL frame until the next
+ // original image is ready. This also prevents empty characters on slow
+ // public Pages WebKit and repeated source-actor audit sweeps.
+ const desiredNativeFrame=new WeakMap();
+ const decodedNativeFrameUrls=new Set();
+ const inflightNativeFrameUrls=new Map();
+ function preloadNativeFrame(url){
+   if(decodedNativeFrameUrls.has(url))return Promise.resolve();
+   if(inflightNativeFrameUrls.has(url))return inflightNativeFrameUrls.get(url);
+   const loader=new Image();
+   loader.decoding='async';
+   loader.src=url;
+   const promise=loader.decode().then(()=>{
+     decodedNativeFrameUrls.add(url);inflightNativeFrameUrls.delete(url);
+   },error=>{inflightNativeFrameUrls.delete(url);throw error});
+   inflightNativeFrameUrls.set(url,promise);
+   return promise;
+ }
  function renderNativeFrame(pawn,frame){
    const img=pawn.querySelector('img.leaf-chess-original-obs');
    if(!img||!frame)return;
-   if(img.getAttribute('src')!==frame.url)img.src=frame.url;
+   desiredNativeFrame.set(pawn,frame);
+   const current=img.getAttribute('src');
+   if(current&&current!==frame.url){
+     if(!img.complete||img.naturalWidth<=0)return; // still loading first source
+     if(!decodedNativeFrameUrls.has(frame.url)){
+       preloadNativeFrame(frame.url).then(()=>{
+         if(pawn.isConnected&&desiredNativeFrame.get(pawn)===frame)
+           renderNativeFrame(pawn,frame);
+       }).catch(()=>{
+         // Only a genuine source-failure may invoke existing runtime retry;
+         // never claim another actor's card portrait is the source model.
+         if(pawn.isConnected&&desiredNativeFrame.get(pawn)===frame){
+           img.src=frame.url; // existing error handler retries same original
+         }
+       });
+       return;
+     }
+   }
+   if(current!==frame.url)img.src=frame.url;
    img.style.setProperty('--leaf-obs-width',frame.width+'px');
    img.style.setProperty('--leaf-obs-height',frame.height+'px');
    // The former WEB contact ellipse was always 36px, even for original
@@ -356,6 +394,11 @@
        img.hidden=false;
        pawn.dataset.actorSourceLoad=pawn.dataset.sourceFullUnavailable==='true'
         ?'ready-legacy-original-OBS': 'ready';
+       // The requested pose may have advanced while the previous source PNG
+       // loaded. Catch up only after there is at least one decoded body frame.
+       const desired=desiredNativeFrame.get(pawn);
+       if(desired&&img.getAttribute('src')!==desired.url)
+         renderNativeFrame(pawn,desired);
      });
      img.addEventListener('error',()=>{
        if(!pawn.isConnected)return;
@@ -683,6 +726,10 @@
    if(previousSourceImage){
     previousSourceImage.dataset.obsRetryCount='0';
     delete previousSourceImage.dataset.obsRetryFor;
+    // Don't show a previously mounted card while its replacement downloads.
+    previousSourceImage.hidden=true;
+    previousSourceImage.removeAttribute('src');
+    desiredNativeFrame.delete(pawn);
    }
    pawn.dataset.actorSource=originalFor(src)?'OBS/'+originalFor(src).originalMember:'CardData';
    pawn.dataset.actorOriginalModelRecovered=String(!!originalFor(src));
