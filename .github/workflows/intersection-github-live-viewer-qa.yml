@@ -70,19 +70,27 @@ jobs:
           print("LIVE_GITHUB_TEMP_BACKUP_ENABLED",flush=True)
           response=get("/api/account-archives",timeout=170)
           accounts=[a for a in response.get("accounts",[]) if
-                    a.get("backup_kind")=="github_temp_sha_verified" and
-                    a.get("posts_verified_in_bundle",0)>0]
+                    a.get("backup_kind")=="github_temp_sha_verified"]
           if not accounts:raise RuntimeError("No independently verified live account ZIP")
           print("LIVE_ENCRYPTED_RELEASE_DISCOVERED count",len(accounts),flush=True)
-          account=accounts[0]
-          key=account["key"]
-          if not key.startswith(("bluesky-","mastodon-")):
-              raise RuntimeError("Invalid verified account key")
-          prefix="/api/account-archives/"+key
-          details=get(prefix+"/backup-status",timeout=100)
-          if (details.get("state")!="REMOTE_ZIP_SHA_VERIFIED" or
-              details.get("storage")!="github_encrypted_temporary"):
-              raise RuntimeError("Live source ZIP has not passed SHA verification")
+          # An append-only ZIP may contain zero NEW posts while signed,
+          # independently verified ancestor ZIPs still contain originals.
+          # Never classify the entire account by its latest delta count.
+          selected=None
+          for account in accounts:
+              key=account.get("key","")
+              if not isinstance(key,str) or not key.startswith(("bluesky-","mastodon-")):
+                  continue
+              prefix="/api/account-archives/"+key
+              details=get(prefix+"/backup-status",timeout=100)
+              if (details.get("state")=="REMOTE_ZIP_SHA_VERIFIED" and
+                  details.get("storage")=="github_encrypted_temporary" and
+                  details.get("public_posts",0)>0):
+                  selected=(key,prefix,details)
+                  break
+          if not selected:
+              raise RuntimeError("No SHA-verified history with an archived post")
+          key,prefix,details=selected
           print("LIVE_GITHUB_ZIP_VERIFIED posts",details.get("public_posts"),
                 "objects",details.get("original_objects"),flush=True)
           profile=get(prefix+"/profile")

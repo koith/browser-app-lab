@@ -506,12 +506,29 @@ def create_router(auth):
         _,_,archive=open_account(account)
         if isinstance(archive,BundleAccountCloud):
             bundle=archive.bundle
+            # An append-only incremental ZIP may contain zero NEW posts
+            # while older, independently SHA-verified ancestor ZIPs contain
+            # the complete saved feed. Count UNIQUE verified object keys in
+            # the merged reader, not the latest delta's post_count.
+            history=(archive.bundles if isinstance(
+                archive,MergedBundleAccountCloud) else (bundle,))
+            keys={key for part in history for key in part.items}
+            prefix=archive.prefix+"posts/"
+            post_keys={key for key in keys if
+                       key.startswith(prefix) and key.endswith("/post.json")}
+            source_kinds={bool(getattr(part,"temporary",False))
+                          for part in history}
+            storage=("mixed_verified_zip_sources" if len(source_kinds)>1 else
+                     "github_encrypted_temporary" if True in source_kinds
+                     else "private_terabox")
             return JSONResponse({
-                "storage":"github_encrypted_temporary" if getattr(bundle,"temporary",False) else "private_terabox",
+                "storage":storage,
                 "state":"REMOTE_ZIP_SHA_VERIFIED",
                 "source_state":bundle.source_state,
-                "original_objects":bundle.object_count,
-                "public_posts":bundle.post_count,
+                "original_objects":len(keys),
+                "public_posts":len(post_keys),
+                "latest_zip_public_posts":bundle.post_count,
+                "verified_history_zips":len(history),
                 "recorded_at":bundle.recorded_at,
                 "full_historical_coverage_guaranteed":False,
             },headers=CACHE_HEADERS)
