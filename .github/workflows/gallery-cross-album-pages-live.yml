@@ -9,6 +9,7 @@ on:
       - 'apps/mimmi-gallery/album-grouping.js'
       - 'apps/gallery-archive/test_cross_album_static_copy.cjs'
       - 'apps/gallery-archive/qa_cross_album_pages_live.py'
+      - '.github/scripts/test-gallery-essential-json-retry.cjs'
       - 'apps/gallery-archive/pages_deployment_identity.py'
       - 'apps/gallery-archive/test_pages_deployment_identity.py'
       - '.github/workflows/static.yml'
@@ -36,6 +37,7 @@ jobs:
           node --check apps/mimmi-gallery/saved-photo-union.js
           node --check apps/yui-gallery/saved-photo-union.js
           node --test apps/gallery-archive/test_cross_album_static_copy.cjs
+          node .github/scripts/test-gallery-essential-json-retry.cjs
           python apps/gallery-archive/test_pages_deployment_identity.py
       - name: Validate both gallery inline scripts syntax
         run: |
