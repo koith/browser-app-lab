@@ -5,8 +5,9 @@
  * original Dice/EXE data or the 2002 installer price formula.
  * Shop prices were dynamically adjusted in 2003; 2003-01-15 changes are
  * recorded separately at https://4leafmemorial.geld.kr/1454.
- * Only exact CHR Korean-name matches may use these prices automatically.
- * No guessed alias or 50%-resale claim is marked historical. */
+ * Exact CHR Korean-name matches are source-grounded; spelling/roman aliases
+ * are explicitly INFERRED and may be wrong. Historical 2004 EXE price
+ * aliases or 50%-resale are not claimed recovered. */
 window.ORIGINAL_LEAF_SHOP_PRICE_SNAPSHOT_20030105=Object.freeze({
  date:'2003-01-05',
  source:'https://4leafmemorial.geld.kr/1451',
@@ -15,6 +16,53 @@ window.ORIGINAL_LEAF_SHOP_PRICE_SNAPSHOT_20030105=Object.freeze({
  serializedCardResale2003Jan15GP:1000,
  serializedCardResaleSource:'https://4leafmemorial.geld.kr/1454',
  serializedCardResaleAppliesToNormalBoughtCards:false,
+ // Native CHR ID+exact local name gated candidate spellings, not verified historical identity.
+ orthographicAliases:Object.freeze({
+  "0058": {
+    "chrName": "오스만누리파사",
+    "archiveName": "오스만누리파샤"
+  },
+  "0065": {
+    "chrName": "해럴드깁슨",
+    "archiveName": "헤럴드깁슨"
+  },
+  "0126": {
+    "chrName": "네리샤",
+    "archiveName": "네리사"
+  },
+  "0137": {
+    "chrName": "살라딘2",
+    "archiveName": "살라딘II"
+  },
+  "0139": {
+    "chrName": "아마딘",
+    "archiveName": "아만딘"
+  },
+  "0143": {
+    "chrName": "죠안2",
+    "archiveName": "죠안II"
+  },
+  "0147": {
+    "chrName": "크리스티앙2",
+    "archiveName": "크리스티앙II"
+  },
+  "0158": {
+    "chrName": "고렘",
+    "archiveName": "골렘"
+  },
+  "0166": {
+    "chrName": "팬텀 데미안",
+    "archiveName": "팬텀데미안"
+  },
+  "0167": {
+    "chrName": "펜텀 마리아",
+    "archiveName": "팬텀마리아"
+  },
+  "0168": {
+    "chrName": "펜텀 유진",
+    "archiveName": "팬텀유진"
+  }
+}),
  prices:Object.freeze({
   "슈": 2100,
   "닐라": 1450,
