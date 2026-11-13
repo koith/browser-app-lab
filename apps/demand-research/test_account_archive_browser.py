@@ -204,12 +204,25 @@ def run(browser_type,name,width,height):
         page.locator("#results .person").get_by_text("Public Reader").wait_for(timeout=5000)
         page.get_by_role("tab",name="팔로잉").click()
         page.locator("#results .person").get_by_text("@reader.bsky.social").wait_for(timeout=5000)
+        # Round trips must reuse already SHA-backed cards/media and avoid
+        # another cold download of the entire immutable private ZIP.
         first_page_return_failure["armed"]=True
         page.get_by_role("tab",name="게시글·답글").click()
         page.locator("#results").get_by_text(
             "Synthetic posted image and comment history").wait_for(timeout=12000)
+        assert first_page_return_failure["count"]==0, (
+            "cached verified posts tab unexpectedly re-downloaded private ZIP")
+        assert page.locator("#results article.post").count()==2
+        assert "보관 원본 표시 실패" in page.locator(
+            "#results .media-unavailable").first.inner_text(), (
+            "previously verified attachment identity was silently substituted")
+        # An explicit filter reset invalidates the short-lived DOM snapshot;
+        # when that real fresh API call gets 503, retry exactly once.
+        page.locator("#feedReset").click()
+        page.locator("#results").get_by_text(
+            "Synthetic posted image and comment history").wait_for(timeout=12000)
         assert first_page_return_failure["count"]==2, (
-            "failed first verified ZIP read must automatically retry once")
+            "failed fresh verified ZIP read must automatically retry once")
         first_page_return_failure["armed"]=False
         # Switching tabs during the previous request must launch the new tab\x27s page.
         page.evaluate("""() => {

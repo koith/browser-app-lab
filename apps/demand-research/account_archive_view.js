@@ -24,6 +24,15 @@ if(["","post","reply","revision"].includes(params.get("kind")||""))
 if(["","complete","partial"].includes(params.get("media_status")||""))
   feedMediaStatus.value=params.get("media_status")||"";
 let feedSearchTimer=null;
+// Previously rendered, SHA-backed SAME-account DOM only. No persistent cache.
+let savedPostsView=null;
+const POSTS_VIEW_MAX_AGE_MS=90_000;
+function feedFilterKey(){
+  return JSON.stringify([feedQuery.value.trim().slice(0,100),
+    feedKind.value,feedMediaStatus.value]);
+}
+function invalidateSavedPostsView(){savedPostsView=null;}
+
 function persistFeedFilters(){
   for(const [key,value] of [
     ["q",feedQuery.value.trim().slice(0,100)],
@@ -33,11 +42,13 @@ function persistFeedFilters(){
   history.replaceState(null,"",location.pathname+"?"+params.toString());
 }
 function resetFeedSearch(){
+  invalidateSavedPostsView();
   if(feedSearchTimer!==null){clearTimeout(feedSearchTimer);feedSearchTimer=null;}
   persistFeedFilters();
   if(state.section==="posts")setTab("posts");
 }
 function scheduleFeedSearch(){
+  invalidateSavedPostsView();
   if(feedSearchTimer!==null)clearTimeout(feedSearchTimer);
   // Invalidate pending old results as soon as text changes.
   state.viewVersion++;state.loading=false;state.offset=0;state.more=false;
@@ -366,7 +377,21 @@ async function openDetail(post){
   }
 }
 function setTab(section){
-  // A response for the previous tab must not block or overwrite this tab.
+  // An unchanged verified ZIP must not be re-downloaded on every tab return.
+  // Cache one account/filter's previously rendered DOM for <=90 seconds.
+  const previous=state.section;
+  if(previous==="posts"&&section!=="posts"&&!state.loading&&
+     state.account&&results.querySelector("article.post")&&
+     $("more").textContent!=="다시 시도"){
+    savedPostsView={account:state.account,filterKey:feedFilterKey(),
+      age:performance.now(),nodes:[...results.childNodes],
+      offset:state.offset,more:state.more,message:status.textContent};
+  }
+  const restore=(previous!=="posts"&&section==="posts"&&
+     savedPostsView?.account===state.account&&
+     savedPostsView.filterKey===feedFilterKey()&&
+     performance.now()-savedPostsView.age<=POSTS_VIEW_MAX_AGE_MS);
+  // An in-flight response from the old tab must never overwrite the new tab.
   if(state.retryTimer!==null){clearTimeout(state.retryTimer);state.retryTimer=null;}
   state.firstPageRetries=0;
   state.viewVersion+=1;state.loading=false;
@@ -379,6 +404,16 @@ function setTab(section){
     }
   }
   $("more").hidden=true;$("more").disabled=false;
+  if(restore){
+    const cached=savedPostsView;
+    results.replaceChildren(...cached.nodes);
+    state.offset=cached.offset;state.more=cached.more;
+    $("more").hidden=!state.more;
+    $("more").textContent="더 보기";
+    setStatus(cached.message);
+    return;
+  }
+  if(section==="posts")savedPostsView=null;
   showMessage("보관된 "+sectionLabels[section]+" 불러오는 중…");
   if(state.account)void nextPage();
 }
@@ -440,6 +475,7 @@ async function nextPage(){
   }
 }
 async function selectAccount(value){
+  invalidateSavedPostsView();
   // Cancel stale page and comment renders before changing account.
   state.viewVersion+=1;state.loading=false;
   $("more").hidden=true;$("more").disabled=false;
