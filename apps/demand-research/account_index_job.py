@@ -20,7 +20,7 @@ from pathlib import Path
 import account_index
 import account_index_sources
 import account_groups
-from demand_archive import CloudArchive
+from demand_archive import CloudArchive, validate_post, MAX_POST
 
 REMOTE="archive:DemandAccountIndex"
 ARCHIVE="archive:DemandResearch/metadata/catalog.json"
@@ -242,21 +242,98 @@ def create_snapshot(path,run_id):
     return {"file":name,"sha256":digest,"at":int(time.time())}
 
 
-def catalog_sync_child(db_path, marker_path):
-    """Isolated worker: write ONLY bounded aggregate success after DB commit.
+def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=12,
+                       max_seconds=145):
+    """Read a bounded page of immutable SHA-verifiable journal originals.
 
-    Terminating this process group never deletes previously verified snapshots
-    or any cloud object. The catalog remains optional to a partial checkpoint.
+    Older monolithic load_catalog() repeatedly exceeded 90 and even 180
+    seconds, so all newly verified posts disappeared from the account index
+    until a complete scan succeeded. Never let a partial read call the
+    destructive full-snapshot sync_catalog(), or mutate remote files.
+    Advance a PRIVATE SQLite journal cursor, preserving earlier observations.
     """
     if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):
         raise RuntimeError("private cloud credential missing")
-    posts=CloudArchive("archive:DemandResearch").load_catalog()
-    accepted=0
-    if posts:
-        imported=account_index.sync_catalog(db_path,posts)
-        accepted=imported["accepted"]
-    result={"accepted":accepted,"has_posts":bool(posts)}
-    Path(marker_path).write_text(json.dumps(result,sort_keys=True))
+    active=cloud or CloudArchive("archive:DemandResearch")
+    deadline=time.monotonic()+max_seconds
+    previous=active.runner
+
+    def bounded_runner(args,data=None,timeout=150,allow_missing=False):
+        remaining=deadline-time.monotonic()
+        if remaining<=0:
+            raise TimeoutError("bounded private journal page exhausted")
+        return previous(args,data=data,
+                        timeout=max(1,min(timeout,22,remaining)),
+                        allow_missing=allow_missing)
+    active.runner=bounded_runner
+    try:
+        ids=sorted(active.marker_ids())
+        if not ids:
+            Path(marker_path).write_text(json.dumps({
+                "accepted":0,"has_posts":False,"mode":"journal_incremental",
+                "pending":0,"verified":0},sort_keys=True))
+            return
+        db=account_index.connect(str(db_path))
+        try:
+            row=db.execute("SELECT value FROM index_meta WHERE key='journal_page_cursor'").fetchone()
+            cursor=row[0] if row else ""
+        finally:
+            db.close()
+        # Sorted circular order automatically revisits earlier damaged
+        # markers on later scans. No post IDs are printed to logs.
+        start=next((i for i,pid in enumerate(ids) if pid>cursor),0)
+        chosen=(ids[start:]+ids[:start])[:max_items]
+        posts=[]
+        verified=[]
+        attempted=0
+        for pid in chosen:
+            if deadline-time.monotonic()<22:
+                break
+            attempted+=1
+            for directory in ("metadata/entries-repaired","metadata/entries"):
+                try:
+                    marker=active.read(directory+"/"+pid+".json",cap=1024,
+                                       optional=True)
+                    if marker is None:
+                        continue
+                    parsed=json.loads(marker)
+                    digest=parsed.get("sha256") if type(parsed) is dict else None
+                    if (parsed.get("id")!=pid or not isinstance(digest,str)
+                            or not re.fullmatch(r"[a-f0-9]{64}",digest)):
+                        continue
+                    raw=active.read_verified("posts/"+pid+"/post.json",
+                                             digest,cap=MAX_POST)
+                    if raw is None:
+                        continue
+                    record=validate_post(json.loads(raw))
+                    if record["id"]!=pid:
+                        continue
+                    posts.append(record)
+                    verified.append(pid)
+                    break
+                except (RuntimeError,ValueError,TypeError,KeyError,TimeoutError):
+                    # Keep private source paths and raw provider errors out of
+                    # Actions; retries must not destroy older index snapshots.
+                    continue
+        last=chosen[attempted-1] if attempted else cursor
+        summary=account_index.ingest_verified_marker_page(
+            str(db_path),posts,verified,ids,last)
+        print("PRIVATE_JOURNAL_PAGE_SHA_VERIFIED",json.dumps({
+            "remote_marker_candidates":len(ids),
+            "attempted":attempted,
+            "verified_post_markers_this_run":len(verified),
+            "pending_post_markers":summary["pending_marker_count"],
+            "full_catalog_media_parity_verified":False,
+        },sort_keys=True),flush=True)
+        # An append-only journal page is not the versioned catalog+media
+        # parity assertion required to close INT-04.
+        Path(marker_path).write_text(json.dumps({
+            "accepted":summary["accepted"],"has_posts":True,
+            "mode":"journal_incremental",
+            "pending":summary["pending_marker_count"],
+            "verified":len(verified)},sort_keys=True))
+    finally:
+        active.runner=previous
 
 
 def catalog_sync_bounded(db_path, folder, *, timeout_seconds=180, worker=None):
@@ -304,6 +381,15 @@ def catalog_sync_bounded(db_path, folder, *, timeout_seconds=180, worker=None):
             raise ValueError("invalid private catalog receipt")
     except (FileNotFoundError,ValueError,TypeError,KeyError,UnicodeError):
         return "deferred_invalid_receipt"
+    if info.get("mode")=="journal_incremental":
+        pending=info.get("pending")
+        verified=info.get("verified")
+        if (type(pending) is not int or not 0<=pending<=150000
+                or type(verified) is not int or not 0<=verified<=24):
+            return "deferred_invalid_receipt"
+        # Partial journal progress is durable and real, but full remote
+        # journal/catalog/media parity has not been SHA checked here.
+        return "deferred_journal_pending_"+str(pending)
     return "verified_"+str(info["accepted"]) if info["has_posts"] else "not_found"
 
 
