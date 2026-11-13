@@ -17,7 +17,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, FileResponse, Response
-from demand_archive import CloudArchive, sha256
+from demand_archive import CloudArchive, sha256, original_media_slot
 import github_temp_bundle
 from target_account_archive import REGISTRY_RE, archive_key, account_cloud
 from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
@@ -281,15 +281,17 @@ def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
         media=[]
         source=post.get("media",[])
         if not isinstance(source,list):source=[]
-        for index,item in enumerate(source[:16]):
-            verified=(isinstance(item,dict) and
-                      item.get("remote_verified") is True)
+        used_slots=set()
+        for list_index,item in enumerate(source[:16]):
+            slot=original_media_slot(pid,item)
+            if slot is None or slot in used_slots:
+                continue
+            used_slots.add(slot)
+            verified=(isinstance(item,dict) and item.get("remote_verified") is True)
             media.append({
-                "index":index,
-                "kind":item.get("kind","image") if isinstance(item,dict) else "",
-                "mime":item.get("mime") if isinstance(item,dict) else "",
-                "bytes":item.get("bytes") if isinstance(item,dict) else 0,
-                "url":("/api/account-archives/"+account+"/media/"+pid+"/"+str(index))
+                "index":slot,"kind":item.get("kind","image"),
+                "mime":item.get("mime",""),"bytes":item.get("bytes",0),
+                "url":("/api/account-archives/"+account+"/media/"+pid+"/"+str(list_index))
                         if verified else None,
                 "verified_sha256":bool(verified)})
         matching.append({
