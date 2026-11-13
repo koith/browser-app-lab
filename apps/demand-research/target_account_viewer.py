@@ -7,6 +7,7 @@ No repo logs/analytics, broad CORS, unverified media or account identifier leaks
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import threading
@@ -152,7 +153,35 @@ def sanitize_safe_link(value):
     return value
 
 
+# On the free 512MiB worker, opening the same saved account for
+# profile/feed/media in parallel used to decrypt and SHA-verify the entire
+# immutable ZIP history repeatedly, triggering verified Render OOM restarts.
+# Reuse only successfully validated, account-bound bytes and serialize cold
+# loads. Opt-in on the production Render container; offline tests and other
+# runners remain unchanged.
+_ARCHIVE_SESSION_LOCK=threading.RLock()
+_ARCHIVE_SESSION_CACHE=None
+ARCHIVE_SESSION_SECONDS=75
+
+
 def open_account(account):
+    global _ARCHIVE_SESSION_CACHE
+    if os.getenv("DEMAND_ACCOUNT_VIEWER_SESSION_CACHE","0")!="1":
+        return _open_account_uncached(account)
+    with _ARCHIVE_SESSION_LOCK:
+        cached=_ARCHIVE_SESSION_CACHE
+        now=time.monotonic()
+        if (cached is not None and cached[0]==account
+                and now-cached[1]<ARCHIVE_SESSION_SECONDS):
+            return cached[2]
+        # Errors never populate the cache. Loading another account releases
+        # the previous union, preventing N-account copies filling free RAM.
+        result=_open_account_uncached(account)
+        _ARCHIVE_SESSION_CACHE=(account,time.monotonic(),result)
+        return result
+
+
+def _open_account_uncached(account):
     match=REGISTRY_RE.fullmatch(account+".json")
     if not match:
         raise HTTPException(400,"Invalid archive account key")

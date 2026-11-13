@@ -308,3 +308,52 @@ def test_verified_incremental_history_status_includes_older_originals(populated,
     assert body["public_posts"]==1
     assert body["original_objects"]==4
     assert body["full_historical_coverage_guaranteed"] is False
+
+
+def test_render_verified_bundle_singleflight_never_redecrypts_8_parallel_reads(monkeypatch):
+    """No duplicate big ZIP in eight concurrent real-gateway endpoints."""
+    from concurrent.futures import ThreadPoolExecutor
+    import threading,time
+    monkeypatch.setenv("DEMAND_ACCOUNT_VIEWER_SESSION_CACHE","1")
+    monkeypatch.setattr(viewer,"_ARCHIVE_SESSION_CACHE",None)
+    calls=[]
+    lock=threading.Lock()
+    def verified_archive(account):
+        with lock:calls.append(account)
+        time.sleep(.025)
+        return (None,{"platform":"bluesky","identity":"synthetic"},object())
+    monkeypatch.setattr(viewer,"_open_account_uncached",verified_archive)
+    acc="bluesky-"+"a"*40
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        values=list(pool.map(viewer.open_account,[acc]*8))
+    assert len(calls)==1 and all(value is values[0] for value in values)
+    other="mastodon-"+"b"*40
+    assert viewer.open_account(other) is not values[0]
+    assert calls==[acc,other]
+    old=viewer._ARCHIVE_SESSION_CACHE
+    monkeypatch.setattr(viewer,"_ARCHIVE_SESSION_CACHE",
+                        (old[0],time.monotonic()-viewer.ARCHIVE_SESSION_SECONDS-1,old[2]))
+    assert viewer.open_account(other) is not old[2]
+    assert len(calls)==3
+
+
+def test_render_verified_bundle_cache_never_caches_errors_or_another_account(
+        monkeypatch):
+    monkeypatch.setenv("DEMAND_ACCOUNT_VIEWER_SESSION_CACHE","1")
+    monkeypatch.setattr(viewer,"_ARCHIVE_SESSION_CACHE",None)
+    calls=[]
+    def _open(account):
+        calls.append(account)
+        if len(calls)==1:raise RuntimeError("synthetic SHA mismatch")
+        return (None,{"platform":"bluesky","identity":"synthetic"},object())
+    monkeypatch.setattr(viewer,"_open_account_uncached",_open)
+    account="bluesky-"+"c"*40
+    with pytest.raises(RuntimeError,match="SHA mismatch"):
+        viewer.open_account(account)
+    assert viewer._ARCHIVE_SESSION_CACHE is None
+    verified=viewer.open_account(account)
+    assert viewer.open_account(account) is verified
+    assert len(calls)==2
+    monkeypatch.delenv("DEMAND_ACCOUNT_VIEWER_SESSION_CACHE",raising=False)
+    assert viewer.open_account(account) is not verified
+    assert len(calls)==3
