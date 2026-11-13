@@ -262,7 +262,7 @@ def archived_media_slot(pid,item):
     if not isinstance(item,dict) or not isinstance(item.get("key"),str):
         return None
     match=re.fullmatch(
-        r"posts/"+re.escape(pid)+r"/media/([0-9]{4})\\.[a-z0-9]{1,8}",
+        r"posts/"+re.escape(pid)+r"/media/([0-9]{4})\.[a-z0-9]{1,8}",
         item["key"])
     if match is None:
         return None
