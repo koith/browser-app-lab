@@ -26,7 +26,7 @@ MAX_BYTES=200_000_000
 MAX_BUNDLE_BYTES=48_000_000
 MAX_ARTIFACT_PAGES=60
 MAX_CONSECUTIVE_FAILURES=3
-MAX_RECORD_SECONDS=55
+MAX_RECORD_SECONDS=120
 # Leave time for a final sanitized summary before the 21-minute Actions kill.
 MAX_REPLAY_SECONDS=900
 MAX_BATCH_SECONDS=100
@@ -258,7 +258,10 @@ def with_cloud_budget(cloud,work,*,max_seconds=MAX_RECORD_SECONDS):
         if remaining<=0:
             raise TimeoutError("private recovery time budget exceeded")
         return previous_runner(
-            args,data=data,timeout=max(1,min(timeout,18,remaining)),
+            # A SHA-verified video/object read can legitimately exceed the
+            # old 18-second per-command cap on the free remote gateway.
+            # Keep a strict 45-second ceiling AND an overall per-record budget.
+            args,data=data,timeout=max(1,min(timeout,45,remaining)),
             allow_missing=allow_missing)
 
     cloud.runner=bounded_runner
@@ -330,6 +333,7 @@ def replay(cloud=None,local_directory=None):
              "first_observation_verified":0,"post_and_media_verified":0,
              "prior_original_preserved":0,"original_media_incomplete":0,
              "buffer_failures":0,"buffer_error_categories":{},
+             "buffer_failure_stages":{},
              "artifact_download_failures":0,
              "deferred_buffers":0,
              "batch_sha_verified":0,"batch_ciphertext_count":0,
@@ -454,6 +458,13 @@ def replay(cloud=None,local_directory=None):
                 except (RuntimeError,ValueError,KeyError,TypeError,OverflowError,TimeoutError) as error:
                     summary["buffer_failures"]+=1
                     count_safe_failure(summary,"buffer_error_categories",error)
+                    stage=getattr(spool,"restore_stage","not_started")
+                    safe_stages={"not_started","decrypt","first_observation",
+                                 "media_integrity","post_media_remote",
+                                 "partial_media_remote"}
+                    stage=stage if stage in safe_stages else "unknown"
+                    bucket=summary["buffer_failure_stages"]
+                    bucket[stage]=bucket.get(stage,0)+1
                     consecutive_failures+=1
     finally:
         if tmp:

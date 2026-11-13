@@ -106,6 +106,9 @@ def _decode_file(raw,secret):
 class RecoverySpool:
     def __init__(self, directory=None, secret=None):
         self.directory=Path(directory or os.environ["DEMAND_RECOVERY_SPOOL_DIR"])
+        # Only fixed stage names are surfaced in public aggregate logs.
+        # Never record the recovered source ID, platform user or cloud path.
+        self.restore_stage="not_started"
         self.secret=secret if isinstance(secret,bytes) else _encryption_secret()
         self.directory.mkdir(parents=True,exist_ok=True,mode=0o700)
         self.directory.chmod(0o700)
@@ -177,12 +180,14 @@ class RecoverySpool:
         return _decode_file(path.read_bytes(),self.secret)
 
     def restore(self,path,cloud):
+        self.restore_stage="decrypt"
         record=self.read(path)
         first=record["first"]
         pid=first["id"]
         if path.name!=_filename(pid,self.secret):
             raise ValueError("encrypted artifact filename identity mismatch")
         original=canonical_json(first)
+        self.restore_stage="first_observation"
         current=cloud.save_first_observation(pid,original,prefer_flat=True)
         if current!=original:
             # An earlier saved observation may have a different captured time
@@ -196,6 +201,7 @@ class RecoverySpool:
         post=record.get("post")
         if post is None:
             return "first_observation_verified"
+        self.restore_stage="media_integrity"
         blobs=[base64.b64decode(x,validate=True) for x in record["media"]]
         if len(blobs)!=len(post["media"]):
             raise ValueError("original media attachment count mismatch")
@@ -203,6 +209,7 @@ class RecoverySpool:
             if len(blob)!=info["bytes"] or sha256(blob)!=info["sha256"]:
                 raise ValueError("recovered original attachment checksum mismatch")
         if post.get("archive_complete"):
+            self.restore_stage="post_media_remote"
             saved=cloud.save_post(post,blobs)
             # A pre-existing immutable post may win when the new observation
             # differs. Do not count the queued local media as verified merely
@@ -216,6 +223,7 @@ class RecoverySpool:
                 return "prior_original_preserved"
             return "post_and_media_verified"
         if blobs:
+            self.restore_stage="partial_media_remote"
             cloud.stage_partial_media(post,blobs)
         return "original_media_incomplete"
 
