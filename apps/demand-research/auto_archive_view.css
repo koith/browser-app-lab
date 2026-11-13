@@ -12,3 +12,9 @@
  #search label:first-child{flex:1 1 100%}
  #search button{width:auto;flex:0 0 auto}
 }
+
+/* Keep each original attachment slot visible without inventing media. */
+.media-unavailable{min-height:92px;display:grid;place-items:center;padding:12px;text-align:center;background:#f5f6fa;color:#765b3b;border-radius:6px;font-size:12px}
+.media-missing{border-style:dashed}
+.media-error{font-size:12px;color:#a13f2d;line-height:1.5}
+.media-error-state img,.media-error-state video,.media-error-state audio{display:none}
