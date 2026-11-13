@@ -1,7 +1,7 @@
 'use strict';
-/* CHT-02: archived 2002 Korean CP949 display-byte fixture -> actual modern
+/* CHT-02: known Korean CP949 codepage fixture -> actual modern
  * interactive chat input and transmitted Korean text. CP949 byte provenance
- * is verified for this fixture only: never claim 2004 server protocol. */
+ * is verified for this fixture only: never claim archived original 2004 protocol. */
 const assert=require('node:assert/strict');
 const {chromium,webkit}=require('playwright');
 (async()=>{
