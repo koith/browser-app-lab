@@ -189,6 +189,57 @@ def sync_catalog(db_path, posts):
         db.close()
 
 
+
+def ingest_verified_marker_page(db_path, posts, verified_ids, all_ids, cursor):
+    """Merge one independently SHA-checked TeraBox journal page, append-only.
+
+    A full catalog snapshot importer may remove entries absent from the new
+    snapshot. A PARTIAL marker page must NEVER do that; verified previous
+    observations remain intact across provider timeouts and reconnects.
+    The cursor and verification receipts live inside the same private SQLite
+    transaction as the imported rows.
+    """
+    pattern=re.compile(r"[a-f0-9]{40}\\Z")
+    if (not isinstance(posts,list) or len(posts)>24 or
+            not isinstance(verified_ids,list) or len(verified_ids)>24 or
+            not isinstance(all_ids,list) or len(all_ids)>150000 or
+            len(set(all_ids))!=len(all_ids) or
+            any(not isinstance(pid,str) or not pattern.fullmatch(pid)
+                for pid in all_ids+verified_ids) or
+            not set(verified_ids).issubset(set(all_ids)) or
+            not isinstance(cursor,str) or
+            (cursor and not pattern.fullmatch(cursor))):
+        raise ValueError("invalid bounded private journal sync input")
+    if any(not isinstance(post,dict) or post.get("id") not in verified_ids
+           for post in posts):
+        raise ValueError("catalog page must contain only SHA-verified markers")
+    now=int(time.time())
+    db=connect(db_path)
+    try:
+        with db:
+            db.execute("""CREATE TABLE IF NOT EXISTS verified_archive_markers(
+                id TEXT PRIMARY KEY, verified_at INTEGER NOT NULL)""")
+            accepted,skipped=_upsert(db,posts,"catalog",now)
+            db.executemany("""INSERT INTO verified_archive_markers(id,verified_at)
+                VALUES(?,?) ON CONFLICT(id) DO UPDATE SET
+                verified_at=excluded.verified_at""",
+                [(pid,now) for pid in verified_ids])
+            db.execute("""INSERT INTO index_meta(key,value)
+                VALUES('journal_page_cursor',?)
+                ON CONFLICT(key) DO UPDATE SET value=excluded.value""",(cursor,))
+            seen={r[0] for r in db.execute(
+                "SELECT id FROM verified_archive_markers")}
+            outstanding=len(set(all_ids)-seen)
+            # Never set last_catalog_sync: a page is NOT full catalog parity.
+        return {"accepted":accepted,"skipped":skipped,
+                "current_marker_count":len(all_ids),
+                "pending_marker_count":outstanding,
+                "journal_marker_page_verified":len(verified_ids)}
+    finally:
+        db.close()
+
+
+
 def ingest_discovery(db_path, posts):
     if not isinstance(posts,list) or len(posts)>100:
         raise ValueError("invalid provider batch")
