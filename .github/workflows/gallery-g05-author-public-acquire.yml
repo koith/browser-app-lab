@@ -1,13 +1,5 @@
 name: G05 Current Yui Public Author Original Byte Capture
 on:
-  push:
-    branches:
-      - feat/gallery-g05-yui-fresh-social-public-20261113
-    paths:
-      - ".github/workflows/gallery-g05-author-public-acquire.yml"
-      - "apps/gallery-archive/collect_new_creator_public_shas.py"
-      - "apps/gallery-archive/collect_teapawt_public.py"
-      - "apps/gallery-archive/test_teapawt_public.py"
   pull_request:
     paths:
       - ".github/workflows/gallery-g05-author-public-acquire.yml"
@@ -21,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   capture-real-originals:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 23
     steps:
