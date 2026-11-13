@@ -214,34 +214,58 @@ def latest_snapshot(archive,folder,pattern,cap=300_000):
     return None
 
 
-def feed_data(archive,account,offset,limit):
-    # Every returned post is backed by the existing read-verified entry journal.
+def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
+    """Filter the COMPLETE verified account journal before pagination.
+
+    Never search only the currently displayed page. Keep the original media
+    indices, including unverified slots, so missing source photos cannot slide
+    into another attachment position in the private SNS-style reader.
+    """
     rows=archive.load_catalog(include_entries=True)
     matching=[]
+    needle=q.strip().casefold()
     for post in rows:
         if not isinstance(post,dict) or not HEX40.fullmatch(str(post.get("id",""))):
             continue
+        text=str(post.get("text") or "")
+        if needle and needle not in text.casefold():
+            continue
+        category=("revision" if post.get("revision_of") else
+                  "reply" if post.get("kind")=="reply" else "post")
+        if kind and category!=kind:
+            continue
+        expected=post.get("media_expected",0)
+        saved=post.get("media_saved",0)
+        if not isinstance(expected,int) or expected<0:expected=0
+        if not isinstance(saved,int) or saved<0:saved=0
+        complete=post.get("archive_complete") is True and saved>=expected
+        if media_status and media_status!=("complete" if complete else "partial"):
+            continue
         pid=post["id"]
         media=[]
-        for index,item in enumerate(post.get("media",[])):
-            if not isinstance(item,dict) or item.get("remote_verified") is not True:
-                continue
+        source=post.get("media",[])
+        if not isinstance(source,list):source=[]
+        for index,item in enumerate(source[:16]):
+            verified=(isinstance(item,dict) and
+                      item.get("remote_verified") is True)
             media.append({
-                "kind":item.get("kind","image"),
-                "mime":item.get("mime"),"bytes":item.get("bytes"),
-                "url":"/api/account-archives/"+account+"/media/"+pid+"/"+str(index),
-                "verified_sha256":True})
+                "index":index,
+                "kind":item.get("kind","image") if isinstance(item,dict) else "",
+                "mime":item.get("mime") if isinstance(item,dict) else "",
+                "bytes":item.get("bytes") if isinstance(item,dict) else 0,
+                "url":("/api/account-archives/"+account+"/media/"+pid+"/"+str(index))
+                        if verified else None,
+                "verified_sha256":bool(verified)})
         matching.append({
-            "id":pid,"posted_at":post.get("posted_at"),"text":post.get("text",""),
+            "id":pid,"posted_at":post.get("posted_at"),"text":text,
             "source_url":sanitize_safe_link(post.get("source_url")),
             "profile_url":sanitize_safe_link(post.get("profile_url")),
             "kind":post.get("kind","post"),
             "revision_of":post.get("revision_of",""),
             "captured_at":post.get("captured_at",""),
             "reply_to":post.get("reply_to",""),
-            "media":media,"media_expected":post.get("media_expected",0),
-            "media_saved":post.get("media_saved",0),
-            "archive_complete":post.get("archive_complete") is True})
+            "media":media,"media_expected":expected,
+            "media_saved":saved,"archive_complete":complete})
     return {"total":len(matching),"offset":offset,"limit":limit,
             "posts":matching[offset:offset+limit],"more":offset+limit<len(matching)}
 
@@ -524,11 +548,19 @@ def create_router(auth):
     @router.get("/api/account-archives/{account}/feed")
     def feed(request:Request,account:str,
                    offset:int=Query(0,ge=0,le=200000),
-                   limit:int=Query(20,ge=1,le=50)):
+                   limit:int=Query(20,ge=1,le=50),
+                   q:str=Query("",max_length=100),
+                   kind:str=Query(""),
+                   media_status:str=Query("")):
         auth(request)
+        if kind not in ("","post","reply","revision"):
+            raise HTTPException(400,"Invalid archived post type")
+        if media_status not in ("","complete","partial"):
+            raise HTTPException(400,"Invalid media verification filter")
         _,_,archive=open_account(account)
         try:
-            return JSONResponse(feed_data(archive,account,offset,limit),
+            return JSONResponse(feed_data(archive,account,offset,limit,
+                                          q=q,kind=kind,media_status=media_status),
                                 headers=CACHE_HEADERS)
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Account history read unavailable") from None

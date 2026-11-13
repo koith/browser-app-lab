@@ -17,6 +17,7 @@ on:
       - "apps/demand-research/test_target_account_viewer.py"
       - "apps/demand-research/test_archive_tab_browser.py"
       - "apps/demand-research/test_account_archive_picker_browser.py"
+      - "apps/demand-research/test_account_archive_browser.py"
       - "apps/demand-research/test_live_archive_picker_smoke.py"
   push:
     branches: [main]
@@ -34,6 +35,7 @@ on:
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_archive_tab_browser.py"
       - "apps/demand-research/test_account_archive_picker_browser.py"
+      - "apps/demand-research/test_account_archive_browser.py"
       - "apps/demand-research/test_live_archive_picker_smoke.py"
   workflow_dispatch:
 
@@ -70,6 +72,7 @@ jobs:
           node --check apps/demand-research/account_archive_view.js
           python apps/demand-research/test_archive_tab_browser.py
           python apps/demand-research/test_account_archive_picker_browser.py
+          python apps/demand-research/test_account_archive_browser.py
       - name: Test auto-capture search races, instant filters and original media slots
         run: |
           set -euo pipefail

@@ -177,3 +177,33 @@ body{background:var(--paper);color:var(--ink)}
  .archive-content .tabs button{padding:11px 5px;font-size:12px}
  .archive-embedded .cover{height:112px}
 }
+
+/* Dense original-account archive navigation. Each filter searches every
+   verified journal entry through the private API, not just loaded cards. */
+.account-picker #accountSearch{width:100%;min-width:0;height:36px;padding:6px 10px;
+ background:var(--white);color:var(--ink);border:1px solid var(--line);border-radius:8px;
+ font-size:13px}
+.account-picker #retryAccounts{justify-self:start;border:1px solid var(--line);
+ background:var(--accent2);color:var(--accent);border-radius:8px;padding:6px 11px;font-size:12px}
+.account-picker #retryAccounts[hidden]{display:none}
+.feed-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 11px;
+ border-bottom:1px solid var(--line);background:var(--white)}
+.feed-controls[hidden]{display:none}
+.feed-controls input,.feed-controls select{height:33px;min-width:0;background:var(--white);
+ color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:12px}
+.feed-controls input{flex:1 1 185px}
+.feed-controls select{flex:0 1 144px}
+.feed-controls button{height:33px;border:1px solid var(--line);border-radius:8px;
+ color:var(--ink);background:var(--accent2);padding:4px 11px;font-size:12px}
+.feed-controls :focus-visible,.account-picker #accountSearch:focus-visible{
+ outline:2px solid var(--accent);outline-offset:2px}
+.post-media .media-missing{min-height:100px;display:grid;place-items:center;
+ border:1px dashed var(--line);background:var(--paper);color:var(--sub);
+ text-align:center;padding:12px;font-size:12px}
+.post-media .media-error{grid-column:1/-1;color:#a65e30;font-size:12px;padding:8px}
+@media(max-width:650px){
+ .feed-controls{padding:7px;gap:5px}
+ .feed-controls input{flex-basis:100%}
+ .feed-controls select{flex:1 1 120px}
+ .feed-controls button{padding:4px 9px}
+}
