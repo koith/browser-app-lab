@@ -6,6 +6,7 @@ No repo logs/analytics, broad CORS, unverified media or account identifier leaks
 """
 from __future__ import annotations
 
+import gc
 import json
 import os
 import re
@@ -174,6 +175,12 @@ def open_account(account):
         if (cached is not None and cached[0]==account
                 and now-cached[1]<ARCHIVE_SESSION_SECONDS):
             return cached[2]
+        # Release OLD strong ZIP references BEFORE loading the next immutable
+        # generation. Holding both old and new 200MiB+ histories during the
+        # 75s rollover exceeded the 512MiB free instance.
+        _ARCHIVE_SESSION_CACHE=None
+        cached=None
+        gc.collect()
         # Errors never populate the cache. Loading another account releases
         # the previous union, preventing N-account copies filling free RAM.
         result=_open_account_uncached(account)
