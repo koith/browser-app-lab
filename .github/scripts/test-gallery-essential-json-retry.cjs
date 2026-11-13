@@ -38,6 +38,39 @@ async function run(path) {
   assert.equal(success, succeeds, path + ' ' + statuses);
   assert.equal(calls, expectedCalls, path + ' request count ' + statuses);
  }
+
+ // The owner index is also an essential JSON manifest. For 401/403/404
+ // and broken schema, fail promptly; only transient same-origin 5xx retry.
+ const first=html.indexOf('async function fetchOwnerIndexWithRetry(');
+ const last=html.indexOf('\\n}\\n',first);
+ assert(first>=0&&last>first,'owner retry function present');
+ const ownerSource=html.slice(first,last+2);
+ for(const [statuses,expectedCalls,succeeds] of [
+  [[503,200],2,true],[[502,504,200],3,true],
+  [[401,200],1,false],[[403,200],1,false],[[404,200],1,false],
+  [[200],1,false],
+ ]) {
+  let calls=0;
+  const context={
+   AbortController,Error,TypeError,Promise,console:{warn:()=>{}},
+   setTimeout:(fn,ms)=>{if(ms<12000)queueMicrotask(fn);return 1;},
+   clearTimeout:()=>{},
+   fetch:async()=>{
+    const status=statuses[calls++]||200;
+    const model=path.includes('mimmi')?'mimmi':'yui';
+    return {ok:status===200,status,json:async()=>statuses.length===1
+      ?{schema_version:999,model,albums:[]}
+      :{schema_version:1,model,albums:[]}};
+   },
+  };
+  vm.createContext(context);
+  vm.runInContext(ownerSource+'\\nthis.loadOwner=fetchOwnerIndexWithRetry;',context);
+  let succeeded=false;
+  try{await context.loadOwner(path.includes('mimmi')?'mimmi':'yui');succeeded=true}
+  catch(_){}
+  assert.equal(succeeded,succeeds,path+' owner '+statuses);
+  assert.equal(calls,expectedCalls,path+' owner calls '+statuses);
+ }
 }
 (async () => {
  await run('apps/mimmi-gallery/index.html');
