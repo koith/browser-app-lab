@@ -329,12 +329,12 @@ def verify(engine, *, label, width, height):
 
 
 def verify_main_archive_hub(engine):
-    """Check actual signed web app preloads its picker without extra clicks."""
+    """Account-mode deep link preloads the real picker without extra clicks."""
     browser=engine.launch(headless=True)
     try:
         page=browser.new_page(viewport={"width":430,"height":932})
         base=SITE.rsplit("/account-archive",1)[0]
-        response=page.goto(base+"/?tab=archives",wait_until="domcontentloaded",
+        response=page.goto(base+"/?tab=archives&mode=accounts",wait_until="domcontentloaded",
                            timeout=180000)
         assert response and response.status==200
         quick=page.locator("#archiveQuickSelect")
@@ -359,8 +359,8 @@ def verify_main_archive_hub(engine):
             "() => document.documentElement.scrollWidth <= innerWidth+3"), (
             "mobile archive page has horizontal overflow"
         )
-        print("LIVE_MAIN_ARCHIVE_AUTO_PICKER_PASS",
-              "client=mobile-chromium","no_clicks=PASS",
+        print("LIVE_MAIN_ARCHIVE_ACCOUNT_DEEPLINK_PASS",
+              "client=mobile-chromium","account_deeplink=PASS","no_extra_clicks=PASS",
               "names=PASS","embedded_feed=PASS","responsive=PASS",
               flush=True)
     finally:
