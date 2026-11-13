@@ -247,3 +247,93 @@ def test_invalid_zip_must_never_enter_verified_lru(monkeypatch):
     with pytest.raises(BundleInvalid):
         gh.tagged_bundle(tag)
     assert gh._cache=={}
+
+
+def test_account_history_singleflight_reuses_exact_sha_verified_ancestors(
+        monkeypatch):
+    """Six parallel LIVE viewer requests must not redownload six ZIPs each."""
+    import io
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    from types import SimpleNamespace
+    account="bluesky-"+"a"*40
+    newest="intersection-github-archive-43210010001-a1"
+    old="intersection-github-archive-43210010000-a1"
+    tags={newest:SimpleNamespace(
+        account=account,ancestor_tags=(old,),_zip_source=io.BytesIO(b"newer")),
+        old:SimpleNamespace(
+        account=account,ancestor_tags=(),_zip_source=io.BytesIO(b"older"))}
+    calls={"atom":0,"bundle":0}
+    def atom():
+        calls["atom"]+=1
+        yield newest
+    def signed(tag):
+        calls["bundle"]+=1
+        time.sleep(0.025)
+        return tags[tag]
+    monkeypatch.setattr(gh,"_history_cache",None)
+    monkeypatch.setattr(gh,"atom_tags",atom)
+    monkeypatch.setattr(gh,"tagged_bundle",signed)
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        pages=list(pool.map(lambda _:gh.matching_bundles(account),
+                            range(6)))
+    assert calls=={"atom":1,"bundle":2}
+    assert len(pages)==6 and all(page==list(tags.values()) for page in pages)
+    assert all(page[0] is tags[newest] and page[1] is tags[old]
+               for page in pages)
+    # TTL is bounded: future newly published signed ancestor history is
+    # discovered on a fresh check, not hidden by a permanent cache.
+    monkeypatch.setattr(gh,"HISTORY_CACHE_SECONDS",-1)
+    assert len(gh.matching_bundles(account))==2
+    assert calls=={"atom":2,"bundle":4}
+
+
+def test_signed_account_history_never_crosses_account_or_memory_limit(
+        monkeypatch):
+    import io
+    from types import SimpleNamespace
+    account="bluesky-"+"a"*40
+    other="bluesky-"+"b"*40
+    tag="intersection-github-archive-43210010002-a1"
+    bundle=SimpleNamespace(
+        account=account,ancestor_tags=(),_zip_source=io.BytesIO(b"x"*128))
+    calls={"atom":0}
+    def atom():
+        calls["atom"]+=1
+        yield tag
+    monkeypatch.setattr(gh,"_history_cache",None)
+    monkeypatch.setattr(gh,"atom_tags",atom)
+    monkeypatch.setattr(gh,"tagged_bundle",lambda _:bundle)
+    monkeypatch.setattr(gh,"HISTORY_MAX_BYTES",64)
+    assert len(gh.matching_bundles(account))==1
+    assert len(gh.matching_bundles(account))==1
+    assert calls["atom"]==2,"oversized history must not remain resident"
+    assert gh.matching_bundles(other)==[]
+    assert calls["atom"]==3,"never substitute a different account archive"
+    assert gh._history_cache is None
+
+
+def test_missing_signed_ancestor_rejects_history_without_caching(
+        monkeypatch):
+    import io
+    from types import SimpleNamespace
+    account="mastodon-"+"a"*40
+    newest="intersection-github-archive-43210010003-a1"
+    old="intersection-github-archive-43210010002-a1"
+    head=SimpleNamespace(
+        account=account,ancestor_tags=(old,),_zip_source=io.BytesIO(b"head"))
+    ancestor=SimpleNamespace(
+        account=account,ancestor_tags=(),_zip_source=io.BytesIO(b"old"))
+    state={"valid":False,"lookups":0}
+    monkeypatch.setattr(gh,"_history_cache",None)
+    monkeypatch.setattr(gh,"atom_tags",lambda:iter([newest]))
+    def bundle(tag):
+        state["lookups"]+=1
+        return head if tag==newest else ancestor if state["valid"] else None
+    monkeypatch.setattr(gh,"tagged_bundle",bundle)
+    with pytest.raises(RuntimeError,match="signed immutable account history"):
+        gh.matching_bundles(account)
+    assert gh._history_cache is None
+    state["valid"]=True
+    assert gh.matching_bundles(account)==[head,ancestor]
+    assert state["lookups"]==4
