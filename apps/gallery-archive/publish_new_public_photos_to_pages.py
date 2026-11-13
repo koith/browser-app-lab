@@ -74,10 +74,26 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
             occupied={int(p.get('number') or 0) for p in rec['images']}
             if n<1 or n in occupied:
                 n=max(occupied|{0})+1
-            rec['images'].append({'number':n,'url':rel,
+            # Preserve observed source-file numbering separately from our
+            # immutable gallery slot. Losing this evidence prevents later
+            # page-by-page missing-cut audits, and source sequence is never
+            # represented as the publisher's original sequence.
+            recorded={'number':n,'url':rel,
               'sha256':digest,'bytes':len(raw),'width':photo['width'],'height':photo['height'],
               'origin_page':source.get('source'),'source_url':photo.get('source_url',''),
-              'quality':'direct_public_original_bytes_not_publisher_master_verified'})
+              'quality':'direct_public_original_bytes_not_publisher_master_verified'}
+            source_no=photo.get('source_photo_number')
+            if type(source_no) is int and 1<=source_no<=25000:
+                recorded['source_photo_number']=source_no
+                recorded['source_numbering']='public_web_filename_not_publisher_original'
+            provenance=photo.get('numbering_provenance')
+            if provenance in {
+                    'archive_append_order_not_publisher_number',
+                    'published_source_order',
+                    'official_source_unique_url_append_not_publisher_sequence',
+                    'verified_creator_cached_public_feed_append'}:
+                recorded['numbering_provenance']=provenance
+            rec['images'].append(recorded)
             existing_sha.add(digest);added.append((aid,digest,len(raw)))
             used+=len(raw)
         if rec['images']:
