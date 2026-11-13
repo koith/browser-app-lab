@@ -46,6 +46,8 @@ def exercise(engine,label,width,height):
         assert established+new>=1, "real posts never reached account ranking"
         for cohort,n in (("established",established),("new",new)):
             page.locator('[data-rank-cohort="'+cohort+'"]').click()
+            # Profile hydration may revise the cohort during a tab click.
+            n=cohort_count(cohort)
             cards=page.locator("#activityRankingRows .activity-rank-card")
             assert cards.count()==min(20,n), "real ranked card count incorrect"
             if n==0:
