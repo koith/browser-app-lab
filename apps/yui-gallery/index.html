@@ -746,13 +746,19 @@ async function fetchOwnerIndexWithRetry(model){
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
   try{
    const response=await fetch('owner-index.json',{cache:'no-store',signal:controller.signal});
-   if(!response.ok)throw Error('owner-index HTTP '+response.status);
+   if(!response.ok){
+    const error=Error('owner-index HTTP '+response.status);
+    error.retryable=response.status===502||response.status===503||response.status===504;
+    throw error;
+   }
    const index=await response.json();
    if(index?.schema_version!==1||index.model!==model||!Array.isArray(index.albums))
     throw Error('owner-index schema mismatch');
    return index;
   }catch(error){
    lastError=error;
+   // Access denial and malformed JSON/schema cannot improve by retrying.
+   if(!error.retryable&&error.name!=='AbortError'&&!(error instanceof TypeError))throw error;
    if(attempt<3)await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));
   }finally{clearTimeout(timeout)}
  }
@@ -771,12 +777,18 @@ async function essentialGalleryJSON(path,label,validate){
   const timeout=setTimeout(()=>controller.abort(),10000);
   try{
    const response=await fetch(path,{cache:'no-store',signal:controller.signal});
-   if(!response.ok)throw Error(label+' HTTP '+response.status);
+   if(!response.ok){
+    const error=Error(label+' HTTP '+response.status);
+    error.retryable=response.status===502||response.status===503||response.status===504;
+    throw error;
+   }
    const data=await response.json();
    if(!validate(data))throw Error(label+' invalid schema');
    return data;
   }catch(error){
    lastError=error;
+   // Retry temporary transport failures only; 401/403, invalid JSON and schema are terminal.
+   if(!error.retryable&&error.name!=='AbortError'&&!(error instanceof TypeError))throw error;
    if(attempt<2)await new Promise(resolve=>setTimeout(resolve,400*(attempt+1)));
   }finally{clearTimeout(timeout)}
  }
