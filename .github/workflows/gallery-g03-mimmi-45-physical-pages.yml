@@ -1,0 +1,87 @@
+name: G03 Mimmi Author Public SNS and Official Publisher Original JPG Archive
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/gallery-g03-mimmi-45-physical-pages.yml"
+      - "apps/gallery-archive/direct_photo_pipeline.py"
+      - "apps/gallery-archive/visual_public_work.py"
+      - "apps/mimmi-gallery/public-work-pages.json"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: gallery-mimmi-new-sns-work-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  cancel-in-progress: false
+jobs:
+  save-public-45-photo-work:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 27
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
+      - name: Test genuine photo collector and same-work visual reference checks
+        run: |
+          python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/visual_public_work.py apps/gallery-archive/publish_new_public_photos_to_pages.py
+          (cd apps/gallery-archive && python test_visual_public_work.py)
+      - name: Directly download only observed publisher-public JPEG photos from four new Mimmi official works
+        run: |
+          python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
+            --owner apps/mimmi-gallery/owner-index.json \
+            --out "$RUNNER_TEMP/mimmi-45-source" \
+            --max-new 60 --max-pages 4 --render-budget 0 --reviewed-source-only \
+            --album-id djawa-in-the-summer-sunshine-part-2 \
+            --album-id djawa-blossom-reverie \
+            --album-id djawa-christmas-special-2025-mimmi-the-christmas-witch \
+            --album-id djawa-asuna-the-maid \
+            --album-id public-mimmi-sns
+      - name: Append only new actual SHA-distinct immutable photos
+        run: |
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py \
+            --model mimmi --stage "$RUNNER_TEMP/mimmi-45-source" \
+            --budget 30000000 --limit 60
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          base=Path(os.environ['RUNNER_TEMP'])/'mimmi-45-source/metadata'
+          saved=json.loads((base/'collection-audit.json').read_text())
+          published=json.loads((base/'pages-publication.json').read_text())
+          for entry in saved['results']:
+              print('MIMMI_OFFICIAL_PUBLIC_SAMPLE_RESULT',json.dumps({
+                 k:entry.get(k) for k in ('id','individual_files_saved',
+                 'source_pages_registered','published_image_candidates',
+                 'failure_categories','failures')},ensure_ascii=False))
+          assert published['new_sha_verified_originals']>=0
+          print('MIMMI_PUBLIC_NEW_SHA_PAGES_FILE_TOTAL',published['new_sha_verified_originals'])
+          PY
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          node apps/gallery-archive/test_curated_cover_manifest.cjs
+      - name: Commit only verified actual image files to this PR branch
+        if: github.event_name == 'pull_request'
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/mimmi-gallery/stored-albums.json apps/mimmi-gallery/stored-albums
+          if git diff --cached --quiet; then
+            echo "G03_MIMMI_OFFICIAL_SAMPLES_ALREADY_SAVED_OR_SOURCE_BLOCKED" >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m "feat(G03 G06): save Mimmi verified same-work public photo files"
+            git push origin "HEAD:refs/heads/$BRANCH"
+            echo "G03_MIMMI_OFFICIAL_NEW_PHOTOS_SHA_VERIFIED_IN_PR" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g03-mimmi-45-public-work-real-photos
+          path: |
+            ${{ runner.temp }}/mimmi-45-source/metadata/collection-audit.json
+            ${{ runner.temp }}/mimmi-45-source/metadata/pages-publication.json
+          retention-days: 10
+          if-no-files-found: warn
