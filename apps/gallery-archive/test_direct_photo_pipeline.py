@@ -636,6 +636,24 @@ class DirectTests(unittest.TestCase):
         self.assertEqual(page_images(login,page+'?page=2','mimmi'),
                          ([],[],'login_required_for_additional_pages'))
 
+    def test_v2ph_visible_public_previews_survive_extra_login_banner(self):
+        # The page has real publicly visible image nodes AND a note that the
+        # rest of the set requires a login. Keep only visible cards, never
+        # traverse paywalled pagination or invent higher numbered assets.
+        url='https://www.v2ph.com/album/axm7n43z.html'
+        photo='https://cdn.v2ph.com/photos/DS_yUpyIO5uxxXNQ.jpg'
+        raw=(f'<h1>[DJAWA] Mimmi - Sukajan Gal</h1>'
+             f'<div class="photo-gallery"><a href="{photo}">'
+             f'<img src="{photo}" alt="Sukajan Gal 0"></a></div>'
+             '<p>Need to log in to view more content of this album.</p>'
+             '<a href="?page=2">Next</a>')
+        self.assertEqual(page_images(raw,url,'mimmi'),
+          ([photo],[],'scoped_public_page'))
+        self.assertEqual(page_images(raw,url,'yui')[2],'missing_model_context')
+        self.assertEqual(page_images(
+          '<h1>Mimmi - Sukajan Gal</h1><p>Need to log in to view more</p>',
+          url,'mimmi'),([],[],'login_required_for_additional_pages'))
+
     def test_targeted_v2ph_photo_is_stored_as_individual_file(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);base=root/'apps/mimmi-gallery';base.mkdir(parents=True)
