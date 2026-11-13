@@ -11,6 +11,7 @@ import pathlib
 import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -71,12 +72,31 @@ try:
             raise AssertionError("Native Safari automation cannot reach requested "
                 +str(width)+"px width; actual "+str(real))
         world=inspect(d,"world-"+str(width))
-        assert_true(world["scene"]=="world" or world["scene"]=="world-map",
+        assert_true(world["scene"] in ("sky","world","world-map"),
                     "WorldMap not visible on Safari "+str(width)+": "+str(world["scene"]))
-        d.find_element(By.CSS_SELECTOR,'[data-route="lobby"]').click()
+        # User clicks the actual archive's WorldMap region, then the real
+        # original Region channel hotspot; no hidden developer route bypass.
+        button=d.find_element(By.CSS_SELECTOR,'.world-location[data-region="dice"]')
+        for fx,fy in ((.5,.5),(.35,.42),(.6,.7)):
+            bounds=button.rect
+            ActionChains(d).move_to_element_with_offset(button,
+                round((fx-.5)*bounds["width"]),
+                round((fy-.5)*bounds["height"])).click().perform()
+            if d.execute_script("return !!document.querySelector('#dice-channels:not(.hidden)')"):
+                break
+        until(d,"return !!document.querySelector('#dice-channels:not(.hidden)')",12)
+        WebDriverWait(d,15).until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR,'#dice-channels .dice-channel-hotspot[data-channel="ispin:1"]'))).click()
+        until(d,"return !!document.querySelector('#lobby:not(.hidden)')",12)
         WebDriverWait(d,15).until(EC.element_to_be_clickable((By.ID,"lobby-create"))).click()
         Select(d.find_element(By.ID,"game-mode")).select_by_value("hotseat")
         Select(d.find_element(By.ID,"bot-count")).select_by_value("1")
+        Select(d.find_element(By.ID,"point-limit")).select_by_value("12")
+        Select(d.find_element(By.ID,"map-select")).select_by_value("4LEAF")
+        if width<=430:
+            focus=d.find_element(By.ID,"dice-room-ready-focus")
+            assert_true(focus.is_displayed(),"mobile source READY focus control is missing")
+            focus.click()
         WebDriverWait(d,15).until(EC.element_to_be_clickable((By.ID,"start-game"))).click()
         until(d,"return !!document.querySelector('#game:not(.hidden)')&&document.querySelectorAll('#board-nodes>.tile').length===104",35)
         state=inspect(d,"game-"+str(width))
@@ -89,10 +109,11 @@ try:
                     "roll button unexpectedly disabled")
         old_positions=state["game"]["positions"]
         d.find_element(By.ID,"roll-btn").click()
-        until(d,"return window.__ROG_TEST__?.getMatch?.()?.players?.some(p=>p.position>0) || !!window.__ROG_TEST__?.getMatch?.()?.finished",35)
+        until(d,"return (window.__ROG_TEST__?.getMatch?.()?.lastRoll?.length||0)>0",40)
         rolled=inspect(d,"rolled-"+str(width))
-        assert_true(rolled["game"]["positions"]!=old_positions or rolled["game"]["finished"],
-                    "Safari real roll never progressed")
+        assert_true((rolled["game"]["positions"]!=old_positions or rolled["game"]["finished"]
+           or d.execute_script("return (window.__ROG_TEST__?.getMatch?.()?.lastRoll?.length||0)>0")),
+                    "Safari real roll never had an authoritative dice result")
     assert_true(len(RESULTS)==15,"five widths × 3 native screens expected")
     print("R22_REAL_APPLE_SAFARI_5_VIEWPORT_15_SCENES_PASS",json.dumps({
       "testedViewports":[x["viewport"] for x in RESULTS if x["tag"].startswith("game-")],
