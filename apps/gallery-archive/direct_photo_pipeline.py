@@ -479,8 +479,13 @@ def page_images(raw,url,model):
         heading=title.get_text(' ',strip=True) if title else ''
         if not MODEL_PATTERNS[model].search(heading):
             return [],[],'missing_model_context'
-        if re.search(r'need to log in to view more|login to view more|请登录|ログインして',soup.get_text(' ',strip=True),re.I):
-            return [],[],'login_required_for_additional_pages'
+        # A page may show 10 freely visible same-work preview JPEGs AND
+        # separately advertise a login for extra pages. Never discard the
+        # public previews merely because the login banner is visible.
+        # Stop pagination at that boundary; never bypass it.
+        login_boundary=bool(re.search(
+            r'need to log in to view more|login to view more|请登录|ログインして',
+            soup.get_text(' ',strip=True),re.I))
         selected=[]
         seen=set()
         def candidate(raw_link):
@@ -517,6 +522,10 @@ def page_images(raw,url,model):
             if 2<=page_number<=60 and target!=url and target not in more:
                 more.append(target)
         # No source identity/album content should be inferred from gallery count.
+        # Only pages rendered visibly to an unauthenticated visitor are used.
+        if login_boundary:
+            return (selected,[],'scoped_public_page') if selected else (
+                [],[],'login_required_for_additional_pages')
         return selected,more,'scoped_public_page' if selected else 'no_public_photos'
     if urlsplit(url).hostname=='www.nicesss.com':
         # Independent public previews for Yui ArtGravia Vol.677. A different
