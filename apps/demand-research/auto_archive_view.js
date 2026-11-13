@@ -155,8 +155,11 @@ async function load(reset){
     state.total=Number(result.total);
     if(!state.offset)list.append(node("p","empty",
       "확인된 보관본이 없습니다. 수집 작업과 테라박스 저장 상태를 확인해 주세요."));
+    const cacheAge=Number(result.verified_catalog_cache_age_seconds);
+    const delayed=Number.isFinite(cacheAge)&&cacheAge>=90;
     status.textContent="검증된 게시글 "+state.total.toLocaleString("ko-KR")+
-      "건 중 "+state.offset.toLocaleString("ko-KR")+"건 표시";
+      "건 중 "+state.offset.toLocaleString("ko-KR")+"건 표시"+
+      (delayed?" · 기존 SHA 검증본 표시 (최신 원격 확인 지연)":"");
     more.hidden=state.offset>=state.total||!result.posts.length;
     more.textContent="더 보기 ("+Math.max(0,state.total-state.offset)+"건 남음)";
   }catch(error){
