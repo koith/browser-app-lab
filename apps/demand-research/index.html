@@ -983,6 +983,68 @@ main{padding-top:10px}
   </div>
 </section>
 </main>
+<script>
+/* Core navigation remains usable if the separate public account-analysis
+   bundle cannot load, initialize or access browser storage. It is independent
+   of cloud credentials, SNS APIs and profile snapshots. The normal account
+   bundle advertises INTERSECTION_NAV_BOUND when its richer nav is ready. */
+(function(){
+ "use strict";
+ const navigation=performance.getEntriesByType?.("navigation")?.[0];
+ const reloading=navigation?.type==="reload"||
+   (performance.navigation&&performance.navigation.type===1);
+ window.INTERSECTION_RELOAD_TO_POSTS=Boolean(reloading);
+ document.addEventListener("DOMContentLoaded",()=>{
+   if(window.INTERSECTION_NAV_BOUND)return;
+   const names=["posts","accounts","archives"];
+   const target={posts:["postsView","viewPosts"],
+                 accounts:["accountsView","viewAccounts"],
+                 archives:["archivesView","viewArchives"]};
+   if(names.some(name=>!document.getElementById(target[name][0])||
+                     !document.getElementById(target[name][1])))return;
+   let selected="posts";
+   function activate(name){
+     selected=names.includes(name)?name:"posts";
+     for(const key of names){
+       const [panelID,buttonID]=target[key];
+       const current=key===selected;
+       document.getElementById(panelID).classList.toggle("hidden",!current);
+       const button=document.getElementById(buttonID);
+       button.classList.toggle("active",current);
+       button.setAttribute("aria-selected",String(current));
+     }
+     window.dispatchEvent(new CustomEvent("intersection:tab-change",
+                              {detail:{view:selected}}));
+   }
+   for(const name of names){
+     document.getElementById(target[name][1])
+       .addEventListener("click",()=>activate(name));
+   }
+   document.getElementById("viewPosts").parentElement
+     .addEventListener("keydown",event=>{
+       if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+       const index=names.indexOf(selected);
+       const next=event.key==="Home"?0:event.key==="End"?2:
+         (index+(event.key==="ArrowRight"?1:2))%3;
+       event.preventDefault();
+       activate(names[next]);
+       document.getElementById(target[names[next]][1]).focus();
+     });
+   window.INTERSECTION_NAV_BOUND=true;
+   window.INTERSECTION_NAV_FALLBACK=true;
+   const query=new URLSearchParams(location.search);
+   if(reloading){
+     if(query.has("tab")){
+       const next=new URL(location.href);
+       next.searchParams.delete("tab");
+       history.replaceState(null,"",next.pathname+next.search+next.hash);
+     }
+     activate("posts");
+   }else activate(query.get("tab")==="archives"?"archives":
+                 query.get("tab")==="accounts"?"accounts":"posts");
+ });
+})();
+</script>
 <dialog id="activityRankingDialog" class="activity-rank-dialog" aria-labelledby="activityRankingDialogTitle">
  <div class="dialog-head"><b id="activityRankingDialogTitle">RANK</b><button type="button" id="activityRankingDialogClose" aria-label="랭킹 상세 닫기">×</button></div>
  <div id="activityRankingDialogContent" class="dialog-content"></div>

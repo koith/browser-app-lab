@@ -537,6 +537,10 @@ async function refreshWatch(w,manual){
 $("viewPosts").addEventListener("click",()=>setView("posts"));
 $("viewAccounts").addEventListener("click",()=>setView("accounts"));
 $("viewArchives").addEventListener("click",()=>setView("archives"));
+/* Advertise that full navigation really initialized. If a preceding
+   account-only dependency aborted this module, the independent inline
+   controller will handle these three essential tabs instead. */
+window.INTERSECTION_NAV_BOUND=true;
 $("viewPosts").parentElement.addEventListener("keydown",e=>{
  if(!["ArrowLeft","ArrowRight","Home","End"].includes(e.key))return;
  const tabs=["posts","accounts","archives"];
