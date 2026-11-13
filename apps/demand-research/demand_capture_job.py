@@ -112,7 +112,7 @@ def blob_sha256_from_cid(cid):
         raw=base64.b32decode(body+"="*((-len(body))%8),casefold=False)
     except (ValueError,base64.binascii.Error):
         return None
-    if len(raw)!=36 or raw[:4]!=b"\\x01\\x55\\x12\\x20":
+    if len(raw)!=36 or raw[:4]!=b"\x01\x55\x12\x20":
         return None
     return raw[4:]
 
@@ -226,14 +226,24 @@ def bluesky(term, start, end):
                 if playlist:
                     original=None
                     record_embed=rec.get("embed") or {}
-                    source_blob=((record_embed.get("video") or {}).get("ref") or {}
-                                 if type(record_embed) is dict else {})
-                    reference=source_blob.get("$link") if type(source_blob) is dict else ""
-                    if pds_lookup_count<MAX_PUBLIC_VIDEO_PDS_LOOKUPS_PER_TERM:
+                    video_info=(record_embed.get("video")
+                                if type(record_embed) is dict else None)
+                    source_blob=(video_info.get("ref")
+                                 if type(video_info) is dict else None)
+                    reference=(source_blob.get("$link")
+                               if type(source_blob) is dict else "")
+                    # Reconstruct the actor CID from the ALREADY verified
+                    # public playlist; the optional view path may have been
+                    # absent before the fallback was constructed.
+                    playlist_parts=urlsplit(playlist).path.split("/")
+                    captured_cid=(playlist_parts[3]
+                                  if len(playlist_parts)==5 else "")
+                    if (pds_lookup_count<MAX_PUBLIC_VIDEO_PDS_LOOKUPS_PER_TERM
+                            and reference==captured_cid
+                            and blob_sha256_from_cid(reference) is not None):
                         pds_lookup_count+=1
                         original=trusted_pds_blob_link(
-                            match.group(1),parts[3] if len(parts)==5 else "",
-                            reference)
+                            match.group(1),captured_cid,reference)
                     # Original PDS blob is byte-verified via its CID. If the
                     # author PDS cannot be trusted/reached, retain the HLS
                     # evidence URL as INCOMPLETE, never as an MP4 original.
