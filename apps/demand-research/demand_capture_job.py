@@ -100,7 +100,7 @@ def normalized(platform, original_id, url, text, published, media_urls=(), profi
 # Read only authored public video blobs from verified AT Protocol PDS hosts.
 # GitHub/Render contains no generic URL fetching path for arbitrary PDS URLs.
 TRUSTED_PDS_HOSTS={"bsky.social"}
-MAX_PUBLIC_VIDEO_PDS_LOOKUPS_PER_TERM=1
+MAX_PUBLIC_VIDEO_PDS_LOOKUPS_PER_TERM=4  # bounded <=16 public author-PDS reads per capture
 
 
 def blob_sha256_from_cid(cid):
