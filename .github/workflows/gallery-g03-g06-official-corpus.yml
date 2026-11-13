@@ -6,10 +6,14 @@ on:
     paths:
       - ".github/workflows/gallery-g03-g06-official-corpus.yml"
       - "apps/mimmi-gallery/public-work-pages.json"
+      - "apps/mimmi-gallery/stored-albums.json"
+      - "apps/mimmi-gallery/stored-albums/**"
   pull_request:
     paths:
       - ".github/workflows/gallery-g03-g06-official-corpus.yml"
       - "apps/mimmi-gallery/public-work-pages.json"
+      - "apps/mimmi-gallery/stored-albums.json"
+      - "apps/mimmi-gallery/stored-albums/**"
 permissions:
   contents: write
 concurrency:
@@ -56,6 +60,33 @@ jobs:
           PY
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/publish_new_public_photos_to_pages.py
           (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
+      - name: Verify eight already staged Rudy2 JPEGs against immutable SHA, bytes and pixels
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          from PIL import Image
+          base=Path('apps/mimmi-gallery')
+          doc=json.loads((base/'stored-albums.json').read_text())
+          album=next(a for a in doc['albums'] if a['id']=='djawa-rudy2-codename-wolfgirl')
+          assert len(album['images'])==8, 'Rudy2 expected physical file count changed'
+          seen=set()
+          for p in album['images']:
+            rel=Path(p['url'])
+            assert not rel.is_absolute() and '..' not in rel.parts
+            assert rel.parts[0]=='stored-albums'
+            target=base/rel
+            raw=target.read_bytes()
+            digest=hashlib.sha256(raw).hexdigest()
+            assert digest==p['sha256'] and len(raw)==p['bytes']
+            assert digest not in seen
+            seen.add(digest)
+            with Image.open(target) as im:
+              im.load()
+              assert im.format=='JPEG'
+              assert im.size==(p['width'],p['height'])
+          print('G03_G06_RUDY2_EIGHT_PHYSICAL_SHA_BYTES_PIXELS_PASS',len(seen))
+          PY
       - name: Visit all 32 exact publisher works in four bounded 10-work batches
         run: |
           python - <<'PY'
