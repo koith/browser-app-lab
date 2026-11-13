@@ -191,3 +191,33 @@ def test_failed_opportunistic_remote_pack_leaves_all_ciphertext_artifacts_untouc
     # An independent working remote can still restore those exact bytes.
     restored=recover_directory(tmp_path,FakeCloud())
     assert restored["post_and_media_verified"]==2
+
+
+def test_source_first_captures_over_24_with_multiple_verified_remote_packs(tmp_path,monkeypatch):
+    """36 distinct public originals are not silently dropped at old 24 cap."""
+    import recover_spool_artifacts as replay
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE","1")
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_PACK_REMOTE","1")
+    install_fake_media_fetch(monkeypatch)
+    rows=[source(i) for i in range(36)]
+    cloud=FakeCloud()
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+                cloud=cloud,clock=lambda:1793667900,run_id="123456942",
+                fast_mode=True,max_fast_seconds=240)
+    sealed=sorted(tmp_path.glob("*.enc"))
+    assert len(sealed)==36,"new source-first bound must exceed old 24 cutoff"
+    packs=sorted(key for key in cloud.objects if key.startswith("recovery-pack-"))
+    assert len(packs)==2,"36 immutable ciphertext originals split 24 + 12"
+    verified_count=0
+    for i,key in enumerate(packs):
+        downloaded=replay.extract_verified_remote_pack(
+            cloud,key,tmp_path/("verified-"+str(i)))
+        assert all(RecoverySpool(tmp_path).read(f)["first"]["platform"]=="bluesky"
+                   for f in downloaded)
+        verified_count+=len(downloaded)
+    assert verified_count==36
+    # Only sealed originals are copied; no post/media journal is presented as
+    # individually remotely verified until the separate strict replay succeeds.
+    assert cloud.load_catalog()==[]
+    assert not any(key.startswith("posts/") for key in cloud.objects)
