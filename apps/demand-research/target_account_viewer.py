@@ -250,6 +250,27 @@ def latest_snapshot(archive,folder,pattern,cap=300_000):
     return None
 
 
+
+def archived_media_slot(pid,item):
+    """Immutable source attachment position encoded by its verified media key.
+
+    A partially saved post may have media/0002.jpg but no media/0001.jpg.
+    Using list enumeration would silently promote its second original into
+    the first slot (and make /media/<pid>/0 serve the wrong photo). Never
+    reconstruct position from a compacted list or another source thumbnail.
+    """
+    if not isinstance(item,dict) or not isinstance(item.get("key"),str):
+        return None
+    match=re.fullmatch(
+        r"posts/"+re.escape(pid)+r"/media/([0-9]{4})\\.[a-z0-9]{1,8}",
+        item["key"])
+    if match is None:
+        return None
+    slot=int(match.group(1))-1
+    return slot if 0<=slot<16 else None
+
+
+
 def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
     """Filter the COMPLETE verified account journal before pagination.
 
@@ -281,17 +302,25 @@ def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
         media=[]
         source=post.get("media",[])
         if not isinstance(source,list):source=[]
-        for index,item in enumerate(source[:16]):
-            verified=(isinstance(item,dict) and
-                      item.get("remote_verified") is True)
+        known_slots=set()
+        for item in source[:16]:
+            original_slot=archived_media_slot(pid,item)
+            if original_slot is None or original_slot in known_slots:
+                # An invalid/duplicate position cannot provide provenance.
+                # The client renders expected-but-missing positions as
+                # numbered placeholders, never with a substituted file.
+                continue
+            known_slots.add(original_slot)
+            verified=item.get("remote_verified") is True
             media.append({
-                "index":index,
-                "kind":item.get("kind","image") if isinstance(item,dict) else "",
-                "mime":item.get("mime") if isinstance(item,dict) else "",
-                "bytes":item.get("bytes") if isinstance(item,dict) else 0,
-                "url":("/api/account-archives/"+account+"/media/"+pid+"/"+str(index))
-                        if verified else None,
+                "index":original_slot,
+                "kind":item.get("kind","image"),
+                "mime":item.get("mime",""),
+                "bytes":item.get("bytes",0),
+                "url":("/api/account-archives/"+account+"/media/"+pid+"/"+
+                        str(original_slot)) if verified else None,
                 "verified_sha256":bool(verified)})
+        media.sort(key=lambda item:item["index"])
         matching.append({
             "id":pid,"posted_at":post.get("posted_at"),"text":text,
             "source_url":sanitize_safe_link(post.get("source_url")),
@@ -668,11 +697,14 @@ def create_router(auth):
         try:
             posts=archive.load_catalog()
             post=next((p for p in posts if p.get("id")==pid),None)
-            if not post or index>=len(post.get("media",[])):
+            if not post or not isinstance(post.get("media"),list):
                 raise HTTPException(404,"Media not archived")
-            media=post["media"][index]
-            if not media.get("key","").startswith("posts/"+pid+"/media/"):
-                raise HTTPException(404,"Invalid original source")
+            # Endpoint index is the ORIGINAL immutable source slot, not the
+            # compressed position of surviving saved files.
+            media=next((item for item in post["media"]
+                        if archived_media_slot(pid,item)==index),None)
+            if media is None:
+                raise HTTPException(404,"Original attachment position not saved")
             return get_verified_media(archive,media,request)
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Original media read unavailable") from None
