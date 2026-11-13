@@ -27,6 +27,8 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
     ids={a['id'] for a in registered['albums']}
     owner_sha={p['sha256'] for a in owner['albums'] for p in a['images']}
     existing_sha={p['sha256'] for a in old['albums'] for p in a['images']}
+    # An indexed SHA alone does not establish that its Pages bytes exist.
+    # Missing files are repaired at their original immutable URL, not duplicated.
     # Owner-index references are not proof of a physical Pages copy.
     # Preserve global uniqueness accounting separately from physical recovery.
     byid={a['id']:a for a in old['albums']}
@@ -46,8 +48,19 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                  'images':[]}
         for photo in album.get('images',[]):
             digest=photo.get('sha256')
-            if not isinstance(digest,str) or len(digest)!=64 or digest in existing_sha:
+            if not isinstance(digest,str) or len(digest)!=64:
                 continue
+            indexed=next((p for a in old['albums'] for p in a['images'] if p['sha256']==digest),None)
+            if indexed is not None:
+                indexed_rel=indexed.get('url','')
+                indexed_dest=(base/indexed_rel).resolve()
+                if (not indexed_rel.startswith('stored-albums/') or
+                    not indexed_dest.is_relative_to((base/'stored-albums').resolve())):
+                    raise ValueError('unsafe indexed Pages path')
+                if indexed_dest.is_file():
+                    if hashlib.sha256(indexed_dest.read_bytes()).hexdigest()!=digest:
+                        raise ValueError('indexed Pages physical SHA mismatch')
+                    continue
             key=photo.get('key','')
             stage_file=(stage/key).resolve()
             if not str(stage_file).startswith(str(stage.resolve())+os.sep) or not stage_file.is_file():
@@ -66,12 +79,16 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                 if im.format!=ALLOWED_EXT[ext] or im.size!=(photo['width'],photo['height']):
                     raise ValueError('staged source decoded image mismatch')
                 if min(im.size)<300:continue
-            rel=f'stored-albums/{aid}/{digest[:20]}{ext}'
+            rel=indexed['url'] if indexed is not None else f'stored-albums/{aid}/{digest[:20]}{ext}'
             dest=base/rel
             if dest.exists() and dest.read_bytes()!=raw:
                 raise ValueError('immutable Pages destination collision')
             dest.parent.mkdir(parents=True,exist_ok=True)
             if not dest.exists():dest.write_bytes(raw)
+            if indexed is not None:
+                recovered_owner.append((aid,digest,len(raw)))
+                used+=len(raw)
+                continue
             n=int(photo.get('number') or 0)
             occupied={int(p.get('number') or 0) for p in rec['images']}
             if n<1 or n in occupied:
