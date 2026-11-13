@@ -148,6 +148,46 @@
       "advertised_photos": 325,
       "visual_reference_required": true,
       "identity_evidence": "Observed ordinary Mimmi search title and work URL. At least three SHA-verified whole-frame saved-cut anchors required before any new photo publication. Source numbering is separate from publisher original sequence."
+    },
+    {
+      "id": "djawa-in-the-summer-sunshine-part-2",
+      "title": "In the summer sunshine (part 2)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-2/",
+      "source_claimed_total_edition_photos": 209,
+      "priority": 0,
+      "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master"
+    },
+    {
+      "id": "djawa-blossom-reverie",
+      "title": "Blossom Reverie",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/blossom-reverie/",
+      "source_claimed_total_edition_photos": 199,
+      "priority": 0,
+      "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master"
+    },
+    {
+      "id": "djawa-christmas-special-2025-mimmi-the-christmas-witch",
+      "title": "Christmas Special 2025 : Mimmi – The Christmas Witch",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+      "source_claimed_total_edition_photos": 151,
+      "priority": 0,
+      "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master"
+    },
+    {
+      "id": "djawa-asuna-the-maid",
+      "title": "Asuna the Maid",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+      "source_claimed_total_edition_photos": 125,
+      "priority": 0,
+      "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master"
     }
   ]
 }
