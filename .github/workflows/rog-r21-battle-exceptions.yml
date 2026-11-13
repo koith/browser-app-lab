@@ -1,0 +1,46 @@
+name: 4LEAF R21 original 2004 Destroy Block and real item exception gameplay
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r21-historic-battle-rule.cjs'
+      - '.github/workflows/rog-r21-battle-exceptions.yml'
+      - 'apps/4leaf/rog/game.js'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r21-historic-battle-rule.cjs'
+      - '.github/workflows/rog-r21-battle-exceptions.yml'
+      - 'apps/4leaf/rog/game.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical-fixed-ability-and-item:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.browser }} --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-r21-rule.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r21-historic-battle-rule.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r21-original-destroy-block-${{ matrix.browser }}
+          if-no-files-found: ignore
+          path: leaf-r21-historical-*.png
