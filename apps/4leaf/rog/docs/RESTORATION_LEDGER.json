@@ -3829,9 +3829,9 @@
       "id": "QA-03",
       "priority": "P0",
       "title": "아이폰 Safari 세로·가로 4LEAF HUD 오버랩 재검증",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M09",
-      "current": "2026-11-08 WebKit/iPhone 크기 자동 브라우저 QA와 공개 원본 체스맨 6종 WebKit 검증 PASS; 실제 물리 iPhone Safari/PWA 검증은 미수행.\n[이전 작업 이력] 2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.; WebKit 가상 iPhone 390x844->844x390 실제 회전 후 104개 DMP TIS(145x97), 2명 원본 OBS, 물리 ROLL 버튼 클릭, 턴 이동 미변경을 검증하는 E2E 추가. 실제 물리 iOS 단말/사파리 주소줄 환경은 미검증. | 2026-11-02 public beta.39 QA: chat scroll physical wheel retry test now actually retries four times before reporting failure; runtime chat code unchanged, public revalidation pending.\n2026-11-09: #920 WebKit mobile and Chromium mobile/PWA returning first-roll E2E verified in browsers. Physical iPhone Safari/PWA not accessed, no physical PASS claim.",
+      "current": "2026-11-08 WebKit/iPhone 크기 자동 브라우저 QA와 공개 원본 체스맨 6종 WebKit 검증 PASS; 실제 물리 iPhone Safari/PWA 검증은 미수행.\n[이전 작업 이력] 2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.; WebKit 가상 iPhone 390x844->844x390 실제 회전 후 104개 DMP TIS(145x97), 2명 원본 OBS, 물리 ROLL 버튼 클릭, 턴 이동 미변경을 검증하는 E2E 추가. 실제 물리 iOS 단말/사파리 주소줄 환경은 미검증. | 2026-11-02 public beta.39 QA: chat scroll physical wheel retry test now actually retries four times before reporting failure; runtime chat code unchanged, public revalidation pending.\n2026-11-09: #920 WebKit mobile and Chromium mobile/PWA returning first-roll E2E verified in browsers. Physical iPhone Safari/PWA not accessed, no physical PASS claim. | 2026-11-13 PASS real Apple macOS Safari 27.2: original WorldMap -> channel -> 5 responsive READY/ROLL full native client journeys (390,430,768,800,844x390), real 104 DMP cells/2 source actors, interactive roll/chat HUD unobstructed. 15 native Safari screenshots; physical iPhone Safari/PWA hardware still OPEN in M09/P0-RELEASE.",
       "acceptance": [
         "실제 iOS 또는 공개 Safari 실행 증빙 포함; 390/430/768/800+ 화면의 조작/텍스트/버튼 가림 0건"
       ],
@@ -3845,11 +3845,20 @@
         "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
         "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs",
         "apps/4leaf/rog/original/OBS/embedded/dice-selected.js",
-        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
+        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1090",
+        "https://github.com/koith/browser-app-lab/actions/runs/43430231304",
+        "apps/4leaf/rog/tests/r22-real-macos-safari-hud.py",
+        "apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-09",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-ACTUAL-APPLE-SAFARI-27.2-REAL-WEBDRIVER-5-SOURCE-VIEWPORTS-15-SCREENSHOTS-5-GAME-ROLLS/NATIVE-MOBILE-WEBKIT-REGRESSION; PHYSICAL-IPHONE-SAFARI-PWA-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "2002 original WorldMap and Region art, 2002 source DMP 4LEAF 104-cell original 145×97 TIS board, authentic 2-player CHR sprite renderer and native source HUD action panel tested without mock source overlays. Actual macOS Apple Safari 27.2 on macos-15 GitHub runner, using Apple's native safaridriver WebDriver, NOT Playwright's emulated WebKit binary, exposed genuine full source game. Historic 2004 3D mesh and physical iPhone Safari UI remains UNVERIFIED separately M09/P0-RELEASE.",
+        "implementation": "PR #1090 merged main 0ab9c3c833fc88d4f58d206ec240fa9951c58774: tests/r22-real-macos-safari-hud.py launches Apple Safari via Selenium & `/usr/bin/safaridriver` with sudo enable. Uses only ACTUAL visible source WorldMap dice region click -> original Region channel hotspot -> room create -> READY (real ongoing-match confirmation when needed) -> 104 TIS DMP source board -> real ROLL button click. No window.__ROG_TEST__.go bypass or faked match/random. Five exact source responsive viewport widths 390,430,768,800,844 landscape, each with actual text box, native HUD hit & source roll button elementFromPoint checks.",
+        "runtimeTest": "Actions #43430231304 official Apple Safari macos-15 native job SUCCESS, userAgent Safari/605.1.15 Version/27.2 MacIntel; five actual inner viewports [[390,792],[430,880],[768,972],[800,848],[844,338]], 5 independently created playable source matches, 104 real DMP cells + two original CHR bodies each, 5 actual ROLL clicks, no source HUD overlap preventing the roll, source chat text area and message hit checks at all widths; 15 screenshots + JSON captured; R22_REAL_APPLE_SAFARI_5_VIEWPORT_15_SCENES_PASS. Prior Chromium/WebKit simulated iPhone 390x844->844x390 actual touch/roll/104 tiles and source chat UI had already passed in existing tests dice-landscape-webkit-release.cjs, dice-mobile-roll-dmp-order.cjs, chat-map-click-room-entry.cjs. Physical iPhone/PWA remains unverified.",
+        "deployment": "QA-only workflow and Safari test merged `main` #1090 SHA 0ab9c3c833fc88d4f58d206ec240fa9951c58774; the tested original UI/game runtime assets were already published under 4LEAF beta.78/PWA v165. This closes published Safari responsive interaction acceptance under explicit OR criterion; native physical iPhone Safari/PWA browser chrome, safe-area and original proprietary 3D historical equivalence remain OPEN under M09/P0-RELEASE and do not inherit verified status."
+      },
       "dependencies": [
         "QA-02",
         "DIE-02",
@@ -10269,6 +10278,16 @@
         "ACT-05"
       ],
       "details": "User requests completion of 22 outstanding canonical tasks; R21 newly accepted only source-SRC02 and real-actor-ACT04. Other 20 remain original acceptance OPEN, not falsified; no new tasks added."
+    },
+    {
+      "seq": 479,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "QA-03",
+      "from": "in_progress",
+      "to": "done",
+      "details": "Actual Apple macOS Safari WebDriver (not Playwright WebKit simulator) source UI/HUD five responsive viewport journeys with 15 screenshots and five authentic room-to-ROLL first turns SUCCESS; physical iPhone Safari remains separate open M09/P0-RELEASE.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43430231304"
     }
   ],
   "restorationPriority": {
