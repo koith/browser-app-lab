@@ -297,7 +297,9 @@ def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=12,
                     if marker is None:
                         continue
                     parsed=json.loads(marker)
-                    digest=parsed.get("sha256") if type(parsed) is dict else None
+                    if type(parsed) is not dict:
+                        continue
+                    digest=parsed.get("sha256")
                     if (parsed.get("id")!=pid or not isinstance(digest,str)
                             or not re.fullmatch(r"[a-f0-9]{64}",digest)):
                         continue
