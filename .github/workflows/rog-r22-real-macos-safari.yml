@@ -1,0 +1,50 @@
+name: 4LEAF actual Apple Safari macOS 390/430/768/800 and landscape source-game QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r22-real-macos-safari-hud.py'
+      - '.github/workflows/rog-r22-real-macos-safari.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r22-real-macos-safari-hud.py'
+      - '.github/workflows/rog-r22-real-macos-safari.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  true-apple-safari:
+    runs-on: macos-15
+    timeout-minutes: 32
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Enable Apple-bundled SafariDriver
+        run: |
+          /usr/bin/safaridriver --enable
+          /usr/bin/safaridriver --version
+          python -m pip install selenium==4.36.0
+      - name: Serve genuine 4LEAF source game and check availability
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-real-safari-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-real-safari-http.log
+          exit 1
+      - name: Real Safari five actual source DMP first rolls and HUD pointer checks
+        run: python apps/4leaf/rog/tests/r22-real-macos-safari-hud.py
+      - name: Archive real native Safari screenshots even on test failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-r22-real-apple-safari-evidence
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            leaf-r22-real-macos-safari-*.png
+            leaf-r22-safari-report.json
