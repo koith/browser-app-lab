@@ -221,3 +221,50 @@ def test_source_first_captures_over_24_with_multiple_verified_remote_packs(tmp_p
     # individually remotely verified until the separate strict replay succeeds.
     assert cloud.load_catalog()==[]
     assert not any(key.startswith("posts/") for key in cloud.objects)
+
+
+def test_fair_first_sighting_samples_all_four_sns_before_48_limit(tmp_path,monkeypatch):
+    """One high-volume public provider must not starve other verified sources."""
+    from collections import Counter
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE","1")
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_PACK_REMOTE","1")
+    install_fake_media_fetch(monkeypatch)
+    names=("bluesky","mastodon","misskey","lemmy")
+    fetchers=[]
+    for platform in names:
+        rows=[]
+        for i in range(36):
+            row=source(i)
+            row["platform"]=platform
+            row["original_id"]="https://example.org/qa/"+platform+"/"+str(i)
+            row["source_url"]="https://example.org/public/"+platform+"/"+str(i)
+            row["profile_url"]="https://example.org/user/"+platform
+            rows.append(row)
+        fetchers.append(
+            lambda term,start,end,rows=rows:
+                rows if term==job.TERMS[0] else [])
+    cloud=FakeCloud()
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=fetchers,cloud=cloud,clock=lambda:1793667900,
+                run_id="123456943",fast_mode=True,max_fast_seconds=240)
+    sealed=sorted(tmp_path.glob("*.enc"))
+    assert len(sealed)==48
+    spool=RecoverySpool(tmp_path)
+    counts=Counter(spool.read(path)["first"]["platform"] for path in sealed)
+    assert counts=={name:12 for name in names}
+    assert len([key for key in cloud.objects if key.startswith("recovery-pack-")])==2
+    assert cloud.load_catalog()==[]
+
+
+def test_public_round_robin_isolates_provider_failure_without_losing_other_rows():
+    def broken(term,start,end):
+        if term!="first":return []
+        def failing():
+            yield {"platform":"bluesky","text":"first"}
+            raise RuntimeError("remote secret that must not be logged")
+        return failing()
+    def healthy(term,start,end):
+        return [{"platform":"mastodon","text":"second"}] if term=="first" else []
+    actual=list(job.round_robin_public_rows((broken,healthy),("first",),0,1))
+    assert [row["text"] for row in actual if row is not None]==["first","second"]
+    assert actual.count(None)==1
