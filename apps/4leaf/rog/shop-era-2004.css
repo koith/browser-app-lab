@@ -1,0 +1,144 @@
+/* Two VERIFIABLE source eras. 2002 native PAK 3×3 remains unchanged.
+ * 2004 shop_ref.png is a screenshot REFERENCE, never pasted into the game.
+ * Later 4×2/Rare/owned-layout UI is reconstructed with semantic DOM and
+ * original source-owned CHR sprite art; 2004 CSS geometry is provisional. */
+#shop .shop-era-toggle{
+ position:absolute;right:12px;bottom:8px;z-index:40;
+ display:flex;gap:2px;padding:2px;background:#151a41cf;
+ border:1px solid #8294c2;box-shadow:0 1px 3px #0c1128;
+}
+#shop .shop-era-toggle button{
+ border:1px solid #7790b6;background:#374779;color:#fff5df;
+ min-width:42px;height:22px;padding:1px 7px;
+ font:700 11px Gulim,'굴림',sans-serif;cursor:pointer;
+}
+#shop .shop-era-toggle button[aria-pressed="true"]{
+ color:#271c3c;background:#f5dca4;border-color:#e7bd73;
+}
+#shop #shop-era-provenance{
+ position:absolute;left:15px;bottom:7px;z-index:39;
+ color:#fff0ae;background:#181e45df;padding:2px 7px;
+ font:10px/18px Gulim,'굴림',sans-serif;max-width:540px;
+}
+#shop .shop-stock .tabline .group-tab[data-group="rare"]{
+ display:none!important;pointer-events:none!important;
+}
+#shop .shop-native-stage[data-era="2004"]{
+ background:
+ radial-gradient(ellipse at 31% 45%,#544183 0%,#35275d 54%,#19193d 88%)!important;
+ border:2px ridge #899ac9!important;
+}
+#shop .shop-native-stage[data-era="2004"]::before{
+ content:'';position:absolute;left:17px;top:12px;width:717px;height:365px;
+ box-sizing:border-box;border:3px ridge #6b5793;
+ border-radius:16px 16px 5px 5px;pointer-events:none;
+ background:linear-gradient(145deg,#33235771 10%,#7050983d 55%,#23204f85);
+ box-shadow:inset 0 0 0 4px #28225466,inset 0 0 28px #07091d87;
+ z-index:0;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-keeper .keeper-silhouette,
+#shop .shop-native-stage[data-era="2004"] .shop-keeper h3,
+#shop .shop-native-stage[data-era="2004"] .shop-keeper p{
+ display:none!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-grid{
+ left:33px!important;top:57px!important;
+ width:330px!important;height:197px!important;
+ display:grid!important;grid-template-columns:repeat(4,73px)!important;
+ grid-template-rows:repeat(2,91px)!important;
+ gap:7px 11px!important;overflow:visible!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-grid .shop-card:not(.shop-empty){
+ background-image:url('./original/CardShop/cardshopbutton.png')!important;
+ background-size:500px 510px!important;
+ background-position:0 0!important;
+ border:1px solid #ab98d8!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-grid .shop-card[data-rank="valuable"]:not(.shop-empty){
+ background-position:0 -183px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-grid .shop-card[data-owned="true"]:not(.shop-empty){
+ background-position:0 -366px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-grid .shop-card:not(.shop-empty) .card-art,
+#shop .shop-native-stage[data-era="2004"] .shop-grid .shop-card:not(.shop-empty)>b,
+#shop .shop-native-stage[data-era="2004"] .shop-grid .shop-card:not(.shop-empty) .card-state{
+ opacity:1!important;pointer-events:none!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline{
+ z-index:5!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab{
+ top:18px!important;width:104px!important;height:27px!important;
+ display:block!important;background:linear-gradient(#5b467d,#34275b)!important;
+ border:2px ridge #9d89c5!important;
+ font:italic 700 14px/23px Georgia,serif!important;
+ color:#f8efff!important;text-shadow:1px 1px #24173f!important;
+ border-radius:8px 8px 1px 1px!important;
+ text-align:center!important;cursor:pointer;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="all"]{
+ left:376px!important;top:18px!important;
+ width:54px!important;font:11px/23px Gulim,'굴림',sans-serif!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="normal"]{
+ left:31px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="valuable"]{
+ left:139px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="rare"]{
+ left:247px!important;display:block!important;pointer-events:auto!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab.selected{
+ background:linear-gradient(#aa7abc,#544081)!important;border-color:#e2c8ec!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab::after{
+ content:none!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-page-controls #shop-prev{
+ left:8px!important;top:142px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-page-controls #shop-next{
+ left:374px!important;top:142px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-page-controls #shop-page{
+ left:165px!important;top:261px!important;
+ width:70px!important;font-size:11px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-equipped,
+#shop .shop-native-stage[data-era="2004"].owned-open .shop-equipped{
+ left:432px!important;top:51px!important;
+ width:285px!important;height:207px!important;
+ display:flex!important;
+ border:2px ridge #a38ac0!important;
+ background:linear-gradient(#332653dd,#1b244bfa)!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-equiv{display:none}
+#shop .shop-native-stage[data-era="2004"] .shop-owned-toggle{
+ left:680px;right:auto;top:12px;width:42px;height:28px;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-detail{
+ left:29px!important;top:280px!important;
+ width:348px!important;height:75px!important;
+ padding:8px!important;z-index:10!important;
+ border:2px ridge #917bac!important;
+ background:#25234ccc!important;overflow:visible!important;
+}
+#shop .shop-native-stage[data-era="2004"] #shop-selected{
+ width:318px!important;height:65px!important;max-height:65px!important;
+ font-size:11px!important;line-height:15px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-detail #shop-buy{
+ left:413px!important;top:-15px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-detail #shop-sell{
+ left:520px!important;top:-15px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-keeper .money{
+ left:435px!important;top:282px!important;
+ width:278px!important;height:31px!important;
+ padding:5px 9px!important;
+ border:2px ridge #a38bbf!important;
+ color:#f2efff!important;background:#272654df!important;
+}
