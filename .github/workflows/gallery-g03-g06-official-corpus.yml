@@ -1,0 +1,123 @@
+name: G03 G06 Full Mimmi Official Public Portfolio Physical SHA Sweep
+on:
+  push:
+    branches:
+      - feat/gallery-g03-g06-official-corpus-31-20261113
+    paths:
+      - ".github/workflows/gallery-g03-g06-official-corpus.yml"
+      - "apps/mimmi-gallery/public-work-pages.json"
+  pull_request:
+    paths:
+      - ".github/workflows/gallery-g03-g06-official-corpus.yml"
+      - "apps/mimmi-gallery/public-work-pages.json"
+permissions:
+  contents: write
+concurrency:
+  group: g03-g06-official-mimmi-corpus-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  real-publisher-originals:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 29
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
+      - name: Validate all unambiguous registered original official Mimmi works
+        run: |
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          from collections import Counter
+          base=Path('apps/mimmi-gallery')
+          cat=json.loads((base/'albums.json').read_text())['albums']
+          known=json.loads((base/'public-work-pages.json').read_text())['albums']
+          urls={x['id']:x['source'] for x in cat if re.fullmatch(
+            r'https://djawaphoto\.com/portfolio/[a-z0-9-]+/',x.get('source',''))
+            and not x.get('catalogueOnly')}
+          registered={}
+          for x in known:
+            if x['id'] in registered:raise ValueError('duplicate_registered_work_id')
+            registered[x['id']]=x
+          assert len(urls)==31,len(urls)
+          for aid,url in urls.items():
+            rec=registered.get(aid)
+            assert rec and (url==rec['source'] or url in rec.get('source_pages',[])),aid
+          print('G03_G06_OFFICIAL_MIMMI_31_KNOWN_PUBLISHER_WORKS_REGISTERED_PASS')
+          print('ONE_PERCENT_ESCAPED_RUDY2_WORK_HELD_FOR_EXPLICIT_IDENTITY_REVIEW')
+          PY
+          python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/publish_new_public_photos_to_pages.py
+          (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
+      - name: Visit all 31 exact official publisher work pages and download only distinct actual bytes
+        run: |
+          mapfile -t IDS < <(python - <<'PY'
+          import json
+          from pathlib import Path
+          rows=json.loads(Path('apps/mimmi-gallery/albums.json').read_text())['albums']
+          for row in rows:
+            src=row.get('source','')
+            if src.startswith('https://djawaphoto.com/portfolio/') and '%' not in src:
+              print(row['id'])
+          PY
+          )
+          ARGS=()
+          for id in "${IDS[@]}"; do ARGS+=(--album-id "$id"); done
+          echo "G03_G06_OFFICIAL_MIMMI_WORKS_TO_SCAN=${#ARGS[@]}"
+          python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
+            --owner apps/mimmi-gallery/owner-index.json \
+            --out "$RUNNER_TEMP/g03-g06-official" \
+            --max-new 70 --max-pages 3 --render-budget 0 --reviewed-source-only "${ARGS[@]}"
+      - name: Publish only genuine SHA distinct decoded image bytes; never URLs or replaced originals
+        run: |
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model mimmi \
+            --stage "$RUNNER_TEMP/g03-g06-official" --limit 70 --budget 50000000
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          node apps/gallery-archive/test_curated_cover_manifest.cjs
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'g03-g06-official/metadata'
+          audit=json.loads((p/'collection-audit.json').read_text())
+          pub=json.loads((p/'pages-publication.json').read_text())
+          rows=audit.get('results',[])
+          print('G03_G06_OFFICIAL_PUBLIC_WORKS_ACTUAL_BYTES',json.dumps({
+            'works_checked':len(rows),
+            'works_with_new_bytes':sum(bool(r.get('individual_files_saved')) for r in rows),
+            'new_sha_photos_in_pages':pub.get('new_sha_verified_originals'),
+            'new_bytes_in_pages':pub.get('total_bytes_added'),
+            'works_with_source_failures':sum(bool(r.get('failures')) for r in rows)},
+            ensure_ascii=False),flush=True)
+          PY
+      - name: Commit verifiable new immutably stored JPEG images to this PR branch
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          git checkout -B "$BRANCH" "refs/remotes/origin/$BRANCH"
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model mimmi \
+            --stage "$RUNNER_TEMP/g03-g06-official" --limit 70 --budget 50000000
+          git add apps/mimmi-gallery/stored-albums.json apps/mimmi-gallery/stored-albums/
+          if git diff --cached --quiet; then
+            echo 'G03_G06_NO_NEW_SHA_PUBLIC_PHOTOS_IN_THIS_RUN' >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m "feat(G03 G06): add verified original Mimmi public photo bytes"
+            git push origin "HEAD:refs/heads/$BRANCH"
+            echo 'G03_G06_REAL_NEW_MIMMI_ORIGINALS_COMMITTED' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g03-g06-31-work-public-coverage-and-sha
+          path: |
+            ${{ runner.temp }}/g03-g06-official/metadata/collection-audit.json
+            ${{ runner.temp }}/g03-g06-official/metadata/pages-publication.json
+          retention-days: 7
+          if-no-files-found: warn
