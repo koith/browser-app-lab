@@ -67,7 +67,7 @@ for(const [member,sides,originalSha,expectedBlocks] of [
  assert.ok(action.animations[20].keys.length>5);
  // Face indices 0..3/0..5 are SOURCE VERIFIED from decoded D4/D6 pip
  // silhouettes; no asserted original EXE keyframe action semantics.
- assert.deepEqual(ui.frames.slice(0,sides).map(f=>f.index),
+ assert.deepEqual(Array.from(ui.frames.slice(0,sides),f=>f.index),
   Array.from({length:sides},(_,i)=>i));
  faceCount+=sides;
  output[member]={sides,sourceSha:ui.sourceSHA256,
