@@ -268,3 +268,25 @@ def test_public_round_robin_isolates_provider_failure_without_losing_other_rows(
     actual=list(job.round_robin_public_rows((broken,healthy),("first",),0,1))
     assert [row["text"] for row in actual if row is not None]==["first","second"]
     assert actual.count(None)==1
+
+
+def test_dead_public_source_only_consumes_one_outage_not_all_hashtag_windows():
+    """A dead provider must not burn four times three hosts network timeouts."""
+    calls={"dead_network":0,"healthy_network":0}
+    def dead(term,start,end):
+        def failed():
+            calls["dead_network"]+=1
+            raise RuntimeError("mastodon public source endpoints unavailable")
+            yield None
+        return failed()
+    def healthy(term,start,end):
+        def successful():
+            calls["healthy_network"]+=1
+            yield {"platform":"bluesky","text":term}
+        return successful()
+    actual=list(job.round_robin_public_rows((dead,healthy),
+                ("tag-one","tag-two","tag-three","tag-four"),0,1))
+    assert calls=={"dead_network":1,"healthy_network":4}
+    assert len([v for v in actual if v is None])==1
+    assert [v["text"] for v in actual if v is not None]==[
+        "tag-one","tag-two","tag-three","tag-four"]
