@@ -1,0 +1,73 @@
+name: 4LEAF R21 97 genuine actor source-foot and 6-player DMP contact
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r21-original-97-contact.cjs'
+      - '.github/workflows/rog-r21-97-contact.yml'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/game.js'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r21-original-97-contact.cjs'
+      - '.github/workflows/rog-r21-97-contact.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actor-source-contact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 36
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.browser }} --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-r21-actor.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r21-original-97-contact.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r21-97-actor-grounding-${{ matrix.browser }}
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            leaf-r21-original-actor-contact-*.png
+            leaf-r21-native-actor-97-foot-contact.json
+  six-person-original:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-r21-six.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
+          exit 1
+      - run: node apps/4leaf/rog/tests/r20-six-original-actor-formation.cjs
+      - run: node apps/4leaf/rog/tests/battle-anchor-compare.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r21-six-actor-and-two-side-battle-source
+          if-no-files-found: ignore
+          path: |
+            leaf-r20-original-six-player*.png
+            leaf-original*.png
