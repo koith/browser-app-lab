@@ -485,7 +485,7 @@ function drawShop(){
    b.dataset.cardId=c.id;
    b.dataset.owned=profile.owned.includes(c.id)?'true':'false';
    b.title=c.name+' · '+c.ability+' · '+c.price.toLocaleString()+'GP · '+
-    (c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 기록 시세':'웹 추정가격 · 원작 시세 미확인')+
+    (c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 기록 시세':c.priceEvidence==='ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED'?'2003.01.05 시세·명칭 추정('+c.historicalPriceLabel+')':'웹 추정가격 · 원작 시세 미확인')+
     ' · '+(profile.owned.includes(c.id)?'보유':'미보유');
    const art=document.createElement('div');art.className='card-art';
    const img=document.createElement('img');img.className='pixel-portrait';img.alt=c.name;assignCardImage(img,c.id);art.append(img);
