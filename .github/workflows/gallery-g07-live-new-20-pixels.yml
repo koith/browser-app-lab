@@ -1,5 +1,14 @@
 name: G07 New 20 Individual Yui Photo Bytes Live Pages Acceptance
 on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/gallery-archive/qa_g07_new_public_saved_sha.py"
+      - ".github/workflows/gallery-g07-live-new-20-pixels.yml"
+  pull_request:
+    paths:
+      - "apps/gallery-archive/qa_g07_new_public_saved_sha.py"
+      - ".github/workflows/gallery-g07-live-new-20-pixels.yml"
   workflow_dispatch:
   workflow_run:
     workflows:
@@ -12,6 +21,8 @@ jobs:
   real-new-photo-live:
     if: |
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'push' ||
+      github.event_name == 'pull_request' ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository)
