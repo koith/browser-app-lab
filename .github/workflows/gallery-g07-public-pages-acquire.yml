@@ -27,17 +27,28 @@ jobs:
         run: |
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/publish_new_public_photos_to_pages.py
           (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
-      - name: Scan actual Mimmi registered work pages without authentication
+      - name: Scan all 14 registered Mimmi work pages for physical missing cuts
         run: |
+          # The old workflow sampled only six works. Public source candidates
+          # stay read-only until physical SHA, image decode, work identity,
+          # correct album slot and immutable Pages readback all pass.
           python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
             --owner apps/mimmi-gallery/owner-index.json --out "$RUNNER_TEMP/g07-mimmi" \
-            --max-new 18 --max-pages 4 --render-budget 0 \
+            --max-new 64 --max-pages 8 --render-budget 0 \
+            --album-id djawa-my-summer-vacation-vol-5 \
             --album-id v2ph-actor-z7exoo5z \
             --album-id v2ph-actor-z76xe74a \
             --album-id v2ph-actor-a8n8n85a \
             --album-id v2ph-actor-an65656a \
-            --album-id djawa-your-panties \
-            --album-id djawa-my-summer-vacation-vol-5
+            --album-id v2ph-actor-z6exx6ma \
+            --album-id v2ph-actor-z4ox65ea \
+            --album-id v2ph-sukajan-gal \
+            --album-id v2ph-actor-z63984ma \
+            --album-id v2ph-actor-a54e445z \
+            --album-id v2ph-actor-zo5n754z \
+            --album-id v2ph-actor-amn8o34z \
+            --album-id djawa-mademoiselle-mimmi \
+            --album-id djawa-your-panties
       - name: Scan actual Yui registered work pages without authentication
         run: |
           python apps/gallery-archive/direct_photo_pipeline.py --model yui \
@@ -51,7 +62,7 @@ jobs:
             --album-id public-yui-sns
       - name: Independently verify and preserve new real static Pages photo bytes
         run: |
-          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model mimmi --stage "$RUNNER_TEMP/g07-mimmi" --limit 18 --budget 14000000
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model mimmi --stage "$RUNNER_TEMP/g07-mimmi" --limit 64 --budget 30000000
           python apps/gallery-archive/publish_new_public_photos_to_pages.py --model yui --stage "$RUNNER_TEMP/g07-yui" --limit 18 --budget 14000000
           node apps/gallery-archive/test_saved_photo_union.cjs
           node apps/gallery-archive/test_curated_cover_manifest.cjs
