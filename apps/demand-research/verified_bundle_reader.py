@@ -6,6 +6,7 @@ Pages never see remote archive paths, cookies, ZIP bytes or credentials.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import copy
 import hashlib
 import io
 from collections.abc import Mapping
@@ -228,6 +229,25 @@ class MergedBundleAccountCloud(BundleAccountCloud):
         self.bundles=tuple(sorted(bundles,
             key=lambda bundle:str(bundle.recorded_at or "")))
         super().__init__(self.bundles[-1])
+        self._verified_catalog_cache={}
+        self._verified_catalog_lock=threading.RLock()
+
+    def load_catalog(self, *, include_entries=True):
+        """Compute once per immutable SHA-verified bundle UNION.
+
+        A real 921-post account cost many seconds on EVERY text/type/media
+        filter request because CloudArchive rehashed all entry journals.
+        This instance can only read independently verified immutable ZIPs;
+        cache the read-only record snapshot until the 75s account session
+        expires. Return a deep copy so callers cannot change verified data.
+        """
+        if type(include_entries) is not bool:
+            raise ValueError("invalid account history scan mode")
+        with self._verified_catalog_lock:
+            if include_entries not in self._verified_catalog_cache:
+                rows=super().load_catalog(include_entries=include_entries)
+                self._verified_catalog_cache[include_entries]=copy.deepcopy(rows)
+            return copy.deepcopy(self._verified_catalog_cache[include_entries])
 
     def read(self,key,*,cap=MAX_CATALOG,optional=False,domain=None):
         if not isinstance(key,str) or key.startswith("/") or ".." in key or not re.fullmatch(r"[A-Za-z0-9_./-]+",key):
