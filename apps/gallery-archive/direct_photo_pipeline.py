@@ -177,7 +177,7 @@ def reviewed_direct_media(url, page, model):
         q=urlsplit(url)
         return bool(q.scheme=='https' and q.hostname=='upload3.inven.co.kr'
             and not q.fragment and not q.username and not q.password and
-            re.fullmatch(r'/upload/[^\\s?]{5,280}\\.(?:jpe?g|png|webp)',q.path,re.I))
+            re.fullmatch(r'/[A-Za-z0-9/_-]{5,280}\.(?:jpe?g|png|webp)',q.path,re.I))
     if model=='yui' and urlsplit(page).hostname=='showartx.net' and reviewed_direct_source(page,'yui'):
         # Exactly the ordinary public JPG naming patterns of that work;
         # the HTML parser must have observed the URL in its work article.
