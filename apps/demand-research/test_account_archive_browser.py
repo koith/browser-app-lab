@@ -87,6 +87,7 @@ def run(browser_type,name,width,height):
                               color_scheme="light")
         errors=[]
         retry_requests={"count":0}
+        first_page_return_failure={"armed":False,"count":0}
         page.on("pageerror",lambda error:errors.append(str(error)[:160]))
         def route_it(route):
             url=route.request.url
@@ -102,6 +103,13 @@ def run(browser_type,name,width,height):
                 route.fulfill(status=200,content_type="text/javascript",
                               body=(ROOT/"account_archive_view.js").read_text("utf-8"))
             elif path.startswith("/api/account-archives"):
+                if ("/feed" in path and "offset=0" in urlsplit(url).query
+                        and first_page_return_failure["armed"]):
+                    first_page_return_failure["count"]+=1
+                    if first_page_return_failure["count"]==1:
+                        route.fulfill(status=503,content_type="application/json",
+                                      body='{"error":"test first-page transient"}')
+                        return
                 if "/feed" in path and "offset=2" in urlsplit(url).query:
                     retry_requests["count"]+=1
                     if retry_requests["count"]==1:
@@ -196,8 +204,13 @@ def run(browser_type,name,width,height):
         page.locator("#results .person").get_by_text("Public Reader").wait_for(timeout=5000)
         page.get_by_role("tab",name="팔로잉").click()
         page.locator("#results .person").get_by_text("@reader.bsky.social").wait_for(timeout=5000)
+        first_page_return_failure["armed"]=True
         page.get_by_role("tab",name="게시글·답글").click()
-        page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for(timeout=10000)
+        page.locator("#results").get_by_text(
+            "Synthetic posted image and comment history").wait_for(timeout=12000)
+        assert first_page_return_failure["count"]==2, (
+            "failed first verified ZIP read must automatically retry once")
+        first_page_return_failure["armed"]=False
         # Switching tabs during the previous request must launch the new tab\x27s page.
         page.evaluate("""() => {
           document.querySelector(\x27[data-section="posts"]\x27).click();
