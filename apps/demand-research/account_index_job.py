@@ -391,7 +391,14 @@ def catalog_sync_bounded(db_path, folder, *, timeout_seconds=180, worker=None):
             return "deferred_invalid_receipt"
         # Partial journal progress is durable and real, but full remote
         # journal/catalog/media parity has not been SHA checked here.
-        return "deferred_journal_pending_"+str(pending)
+        accepted=info.get("accepted")
+        if type(accepted) is not int or not 0<=accepted<=24:
+            return "deferred_invalid_receipt"
+        # Integer counts only, no private source ID or post content.
+        # Distinguish a 0-progress remote attempt from real SHA-confirmed
+        # journal ingestion while never claiming full catalog parity.
+        return ("deferred_journal_pending_"+str(pending)+
+                "_sha_"+str(verified)+"_imported_"+str(accepted))
     return "verified_"+str(info["accepted"]) if info["has_posts"] else "not_found"
 
 
