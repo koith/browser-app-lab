@@ -276,3 +276,35 @@ def test_entire_verified_feed_search_kind_media_and_missing_slots(populated):
     assert client.get("/api/account-archives/"+name+"/feed?kind=invalid").status_code==400
     assert client.get("/api/account-archives/"+name+"/feed?media_status=invalid").status_code==400
     assert client.get("/api/account-archives/"+name+"/feed?q="+("x"*101)).status_code==422
+
+
+def test_verified_incremental_history_status_includes_older_originals(populated,monkeypatch):
+    """A newest empty incremental ZIP is NOT an empty archived account."""
+    from types import SimpleNamespace
+    client,_,_,account=populated
+    prefix="account-archives/bluesky/"+archive_key(PROFILE)+"/"
+    older=SimpleNamespace(
+        account=account,prefix=prefix,recorded_at="2026-11-01T00:00:00Z",
+        post_count=1,object_count=3,source_state="RESUME_NEEDED",temporary=True,
+        items={prefix+"posts/"+PID+"/post.json":b"original-entry",
+               prefix+"profile/snapshots/first.json":b"first",
+               "metadata/target-accounts/"+account+".json":b"identity"})
+    latest=SimpleNamespace(
+        account=account,prefix=prefix,recorded_at="2026-11-12T00:00:00Z",
+        post_count=0,object_count=2,
+        source_state="COMPLETE_CURRENT_PUBLIC_CURSOR",temporary=True,
+        items={prefix+"profile/snapshots/latest.json":b"latest",
+               "metadata/target-accounts/"+account+".json":b"identity"})
+    archive=viewer.MergedBundleAccountCloud([latest,older])
+    monkeypatch.setattr(viewer,"open_account",
+                        lambda _account:(None,PROFILE,archive))
+    status=client.get("/api/account-archives/"+account+"/backup-status")
+    assert status.status_code==200
+    body=status.json()
+    assert body["storage"]=="github_encrypted_temporary"
+    assert body["state"]=="REMOTE_ZIP_SHA_VERIFIED"
+    assert body["verified_history_zips"]==2
+    assert body["latest_zip_public_posts"]==0
+    assert body["public_posts"]==1
+    assert body["original_objects"]==4
+    assert body["full_historical_coverage_guaranteed"] is False
