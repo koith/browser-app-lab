@@ -28,7 +28,10 @@
     <label for="accountSelect">보관 계정</label>
     <span id="accountCount" class="account-count">계정 목록 자동 준비 중…</span>
   </div>
+  <input id="accountSearch" type="search" maxlength="100" autocomplete="off"
+         aria-label="보관 계정 닉네임 또는 아이디 검색" placeholder="닉네임 · @아이디 빠른 검색">
   <select id="accountSelect" aria-label="보관 계정 선택"><option value="">보관된 계정 확인 중…</option></select>
+  <button id="retryAccounts" type="button" hidden>계정 목록 다시 시도</button>
   <span id="loadStatus" role="status" aria-live="polite">저장된 계정과 게시글을 자동으로 불러옵니다.</span>
  </div>
  <div class="sns-provider-top" aria-label="원본 SNS 형식의 보관 화면">
@@ -63,6 +66,16 @@
    <button type="button" role="tab" data-section="followers" aria-selected="false">팔로워</button>
    <button type="button" role="tab" data-section="following" aria-selected="false">팔로잉</button>
   </nav>
+  <form id="feedSearch" class="feed-controls" autocomplete="off" aria-label="저장된 게시글 검색과 필터">
+   <input id="feedQuery" maxlength="100" type="search" aria-label="보관된 모든 게시글 본문 검색" placeholder="모든 보관 글에서 검색">
+   <select id="feedKind" aria-label="게시물 유형"><option value="">모든 글</option>
+    <option value="post">게시글</option><option value="reply">답글</option><option value="revision">수정 이력</option>
+   </select>
+   <select id="feedMediaStatus" aria-label="원본 보관 상태"><option value="">전체 보관 상태</option>
+    <option value="complete">첨부 검증 완료</option><option value="partial">일부 미보관</option>
+   </select>
+   <button id="feedReset" type="button">초기화</button>
+  </form>
   <div id="results" class="results" aria-live="polite">
     <p class="placeholder">보관된 계정을 선택해 주세요.</p>
   </div>
