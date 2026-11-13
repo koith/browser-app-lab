@@ -284,5 +284,5 @@ def test_incremental_receipt_cannot_pass_full_catalog_verified_gate(tmp_path):
     verdict=job.catalog_sync_bounded(
         str(tmp_path/"archive.sqlite3"),tmp_path,timeout_seconds=4,
         worker=[sys.executable,"-c",script,str(marker)])
-    assert verdict=="deferred_journal_pending_8"
+    assert verdict=="deferred_journal_pending_8_sha_2_imported_2"
     assert not verdict.startswith("verified_")
