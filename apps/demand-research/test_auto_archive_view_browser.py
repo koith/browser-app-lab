@@ -75,6 +75,10 @@ def exercise(browser_type,label):
         assert page.locator("#posts video").count()==1
         assert page.locator("#posts audio").count()==1
         assert page.locator("#posts .media a").count()==3
+        # Two original slots per post: do not silently collapse missing slot 2.
+        assert page.locator("#posts figure.media").count()==4
+        assert page.locator("#posts .media-unavailable").count()==1
+        assert "첨부 2" in page.locator("#posts .media-unavailable").inner_text()
         assert "미보관 원본 있음" in page.locator("#posts article.post").last.inner_text()
         assert page.locator("#posts .post-body script").count()==0
         assert "<script>danger()</script>" in page.locator("#posts .post-body").first.text_content()
@@ -93,6 +97,42 @@ def exercise(browser_type,label):
                                timeout=12000)
         assert page.locator("#posts article.post").count()==1
         assert page.locator("#posts video").count()==1
+        # A failed playback stays labeled as an error; never insert a CDN fallback.
+        page.locator("#posts img").first.evaluate("(img) => img.dispatchEvent(new Event('error'))")
+        assert "원본 표시 오류" in page.locator("#posts .media-error").first.inner_text()
+        assert page.locator("#posts img").first.is_hidden()
+        # Changing SNS selector now reloads without needing the Search button.
+        page.locator("#platform").select_option("mastodon")
+        page.wait_for_function("document.querySelector('#posts .post-head strong')?.textContent.includes('Mastodon')")
+        assert page.locator("#posts article.post").count()==1
+        # A delayed obsolete query must not overwrite the newest request.
+        page.locator("#platform").select_option("")
+        page.locator("#query").fill("")
+        page.locator("#search button").click()
+        page.evaluate("""() => {
+          const original=window.fetch.bind(window);
+          window.__slowStarted=false;
+          window.fetch=(input,init)=>{
+            if(String(input).includes("q=slow")){
+              window.__slowStarted=true;
+              return new Promise(resolve=>setTimeout(()=>resolve(new Response(
+                JSON.stringify({total:1,posts:[{id:"obsolete",platform:"bluesky",
+                  text:"obsolete delayed result",capture_status:"remote_verified",media:[]}]}),
+                {status:200,headers:{"Content-Type":"application/json"}})),850));
+            }
+            return original(input,init);
+          };
+        }""")
+        page.locator("#query").fill("slow")
+        page.locator("#search button").click()
+        page.wait_for_function("window.__slowStarted===true")
+        page.locator("#query").fill("audio")
+        page.locator("#search button").click()
+        page.wait_for_function("document.querySelector('#posts .post-body')?.textContent.includes('audio file')")
+        page.wait_for_timeout(1050)
+        assert page.locator("#posts article.post").count()==1
+        assert "obsolete delayed result" not in page.locator("#posts").inner_text()
+        assert "1건 중 1건" in page.locator("#status").inner_text()
         w=page.evaluate("({scroll:document.documentElement.scrollWidth,width:innerWidth})")
         assert w["scroll"]<=w["width"]+2,w
         assert not errors,errors
