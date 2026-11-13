@@ -1,4 +1,4 @@
-name: G03 Mimmi Five Verified Official and Public SNS Original JPG Archive
+name: G03 Mimmi Four Verified Official Public Original JPG Archive
 on:
   pull_request:
     paths:
@@ -28,7 +28,7 @@ jobs:
         run: |
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/visual_public_work.py apps/gallery-archive/publish_new_public_photos_to_pages.py
           (cd apps/gallery-archive && python test_visual_public_work.py)
-      - name: Acquire publicly visible JPEGs from four Mimmi official works and author SNS
+      - name: Acquire publicly visible JPEGs from four verified Mimmi official works
         run: |
           python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
             --owner apps/mimmi-gallery/owner-index.json \
@@ -37,8 +37,8 @@ jobs:
             --album-id djawa-in-the-summer-sunshine-part-2 \
             --album-id djawa-blossom-reverie \
             --album-id djawa-christmas-special-2025-mimmi-the-christmas-witch \
-            --album-id djawa-asuna-the-maid \
-            --album-id public-mimmi-sns
+            --album-id djawa-asuna-the-maid
+
       - name: Append only new actual SHA-distinct immutable photos
         run: |
           python apps/gallery-archive/publish_new_public_photos_to_pages.py \
