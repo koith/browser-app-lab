@@ -74,9 +74,31 @@ def exercise(engine,label,width,height):
                 "https://"),"rank profile source link missing"
             page.locator("#activityRankingDialogClose").click()
             assert not dialog.evaluate("(d)=>d.open"), "rank detail did not close"
-            if n>20:
-                page.locator("#activityRankingMore").click()
-                assert cards.count()==min(n,40), "rank more must append 20"
+            # Official public profile creation dates can arrive after the
+            # first ranking count. Accounts correctly move from "new/unknown"
+            # to "established" without a page reload. Re-read the active
+            # count around More; a stale pre-hydration N is not a UI failure.
+            page.wait_for_timeout(300)
+            current=cohort_count(cohort)
+            more=page.locator("#activityRankingMore")
+            if current>20:
+                assert more.is_visible(), (
+                    "real ranking More disappeared despite more than 20 accounts")
+                more.click()
+                page.wait_for_function(
+                    "(name) => {const btn=document.querySelector("
+                    "'[data-rank-cohort=\\\"'+name+'\\\"]');"
+                    "const n=Number(btn?.textContent?.match(/[0-9]+/)?.[0]||0);"
+                    "const actual=document.querySelectorAll("
+                    "'#activityRankingRows .activity-rank-card').length;"
+                    "return actual===Math.min(40,n);}",
+                    arg=cohort,timeout=15000)
+                now_count=cohort_count(cohort)
+                assert cards.count()==min(now_count,40), (
+                    "rank more must follow current verified cohort size",
+                    {"before":current,"after":now_count,"visible":cards.count()})
+            else:
+                assert cards.count()<=20, "one rank cohort exceeds first page"
         print("INTERSECTION_LIVE_REAL_RANKING_PASS",
               "client="+label,"verified_posts="+str(result["total"]),
               "source_count="+str(result["sourceCount"]),
