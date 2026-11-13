@@ -1,14 +1,18 @@
-name: 4LEAF R22 source-body predecoded frame swap prevents blank WebKit attacks
+name: 4LEAF R23 original OBS predecode and match GOAL one-claim safety
 on:
   pull_request:
     branches: [main]
     paths:
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/r23-goal-idempotence.cjs'
       - '.github/workflows/rog-r22-obs-predecode.yml'
   push:
     branches: [main]
     paths:
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/r23-goal-idempotence.cjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,6 +39,7 @@ jobs:
         run: |
           LEAF_CARDS=0081,0055,0086,0088 FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
           FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r20-card-original-source-safety.cjs
+          FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r23-goal-idempotence.cjs
       - name: Source six-person same-tile contact after decoded swaps
         run: node apps/4leaf/rog/tests/r20-six-original-actor-formation.cjs
       - uses: actions/upload-artifact@v4
