@@ -357,3 +357,23 @@ def test_render_verified_bundle_cache_never_caches_errors_or_another_account(
     monkeypatch.delenv("DEMAND_ACCOUNT_VIEWER_SESSION_CACHE",raising=False)
     assert viewer.open_account(account) is not verified
     assert len(calls)==3
+
+
+def test_expired_free_worker_history_is_evicted_before_sha_loading_next(
+        monkeypatch):
+    """Cannot retain two complete 200MiB immutable ZIP unions in 512MiB."""
+    import time
+    monkeypatch.setenv("DEMAND_ACCOUNT_VIEWER_SESSION_CACHE","1")
+    now=time.monotonic()
+    monkeypatch.setattr(viewer,"_ARCHIVE_SESSION_CACHE",(
+        "bluesky-"+"a"*40,now-viewer.ARCHIVE_SESSION_SECONDS-2,
+        (None,{"platform":"bluesky"},object())))
+    observations=[]
+    def cold_open(account):
+        observations.append(viewer._ARCHIVE_SESSION_CACHE is None)
+        return (None,{"platform":"bluesky"},object())
+    monkeypatch.setattr(viewer,"_open_account_uncached",cold_open)
+    newer=viewer.open_account("bluesky-"+"b"*40)
+    assert observations==[True]
+    assert viewer.open_account("bluesky-"+"b"*40) is newer
+    assert len(observations)==1
