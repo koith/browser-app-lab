@@ -9,6 +9,9 @@ on:
       - "apps/demand-research/account_archive_view.css"
       - "apps/demand-research/account_archive_view.html"
       - "apps/demand-research/archive_tab.js"
+      - "apps/demand-research/auto_archive_view.js"
+      - "apps/demand-research/auto_archive_view.css"
+      - "apps/demand-research/test_auto_archive_view_browser.py"
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_target_account_viewer.py"
       - "apps/demand-research/test_archive_tab_browser.py"
@@ -22,6 +25,9 @@ on:
       - "apps/demand-research/account_archive_view.css"
       - "apps/demand-research/account_archive_view.html"
       - "apps/demand-research/archive_tab.js"
+      - "apps/demand-research/auto_archive_view.js"
+      - "apps/demand-research/auto_archive_view.css"
+      - "apps/demand-research/test_auto_archive_view_browser.py"
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_archive_tab_browser.py"
       - "apps/demand-research/test_account_archive_picker_browser.py"
@@ -60,3 +66,8 @@ jobs:
           node --check apps/demand-research/account_archive_view.js
           python apps/demand-research/test_archive_tab_browser.py
           python apps/demand-research/test_account_archive_picker_browser.py
+      - name: Verify automatic archive query, media slots, Chromium + WebKit
+        run: |
+          set -euo pipefail
+          node --check apps/demand-research/auto_archive_view.js
+          python apps/demand-research/test_auto_archive_view_browser.py
