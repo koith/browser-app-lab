@@ -98,6 +98,25 @@ try:
             assert_true(focus.is_displayed(),"mobile source READY focus control is missing")
             focus.click()
         WebDriverWait(d,15).until(EC.element_to_be_clickable((By.ID,"start-game"))).click()
+        # Safari reuses an isolated automation profile across screen sizes.
+        # The source game intentionally protects an unfinished match. Click
+        # the genuine replacement confirmation, rather than destroying
+        # localStorage or bypassing normal game lifecycle.
+        try:
+            until(d,"return !!document.querySelector('#game:not(.hidden)') || !!document.querySelector('#modal:not(.hidden)')",12)
+            visible=d.execute_script("return !!document.querySelector('#modal:not(.hidden)')")
+            if visible:
+                text=d.execute_script("return document.querySelector('#modal')?.textContent||''")
+                if "진행 중인 경기" in text or "새 경기" in text:
+                    choice=d.find_elements(By.XPATH,"//div[@id='modal-buttons']//button[contains(.,'새 경기 시작')]")
+                    assert_true(len(choice)==1,"source match replacement needs a real option: "+text)
+                    choice[0].click()
+                else: raise AssertionError("unexpected blocking source modal: "+text)
+        except Exception:
+            print("SAFARI_CURRENT_STATE",json.dumps(d.execute_script(
+              "return {scene:document.querySelector('.scene:not(.hidden)')?.id,modal:document.querySelector('#modal')?.textContent||'',match:window.__ROG_TEST__?.getMatch?.()}"),
+              ensure_ascii=False,default=str),flush=True)
+            raise
         until(d,"return !!document.querySelector('#game:not(.hidden)')&&document.querySelectorAll('#board-nodes>.tile').length===104",35)
         state=inspect(d,"game-"+str(width))
         assert_true(state["sourceTiles"]==104,"104 genuine 4LEAF DMP cells required")
