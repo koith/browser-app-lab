@@ -55,7 +55,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
             raw=stage_file.read_bytes()
             if len(raw)!=photo.get('bytes') or hashlib.sha256(raw).hexdigest()!=digest:
                 raise ValueError('staged original physical SHA mismatch')
-            if len(raw)>8_000_000 or used+len(raw)>budget or len(added)>=limit:
+            if len(raw)>8_000_000 or used+len(raw)>budget or len(added)+len(recovered_owner)>=limit:
                 continue
             ext=stage_file.suffix.lower()
             if ext not in ALLOWED_EXT:continue
@@ -93,6 +93,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
         old_path.write_text(json.dumps(old,ensure_ascii=False,indent=2)+'\n')
     result={'model':model,'new_sha_verified_originals':len(added),
        'total_bytes_added':used,'recovered_owner_sha_pages_copies':len(recovered_owner),'sha_samples':[{'album':a,'sha256':s,'bytes':n} for a,s,n in added],
+       'recovered_owner_sha_samples':[{'album':a,'sha256':d,'bytes':n} for a,d,n in recovered_owner],
        'real_files_in_pages':bool(added or recovered_owner),'private_terabox_readback_verified':False,
        'photo_source_fallback_prohibited':True}
     (stage/'metadata/pages-publication.json').write_text(json.dumps(result,indent=2)+'\n')
