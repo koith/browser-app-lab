@@ -12,6 +12,7 @@ async function run(path) {
  for (const [statuses, expectedCalls, succeeds] of [
   [[503, 200], 2, true],
   [[502, 503, 200], 3, true],
+  [[504, 200], 2, true],
   [[401, 200], 1, false],
   [[403, 200], 1, false],
   [[404, 200], 1, false],
@@ -20,7 +21,9 @@ async function run(path) {
   let calls = 0;
   const context = {
    AbortController, Error, TypeError, Promise,
-   setTimeout: (fn) => { /* no real delay */ return 1; },
+   // Only fire retry backoffs; never fire the 10-second abort watchdog.
+   // A no-op timer leaves the awaited retry promise permanently unresolved.
+   setTimeout: (fn, ms) => { if (ms < 10000) queueMicrotask(fn); return 1; },
    clearTimeout: () => {},
    fetch: async () => {
     const status = statuses[calls++] || 200;
