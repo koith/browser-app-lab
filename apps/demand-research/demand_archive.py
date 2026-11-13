@@ -113,6 +113,31 @@ def post_key(platform, original_id):
     return hashlib.sha256((platform + "\x00" + original_id).encode("utf-8")).hexdigest()[:40]
 
 
+
+def original_media_slot(pid,media):
+    """0-based authored attachment position from the immutable media key.
+
+    These archive writers name images 0001..0016 in source order. A
+    partially saved source can have ONLY 0002: list index zero is NOT the
+    original slot zero. Never silently substitute a different original when
+    the key is missing, malformed or belongs to another post.
+    """
+    if (not isinstance(pid,str) or not ID.fullmatch(pid)
+            or not isinstance(media,dict)):
+        return None
+    path=media.get("key")
+    if not isinstance(path,str):
+        return None
+    matched=re.fullmatch(
+        r"posts/"+re.escape(pid)+r"/media/([0-9]{4})\.[a-z0-9]{2,10}",
+        path)
+    if not matched:
+        return None
+    slot=int(matched.group(1))-1
+    return slot if 0<=slot<16 else None
+
+
+
 def validate_post(p):
     if not isinstance(p, dict) or not ID.fullmatch(str(p.get("id", ""))):
         raise ValueError("bad post id")
