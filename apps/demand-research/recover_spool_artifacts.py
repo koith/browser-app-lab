@@ -26,6 +26,9 @@ MAX_BYTES=200_000_000
 MAX_BUNDLE_BYTES=48_000_000
 MAX_ARTIFACT_PAGES=60
 MAX_CONSECUTIVE_FAILURES=3
+# Six failed attempts across independently encrypted source artifacts is the
+# global limit, while three consecutive failures isolate only that artifact.
+MAX_TOTAL_FAILURES=6
 MAX_RECORD_SECONDS=120
 # Leave time for a final sanitized summary before the 21-minute Actions kill.
 MAX_REPLAY_SECONDS=900
@@ -379,8 +382,15 @@ def replay(cloud=None,local_directory=None):
             pending=pending[:1]+[(CLOUD_PACK_ITEM,key) for key in packs]+pending[1:]
     deadline=started+MAX_REPLAY_SECONDS
     try:
-        consecutive_failures=0
         for index,item in enumerate(pending):
+            # A damaged/slow artifact must not permanently poison unrelated
+            # trusted source ZIPs. Stop after six total failed post attempts
+            # if the provider really remains unhealthy. The untouched source
+            # queue and SHA-verified ciphertext packs survive another run.
+            if summary["buffer_failures"]>=MAX_TOTAL_FAILURES:
+                summary["deferred_artifacts"]+=len(pending)-index
+                break
+            consecutive_failures=0
             # Process one artifact immediately; eager downloading all twelve
             # can exhaust the runner without recovering even one original.
             if time.monotonic()>=deadline-MAX_BATCH_SECONDS-MAX_RECORD_SECONDS:
