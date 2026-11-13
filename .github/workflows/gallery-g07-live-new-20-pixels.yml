@@ -1,0 +1,53 @@
+name: G07 New 20 Individual Yui Photo Bytes Live Pages Acceptance
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Deploy static content to Pages"
+      - "pages build and deployment"
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  real-new-photo-live:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 27
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Check whether this exact release includes G07 physical photos
+        id: g07
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          path=Path('apps/yui-gallery/stored-albums.json')
+          ok=path.exists() and any(
+             a.get('id')=='artgravia-677-yui-public-samples' and len(a.get('images',[]))>=12
+             for a in json.loads(path.read_text()).get('albums',[]))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:
+             out.write('has_new_photos='+str(ok).lower()+'\n')
+          print('G07_RELEASE_HAS_NEW_WORKS',ok)
+          PY
+      - name: Install real browser and lossless photo decoder
+        if: steps.g07.outputs.has_new_photos == 'true'
+        run: |
+          python -m pip install 'playwright==1.58.0' 'Pillow==11.3.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Check real sha-pinned files, gallery album, browser pixels and reload
+        if: steps.g07.outputs.has_new_photos == 'true'
+        run: |
+          python apps/gallery-archive/qa_g07_new_public_saved_sha.py --browser ${{ matrix.browser }}
