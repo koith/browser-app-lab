@@ -69,6 +69,41 @@ def verify(engine, *, label, width, height):
         assert readable is not None, (
             "no signed SHA-verified account HISTORY with saved posts and profile")
         key=readable["key"]
+        # Exercise the ACTUAL SHA-verified saved journal, not a mocked API.
+        # These calls are read-only; never print source text or account IDs.
+        if "chromium" in label:
+            endpoint=SITE.rsplit("/",1)[0]+"/api/account-archives/"+quote(key,safe="")+"/feed"
+            def real_feed(query):
+                raw=page.request.get(endpoint+"?"+query,timeout=120000)
+                assert raw.status==200, "actual archived feed API unavailable"
+                data=raw.json()
+                assert isinstance(data.get("posts"),list) and isinstance(data.get("total"),int)
+                return data
+            baseline=real_feed("offset=0&limit=50")
+            total=baseline["total"]
+            assert total>0 and baseline["posts"], "verified history feed empty"
+            kinds=[real_feed("offset=0&limit=1&kind="+v)["total"]
+                   for v in ("post","reply","revision")]
+            assert sum(kinds)==total, "real post/reply/revision filter parity failed"
+            media_states=[real_feed("offset=0&limit=1&media_status="+v)["total"]
+                          for v in ("complete","partial")]
+            assert sum(media_states)==total, "real media verification filter parity failed"
+            sample=next((p for p in baseline["posts"]
+                         if isinstance(p.get("text"),str) and p["text"].strip()),None)
+            assert sample is not None, "no saved original body for actual full-history search"
+            term=sample["text"].strip()[:12]
+            searched=real_feed("offset=0&limit=50&q="+quote(term,safe=""))
+            assert any(p["id"]==sample["id"] for p in searched["posts"]), (
+                "full-history text search lost an actual saved post")
+            if total>1:
+                next_page=real_feed("offset=1&limit=1")
+                assert next_page["posts"] and next_page["posts"][0]["id"]!=baseline["posts"][0]["id"], (
+                    "real post pagination repeats or skips first original")
+            print("LIVE_ARCHIVE_REAL_FILTERS_PASS",
+                  "stored_posts="+str(total),
+                  "kinds="+str(len(kinds)),
+                  "media_statuses="+str(len(media_states)),
+                  "text_search=PASS","pagination=PASS",flush=True)
         response = page.goto(SITE+"?account="+quote(key,safe=""),
                              wait_until="domcontentloaded", timeout=180000)
         assert response and response.status == 200, "live account-viewer HTML unavailable"
