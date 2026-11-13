@@ -32,7 +32,7 @@ const {chromium,webkit}=require('playwright');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const T=window.__ROG_TEST__,m=T.getMatch();
-   assert=m.players.length===2;
+   if(m.players.length!==2)throw Error('two real source players required');
    m.players[0].name='철가면',m.players[1].name='데미안';
    m.players[0].team=['c_0091'];m.players[1].team=['c_0127'];
    m.players[0].position=m.players[1].position=12;
