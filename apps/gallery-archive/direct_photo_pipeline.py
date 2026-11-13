@@ -127,6 +127,16 @@ def reviewed_direct_source(url, model):
     """Eligible *storage* origins. Other public hosts remain discovery leads."""
     from official_sample_recovery import _publisher_page
     from urllib.parse import urlsplit
+    if model=='yui' and urlsplit(url).hostname=='www.inven.co.kr':
+        # Four individually reviewed, public Korean posts whose article
+        # headline explicitly identifies 심유이. Never generic Inven boards.
+        p=urlsplit(url)
+        return bool(p.scheme=='https' and not p.query and not p.fragment
+            and p.path in {
+              '/board/webzine/2097/2720586',
+              '/board/webzine/2097/2735151',
+              '/board/webzine/2097/2706589',
+              '/board/webzine/2097/2742111'})
     if model=='yui' and urlsplit(url).hostname=='showartx.net':
         # Only the known, individually registered Yui public-preview works.
         # Their HTML extractor independently proves exact model/volume and
@@ -163,6 +173,11 @@ def reviewed_direct_media(url, page, model):
         return url in YUI_PHOTOGRAPHER_ORIGINAL_MEDIA
     if _publisher_page(page):
         return _publisher_photo(url)
+    if model=='yui' and urlsplit(page).hostname=='www.inven.co.kr' and reviewed_direct_source(page,'yui'):
+        q=urlsplit(url)
+        return bool(q.scheme=='https' and q.hostname=='upload3.inven.co.kr'
+            and not q.fragment and not q.username and not q.password and
+            re.fullmatch(r'/upload/[^\\s?]{5,280}\\.(?:jpe?g|png|webp)',q.path,re.I))
     if model=='yui' and urlsplit(page).hostname=='showartx.net' and reviewed_direct_source(page,'yui'):
         # Exactly the ordinary public JPG naming patterns of that work;
         # the HTML parser must have observed the URL in its work article.
