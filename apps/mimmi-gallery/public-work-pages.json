@@ -184,6 +184,19 @@
       "priority": 0,
       "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
       "storage_scope": "public_publisher_samples_only_not_purchased_master"
+    },
+    {
+      "id": "public-mimmi-sns",
+      "title": "밈미 — 본인 공개 X 촬영 사진",
+      "publisher": "Mimmi 공식 SNS",
+      "source": "https://teapawt.net/Mimmi_official/media",
+      "source_pages": [
+        "https://teapawt.net/Mimmi_official"
+      ],
+      "priority": 0,
+      "identity_evidence": "Only direct picture attachments of public author Mimmi_official post cards on a read-only normal public timeline mirror. No retweets, quoted other-account media, protected user posts, invented image URLs, or password/auth workarounds. Exact observed pbs.twimg.com photo bytes require independent SHA checks and gallery native decode.",
+      "storage_scope": "normal_public_author_photos_only",
+      "expected": null
     }
   ]
 }
