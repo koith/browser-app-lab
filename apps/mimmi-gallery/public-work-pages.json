@@ -80,7 +80,11 @@
       "public_web_edition_photos": 177,
       "advertised_photos": 177,
       "visual_reference_required": true,
-      "identity_evidence": "Observed Mimmi search result and matching work name. Publication requires every declared public file number and at least 3 whole-frame matches to existing saved originals; no protected or archive download."
+      "identity_evidence": "Observed Mimmi search result and matching work name. Publication requires every declared public file number and at least 3 whole-frame matches to existing saved originals; no protected or archive download.",
+      "source_pages": [
+        "https://www.v2ph.com/album/axm7n43z.html"
+      ],
+      "public_preview_provenance": "Public V2PH album heading [DJAWA] Mimmi - Sukajan Gal, 177 advertised, page 1 displays publicly accessible preview photo cards. No hidden/login pages or paid content."
     },
     {
       "id": "v2ph-actor-z63984ma",
