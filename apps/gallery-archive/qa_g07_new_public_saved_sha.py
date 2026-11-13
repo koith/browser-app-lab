@@ -40,13 +40,17 @@ def source_proof():
             assert image.format=='JPEG'
         assert candidate['number']==number,'public album photos must be append-only'
         verified[sha]=candidate
+    # Baseline is a MINIMUM, not a fixed cap: an actual new SHA-verified public
+    # photograph must not fail the regression that guards the previous 20.
     expected_albums={'public-yui-sns':2,'artgravia-677-yui-public-samples':12,
                      'yui-meow-public-samples':6}
+    actual_counts={}
     total=0
     global_sha=set()
     for album in saved['albums']:
         if album['id'] not in expected_albums:continue
-        assert len(album['images'])==expected_albums[album['id']],('unexpected count',album['id'])
+        assert len(album['images'])>=expected_albums[album['id']],('baseline photo lost',album['id'])
+        actual_counts[album['id']]=len(album['images'])
         for item in album['images']:
             sha=item['sha256']
             assert sha not in global_sha,('duplicate SHA in new works',sha)
@@ -62,9 +66,11 @@ def source_proof():
                 assert image.size==(item['width'],item['height'])
                 assert image.format=='JPEG'
             total+=1
-    assert total==20,('all 20 actual individual new public photo bytes required',total)
-    print('G07_ACTUAL_NEW_20_SHA_ORIGINALS_VERIFIED',{ 'model':'yui',
-        'albums':expected_albums,'bytes_sha_decoded':total},flush=True)
+    assert all(aid in actual_counts for aid in expected_albums),('baseline albums missing',actual_counts)
+    assert total>=20,('all baseline 20 actual individual new public photo bytes required',total)
+    print('G07_ACTUAL_20_BASELINE_AND_ADDITIONAL_SHA_ORIGINALS_VERIFIED',{ 'model':'yui',
+        'baseline_minimum':expected_albums,'actual_album_counts':actual_counts,
+        'bytes_sha_decoded':total,'above_baseline':total-20},flush=True)
     p=verified[PHOTO_SHA]
     print('G07_REAL_PUBLIC_NEW_FILE_SHA_BYTES_PIXELS_PASS',json.dumps({
       'sha256':PHOTO_SHA,'bytes':p['bytes'],'width':p['width'],
