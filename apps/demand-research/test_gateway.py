@@ -684,3 +684,72 @@ def test_archive_overview_default_does_not_spawn_full_terabox_inventory(monkeypa
     assert details["account_bundles_state"]=="listing_deferred_memory_guard"
     assert details["post_journal_state"]=="listing_deferred_memory_guard"
     assert details["account_zip_read_verified"] is None
+
+
+def test_verified_catalog_singleflight_retains_exact_old_posts_during_slow_backend(monkeypatch):
+    """One slow TeraBox journal scan cannot block every public reader or OOM."""
+    import asyncio
+    import threading
+    import time
+    started=threading.Event()
+    release=threading.Event()
+    calls=[]
+    original={"id":"a"*40,"platform":"bluesky","text":"old SHA-verified immutable",
+              "media":[],"archive_complete":True}
+    updated={"id":"b"*40,"platform":"mastodon","text":"new SHA-verified immutable",
+              "media":[],"archive_complete":True}
+    class SlowArchive:
+        def __init__(self,_remote):
+            pass
+        def load_catalog(self):
+            calls.append(1)
+            started.set()
+            assert release.wait(timeout=5)
+            return [original,updated]
+    monkeypatch.setattr(gateway,"CloudArchive",SlowArchive)
+    monkeypatch.setattr(gateway,"_cache",{"at":0.0,"posts":None})
+    monkeypatch.setattr(gateway,"_catalog_task",None)
+    monkeypatch.setattr(gateway,"_catalog_retry_after",0.0)
+    monkeypatch.setattr(gateway,"_lock",asyncio.Lock())
+    monkeypatch.setattr(gateway,"CATALOG_INITIAL_WAIT_SECONDS",0.03)
+    async def run():
+        for _ in range(2):
+            with pytest.raises(gateway.HTTPException) as ex:
+                await gateway.get_catalog()
+            assert ex.value.status_code==503
+        assert started.is_set()
+        assert calls==[1], "concurrent callers must attach to one SHA reader"
+        release.set()
+        assert await asyncio.wait_for(gateway._catalog_task,timeout=3) is True
+        assert await gateway.get_catalog()==[original,updated]
+        # Force stale but verified immutable source while cloud refresh is slow.
+        gateway._cache["at"]=time.time()-500
+        started.clear()
+        release.clear()
+        posts=await gateway.get_catalog()
+        assert posts==[original,updated], "verified previous entries must remain visible"
+        assert await gateway.get_catalog()==posts
+        assert len(calls)<=2, "never spawn a cloud reader per HTTP caller"
+        release.set()
+        assert await asyncio.wait_for(gateway._catalog_task,timeout=3) is True
+    asyncio.run(run())
+
+
+def test_verified_catalog_invalid_remote_refresh_never_replaces_existing_sha_cache(monkeypatch):
+    import asyncio
+    import time
+    safe=[{"id":"c"*40,"text":"verified earlier"}]
+    class BadArchive:
+        def __init__(self,_remote):pass
+        def load_catalog(self):raise ValueError("private identifier must not leak")
+    monkeypatch.setattr(gateway,"CloudArchive",BadArchive)
+    monkeypatch.setattr(gateway,"_cache",{"at":time.time()-100,"posts":safe})
+    monkeypatch.setattr(gateway,"_catalog_task",None)
+    monkeypatch.setattr(gateway,"_catalog_retry_after",0.0)
+    monkeypatch.setattr(gateway,"_lock",asyncio.Lock())
+    async def run():
+        assert await gateway.get_catalog()==safe
+        assert await asyncio.wait_for(gateway._catalog_task,timeout=2) is False
+        assert await gateway.get_catalog()==safe
+        assert gateway._catalog_retry_after>time.monotonic()
+    asyncio.run(run())
