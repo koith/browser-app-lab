@@ -104,11 +104,11 @@ function postCard(post){
   const media=node("div","post-medias");
   const stored=Array.isArray(post.media)?post.media:[];
   const totalExpected=Number(post.media_expected);
-  const expected=Number.isSafeInteger(totalExpected)&&totalExpected>=0?totalExpected:0;
+  const expectedSlots=Number.isSafeInteger(totalExpected)&&totalExpected>=0?totalExpected:0;
   // The archive may have a verified record for an attachment whose metadata
   // file was never uploaded. Display its absent position instead of silently
   // shrinking the media grid or filling it with a different post's picture.
-  const count=Math.min(16,Math.max(expected,stored.length));
+  const count=Math.min(16,Math.max(expectedSlots,stored.length));
   for(let index=0;index<count;index++)
     media.append(mediaView(stored[index],index));
   if(media.children.length)card.append(media);
