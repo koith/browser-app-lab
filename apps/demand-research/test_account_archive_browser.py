@@ -28,23 +28,36 @@ def response_fixture(path,query=""):
                 "captured_at":"2026-11-04T00:00:00Z",
                 "profile_url":"https://bsky.app/profile/qa.bsky.social"}
     if "/feed" in path:
-        if "offset=2" in query:
-            return {"total":3,"offset":2,"more":False,"posts":[{
-                "id":"e"*40,"kind":"post","posted_at":"2026-11-03T02:00:00Z",
-                "text":"Synthetic retry-only third post","media_expected":0,
-                "media_saved":0,"archive_complete":True,"media":[]}]}
-        return {"total":3,"offset":0,"more":True,"posts":[{
+        from urllib.parse import parse_qs
+        args=parse_qs(query,keep_blank_values=True)
+        posts=[{
             "id":POST,"kind":"post","posted_at":"2026-11-03T00:00:00Z",
             "text":"Synthetic posted image and comment history",
             "source_url":"https://bsky.app/profile/qa.bsky.social/post/abc",
             "media_expected":1,"media_saved":1,"archive_complete":True,
-            "media":[{"kind":"image","mime":"image/png","verified_sha256":True,
-                    "url":"/api/account-archives/"+ACCOUNT+"/media/"+POST+"/0"}]},
-            {"id":POST2,"kind":"post","posted_at":"2026-11-03T01:00:00Z",
+            "media":[{"index":0,"kind":"image","mime":"image/png","verified_sha256":True,
+                      "url":"/api/account-archives/"+ACCOUNT+"/media/"+POST+"/0"}]},
+            {"id":POST2,"kind":"reply","posted_at":"2026-11-03T01:00:00Z",
              "text":"Synthetic second archived post",
              "source_url":"https://bsky.app/profile/qa.bsky.social/post/def",
-             "media_expected":0,"media_saved":0,"archive_complete":True,
-             "media":[]}]}
+             "media_expected":2,"media_saved":0,"archive_complete":False,
+             "media":[{"index":0,"mime":"image/png","verified_sha256":False,"url":None}]},
+            {"id":"e"*40,"kind":"post","revision_of":POST,
+             "posted_at":"2026-11-03T02:00:00Z",
+             "text":"Synthetic retry-only third post",
+             "media_expected":0,"media_saved":0,"archive_complete":True,"media":[]}
+        ]
+        query_text=args.get("q",[""])[0].casefold()
+        kind=args.get("kind",[""])[0]
+        media=args.get("media_status",[""])[0]
+        selected=[p for p in posts if
+                  query_text in p["text"].casefold() and
+                  (not kind or kind==("revision" if p.get("revision_of") else p["kind"])) and
+                  (not media or media==("complete" if p["archive_complete"] else "partial"))]
+        start=int(args.get("offset",["0"])[0])
+        end=start+int(args.get("limit",["20"])[0])
+        return {"total":len(selected),"offset":start,
+                "more":end<len(selected),"posts":selected[start:end]}
     if "/graph/followers" in path or "/graph/following" in path:
         return {"captured_unique":1,"offset":0,"more":False,
                 "full_network_coverage_guaranteed":False,
@@ -134,6 +147,45 @@ def run(browser_type,name,width,height):
         assert page.locator("#results article.post").count()==3
         assert retry_requests["count"]==2,"retry must use the same offset"
         assert page.locator("#more").is_hidden()
+        # Newly added archive search/filter searches full saved history, not page 1.
+        assert page.locator("#results .post-media .media-missing").count()==2
+        assert "첨부 2" in page.locator("#results .post-media .media-missing").last.inner_text()
+        page.locator("#feedQuery").fill("third")
+        page.locator("#feedSearch").press("Enter")
+        page.locator("#results").get_by_text("Synthetic retry-only third post").wait_for()
+        assert page.locator("#results article.post").count()==1
+        assert "q=third" in page.url
+        page.locator("#feedQuery").fill("")
+        page.locator("#feedKind").select_option("reply")
+        page.locator("#results").get_by_text("Synthetic second archived post").wait_for()
+        assert page.locator("#results article.post").count()==1
+        assert "kind=reply" in page.url
+        page.locator("#feedMediaStatus").select_option("partial")
+        page.locator("#results").get_by_text("Synthetic second archived post").wait_for()
+        assert page.locator("#results article.post").count()==1
+        assert "media_status=partial" in page.url
+        # Reload keeps saved filters and chosen private account, not blank results.
+        page.reload(wait_until="domcontentloaded",timeout=30000)
+        page.locator("#results").get_by_text("Synthetic second archived post").wait_for()
+        assert page.locator("#feedKind").input_value()=="reply"
+        assert page.locator("#feedMediaStatus").input_value()=="partial"
+        page.locator("#feedReset").click()
+        page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for()
+        assert page.locator("#results article.post").count()==2
+        assert "media_status=partial" not in page.url
+        # Search a long picker without rewriting the current verified account.
+        page.locator("#accountSearch").fill("Synthetic")
+        assert page.locator("#accountSelect option").count()==1
+        page.locator("#accountSearch").fill("존재하지 않는 계정")
+        assert page.locator("#accountSelect").is_disabled()
+        assert page.locator("#results article.post").count()==2
+        page.locator("#accountSearch").fill("")
+        assert page.locator("#accountSelect").is_enabled()
+        # A media playback failure is explicit and never swaps other media.
+        page.locator("#results .post-media img").first.evaluate(
+            "(img) => img.dispatchEvent(new Event('error'))")
+        assert "보관 원본 표시 실패" in page.locator("#results .media-unavailable").first.inner_text()
+
         page.locator("#results article.post").first.get_by_role("button",name="댓글·상세 보기").click()
         assert page.locator("#postDetail[open]").count()==1
         page.get_by_text("Synthetic comment in private view").wait_for(timeout=5000)
@@ -185,6 +237,27 @@ def run(browser_type,name,width,height):
         page.locator("#results article.post").first.wait_for(timeout=4000)
         assert page.locator("#results article.post").count()==2, (
             "feed must render while 6.5-second profile request is pending")
+        assert not errors,errors
+        # Registry 503 must offer an in-place retry, not require a page reload.
+        page.add_init_script("""
+(() => {
+  const underlying=window.fetch.bind(window);
+  let failOnce=true;
+  window.fetch=(url,init)=>{
+    if(String(url)==="/api/account-archives"&&failOnce){
+      failOnce=false;
+      return Promise.resolve(new Response('{"detail":"temporary"}',{status:503,
+        headers:{"Content-Type":"application/json"}}));
+    }
+    return underlying(url,init);
+  };
+})();
+""")
+        page.reload(wait_until="domcontentloaded",timeout=30000)
+        page.locator("#retryAccounts").wait_for(state="visible",timeout=12000)
+        page.locator("#retryAccounts").click()
+        page.get_by_role("heading",name="Synthetic QA").wait_for(timeout=12000)
+        assert page.locator("#retryAccounts").is_hidden()
         assert not errors,errors
         print("ACCOUNT_ARCHIVE_PARALLEL_FEED_PROFILE_PASS",name)
         print("ACCOUNT_ARCHIVE_BROWSER_PASS",name,
