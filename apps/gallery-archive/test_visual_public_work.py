@@ -9,6 +9,15 @@ from visual_public_work import collect_work,visual_error,owner_reference
 
 
 class VisualWorkTests(unittest.TestCase):
+    def test_exact_registered_mimmi_45_page_is_not_silently_skipped(self):
+        from direct_photo_pipeline import reviewed_direct_source
+        public='https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/'
+        self.assertTrue(reviewed_direct_source(public,'mimmi'))
+        self.assertFalse(reviewed_direct_source(public,'yui'))
+        self.assertFalse(reviewed_direct_source(public+'?page=2','mimmi'))
+        self.assertFalse(reviewed_direct_source(
+            'https://www.shypetal.com/albums/unrelated-artist/','mimmi'))
+
     def test_count_alone_never_claims_complete_edition(self):
         import json
         with tempfile.TemporaryDirectory() as tmp:
