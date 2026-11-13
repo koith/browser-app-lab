@@ -143,3 +143,51 @@ def test_source_first_no_new_data_is_not_a_backup_success(tmp_path,monkeypatch):
     assert output["encrypted_only_originals"]==0
     assert output["operational_status"]=="NO_NEW_PUBLIC_ORIGINALS"
     assert not list(tmp_path.glob("*.enc"))
+
+
+def test_source_first_preserves_a_sha_verified_encrypted_pack_before_artifact_expiry(tmp_path,monkeypatch):
+    """Never label a ciphertext pack as a restored post/media journal entry."""
+    import recover_spool_artifacts as replay
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE","1")
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_PACK_REMOTE","1")
+    monkeypatch.setenv("GITHUB_RUN_ID","123456940")
+    install_fake_media_fetch(monkeypatch)
+    rows=[source(i) for i in range(3)]
+    cloud=FakeCloud()
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+                cloud=cloud,clock=lambda:1793667900,run_id="123456940",
+                fast_mode=True,max_fast_seconds=240)
+    files=sorted(tmp_path.glob("*.enc"))
+    assert len(files)==3
+    # One AES-GCM ZIP was independently read back from private cloud, with
+    # no raw post, attachment, media URL, or plaintext record stored there.
+    keys=list(cloud.objects)
+    assert len(keys)==1 and keys[0].startswith("recovery-pack-")
+    assert b"synthetic verified original" not in cloud.objects[keys[0]]
+    assert not any("posts/" in key for key in keys)
+    verified=replay.extract_verified_remote_pack(cloud,keys[0],tmp_path/"verified")
+    assert len(verified)==3
+    assert all(RecoverySpool(tmp_path).read(p)["first"]["platform"]=="bluesky" for p in verified)
+    # Only the separate replay consumer may publish completed post journals.
+    assert cloud.load_catalog()==[]
+
+
+def test_failed_opportunistic_remote_pack_leaves_all_ciphertext_artifacts_untouched(tmp_path,monkeypatch):
+    class RejectPack(FakeCloud):
+        def write_immutable(self,key,data):
+            raise RuntimeError("(authorization) synthetic TeraBox provider denied")
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE","1")
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_PACK_REMOTE","1")
+    install_fake_media_fetch(monkeypatch)
+    rows=[source(i) for i in range(2)]
+    cloud=RejectPack()
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+                cloud=cloud,clock=lambda:1793667900,run_id="123456941",
+                fast_mode=True,max_fast_seconds=240)
+    assert len(list(tmp_path.glob("*.enc")))==2
+    assert cloud.objects=={}
+    # An independent working remote can still restore those exact bytes.
+    restored=recover_directory(tmp_path,FakeCloud())
+    assert restored["post_and_media_verified"]==2
