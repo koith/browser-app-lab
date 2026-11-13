@@ -19,9 +19,15 @@ const BASE_CARDS=[
 ];
 const CHR_SOURCE=window.ORIGINAL_LEAF_CHESSMEN||[];
 const HISTORIC_SHOP_PRICE_SNAPSHOT=window.ORIGINAL_LEAF_SHOP_PRICE_SNAPSHOT_20030105||null;
-const historicalShopPrice=name=>{
- const value=HISTORIC_SHOP_PRICE_SNAPSHOT?.prices?.[name];
- return Number.isSafeInteger(value)&&value>0?value:null;
+const historicalShopPrice=c=>{
+ const direct=HISTORIC_SHOP_PRICE_SNAPSHOT?.prices?.[c.name];
+ if(Number.isSafeInteger(direct)&&direct>0)return {
+  value:direct,evidence:'ARCHIVE-2003-01-05-EXACT-NAME',label:c.name};
+ const candidate=HISTORIC_SHOP_PRICE_SNAPSHOT?.orthographicAliases?.[c.id];
+ if(candidate?.chrName!==c.name)return null;
+ const value=HISTORIC_SHOP_PRICE_SNAPSHOT?.prices?.[candidate.archiveName];
+ return Number.isSafeInteger(value)&&value>0?{
+  value,evidence:'ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED',label:candidate.archiveName}:null;
 };
 const ABILITY_NAMES={19:'공격C',20:'공격B',21:'공격A',22:'방어C',23:'방어B',24:'이동B',25:'방어B',26:'지력B',27:'지력A',28:'능력 없음',30:'순간이동',31:'팀 지력+',32:'키퍼',33:'프리워프',34:'디스트로이',37:'이동C',38:'공격C',39:'공격B',43:'블럭',56:'흑태자의 힘'};
 const LEGACY_IDS={soldier:'c_0096',joan:'c_0078',rashid:'c_0087',narcia:'c_0088',merza:'c_0040',iolyn:'c_0045',christian:'c_0090',saladin:'c_0087',damian:'c_0127',sherazard:'c_0088',ironmask:'c_0091',schwarz:'c_0170'};
@@ -31,9 +37,12 @@ if(CHR_SOURCE.length>50){
  const originalCards=CHR_SOURCE
  .filter(c=>c.move>=1&&c.move<=2&&c.atk>=1&&c.def>=1&&!['마장기 test','근육이'].includes(c.name))
  .filter(c=>!['근육이','마장기 test','노동자스켈톤'].includes(c.name))
- .map(c=>({id:'c_'+c.id,sourceId:c.id,name:c.name,move:c.move,atk:c.atk,def:c.def,int:c.int,point:Math.max(1,Math.ceil((c.atk+c.def+c.int+c.move)/3)),rank:c.score>=175?'valuable':'normal',price:historicalShopPrice(c.name)??(HIGH_PRICES[c.name]||Math.max(160,Math.round(c.score*18/10)*10)),
- priceEvidence:historicalShopPrice(c.name)!==null?'ARCHIVE-2003-01-05-EXACT-NAME':'WEB-INFERRED-PRICE',
- ability:ABILITY_NAMES[c.abilityId]||'능력 '+c.abilityId,abilityId:c.abilityId,element:['Wands','Swords','Cups','Disks','None'][c.element]||'None',score:c.score,portrait:'♟'}));
+ .map(c=>{
+ const historical=historicalShopPrice(c);
+ return {id:'c_'+c.id,sourceId:c.id,name:c.name,move:c.move,atk:c.atk,def:c.def,int:c.int,point:Math.max(1,Math.ceil((c.atk+c.def+c.int+c.move)/3)),rank:c.score>=175?'valuable':'normal',
+ price:historical?.value??(HIGH_PRICES[c.name]||Math.max(160,Math.round(c.score*18/10)*10)),
+ priceEvidence:historical?.evidence||'WEB-INFERRED-PRICE',historicalPriceLabel:historical?.label||null,
+ ability:ABILITY_NAMES[c.abilityId]||'능력 '+c.abilityId,abilityId:c.abilityId,element:['Wands','Swords','Cups','Disks','None'][c.element]||'None',score:c.score,portrait:'♟'};});
  BASE_CARDS.splice(0,BASE_CARDS.length,...originalCards);
 }
 const CARD_MAP=Object.fromEntries(BASE_CARDS.map(c=>[c.id,c]));
@@ -512,7 +521,7 @@ function drawShop(){
    $('shop-sell').dataset.resaleStatus='unknown-source';
  }
  if(c){
-   $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+(c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 기록 시세':'웹 추정가격');
+   $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+(c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 기록 시세':c.priceEvidence==='ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED'?'2003.01.05 시세·명칭 추정('+c.historicalPriceLabel+')':'웹 추정가격');
    $('shop-buy').disabled=profile.owned.includes(c.id)||profile.gp<c.price;
    $('shop-buy').textContent=profile.owned.includes(c.id)?'보유중':(profile.gp<c.price?'GP 부족':'구입하기');
    const sell=$('shop-sell'),canSell=shopCanSell(c);
@@ -2170,7 +2179,7 @@ function init(){installBoardControls();installNativeDiceMenu();
  if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);
  if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);
  modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까? ('+
-   (c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 역사적 시세 기록':'원작 가격 미확인 · 임시 웹 가격')+')',[
+   (c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 역사적 시세 기록':c.priceEvidence==='ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED'?'2003.01.05 시세·명칭 매칭 추정':'원작 가격 미확인 · 임시 웹 가격')+')',[
   {label:'구매',primary:true,run:()=>{
    // Revalidate at confirmation too: a pending modal is not an ownership
    // or GP lock, and stale duplicate intent must not overdraw the balance.

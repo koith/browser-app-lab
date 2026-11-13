@@ -15,6 +15,12 @@ assert.equal(snapshot.historicalExeRetailTableExtracted,false);
 assert.equal(Object.keys(snapshot.prices).length,97);
 const matched=chessmen.filter(c=>Object.hasOwn(snapshot.prices,c.name));
 assert.equal(chessmen.length,98);assert.equal(matched.length,84);
+const aliases=snapshot.orthographicAliases;
+assert.equal(Object.keys(aliases).length,11);
+const aliased=chessmen.filter(c=>aliases[c.id]?.chrName===c.name&&Object.hasOwn(snapshot.prices,aliases[c.id].archiveName));
+assert.equal(aliased.length,11);
+const unmatched=chessmen.filter(c=>!Object.hasOwn(snapshot.prices,c.name)&&!aliases[c.id]);
+assert.deepEqual(unmatched.map(c=>c.name).sort(),['루크','프라이오스_슈퍼슬라임_','해골병사'].sort());
 assert.equal(snapshot.prices['마르자나'],5100);
 assert.equal(snapshot.prices['살라딘'],37000);
 assert.equal(snapshot.prices['흑태자'],115000);
@@ -44,7 +50,15 @@ assert.equal(snapshot.serializedCardResaleAppliesToNormalBoughtCards,false);
      assert.equal(Number(row.priceText.replaceAll(',','')),snapshot.prices[row.name],
       'real shop must use historical 2003 price for '+row.name);
      assert.ok(row.title.includes('2003.01.05 기록 시세'));
-    }else assert.ok(row.title.includes('웹 추정가격'),'unknown historic price must stay labeled');
+    }else{
+     const src=chessmen.find(c=>'c_'+c.id===row.card);
+     const a=src&&aliases[src.id];
+     if(a){
+      assert.equal(Number(row.priceText.replaceAll(',','')),snapshot.prices[a.archiveName]);
+      assert.ok(row.title.includes('명칭 추정('+a.archiveName+')'),
+       'archived spelling alias is never marked verified: '+row.name);
+     }else assert.ok(row.title.includes('웹 추정가격'),'unknown historic price must stay labeled');
+    }
    }
    const next=page.locator('#shop-next');
    if(await next.isDisabled())break;
@@ -56,7 +70,7 @@ assert.equal(snapshot.serializedCardResaleAppliesToNormalBoughtCards,false);
   assert.deepEqual(errors,[]);
   await page.screenshot({path:'leaf-r20-historic-market-shop.png'});
   console.log('R20_REAL_2003_MAGIC_CARDEN_97_PRICES_PASS',JSON.stringify({
-   archivalEntries:Object.keys(snapshot.prices).length,matchedByExactName:matched.length,
+   archivalEntries:Object.keys(snapshot.prices).length,matchedByExactName:matched.length,inferredAliases:aliased.length,unmatched:unmatched.map(c=>c.name),
    renderedItems:observed.length,source:snapshot.source,
    historicSerialRedemptionResale:'1000GP/serial-only',generalResale:'WEB-INFERRED'}));
  }finally{await browser.close()}
