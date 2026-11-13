@@ -7,6 +7,7 @@ coverage of posts deleted between source polling passes.
 """
 from __future__ import annotations
 
+import base64
 import hashlib
 import html
 import json
@@ -15,7 +16,7 @@ import re
 import time
 from datetime import datetime, timezone
 from html.parser import HTMLParser
-from urllib.parse import quote, urlencode, urlsplit
+from urllib.parse import quote, urlencode, urlsplit, parse_qs
 from urllib.request import Request, urlopen, build_opener, HTTPRedirectHandler
 
 from demand_archive import CloudArchive, MIMES, canonical_json, post_key, public_url, sha256
@@ -95,8 +96,76 @@ def normalized(platform, original_id, url, text, published, media_urls=(), profi
             "media_expected": len(list(dict.fromkeys(media_urls)))}
 
 
+
+# Read only authored public video blobs from verified AT Protocol PDS hosts.
+# GitHub/Render contains no generic URL fetching path for arbitrary PDS URLs.
+TRUSTED_PDS_HOSTS={"bsky.social"}
+MAX_PUBLIC_VIDEO_PDS_LOOKUPS_PER_TERM=1
+
+
+def blob_sha256_from_cid(cid):
+    """AT Protocol CIDv1/raw/sha2-256 digest, not an HLS playlist digest."""
+    if not isinstance(cid,str) or not re.fullmatch(r"b[a-z2-7]{50,120}",cid):
+        return None
+    try:
+        body=cid[1:].upper()
+        raw=base64.b32decode(body+"="*((-len(body))%8),casefold=False)
+    except (ValueError,base64.binascii.Error):
+        return None
+    if len(raw)!=36 or raw[:4]!=b"\\x01\\x55\\x12\\x20":
+        return None
+    return raw[4:]
+
+
+def trusted_pds_blob_link(did,cid,reference):
+    """Resolve author DID to its official public PDS, with hard host allowlist.
+
+    Only the same CID in the original video blob record, AppView CID and
+    signed playlist path is eligible. Custom PDS endpoints and redirects
+    are deliberately unsupported rather than allowing SSRF.
+    """
+    if (os.getenv("DEMAND_BSKY_PDS_BLOB_ORIGINALS")!="1"
+            or not isinstance(did,str)
+            or not re.fullmatch(r"did:plc:[a-z2-7]{20,50}",did)
+            or cid!=reference or blob_sha256_from_cid(cid) is None):
+        return None
+    url="https://plc.directory/"+quote(did,safe=":")
+    try:
+        req=Request(url,headers={"Accept":"application/json",
+                     "User-Agent":"INTERSECTION-PublicResearch/1.0"})
+        with MEDIA_OPENER.open(req,timeout=4) as response:
+            raw=response.read(65537)
+        if len(raw)>65536:
+            return None
+        doc=json.loads(raw)
+        if type(doc) is not dict or doc.get("id")!=did:
+            return None
+        endpoints=[service.get("serviceEndpoint")
+                   for service in doc.get("service",[])
+                   if type(service) is dict
+                   and service.get("type")=="AtprotoPersonalDataServer"]
+        for endpoint in endpoints:
+            if not isinstance(endpoint,str):
+                continue
+            p=urlsplit(endpoint)
+            host=(p.hostname or "").lower()
+            if (p.scheme!="https" or p.port is not None or p.username
+                    or p.password or p.query or p.fragment
+                    or p.path not in ("","/")
+                    or not (host in TRUSTED_PDS_HOSTS
+                            or host.endswith(".bsky.network"))):
+                continue
+            return ("https://"+host+"/xrpc/com.atproto.sync.getBlob?"+
+                    urlencode({"did":did,"cid":cid}))
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,
+            json.JSONDecodeError):
+        pass
+    return None
+
+
 def bluesky(term, start, end):
     body = bluesky_public_search(term, start, end)
+    pds_lookup_count=0
     for item in body.get("posts", [])[:100]:
         try:
             rec = item.get("record") or {}
@@ -155,7 +224,20 @@ def bluesky(term, start, end):
                         playlist=("https://video.bsky.app/watch/"+
                                   match.group(1)+"/"+cid+"/playlist.m3u8")
                 if playlist:
-                    images.append(playlist)
+                    original=None
+                    record_embed=rec.get("embed") or {}
+                    source_blob=((record_embed.get("video") or {}).get("ref") or {}
+                                 if type(record_embed) is dict else {})
+                    reference=source_blob.get("$link") if type(source_blob) is dict else ""
+                    if pds_lookup_count<MAX_PUBLIC_VIDEO_PDS_LOOKUPS_PER_TERM:
+                        pds_lookup_count+=1
+                        original=trusted_pds_blob_link(
+                            match.group(1),parts[3] if len(parts)==5 else "",
+                            reference)
+                    # Original PDS blob is byte-verified via its CID. If the
+                    # author PDS cannot be trusted/reached, retain the HLS
+                    # evidence URL as INCOMPLETE, never as an MP4 original.
+                    images.append(original or playlist)
                 else:
                     # There is no trustworthy attachment link to preserve.
                     # Do not declare this public video fully backed up.
@@ -306,8 +388,20 @@ MEDIA_OPENER = build_opener(NoRedirect())
 def media_allowed(url):
     if not public_url(url):
         return False
-    host = (urlsplit(url).hostname or "").lower()
-    return host in ALLOWED_MEDIA
+    parsed=urlsplit(url)
+    host=(parsed.hostname or "").lower()
+    if host in ALLOWED_MEDIA:
+        return True
+    if (host in TRUSTED_PDS_HOSTS or host.endswith(".bsky.network")):
+        if parsed.path!="/xrpc/com.atproto.sync.getBlob":
+            return False
+        params=parse_qs(parsed.query,keep_blank_values=True)
+        return (set(params)=={"did","cid"} and
+                len(params["did"])==len(params["cid"])==1 and
+                re.fullmatch(r"did:plc:[a-z2-7]{20,50}",
+                             params["did"][0]) is not None and
+                blob_sha256_from_cid(params["cid"][0]) is not None)
+    return False
 
 
 def download_media(url):
@@ -329,6 +423,18 @@ def download_media(url):
                 return None
             data = response.read(limit + 1)
             if not 0 < len(data) <= limit:
+                return None
+        # The PDS returns the ORIGINAL public blob, not transcoded HLS.
+        # A spoofed body, stale PDS, cross-account redirect, or wrong CID
+        # cannot be accepted as an authored video attachment.
+        parsed=urlsplit(url)
+        if (parsed.hostname in TRUSTED_PDS_HOSTS
+                or (parsed.hostname or "").endswith(".bsky.network")):
+            query=parse_qs(parsed.query)
+            cid=query.get("cid",[""])[0]
+            expected=blob_sha256_from_cid(cid)
+            if (mime!="video/mp4" or expected is None or
+                    hashlib.sha256(data).digest()!=expected):
                 return None
         return mime, data
     except Exception:
