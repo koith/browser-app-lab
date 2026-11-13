@@ -242,8 +242,8 @@ def create_snapshot(path,run_id):
     return {"file":name,"sha256":digest,"at":int(time.time())}
 
 
-def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=12,
-                       max_seconds=145):
+def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=64,
+                       max_seconds=430):
     """Read a bounded page of immutable SHA-verifiable journal originals.
 
     Older monolithic load_catalog() repeatedly exceeded 90 and even 180
@@ -338,13 +338,14 @@ def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=12,
         active.runner=previous
 
 
-def catalog_sync_bounded(db_path, folder, *, timeout_seconds=180, worker=None):
+def catalog_sync_bounded(db_path, folder, *, timeout_seconds=450, worker=None):
     """Avoid a stuck remote catalog preventing all other account checkpoints.
 
     The worker is in its own process group so a timeout also stops its rclone
-    descendants. The prior 90-second cutoff repeatedly truncated healthy
-    150-second single-read TeraBox operations (see #43347936710).
-    Use a finite 180-second per-sync budget within the 780-second job limit.
+    descendants. The old full-catalog reads repeatedly timed out at 90 and 180 seconds.
+    The current page cursor remains bounded but can safely consume a larger
+    430-second read budget, with a 450-second isolated process cap within
+    the 780-second job hard limit. A failed page never deletes old entries.
     On any failure, never report a verified catalog sync. The parent may
     still SHA-verify an immutable PARTIAL checkpoint later.
     """
@@ -387,12 +388,12 @@ def catalog_sync_bounded(db_path, folder, *, timeout_seconds=180, worker=None):
         pending=info.get("pending")
         verified=info.get("verified")
         if (type(pending) is not int or not 0<=pending<=150000
-                or type(verified) is not int or not 0<=verified<=24):
+                or type(verified) is not int or not 0<=verified<=64):
             return "deferred_invalid_receipt"
         # Partial journal progress is durable and real, but full remote
         # journal/catalog/media parity has not been SHA checked here.
         accepted=info.get("accepted")
-        if type(accepted) is not int or not 0<=accepted<=24:
+        if type(accepted) is not int or not 0<=accepted<=64:
             return "deferred_invalid_receipt"
         # Integer counts only, no private source ID or post content.
         # Distinguish a 0-progress remote attempt from real SHA-confirmed

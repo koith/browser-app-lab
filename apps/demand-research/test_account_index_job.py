@@ -152,7 +152,9 @@ def test_account_index_stage_audit_redacts_exception_and_refuses_unknown_stage(c
 def test_catalog_reader_timeout_preserves_checkpoint_budget(tmp_path):
     # The real private backend may require up to 150s for a single SHA-read.
     # Retain an explicit finite worker cap beneath the parent 780s budget.
-    assert job.catalog_sync_bounded.__kwdefaults__["timeout_seconds"] == 180
+    assert job.catalog_sync_bounded.__kwdefaults__["timeout_seconds"] == 450
+    assert job.catalog_sync_child.__kwdefaults__["max_items"] == 64
+    assert job.catalog_sync_child.__kwdefaults__["max_seconds"] == 430
     import sys
     import time
     start=time.monotonic()
@@ -286,3 +288,25 @@ def test_incremental_receipt_cannot_pass_full_catalog_verified_gate(tmp_path):
         worker=[sys.executable,"-c",script,str(marker)])
     assert verdict=="deferred_journal_pending_8_sha_2_imported_2"
     assert not verdict.startswith("verified_")
+
+
+def test_scaled_sha_journal_page_can_complete_32_verified_posts_in_one_checkpoint(
+        tmp_path,monkeypatch):
+    """New bounded page cap must exceed old 12-entry ceiling."""
+    from test_demand_archive import FakeCloud,post as source
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","synthetic-private-test")
+    cloud=FakeCloud()
+    template=source()
+    for i in range(32):
+        item={**template,"id":format(i+1,"040x"),
+              "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/qa"+str(i)}
+        cloud.save_post(item)
+    db=tmp_path/"accounts.sqlite3"
+    result=tmp_path/"catalog-sync-result.json"
+    job.catalog_sync_child(db,result,cloud=cloud,max_items=64,max_seconds=120)
+    receipt=json.loads(result.read_text())
+    assert receipt["mode"]=="journal_incremental"
+    assert receipt["verified"]==32
+    assert receipt["pending"]==0
+    assert account_index.status(str(db))["source_rows"]==32
+    assert account_index.status(str(db))["last_catalog_sync"]==0

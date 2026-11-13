@@ -200,8 +200,8 @@ def ingest_verified_marker_page(db_path, posts, verified_ids, all_ids, cursor):
     transaction as the imported rows.
     """
     pattern=re.compile(r"[a-f0-9]{40}\Z")
-    if (not isinstance(posts,list) or len(posts)>24 or
-            not isinstance(verified_ids,list) or len(verified_ids)>24 or
+    if (not isinstance(posts,list) or len(posts)>64 or
+            not isinstance(verified_ids,list) or len(verified_ids)>64 or
             not isinstance(all_ids,list) or len(all_ids)>150000 or
             len(set(all_ids))!=len(all_ids) or
             any(not isinstance(pid,str) or not pattern.fullmatch(pid)
