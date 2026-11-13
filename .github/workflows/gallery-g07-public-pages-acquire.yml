@@ -9,7 +9,8 @@ permissions:
   contents: write
 concurrency:
   group: g07-one-free-public-publisher-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-  cancel-in-progress: false
+  # Latest PR source replaces obsolete collector attempts; keep main safe.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   collect-actual-saved-photos:
     # Only this repository's owned PR is permitted to publish committed bytes.
@@ -27,17 +28,30 @@ jobs:
         run: |
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/publish_new_public_photos_to_pages.py
           (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
-      - name: Scan actual Mimmi registered work pages without authentication
+      - name: Scan first seven registered Mimmi public works
         run: |
           python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
             --owner apps/mimmi-gallery/owner-index.json --out "$RUNNER_TEMP/g07-mimmi" \
-            --max-new 18 --max-pages 4 --render-budget 0 \
+            --max-new 32 --max-pages 4 --render-budget 0 \
+            --album-id djawa-my-summer-vacation-vol-5 \
             --album-id v2ph-actor-z7exoo5z \
             --album-id v2ph-actor-z76xe74a \
             --album-id v2ph-actor-a8n8n85a \
             --album-id v2ph-actor-an65656a \
-            --album-id djawa-your-panties \
-            --album-id djawa-my-summer-vacation-vol-5
+            --album-id v2ph-actor-z6exx6ma \
+            --album-id v2ph-actor-z4ox65ea
+      - name: Scan remaining seven registered Mimmi public works
+        run: |
+          python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
+            --owner apps/mimmi-gallery/owner-index.json --out "$RUNNER_TEMP/g07-mimmi-part2" \
+            --max-new 32 --max-pages 4 --render-budget 0 \
+            --album-id v2ph-sukajan-gal \
+            --album-id v2ph-actor-z63984ma \
+            --album-id v2ph-actor-a54e445z \
+            --album-id v2ph-actor-zo5n754z \
+            --album-id v2ph-actor-amn8o34z \
+            --album-id djawa-mademoiselle-mimmi \
+            --album-id djawa-your-panties
       - name: Scan actual Yui registered work pages without authentication
         run: |
           python apps/gallery-archive/direct_photo_pipeline.py --model yui \
@@ -51,7 +65,8 @@ jobs:
             --album-id public-yui-sns
       - name: Independently verify and preserve new real static Pages photo bytes
         run: |
-          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model mimmi --stage "$RUNNER_TEMP/g07-mimmi" --limit 18 --budget 14000000
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model mimmi --stage "$RUNNER_TEMP/g07-mimmi" --limit 64 --budget 30000000
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model mimmi --stage "$RUNNER_TEMP/g07-mimmi-part2" --limit 64 --budget 30000000
           python apps/gallery-archive/publish_new_public_photos_to_pages.py --model yui --stage "$RUNNER_TEMP/g07-yui" --limit 18 --budget 14000000
           node apps/gallery-archive/test_saved_photo_union.cjs
           node apps/gallery-archive/test_curated_cover_manifest.cjs
@@ -79,6 +94,8 @@ jobs:
           path: |
             ${{ runner.temp }}/g07-mimmi/metadata/collection-audit.json
             ${{ runner.temp }}/g07-mimmi/metadata/pages-publication.json
+            ${{ runner.temp }}/g07-mimmi-part2/metadata/collection-audit.json
+            ${{ runner.temp }}/g07-mimmi-part2/metadata/pages-publication.json
             ${{ runner.temp }}/g07-yui/metadata/collection-audit.json
             ${{ runner.temp }}/g07-yui/metadata/pages-publication.json
           retention-days: 7
