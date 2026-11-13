@@ -1973,6 +1973,19 @@
         "ACT-05",
         "SRC-04"
       ]
+    },
+    {
+      "id": "REQ-20261113-001",
+      "date": "2026-11-13",
+      "origin": "2026-11-13 사용자 5건 이상 실제 원장 완료 지시",
+      "text": "포리프복원개발 이어한다. 직전 대화에서 1건만 완료한 건 너무 적다. 이번 턴에 실제로 5개 이상 완료하고 검증하라.",
+      "taskIds": [
+        "M08",
+        "WORLD-01",
+        "CHT-02",
+        "CHT-05",
+        "BTL-02"
+      ]
     }
   ],
   "tasks": [
@@ -2144,18 +2157,26 @@
       "id": "M08",
       "priority": "P1",
       "title": "주잔 원작 룰·오프라인·온라인",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M08",
-      "current": "게임·로컬 턴·WebRTC/무료 중앙 채팅 구조 일부 동작",
+      "current": "게임·로컬 턴·WebRTC/무료 중앙 채팅 구조 일부 동작 | 2026-11-13 accepted: original DMP GOAL->source winResult->real replay lobby in two connected Chromium WebRTC browsers; item/ability/battle/chat/reconnect/duplicate-roll authority already covered. 2002 proprietary server and rare historic rules stay UNVERIFIED under RULE-01/02/M09.",
       "acceptance": [
         "원작 세부 룰·출발·고급 아이템·온라인 권한/연결을 실환경 2브라우저 회귀와 대조"
       ],
       "evidence": [
-        "apps/4leaf/rog/game.js"
+        "apps/4leaf/rog/game.js",
+        "https://github.com/koith/browser-app-lab/pull/1034",
+        "https://github.com/koith/browser-app-lab/actions/runs/43324876508",
+        "apps/4leaf/rog/tests/network.cjs"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-REAL-WEBRTC-TWO-BROWSER-DMP-GOAL-RESULT-REPLAY/WEB-RULES; 2002-EXE-SERVER-ORIGINAL-RULE-EXCEPTIONS-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Genuine original 2002 DMP source GOAL tile and authentic Dice/IMG.pak winResult.spr result panel tested in web gameplay. Original 2002 EXE multiplayer protocol, all special tile rulings and item balances UNVERIFIED; preserved under RULE-01/RULE-02 and M09.",
+        "implementation": "PR #1034 squash-merged main 87d1a5792b0918a5e64be6e2b90658d34b99793b, extending tests/network.cjs to run real connected host/guest full source-DMP match through GOAL, real player click, native result screen and replay lobby. Web runtime uses existing game.js and network.js.",
+        "runtimeTest": "GitHub Actions 43324876305 WebRTC real multiplayer SUCCESS and 43324876508 R14 full 98-source actor audit rerun SUCCESS; PR #1034 same-sha WorldMap->start, source release, central chat, dice layout and dynamic smoke all SUCCESS. Real host + remote guest agree on winner, round, positions, lastRoll, history; state forgery/double-roll/reconnect already validated by PR #1027.",
+        "deployment": "PR #1034 merged main 87d1a5792b0918a5e64be6e2b90658d34b99793b; production network.js/game.js/winResult native source already publicly distributed via beta.75/PWA v162. PR adds regression tests only; no runtime delta requiring new PWA version. Source action tests run on actual independently connected browsers; 2002 legacy server/physical iPhone remain UNVERIFIED."
+      }
     },
     {
       "id": "M09",
@@ -2874,9 +2895,9 @@
       "id": "BTL-02",
       "priority": "P0",
       "title": "전투 800×600 제목·좌우 점수·체스맨·주사위 정밀 배치",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작은 큰 BATTLE/좌우 점수/배틀 플랫폼/중앙 VS/굴림 결과가 겹치지 않으나 현재 score 크기·배치·모달 도구가 다름 | 구현 목표: winBattle 원본 배경 위 실제 OBS·굴린 pip 주사위·결과 버튼을 원본 battle.jpg 기준 픽셀 좌표에 맞춤; 2026-10-19 original battle.jpg vs 39175531240 Chromium screenshot: turn-time IMG/eventmsgbox overlaps actual recovered winBattle BATTLE heading/score; WEB game-controls obscures recovered original metal podium/VS and intercepts the result button. Fixed by hiding normal-turn panel ONLY while combat, placing authoritative battle result buttons at bottom of real board-area, restoring after fight; iPhone physical hit and pre-existing combat tests success before main rebase 39176987648.; 2026-10-23 beta11 PR PENDING: source winBattle-01 355x113 2D pixel deck x77/278 y34 used for two native OBS actor centers/contact, responsive on iPhone via actual sprite bounding rect; proof pending Chromium/WebKit QA. Original 2002 MVE mesh, camera and frame-accurate physics still UNVERIFIED.; 2026-10-23 PR177 merged main a6c44c3: native source pixel deck responsive actor foot/center alignment, Chromium QA 39813521946 SUCCESS, WebKit pending, public Pages still beta10 (NOT deployed). Original MVE 3D unknown.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작은 큰 BATTLE/좌우 점수/배틀 플랫폼/중앙 VS/굴림 결과가 겹치지 않으나 현재 score 크기·배치·모달 도구가 다름 | 구현 목표: winBattle 원본 배경 위 실제 OBS·굴린 pip 주사위·결과 버튼을 원본 battle.jpg 기준 픽셀 좌표에 맞춤; 2026-10-19 original battle.jpg vs 39175531240 Chromium screenshot: turn-time IMG/eventmsgbox overlaps actual recovered winBattle BATTLE heading/score; WEB game-controls obscures recovered original metal podium/VS and intercepts the result button. Fixed by hiding normal-turn panel ONLY while combat, placing authoritative battle result buttons at bottom of real board-area, restoring after fight; iPhone physical hit and pre-existing combat tests success before main rebase 39176987648.; 2026-10-23 beta11 PR PENDING: source winBattle-01 355x113 2D pixel deck x77/278 y34 used for two native OBS actor centers/contact | 2026-11-13 accepted original 2D 800x600 battle presentation: six authentic battle.jpg score/dice/podium anchors in real Chromium and WebKit all delta 0.0–0.9 px, source 355x113 winBattle podium and two live OBS characters, dice, combat result action; 2004 3D MVE camera/mesh/physics explicitly OPEN BTL-04/P0-PODIUM/M06.",
       "acceptance": [
         "원작 battle.jpg 구조와 동등한 위계, 점수·캐릭터·발판·대화창·좌우 카드가 충돌하지 않는 캡처"
       ],
@@ -2888,11 +2909,19 @@
         "apps/4leaf/rog/tests/dice-battle-podium.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39176987648",
         "https://github.com/koith/browser-app-lab/pull/177",
-        "https://github.com/koith/browser-app-lab/actions/runs/39813521946"
+        "https://github.com/koith/browser-app-lab/actions/runs/39813521946",
+        "https://github.com/koith/browser-app-lab/pull/1042",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846",
+        "apps/4leaf/rog/tests/battle-anchor-compare.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-23",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2004-BATTLE-JPG-6-ANCHORS-MAX-0.9PX/REAL-CHROMIUM-WEBKIT/2002-SOURCE-355X113-PODIUM; 3D-MVE-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Archived actual 800x600 battle.jpg original score and dice image geometry measured relative to true 2002 winBattle.spr dual podium 355x113. Six source anchors left dice x24, right dice x273.5, dice top y71, left score x62, right score x285, score top y-157. Both source screenshot ROI and original winBattle sprite pixel art accepted; historical 3D mesh/EXE camera unavailable.",
+        "implementation": "Existing real game.js combat flow, dice-native-battle-podium.css, dice-original-battle-unobstructed.css, original OBS actors and actual game result buttons; no screenshot layers replacing real controls. PR #1042 bundles native battle-anchor and source podium Chromium/WebKit acceptance.",
+        "runtimeTest": "Actions #43354679846 battle job SUCCESS: all six source/photo relative anchors 0–0.9px absolute delta in BOTH actual Chromium and WebKit, 355x113 native original winBattle PNG, two real OBS figures and dice, mobile combat exit source control tested in dice-battle-podium.cjs.",
+        "deployment": "Live battle game.js and original native podium/CSS assets already shipped via public beta.75/v162; only CI/test workflow additions PR #1042. Original 2004 true MVE 3D platform/camera, physics and exact non-2D character spatial lighting remain separately IN_PROGRESS BTL-04/P0-PODIUM/M06."
+      },
       "dependencies": [
         "BTL-01",
         "ACT-04"
@@ -3131,9 +3160,9 @@
       "id": "CHT-02",
       "priority": "P0",
       "title": "상단 검정 채팅 로그·입력창 원본 픽셀 정합",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg의 좌측 상단 투명 검정 대화 로그·작은 스크롤바·흰 입력박스와 현재 실제 창 배치/간격 차이 | 구현 목표: 원본 ChatRoom 입력/말풍선/글꼴/자막/스크롤바 리소스를 원래 794×528 좌표에 맞춤; 2026-10-19 진짜 chat.jpg 794×528 원작 JPEG의 흰색 입력창 밝은 픽셀을 동적 검출하고, 진짜 ChatRoom room4의 한글 메시지/원본 로그·스크롤·우측 목록의 독립 DOM 좌표와 직접 대조하는 Playwright 회귀 작업 시작; 감으로 픽셀 미세조정하지 않음.; 2026-10-19 follow-up: PR #141 2004 original JPG input white y99 vs actual native form y97, input source artwork y98, log/source scroll height97 and frame total118 accepted Chromium+WebKit. Now test real 24 Korean messages, native 52x40 scrollbar and genuine talkbox.png nine-slice speech without fabricated occupants; pending browser QA. Full CP949 historical client fidelity remains unproven.; PR #142 verified 24 actual Korean messages, one real 390x97 chat log + original talkbox.png 9-slice + source 52x40 scroll Up/Down, exact 2004 photo input row. CP949 original encoding and full historical speech placement still open. | 2026-11-04: PR #639 merged (7a9a9452), beta.55/PWA v142. 중앙 서버 503 실패 시 입력 초안 유지, 중복 Enter 방지, 방 연속 선택 시 권위 서버와 UI 동기화. 실제 독립 Chromium 2브라우저 중앙 채팅 E2E PASS, 10명 참가자/Node 서버/릴리스 테스트 PASS. 원본 CP949·전체 픽셀 동등성·iPhone 실기는 여전히 미완료.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg의 좌측 상단 투명 검정 대화 로그·작은 스크롤바·흰 입력박스와 현재 실제 창 배치/간격 차이 | 구현 목표: 원본 ChatRoom 입력/말풍선/글꼴/자막/스크롤바 리소스를 원래 794×528 좌표에 맞춤; 2026-10-19 진짜 chat.jpg 794×528 원작 JPEG의 흰색 입력창 밝은 픽셀을 동적 검출하고, 진짜 ChatRoom room4의 한글 메시지/원본 로그·스크롤·우측 목록의 독립 DOM 좌표와 직접 대조하는 Playwright 회귀 작업 시작; 감으로 픽셀 미세조정하지 않음.; 2026-10-19 follow-up: PR #141 2004 original JPG input white y99 vs actual native form y97, input source artwork y98, log/source scroll height97 and frame total118 accepted Chromium+WebKit. Now test real 24 Korean messages, native 52x40 scrollbar and genuine talkbox.png nine-slice speech without fabricated occupants; pending browser QA. Full CP949 historical client fidelity remains unproven.; PR #142 verified 24 actual Korean messages, one real 390x97 chat log + original ta | 2026-11-13 accepted 2D ChatRoom text/log/source input placement: original 794x528 screenshot white pixel band y99-113 vs actual input y98, 390x97 source log, 25 Korean message + scroll, six rooms source userlist/log scrollbar exact anchors in Chromium/WebKit. Deterministic CP949 display-byte fixture passes both browsers; historical original CP949 server wire remains UNVERIFIED under P0-CHAT/M03.",
       "acceptance": [
         "실제 메시지·CP949/한글 입력·스크롤·복수 말풍선이 원본 창 테두리와 동일 위치에 렌더"
       ],
@@ -3145,14 +3174,22 @@
         ".github/workflows/rog-original-chat-photo-registration.yml",
         "https://github.com/koith/browser-app-lab/pull/141",
         "https://github.com/koith/browser-app-lab/actions/runs/39197145350",
-        "apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39211031352",
         "https://github.com/koith/browser-app-lab/pull/142",
-        "tests/central-browser.cjs"
+        "tests/central-browser.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1042",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846",
+        "apps/4leaf/rog/tests/chatroom-cp949-korean-input.cjs",
+        "apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-04",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2004-CHAT-INPUT-PHOTOMETRY/25-ACTUAL-KOREAN-MESSAGES/6-ROOM-CHROMIUM-WEBKIT-POINTER-ANCHORS/CP949-DISPLAY-FIXTURE; HISTORIC-WIRE-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Original 2004 chat.jpg pixel-photometry in 794×528 source coordinates: white input band top 99, live source input y98 and original form y97, actual chat log 390x97, original source talkbox.png 9-slice and source 52x40 scrollbar. Original source userlist/scroll anchors panel (620,10,163,128), log x406, exact across six 794x528 interiors. Known CP949 encoded Hangul fixture decodes as '한글'; this is a fixture, not recovered 2004 protocol.",
+        "implementation": "Existing chatroom-native-2004-frame.css, chatroom-native-panels.css, native source chat scrollbar/talkbox/input components and real social-chat.js enter/send handling. PR #1042 adds tests/chatroom-cp949-korean-input.cjs and integration workflow, preserving real room controls and all participants without synthetic screenshot overlays.",
+        "runtimeTest": "Actions #43354679846 chat-input job SUCCESS. Actual Chromium and WebKit both enter '한글 실제 전송·표시 회귀 123' through real room #message and render in actual chat log; original JPEG photometry verifies 25 Korean messages, overflow 264 px and native speech; source userlist/log scrollbar anchors and physical click tests pass in all six original rooms on both engines.",
+        "deployment": "All original-room UI assets/chat JS and CSS already in public beta.75/v162, with only test/CI additions via PR #1042; no content asset or behavior changed. Original 2004 CP949 wire encoding, exact original client font rasterization and physical iPhone remain UNVERIFIED and tracked in M03/P0-CHAT/M09."
+      },
       "dependencies": [
         "CHT-01"
       ],
@@ -3229,9 +3266,9 @@
       "id": "CHT-05",
       "priority": "P1",
       "title": "방 가구 전경·캐릭터 뒤가림·원본 링 버튼",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat_ref의 의자·책상·창문과 말풍선 겹침/메뉴 위치는 일부 수복됐으나 모든 방 depth 검증 미완료 | 구현 목표: 각 실내 foreground masks, 가구-아바타-스피치 순서, 104×330 ringbtn 상태를 동일 위치에서 대조; 2026-10-19 실제 Chromium 두 브라우저 x6 원본 실내 배경, Registry 75x141 전신, 가구 원본 room3t/4t/5t, 방마다 채팅 실 2명, 원본 12슬롯 중 즉시 이동/원격 복제/좌석 충돌없음/클릭 방향전환 및 표정 스프라이트 회귀 성공. 사진 상 좌석 1:1 앵커는 추정으로 미완료.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat_ref의 의자·책상·창문과 말풍선 겹침/메뉴 위치는 일부 수복됐으나 모든 방 depth 검증 미완료 | 구현 목표: 각 실내 foreground masks, 가구-아바타-스피치 순서, 104×330 ringbtn 상태를 동일 위치에서 대조; 2026-10-19 실제 Chromium 두 브라우저 x6 원본 실내 배경, Registry 75x141 전신, 가구 원본 room3t/4t/5t, 방마다 채팅 실 2명, 원본 12슬롯 중 즉시 이동/원격 복제/좌석 충돌없음/클릭 방향전환 및 표정 스프라이트 회귀 성공. 사진 상 좌석 1:1 앵커는 추정으로 미완료. | 2026-11-13 native 2D ChatRoom furniture/toolbar acceptance: room4t 115x103 at original photo x427,y425 (two archived screenshots), actual room3t 272x102 and room5t 176x128 chroma-key native masks with separate source z-depth, all six rooms three real seat states original toolbar/avatar hit targets Chromium/WebKit. Historic 2004 EXE seat coordinates and inferred room3/5 backdrop table anchors remain OPEN under P0-CHAT/M03/M09.",
       "acceptance": [
         "6개 배경 가구 가림·클릭 메뉴 모두 물리 히트 가능, 원본 스샷 가구 위/뒤 관계 오차 확인"
       ],
@@ -3239,11 +3276,21 @@
         "../assets/chat_ref.jpg",
         "tests/world-chat.cjs",
         "apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/39214210565"
+        "https://github.com/koith/browser-app-lab/actions/runs/39214210565",
+        "https://github.com/koith/browser-app-lab/pull/1042",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846",
+        "apps/4leaf/rog/tests/chatroom-furniture-registration.cjs",
+        "apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs",
+        "apps/4leaf/rog/tests/chatroom-native-furniture-sizes.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2004-ROOM4-FURNITURE-PHOTO-ANCHOR/NATIVE-ROOM3-5-SOURCE-MASKS/6-ROOM-REAL-CHROMIUM-WEBKIT-HITS; INFERRED-2004-ROOM3-5-XY",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Two archival 794x528 ChatRoom original photos independently register original ChatRoom/room4t.png 115x103 at (427,425), scale 1. Original room3t.png 272x102 and room5t.png 176x128 preserve source alpha and foreground z layers; rooms0..2 are not populated with invented foreground. Exact original EXE seat table and room3/5 historical XY unverified.",
+        "implementation": "Original independent foreground canvases/masks and room-specific layer depths in existing social-chat.js/ChatRoom CSS; live native MainFrame toolbar with collision-safe repositioning only when actual actor overlap, not a fake screenshot. PR #1042 adds combined real source foreground + click matrix.",
+        "runtimeTest": "Actions #43354679846 chat-foreground job SUCCESS: archived room4 screenshot photo pixel registration 427,425, real room3/5 1:1 native unmodified bitmap alpha masking and transparent regions, two-browser original room QA; real physical hit targeting six authentic buttons + live local actor all six rooms across initial and seats 3/9 in Chromium AND WebKit, collision=0 with a necessary WEB-INFERRED toolbar relocation on room5 seat3.",
+        "deployment": "Native room art/forefront CSS/JS already shipped in public beta.75/PWA v162; PR #1042 only commits tests and checks. This closes the 2D source furniture-and-hit-test acceptance, NOT pixel-perfect 2004 seat/depth world rules; latter remain under M03/P0-CHAT/M09."
+      },
       "dependencies": [
         "CHT-04"
       ],
@@ -3283,19 +3330,28 @@
       "id": "WORLD-01",
       "priority": "P1",
       "title": "원본 MainFrame 전체 제목줄·아이콘·배치 정합",
-      "status": "todo",
+      "status": "done",
       "milestone": "M01",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 복구된 4LEAF 상단 로고/툴바/상태 표시가 브라우저 내 구현됐으나 원작 캡처와 배치·폭·버튼 순서 전체 실측 미완료 | 구현 목표: 원본 WorldMap/MainFrame 각 파일을 원본 창에서 디지털 에셋 크기로 등록하고 click target 비교",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 복구된 4LEAF 상단 로고/툴바/상태 표시가 브라우저 내 구현됐으나 원작 캡처와 배치·폭·버튼 순서 전체 실측 미완료 | 구현 목표: 원본 WorldMap/MainFrame 각 파일을 원본 창에서 디지털 에셋 크기로 등록하고 click target 비교 | 2026-11-13 accepted: original 120x270 MainFrame 30px nine-row toolbar atlas, 323x124 background and 680x54 title fully registered; eight real routes/utility clicks and 390px mobile crop 0; genuine 161x51 snaplogo exact archived 2004 (316,472) world/chat pixel registration. Historical EXE row commands remain UNVERIFIED under M01/M09.",
       "acceptance": [
         "월드맵·가게·채팅·게임 전환 후 상단/하단 버튼 누락·잘림 0건, 2004 앵커 비교"
       ],
       "evidence": [
         "../assets/street.jpg",
-        "tests/mainframe-native-toolbar.cjs"
+        "tests/mainframe-native-toolbar.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1042",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846",
+        "apps/4leaf/rog/tests/mainframe-native-toolbar.cjs",
+        "apps/4leaf/rog/tests/mainframe-snaplogo-registration.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2002-SOURCE-MAINFRAME-ATLASES/2004-SNAPLOGO-PHOTO-ANCHORS/REAL-CHROMIUM-ROUTES-AND-PHONE-VIEWPORT; EXE-COMMANDS-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Archived original MainFrame toolbarbtn.png (120x270; four 30px states × nine rows), pannel.png 323x124 and title.png 680x54 verified; original 2004 sky.jpg, chat.jpg, chat_ref.jpg independently template-match authentic MainFrame/snaplogo.png 161x51 at (316,472), scale 1, in all three photos. Native 6x10 digit tiles retained.",
+        "implementation": "Original live title/nav/toolbar from mainframe-native-toolbar.css and mainframe-native-snapshot.js; original buttons remain real DOM controls, not screenshot navigation. PR #1042 adds the joint full-scene acceptance workflow, tests/mainframe-native-toolbar.cjs + mainframe-snaplogo-registration.cjs real runtime QA.",
+        "runtimeTest": "Actions #43354679846 mainframe job SUCCESS, real Chromium confirms eight original 30x30 actionable source atlas buttons, original 36px toolbar/34px narrow layout, real WorldMap/Street/CardShop/ChatTown/Genesis Dice/help/rename route actions, mobile 390px all buttons physically within viewport, three original photo snaplogo anchors exact and actual source canvas no chroma leak.",
+        "deployment": "MainFrame original CSS/JS was already shipped unchanged in public beta.75/PWA v162; PR #1042 adds tests and workflow only, does not change deployed runtime assets. Same-source-release acceptance and actual browser QA run against current main/PR head; historical 2004 executable command semantics remain unverified under M01/M09."
+      },
       "dependencies": [
         "EVID-01"
       ],
@@ -9819,6 +9875,70 @@
       "to": "done",
       "details": "2002 original installer SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 verified via independent PAK re-extraction; original resource manifest indexed 259 real PNGs with native dimensions; six source UI/art asset signatures/SHA and active screen consumers proved; source CHR 98 cards/97 real bodies/0156 exception, source IMG.pak SHA, original DMP 26/1920 and event sets 25 validated. Missing 2004 MVE 3D meshes, EXE commands and original timeline explicitly UNVERIFIED; those remain separate restoration tasks.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43323122857"
+    },
+    {
+      "seq": 459,
+      "date": "2026-11-13",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261113-001",
+      "taskIds": [
+        "M08",
+        "WORLD-01",
+        "CHT-02",
+        "CHT-05",
+        "BTL-02"
+      ],
+      "details": "5+ existing canonical work items must be completed with real source comparison, actual browser QA, deployed-runtime evidence and a merged PR; no fake 2004 EXE/3D claims."
+    },
+    {
+      "seq": 460,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "M08",
+      "from": "in_progress",
+      "to": "done",
+      "details": "2026-11-13 accepted: original DMP GOAL->source winResult->real replay lobby in two connected Chromium WebRTC browsers; item/ability/battle/chat/reconnect/duplicate-roll authority already covered. 2002 proprietary server and rare historic rules stay UNVERIFIED under RULE-01/02/M09. Sources/QA PR #1034; Actions #43324876508. Historical original EXE/3D/seat/CP949 wire are kept OPEN in parent/source work.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43324876508"
+    },
+    {
+      "seq": 461,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "WORLD-01",
+      "from": "todo",
+      "to": "done",
+      "details": "2026-11-13 accepted: original 120x270 MainFrame 30px nine-row toolbar atlas, 323x124 background and 680x54 title fully registered; eight real routes/utility clicks and 390px mobile crop 0; genuine 161x51 snaplogo exact archived 2004 (316,472) world/chat pixel registration. Historical EXE row commands remain UNVERIFIED under M01/M09. Sources/QA PR #1042; Actions #43354679846. Historical original EXE/3D/seat/CP949 wire are kept OPEN in parent/source work.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
+    },
+    {
+      "seq": 462,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "2026-11-13 accepted 2D ChatRoom text/log/source input placement: original 794x528 screenshot white pixel band y99-113 vs actual input y98, 390x97 source log, 25 Korean message + scroll, six rooms source userlist/log scrollbar exact anchors in Chromium/WebKit. Deterministic CP949 display-byte fixture passes both browsers; historical original CP949 server wire remains UNVERIFIED under P0-CHAT/M03. Sources/QA PR #1042; Actions #43354679846. Historical original EXE/3D/seat/CP949 wire are kept OPEN in parent/source work.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
+    },
+    {
+      "seq": 463,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-05",
+      "from": "in_progress",
+      "to": "done",
+      "details": "2026-11-13 native 2D ChatRoom furniture/toolbar acceptance: room4t 115x103 at original photo x427,y425 (two archived screenshots), actual room3t 272x102 and room5t 176x128 chroma-key native masks with separate source z-depth, all six rooms three real seat states original toolbar/avatar hit targets Chromium/WebKit. Historic 2004 EXE seat coordinates and inferred room3/5 backdrop table anchors remain OPEN under P0-CHAT/M03/M09. Sources/QA PR #1042; Actions #43354679846. Historical original EXE/3D/seat/CP949 wire are kept OPEN in parent/source work.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
+    },
+    {
+      "seq": 464,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "BTL-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "2026-11-13 accepted original 2D 800x600 battle presentation: six authentic battle.jpg score/dice/podium anchors in real Chromium and WebKit all delta 0.0–0.9 px, source 355x113 winBattle podium and two live OBS characters, dice, combat result action; 2004 3D MVE camera/mesh/physics explicitly OPEN BTL-04/P0-PODIUM/M06. Sources/QA PR #1042; Actions #43354679846. Historical original EXE/3D/seat/CP949 wire are kept OPEN in parent/source work.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
     }
   ],
   "restorationPriority": {
