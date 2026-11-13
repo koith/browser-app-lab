@@ -314,7 +314,13 @@
    if(!img||!frame)return;
    const id=pawn.dataset.chessmanId;
    requestedObsFrame.set(pawn,{id,url:frame.url});
-   if(img.getAttribute('src')!==frame.url&&!decodedObsUrls.has(frame.url)){
+   // The FIRST requested frame must receive a real src synchronously:
+   // the source-foot UI and tested pose use that exact src in the same
+   // task. Only defer subsequent swaps when the CURRENT frame is STILL
+   // downloading. This prevents blank OBS actors without delaying initial
+   // semantic pose/footprint updates.
+   if(img.getAttribute('src')&&img.getAttribute('src')!==frame.url&&
+      !img.complete&&!decodedObsUrls.has(frame.url)){
      ensureDecodedObs(frame.url).then(()=>{
        const wanted=requestedObsFrame.get(pawn);
        if(!pawn.isConnected||pawn.querySelector('img.leaf-chess-original-obs')!==img||
