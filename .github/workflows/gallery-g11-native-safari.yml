@@ -9,21 +9,36 @@ on:
     paths:
       - 'apps/gallery-archive/qa_native_safari_gallery.py'
       - '.github/workflows/gallery-g11-native-safari.yml'
+  workflow_run:
+    workflows:
+      - "Deploy static content to Pages"
+    types: [completed]
 permissions:
   contents: read
 jobs:
   native-desktop-safari:
+    if: |
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: macos-15
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
           sparse-checkout: apps/gallery-archive/qa_native_safari_gallery.py
           sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: python -m pip install 'selenium==4.37.0'
+      - name: Confirm native gallery QA tests the exact deployed SHA
+        if: github.event_name == 'workflow_run'
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+          echo 'G11_NATIVE_SAFARI_EXACT_PAGES_DEPLOY_SHA_PASS'
       - name: Enable genuine Apple safaridriver without owner-gallery secrets
         run: |
           /usr/bin/safaridriver --version
