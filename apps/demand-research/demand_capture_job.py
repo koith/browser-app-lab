@@ -409,31 +409,41 @@ def public_error_class(err):
 
 
 def round_robin_public_rows(getters,terms,start,end):
-    """Alternate publicly visible source/term cursors fairly.
+    """Bound repeated unavailable-provider retries while preserving fairness.
 
-    A single high-volume SNS must not exhaust the bounded first-sighting
-    buffer before other public providers are even queried. Each source
-    cursor is read incrementally, and individual provider failures are
-    reported only as anonymous sentinel values. No source ID is logged.
+    Exhausting one dead Fediverse instance once must not consume the remaining
+    four query terms' capture window. Skip this getter for the rest of the
+    source period ONLY after a provider-wide access/transport failure.
+    Other public providers and their cursors keep running. No raw errors log.
     """
     from collections import deque
     pending=deque()
     for term in terms:
         for getter in getters:
             try:
-                pending.append(iter(getter(term,start,end)))
+                pending.append((getter,iter(getter(term,start,end))))
             except Exception:
                 yield None
+    unavailable=set()
     while pending:
-        iterator=pending.popleft()
+        getter,iterator=pending.popleft()
+        if getter in unavailable:
+            continue
         try:
             row=next(iterator)
         except StopIteration:
             continue
-        except Exception:
+        except Exception as error:
+            # A local malformed record failure should not permanently ban
+            # future public records from this provider. Only broad transport
+            # and explicitly classified provider outages trip this circuit.
+            if isinstance(error,(TimeoutError,ConnectionError,OSError)) or (
+                isinstance(error,RuntimeError) and
+                "public source" in str(error)):
+                unavailable.add(getter)
             yield None
             continue
-        pending.append(iterator)
+        pending.append((getter,iterator))
         yield row
 
 
