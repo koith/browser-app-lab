@@ -28,6 +28,7 @@ MAX_CATCHUP_MINUTES = 1440  # bounded 24h missed-schedule window; current 16m al
 # earlier so encrypted buffers and aggregate SHA counters can be emitted.
 FAST_SOFT_BUDGET_SECONDS = 720
 MAX_PER_RUN = 90
+FAST_FIRST_SIGHTING_LIMIT = 48  # only encrypted-first captures with an existing safe spool
 MAX_MEDIA_PER_POST = 16  # matches validated post and AES recovery slot limits
 MAX_IMAGE = 24_000_000
 MAX_VIDEO = 80_000_000
@@ -551,7 +552,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                 if pid in known_ids or pid in known or pid in seen_this_scan:
                     duplicates += 1
                     continue
-                if saved + buffered >= (24 if fast_mode else MAX_PER_RUN):
+                if saved + buffered >= (FAST_FIRST_SIGHTING_LIMIT if defer_remote else
+                                      24 if fast_mode else MAX_PER_RUN):
                     budget_exhausted = True
                     break
                 seen_this_scan.add(pid)
@@ -692,24 +694,58 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     if (defer_remote and spool is not None and
             os.getenv("DEMAND_FAST_CAPTURE_PACK_REMOTE")=="1"):
         sealed_files=sorted(spool.directory.glob("*.enc"))
-        remaining=max_fast_seconds-(elapsed_clock()-started_at)
-        if sealed_files and remaining>=30:
+        if sealed_files:
             from recover_spool_artifacts import (
-                preserve_encrypted_batch,with_cloud_budget,safe_failure_category)
-            try:
-                budget=min(70,max(1,int(remaining)-15))
-                with_cloud_budget(
-                    cloud,
-                    lambda:preserve_encrypted_batch(cloud,spool,sealed_files),
-                    max_seconds=budget)
-                encrypted_remote_pack_count=len(sealed_files)
-            except (RuntimeError,ValueError,TypeError,KeyError,
-                    TimeoutError,OSError) as error:
-                # Never include private source IDs, provider paths, or
-                # exception text in public workflow logs.
-                encrypted_remote_pack_failure=safe_failure_category(error)
-        elif sealed_files:
-            encrypted_remote_pack_failure="time_budget_deferred"
+                preserve_encrypted_batch,with_cloud_budget,
+                safe_failure_category,MAX_BUNDLE_BYTES)
+            # A single high-quality original video may exceed one safe ZIP.
+            # Group ciphertext only, never split/alter an original media blob.
+            # Bounded root packs are immutable and independently SHA-checked.
+            groups=[]
+            batch=[]
+            batch_bytes=0
+            oversized=False
+            for sealed in sealed_files:
+                try:
+                    size=sealed.stat().st_size
+                except OSError:
+                    oversized=True
+                    continue
+                if size>MAX_BUNDLE_BYTES-8192:
+                    oversized=True
+                    continue
+                if batch and (len(batch)>=24 or
+                    batch_bytes+size+1024*(len(batch)+1)>MAX_BUNDLE_BYTES-8192):
+                    groups.append(batch)
+                    batch=[]
+                    batch_bytes=0
+                batch.append(sealed)
+                batch_bytes+=size
+            if batch:
+                groups.append(batch)
+            if oversized:
+                encrypted_remote_pack_failure="oversized_or_unreadable_buffer"
+            for group in groups:
+                remaining=max_fast_seconds-(elapsed_clock()-started_at)
+                if remaining<30:
+                    encrypted_remote_pack_failure="time_budget_deferred"
+                    break
+                try:
+                    budget=min(70,max(1,int(remaining)-15))
+                    key=with_cloud_budget(
+                        cloud,
+                        lambda group=group:preserve_encrypted_batch(
+                            cloud,spool,group),
+                        max_seconds=budget)
+                    if not key:
+                        raise RuntimeError("encrypted pack readback did not converge")
+                    encrypted_remote_pack_count+=len(group)
+                except (RuntimeError,ValueError,TypeError,KeyError,
+                        TimeoutError,OSError) as error:
+                    # Preserve ALL encrypted local artifacts for replay.
+                    # No raw cloud exception detail is logged or returned.
+                    encrypted_remote_pack_failure=safe_failure_category(error)
+                    break
     if defer_remote:
         print("INTERSECTION_SOURCE_FIRST_SAFETY_PACK",json.dumps({
             "ciphertexts_remote_sha_verified":encrypted_remote_pack_count,
