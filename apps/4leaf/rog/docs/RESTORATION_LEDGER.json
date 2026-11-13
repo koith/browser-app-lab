@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-13",
+  "updatedAt": "2026-11-14",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -2034,6 +2034,18 @@
         "QA-03",
         "ACT-05"
       ]
+    },
+    {
+      "id": "REQ-20261114-COMPLETE-8-CANONICAL",
+      "date": "2026-11-14",
+      "origin": "2026-11-14 사용자 요청",
+      "text": "이번 턴에 기존 4LEAF 개발원장의 미완료 일감 8개 이상을 실제 개발·원본 검증·브라우저 QA·병합·배포로 완료하라. 기존 60건 외 새 일감이나 단순 점검을 완료 수로 환산하지 말 것.",
+      "taskIds": [
+        "ACT-03",
+        "RULE-02",
+        "M07",
+        "M09"
+      ]
     }
   ],
   "tasks": [
@@ -3641,18 +3653,20 @@
       "id": "RULE-02",
       "priority": "P1",
       "title": "전투·능력·아이템·라운드 원본 예외처리",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M08",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 창세기전 능력치/24 특수 충돌/카드 파티 조합과 텍스트 룰 일부 구현했으나 세부 판정 확정 자료 부족 | 구현 목표: 원본 룰 문서/게임 영상의 전투 2인/다인·아이템 소모·선공·무효 판정 정리 및 고정 재현",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 창세기전 능력치/24 특수 충돌/카드 파티 조합과 텍스트 룰 일부 구현했으나 세부 판정 확정 자료 부족 | 구현 목표: 원본 룰 문서/게임 영상의 전투 2인/다인·아이템 소모·선공·무효 판정 정리 및 고정 재현 | 2026-11-14 R23 code: duplicate GOAL/finish event no longer credits repeated GP/wins, stale winner identity rejected, canonical 워프게이트 reward source spelling restored; real browser Chromium/WebKit acceptance pending PR #1113, other original 2004 battle/item exception semantics still unverified.",
       "acceptance": [
         "샘플 전투 수치·아이템·무승부·중복 효과·탈출/종료 원본 기대값 fixture 전부 통과"
       ],
       "evidence": [
         "tests/dice-historical-24-clash.cjs",
-        "game.js"
+        "game.js",
+        "https://github.com/koith/browser-app-lab/pull/1113",
+        "apps/4leaf/rog/tests/r23-goal-idempotence.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-11-14",
       "verifiedAcceptance": null,
       "dependencies": [
         "RULE-01",
@@ -10288,6 +10302,47 @@
       "to": "done",
       "details": "Actual Apple macOS Safari WebDriver (not Playwright WebKit simulator) source UI/HUD five responsive viewport journeys with 15 screenshots and five authentic room-to-ROLL first turns SUCCESS; physical iPhone Safari remains separate open M09/P0-RELEASE.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43430231304"
+    },
+    {
+      "seq": 480,
+      "date": "2026-11-14",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261114-COMPLETE-8-CANONICAL",
+      "taskIds": [
+        "ACT-03",
+        "RULE-02",
+        "M07",
+        "M09"
+      ],
+      "details": "Started from canonical 41 done / 17 in_progress / 2 todo = 19 open. Requested >=8 NEW existing-task completions. Do not count bugfixes or CI workflow additions as canonical done."
+    },
+    {
+      "seq": 481,
+      "date": "2026-11-14",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskIds": [
+        "ACT-03",
+        "M07"
+      ],
+      "details": "Rebased original OBS source frame recovery from stale PR #1093 to PR #1113, fixed reentrant WebKit image decode/old source hold, prevented old pawn CHR identity callbacks and kept tested synchronous native source key order. Earlier CI found source-key regression; corrected as of cf3cca24. Chromium/WebKit final full CI remains pending. Historical EXE original actor frames/3D roles still UNKNOWN; neither task marked done.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/1113",
+        "apps/4leaf/rog/genesis-chessman-actors.js",
+        ".github/workflows/rog-r22-obs-predecode.yml"
+      ]
+    },
+    {
+      "seq": 482,
+      "date": "2026-11-14",
+      "type": "STATUS_CHANGED",
+      "taskId": "RULE-02",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Actual current game-code GOAL idempotence and Warp Gate historical map source correction is implemented on PR #1113; browser QA and historical full rules NOT yet accepted. This is progress, NOT completion.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/1113",
+        "apps/4leaf/rog/tests/r23-goal-idempotence.cjs"
+      ]
     }
   ],
   "restorationPriority": {
