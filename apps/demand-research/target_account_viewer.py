@@ -92,46 +92,54 @@ class _BoundedZipRoot:
 _ZIP_SESSION_CACHE=None
 _ZIP_SESSION_LOCK=threading.Lock()
 ZIP_VERIFIED_SESSION_SECONDS=90
-ZIP_UNAVAILABLE_BACKOFF_SECONDS=25
+# Avoid repeating a known-denied provider listing/cat for every simultaneous
+# verified GitHub feed, media and profile request on a 512 MiB free instance.
+# Retry within the five-minute user refresh window; never a permanent denial.
+ZIP_UNAVAILABLE_BACKOFF_SECONDS=150
 
 
 def _verified_account_bundles(root):
-    """Reuse only independently SHA-verified immutable ZIPs across reads.
+    """Reuse independently SHA-verified TeraBox ZIPs; singleflight 403 probes.
 
-    A free Render request typically builds a fresh CloudArchive. Repeating a
-    TeraBox 403 probe for every feed, follower, image and comment request
-    previously delayed actual SIX-post playback for minutes. Synthetic roots
-    bypass this process-local cache; the GitHub verified reader stays usable.
+    On Render's 512 MiB free instance, an unavailable TeraBox ZIP used to
+    trigger one rclone listing + denied cat for every parallel feed, profile,
+    graph, thread and media request. The old cache protected only AFTER the
+    remote call returned; concurrent requests all bypassed it. Serialize
+    that one bounded remote probe and share its verified result or safely
+    classified temporary failure across the whole browsing session.
+    Synthetic roots continue using the original independent reader.
     """
     global _ZIP_SESSION_CACHE
     if not github_temp_bundle.enabled():
         return available_bundles(root)
     cacheable=type(root) is CloudArchive
-    now=time.monotonic()
-    if cacheable:
-        with _ZIP_SESSION_LOCK:
-            cached=_ZIP_SESSION_CACHE
-            if cached is not None and cached[0]==root.remote:
-                ttl=(ZIP_UNAVAILABLE_BACKOFF_SECONDS if cached[3]
-                     else ZIP_VERIFIED_SESSION_SECONDS)
-                if now-cached[1]<ttl:
-                    if cached[3]:
-                        raise RuntimeError("Private ZIP provider temporarily unavailable")
-                    return cached[2]
-    try:
-        # Materialize while the per-pass authorization circuit breaker is
-        # alive, not after its wrapper has been discarded.
-        result=tuple(available_bundles(_BoundedZipRoot(root)))
-    except (RuntimeError,ValueError,TypeError,BundleInvalid):
-        if cacheable:
-            with _ZIP_SESSION_LOCK:
-                _ZIP_SESSION_CACHE=(root.remote,time.monotonic(),(),True)
-        raise
-    if cacheable and len(result)<=4:
-        with _ZIP_SESSION_LOCK:
-            _ZIP_SESSION_CACHE=(root.remote,time.monotonic(),result,not bool(result))
-    return result
-
+    if not cacheable:
+        return tuple(available_bundles(_BoundedZipRoot(root)))
+    # LOCK BEFORE checking the cache and KEEP it during the remote probe.
+    # This deliberately trades duplicate blocking worker threads for one
+    # provider request without extending network permissions or bypassing
+    # SHA256. The subprocess retains its strict operation timeout.
+    with _ZIP_SESSION_LOCK:
+        now=time.monotonic()
+        cached=_ZIP_SESSION_CACHE
+        if cached is not None and cached[0]==root.remote:
+            ttl=(ZIP_UNAVAILABLE_BACKOFF_SECONDS if cached[3]
+                 else ZIP_VERIFIED_SESSION_SECONDS)
+            if now-cached[1]<ttl:
+                if cached[3]:
+                    raise RuntimeError("Private ZIP provider temporarily unavailable")
+                return cached[2]
+        try:
+            # Materialize while the per-pass authorization circuit breaker
+            # is alive, not after its wrapper has been discarded.
+            result=tuple(available_bundles(_BoundedZipRoot(root)))
+        except (RuntimeError,ValueError,TypeError,BundleInvalid):
+            _ZIP_SESSION_CACHE=(root.remote,time.monotonic(),(),True)
+            raise
+        if len(result)<=4:
+            _ZIP_SESSION_CACHE=(
+                root.remote,time.monotonic(),result,not bool(result))
+        return result
 
 
 def public_profile_fields(doc):
