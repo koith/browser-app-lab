@@ -69,6 +69,41 @@ def verify(engine, *, label, width, height):
         assert readable is not None, (
             "no signed SHA-verified account HISTORY with saved posts and profile")
         key=readable["key"]
+        # Exercise the ACTUAL SHA-verified saved journal, not a mocked API.
+        # These calls are read-only; never print source text or account IDs.
+        if "chromium" in label:
+            endpoint=SITE.rsplit("/",1)[0]+"/api/account-archives/"+quote(key,safe="")+"/feed"
+            def real_feed(query):
+                raw=page.request.get(endpoint+"?"+query,timeout=120000)
+                assert raw.status==200, "actual archived feed API unavailable"
+                data=raw.json()
+                assert isinstance(data.get("posts"),list) and isinstance(data.get("total"),int)
+                return data
+            baseline=real_feed("offset=0&limit=50")
+            total=baseline["total"]
+            assert total>0 and baseline["posts"], "verified history feed empty"
+            kinds=[real_feed("offset=0&limit=1&kind="+v)["total"]
+                   for v in ("post","reply","revision")]
+            assert sum(kinds)==total, "real post/reply/revision filter parity failed"
+            media_states=[real_feed("offset=0&limit=1&media_status="+v)["total"]
+                          for v in ("complete","partial")]
+            assert sum(media_states)==total, "real media verification filter parity failed"
+            sample=next((p for p in baseline["posts"]
+                         if isinstance(p.get("text"),str) and p["text"].strip()),None)
+            assert sample is not None, "no saved original body for actual full-history search"
+            term=sample["text"].strip()[:12]
+            searched=real_feed("offset=0&limit=50&q="+quote(term,safe=""))
+            assert any(p["id"]==sample["id"] for p in searched["posts"]), (
+                "full-history text search lost an actual saved post")
+            if total>1:
+                next_page=real_feed("offset=1&limit=1")
+                assert next_page["posts"] and next_page["posts"][0]["id"]!=baseline["posts"][0]["id"], (
+                    "real post pagination repeats or skips first original")
+            print("LIVE_ARCHIVE_REAL_FILTERS_PASS",
+                  "stored_posts="+str(total),
+                  "kinds="+str(len(kinds)),
+                  "media_statuses="+str(len(media_states)),
+                  "text_search=PASS","pagination=PASS",flush=True)
         response = page.goto(SITE+"?account="+quote(key,safe=""),
                              wait_until="domcontentloaded", timeout=180000)
         assert response and response.status == 200, "live account-viewer HTML unavailable"
@@ -148,6 +183,14 @@ def verify(engine, *, label, width, height):
                 assert actual and actual.startswith("/api/account-archives/"), (
                     "media did not come from the verified account-archive reader"
                 )
+        # Keep an EXACT original media API path, not just the number of
+        # thumbnails. Switching tabs intentionally resets pagination to
+        # the first page; earlier media can only reappear after More.
+        selected_original=next(
+            (m.first.get_attribute("src") for m in (image,video,audio)
+             if m.count()),None)
+        assert selected_original and selected_original.startswith(
+            "/api/account-archives/")
 
         page.locator("#results article.post").first.get_by_role(
             "button", name="댓글·상세 보기"
@@ -188,23 +231,57 @@ def verify(engine, *, label, width, height):
             "#results .post-media img, #results .post-media video, "
             "#results .post-media audio"
         )
-        assert originals.count()>=media_count>0, (
-            "previously visible verified media disappeared after tab round-trip"
+        # A valid tab round-trip resets pagination. Require that the SAME
+        # independently SHA-verified original remains obtainable after
+        # traversing the real live feed again, never substitute an avatar.
+        def original_present():
+            return page.evaluate("""(expected) => [...document.querySelectorAll(
+                '#results .post-media img, #results .post-media video, #results .post-media audio'
+            )].some(el => el.getAttribute('src')===expected)""",selected_original)
+        for _ in range(26):
+            if original_present():
+                break
+            more=page.locator("#more")
+            if not more.is_visible() or not more.is_enabled():
+                break
+            before=page.locator("#results article.post").count()
+            more.click()
+            page.wait_for_function(
+                "(before) => document.querySelectorAll('#results article.post').length>before"
+                " || document.querySelector('#more')?.textContent?.includes('다시 시도')",
+                arg=before,timeout=60000)
+            assert "다시 시도" not in more.inner_text(), (
+                "verified source became unreachable on re-pagination")
+        assert original_present(), (
+            "previously visible verified original cannot be recovered after tab round-trip")
+        chosen=page.locator(
+            "#results .post-media img[src], #results .post-media video[src], "
+            "#results .post-media audio[src]"
         )
-        originals.first.scroll_into_view_if_needed()
-        media_kind=originals.first.evaluate("(node) => node.tagName.toLowerCase()")
+        # Match one exact stored source, regardless of its position among
+        # older posts; do not claim the full media list must remain paginated in.
+        original_index=page.evaluate("""(expected) => {
+           const list=[...document.querySelectorAll(
+             '#results .post-media img[src], #results .post-media video[src], #results .post-media audio[src]')];
+           return list.findIndex(el=>el.getAttribute('src')===expected);
+        }""",selected_original)
+        assert original_index>=0
+        exact_original=chosen.nth(original_index)
+        exact_original.scroll_into_view_if_needed()
+        media_kind=exact_original.evaluate("(node) => node.tagName.toLowerCase()")
         assert media_kind in ("img","video","audio"), "unsupported source media node"
         if media_kind=="img":
             page.wait_for_function(
-                "() => {const img=document.querySelector('#results .post-media img');"
-                "return !!img && img.complete && img.naturalWidth > 0;}",
-                timeout=90000,
+                "(expected) => [...document.querySelectorAll('#results .post-media img')]"
+                ".some(img => img.getAttribute('src')===expected "
+                "&& img.complete && img.naturalWidth > 0)",
+                arg=selected_original,timeout=90000,
             )
         else:
-            assert originals.first.evaluate("(node) => node.controls === true"), (
+            assert exact_original.evaluate("(node) => node.controls === true"), (
                 "verified video or audio has no playback controls"
             )
-        source=originals.first.get_attribute("src")
+        source=exact_original.get_attribute("src")
         assert source and source.startswith("/api/account-archives/"), (
             "verified original was not delivered through authenticated reader"
         )
