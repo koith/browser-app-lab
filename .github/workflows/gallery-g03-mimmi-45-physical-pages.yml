@@ -10,7 +10,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: gallery-mimmi-45-work-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  group: gallery-mimmi-official-djawa-work-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
   cancel-in-progress: false
 jobs:
   save-public-45-photo-work:
