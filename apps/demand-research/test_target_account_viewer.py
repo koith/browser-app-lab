@@ -308,3 +308,33 @@ def test_verified_incremental_history_status_includes_older_originals(populated,
     assert body["public_posts"]==1
     assert body["original_objects"]==4
     assert body["full_historical_coverage_guaranteed"] is False
+
+
+def test_github_sha_reader_does_not_repeat_denied_terabox_probe_each_media(
+        monkeypatch):
+    """Keep verified GitHub access responsive under independent TeraBox 403."""
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer,"_ZIP_SESSION_CACHE",None)
+    calls=[]
+    def denied(_root):
+        calls.append(1)
+        raise RuntimeError("(authorization) synthetic private provider denied")
+    monkeypatch.setattr(viewer,"available_bundles",denied)
+    root=viewer.CloudArchive(remote="archive:DemandResearch",
+                             runner=lambda *a,**k:None)
+    with pytest.raises(RuntimeError):
+        viewer._verified_account_bundles(root)
+    assert len(calls)==1
+    for _ in range(5):
+        with pytest.raises(RuntimeError,match="temporarily unavailable"):
+            viewer._verified_account_bundles(root)
+    assert len(calls)==1,"do not turn each feed/media/profile request into 30s probe"
+    assert 120<=viewer.ZIP_UNAVAILABLE_BACKOFF_SECONDS<300
+    # No permanent denial: next session can retry the TeraBox source.
+    monkeypatch.setattr(
+        viewer,"_ZIP_SESSION_CACHE",
+        (root.remote,viewer.time.monotonic()-
+         viewer.ZIP_UNAVAILABLE_BACKOFF_SECONDS-1,(),True))
+    with pytest.raises(RuntimeError):
+        viewer._verified_account_bundles(root)
+    assert len(calls)==2
