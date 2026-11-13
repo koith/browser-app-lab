@@ -78,6 +78,10 @@ jobs:
       # remote SHA-readback verified AFTER the public source capture ends.
       # Never count as an individually restored or viewable original.
       DEMAND_FAST_CAPTURE_PACK_REMOTE: "1"
+      # Best-effort only (one video per hashtag cursor). Public ATProto
+      # getBlob is accepted only after CIDv1/raw/sha2-256 verification and
+      # explicit author DID -> trusted PDS proof. Unreachable stays PARTIAL.
+      DEMAND_BSKY_PDS_BLOB_ORIGINALS: "1"
       DEMAND_ARCHIVE_RECOVERY_KEY: ${{ secrets.DEMAND_ARCHIVE_RECOVERY_KEY }}
       DEMAND_RECOVERY_SPOOL_DIR: "/tmp/intersection-private-recovery"
       GITHUB_RUN_ID: ${{ github.run_id }}
