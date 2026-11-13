@@ -406,3 +406,32 @@ def test_source_run_targeted_restore_never_scans_other_cloud_packs(
     assert result["remote_packs_sha_verified"]==0
     assert result["remote_pack_list_failures"]==0
 
+
+
+def test_slow_archive_replay_has_finite_stage_aware_backend_budget():
+    """Increase slow SHA read allowance without allowing an unbounded request."""
+    from types import SimpleNamespace
+    observed=[]
+    def backend(args,data=None,timeout=0,allow_missing=False):
+        observed.append(timeout)
+        return b"synthetic"
+    cloud=SimpleNamespace(runner=backend)
+    assert replay.MAX_RECORD_SECONDS==120
+    assert replay.with_cloud_budget(
+        cloud,lambda:cloud.runner(["cat","synthetic"],timeout=250),
+        max_seconds=replay.MAX_RECORD_SECONDS)==b"synthetic"
+    assert 0<observed[0]<=45
+    assert cloud.runner is backend
+
+
+def test_replay_reports_only_safe_first_observation_timeout_stage(tmp_path):
+    class SlowCloud(FakeCloud):
+        def save_first_observation(self,*args,**kwargs):
+            raise TimeoutError("private account identifier SHOULD NEVER LEAK")
+    spool=RecoverySpool(tmp_path)
+    spool.save("a"*40,first("a"*40))
+    result=replay.replay(cloud=SlowCloud(),local_directory=tmp_path)
+    assert result["buffer_failures"]==1
+    assert result["buffer_error_categories"]=={"timeout":1}
+    assert result["buffer_failure_stages"]=={"first_observation":1}
+    assert "SHOULD NEVER LEAK" not in json.dumps(result)
