@@ -199,7 +199,7 @@ def ingest_verified_marker_page(db_path, posts, verified_ids, all_ids, cursor):
     The cursor and verification receipts live inside the same private SQLite
     transaction as the imported rows.
     """
-    pattern=re.compile(r"[a-f0-9]{40}\\Z")
+    pattern=re.compile(r"[a-f0-9]{40}\Z")
     if (not isinstance(posts,list) or len(posts)>24 or
             not isinstance(verified_ids,list) or len(verified_ids)>24 or
             not isinstance(all_ids,list) or len(all_ids)>150000 or
