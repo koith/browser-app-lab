@@ -192,8 +192,9 @@ def capture(source,folder,max_pages=40,max_photos=650,workers=3,client=None,fetc
     failure_causes=collections.Counter()
     hashes=set()
     with ThreadPoolExecutor(max_workers=max(1,min(workers,4))) as pool:
-        futures=[pool.submit(fetch,url,source) for url in photo_urls.values()]
+        futures={pool.submit(fetch,url,source):url for url in photo_urls.values()}
         for future in as_completed(futures):
+            actual_media_url=futures[future]
             result,error=future.result()
             if result is None:
                 failed+=1
@@ -205,7 +206,8 @@ def capture(source,folder,max_pages=40,max_photos=650,workers=3,client=None,fetc
             filename=folder/(sha+"."+result["extension"])
             filename.write_bytes(result["bytes"])
             filename.with_suffix(".json").write_text(
-                json.dumps({"author":{"screen_name":source["account"]}},
+                json.dumps({"author":{"screen_name":source["account"]},
+                            "observed_media_url":actual_media_url},
                             ensure_ascii=False),encoding="utf-8")
             success+=1
     report={"source":source["id"],"source_pages":len(visited),

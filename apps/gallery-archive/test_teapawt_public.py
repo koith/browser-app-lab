@@ -95,7 +95,11 @@ def main():
         for digest in (hashlib.sha256(v).hexdigest() for v in payloads):
             photo=Path(tmp)/(digest+".jpg")
             assert photo.is_file()
-            assert json.loads(photo.with_suffix(".json").read_text())["author"]["screen_name"]=="super_yuisan"
+            sidecar=json.loads(photo.with_suffix(".json").read_text())
+            assert sidecar["author"]["screen_name"]=="super_yuisan"
+            assert sidecar["observed_media_url"].startswith("https://pbs.twimg.com/media/")
+            assert ("FirstPhoto1234" in sidecar["observed_media_url"] or
+                    "SecondPhoto1234" in sidecar["observed_media_url"])
     import requests
     import unittest.mock
     class RecoveringClient:

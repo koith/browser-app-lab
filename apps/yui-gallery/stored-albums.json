@@ -308,6 +308,17 @@
           "origin_page": "https://teapawt.net/super_yuisan",
           "source_url": "https://teapawt.net/super_yuisan/media",
           "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 469,
+          "url": "stored-albums/public-yui-sns/44b574ffd862004f4f0b.jpg",
+          "sha256": "44b574ffd862004f4f0bf1e2b5391874925bcf089f7410862371a06b7ad940da",
+          "bytes": 434348,
+          "width": 2048,
+          "height": 1799,
+          "origin_page": "https://teapawt.net/super_yuisan",
+          "source_url": "https://pbs.twimg.com/media/HW_KrxAaIAAWzVp.jpg?name=orig",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
         }
       ]
     },

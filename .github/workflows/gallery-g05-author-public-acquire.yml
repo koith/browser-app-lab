@@ -1,0 +1,79 @@
+name: G05 Current Yui Public Author Original Byte Capture
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/gallery-g05-author-public-acquire.yml"
+      - "apps/gallery-archive/collect_new_creator_public_shas.py"
+      - "apps/gallery-archive/collect_teapawt_public.py"
+      - "apps/gallery-archive/test_teapawt_public.py"
+permissions:
+  contents: write
+concurrency:
+  group: g05-public-yui-physical-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  capture-real-originals:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
+      - name: Verify exact public-author media card identity and source photo provenance
+        run: |
+          PYTHONPATH=apps/gallery-archive python apps/gallery-archive/test_teapawt_public.py
+          python -m py_compile apps/gallery-archive/collect_new_creator_public_shas.py apps/gallery-archive/publish_new_public_photos_to_pages.py
+      - name: Download and SHA-decode up to four real author-media pages
+        run: |
+          python apps/gallery-archive/collect_new_creator_public_shas.py --stage "$RUNNER_TEMP/g05-author" --max-pages 4 --max-photos 80
+      - name: Append only real newly verified JPG bytes to static Pages manifest
+        run: |
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model yui --stage "$RUNNER_TEMP/g05-author" --limit 36 --budget 30000000
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          node apps/gallery-archive/test_curated_cover_manifest.cjs
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'g05-author/metadata'
+          audit=json.loads((root/'collection-audit.json').read_text())
+          published=json.loads((root/'pages-publication.json').read_text())
+          print('G05_ACTUAL_CURRENT_AUTHOR_SAVED_BYTES',json.dumps({
+            'source_pages':audit.get('source_pages'),
+            'physical_decoded_files':audit.get('physical_decoded_files'),
+            'distinct_new_sha_staged':audit.get('new_SHA_not_in_existing_owner_or_Pages'),
+            'new_photos_for_pages':published.get('new_sha_verified_originals'),
+            'bytes_added':published.get('total_bytes_added'),
+            'source_failures':audit.get('page_error_types')},ensure_ascii=False))
+          PY
+      - name: Save physical newly distinct originals in this exact PR branch
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          git checkout -B "$BRANCH" "refs/remotes/origin/$BRANCH"
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model yui --stage "$RUNNER_TEMP/g05-author" --limit 36 --budget 30000000
+          git add apps/yui-gallery/stored-albums.json apps/yui-gallery/stored-albums/
+          if git diff --cached --quiet; then
+            echo 'G05_NO_NEW_PHYSICAL_BYTES_FOUND' >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m "feat(G05): archive newly observed Yui author JPEG originals with SHA"
+            git push origin "HEAD:refs/heads/$BRANCH"
+            echo 'G05_NEW_REAL_PHOTOS_PHYSICALLY_STORED_TO_PR' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g05-current-yui-source-sha-evidence
+          path: |
+            ${{ runner.temp }}/g05-author/metadata/collection-audit.json
+            ${{ runner.temp }}/g05-author/metadata/pages-publication.json
+          retention-days: 7
+          if-no-files-found: warn

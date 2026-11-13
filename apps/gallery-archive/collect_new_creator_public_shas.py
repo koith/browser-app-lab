@@ -34,6 +34,12 @@ def collect(stage,max_pages=2,max_photos=44,root=ROOT,fetch=None):
         sidecar=file.with_suffix('.json')
         identity=json.loads(sidecar.read_text()) if sidecar.is_file() else {}
         if identity.get('author',{}).get('screen_name')!='super_yuisan':continue
+        # Preserve the exact first-party public photo URL seen in the author
+        # card; never silently attribute every image to the profile landing.
+        observed_url=identity.get('observed_media_url')
+        from collect_teapawt_public import safe_media_url
+        if not isinstance(observed_url,str) or safe_media_url(observed_url,source['url'])!=observed_url:
+            continue
         raw=file.read_bytes();sha=hashlib.sha256(raw).hexdigest()
         if sha in existing or len(raw)<5000 or len(raw)>8_000_000:continue
         if file.stem!=sha:raise ValueError('source filename SHA mismatch')
@@ -49,7 +55,7 @@ def collect(stage,max_pages=2,max_photos=44,root=ROOT,fetch=None):
         dest=stage/rel;dest.parent.mkdir(parents=True,exist_ok=True)
         shutil.copyfile(file,dest)
         new.append({'number':number,'key':rel,'sha256':sha,'bytes':len(raw),
-                    'width':w,'height':h,'extension':ext,'source_url':source['url']})
+                    'width':w,'height':h,'extension':ext,'source_url':observed_url})
         number+=1;existing.add(sha)
     meta=stage/'metadata';meta.mkdir(parents=True,exist_ok=True)
     (meta/'catalog.json').write_text(json.dumps({'schema_version':1,'model':'yui',
