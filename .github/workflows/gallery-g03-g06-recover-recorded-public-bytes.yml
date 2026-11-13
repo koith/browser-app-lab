@@ -1,0 +1,70 @@
+name: G03 G06 Recover Real Historic Public Mimmi Original Bytes
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/gallery-g03-g06-recover-recorded-public-bytes.yml"
+      - "apps/gallery-archive/recover_recorded_public_photo_bytes.py"
+      - "apps/gallery-archive/test_recover_recorded_public_photo_bytes.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: gallery-g03-g06-physical-source-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  actually-archive-missing-public-photos:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
+      - name: Validate strict SHA and no duplicate or altered photo storage
+        run: |
+          (cd apps/gallery-archive && python -m unittest -v test_recover_recorded_public_photo_bytes)
+      - name: Fetch only exactly SHA-pinned public originals and SAVE actual JPEGs
+        run: |
+          python apps/gallery-archive/recover_recorded_public_photo_bytes.py \
+            --kind both --max-new 90 --max-bytes 75000000
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          node apps/gallery-archive/test_curated_cover_manifest.cjs
+      - name: Report actual new SHA and publisher remaining gap
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('.gallery-public-recovery-report.json').read_text())
+          print('G03_G06_REAL_FILES_PHYSICALLY_WRITTEN',d['real_physical_new_sha'])
+          print('G03_G06_BYTES_PHYSICALLY_WRITTEN',d['real_bytes_added'])
+          print('G03_G06_EXACT_PUBLIC_SHA_RECOVERY_COUNTS',d['statistics'])
+          with Path(__import__('os').environ['GITHUB_STEP_SUMMARY']).open('a') as f:
+              f.write('Physical Mimmi SHA files: **'+str(d['real_physical_new_sha'])+'**\\n\\n')
+              f.write('Bytes stored: '+str(d['real_bytes_added'])+'\\n\\n')
+          PY
+      - name: Commit ONLY genuine image bytes and photo ledger back to this PR
+        if: github.event_name == 'pull_request'
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mimmi-gallery/stored-albums.json apps/mimmi-gallery/stored-albums/
+          if git diff --cached --quiet; then
+            echo 'G03_G06_NO_NEW_VERIFIED_JPEG; parents remain incomplete' >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m 'feat(G03 G06): archive exact SHA new public Mimmi photo files'
+            git push origin "HEAD:refs/heads/$BRANCH"
+            echo 'G03_G06_NEW_ACTUAL_PHYSICAL_JPEGS_COMMITTED' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g03-g06-recorded-public-physical-sha-report
+          path: .gallery-public-recovery-report.json
+          retention-days: 10
+          if-no-files-found: warn
