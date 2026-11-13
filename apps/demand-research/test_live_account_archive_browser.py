@@ -148,6 +148,14 @@ def verify(engine, *, label, width, height):
                 assert actual and actual.startswith("/api/account-archives/"), (
                     "media did not come from the verified account-archive reader"
                 )
+        # Keep an EXACT original media API path, not just the number of
+        # thumbnails. Switching tabs intentionally resets pagination to
+        # the first page; earlier media can only reappear after More.
+        selected_original=next(
+            (m.first.get_attribute("src") for m in (image,video,audio)
+             if m.count()),None)
+        assert selected_original and selected_original.startswith(
+            "/api/account-archives/")
 
         page.locator("#results article.post").first.get_by_role(
             "button", name="댓글·상세 보기"
@@ -188,11 +196,47 @@ def verify(engine, *, label, width, height):
             "#results .post-media img, #results .post-media video, "
             "#results .post-media audio"
         )
-        assert originals.count()>=media_count>0, (
-            "previously visible verified media disappeared after tab round-trip"
+        # A valid tab round-trip resets pagination. Require that the SAME
+        # independently SHA-verified original remains obtainable after
+        # traversing the real live feed again, never substitute an avatar.
+        def original_present():
+            return page.evaluate("""(expected) => [...document.querySelectorAll(
+                '#results .post-media img, #results .post-media video, #results .post-media audio'
+            )].some(el => el.getAttribute('src')===expected)""",selected_original)
+        for _ in range(26):
+            if original_present():
+                break
+            more=page.locator("#more")
+            if not more.is_visible() or not more.is_enabled():
+                break
+            before=page.locator("#results article.post").count()
+            more.click()
+            page.wait_for_function(
+                "(before) => document.querySelectorAll('#results article.post').length>before"
+                " || document.querySelector('#more')?.textContent?.includes('다시 시도')",
+                arg=before,timeout=60000)
+            assert "다시 시도" not in more.inner_text(), (
+                "verified source became unreachable on re-pagination")
+        assert original_present(), (
+            "previously visible verified original cannot be recovered after tab round-trip")
+        chosen=page.locator(
+            "#results .post-media img, #results .post-media video, "
+            "#results .post-media audio"
+        ).filter(visible=True) if False else page.locator(
+            "#results .post-media img[src], #results .post-media video[src], "
+            "#results .post-media audio[src]"
         )
-        originals.first.scroll_into_view_if_needed()
-        media_kind=originals.first.evaluate("(node) => node.tagName.toLowerCase()")
+        # Match one exact stored source, regardless of its position among
+        # older posts; do not claim the full media list must remain paginated in.
+        original_index=page.evaluate("""(expected) => {
+           const list=[...document.querySelectorAll(
+             '#results .post-media img[src], #results .post-media video[src], #results .post-media audio[src]')];
+           return list.findIndex(el=>el.getAttribute('src')===expected);
+        }""",selected_original)
+        assert original_index>=0
+        exact_original=chosen.nth(original_index)
+        exact_original.scroll_into_view_if_needed()
+        media_kind=exact_original.evaluate("(node) => node.tagName.toLowerCase()")
         assert media_kind in ("img","video","audio"), "unsupported source media node"
         if media_kind=="img":
             page.wait_for_function(
@@ -201,10 +245,10 @@ def verify(engine, *, label, width, height):
                 timeout=90000,
             )
         else:
-            assert originals.first.evaluate("(node) => node.controls === true"), (
+            assert exact_original.evaluate("(node) => node.controls === true"), (
                 "verified video or audio has no playback controls"
             )
-        source=originals.first.get_attribute("src")
+        source=exact_original.get_attribute("src")
         assert source and source.startswith("/api/account-archives/"), (
             "verified original was not delivered through authenticated reader"
         )
