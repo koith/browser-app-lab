@@ -42,7 +42,7 @@ async function run(path) {
  // The owner index is also an essential JSON manifest. For 401/403/404
  // and broken schema, fail promptly; only transient same-origin 5xx retry.
  const first=html.indexOf('async function fetchOwnerIndexWithRetry(');
- const last=html.indexOf('\\n}\\n',first);
+ const last=html.indexOf('\n}\n',first);
  assert(first>=0&&last>first,'owner retry function present');
  const ownerSource=html.slice(first,last+2);
  for(const [statuses,expectedCalls,succeeds] of [
@@ -64,7 +64,7 @@ async function run(path) {
    },
   };
   vm.createContext(context);
-  vm.runInContext(ownerSource+'\\nthis.loadOwner=fetchOwnerIndexWithRetry;',context);
+  vm.runInContext(ownerSource+'\nthis.loadOwner=fetchOwnerIndexWithRetry;',context);
   let succeeded=false;
   try{await context.loadOwner(path.includes('mimmi')?'mimmi':'yui');succeeded=true}
   catch(_){}
