@@ -127,6 +127,13 @@ def reviewed_direct_source(url, model):
     """Eligible *storage* origins. Other public hosts remain discovery leads."""
     from official_sample_recovery import _publisher_page
     from urllib.parse import urlsplit
+    # The registered 45-page photo work was silently dropped by this gate:
+    # the source registry knew all 45 normal public web photos, but the
+    # collector visited only the unrelated DJAWA 8-14-photo teaser instead.
+    # Keep this exception constrained to its exact verified Mimmi work URL,
+    # never every ShyPetal gallery, and retain visual owner-photo anchors.
+    if model=='mimmi' and url=='https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/':
+        return True
     if model=='yui' and url in (YUI_PHOTOGRAPHER_ORIGINAL_X,YUI_PHOTOGRAPHER_PUBLIC_VIEW):
         return True
     if _publisher_page(url):
