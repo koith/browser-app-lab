@@ -33,20 +33,41 @@ def verify(engine, *, label, width, height):
         # Direct TeraBox reads may be provider-denied on the free viewer host.
         # An AES-GCM GitHub mirror of an SHA-verified saved ZIP is acceptable
         # temporary readback, never proof of TeraBox permanent storage.
+        # Latest increment may contain zero NEW posts even though signed
+        # ancestor ZIPs contain complete saved history. For each legitimate
+        # archive row, check the independently verified merged history endpoint.
         available=[item for item in sources
                    if item.get("backup_kind") in (
                        "terabox_zip_sha_verified","github_temp_sha_verified")
-                   and item.get("posts_verified_in_bundle",0)>=1]
-        assert available, "no SHA-verified account ZIP with saved posts discoverable"
-        # Only an authenticated SHA-read-back public profile snapshot can
-        # supply real account-picker names; do not invent a nickname from URL.
-        readable=next((item for item in available
-                       if item.get("profile_snapshot_verified") is True
-                       and isinstance(item.get("display_name"),str)
-                       and item["display_name"].strip()
-                       and isinstance(item.get("handle"),str)
-                       and item["handle"].strip()),None)
-        assert readable is not None, "verified account has no archived nickname/handle"
+                   and isinstance(item.get("key"),str)
+                   and item["key"].startswith(("bluesky-","mastodon-"))]
+        assert available, "no verified account ZIP available"
+        # Only SHA-read-back profile snapshots can supply display names.
+        readable=None
+        for item in available[:12]:
+            if not (item.get("profile_snapshot_verified") is True
+                    and isinstance(item.get("display_name"),str)
+                    and item["display_name"].strip()
+                    and isinstance(item.get("handle"),str)
+                    and item["handle"].strip()):
+                continue
+            status=page.request.get(
+                SITE.rsplit("/",1)[0]+"/api/account-archives/"+
+                quote(item["key"],safe="")+"/backup-status",
+                timeout=120000,
+            )
+            if status.status!=200:
+                continue
+            info=status.json()
+            if (info.get("state")=="REMOTE_ZIP_SHA_VERIFIED"
+                    and info.get("storage") in (
+                        "private_terabox","github_encrypted_temporary")
+                    and isinstance(info.get("public_posts"),int)
+                    and info["public_posts"]>=1):
+                readable=item
+                break
+        assert readable is not None, (
+            "no signed SHA-verified account HISTORY with saved posts and profile")
         key=readable["key"]
         response = page.goto(SITE+"?account="+quote(key,safe=""),
                              wait_until="domcontentloaded", timeout=180000)
