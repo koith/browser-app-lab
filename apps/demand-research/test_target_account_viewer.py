@@ -244,8 +244,10 @@ def test_entire_verified_feed_search_kind_media_and_missing_slots(populated):
        "media_expected":0,"media_saved":0,"archive_complete":True,"media":[]},
       {"id":b,"text":"서울 밤 산책","kind":"reply",
        "media_expected":3,"media_saved":1,"archive_complete":False,
-       "media":[{"remote_verified":True,"mime":"image/png","bytes":10,"kind":"image"},
-                {"remote_verified":False,"mime":"image/png","bytes":20,"kind":"image"}]},
+       "media":[{"key":"posts/"+b+"/media/0001.png",
+                 "remote_verified":True,"mime":"image/png","bytes":10,"kind":"image"},
+                {"key":"posts/"+b+"/media/0002.png",
+                 "remote_verified":False,"mime":"image/png","bytes":20,"kind":"image"}]},
       {"id":d,"text":"서울 새벽 기록 수정","kind":"post","revision_of":a,
        "media_expected":0,"media_saved":0,"archive_complete":True,"media":[]},
     ]
@@ -377,3 +379,57 @@ def test_expired_free_worker_history_is_evicted_before_sha_loading_next(
     assert observations==[True]
     assert viewer.open_account("bluesky-"+"b"*40) is newer
     assert len(observations)==1
+
+
+def test_saved_second_original_never_becomes_first_media_slot(populated,monkeypatch):
+    """Partial original slot 0002 must not impersonate missing 0001."""
+    client,root,archive,account=populated
+    pid="c"*40
+    record={
+        "id":pid,"platform":"bluesky","text":"Archived exact media slot",
+        "source_url":"https://bsky.app/profile/qa/post/test2",
+        "posted_at":"2026-11-03T00:00:00Z",
+        "media_expected":2,"media_saved":1,"archive_complete":False,
+        "media":[{"key":"posts/"+pid+"/media/0002.jpg",
+                  "mime":"image/jpeg","kind":"image",
+                  "bytes":len(PHOTO),"sha256":sha256(PHOTO),
+                  "remote_verified":True}]
+    }
+    class ExactArchive:
+        def load_catalog(self,include_entries=False):
+            return [record]
+        def read_verified(self,key,digest,*,cap):
+            return PHOTO if (key==record["media"][0]["key"]
+                             and digest==sha256(PHOTO)) else None
+    monkeypatch.setattr(viewer,"open_account",
+                        lambda _: (None,PROFILE,ExactArchive()))
+    feed=client.get("/api/account-archives/"+account+"/feed")
+    assert feed.status_code==200
+    media=feed.json()["posts"][0]["media"]
+    assert len(media)==1 and media[0]["index"]==1
+    assert media[0]["url"].endswith("/1")
+    assert client.get("/api/account-archives/"+account+"/media/"+pid+"/0").status_code==404
+    verified=client.get("/api/account-archives/"+account+"/media/"+pid+"/1",
+                        headers={"Range":"bytes=0-4"})
+    assert verified.status_code==206 and verified.content==PHOTO[:5]
+
+
+def test_out_of_order_verified_originals_keep_source_positions(populated,monkeypatch):
+    """No reindexing on skipped originals or reordered archive arrays."""
+    _,_,_,account=populated
+    pid="e"*40
+    rows=[{"id":pid,"text":"source slots test","kind":"post",
+           "media_expected":3,"media_saved":2,"archive_complete":False,
+           "media":[{"key":"posts/"+pid+"/media/0003.jpg",
+                      "mime":"image/jpeg","remote_verified":True},
+                     {"key":"posts/"+pid+"/media/0001.jpg",
+                      "mime":"image/jpeg","remote_verified":True},
+                     {"key":"posts/"+"f"*40+"/media/0002.jpg",
+                      "mime":"image/jpeg","remote_verified":True}]}]
+    class Journal:
+        def load_catalog(self,include_entries=False):return rows
+    saved=viewer.feed_data(Journal(),account,0,20)["posts"][0]["media"]
+    assert [x["index"] for x in saved]==[0,2]
+    assert [x["url"].rsplit("/",1)[-1] for x in saved]==["0","2"]
+    assert viewer.archived_media_slot(pid,{"key":"posts/other/media/0001.jpg"}) is None
+    assert viewer.archived_media_slot(pid,{"key":"posts/"+pid+"/media/0017.jpg"}) is None
