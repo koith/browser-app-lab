@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T13:24:16.565Z",
+  "updated": "2026-11-13T13:26:56.711Z",
   "storage": "physically stored public previews in GitHub Pages repository, not paid originals",
   "albums": [
     {
@@ -369,6 +369,61 @@
           "url": "stored-albums/public-yui-sns/de35afe2a35ae33a5e0d.jpg",
           "sha256": "de35afe2a35ae33a5e0d505e89d81314ce39e443332c250d098c6b8f092ff5d7",
           "bytes": 101320,
+          "width": 1366,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan/media",
+          "quality": "SHA verified existing public photo copied to static Pages",
+          "numbering_provenance": "owner_original_gallery_number_or_conflict_safe_append"
+        },
+        {
+          "number": 212,
+          "url": "stored-albums/public-yui-sns/05a46d3f8b56598f7cd0.jpg",
+          "sha256": "05a46d3f8b56598f7cd03c4cf31d407039c5df2575ba5f85df582e881fba048d",
+          "bytes": 132922,
+          "width": 1366,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan/media",
+          "quality": "SHA verified existing public photo copied to static Pages",
+          "numbering_provenance": "owner_original_gallery_number_or_conflict_safe_append"
+        },
+        {
+          "number": 211,
+          "url": "stored-albums/public-yui-sns/60b9679815906fd5ba0b.jpg",
+          "sha256": "60b9679815906fd5ba0bca4fa707de7a728bde83998234605d9cd137d70a070e",
+          "bytes": 132953,
+          "width": 1366,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan/media",
+          "quality": "SHA verified existing public photo copied to static Pages",
+          "numbering_provenance": "owner_original_gallery_number_or_conflict_safe_append"
+        },
+        {
+          "number": 210,
+          "url": "stored-albums/public-yui-sns/0dbb5c6e23a30ab6dd42.jpg",
+          "sha256": "0dbb5c6e23a30ab6dd428cd791e9e02d7f4a42e33f000965dcf7d2f8512f645e",
+          "bytes": 314877,
+          "width": 1366,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan/media",
+          "quality": "SHA verified existing public photo copied to static Pages",
+          "numbering_provenance": "owner_original_gallery_number_or_conflict_safe_append"
+        },
+        {
+          "number": 209,
+          "url": "stored-albums/public-yui-sns/83d8b6499f9f02288267.jpg",
+          "sha256": "83d8b6499f9f022882677d99561f2943e57cc9b708f408c31222cfabf8797fb7",
+          "bytes": 256015,
+          "width": 1366,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan/media",
+          "quality": "SHA verified existing public photo copied to static Pages",
+          "numbering_provenance": "owner_original_gallery_number_or_conflict_safe_append"
+        },
+        {
+          "number": 208,
+          "url": "stored-albums/public-yui-sns/65462f418da7aab7a877.jpg",
+          "sha256": "65462f418da7aab7a87791fc57a870069584f1c5013ef9d901211469351e80b0",
+          "bytes": 238460,
           "width": 1366,
           "height": 2048,
           "origin_page": "https://teapawt.net/super_yuisan/media",
