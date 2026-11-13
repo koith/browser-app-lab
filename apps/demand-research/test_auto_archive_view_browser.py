@@ -62,7 +62,9 @@ def exercise(browser_type,label):
                 start=int(params.get("offset",["0"])[0])
                 route.fulfill(status=200,content_type="application/json",
                               body=json.dumps({"total":len(rows),"offset":start,
-                                "posts":rows[start:start+20],"storage":"TeraBox"}))
+                                "posts":rows[start:start+20],"storage":"TeraBox",
+                                "verified_catalog_cache_age_seconds":180,
+                                "verified_catalog_refresh_pending":True}))
             elif parsed.path.startswith("/api/media/"):
                 route.fulfill(status=200,content_type="application/octet-stream",body="synthetic")
             else:
@@ -71,6 +73,8 @@ def exercise(browser_type,label):
         page.goto(BASE+"/auto-archive",wait_until="domcontentloaded",timeout=30000)
         page.locator("#posts article.post").first.wait_for(state="visible",timeout=12000)
         assert page.locator("#posts article.post").count()==2
+        assert "기존 SHA 검증본 표시" in page.locator("#status").inner_text(), (
+            "stale but independently verified archive must not pretend to be fresh")
         assert page.locator("#posts img").count()==1
         assert page.locator("#posts video").count()==1
         assert page.locator("#posts audio").count()==1
