@@ -280,6 +280,36 @@
       "status": "partial_public_page_only",
       "pages_visited": 1,
       "errors": []
+    },
+    {
+      "id": "public-yui-sns",
+      "title": "심유이 — 코스프레·공개 사진",
+      "source": "https://teapawt.net/super_yuisan",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 467,
+          "url": "stored-albums/public-yui-sns/c00059932bfcfd17c214.jpg",
+          "sha256": "c00059932bfcfd17c214d4dc8b462de4846cad8881bcebc2ac24f4feb31b8802",
+          "bytes": 325352,
+          "width": 1365,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 468,
+          "url": "stored-albums/public-yui-sns/68ff6a9b92bd13e7a1de.jpg",
+          "sha256": "68ff6a9b92bd13e7a1def21ef2dfb42a28c7bf627d1a493164906107158dcc7b",
+          "bytes": 234959,
+          "width": 1366,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        }
+      ]
     }
   ]
 }
