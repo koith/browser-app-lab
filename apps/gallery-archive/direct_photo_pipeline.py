@@ -127,6 +127,19 @@ def reviewed_direct_source(url, model):
     """Eligible *storage* origins. Other public hosts remain discovery leads."""
     from official_sample_recovery import _publisher_page
     from urllib.parse import urlsplit
+    if model=='yui' and urlsplit(url).hostname=='showartx.net':
+        # Only the known, individually registered Yui public-preview works.
+        # Their HTML extractor independently proves exact model/volume and
+        # observes numbered JPGs; no paid gallery enumeration.
+        p=urlsplit(url)
+        volumes={'639','650','670','677','684','693'}
+        names={'asuna-qipao','become-beautiful','meow','night-cat',
+               'night-training','pure','summer'}
+        m=re.fullmatch(r'/artgravia-vol-(\d{3})-yui/?',p.path,re.I)
+        n=re.fullmatch(r'/yui-([a-z0-9-]+)/?',p.path,re.I)
+        if p.scheme=='https' and not p.query and not p.fragment and (
+                m and m.group(1) in volumes or n and n.group(1) in names):
+            return True
     if model=='yui' and url in (YUI_PHOTOGRAPHER_ORIGINAL_X,YUI_PHOTOGRAPHER_PUBLIC_VIEW):
         return True
     if _publisher_page(url):
@@ -150,6 +163,28 @@ def reviewed_direct_media(url, page, model):
         return url in YUI_PHOTOGRAPHER_ORIGINAL_MEDIA
     if _publisher_page(page):
         return _publisher_photo(url)
+    if model=='yui' and urlsplit(page).hostname=='showartx.net' and reviewed_direct_source(page,'yui'):
+        # Exactly the ordinary public JPG naming patterns of that work;
+        # the HTML parser must have observed the URL in its work article.
+        origin=urlsplit(url)
+        source=urlsplit(page)
+        if (origin.scheme!='https' or origin.hostname!='showartx.net'
+                or origin.query or origin.fragment or origin.username
+                or origin.password or origin.port):
+            return False
+        vol=re.fullmatch(r'/artgravia-vol-(\d{3})-yui/?',source.path,re.I)
+        named=re.fullmatch(r'/yui-([a-z0-9-]+)/?',source.path,re.I)
+        prefix=('ART_'+vol.group(1)+'_' if vol else {
+          'asuna-qipao':'Yui_Asuna-Qipao_',
+          'become-beautiful':'yui_beautiful_',
+          'meow':'Yui_Meow_',
+          'night-cat':'NightCat_',
+          'night-training':'Yui_Night-Training_',
+          'pure':'Yui_pure_',
+          'summer':'Yui_Sum_'}.get(named.group(1) if named else '',''))
+        return bool(prefix and re.fullmatch(
+          r'/wp-content/uploads/\d{4}/\d{2}/'+re.escape(prefix)+
+          r'\d{1,3}(?:-\d{2,5}x\d{2,5})?\.jpg',origin.path,re.I))
     p=urlsplit(url)
     if (urlsplit(page).hostname in X_PUBLIC_HOSTS
             and reviewed_direct_source(page,model)):
