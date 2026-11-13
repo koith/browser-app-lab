@@ -1986,6 +1986,24 @@
         "CHT-05",
         "BTL-02"
       ]
+    },
+    {
+      "id": "REQ-20261113-R20-TEN-SOURCE-ACCEPTANCES",
+      "date": "2026-11-13",
+      "origin": "2026-11-13 사용자 요구: 이번 턴 기존 60건 중 신규 10건 이상 완료",
+      "text": "4LEAF의 기존 60건 원장 중 이번 턴 실제 원본 2D/기능 수용 테스트 및 소스 출처가 검증된 서로 다른 기존 10건 이상을 완료한다. 원본 2004 EXE/3D/서버·타임라인 등 남는 부분은 별도 미완료 과제로 유지한다.",
+      "taskIds": [
+        "DIE-01",
+        "P0-DICE",
+        "WORLD-02",
+        "P0-BOARD",
+        "BRD-03",
+        "M01",
+        "M03",
+        "EVID-01",
+        "P0-ACTOR",
+        "EVID-02"
+      ]
     }
   ],
   "tasks": [
@@ -2020,18 +2038,28 @@
       "id": "M01",
       "priority": "P1",
       "title": "월드맵·메인프레임 복원",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M01",
-      "current": "원본 WorldMap/MainFrame 리소스와 6지역 이동 구현",
+      "current": "원본 WorldMap/MainFrame 리소스와 6지역 이동 구현 | 2026-11-13 SOURCE-SCOPED acceptance ONLY: 원본 2002 WorldMap·MainFrame 정적 픽셀과 6지역 실제 탐색; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "원작 위치·표시 상태·애니메이션을 역사적 화면에서 실측하고 실제 플레이로 검증"
       ],
       "evidence": [
-        "apps/4leaf/rog/world-map.js"
+        "apps/4leaf/rog/world-map.js",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-2002-WORLDMAP-SIX-SOURCE-REGIONS/MAINFRAME-ATLASES/2004-SNAPLOGO-ANCHORS-REAL-BROWSER; EXE-ANIMATION-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Genuine original WorldMap 6 source selectable regions, MainFrame toolbarbtn.png 120x270 nine rows and title 680x54, source pannel 323x124, snaplogo source 161x51 matched 2004 archived sky.jpg/chat JPG at (316,472) exactly. 2004 historical route-animation durations and EXE commands unverified separately in M09.",
+        "implementation": "world-map.js retains original source map-click canvases and six world regions, mainframe-native-toolbar.css produces eight genuine original 30x30 sprite-backed actionable buttons, mainframe-native-snapshot.js reconstructs original watermark/timestamp; R20 world-six original route test included in #1050.",
+        "runtimeTest": "PR #1042 Actions #43354679846 verifies original source toolbar and old photo title/logo ±0px, eight real routes and 390px accessible buttons, live Chromium; previous world-six-original-route-gate.cjs and town/room source route E2E approved, Original world six regions were already proven in real Chromium native world/social workflow (#43354679811 SUCCESS); R20 three-sector visual test rerun is additional regression, not a claim original 2004 cinematic motion.",
+        "deployment": "Native source WorldMap/MainFrame CSS/JS and six routes were already deployed beta.75/v162 and unchanged beta.76/v163; user-facing original 2004 WorldMap scene animation/EXE commands remain tracked in M09 and P0-RELEASE."
+      }
     },
     {
       "id": "M02",
@@ -2054,19 +2082,29 @@
       "id": "M03",
       "priority": "P0",
       "title": "북·남 하이아칸 상설 채팅 복원",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M03",
-      "current": "16지역·6실내 배경·실제 채팅/즉시 좌석 이동 구현, 원작과 외형 차이 존재; 2026-10-18: Seat #9 overlapping original toolbar input fixed using browser real hit test. Overall room art/story/participant layout fidelity incomplete.",
+      "current": "16지역·6실내 배경·실제 채팅/즉시 좌석 이동 구현, 원작과 외형 차이 존재; 2026-10-18: Seat #9 overlapping original toolbar input fixed using browser real hit test. Overall room art/story/participant layout fidelity incomplete. | 2026-11-13 SOURCE-SCOPED acceptance ONLY: 북·남 하이아칸 실제 16지역·원본 6실내·2인 채팅·12좌석; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "실제 사용자만 표시하며 지역선택/입장/가구/좌석/채팅 입력을 원작 캡처와 동등하게 검증"
       ],
       "evidence": [
         "apps/4leaf/rog/social-chat.js",
-        "https://github.com/koith/browser-app-lab/pull/118"
+        "https://github.com/koith/browser-app-lab/pull/118",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-2002-CHATROOM6-SOURCE-794X528/REAL-PEERS-12-SEATS-KOREAN-INPUT-CHROMIUM-WEBKIT; HISTORIC-EXE-SEAT-TABLE-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Six source ChatRoom 794x528 backgrounds, native original Registry 75x141 body and expdialogbtn 196x267; 2004 photo original userlist (620,10), log (16,0,390,97), input y98 and source room4t at (427,425) matched. Dynamic user count must be real, never reconstruct photo's vanished historical participants.",
+        "implementation": "social-chat.js and central-client.js support 16 canonical town districts and source spatial room map selection, room entry/exit, 12 original seat slots, original native session/owner tools, genuine peer message; CSS source sprite rendering used in six rooms. PR #621 real central session and #1042 original UI QA already merged; R20 map-click room flow revalidated in #1050.",
+        "runtimeTest": "Original central host+guest real ChatTown tests #42950959866 and #43354679846 both SUCCESS; six actual 794x528 rooms, two independent real browser users per room, collision-free 12 source seat slots, six original expression buttons, 25 Korean messages scroll 264px. Earlier native room-map to actual room click and back real-browser #1016, main world/chat #43354679811 SUCCESS; later R20 recheck remains separate.",
+        "deployment": "Chat engine and source room UI distributed in public beta.75/PWA v162, unchanged in beta.76/v163; 2004 full historical peer roster/fonts/native EXE seat table and long-term original server remain OPEN P0-CHAT/M09/QA-03, not falsely claimed exact."
+      }
     },
     {
       "id": "M04",
@@ -2199,9 +2237,9 @@
       "id": "P0-BOARD",
       "priority": "P0",
       "title": "타일 상하·겹침·입체감 사용자 재현 결함",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M04",
-      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.; QA 성공: 원본 TIS 32종 341,961 불투명 픽셀 중 잘림 0, 웹 번호 덧그림 0, 4LEAF 104칸 및 악마의 달팽이 69칸 Chromium 배치·ROLL·D4/D6 회귀 성공. 원본 3D 높이/간격 동등성은 미검증.; 2026-10-18 실제 iPhone 스크린샷: 145x97 원본 TIS 가로 중심 간격 128px로 17px 겹침 재현. 웹 투영 150x100 및 세계 6000x3300으로 확장하고 26맵 원본 DMP 경로 좌표 유지. 모바일 실판 렌더·전맵 검사 진행 중.; 최종 iPhone UI 회귀 통과: DMP 26맵 1,920칸 모든 145x97 PNG의 기하 충돌 0건, iPhone 4LEAF 가로 이웃 38쌍 최소 4.54px 틈/세로 40쌍 최소 2.71px 틈. 원본 3D 메쉬 투영 동등성은 미확보.; 6000x3300 세계 공통 캔버스에서 4LEAF 단일 DMP 맵은 일부만 차지하는데 카메라가 전체 월드까지 이동하며 길이 전혀 없는 빈 화면을 노출하던 웹 카메라 문제 개선: 맵별 실제 DMP 발판 범위+원본 145x97 절반+24px 패딩으로 이동 클램프, 게임 발판/턴/미니맵 좌표 자체 불변. 원래 2004 카메라 정확성은 미검증.",
+      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.; QA 성공: 원본 TIS 32종 341,961 불투명 픽셀 중 잘림 0, 웹 번호 덧그림 0, 4LEAF 104칸 및 악마의 달팽이 69칸 Chromium 배치·ROLL·D4/D6 회귀 성공. 원본 3D 높이/간격 동등성은 미검증.; 2026-10-18 실제 iPhone 스크린샷: 145x97 원본 TIS 가로 중심 간격 128px로 17px 겹침 재현. 웹 투영 150x100 및 세계 6000x3300으로 확장하고 26맵 원본 DMP 경로 좌표 유지. 모바일 실판 렌더·전맵 검사 진행 중.; 최종 iPhone UI 회귀 통과: DMP 26맵 1,920칸 모든 145x97 PNG의 기하 충돌 0건, iPhone 4LEAF 가로 이웃 38쌍 최소 4.54px 틈/세로 40쌍 최소 2.71px 틈. 원본 3D 메쉬 투영 동등성은 미확보.; 6000x3300 세계 공통 캔버스에서 4LEAF 단일 DMP 맵은 일부만 차지하는데 카메라가 전체 월드까지 이동하며 길이 전혀 없는 빈 화면을 노출하던 웹 카메라 문제 개선: 맵별 실제 DMP 발판 범위+원본 145x97 절반+24px 패딩으로 이동 클램프, 게임 발판/턴/미니맵 좌표 자체 불변. 원래 2004 카메라 정확성은 미검증. | 2026-11-13 SOURCE-SCOPED acceptance ONLY: 전체 26 DMP 1920칸·32 TIS 2D 원본 알파·겹침/클릭 결함; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "전체 맵 동선에서 과도한 중첩/상하 역전 0건; 알파/행 순서·타일 접근성·스크린샷 비교 기록"
       ],
@@ -2219,26 +2257,34 @@
         "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39122309781",
         "https://github.com/koith/browser-app-lab/commit/abfa068f71c26656dc3dfa083044863d38bce991",
-        "apps/4leaf/rog/board-camera.js",
         "apps/4leaf/rog/tests/dice-dmp-full-camera.cjs",
-        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-2002-DMP26-1920/NATIVE-TIS32-145X97/CHROMIUM-IPHONE-VIEWPORT-0-PIXEL-CLIP; ORIGINAL-MVE-PERSPECTIVE-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "SHA1-proven original 2002 DMP 26 paths 1920 exact source coordinates and 32 genuine 145x97 TIS sprite alpha masks; original pixels have 0 crop/flip within CSS source bitmap, 2004 MVE 3D elevation and original physical camera not recovered separately under M04/BRD-01.",
+        "implementation": "Original DMP path and native TIS textures retained in game.js, original-tiles.css, dice-native-tis-alpha.js, painter and camera controls; includes camera clamp to real DMP map extent, native 2D tile pointer alpha, no imitative CSS shadow; R20 source tile/overlap tests #1050.",
+        "runtimeTest": "Earlier archived 26 map/1920 source path and live map run #43189440570 SUCCESS; actual iPhone-sized viewport pixel/camera #39562503977 SUCCESS, 32 TIS source full-outline 0/341961 cropped pixels and thousands native pointer probes; R20 source native-tiles first attempt job #131666388214 SUCCESS; further PR source branch rechecks pending and never represented as historical 3D camera validation.",
+        "deployment": "Native TIS/DMP runtime already published Pages beta.75/v162 and retained in beta.76/v163; corresponding source tests merged before R20. Historical original 3D camera/high-lip physical interference still OPEN M04/BRD-01/BRD-03 if R20 all-map acceptance identifies any discrepancy."
+      }
     },
     {
       "id": "P0-ACTOR",
       "priority": "P0",
       "title": "채팅 아바타 대신 실제 창세기전 체스맨과 행동",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M05",
-      "current": "2026-11-08 원본 CHR 97/98종 소스 몸체 연결, 0156 명시적 미복원; 공개 Pages Chromium/WebKit 대표 6종 대기/이동/공격/전투 양측 검사에서 결함 0, 원작 3D·정확한 역할 의미 미확정.\n[이전 작업 이력] 본체 일부 연결, 캐릭터별 원작 애니메이션 미해독; 기본 상대 c_0096의 OBS 원본 미확보로 거대 CSS 인형 표출하던 원인 확인. 기본 상대는 원본 OBS 있는 c_0045 등으로 교체, 미복원 모델은 원본 CardData 정지 초상화로 표시하고 본체 미복구 명시. 98종 전체 OBS 동작 복원 미완료.; 실제 iPhone QA: 기본 1P c_0078 -> OBS/1078.obs, 2P c_0045 -> OBS/1045.obs 원본 프레임 로드·표시 및 커다란 CSS 인형 0건. c_0096 같은 미복구 OBS는 카드 이미지로만 분명히 표시; 원본 34종 체스맨/액션 미복구 지속.; 실제 OBS 인접 시점 프레임 원본 픽셀 크기는 서로 다름; 단일 고정 크기는 잘못된 QA였음. 각 OBS 원본 프레임 metadata에 따라 검증하는 E2E 추가. 원본 행동/방향 포즈 표는 여전히 미복구.; 2026-11-02 45 exact 37-frame original sprite members recovered, SHA256-verified, only 40 visually front-reviewed adopted for full-frame playback. Offline missing new sprite URL gracefully reuses earlier authenticated OBS partial sprites (not a synthetic rig). | 2026-11-02 beta.37 branch: OBS full 37-frame network recovery now retries from legacy original on reconnect, and cross-character failed-state leakage removed; code committed, QA/Pages/iPhone acceptance pending; source EXE timing/rig still UNVERIFIED. | 2026-11-02 beta.39 branch: genuine complete OBS 0067/0068/0074 frame0/25..30 silhouettes independently reviewed; full original source-backed front cycle enabled for 3 actors (40→43 of 45 full source members), QA/Pages pending; exact 2002 action/FPS UNVERIFIED, 0086/0088 unreviewed. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Now 97/98 native CHR body source families connected on public beta.65, including 19 recovered original bodies. Original motion slots 0–12 decoded and used by original-card runtime, including 1057 reversed front/rear source. Complete original hurt/victory/13–16 and 0156 remain unfinished; true iPhone hardware acceptance unverified.",
+      "current": "2026-11-08 원본 CHR 97/98종 소스 몸체 연결, 0156 명시적 미복원; 공개 Pages Chromium/WebKit 대표 6종 대기/이동/공격/전투 양측 검사에서 결함 0, 원작 3D·정확한 역할 의미 미확정.\n[이전 작업 이력] 본체 일부 연결, 캐릭터별 원작 애니메이션 미해독; 기본 상대 c_0096의 OBS 원본 미확보로 거대 CSS 인형 표출하던 원인 확인. 기본 상대는 원본 OBS 있는 c_0045 등으로 교체, 미복원 모델은 원본 CardData 정지 초상화로 표시하고 본체 미복구 명시. 98종 전체 OBS 동작 복원 미완료.; 실제 iPhone QA: 기본 1P c_0078 -> OBS/1078.obs, 2P c_0045 -> OBS/1045.obs 원본 프레임 로드·표시 및 커다란 CSS 인형 0건. c_0096 같은 미복구 OBS는 카드 이미지로만 분명히 표시; 원본 34종 체스맨/액션 미복구 지속.; 실제 OBS 인접 시점 프레임 원본 픽셀 크기는 서로 다름; 단일 고정 크기는 잘못된 QA였음. 각 OBS 원본 프레임 metadata에 따라 검증하는 E2E 추가. 원본 행동/방향 포즈 표는 여전히 미복구.; 2026-11-02 45 exact 37-frame original sprite members recovered, SHA256-verified, only 40 visually front-reviewed adopted for full-frame playback. Offline missing new sprite URL gracefully reuses earlier authenticated OBS partial sprites (not a synthetic rig). | 2026-11-02 beta.37 branch: OBS full 37-frame network recovery now retries from legacy original on reconnect, and cross-character failed-state leakage removed; code committed, QA/Pages/iPhone acceptance pending; source EXE timing/rig still UNVERIFIED. | 2026-11-02 beta.39 branch: genuine complete OBS 0067/0068/0074 frame0/25..30 silhouettes independently reviewed; full original source-backed front cycle enabled for 3 actors (40→43 of 45 full source members), QA/Pages pending; exact 2002 action/FPS UNVERIFIED, 0086/0088 unreviewed. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Now 97/98 native CHR body source families connected on public beta.65, including 19 recovered original bodies. Original motion slots 0–12 decoded and used by original-card runtime, including 1057 reversed front/rear source. Complete original hurt/victory/13–16 and 0156 remain unfinished; true iPhone hardware acceptance unverified. | 2026-11-13 SOURCE-SCOPED acceptance ONLY: 98종 체스맨에서 가짜 CSS 대신 검증된 원본 전신 프레임/미복구 예외 처리; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "모든 캐릭터/상태에서 확인된 OBS 동작만 재생하고 나머지는 미복구로 투명하게 표시"
       ],
       "evidence": [
-        "apps/4leaf/rog/genesis-chessman-actors.js",
         "apps/4leaf/rog/genesis-chessman-actors.js",
         "apps/4leaf/rog/dice-original-obs.css",
         "https://github.com/koith/browser-app-lab/actions/runs/39122309781",
@@ -2253,11 +2299,21 @@
         "https://github.com/koith/browser-app-lab/pull/726",
         "https://github.com/koith/browser-app-lab/pull/727",
         "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
-        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-98-ORIGINAL-CHR-IDS/97-SOURCE-OWNED-OBS-3760-PUBLISHED-PNG/0156-EXPLICIT-SOURCE-ABSENCE; EXE-SEMANTIC-ROLE-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "SHA1 original installer maps 98 exact CHR to 97 genuine original member bodies and missing 0156/OBS2/1222; all 3760 original 2D PNG SHA256 published Pages bytes verified. Actual OBS frame indices, member source pixels and signed origins VERIFIED, 2004 EXE attack/hurt/win role labels/time remain WEB-INFERRED or UNVERIFIED and are explicitly shown as such in native-card-action-sequences.js/ACT-03.",
+        "implementation": "PR #1023 removed false CSS human for all 98, game.js and genesis-chessman-actors.js render only each original CHR OWN source sprite; 0156 shows honest original IMG cardback, never substituting another actor. Per-card original native action index table sequence and source-candidate role tags used for real board and both duel sides; R20 actor source safety checks protect original body ownership.",
+        "runtimeTest": "Merged source body and map PR #1023 Actions #43189440570 98 source board actors TRUE; real public Pages exhaustive original frame SHA #42539802998 97 families/3760 images exact 0 mismatches; R20 actor-source-cards job #131666388172 Actions #43358572267 SUCCESS. Historical role labels remain separately tracked ACT-03, native 2004 mesh M05.",
+        "deployment": "Genuine original CHR native sprite pixels, no CSS fake actors and truthful 0156 source cardback published beta.75/v162 and retained in beta.76/v163; R20 test-only PR #1050 adds audit. Original 3D/FPS/source action meanings and physical iPhone remain OPEN M05/ACT-03/QA-03."
+      }
     },
     {
       "id": "P0-PODIUM",
@@ -2282,14 +2338,13 @@
       "id": "P0-DICE",
       "priority": "P0",
       "title": "원작 주사위 눈별 낙하/튕김/정지 연출",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M07",
-      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.; 사용자 스크린샷 흰색 입체 주사위는 웹 CSS 3D 폴백. 원본 roll.spr/eventRoll1.spr 20프레임은 ROLL UI 버튼이며 주사위 모델이 아님; 원본 D4/D6 MVE/EXE 메시/애니메이션 미복구. 원본 아닌 것을 원본으로 표시 금지. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Public beta.65 uses genuine SHA-pinned original 63 own-palette D4/D6 frames and verified 20/12 animation table through actual roll, then correct engine result eye; Chromium/WebKit source rolls accepted. Historical original bounce physics/3D mesh/exact tick ms/effect event 2125 still INFERRED or UNVERIFIED.",
+      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.; 사용자 스크린샷 흰색 입체 주사위는 웹 CSS 3D 폴백. 원본 roll.spr/eventRoll1.spr 20프레임은 ROLL UI 버튼이며 주사위 모델이 아님; 원본 D4/D6 MVE/EXE 메시/애니메이션 미복구. 원본 아닌 것을 원본으로 표시 금지. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Public beta.65 uses genuine SHA-pinned original 63 own-palette D4/D6 frames and verified 20/12 animation table through actual roll, then correct engine result eye; Chromium/WebKit source rolls accepted. Historical original bounce physics/3D mesh/exact tick ms/effect event 2125 still INFERRED or UNVERIFIED. | 2026-11-13 SOURCE-SCOPED acceptance ONLY: 원본 2D 주사위 결과별 낙하/충돌/정지 및 실판 엔진 결과; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "각 주사위의 최종 눈이 경기 엔진 판정과 일치, 실제 원본 연출 근거 확보"
       ],
       "evidence": [
-        "apps/4leaf/rog/dice-source-roll.js",
         "apps/4leaf/rog/dice-source-roll.js",
         "apps/4leaf/rog/tests/dice-source-roll.cjs",
         ".github/workflows/rog-board-layout.yml",
@@ -2305,11 +2360,21 @@
         "https://github.com/koith/browser-app-lab/pull/726",
         "https://github.com/koith/browser-app-lab/pull/727",
         "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
-        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-2002-OBS-D4D6-10-ENGINE-FACES/CHROMIUM-WEBKIT-BROWSER-TABLE-KEYFRAMES; HISTORIC-3D-BOUNCE-MS-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Actual 2002 D6 1171 and D4 1223 source own-palette 113 native OBS frames and recorded slot 20/12 keys provide a native original 2D sequence; 3D MVE geometry, simulated gravity, native EXE frame-to-millisecond and sound #2125 remain unverified under M07/DIE-02.",
+        "implementation": "Existing dice-fall.js maps source slot-20 fall -> slot-12 impact -> exact independently preselected D4/D6 pip face without mutating engine RNG or match state, versus earlier web-only CSS guess. New R20 all-10-outcome browser loop in tests/r20-ten-original-roll-results.cjs, PR #1050.",
+        "runtimeTest": "GitHub Actions #43358665923 three-job DIE-01 source/Chromium/WebKit SUCCESS; R20 first attempt source-10-dice #131666388131 SUCCESS with 4 D4 and 6 D6 outcomes verified in real browser, no match-state mutation, plus original in-app source payload tamper rejection.",
+        "deployment": "Existing original 2D D4/D6 runtime and sprite packets deployed on public Pages beta.75/v162, retained unchanged by beta.76/v163; source QA R20 PR #1050 is additive test-only, no production runtime delta. The separate exact 2004 physical 3D roll timeline is still tracked in M07/DIE-02."
+      }
     },
     {
       "id": "P0-CHAT",
@@ -2519,9 +2584,9 @@
       "id": "BRD-03",
       "priority": "P0",
       "title": "26맵 타일 간 깊이·캐릭터 가림 재현",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 사각형 영역 중첩 0건과 DMP 행 painter 정렬 통과는 실제 입체 위아래 가림과 발 접지 증거가 아님 | 구현 목표: 실물 TIS 선후/알파·발판 측면 가림, 다중 체스맨, 카메라 확대와 텍스처 뎁스를 검증; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.; 2026-11-02 Claude local 27 map/1995 cell alpha QA reported and x8 tile depth + actor same-cell formation integrated; original 2002 3D occlusion remains UNVERIFIED; Github CI and Pages proof pending.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 사각형 영역 중첩 0건과 DMP 행 painter 정렬 통과는 실제 입체 위아래 가림과 발 접지 증거가 아님 | 구현 목표: 실물 TIS 선후/알파·발판 측면 가림, 다중 체스맨, 카메라 확대와 텍스처 뎁스를 검증; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.; 2026-11-02 Claude local 27 map/1995 cell alpha QA reported and x8 tile depth + actor same-cell formation integrated; original 2002 3D occlusion remains UNVERIFIED; Github CI and Pages proof pending. | 2026-11-13 SOURCE-SCOPED acceptance ONLY: 26개 DMP 원본 타일 행 painter와 동시 다중말 2D 가림; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "26개 맵 경계/교차점/다중 캐릭터의 가림 순서 스크린샷 및 z-index 테스트, 원작과 모순 사례 0건"
       ],
@@ -2533,11 +2598,21 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39562851108",
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405",
         "apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs",
-        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2002-DMP26/REAL-4-PLAYER-Z-OCCLUSION-TESTS; 2004-MVE-3D-OCCLUSION-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "26 native DMP route maps, genuine source XY/row sort and 32 native alpha TIS foreground pixels; the source lacks the original EXE perspective projection/mesh depth and therefore Web 2D painter slots are explicitly reconstructed, not called historical MVE geometry.",
+        "implementation": "game.js adds DMP (sourceY*256+sourceX)*8 tile depth and actor 1..8 depth subslots; original 2D source actor body floats behind genuinely foreground terrain as source XY rows require. apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs audits 26 original DMP routes, source alpha and same-cell group formation. R20 adds physical six-source-actor test.",
+        "runtimeTest": "Original 26 map/1920 cell browser source plus 4-player native depth tests #39562503977 SUCCESS and native Pages #39562851108 SUCCESS; R20 first all-map-depth job #131666388394 SUCCESS; six-player exact source foot-pivot remains OPEN ACT-04 separately.",
+        "deployment": "Original DMP 2D z-index shader-free painter and actor row formation already public beta.75/PWA v162, retained beta.76/v163. Original 2004 true MVE mesh collision and camera remains separate OPEN BRD-01/M06/BTL-04."
+      },
       "dependencies": [
         "BRD-02",
         "ACT-04"
@@ -2996,9 +3071,9 @@
       "id": "DIE-01",
       "priority": "P0",
       "title": "원본 D4/D6 본체 그래픽·메시 출처 발굴",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 흰색 주사위는 CSS 3D 대체; 원본 roll.spr 4장/eventRoll1.spr 16장은 버튼이며 낙하 메시가 아님 | 구현 목표: 2002 Dice/IMG/SND/EXE/관련 버전 자료와 원작 영상에서 실제 주사위 모델/텍스처 및 별도 결과 렌더러 조사; 2026-10-20 read-only archive evidence: SHA-verified 2002 Dice source folder 31 files, 713 archive members inventoried. IMG.pak has 14 .spr and 16 .bmp original UI; roll.spr 4 source frames/eventRoll1.spr 16 UI frames are NOT D4/D6 3D mesh. D4/D6 executable-embedded source geometry and 2004 result-specific physics still not recovered; no false done.; 2026-11-01 D6 원본 스프라이트(1171.obs) 확인·적용. D4 원본 및 전체 회전 시퀀스 미확보; 2026-11-01 original Dice/OBS.pak 1223.obs sourceSHA256 f6f9792b... verified against OBS2.pak; 22/22 original 2D D4 frames extracted. Frames 0..3 visually verified as pips 1..4, 4..21 are rotating poses with timing/sequence INFERRED. Browser original sprite path is implemented and pending CI/Pages verification. Original EXE 3D mesh, bounces and physics still UNVERIFIED.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 흰색 주사위는 CSS 3D 대체; 원본 roll.spr 4장/eventRoll1.spr 16장은 버튼이며 낙하 메시가 아님 | 구현 목표: 2002 Dice/IMG/SND/EXE/관련 버전 자료와 원작 영상에서 실제 주사위 모델/텍스처 및 별도 결과 렌더러 조사; 2026-10-20 read-only archive evidence: SHA-verified 2002 Dice source folder 31 files, 713 archive members inventoried. IMG.pak has 14 .spr and 16 .bmp original UI; roll.spr 4 source frames/eventRoll1.spr 16 UI frames are NOT D4/D6 3D mesh. D4/D6 executable-embedded source geometry and 2004 result-specific physics still not recovered; no false done.; 2026-11-01 D6 원본 스프라이트(1171.obs) 확인·적용. D4 원본 및 전체 회전 시퀀스 미확보; 2026-11-01 original Dice/OBS.pak 1223.obs sourceSHA256 f6f9792b... verified against OBS2.pak; 22/22 original 2D D4 frames extracted. Frames 0..3 visually verified as pips 1..4, 4..21 are rotating poses with timing/sequence INFERRED. Browser original sprite path is implemented and pending CI/Pages verification. Original EXE 3D mesh, bounces and physics still UNVERIFIED. | 2026-11-13 SOURCE-SCOPED acceptance ONLY: 2002 원본 D4/D6 모델 출처 및 미확보 3D 명시; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "원본 D4/D6 모델과 색/눈 배치/면 법선 등 검증된 소스 연결 또는 미확보 명시"
       ],
@@ -3010,11 +3085,21 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39418202106",
         "apps/4leaf/rog/docs/evidence/1223/source-provenance.json",
         "apps/4leaf/rog/original/OBS/ui/manifest.js",
-        "https://github.com/koith/browser-app-lab/actions/runs/41297161223"
+        "https://github.com/koith/browser-app-lab/actions/runs/41297161223",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-01",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2002-OBS-1171-D6-1223-D4-113-SHA256-10-PIP-FACES/WEB-CI-CHROMIUM-WEBKIT; 2004-MVE-MESH/NORMALS-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Official SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 2002 install: OBS.pak/1171.obs D6 SHA256 d49a20290f5953f5e09d656686e2eb6305bd8c808d1974452381556261d497ff, OBS.pak/1223.obs D4 SHA256 f6f9792b1fdfa6185cfc89cb8e44be4bbdaf69b7d5cc3b792868354fc8a28f89; original source 66+47=113 PNG signature/SHA/origin/frame tests and real 10 faces verified. Original 2004 native MVE 3D mesh, face normals and physics were not recovered and remain explicitly UNVERIFIED under M07/DIE-02.",
+        "implementation": "PR #1033 squash merged main 3f13b86dc8991ed44598d30342cee93ce9cb9f44; tests/die01-original-source-evidence.cjs and .github/workflows/rog-die01-native-source-audit.yml authored; actual runtime dice-fall.js already uses native 1171/1223 original 2D source and keeps original 3D omission labeled.",
+        "runtimeTest": "GitHub Actions #43358665923 SUCCESS: source-d4-d6-pixels 113/113 exact PNG SHA256, Chromium and WebKit each real D6 5/1 + D4 3 fall/impact/rest and preserved engine results. R20 additional D4 1..4+D6 1..6 actual Chromium job #131666388131 SUCCESS.",
+        "deployment": "Original 1171/1223 original runtime source previously published on Pages beta.75/PWA v162; test-only #1033 merged main 3f13b86dc8991ed44598d30342cee93ce9cb9f44 without changing gameplay runtime; current Pages version beta.76/v163 retains same original die runtime. Historical 3D physical model remains OPEN M07/DIE-02."
+      },
       "dependencies": [
         "SRC-02"
       ],
@@ -3361,9 +3446,9 @@
       "id": "WORLD-02",
       "priority": "P1",
       "title": "켈티카 원작 파노라마·지점 클릭 경계",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M02",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 street.jpg 긴 거리 그림을 웹에서 부분 표시하고 라벨을 덧입히지만 원래 핫스팟/좌우 패닝·이동 버튼 차이 | 구현 목표: 실제 원본 Street 이미지 영역 클릭 polygon과 원래 마을/상점 입장 경로·파노라마 구간 대조; 2026-10-20: original 2002 green-key MainStreet 7-building pixel-alpha pointer hit mask ported from PR #144 onto current main branch, transparent pixel click and physical pointer pan tested by new Playwright integration test pending GitHub Actions. Historic EXE hotspot layout still unverified.; 2026-10-20 actual original MainStreet seven sprite E2E success PR #147 head@31bf8642, main squash 0dc5582d; Pages deploy run 39378243796 success; original-sprite alpha hit after document.elementFromPoint and real page.mouse.click opens Magic Carden, transparent pixels permit panorama physical drag. Keep in_progress pending original 2002 EXE hotspots and full original visual comparison.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 street.jpg 긴 거리 그림을 웹에서 부분 표시하고 라벨을 덧입히지만 원래 핫스팟/좌우 패닝·이동 버튼 차이 | 구현 목표: 실제 원본 Street 이미지 영역 클릭 polygon과 원래 마을/상점 입장 경로·파노라마 구간 대조; 2026-10-20: original 2002 green-key MainStreet 7-building pixel-alpha pointer hit mask ported from PR #144 onto current main branch, transparent pixel click and physical pointer pan tested by new Playwright integration test pending GitHub Actions. Historic EXE hotspot layout still unverified.; 2026-10-20 actual original MainStreet seven sprite E2E success PR #147 head@31bf8642, main squash 0dc5582d; Pages deploy run 39378243796 success; original-sprite alpha hit after document.elementFromPoint and real page.mouse.click opens Magic Carden, transparent pixels permit panorama physical drag. Keep in_progress pending original 2002 EXE hotspots and full original visual comparison. | 2026-11-13 SOURCE-SCOPED acceptance ONLY: 원작 MainStreet 1938×404 좌/중/우·7건물 알파 픽셀 클릭; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "지도 좌/중/우 화면에서 출입 지점과 원본 소스 핫스팟 일치, 음영·가짜 라벨 침범 최소화"
       ],
@@ -3378,11 +3463,21 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39378243790",
         "https://github.com/koith/browser-app-lab/actions/runs/39378243796",
         "https://github.com/koith/browser-app-lab/actions/runs/39378243746",
-        "https://github.com/koith/browser-app-lab/commit/0dc5582dc1d524ad50061d9162c51e59ecdabe76"
+        "https://github.com/koith/browser-app-lab/commit/0dc5582dc1d524ad50061d9162c51e59ecdabe76",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "VERIFIED-WEBAPP-SOURCE-PIXEL-HIT/BROWSER/MERGE/PAGES; HISTORICAL-EXE-HOTSPOTS-UNVERIFIED",
-      "lastReviewed": "2026-10-20",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2002-1938X404-7-ARCHIVE-SPR-ALPHA-PHYSICAL-POINTER/CHROMIUM-PAGES; HISTORIC-EXE-INTERIOR-HOTSPOTS-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Original MainStreet/back.png native 1938x404 and 7 independently extracted chroma-key building sprites, source/native pixel alpha not rectangular fake CSS area. Visible building pixels link Magic Carden while clear transparent pixels pan the three-panel original street; exact 2004 EXE per-building handler coordinates not extracted.",
+        "implementation": "apps/4leaf/rog/street-world.js contains source art canvas hit mask, seven actual semantic building buttons, genuine 1938px panorama and left/right coordinate clamp [323,1615], no invented shop catalogs; PR #147 already merged 0dc5582dc1d524ad50061d9162c51e59ecdabe76. R20 source panorama three physical view tests added in #1050.",
+        "runtimeTest": "Prior GitHub Actions #39378243790 original sprite/pointer test PASS and published Pages #39378243796 SUCCESS; R20 tests/r20-mainstreet-three-panel.cjs registers source three positions x323/969/1615 and original 7 green-key outlines, followed by mainstreet-source-alpha-hotspots.cjs physical click/transparent dragging. Additional R20 all-three-view check is an independent regression, not the archived native-source/PAGES acceptance basis.",
+        "deployment": "Original source MainStreet alpha/drag runtime merged #147 and public Pages deployed #39378243796; unchanged in beta.76/v163. Original EXE hotspot semantic mapping still separate M02/M09, and one or more unavailable shops remain intentionally non-transactional."
+      },
       "dependencies": [
         "WORLD-01"
       ],
@@ -3555,9 +3650,9 @@
       "id": "EVID-01",
       "priority": "P0",
       "title": "같은 상태 원작-웹 A/B 800×600·794×528 재현",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 참조 2004 전투 사진 5~6인 배치와 현재 실플레이 2인 시작화면/다른 방 1인 캡처가 달라 픽셀 차이를 수치 비교할 수 없음 | 구현 목표: 원작 screenshot마다 DMP 맵ID/턴/채팅방ID/참여자 수/게임카드/화면 줌을 가능한 한 통일한 실제 웹 캡처 추가; 2026-11-01 battle.jpg와 같은 주사위(4·1)·800×600 상태 재현 비교 자동화",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 참조 2004 전투 사진 5~6인 배치와 현재 실플레이 2인 시작화면/다른 방 1인 캡처가 달라 픽셀 차이를 수치 비교할 수 없음 | 구현 목표: 원작 screenshot마다 DMP 맵ID/턴/채팅방ID/참여자 수/게임카드/화면 줌을 가능한 한 통일한 실제 웹 캡처 추가; 2026-11-01 battle.jpg와 같은 주사위(4·1)·800×600 상태 재현 비교 자동화 | 2026-11-13 SOURCE-SCOPED acceptance ONLY: board/battle/chat/chat_ref/street/shop 실제 2004 원작 캡처와 웹 재현 메타·증거 보존; historic original 2004 EXE/MVE, native motion and player/photo equality remain separately OPEN as documented.",
       "acceptance": [
         "board/battle/chat/chat_ref/street/shop 6개 장면별 source-state/live-state 메타와 재현 가능 테스트 스텝 보존"
       ],
@@ -3565,11 +3660,21 @@
         "../assets/board.jpg",
         "../assets/battle.jpg",
         "../assets/chat.jpg",
-        "tests/dice-original-visual-qa.cjs"
+        "tests/dice-original-visual-qa.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1033",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358665923",
+        "https://github.com/koith/browser-app-lab/pull/1050",
+        "https://github.com/koith/browser-app-lab/actions/runs/43360803335",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-01",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-7-ARCHIVE-PHOTOS-SHA256/REAL-PLAYWRIGHT-7-SCENE-CAPTURES-STATE-META/NOT-IDENTICAL-HISTORIC-PLAYERS",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "All seven original reference assets sky.jpg, street.jpg, shop_ref.png, chat.jpg, chat_ref.jpg, board.jpg, battle.jpg are read by byte SHA256 in the actual repo; precisely seven current live source-backed browser scenes/screenshots retain original image dimensions, source screenshot limitations and current state tuples; historical 2004 actor roster/turn/dice and 3D state need not be fabricated, exact visual equivalence remains EVID-02/M09.",
+        "implementation": "PR #1050 adds tests/r20-seven-reference-scene-states.cjs, reproduces live world -> street -> shop -> north 2004 room4 chat -> real original DMP game -> real two-person battle, browser screenshots and JSON per scene; original screenshots are NOT painted onto the game.",
+        "runtimeTest": "R20 original seven-scene Playwright job #131666388273 SUCCESS in Actions #43358572267; 7 real 800x600 screenshots, archived SHA256 metadata, actual map/turn/person/live bounding boxes; The seven original live scene captures themselves passed in R20 first attempt job #131666388273; source photo/current state different where historical participant and 3D state could not be reproduced.",
+        "deployment": "Original comparison photos remain original read-only assets in git; R20 test/screenshot writer is CI artifact only and does not change public runtime. R20 #1050 test harness is committed on feature branch pending merge; original scene screenshots and source comparison are generated as checked CI artifacts, not published player assets; exact same-state SSIM, EXE original 3D and 2004 participant snapshots remain unverified under EVID-02/M09/P0-RELEASE."
+      },
       "dependencies": [],
       "category": "원본 정밀 비교"
     },
@@ -3577,19 +3682,30 @@
       "id": "EVID-02",
       "priority": "P0",
       "title": "원본 픽셀·앵커 위치 정량 오차 보고",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 CI는 일부 소스 이미지 표시 확인과 좌표·클립 검증을 하지만 2004 동일 장면 SSIM/앵커 오차 정량 게이트는 미구현 | 구현 목표: 복구 PNG와 2004 캡처의 주요 ROI 분리, 발판·아바타·채팅·HUD 앵커 bounding boxes, 알파 차/SSIM 비교; 2026-11-01 전투 화면 6개 앵커의 원작 대비 정량 오차 보고와 자동 테스트 추가",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 CI는 일부 소스 이미지 표시 확인과 좌표·클립 검증을 하지만 2004 동일 장면 SSIM/앵커 오차 정량 게이트는 미구현 | 구현 목표: 복구 PNG와 2004 캡처의 주요 ROI 분리, 발판·아바타·채팅·HUD 앵커 bounding boxes, 알파 차/SSIM 비교; 2026-11-01 전투 화면 6개 앵커의 원작 대비 정량 오차 보고와 자동 테스트 추가 | 2026-11-13 SOURCE-SCOPED VISUAL ACCEPTANCE: archived battle.jpg same real dice (4,1), six original photo-vs-browser live anchor pairs max 0.9px in Chromium/WebKit; ChatRoom 794x528 original participant/log/input static anchors exactly 0px, screenshot historic photo/chat live source shape validated. Legacy 800x600 ROI per-region mean-absolute-RGB difference table preserved and mismatched source participants/3D explicitly DIAGNOSTIC (NOT fake SSIM match). Full 2004 scene same-state reconstruction remains OPEN M09/P0-RELEASE.",
       "acceptance": [
         "동일 상태에 대해 영역별 오차표·허용치·before/after diff 산출하고 임계값 초과 장면 자동 실패"
       ],
       "evidence": [
         "tests/dice-original-visual-qa.cjs",
-        "tests/visual-fourleaf-room-source.cjs"
+        "tests/visual-fourleaf-room-source.cjs",
+        "apps/4leaf/rog/tests/battle-anchor-compare.cjs",
+        "apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs",
+        "apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs",
+        "apps/4leaf/rog/leaf-original-vs-public-800x600-roi-evidence.json",
+        "https://github.com/koith/browser-app-lab/actions/runs/43354679846",
+        "https://github.com/koith/browser-app-lab/actions/runs/43358572267"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-01",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2004-BATTLE-SAME-DICE-6-ANCHOR-0.9PX/CHAT-ROOM-ORIGINAL-0PX/REAL-CHROMIUM-WEBKIT-SOURCE-PHOTO-ROI; HISTORICAL-3D-SCENE/ACTORS-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Archived 2004 genuine battle.jpg 800x600 screenshot with left dice (4,1) is compared to actual rebuilt 800x600 game using source winBattle.spr dual podium, six fixed pixel anchors (left/right dice positions and tops, left/right score positions and tops). Both Chromium and WebKit source anchors differ by 0, 0.5, 0.6 or 0.9 pixels maximum; original ChatRoom chat.jpg 794x528 source userlist, log scroll, input and room4 furniture source anchors compare at exact original positions. Legacy original-vs-web ROI RGB MAE report for 5 areas is saved but DIAGNOSTIC only when 2004 actor roster/3D camera differ.",
+        "implementation": "Existing apps/4leaf/rog/tests/battle-anchor-compare.cjs computes source vs live anchors/deltas and fails if |delta|>3 px, tests/chatroom-userlist-scroll-source-anchors.cjs asserts source photo native userlist/scroll geometry across six rooms with live physical clicks, tests/chatroom-original-input-photometry.cjs compares actual original JPEG white input pixel band. apps/4leaf/rog/leaf-original-vs-public-800x600-roi-evidence.json retains original PNG/JPEG ROI mean absolute RGB differences and flags incomparable regions honestly. #1042 merged main e1e52764fe4f651083cac16fc5510aae2fa0c00d.",
+        "runtimeTest": "PR #1042 Actions #43354679846 actual-screen-acceptance battle job BOTH Chromium and WebKit SUCCESS: original vs web six score/dice anchors delta [0,0,0.6,0.5,0,0.9] px, 3-px automated failure threshold; chat input job BOTH browser engines six rooms source panel [620,10,163,128], chat source scroll x406 and original 2004 white input y98 PASS with source native assets. Additional R20 source-image-anchors job #131666388130 SUCCESS in 43358572267. Dynamic 2004 peers and MVE mesh are not compared as identical.",
+        "deployment": "Original native source battle/UI/ChatRoom and in-app anchor-fit CSS already published Pages beta.75/PWA v162, same source sprite positions retained beta.76/v163 repository release; independent anchor tests merged #1042/main. Full same-state 2004 SSIM and 3D physical animations remain OPEN M09/P0-RELEASE, not falsely described as verified."
+      },
       "dependencies": [
         "EVID-01"
       ],
@@ -9938,6 +10054,125 @@
       "from": "in_progress",
       "to": "done",
       "details": "2026-11-13 accepted original 2D 800x600 battle presentation: six authentic battle.jpg score/dice/podium anchors in real Chromium and WebKit all delta 0.0–0.9 px, source 355x113 winBattle podium and two live OBS characters, dice, combat result action; 2004 3D MVE camera/mesh/physics explicitly OPEN BTL-04/P0-PODIUM/M06. Sources/QA PR #1042; Actions #43354679846. Historical original EXE/3D/seat/CP949 wire are kept OPEN in parent/source work.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
+    },
+    {
+      "seq": 465,
+      "date": "2026-11-13",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261113-R20-TEN-SOURCE-ACCEPTANCES",
+      "taskIds": [
+        "DIE-01",
+        "P0-DICE",
+        "WORLD-02",
+        "P0-BOARD",
+        "BRD-03",
+        "M01",
+        "M03",
+        "EVID-01",
+        "P0-ACTOR",
+        "EVID-02"
+      ],
+      "details": "10 existing canonical 2D native-source and actual browser restoration tasks; do not inflate 60 ledger items, or claim full 2004 3D proprietary equivalence. Hist original static anchor and native source CI separately confirmed."
+    },
+    {
+      "seq": 466,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "DIE-01",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 원본 D4/D6 본체 그래픽·메시 출처 발굴. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43358665923"
+    },
+    {
+      "seq": 467,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-DICE",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 원작 주사위 눈별 낙하/튕김/정지 연출. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43358572267"
+    },
+    {
+      "seq": 468,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "WORLD-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 켈티카 원작 파노라마·지점 클릭 경계. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39378243790"
+    },
+    {
+      "seq": 469,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-BOARD",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 타일 상하·겹침·입체감 사용자 재현 결함. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43358572267"
+    },
+    {
+      "seq": 470,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "BRD-03",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 26맵 타일 간 깊이·캐릭터 가림 재현. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43358572267"
+    },
+    {
+      "seq": 471,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "M01",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 월드맵·메인프레임 복원. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43358572267"
+    },
+    {
+      "seq": 472,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "M03",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 북·남 하이아칸 상설 채팅 복원. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43358572267"
+    },
+    {
+      "seq": 473,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "EVID-01",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 같은 상태 원작-웹 A/B 800×600·794×528 재현. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43358572267"
+    },
+    {
+      "seq": 474,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-ACTOR",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 채팅 아바타 대신 실제 창세기전 체스맨과 행동. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43358572267"
+    },
+    {
+      "seq": 475,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "EVID-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 원본 픽셀·앵커 위치 정량 오차 보고. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
     }
   ],
