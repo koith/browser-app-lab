@@ -145,8 +145,13 @@ restoreImportedWatches();
 // old GitHub Pages interest accounts. Same-tab top-level navigation preserves
 // each origin's own storage. Never run twice in a tab or delete the old list.
 // Manual button remains for browsers that block this first-party round trip.
+// A user who explicitly opened a saved archive must NOT be redirected to
+// GitHub Pages for a one-time legacy watch-list migration. That transfer
+// should run only on normal app entry, or it loses the requested private
+// archive deep link and its selected account/mode.
+const requestedArchive=new URLSearchParams(location.search).get("tab")==="archives";
 if(location.hostname==="intersection-originals-free.onrender.com"&&
-   !arrivingFromLegacy&&!read().length){
+   !requestedArchive&&!arrivingFromLegacy&&!read().length){
   try{
     const flag="intersection:watch-origin-migration-attempted:v1";
     if(sessionStorage.getItem(flag)!=="1"){
