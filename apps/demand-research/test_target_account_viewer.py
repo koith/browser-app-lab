@@ -230,3 +230,49 @@ def test_unmatched_snapshot_never_injects_another_account_name(populated):
     assert result["profile_snapshot_verified"] is False
     assert result["display_name"]==""
     assert result["handle"]==""
+
+
+def test_entire_verified_feed_search_kind_media_and_missing_slots(populated):
+    """Independent subtask gates: global text search, type filter, completeness
+    filter and exact source attachment indices, no other-original substitution."""
+    client,_,_,name=populated
+    a="a"*40
+    b="b"*40
+    d="d"*40
+    rows=[
+      {"id":a,"text":"서울 아침 커피","kind":"post",
+       "media_expected":0,"media_saved":0,"archive_complete":True,"media":[]},
+      {"id":b,"text":"서울 밤 산책","kind":"reply",
+       "media_expected":3,"media_saved":1,"archive_complete":False,
+       "media":[{"remote_verified":True,"mime":"image/png","bytes":10,"kind":"image"},
+                {"remote_verified":False,"mime":"image/png","bytes":20,"kind":"image"}]},
+      {"id":d,"text":"서울 새벽 기록 수정","kind":"post","revision_of":a,
+       "media_expected":0,"media_saved":0,"archive_complete":True,"media":[]},
+    ]
+    class Journal:
+        def load_catalog(self,include_entries=False):
+            assert include_entries
+            return rows
+    full=viewer.feed_data(Journal(),name,0,2,q="서울")
+    assert full["total"]==3 and len(full["posts"])==2 and full["more"] is True
+    last=viewer.feed_data(Journal(),name,2,2,q="서울")
+    assert last["total"]==3 and last["posts"][0]["id"]==d
+    assert viewer.feed_data(Journal(),name,0,20,q="밤")["posts"][0]["id"]==b
+    assert viewer.feed_data(Journal(),name,0,20,q="없는 글")["total"]==0
+    assert viewer.feed_data(Journal(),name,0,20,kind="reply")["posts"][0]["id"]==b
+    assert viewer.feed_data(Journal(),name,0,20,kind="revision")["posts"][0]["id"]==d
+    assert viewer.feed_data(Journal(),name,0,20,kind="post")["posts"][0]["id"]==a
+    partial=viewer.feed_data(Journal(),name,0,20,media_status="partial")
+    assert partial["total"]==1 and partial["posts"][0]["id"]==b
+    media=partial["posts"][0]["media"]
+    assert [x["index"] for x in media]==[0,1]
+    assert media[0]["verified_sha256"] and media[0]["url"].endswith("/0")
+    assert media[1]["verified_sha256"] is False and media[1]["url"] is None
+    assert viewer.feed_data(Journal(),name,0,20,media_status="complete")["total"]==2
+    # Authentication and validated private API contract use the same filters.
+    assert client.get("/api/account-archives/"+name+"/feed?q=saved").json()["total"]==1
+    assert client.get("/api/account-archives/"+name+"/feed?kind=reply").json()["total"]==0
+    assert client.get("/api/account-archives/"+name+"/feed?media_status=complete").json()["total"]==1
+    assert client.get("/api/account-archives/"+name+"/feed?kind=invalid").status_code==400
+    assert client.get("/api/account-archives/"+name+"/feed?media_status=invalid").status_code==400
+    assert client.get("/api/account-archives/"+name+"/feed?q="+("x"*101)).status_code==422

@@ -14,7 +14,55 @@ const sectionLabels={posts:"게시글·답글",followers:"팔로워",following:"
 const ACCOUNT_KEY=/^(?:bluesky|mastodon)-[a-f0-9]{40}$/;
 const params=new URLSearchParams(location.search);
 const embedded=params.get("embedded")==="1";
+const feedSearch=$("feedSearch"),feedQuery=$("feedQuery"),
+      feedKind=$("feedKind"),feedMediaStatus=$("feedMediaStatus");
 if(embedded)document.body.classList.add("archive-embedded");
+if(typeof params.get("q")==="string")feedQuery.value=params.get("q").slice(0,100);
+if(["","post","reply","revision"].includes(params.get("kind")||""))
+  feedKind.value=params.get("kind")||"";
+if(["","complete","partial"].includes(params.get("media_status")||""))
+  feedMediaStatus.value=params.get("media_status")||"";
+let feedSearchTimer=null;
+function persistFeedFilters(){
+  for(const [key,value] of [
+    ["q",feedQuery.value.trim().slice(0,100)],
+    ["kind",feedKind.value],["media_status",feedMediaStatus.value]]){
+    if(value)params.set(key,value);else params.delete(key);
+  }
+  history.replaceState(null,"",location.pathname+"?"+params.toString());
+}
+function resetFeedSearch(){
+  if(feedSearchTimer!==null){clearTimeout(feedSearchTimer);feedSearchTimer=null;}
+  persistFeedFilters();
+  if(state.section==="posts")setTab("posts");
+}
+function scheduleFeedSearch(){
+  if(feedSearchTimer!==null)clearTimeout(feedSearchTimer);
+  // Invalidate pending old results as soon as text changes.
+  state.viewVersion++;state.loading=false;state.offset=0;state.more=false;
+  $("more").hidden=true;showMessage("보관된 모든 글에서 검색 중…");
+  feedSearchTimer=setTimeout(()=>{feedSearchTimer=null;resetFeedSearch();},300);
+}
+function renderAccountChoices(){
+  const term=($("accountSearch")?.value||"").trim().toLocaleLowerCase("ko-KR");
+  const filtered=state.accounts.filter(item=>
+    !term||accountLabel(item).toLocaleLowerCase("ko-KR").includes(term));
+  accountSelect.replaceChildren();
+  if(!filtered.length){
+    const empty=node("option","","일치하는 계정 없음");
+    empty.value="";accountSelect.append(empty);
+  }else for(const item of filtered){
+    const opt=node("option","",accountLabel(item));
+    opt.value=item.key;accountSelect.append(opt);
+  }
+  accountSelect.disabled=!filtered.length;
+  if(filtered.some(item=>item.key===state.account))
+    accountSelect.value=state.account;
+  else if(filtered.length)
+    accountSelect.selectedIndex=0;
+  if($("accountCount"))$("accountCount").textContent=
+    "보관 계정 "+filtered.length+"/"+state.accounts.length+"개";
+}
 function setPlatformTheme(accountKey){
   const provider=String(accountKey||"").startsWith("mastodon-")?"mastodon":"bluesky";
   document.documentElement.dataset.platform=provider;
@@ -164,28 +212,42 @@ function renderProfile(profile){
      " · "+assets.join(" · ")+" · 관계 목록/게시글 완전성 별도 확인 필요";
   syncVisiblePostIdentity();
 }
-function mediaElement(item){
-  const mime=String(item.mime||"");
-  const url=item.url;
-  if(!url||!item.verified_sha256)return node("div","media-unavailable","원본 파일 검증 대기");
+function safeMediaPath(value){
+  if(typeof value!=="string"||value.length>300)return "";
+  try{
+    const url=new URL(value,location.origin);
+    return url.origin===location.origin&&!url.search&&!url.hash&&
+      /^\/api\/account-archives\/(?:bluesky|mastodon)-[a-f0-9]{40}\/media\/[a-f0-9]{40}\/(?:[0-9]|1[0-5])$/.test(url.pathname)
+        ?url.pathname:"";
+  }catch{return "";}
+}
+function mediaElement(item,index){
+  const slot=node("div","media-slot");
+  const mime=String(item?.mime||""),url=item?.verified_sha256===true?safeMediaPath(item.url):"";
+  if(!url||!(/^(image|video|audio)\//).test(mime)){
+    slot.classList.add("media-missing");
+    slot.append(node("div","media-unavailable","첨부 "+(index+1)+" · 원본 미보관 또는 검증 불가"));
+    return slot;
+  }
+  let el;
   if(mime.startsWith("image/")){
-    const img=node("img");
-    img.src=url;img.loading="lazy";img.decoding="async";
-    img.alt="SHA-256 검증된 보관 원본 이미지";
-    img.addEventListener("click",()=>window.open(url,"_blank","noopener,noreferrer"));
-    return img;
+    el=node("img");
+    el.src=url;el.loading="lazy";el.decoding="async";
+    el.alt="SHA-256 검증된 보관 원본 이미지 · 첨부 "+(index+1);
+    el.addEventListener("click",()=>window.open(url,"_blank","noopener,noreferrer"));
+  }else if(mime.startsWith("video/")){
+    el=node("video");el.controls=true;el.preload="metadata";el.playsInline=true;el.src=url;
+  }else{
+    el=node("audio");el.controls=true;el.preload="none";el.src=url;
   }
-  if(mime.startsWith("video/")){
-    const video=node("video");
-    video.controls=true;video.preload="metadata";video.playsInline=true;video.src=url;
-    return video;
-  }
-  if(mime.startsWith("audio/")){
-    const audio=node("audio");
-    audio.controls=true;audio.preload="none";audio.src=url;
-    return audio;
-  }
-  return node("div","media-unavailable","지원하지 않는 원본 미디어 형식");
+  el.addEventListener("error",()=>{
+    if(!slot.isConnected)return;
+    slot.replaceChildren(node("div","media-unavailable",
+      "첨부 "+(index+1)+" · 보관 원본 표시 실패 (서버 재확인 필요)"));
+    slot.classList.add("media-missing");
+  });
+  slot.append(el);
+  return slot;
 }
 function postCard(post,inDetail=false){
   const card=node("article","post");
@@ -209,10 +271,22 @@ function postCard(post,inDetail=false){
     card.append(node("p","notice","이전 원문은 그대로 보관 · 변경본 추가 저장 "+
       (date(post.captured_at)||"")));
   }
-  if(post.media&&post.media.length){
+  // A server may know that an attachment existed without retaining its
+  // bytes. Never collapse or reorder those missing original positions.
+  const stored=Array.isArray(post.media)?post.media:[];
+  const expected=Number.isSafeInteger(Number(post.media_expected))
+    ?Math.max(0,Number(post.media_expected)):0;
+  const byIndex=new Map();
+  for(const [arrayIndex,item] of stored.entries()){
+    const index=Number.isInteger(item?.index)?item.index:arrayIndex;
+    if(index>=0&&index<16&&!byIndex.has(index))byIndex.set(index,item);
+  }
+  const count=Math.min(16,Math.max(expected,stored.length,
+    ...(byIndex.size?[...byIndex.keys()].map(i=>i+1):[0])));
+  if(count){
     const grid=node("div","post-media");
-    grid.dataset.count=String(post.media.length);
-    for(const item of post.media)grid.append(mediaElement(item));
+    grid.dataset.count=String(count);
+    for(let i=0;i<count;i++)grid.append(mediaElement(byIndex.get(i),i));
     card.append(grid);
   }
   const bottom=node("div","post-bottom");
@@ -294,6 +368,7 @@ function setTab(section){
   // A response for the previous tab must not block or overwrite this tab.
   state.viewVersion+=1;state.loading=false;
   state.section=section;state.offset=0;state.more=false;
+  feedSearch.hidden=section!=="posts";
   for(const btn of document.querySelectorAll("[data-section]")){
     const active=btn.dataset.section===section;
     if(btn.getAttribute("role")==="tab"){
@@ -310,8 +385,11 @@ async function nextPage(){
   const selected=state.section,selectedAccount=state.account,offset=state.offset,
         requestVersion=state.viewVersion;
   try{
+    const feedParams=new URLSearchParams({
+      offset:String(offset),limit:"20",q:feedQuery.value.trim(),
+      kind:feedKind.value,media_status:feedMediaStatus.value});
     const endpoint=selected==="posts"
-       ?base()+"/feed?offset="+offset+"&limit=20"
+       ?base()+"/feed?"+feedParams.toString()
        :base()+"/graph/"+selected+"?offset="+offset+"&limit=50";
     const data=await get(endpoint);
     if(state.account!==selectedAccount||state.section!==selected||
@@ -323,8 +401,8 @@ async function nextPage(){
     if(!records.length&&offset===0)
       showMessage(selected==="posts"?"보관된 게시글이 없습니다. 백업 실행·완료 여부를 확인하세요.":"조회 가능한 공개 "+sectionLabels[selected]+" 목록이 없습니다.");
     state.offset+=records.length;
-    // An empty page cannot advance an offset-based cursor; stop repeat loops.
-    state.more=Boolean(data.more)&&records.length>0;
+    // A stale or malformed cursor cannot create an endless More loop.
+    state.more=Boolean(data.more)&&records.length>0&&state.offset>offset;
     $("more").hidden=!state.more;$("more").textContent="더 보기";
     setStatus(selected==="posts"?"게시글 "+fmt(data.total)+"건 중 "+fmt(state.offset)+"건 표시":
        "공개 관계 계정 "+fmt(data.captured_unique)+"명 보관 · "+fmt(state.offset)+"명 표시 (전체 명단 보장 안 됨)");
@@ -392,19 +470,14 @@ async function init(){
     state.accounts=Array.isArray(data.accounts)?data.accounts.filter(
       item=>ACCOUNT_KEY.test(item.key)):[];
     state.accounts.sort((a,b)=>accountLabel(a).localeCompare(accountLabel(b),"ko-KR"));
-    const count=$("accountCount");
-    if(count)count.textContent="보관된 계정 "+state.accounts.length+"개";
-    accountSelect.replaceChildren();
+    $("retryAccounts").hidden=true;
+    renderAccountChoices();
     if(!state.accounts.length){
       const opt=node("option","","아직 보관된 계정 없음");opt.value="";
       accountSelect.append(opt);
       setStatus("등록된 계정 보관본이 없습니다.");
       showMessage("계정 분석에서 공개 계정을 지정해 백업을 시작하세요.");
       return;
-    }
-    for(const item of state.accounts){
-      const opt=node("option","",accountLabel(item));
-      opt.value=item.key;accountSelect.append(opt);
     }
     const first=state.accounts.find(a=>a.key===selected)||state.accounts[0];
     accountSelect.value=first.key;
@@ -413,11 +486,27 @@ async function init(){
   }catch(error){
     const count=$("accountCount");
     if(count)count.textContent="불러오기 실패";
-    setStatus("계정 목록 연결에 실패했습니다. 다시 열면 자동 재시도합니다.");
+    $("retryAccounts").hidden=false;
+    setStatus("계정 목록 연결 실패 · 아래 버튼을 눌러 다시 시도할 수 있습니다.");
     showMessage("개인용 아카이브 서버 인증 또는 저장 연결 상태를 확인하세요.");
   }
 }
-accountSelect.addEventListener("change",()=>void selectAccount(accountSelect.value));
+accountSelect.addEventListener("change",()=>{
+  if(ACCOUNT_KEY.test(accountSelect.value))void selectAccount(accountSelect.value);
+});
+$("accountSearch").addEventListener("input",renderAccountChoices);
+$("retryAccounts").addEventListener("click",()=>{
+  $("retryAccounts").hidden=true;setStatus("보관 계정 목록을 다시 불러오는 중…");
+  void init();
+});
+feedSearch.addEventListener("submit",event=>{event.preventDefault();resetFeedSearch();});
+feedQuery.addEventListener("input",scheduleFeedSearch);
+feedKind.addEventListener("change",resetFeedSearch);
+feedMediaStatus.addEventListener("change",resetFeedSearch);
+$("feedReset").addEventListener("click",()=>{
+  feedQuery.value="";feedKind.value="";feedMediaStatus.value="";
+  resetFeedSearch();
+});
 document.querySelectorAll("[data-section]").forEach(btn=>btn.addEventListener(
   "click",()=>setTab(btn.dataset.section)));
 $("more").addEventListener("click",()=>void nextPage());

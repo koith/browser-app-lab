@@ -6,6 +6,23 @@
 const $=id=>document.getElementById(id);
 const list=$("posts"),status=$("status"),more=$("more");
 const state={offset:0,total:0,busy:false,generation:0};
+const queryParams=new URLSearchParams(location.search);
+$("query").value=String(queryParams.get("q")||"").slice(0,100);
+if(["","bluesky","mastodon","misskey","lemmy"].includes(queryParams.get("platform")||""))
+  $("platform").value=queryParams.get("platform")||"";
+if(["","complete","partial"].includes(queryParams.get("media_status")||""))
+  $("mediaStatus").value=queryParams.get("media_status")||"";
+function persistFilters(){
+  const next=new URL(location.href);
+  for(const [key,value] of [
+    ["q",$("query").value.trim().slice(0,100)],
+    ["platform",$("platform").value],["media_status",$("mediaStatus").value]]){
+    if(value)next.searchParams.set(key,value);
+    else next.searchParams.delete(key);
+  }
+  if(next.href!==location.href)
+    history.replaceState(null,"",next.pathname+next.search+next.hash);
+}
 function node(tag,className,value){
   const el=document.createElement(tag);
   if(className)el.className=className;
@@ -85,8 +102,15 @@ function postCard(post){
               node("time","",displayDate(post.posted_at)));
   card.append(head,node("p","post-body",post.text||"(본문 없음)"));
   const media=node("div","post-medias");
-  for(const [index,item] of (Array.isArray(post.media)?post.media:[]).entries())
-    media.append(mediaView(item,index));
+  const stored=Array.isArray(post.media)?post.media:[];
+  const totalExpected=Number(post.media_expected);
+  const expectedSlots=Number.isSafeInteger(totalExpected)&&totalExpected>=0?totalExpected:0;
+  // The archive may have a verified record for an attachment whose metadata
+  // file was never uploaded. Display its absent position instead of silently
+  // shrinking the media grid or filling it with a different post's picture.
+  const count=Math.min(16,Math.max(expectedSlots,stored.length));
+  for(let index=0;index<count;index++)
+    media.append(mediaView(stored[index],index));
   if(media.children.length)card.append(media);
   const saved=Number(post.media_saved||0),expected=Number(post.media_expected||0);
   const partial=post.capture_status!=="remote_verified"||saved<expected;
@@ -107,6 +131,7 @@ function params(){
 }
 async function load(reset){
   if(reset){
+    persistFilters();
     // A new search supersedes every prior request, even while one is in flight.
     state.generation++;state.offset=0;state.total=0;
     state.busy=false;list.replaceChildren();
