@@ -310,6 +310,220 @@
           "quality": "direct_public_original_bytes_not_publisher_master_verified"
         }
       ]
+    },
+    {
+      "id": "artgravia-677-yui-public-samples",
+      "title": "ArtGravia Vol.677 [Yui] — 공개 사진 미리보기",
+      "source": "https://showartx.net/artgravia-vol-677-yui/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 6,
+          "url": "stored-albums/artgravia-677-yui-public-samples/27595eafee8ac4380788.jpg",
+          "sha256": "27595eafee8ac4380788d029385e936b269f84d5d9842b045fc8e69c48666923",
+          "bytes": 71515,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 7,
+          "url": "stored-albums/artgravia-677-yui-public-samples/adce271c123aa2d24365.jpg",
+          "sha256": "adce271c123aa2d24365537d3b3a15deb6001d30d103968fcafaf8bfefbe2bbb",
+          "bytes": 67427,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 8,
+          "url": "stored-albums/artgravia-677-yui-public-samples/c6705af4bfeda27d9c47.jpg",
+          "sha256": "c6705af4bfeda27d9c4745ea588e51eaabe926bb7b07c2a2833ca510831fc759",
+          "bytes": 64196,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 9,
+          "url": "stored-albums/artgravia-677-yui-public-samples/35ec026839259f58224a.jpg",
+          "sha256": "35ec026839259f58224a738419b85246ea5dbba75feac546a64ae9139972c9c2",
+          "bytes": 81155,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 10,
+          "url": "stored-albums/artgravia-677-yui-public-samples/7360de500e18ddf94a95.jpg",
+          "sha256": "7360de500e18ddf94a95f2527bf91c52c6b7918a6e0654b5c2d37b2aaa59fafd",
+          "bytes": 132304,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 11,
+          "url": "stored-albums/artgravia-677-yui-public-samples/bce890a97f99aefc7f77.jpg",
+          "sha256": "bce890a97f99aefc7f77e24db060295907486625e90e7f2db70a824aee26bd42",
+          "bytes": 66240,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 12,
+          "url": "stored-albums/artgravia-677-yui-public-samples/3d5c15d78b410ef806c1.jpg",
+          "sha256": "3d5c15d78b410ef806c10d04c796bf2b2cbd1ff50ae6f443af90c52d6e3e12e5",
+          "bytes": 112410,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 13,
+          "url": "stored-albums/artgravia-677-yui-public-samples/2c6bd2d97deedcd33221.jpg",
+          "sha256": "2c6bd2d97deedcd33221691afe6f926f4b93f9f68ac709b70d340d5a355f1377",
+          "bytes": 77445,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 14,
+          "url": "stored-albums/artgravia-677-yui-public-samples/a647e3d71ff3b13cb588.jpg",
+          "sha256": "a647e3d71ff3b13cb5884aefa749ac996b5f2689fabf82de8418781863939e52",
+          "bytes": 58949,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 15,
+          "url": "stored-albums/artgravia-677-yui-public-samples/515b361985aff3b7ad33.jpg",
+          "sha256": "515b361985aff3b7ad33596c3953f3f18b6b41e8eebb0640ba2431f775e41037",
+          "bytes": 65977,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 16,
+          "url": "stored-albums/artgravia-677-yui-public-samples/77ad226c64542c2570e1.jpg",
+          "sha256": "77ad226c64542c2570e1941ee37e7ef4586703b1839a77ef15812196e484a9a0",
+          "bytes": 82977,
+          "width": 600,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 17,
+          "url": "stored-albums/artgravia-677-yui-public-samples/d5648387b87f248b0b62.jpg",
+          "sha256": "d5648387b87f248b0b62e1b41aeb4ad01a19cf502de1e1d262f49e3b66a9ded1",
+          "bytes": 98606,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-677-yui/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        }
+      ]
+    },
+    {
+      "id": "yui-meow-public-samples",
+      "title": "Yui — Meow (공개 사진 미리보기)",
+      "source": "https://showartx.net/yui-meow/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-meow-public-samples/a575be8dc27ce030f857.jpg",
+          "sha256": "a575be8dc27ce030f85787c08d32ef6908a199239b3b5480d7f083414f46adec",
+          "bytes": 61271,
+          "width": 534,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-meow/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-meow-public-samples/5de9188ed092ae233e3b.jpg",
+          "sha256": "5de9188ed092ae233e3b2d841e92f0df75907b0685940d95b93de95378e46e7b",
+          "bytes": 51616,
+          "width": 534,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-meow/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/yui-meow-public-samples/357234ca08e022163731.jpg",
+          "sha256": "357234ca08e022163731d9351c669f3c1d363fec15a2cf8f1aadb221e9b553c3",
+          "bytes": 51109,
+          "width": 534,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-meow/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/yui-meow-public-samples/d079054f2f4469144665.jpg",
+          "sha256": "d079054f2f4469144665eb1da7fb37eea4d570ac8d2f65d7a6b623ee56a14810",
+          "bytes": 57037,
+          "width": 534,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-meow/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 5,
+          "url": "stored-albums/yui-meow-public-samples/a8e2139528bca9896c28.jpg",
+          "sha256": "a8e2139528bca9896c28bd0abfd71cf6ec2e21d69b3e75775161853560e3292e",
+          "bytes": 50950,
+          "width": 534,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-meow/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        },
+        {
+          "number": 6,
+          "url": "stored-albums/yui-meow-public-samples/1f326f703ed8c7a66712.jpg",
+          "sha256": "1f326f703ed8c7a66712edf4e3de984f22a278565116e5f9169f4dce79106cfe",
+          "bytes": 103390,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-meow/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified"
+        }
+      ]
     }
   ]
 }
