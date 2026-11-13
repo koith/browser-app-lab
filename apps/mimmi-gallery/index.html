@@ -792,12 +792,34 @@ async function fetchOwnerIndexWithRetry(model){
  throw lastError;
 }
 
+/* A single transient Pages 502/503 must not destroy the entire gallery.
+   Retry only the same-origin essential JSON; never substitute unverified data,
+   remove identity exclusions, or use a third-party image proxy. */
+async function essentialGalleryJSON(path,label,validate){
+ let lastError;
+ for(let attempt=0;attempt<3;attempt++){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),10000);
+  try{
+   const response=await fetch(path,{cache:'no-store',signal:controller.signal});
+   if(!response.ok)throw Error(label+' HTTP '+response.status);
+   const data=await response.json();
+   if(!validate(data))throw Error(label+' invalid schema');
+   return data;
+  }catch(error){
+   lastError=error;
+   if(attempt<2)await new Promise(resolve=>setTimeout(resolve,400*(attempt+1)));
+  }finally{clearTimeout(timeout)}
+ }
+ throw lastError;
+}
+
 // Backward-compatible hidden verifier is for existing archive QA; no import controls appear in the gallery.
 Promise.all([
- fetch('stored-albums.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('stored index unavailable');return r.json()}),
+ essentialGalleryJSON('stored-albums.json','mimmi physical archive',d=>Array.isArray(d?.albums)&&(!d.model||d.model==='mimmi')),
  fetchOwnerIndexWithRetry('mimmi').then(d=>({albums:MimmiPrivate.fromIndex(d)})).catch(error=>({albums:[],error:error.message})), // Complete saved-photo metadata from static Pages; originals remain on TeraBox.
  PhotoVault.albums('mimmi').then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
- fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
+ essentialGalleryJSON('identity-exclusions.json','mimmi identity exclusions',d=>d&&typeof d==='object'&&!Array.isArray(d)),
  fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
  fetch('album-aliases.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
  fetch('publishers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{publishers:[]}).catch(()=>({publishers:[]})),
