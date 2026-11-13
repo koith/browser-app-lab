@@ -41,12 +41,17 @@ function displayDate(value){
   const d=new Date(value);
   return Number.isFinite(d.getTime())?d.toLocaleString("ko-KR"):"작성 시각 미확인";
 }
-function mediaView(item){
-  if(!item||item.verified!==true)return null;
-  const url=archivedMediaUrl(item.url);
-  if(!url)return null;
-  const mime=String(item.mime||"");
-  const box=node("figure","media");
+function mediaView(item,index){
+  // Preserve the original attachment slot and order even if its SHA-verified
+  // bytes are missing. Never fill that position with a preview or other photo.
+  const box=node("figure","media"),slot="첨부 "+(index+1);
+  const url=item?.verified===true?archivedMediaUrl(item.url):"";
+  const mime=String(item?.mime||"");
+  if(!url||!(/^(image|video|audio)\//).test(mime)){
+    box.classList.add("media-missing");
+    box.append(node("div","media-unavailable",slot+" · 원본 미보관 또는 검증 불가"));
+    return box;
+  }
   let content;
   if(mime.startsWith("image/")){
     content=node("img");content.alt="테라박스에 저장된 원본 이미지";
@@ -54,9 +59,16 @@ function mediaView(item){
   }else if(mime.startsWith("video/")){
     content=node("video");content.controls=true;content.playsInline=true;
     content.preload="metadata";content.src=url;
-  }else if(mime.startsWith("audio/")){
+  }else{
     content=node("audio");content.controls=true;content.preload="none";content.src=url;
-  }else{return null;}
+  }
+  content.addEventListener("error",()=>{
+    // A verified index entry does not mean this particular browser playback
+    // succeeded. Make the failure visible without loading external fallback.
+    if(box.classList.contains("media-error-state"))return;
+    box.classList.add("media-error-state");
+    box.append(node("p","media-error",slot+" · 원본 표시 오류. 원본 파일 링크로 재확인하세요."));
+  });
   box.append(content);
   const caption=node("figcaption");
   caption.append(node("span","",mime+" · "+Math.round(Number(item.bytes||0)/1024)+" KB"),
@@ -73,9 +85,8 @@ function postCard(post){
               node("time","",displayDate(post.posted_at)));
   card.append(head,node("p","post-body",post.text||"(본문 없음)"));
   const media=node("div","post-medias");
-  for(const item of Array.isArray(post.media)?post.media:[]){
-    const component=mediaView(item);if(component)media.append(component);
-  }
+  for(const [index,item] of (Array.isArray(post.media)?post.media:[]).entries())
+    media.append(mediaView(item,index));
   if(media.children.length)card.append(media);
   const saved=Number(post.media_saved||0),expected=Number(post.media_expected||0);
   const partial=post.capture_status!=="remote_verified"||saved<expected;
@@ -95,18 +106,24 @@ function params(){
     platform:$("platform").value,media_status:$("mediaStatus").value});
 }
 async function load(reset){
-  if(state.busy)return;
-  if(reset){state.generation++;state.offset=0;state.total=0;list.replaceChildren();}
+  if(reset){
+    // A new search supersedes every prior request, even while one is in flight.
+    state.generation++;state.offset=0;state.total=0;
+    state.busy=false;list.replaceChildren();
+  }else if(state.busy)return;
   const version=state.generation,offset=state.offset;
+  const requestParams=params().toString();
   state.busy=true;more.disabled=true;more.hidden=true;
   status.textContent="테라박스 보관본을 확인 중입니다…";
   try{
-    const response=await fetch("/api/posts?"+params(),{
+    const response=await fetch("/api/posts?"+requestParams,{
       credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
+    if(version!==state.generation)return;
     if(!response.ok)throw Error("저장된 원본을 불러오지 못했습니다 (HTTP "+response.status+")");
     const result=await response.json();
     if(version!==state.generation)return;
-    if(!Array.isArray(result.posts)||!Number.isFinite(Number(result.total)))
+    if(!Array.isArray(result.posts)||!Number.isFinite(Number(result.total))||
+       Number(result.total)<0)
       throw Error("보관본 목록 형식이 올바르지 않습니다.");
     for(const row of result.posts)list.append(postCard(row));
     state.offset+=result.posts.length;
@@ -116,14 +133,30 @@ async function load(reset){
     status.textContent="검증된 게시글 "+state.total.toLocaleString("ko-KR")+
       "건 중 "+state.offset.toLocaleString("ko-KR")+"건 표시";
     more.hidden=state.offset>=state.total||!result.posts.length;
-    more.textContent="더 보기 ("+(state.total-state.offset)+"건 남음)";
+    more.textContent="더 보기 ("+Math.max(0,state.total-state.offset)+"건 남음)";
   }catch(error){
+    if(version!==state.generation)return;
     if(!state.offset)list.replaceChildren(node("p","empty",String(error.message)));
     status.textContent="보관본 조회 실패 · 새로 검색하거나 다시 시도해 주세요.";
     more.hidden=false;more.textContent="다시 시도";
-  }finally{state.busy=false;more.disabled=false;}
+  }finally{
+    if(version===state.generation){state.busy=false;more.disabled=false;}
+  }
 }
-$("search").addEventListener("submit",event=>{event.preventDefault();void load(true);});
+let searchTimer=null;
+function searchNow(){
+  if(searchTimer!==null){clearTimeout(searchTimer);searchTimer=null;}
+  void load(true);
+}
+$("search").addEventListener("submit",event=>{event.preventDefault();searchNow();});
+// Filtering is immediate; only free-text typing is debounced to avoid
+// excessive readbacks against the private remote archive.
+$("query").addEventListener("input",()=>{
+  if(searchTimer!==null)clearTimeout(searchTimer);
+  searchTimer=setTimeout(()=>{searchTimer=null;void load(true);},300);
+});
+$("platform").addEventListener("change",searchNow);
+$("mediaStatus").addEventListener("change",searchNow);
 more.addEventListener("click",()=>void load(false));
 void load(true);
 })();
