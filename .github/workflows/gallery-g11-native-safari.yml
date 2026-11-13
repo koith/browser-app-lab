@@ -1,0 +1,37 @@
+name: G11 Native macOS Safari Real Deployed Gallery Smoke
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_native_safari_gallery.py'
+      - '.github/workflows/gallery-g11-native-safari.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/qa_native_safari_gallery.py'
+      - '.github/workflows/gallery-g11-native-safari.yml'
+permissions:
+  contents: read
+jobs:
+  native-desktop-safari:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/gallery-archive/qa_native_safari_gallery.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'selenium==4.37.0'
+      - name: Enable genuine Apple safaridriver without owner-gallery secrets
+        run: |
+          /usr/bin/safaridriver --version
+          sudo /usr/bin/safaridriver --enable
+      - name: Open live Mimmi and Yui gallery in native Safari desktop and decode actual photos
+        run: python apps/gallery-archive/qa_native_safari_gallery.py
+      - name: Explicitly distinguish macOS Safari from a physical iPhone
+        if: success()
+        run: |
+          echo 'G11_NATIVE_MACOS_SAFARI_LIVE_PASS' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Real iPhone 15 Pro Max Safari remains UNVERIFIED' >> "$GITHUB_STEP_SUMMARY"
