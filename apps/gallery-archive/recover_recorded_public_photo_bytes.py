@@ -140,7 +140,7 @@ def recover(root=ROOT,kind='both',max_new=80,max_bytes=75_000_000,client=None):
             else:
                 dest.parent.mkdir(parents=True,exist_ok=True)
                 dest.write_bytes(raw)
-            stored={'number':number,'url':rel,'sha256':meta['sha256'],
+            photo_record={'number':number,'url':rel,'sha256':meta['sha256'],
                'bytes':meta['bytes'],'width':meta['width'],'height':meta['height'],
                'origin_page':item['origin_page'],'source_url':item['url'],
                'quality':'historically_sha_pinned_public_bytes_not_paid_master',
@@ -150,9 +150,9 @@ def recover(root=ROOT,kind='both',max_new=80,max_bytes=75_000_000,client=None):
             # append-order number the publisher's official original order.
             source_number=old.get('number')
             if type(source_number) is int and 1<=source_number<=25000:
-                stored['source_photo_number']=source_number
-                stored['source_numbering']='observed_public_source_not_publisher_master'
-            rec['images'].append(stored)
+                photo_record['source_photo_number']=source_number
+                photo_record['source_numbering']='observed_public_source_not_publisher_master'
+            rec['images'].append(photo_record)
             saved_sha.add(meta['sha256']);used+=meta['bytes']
             additions.append({'album':aid,'sha256':meta['sha256'],
                               'bytes':meta['bytes'],'url':rel,'source_kind':item['kind']})
