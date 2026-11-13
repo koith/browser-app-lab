@@ -12,12 +12,16 @@ on:
       - ".github/workflows/intersection-github-live-viewer-qa.yml"
       - "apps/demand-research/test_live_account_archive_browser.py"
       - "apps/demand-research/test_live_account_index_browser.py"
+      - "apps/demand-research/github_temp_bundle.py"
+      - "apps/demand-research/test_github_temp_bundle.py"
   push:
     branches: [main]
     paths:
       - ".github/workflows/intersection-github-live-viewer-qa.yml"
       - "apps/demand-research/test_live_account_archive_browser.py"
       - "apps/demand-research/test_live_account_index_browser.py"
+      - "apps/demand-research/github_temp_bundle.py"
+      - "apps/demand-research/test_github_temp_bundle.py"
       - "apps/demand-research/account_archive_view.html"
       - "apps/demand-research/account_archive_view.css"
       - "apps/demand-research/account_archive_view.js"
