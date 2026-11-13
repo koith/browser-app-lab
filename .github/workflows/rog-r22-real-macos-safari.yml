@@ -24,7 +24,7 @@ jobs:
           python-version: '3.12'
       - name: Enable Apple-bundled SafariDriver
         run: |
-          /usr/bin/safaridriver --enable
+          sudo /usr/bin/safaridriver --enable || echo 'SafariDriver setup did not enable via sudo; will test whether an existing Safari session is permitted'
           /usr/bin/safaridriver --version
           python -m pip install selenium==4.36.0
       - name: Serve genuine 4LEAF source game and check availability
