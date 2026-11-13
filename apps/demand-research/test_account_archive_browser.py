@@ -55,7 +55,8 @@ def response_fixture(path,query=""):
                   (not kind or kind==("revision" if p.get("revision_of") else p["kind"])) and
                   (not media or media==("complete" if p["archive_complete"] else "partial"))]
         start=int(args.get("offset",["0"])[0])
-        end=start+int(args.get("limit",["20"])[0])
+        # Force 2 records per synthetic page to exercise offset=2 retry.
+        end=start+min(2,int(args.get("limit",["20"])[0]))
         return {"total":len(selected),"offset":start,
                 "more":end<len(selected),"posts":selected[start:end]}
     if "/graph/followers" in path or "/graph/following" in path:
