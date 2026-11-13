@@ -25,13 +25,15 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
     old=json.loads(old_path.read_text())
     registered=json.loads((base/'public-work-pages.json').read_text())
     ids={a['id'] for a in registered['albums']}
-    existing_sha={p['sha256'] for a in owner['albums'] for p in a['images']}
-    existing_sha.update(p['sha256'] for a in old['albums'] for p in a['images'])
+    owner_sha={p['sha256'] for a in owner['albums'] for p in a['images']}
+    existing_sha={p['sha256'] for a in old['albums'] for p in a['images']}
+    # Owner-index references are not proof of a physical Pages copy.
+    # Preserve global uniqueness accounting separately from physical recovery.
     byid={a['id']:a for a in old['albums']}
     stage_doc=json.loads((stage/'metadata/catalog.json').read_text())
     if stage_doc.get('model')!=model:
         raise ValueError('wrong model staged')
-    added=[];used=0
+    added=[];recovered_owner=[];used=0
     for album in stage_doc.get('albums',[]):
         aid=album.get('id')
         if aid not in ids or not isinstance(aid,str) or not aid.replace('-','').isalnum():
@@ -78,16 +80,20 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
               'sha256':digest,'bytes':len(raw),'width':photo['width'],'height':photo['height'],
               'origin_page':source.get('source'),'source_url':photo.get('source_url',''),
               'quality':'direct_public_original_bytes_not_publisher_master_verified'})
-            existing_sha.add(digest);added.append((aid,digest,len(raw)))
+            existing_sha.add(digest)
+            if digest in owner_sha:
+                recovered_owner.append((aid,digest,len(raw)))
+            else:
+                added.append((aid,digest,len(raw)))
             used+=len(raw)
         if rec['images']:
             byid[aid]=rec
-    if added:
+    if added or recovered_owner:
         old['albums']=list(byid.values())
         old_path.write_text(json.dumps(old,ensure_ascii=False,indent=2)+'\n')
     result={'model':model,'new_sha_verified_originals':len(added),
-       'total_bytes_added':used,'sha_samples':[{'album':a,'sha256':s,'bytes':n} for a,s,n in added],
-       'real_files_in_pages':bool(added),'private_terabox_readback_verified':False,
+       'total_bytes_added':used,'recovered_owner_sha_pages_copies':len(recovered_owner),'sha_samples':[{'album':a,'sha256':s,'bytes':n} for a,s,n in added],
+       'real_files_in_pages':bool(added or recovered_owner),'private_terabox_readback_verified':False,
        'photo_source_fallback_prohibited':True}
     (stage/'metadata/pages-publication.json').write_text(json.dumps(result,indent=2)+'\n')
     print('G07_ACTUAL_NEW_PUBLIC_PAGES_STORED_SHA',json.dumps(result),flush=True)
