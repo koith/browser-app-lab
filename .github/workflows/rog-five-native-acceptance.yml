@@ -63,3 +63,13 @@ jobs:
           node apps/4leaf/rog/tests/battle-anchor-compare.cjs
           FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/battle-anchor-compare.cjs
           node apps/4leaf/rog/tests/dice-battle-podium.cjs
+      - name: Preserve real browser screenshots when available
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-${{ matrix.scope }}-browser-evidence
+          if-no-files-found: ignore
+          path: |
+            leaf-*.png
+            apps/4leaf/rog/leaf-*.png
+          retention-days: 10
