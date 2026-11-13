@@ -259,12 +259,15 @@ def catalog_sync_child(db_path, marker_path):
     Path(marker_path).write_text(json.dumps(result,sort_keys=True))
 
 
-def catalog_sync_bounded(db_path, folder, *, timeout_seconds=90, worker=None):
+def catalog_sync_bounded(db_path, folder, *, timeout_seconds=180, worker=None):
     """Avoid a stuck remote catalog preventing all other account checkpoints.
 
     The worker is in its own process group so a timeout also stops its rclone
-    descendants. On any failure, never report a verified catalog sync. The
-    parent may still SHA-verify an immutable PARTIAL checkpoint later.
+    descendants. The prior 90-second cutoff repeatedly truncated healthy
+    150-second single-read TeraBox operations (see #43347936710).
+    Use a finite 180-second per-sync budget within the 780-second job limit.
+    On any failure, never report a verified catalog sync. The parent may
+    still SHA-verify an immutable PARTIAL checkpoint later.
     """
     marker=Path(folder)/"catalog-sync-result.json"
     argv=(worker if worker is not None else [

@@ -150,6 +150,9 @@ def test_account_index_stage_audit_redacts_exception_and_refuses_unknown_stage(c
 
 
 def test_catalog_reader_timeout_preserves_checkpoint_budget(tmp_path):
+    # The real private backend may require up to 150s for a single SHA-read.
+    # Retain an explicit finite worker cap beneath the parent 780s budget.
+    assert job.catalog_sync_bounded.__kwdefaults__["timeout_seconds"] == 180
     import sys
     import time
     start=time.monotonic()
