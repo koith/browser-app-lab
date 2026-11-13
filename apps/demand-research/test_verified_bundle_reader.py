@@ -326,3 +326,29 @@ def test_verified_original_zip_keeps_media_lazy_but_revalidates_sha(private_zip_
                    for value in vars(bundle).values())
     assert bundle.items.get(key)==PHOTO
     assert bundle.items.get("posts/missing/post.json") is None
+
+
+def test_merged_sha_verified_catalog_is_computed_once_per_account_session(
+        private_zip_client,monkeypatch):
+    """Eight full-history filters must not reread the 921 immutable ZIP posts."""
+    from demand_archive import CloudArchive
+    _client,root,name,_post,_meta=private_zip_client
+    bundle=bundles.load_verified_bundle(root,name)
+    archive=bundles.MergedBundleAccountCloud([bundle])
+    original=CloudArchive.load_catalog
+    scans=[]
+    def instrument(self,*,include_entries=True):
+        scans.append(include_entries)
+        return original(self,include_entries=include_entries)
+    monkeypatch.setattr(CloudArchive,"load_catalog",instrument)
+    a=archive.load_catalog()
+    assert len(a)==1
+    a[0]["text"]="tampered caller copy"
+    for _ in range(8):
+        b=archive.load_catalog()
+        assert len(b)==1
+        assert b[0]["text"]=="A synthetic archived public source post"
+    assert scans==[True],"repeated SHA journal scans caused Render OOM/timeout"
+    empty=archive.load_catalog(include_entries=False)
+    assert empty==[]
+    assert scans==[True,False]
