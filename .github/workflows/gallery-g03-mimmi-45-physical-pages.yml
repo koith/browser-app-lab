@@ -1,4 +1,4 @@
-name: G03 Mimmi Official Four New Publisher Works Actual Sample Photos
+name: G03 Mimmi Author Public SNS and Official Publisher Original JPG Archive
 on:
   pull_request:
     paths:
@@ -10,7 +10,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: gallery-mimmi-official-djawa-work-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  group: gallery-mimmi-new-sns-work-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
   cancel-in-progress: false
 jobs:
   save-public-45-photo-work:
@@ -37,7 +37,8 @@ jobs:
             --album-id djawa-in-the-summer-sunshine-part-2 \
             --album-id djawa-blossom-reverie \
             --album-id djawa-christmas-special-2025-mimmi-the-christmas-witch \
-            --album-id djawa-asuna-the-maid
+            --album-id djawa-asuna-the-maid \
+            --album-id public-mimmi-sns
       - name: Append only new actual SHA-distinct immutable photos
         run: |
           python apps/gallery-archive/publish_new_public_photos_to_pages.py \
