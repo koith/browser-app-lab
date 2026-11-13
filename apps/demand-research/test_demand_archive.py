@@ -1147,3 +1147,21 @@ def test_public_content_warnings_do_not_hide_accessible_posts(monkeypatch):
                         lambda url,*args:{"posts":[lemmy,lemmy_deleted]})
     lrows=list(job.lemmy("섹트",start,end))
     assert len(lrows)==1 and lrows[0]["platform"]=="lemmy"
+
+
+def test_all_public_provider_endpoints_unavailable_are_not_misreported_as_zero_posts(monkeypatch):
+    import demand_capture_job as capture
+    def no_public_provider(url,*args):
+        raise TimeoutError("synthetic secret credential NEVER LOG")
+    monkeypatch.setattr(capture,"get_json",no_public_provider)
+    for collector in (capture.mastodon,capture.misskey,capture.lemmy):
+        with pytest.raises(RuntimeError,match="public source"):
+            list(collector("synthetic-test-tag",1793660000,1793667900))
+
+
+def test_valid_empty_public_fediverse_responses_are_not_endpoint_errors(monkeypatch):
+    import demand_capture_job as capture
+    monkeypatch.setattr(capture,"get_json",
+        lambda url,*args:{"posts":[]} if "/api/v3/search" in url else [])
+    for collector in (capture.mastodon,capture.misskey,capture.lemmy):
+        assert list(collector("synthetic-test-tag",1793660000,1793667900))==[]
