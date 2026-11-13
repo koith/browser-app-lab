@@ -40,9 +40,34 @@ def source_proof():
             assert image.format=='JPEG'
         assert candidate['number']==number,'public album photos must be append-only'
         verified[sha]=candidate
+    expected_albums={'public-yui-sns':2,'artgravia-677-yui-public-samples':12,
+                     'yui-meow-public-samples':6}
+    total=0
+    global_sha=set()
+    for album in saved['albums']:
+        if album['id'] not in expected_albums:continue
+        assert len(album['images'])==expected_albums[album['id']],('unexpected count',album['id'])
+        for item in album['images']:
+            sha=item['sha256']
+            assert sha not in global_sha,('duplicate SHA in new works',sha)
+            assert not any(p['sha256']==sha for a in owner['albums'] for p in a['images'])
+            global_sha.add(sha)
+            file=(path/item['url']).resolve()
+            assert file.is_relative_to((path/'stored-albums').resolve())
+            assert file.is_file()
+            raw=file.read_bytes()
+            assert len(raw)==item['bytes'] and hashlib.sha256(raw).hexdigest()==sha
+            with Image.open(file) as image:
+                image.load()
+                assert image.size==(item['width'],item['height'])
+                assert image.format=='JPEG'
+            total+=1
+    assert total==20,('all 20 actual individual new public photo bytes required',total)
+    print('G07_ACTUAL_NEW_20_SHA_ORIGINALS_VERIFIED',{ 'model':'yui',
+        'albums':expected_albums,'bytes_sha_decoded':total},flush=True)
     p=verified[PHOTO_SHA]
     print('G07_REAL_PUBLIC_NEW_FILE_SHA_BYTES_PIXELS_PASS',json.dumps({
-      'sha256':PHOTO_SHA,'bytes':len(raw),'width':p['width'],
+      'sha256':PHOTO_SHA,'bytes':p['bytes'],'width':p['width'],
       'height':p['height'],'album':'public-yui-sns','number':p['number']}),flush=True)
     return p
 
