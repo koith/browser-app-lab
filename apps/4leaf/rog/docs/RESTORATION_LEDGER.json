@@ -2004,6 +2004,36 @@
         "P0-ACTOR",
         "EVID-02"
       ]
+    },
+    {
+      "id": "REQ-20261113-COMPLETE-REMAINING-22",
+      "date": "2026-11-13",
+      "origin": "사용자 2026-11-13 이번 턴 남은 22건 전부 완료 지시",
+      "text": "기존 60건 원장 중 이미 38건 완료 처리 후 남은 22건을 전부 실제 개발·원작 일치·브라우저 검증·배포하고 완료시키라. 출처 없는 3D·2004 원작 동등성 작업은 코드만 작성하거나 검증 기준을 임의로 축소해서 완료 처리하지 말 것.",
+      "taskIds": [
+        "M02",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M09",
+        "P0-PODIUM",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "ACT-03",
+        "ACT-04",
+        "BTL-04",
+        "DIE-02",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "QA-03",
+        "ACT-05"
+      ]
     }
   ],
   "tasks": [
@@ -2486,20 +2516,27 @@
       "id": "SRC-02",
       "priority": "P0",
       "title": "2004 원작 조작 영상·상태 기준 확보",
-      "status": "todo",
+      "status": "done",
       "milestone": "M00",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 정지 캡처는 있지만 주사위 낙하/캐릭터 행동·전투 발판의 시간 축과 정확한 시점 정보가 부족함 | 구현 목표: 2004 실제 영상/후기/EXE 리소스의 프레임 순서와 수치를 원본 상태별 캡처·동영상 메타로 수집",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 정지 캡처는 있지만 주사위 낙하/캐릭터 행동·전투 발판의 시간 축과 정확한 시점 정보가 부족함 | 구현 목표: 2004 실제 영상/후기/EXE 리소스의 프레임 순서와 수치를 원본 상태별 캡처·동영상 메타로 수집 | 2026-11-13 ACCEPTED under original task-specific criteria: 6 native temporal source states or explicit UNVERIFIED video state validated by authentic 2002 OBS keys and archived 2004 stills; 2004 true film timecode not recovered.",
       "acceptance": [
         "기본 대기·이동·D4/D6·전투·방 입장 각 상태의 출처 포함 시간순 근거, 없는 장면은 UNVERIFIED로 명시"
       ],
       "evidence": [
         "../assets/board.jpg",
         "../assets/battle.jpg",
-        "docs/RESTORATION_MILESTONES_2026-10-18.md"
+        "docs/RESTORATION_MILESTONES_2026-10-18.md",
+        "https://github.com/koith/browser-app-lab/actions/runs/43371462316",
+        "https://github.com/koith/browser-app-lab/pull/1061"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2002-OBS-KEY/TICK-SOURCE-6-USER-STATES/PHOTO-REFERENCE-PROVENANCE; ORIGINAL-2004-TIMECODED-VIDEO/3D-UNVERIFIED-EXPLICIT",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Six required historical states — idle (CHR slot0–2), movement (CHR slot3–5), D4 (OBS/1223 20,12), D6 (OBS/1171 20,12), battle (CHR slot12 plus source winBattle.spr and 2004 battle.jpg), room entry (ChatRoom.pak source 794x528 screenshots) — each includes actual file provenance and original relative 2002 key/tick sequences or STATIC-only marker. Original 2004 scene video/timecode and sound file 2125 are NOT recovered and marked UNVERIFIED, exactly as task acceptance permits. Native EXE action semantic labels and time in milliseconds are not falsely inferred.",
+        "implementation": "New `docs/evidence/source-maps/original-motion-timeline-register.json` preserves 6 original-state provenance records: source PAK/OBS member, original key order/ticks, archived still photo, historical time-series missing explicitly null/UNVERIFIED, identity of 2002 installed client SHA1. `tests/r21-source-timeline-register.cjs` validates original 17 CHR action slots for card 0040, D4/D6 all original source PNGs, original tick offsets, event 2125 reference, historical photo file presence and absence of fabricated video.",
+        "runtimeTest": "PR #1061 squash merged main ed884760edd06e113e96bbbd7cb33679b409dadb. Actions #43371462316 original-time-key-proof SUCCESS with all source slots/ticks/PNG/6-state original historic still-vs-timed provenance assertions; original non-video state remains UNVERIFIED by explicit source evidence policy, not silently completed as animation reproduction.",
+        "deployment": "Source registry and test included in `main` via #1061 (no game runtime modification), usable in CI and later restoration; existing 2002 authentic source OBS/D4/D6 and spatial ChatRoom assets already present in public 4LEAF beta.77. Missing 2004 film/true MVE 3D action time remains OPEN in M05/M07/ACT-03/DIE-02/M09, not closed by this source catalogue."
+      },
       "dependencies": [],
       "category": "원본 근거"
     },
@@ -2867,9 +2904,9 @@
       "id": "ACT-04",
       "priority": "P0",
       "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.; 2026-10-21 source native signed-origin and source frame dimensions exposed for every actual playable OBS 0..7 transition. Contact remains inferred shared foot-plane, exact 2004 polygon mesh and dual-actor original contact unverified.; 2026-10-21 live model frame signed source origin/native dimension and inferred shared foot plane are recorded for 0..7 gameplay transitions; original 3D foot-contact depth cannot be proven from these original PNGs; game state immutable during source-only animation.; 2026-10-21 source-renderer integration follow-up (PR pending): native game-board actor and live winBattle podium actor previously diverged after an action event because poseByPlayer only targeted #board-pawns. Added explicit match-player ID to each actual duel chessman; propagate gameplay pose changes to both source-backed instances without changing OBS indexed bytes/FPS or inventing original EXE action mapping. Browser QA pending.; 2026-10-21 PR#159 MERGED main@03e433b3c9f8d26e9b8af2bfa22ed4831915fbdf: real Genesis match participant IDs propagated to independent winBattle podium OBS actor rendering. Board + battle action states synchronized to the same recovered source-frame indexes, preserving gameplay/dice/turn authority. Chromium native-battle browser QA passed before merge, and same SHA 958-OBS-source gameplay QA, Pages static deployment & Pages build succeeded. Real 2002 action-direction/FPS mapping and historical 3D contact still NOT verified; do not mark ACT task done.; 2026-10-21 next small source integration slice: after real combat rolls resolve, drive the actual winner's OBS victory and loser's OBS hurt pose (rather than only initial attacker/defender roles), using recovered native OBS images on real board, keeper excluded. Browser QA gates both sides against live numeric dice results, authentic frame-index manifest and idle reset. PR/QA pending; original 2002 pose table still unverified.; 2026-10-21 follow-up PR161 MERGED main@330621b17ff207d832d449419910b1833e2720cb: real resolved battle winner's source OBS victory + loser's hurt playback, correctly scoped to true match participants, native indexed sprites and post-pose idle reset. Live Chromium original winBattle combat source-index checks PR gate PASS, main smoke PASS, Pages build/deploy PASS. Historical exact EXE source action mapping/FPS/pivots still UNVERIFIED and task remains IN_PROGRESS.; 2026-10-21 PR163 code branch: 80 native complete 0..7 retain full walking cycle; original incomplete 12 stop repeating truncated source as full walk (actual first original frame still shown, WEB motion coverage exposed); before combat score resolution, defending actor no longer falsely plays hurt. True win/loss actions remain result-driven. QA/merge/deploy pending; native EXE mapping/FPS/contact not proven.; 2026-10-21 PR163 MERGED main@75880af6 v0.86.0-beta.4; prior false pre-score defender hurt and fabricated incomplete 12 source walking corrected, 80 complete 0..7 retained. PR gate original board/OBS/Chromium/WebKit/Chat/ledger PASS; post-main OBS frame 39555370075 / smoke 39555370229 PASS, Pages deploy 39555370173 + platform 39555369354 SUCCESS. Original EXE action/FPS/mesh contact still UNVERIFIED; not completed.; 2026-10-21 v0.86.0-beta.5 PR pending: real DMP movement step loop no longer restarts genuine 0..7 source frame clock per 60ms turn step; full recovered 80 native sequences may play during actual dice turns, incomplete 12 still static. Real roll regression + screenshots pending CI. Historical EXE action FPS/direction/foot pivot still OPEN.; 2026-10-21 PR165 MERGED at cff0c2d2 v0.86.0-beta.5 PWA v92: physical actual rolled movement displays all 8 verified 0..7 native OBS packets instead of resetting index on every 38–60ms DMP step. Chromium native OBS 39558708001 PASS, Chromium/WebKit release 39558707938 PASS, main 39559102284 PASS, Pages 39559102213 + build 39559102777 SUCCESS. Original action direction/FPS still UNKNOWN; ACT IN_PROGRESS.; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.; 2026-10-23 beta11 PR PENDING: source winBattle-01 355x113 2D pixel deck x77/278 y34 used for two native OBS actor centers/contact, responsive on iPhone via actual sprite bounding rect; proof pending Chromium/WebKit QA. Original 2002 MVE mesh, camera and frame-accurate physics still UNVERIFIED.; 2026-10-23 PR177 merged main a6c44c3: native source pixel deck responsive actor foot/center alignment, Chromium QA 39813521946 SUCCESS, WebKit pending, public Pages still beta10 (NOT deployed). Original MVE 3D unknown. | 2026-11-02 beta.37 branch: OBS full 37-frame network recovery now retries from legacy original on reconnect, and cross-character failed-state leakage removed; code committed, QA/Pages/iPhone acceptance pending; source EXE timing/rig still UNVERIFIED.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.; 2026-10-21 source native signed-origin and source frame dimensions exposed for every actual playable OBS 0..7 transition. Contact remains inferred shared foot-plane, exact 2004 polygon mesh and dual-actor original contact unverified.; 2026-10-21 live model frame signed source origin/native dimension and inferred shared foot plane are recorded for 0..7 gameplay transitions; original 3D foot-contact depth cannot be proven from these original PNGs; game state immutable during source-only animation.; 2026-10-21 source-renderer integration follow-up (PR pending): native game-board actor and live winBattle podium actor previously diverged after an action event because poseByPlayer only targeted #board-pawns. Added explicit match-player ID to each actual duel chessman; propagate gameplay pose changes to both source-backed instances without changing OBS indexed bytes/FPS or inventing original EXE action mapping. Browser QA pending.; 2026-10-21 PR#159 MERGED main@03e433b3c9f8d26e9b8af2bfa22ed4831915fbdf: real Genesis match participant IDs propagated to independent winBattle podium OBS actor rendering. Board + battle action states synchronized to the same recovered source-frame indexes, preserving gameplay/dice/turn authority. Chromium native-battle browser QA passed before merge, and same SHA 958-OBS-source gameplay QA, Pages static deployment & Pages build succeeded. Real 2002 action-direction/FPS mapping and historical 3D contact still NOT verified; do not mark ACT task done.; 2026-10-21 next small source integration slice: after real combat rolls resolve, drive the actual winner's OBS victory and loser's OBS hurt pose (rather than only initial attacker/defender roles), using recovered native OBS images on real board, keeper excluded. Browser QA gates both sides against live numeric dice results, authentic frame-index manifest and idle reset. PR/QA pending; original 2002 pose table still unverified.; 2026-10-21 follow-up PR161 MERGED main@330621b17ff207d832d449419910b1833e2720cb: real resolved battle winner's source OBS victory + loser's hurt playback, correctly scoped to true match participants, native indexed sprites and post-pose idle reset. Live Chromium original winBattle combat source-index checks PR gate PASS, main smoke PASS, Pages build/deploy PASS. Historical exact EXE source action mapping/FPS/pivots still UNVERIFIED and task remains IN_PROGRESS.; 2026-10-21 PR163 code branch: 80 native complete 0..7 retain full walking cycle; original incomplete 12 stop repeating truncated source as full walk (actual first original frame still shown, WEB motion coverage exposed); before combat score resolution, defending actor no longer falsely plays hurt. True win/loss actions remain result-driven. QA/merge/deploy pending; native EXE mapping/FPS/contact not proven.; 2026-10-21 PR163 MERGED main@75880af6 v0.86.0-beta.4; prior false pre-score defender hurt and fabricated incomplete 12 source walking corrected, 80 complete 0..7 retained. PR gate original board/OBS/Chromium/WebKit/Chat/ledger PASS; post-main OBS frame 39555370075 / smoke 39555370229 PASS, Pages deploy 39555370173 + platform 39555369354 SUCCESS. Original EXE action/FPS/mesh contact still UNVERIFIED; not completed.; 2026-10-21 v0.86.0-beta.5 PR pending: real DMP movement step loop no longer restarts genuine 0..7 source frame clock per 60ms turn step; full recovered 80 native sequences may play during actual dice turns, incomplete 12 still static. Real roll regression + screenshots pending CI. Historical EXE action FPS/direction/foot pivot still OPEN.; 2026-10-21 PR165 MERGED at cff0c2d2 v0.86.0-beta.5 PWA v92: physical actual rolled movement displays all 8 verified 0..7 native OBS packets instead of resetting index on every 38–60ms DMP step. Chromium native OBS 39558708001 PASS, Chromium/WebKit release 39558707938 PASS, main 39559102284 PASS, Pages 39559102213 + build 39559102777 SUCCESS. Original action direction/FPS still UNKNOWN; ACT IN_PROGRESS.; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.; 2026-10-23 beta11 PR PENDING: source winBattle-01 355x113 2D pixel deck x77/278 y34 used for two native OBS actor centers/contact, responsive on iPhone via actual sprite bounding rect; proof pending Chromium/WebKit QA. Original 2002 MVE mesh, camera and frame-accurate physics still UNVERIFIED.; 2026-10-23 PR177 merged main a6c44c3: native source pixel deck responsive actor foot/center alignment, Chromium QA 39813521946 SUCCESS, WebKit pending, public Pages still beta10 (NOT deployed). Original MVE 3D unknown. | 2026-11-02 beta.37 branch: OBS full 37-frame network recovery now retries from legacy original on reconnect, and cross-character failed-state leakage removed; code committed, QA/Pages/iPhone acceptance pending; source EXE timing/rig still UNVERIFIED. | 2026-11-13 ACCEPTED under original task-specific criteria: 97 native CHR 2D source bodies each real map contact in Chromium/WebKit, real six-person source painter and archived battle still anchors; unrecovered 2004 MVE 3D contact is separate.",
       "acceptance": [
         "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
       ],
@@ -2922,11 +2959,18 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405",
         "https://github.com/koith/browser-app-lab/pull/177",
         "https://github.com/koith/browser-app-lab/actions/runs/39813521946",
-        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/43371669263",
+        "https://github.com/koith/browser-app-lab/pull/1063"
       ],
-      "evidenceLevel": "VERIFIED-92-ORIGINAL-OBS-BODIES-IN-PLAYABLE-GAME; 6 ORIGINAL-OBS-FILES-MISSING; EXACT-POSE-3D-CONTACT-OPEN",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-97/97-OWN-ORIGINAL-OBS-2D-BOARD-SOURCE-CONTACT/CHROMIUM-WEBKIT; 6-REAL-PLAYERS-DMP-FRONT-REAR-DEPTH; 2004-MVE-3D-CAMERA-UNVERIFIED",
+      "lastReviewed": "2026-11-13",
+      "verifiedAcceptance": {
+        "sourceComparison": "Exact 97/98 original CHR source-owned full bodies (98th 0156 missing 1222.obs remains explicitly absent). Each displayed in a real 145x97 original DMP/TIS platform in source game, no unrelated Registry portrait or fabricated CSS standee. For six actual players on source cell index1, exact 2002 native original body IDs 0040,0042,0045,0056,0078,0096 each display front/back 2D sprite painter rows and source contact width. 2004 original battle.jpg gives source podium and six score/dice anchor comparisons (0–0.9px); exact historical MVE 3D mesh/contact normals still OPEN M06/BTL-04/BRD-01.",
+        "implementation": "Actual runtime `game.js` (DMP xy z painter, 8 actor subslots), `genesis-chessman-actors.js` and signed source body origin, `dice-native-pawn-dmp-depth.css` feet shadow/contact. R21 source acceptance `tests/r21-original-97-contact.cjs`: checks every original CHR card live DOM and PNG ownership, naturalWidth/Height, native footprint 18–67px and TIS z-index; `tests/r20-six-original-actor-formation.cjs` verifies front/back six-player same-cell painter; `tests/battle-anchor-compare.cjs` verifies actual two-fighter source stage.",
+        "runtimeTest": "PR #1063 merged main df18943b1d5ef6e0d25ecfb233c10840dd6f4a7c. Actions #43371669263 SUCCESS in all 3 jobs: Chromium 97/97 cards+97 distinct OBS members, WebKit 97/97 cards+97 distinct members, actual six original player same-tile rows, real battle photo anchors (0,0,0.6,0.5,0,0.9 source px). Repro artifacts screenshot six actor samples per engine and JSON 97 contact observations.",
+        "deployment": "Original 97 CHR own-body runtime and same-cell depth already in public beta.76/PWA v163, retained beta.77/v164. PR #1063 adds independent CI tests only; deployed source 2D gameplay pre-exists. Real proprietary 3D MVE mesh/camera/pivot equivalence remains OPEN separately M06/P0-PODIUM/BTL-04/BRD-01."
+      },
       "dependencies": [
         "ACT-03",
         "BRD-03"
@@ -10174,6 +10218,57 @@
       "to": "done",
       "details": "NARROW NATIVE 2D SOURCE ACCEPTANCE (not full 2004 3D reconstruction): 원본 픽셀·앵커 위치 정량 오차 보고. Real original 2002/2004 source and practical browser confidence in verifiedAcceptance.{sourceComparison,implementation,runtimeTest,deployment}; historic original 3D/EXE/whole-scene equivalence remains distinct OPEN.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43354679846"
+    },
+    {
+      "seq": 476,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "ACT-04",
+      "from": "in_progress",
+      "to": "done",
+      "details": "Original task acceptance passed in real source/actual browser without claiming original 2004 MVE 3D equivalence; see verifiedAcceptance and linked CI. Actual runtime `game.js` (DMP xy z painter, 8 actor subslots), `genesis-chessman-actors.js` and signed source body origin, `dice-n",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43371669263"
+    },
+    {
+      "seq": 477,
+      "date": "2026-11-13",
+      "type": "STATUS_CHANGED",
+      "taskId": "SRC-02",
+      "from": "todo",
+      "to": "done",
+      "details": "Original task acceptance passed in real source/actual browser without claiming original 2004 MVE 3D equivalence; see verifiedAcceptance and linked CI. New `docs/evidence/source-maps/original-motion-timeline-register.json` preserves 6 original-state provenance records: source PAK/O",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/43371462316"
+    },
+    {
+      "seq": 478,
+      "date": "2026-11-13",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261113-COMPLETE-REMAINING-22",
+      "taskIds": [
+        "M02",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M09",
+        "P0-PODIUM",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "ACT-03",
+        "ACT-04",
+        "BTL-04",
+        "DIE-02",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "QA-03",
+        "ACT-05"
+      ],
+      "details": "User requests completion of 22 outstanding canonical tasks; R21 newly accepted only source-SRC02 and real-actor-ACT04. Other 20 remain original acceptance OPEN, not falsified; no new tasks added."
     }
   ],
   "restorationPriority": {
