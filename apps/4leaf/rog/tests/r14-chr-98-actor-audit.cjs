@@ -36,7 +36,7 @@ async function settled(page,sel){
   if(p.dataset.actorSourceLoad==='loading')return false;
   if(p.dataset.actorRig!=='original-obs-sprite')return true;
   const img=p.querySelector('img.leaf-chess-original-obs');
-  return Boolean(img&&img.complete&&img.naturalWidth>0&&img.getAttribute('src'))},sel,{timeout:8000}).catch(()=>{});
+  return Boolean(img&&img.complete&&img.naturalWidth>0&&img.getAttribute('src'))},sel,{timeout:18000});
 }
 function readState(sel){
  const p=document.querySelector(sel);if(!p)return null;
@@ -101,6 +101,10 @@ function readState(sel){
      const n=window.__LEAF_CHR_BODY_MAP__.resolve(p.dataset.chessmanId);
      const exp=n?window.__LEAF_NATIVE_CARD_ACTIONS__.sequenceFor(n,p.dataset.chessmanId,action,travel,{duel:false,rest:travel}):null;
      return exp?{expected:exp.map(f=>f.index),expectedMirror:Boolean(exp.mirror),expectedTable:exp.table,expectedSlot:exp.nativeSlot||null,evidence:exp.nativeEvidence}:{expected:null}},[sel,action,travel]);
+    await settled(page,sel);
+    // WebKit can finish a short source action while an in-flight PNG decodes.
+    // Never treat that transient as a missing recovered body, but also never
+    // swallow a genuinely missing PNG: require decoded pixels before sampling.
     await settled(page,sel);
     const got=await page.evaluate(readState,sel);
     const key=action+(action==='walk'?'-'+travel:'');
