@@ -74,6 +74,10 @@ jobs:
       # replay asynchronously performs immutable TeraBox remote SHA checks.
       # Red capture status while newly buffered is intentional, never a false PASS.
       DEMAND_FAST_CAPTURE_DEFER_REMOTE: "1"
+      # Best-effort immutable AES-GCM pack in TeraBox, independently
+      # remote SHA-readback verified AFTER the public source capture ends.
+      # Never count as an individually restored or viewable original.
+      DEMAND_FAST_CAPTURE_PACK_REMOTE: "1"
       DEMAND_ARCHIVE_RECOVERY_KEY: ${{ secrets.DEMAND_ARCHIVE_RECOVERY_KEY }}
       DEMAND_RECOVERY_SPOOL_DIR: "/tmp/intersection-private-recovery"
       GITHUB_RUN_ID: ${{ github.run_id }}
