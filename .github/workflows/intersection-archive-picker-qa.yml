@@ -15,6 +15,8 @@ on:
       - "apps/demand-research/test_auto_archive_view_browser.py"
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_target_account_viewer.py"
+      - "apps/demand-research/github_temp_bundle.py"
+      - "apps/demand-research/test_github_temp_bundle.py"
       - "apps/demand-research/test_archive_tab_browser.py"
       - "apps/demand-research/test_account_archive_picker_browser.py"
       - "apps/demand-research/test_account_archive_browser.py"
@@ -69,6 +71,7 @@ jobs:
           set -euo pipefail
           cd apps/demand-research
           python -m pytest -q test_target_account_viewer.py
+          python -m pytest -q test_github_temp_bundle.py
       - name: Real synthetic Chromium and mobile WebKit UX
         run: |
           set -euo pipefail

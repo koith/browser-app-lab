@@ -50,6 +50,17 @@ MAX_VERIFIED_CACHE_ITEMS = 10
 _cache = {}
 _guard = threading.Lock()
 
+# One signed account history can comprise many independent encrypted ZIPs.
+# The per-ZIP LRU prevented repeated downloads of one ZIP, but every parallel
+# account feed/profile/media request still re-walked the release index and
+# ancestor chain. A separate singleflight, one-account verified-history cache
+# stops repeated remote work without bypassing ANY AES, ZIP, manifest or SHA
+# verification. Keep it below the 512 MiB Render free process limit.
+HISTORY_CACHE_SECONDS = 180
+HISTORY_MAX_BYTES = 140_000_000
+_history_guard = threading.RLock()
+_history_cache = None
+
 
 def _cached_verified_bundle(key):
     with _guard:
@@ -266,36 +277,56 @@ def workflow_verified_bundles(max_scan=24):
 
 
 def matching_bundles(account, max_versions=500):
-    """Load the newest verified ZIP plus ALL signed immutable ancestor tags.
+    """Return verified immutable account history, singleflight per process.
 
-    The public Atom feed holds only the most recent releases. The encrypted
-    ancestor chain keeps older originals directly readable long after they
-    age out of that feed; no historical release is edited or deleted.
+    Older records/revisions are kept byte-for-byte and individually validated.
+    Caching only follows a COMPLETE verified ancestor walk, and no unverified
+    CDN hint or failed remote read can enter the cache. Another account, an
+    oversized history, or an expired TTL always forces a fresh SHA readback.
     """
+    global _history_cache
     if not re.fullmatch(r"(?:bluesky|mastodon)-[a-f0-9]{40}",str(account)):
         return []
-    matches={}
-    for tag in atom_tags():
-        try:
-            bundle=tagged_bundle(tag)
-        except (BundleInvalid,RuntimeError,ValueError,zipfile.BadZipFile):
-            continue
-        if bundle.account!=account:
-            continue
-        matches[tag]=bundle
-        if len(matches)>=max_versions:
-            break
-        for old_tag in bundle.ancestor_tags:
-            if old_tag in matches:
+    # A locked cache hit guarantees repeated simultaneous feed, profile and
+    # original-media requests reuse exactly the same signed archive snapshot.
+    with _history_guard:
+        now=time.monotonic()
+        cached=_history_cache
+        if (cached is not None and cached[0]==account
+                and now-cached[1]<HISTORY_CACHE_SECONDS
+                and len(cached[2])<=max_versions):
+            return list(cached[2])
+        matches={}
+        for tag in atom_tags():
+            try:
+                bundle=tagged_bundle(tag)
+            except (BundleInvalid,RuntimeError,ValueError,zipfile.BadZipFile):
                 continue
+            if bundle.account!=account:
+                continue
+            matches[tag]=bundle
             if len(matches)>=max_versions:
-                raise RuntimeError("verified history exceeds bounded reader")
-            old=tagged_bundle(old_tag)
-            if old is None or old.account!=account:
-                raise RuntimeError("signed immutable account history unavailable")
-            matches[old_tag]=old
-        break
-    return list(matches.values())
+                break
+            for old_tag in bundle.ancestor_tags:
+                if old_tag in matches:
+                    continue
+                if len(matches)>=max_versions:
+                    raise RuntimeError("verified history exceeds bounded reader")
+                old=tagged_bundle(old_tag)
+                if old is None or old.account!=account:
+                    raise RuntimeError("signed immutable account history unavailable")
+                matches[old_tag]=old
+            break
+        result=list(matches.values())
+        # Do not pin two large user histories or an unbounded archive. The
+        # per-ZIP LRU may evict its own entries, but an already validated,
+        # immutable account session remains readable during this short TTL.
+        total=sum(_bundle_bytes(bundle) for bundle in result)
+        if result and total<=HISTORY_MAX_BYTES and len(result)<=50:
+            _history_cache=(account,time.monotonic(),tuple(result))
+        else:
+            _history_cache=None
+        return result
 
 
 def atom_tags():
