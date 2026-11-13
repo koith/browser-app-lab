@@ -182,6 +182,7 @@ def get_json(url, body=None):
 
 
 def mastodon(term, start, end):
+    reached=0
     for host in ("mastodon.social", "planet.moe", "twingyeo.kr"):
         url = "https://" + host + "/api/v1/timelines/tag/" + quote(term) + "?limit=40"
         try:
@@ -190,6 +191,7 @@ def mastodon(term, start, end):
             continue
         if not isinstance(data, list):
             continue
+        reached+=1
         for item in data:
             if not isinstance(item, dict) or item.get("visibility") != "public":
                 continue
@@ -209,7 +211,14 @@ def mastodon(term, start, end):
                 yield row
 
 
+    if not reached:
+        # Empty valid API results differ from all hosts failing; the latter
+        # must count toward source coverage errors, not be mistaken for 0 posts.
+        raise RuntimeError("mastodon public source endpoints unavailable")
+
+
 def misskey(term, start, end):
+    reached=0
     for host in ("misskey.io", "hoto.moe"):
         try:
             data = get_json("https://" + host + "/api/notes/search",
@@ -218,6 +227,7 @@ def misskey(term, start, end):
             continue
         if not isinstance(data, list):
             continue
+        reached+=1
         for note in data:
             if not isinstance(note, dict) or note.get("visibility") != "public":
                 continue
@@ -239,13 +249,19 @@ def misskey(term, start, end):
                 yield row
 
 
+    if not reached:
+        raise RuntimeError("misskey public source endpoints unavailable")
+
+
 def lemmy(term, start, end):
     try:
         data = get_json("https://lemmy.world/api/v3/search?" +
                         urlencode({"q": term, "type_": "Posts", "sort": "New", "limit": 40}))
     except Exception:
-        return
-    for item in data.get("posts", []) if isinstance(data, dict) else []:
+        raise RuntimeError("lemmy public source endpoint unavailable") from None
+    if not isinstance(data,dict) or not isinstance(data.get("posts"),list):
+        raise RuntimeError("lemmy public source response invalid")
+    for item in data["posts"]:
         if not isinstance(item, dict):
             continue
         p = item.get("post") or {}
