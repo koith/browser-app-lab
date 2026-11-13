@@ -435,3 +435,46 @@ def test_replay_reports_only_safe_first_observation_timeout_stage(tmp_path):
     assert result["buffer_error_categories"]=={"timeout":1}
     assert result["buffer_failure_stages"]=={"first_observation":1}
     assert "SHOULD NEVER LEAK" not in json.dumps(result)
+
+
+def test_three_bad_first_artifact_buffers_do_not_block_distinct_good_artifact(
+        tmp_path,monkeypatch):
+    """A broken source ZIP cannot poison the rest of the authorized backlog."""
+    from pathlib import Path
+    import shutil
+    monkeypatch.setenv("GH_TOKEN","synthetic-private-github-token")
+    monkeypatch.delenv("DEMAND_RECOVERY_SOURCE_RUN_ID",raising=False)
+    first_src=tmp_path/"bad"
+    second_src=tmp_path/"good"
+    first_spool=RecoverySpool(first_src)
+    second_spool=RecoverySpool(second_src)
+    blocked=set()
+    for n in range(3):
+        pid=hashlib.sha1(("bad-artifact-"+str(n)).encode()).hexdigest()
+        blocked.add(first_spool.save(pid,first(pid)).name)
+    goodpid=hashlib.sha1(b"good-second-artifact").hexdigest()
+    good_file=second_spool.save(goodpid,first(goodpid))
+    monkeypatch.setattr(replay,"list_candidates",lambda:[
+        ("2026-11-01T00:00:00Z",123451,"intersection-private-recovery"),
+        ("2026-11-01T01:00:00Z",123452,"intersection-private-recovery")])
+    monkeypatch.setattr(replay,"select_remote_encrypted_packs",lambda _cloud:[])
+    def fake_download(args,*,max_bytes=2_000_000):
+        assert args[:2]==["run","download"]
+        source=first_src if args[2]=="123451" else second_src
+        dest=Path(args[-1])
+        for item in source.glob("*.enc"):
+            shutil.copyfile(item,dest/item.name)
+        return b""
+    monkeypatch.setattr(replay,"_gh",fake_download)
+    original=replay.restore_with_budget
+    def reject_only_first(spool,path,cloud,**kwargs):
+        if path.name in blocked:
+            raise TimeoutError("synthetic private failure that must never print")
+        return original(spool,path,cloud,**kwargs)
+    monkeypatch.setattr(replay,"restore_with_budget",reject_only_first)
+    result=replay.replay(cloud=FakeCloud())
+    assert result["buffer_failures"]==3
+    assert result["first_observation_verified"]==1
+    assert result["deferred_artifacts"]==0
+    assert result["artifacts"]==2
+    assert "synthetic private failure" not in json.dumps(result)
