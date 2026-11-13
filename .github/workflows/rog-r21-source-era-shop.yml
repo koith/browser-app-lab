@@ -1,0 +1,52 @@
+name: 4LEAF 2004 vs 2002 original shop real source and persistent GP acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/shop-era-2004.*'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/r21-source-era-shop.cjs'
+      - '.github/workflows/rog-r21-source-era-shop.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/shop-era-2004.*'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/r21-source-era-shop.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-shop-and-live-gp:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.browser }} --with-deps
+      - name: Start original source 4LEAF client
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/r21shop.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r21-source-era-shop.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-r21-original-shop-${{ matrix.browser }}
+          if-no-files-found: ignore
+          retention-days: 10
+          path: leaf-r21-*.png
