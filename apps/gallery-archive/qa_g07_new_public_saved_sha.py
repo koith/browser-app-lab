@@ -19,21 +19,28 @@ def source_proof():
     path=ROOT/'apps/yui-gallery'
     saved=json.loads((path/'stored-albums.json').read_text())
     owner=json.loads((path/'owner-index.json').read_text())
-    local=[p for a in saved['albums'] if a['id']=='public-yui-sns' for p in a['images']
-           if p['sha256']==PHOTO_SHA]
-    assert len(local)==1,('new individual photo not in exact recorded source album',local)
-    p=local[0]
-    assert not any(t.get('sha256')==PHOTO_SHA for a in owner['albums'] for t in a['images']),\
-        'not new relative to owner catalog'
-    file=(path/p['url']).resolve()
-    assert file.is_relative_to((path/'stored-albums/public-yui-sns').resolve())
-    raw=file.read_bytes()
-    assert len(raw)==p['bytes'] and hashlib.sha256(raw).hexdigest()==PHOTO_SHA
-    with Image.open(file) as image:
-        image.load()
-        assert image.size==(p['width'],p['height'])
-        assert image.format=='JPEG'
-    assert p['number']==467,'public album photos must be append-only'
+    expected = {
+        '68ff6a9b92bd13e7a1def21ef2dfb42a28c7bf627d1a493164906107158dcc7b': (467,234959,1366,2048),
+        'c00059932bfcfd17c214d4dc8b462de4846cad8881bcebc2ac24f4feb31b8802': (468,325352,1365,2048),
+    }
+    verified = {}
+    for sha, (number, size, width, height) in expected.items():
+        local=[p for a in saved['albums'] if a['id']=='public-yui-sns' for p in a['images']
+               if p['sha256']==sha]
+        assert len(local)==1,('new individual photo not in exact recorded source album',sha)
+        candidate=local[0]
+        assert not any(t.get('sha256')==sha for a in owner['albums'] for t in a['images']), 'not new relative to owner catalog'
+        file=(path/candidate['url']).resolve()
+        assert file.is_relative_to((path/'stored-albums/public-yui-sns').resolve())
+        raw=file.read_bytes()
+        assert len(raw)==size==candidate['bytes'] and hashlib.sha256(raw).hexdigest()==sha
+        with Image.open(file) as image:
+            image.load()
+            assert image.size==(width,height)==(candidate['width'],candidate['height'])
+            assert image.format=='JPEG'
+        assert candidate['number']==number,'public album photos must be append-only'
+        verified[sha]=candidate
+    p=verified[PHOTO_SHA]
     print('G07_REAL_PUBLIC_NEW_FILE_SHA_BYTES_PIXELS_PASS',json.dumps({
       'sha256':PHOTO_SHA,'bytes':len(raw),'width':p['width'],
       'height':p['height'],'album':'public-yui-sns','number':p['number']}),flush=True)
