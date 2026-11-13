@@ -10,7 +10,11 @@
       "public_web_edition_photos": 45,
       "advertised_photos": 45,
       "visual_reference_required": true,
-      "identity_evidence": "Observed Mimmi model-index link, album title and public individual-image JSON declaration. Local full-edition decoding found 9 clear whole-frame matches to SHA-verified saved originals and 36 new files. Keep all larger saved originals; require independent private-storage readback before publication."
+      "identity_evidence": "Observed Mimmi model-index link, album title and public individual-image JSON declaration. Local full-edition decoding found 9 clear whole-frame matches to SHA-verified saved originals and 36 new files. Keep all larger saved originals; require independent private-storage readback before publication.",
+      "source_pages": [
+        "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/"
+      ],
+      "official_publisher_page": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/"
     },
     {
       "id": "v2ph-actor-z7exoo5z",
@@ -137,7 +141,11 @@
       "identity_evidence": "Observed ordinary Mimmi search title and work URL. At least three SHA-verified whole-frame saved-cut anchors required before any new photo publication. Source numbering is separate from publisher original sequence.",
       "storage_verification_hold": true,
       "storage_hold_reason": "Owner provider errno 400141 requires normal account verification. Keep existing objects; no source re-download, re-upload, rename or alternate-credential retry.",
-      "storage_hold_evidence_run": 41193670543
+      "storage_hold_evidence_run": 41193670543,
+      "source_pages": [
+        "https://djawaphoto.com/portfolio/mademoiselle-mimmi/"
+      ],
+      "official_publisher_page": "https://djawaphoto.com/portfolio/mademoiselle-mimmi/"
     },
     {
       "id": "djawa-your-panties",
@@ -147,7 +155,11 @@
       "public_web_edition_photos": 325,
       "advertised_photos": 325,
       "visual_reference_required": true,
-      "identity_evidence": "Observed ordinary Mimmi search title and work URL. At least three SHA-verified whole-frame saved-cut anchors required before any new photo publication. Source numbering is separate from publisher original sequence."
+      "identity_evidence": "Observed ordinary Mimmi search title and work URL. At least three SHA-verified whole-frame saved-cut anchors required before any new photo publication. Source numbering is separate from publisher original sequence.",
+      "source_pages": [
+        "https://djawaphoto.com/portfolio/your-panties/"
+      ],
+      "official_publisher_page": "https://djawaphoto.com/portfolio/your-panties/"
     },
     {
       "id": "djawa-in-the-summer-sunshine-part-2",
@@ -188,6 +200,246 @@
       "priority": 0,
       "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
       "storage_scope": "public_publisher_samples_only_not_purchased_master"
+    },
+    {
+      "id": "djawa-christmas-special-2021-mimmi",
+      "title": "Christmas Special 2021 : Mimmi",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-christmas-special-2023-mimmi",
+      "title": "Christmas Special 2023 : Mimmi",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2023-mimmi/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-christmas-special-2024-mimmi-santa-on-the-street",
+      "title": "Christmas Special 2024 : Mimmi – Santa on the Street",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-full-bloom-yamashiiro",
+      "title": "Full Bloom Yamashiiro",
+      "source": "https://djawaphoto.com/portfolio/full-bloom-yamashiiro/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-grin-and-fire",
+      "title": "Grin and Fire!",
+      "source": "https://djawaphoto.com/portfolio/grin-and-fire/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-holstein-jobs",
+      "title": "Holstein Jobs",
+      "source": "https://djawaphoto.com/portfolio/holstein-jobs/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-in-the-summer-sunshine-part-1",
+      "title": "In the summer sunshine (part 1)",
+      "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-janus-scary-lantern-night",
+      "title": "Janus : Scary Lantern Night",
+      "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-janus-scary-lantern-night-vol-2",
+      "title": "Janus : Scary Lantern Night Vol. 2",
+      "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night-vol-2/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-le-malin-listless-lapin",
+      "title": "Le Malin – Listless Lapin",
+      "source": "https://djawaphoto.com/portfolio/le-malin-listless-lapin/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-maid-for-mayhem",
+      "title": "Maid for Mayhem",
+      "source": "https://djawaphoto.com/portfolio/maid-for-mayhem/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-my-summer-vacation",
+      "title": "My Summer Vacation",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-2",
+      "title": "My Summer Vacation Vol. 2",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-2/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-3",
+      "title": "My Summer Vacation Vol. 3",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-3/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-4",
+      "title": "My Summer Vacation Vol. 4",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-4/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-nikke-alice",
+      "title": "Nikke : Alice",
+      "source": "https://djawaphoto.com/portfolio/nikke-alice/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-nikke-elegg",
+      "title": "Nikke : Elegg",
+      "source": "https://djawaphoto.com/portfolio/nikke-elegg/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-nikke-yuni",
+      "title": "Nikke : Yuni",
+      "source": "https://djawaphoto.com/portfolio/nikke-yuni/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-pop-kitty-party",
+      "title": "Pop Kitty Party",
+      "source": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-rei-beyond-the-heart",
+      "title": "Rei, Beyond the Heart",
+      "source": "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-retrospection",
+      "title": "Retrospection",
+      "source": "https://djawaphoto.com/portfolio/retrospection/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-rudy-the-wolf-of-midnight",
+      "title": "Rudy : The Wolf of Midnight",
+      "source": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-twin-bunnies-affair",
+      "title": "Twin Bunnies Affair",
+      "source": "https://djawaphoto.com/portfolio/twin-bunnies-affair/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-your-fishe-gawr-gura",
+      "title": "Your Fishe (Gawr Gura)",
+      "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
+      "publisher": "DJAWA",
+      "priority": 3,
+      "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_claimed_total_edition_photos": null
     }
   ]
 }
