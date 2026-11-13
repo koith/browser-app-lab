@@ -392,6 +392,35 @@ def public_error_class(err):
     return "unclassified_failure"
 
 
+def round_robin_public_rows(getters,terms,start,end):
+    """Alternate publicly visible source/term cursors fairly.
+
+    A single high-volume SNS must not exhaust the bounded first-sighting
+    buffer before other public providers are even queried. Each source
+    cursor is read incrementally, and individual provider failures are
+    reported only as anonymous sentinel values. No source ID is logged.
+    """
+    from collections import deque
+    pending=deque()
+    for term in terms:
+        for getter in getters:
+            try:
+                pending.append(iter(getter(term,start,end)))
+            except Exception:
+                yield None
+    while pending:
+        iterator=pending.popleft()
+        try:
+            row=next(iterator)
+        except StopIteration:
+            continue
+        except Exception:
+            yield None
+            continue
+        pending.append(iterator)
+        yield row
+
+
 def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False,
         elapsed_clock=time.monotonic, max_fast_seconds=FAST_SOFT_BUDGET_SECONDS):
     started_at=elapsed_clock()
@@ -426,6 +455,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         raise ValueError("an immutable numeric run ID is required")
     start = now - WINDOW_MINUTES * 60
     sources = tuple(fetchers or (bluesky, mastodon, misskey, lemmy))
+    current_source_count=len(sources)
     lookback_minutes=WINDOW_MINUTES
     if fast_mode and spool is not None:
         # Capture recent originals FIRST. Only then backfill still-public
@@ -520,167 +550,166 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     seen_this_scan = set()
     budget_exhausted = False
     soft_time_budget_exhausted = False
-    for getter in sources:
+    platform_candidates={"bluesky":0,"mastodon":0,"misskey":0,"lemmy":0}
+    # Query current-period sources BEFORE catch-up history, but interleave
+    # providers inside each period. A busy Bluesky cursor cannot prevent
+    # Mastodon/Misskey/Lemmy first-sighting attempts.
+    for source_group in (sources[:current_source_count],
+                         sources[current_source_count:]):
         if budget_exhausted or capture_interrupted:
             break
-        for term in TERMS:
+        for row in round_robin_public_rows(source_group,TERMS,start,now):
             if budget_exhausted or capture_interrupted:
                 break
-            try:
-                iterator = iter(getter(term, start, now))
-            except Exception:
-                failures += 1
+            if (fast_mode and elapsed_clock()-started_at>=max_fast_seconds):
+                soft_time_budget_exhausted=True
+                budget_exhausted=True
+                break
+            if row is None:
+                failures+=1
                 continue
-            while True:
-                # Never start another potentially slow private upload when the
-                # 18-minute external timeout could kill summary/reporting.
-                if (fast_mode and elapsed_clock()-started_at>=max_fast_seconds):
-                    soft_time_budget_exhausted=True
-                    budget_exhausted=True
-                    break
-                try:
-                    row = next(iterator)
-                except StopIteration:
-                    break
-                except Exception:
-                    # One provider may fail; retain records already captured
-                    # and continue to other public providers and search terms.
-                    failures += 1
-                    break
-                fetched += 1
-                pid = post_key(row["platform"], row["original_id"])
-                if pid in known_ids or pid in known or pid in seen_this_scan:
-                    duplicates += 1
+            if (not isinstance(row,dict) or
+                row.get("platform") not in platform_candidates or
+                any(not isinstance(row.get(k),str) for k in
+                    ("original_id","text","source_url","posted_at")) or
+                not isinstance(row.get("media_urls"),(list,tuple))):
+                failures+=1
+                continue
+            platform_candidates[row["platform"]]+=1
+            fetched += 1
+            pid = post_key(row["platform"], row["original_id"])
+            if pid in known_ids or pid in known or pid in seen_this_scan:
+                duplicates += 1
+                continue
+            if saved + buffered >= (FAST_FIRST_SIGHTING_LIMIT if defer_remote else
+                                  24 if fast_mode else MAX_PER_RUN):
+                budget_exhausted = True
+                break
+            seen_this_scan.add(pid)
+            phase="read_first_snapshot"
+            try:
+                # First remote write contains observed public text, ahead of media fetch.
+                early = {"id": pid, "platform": row["platform"], "text": row["text"],
+                         "source_url": row["source_url"], "posted_at": row["posted_at"],
+                         "observed_at": now, "media_links": row["media_urls"],
+                         "profile_url": row.get("profile_url", "")}
+                if spool is not None:
+                    # Authenticated encryption BEFORE the first cloud call.
+                    spool.save(pid,early)
+                if not cloud_available:
+                    # Failover circuit: never describe ciphertext as a
+                    # TeraBox backup, but preserve all available original
+                    # attachment bytes while their source remains public.
+                    post,blobs=make_post(row,now,cloud=None)
+                    spool.save(pid,early,post,blobs)
+                    buffered+=1
+                    storage_failures+=1
+                    label=("source_first:encrypted_recovery_pending"
+                           if defer_remote else
+                           "cloud_unreachable:encrypted_recovery_pending")
+                    storage_error_kinds[label]=storage_error_kinds.get(label,0)+1
+                    partial += not post["archive_complete"]
                     continue
-                if saved + buffered >= (FAST_FIRST_SIGHTING_LIMIT if defer_remote else
-                                      24 if fast_mode else MAX_PER_RUN):
-                    budget_exhausted = True
-                    break
-                seen_this_scan.add(pid)
-                phase="read_first_snapshot"
-                try:
-                    # First remote write contains observed public text, ahead of media fetch.
-                    early = {"id": pid, "platform": row["platform"], "text": row["text"],
-                             "source_url": row["source_url"], "posted_at": row["posted_at"],
-                             "observed_at": now, "media_links": row["media_urls"],
-                             "profile_url": row.get("profile_url", "")}
-                    if spool is not None:
-                        # Authenticated encryption BEFORE the first cloud call.
-                        spool.save(pid,early)
-                    if not cloud_available:
-                        # Failover circuit: never describe ciphertext as a
-                        # TeraBox backup, but preserve all available original
-                        # attachment bytes while their source remains public.
-                        post,blobs=make_post(row,now,cloud=None)
-                        spool.save(pid,early,post,blobs)
-                        buffered+=1
-                        storage_failures+=1
-                        label=("source_first:encrypted_recovery_pending"
-                               if defer_remote else
-                               "cloud_unreachable:encrypted_recovery_pending")
-                        storage_error_kinds[label]=storage_error_kinds.get(label,0)+1
-                        partial += not post["archive_complete"]
-                        continue
-                    first_remote_verified=True
-                    first_blob = cloud.read_first_observation(pid)
-                    if first_blob is None:
-                        # A stale 404 from a cloud backend can make a previously
-                        # written immutable original look missing. On conflicting
-                        # readback, inspect the earlier snapshot and never clobber it.
-                        try:
-                            phase="write_first_snapshot"
-                            first_blob = cloud.save_first_observation(
-                                pid,canonical_json(early),prefer_flat=fast_mode)
-                        except RuntimeError:
-                            first_blob = cloud.read_first_observation(pid)
-                            if first_blob is None:
-                                if spool is None:
-                                    raise
-                                # The original public post is still visible.
-                                # Fetch its exact media NOW, before it becomes
-                                # unavailable, into a sealed emergency spool.
-                                # This is not counted as a TeraBox success.
-                                first_blob=canonical_json(early)
-                                first_remote_verified=False
-                    first = json.loads(first_blob)
-                    if (not isinstance(first, dict)
-                            or first.get("id") != pid
-                            or first.get("platform") != row["platform"]
-                            or first.get("source_url") != row["source_url"]
-                            or first.get("posted_at") != row["posted_at"]
-                            or not isinstance(first.get("text"), str)
-                            or not isinstance(first.get("observed_at"), int)
-                            or not isinstance(first.get("media_links"), list)):
-                        raise ValueError("early original capture mismatch; cannot silently replace")
-                    if spool is not None:
-                        spool.save(pid,first,verified_remote_first=first_remote_verified)
-                    row = {**row, "text": first["text"],
-                           "posted_at": first["posted_at"],
-                           "profile_url": first.get("profile_url", ""),
-                           "media_urls": first["media_links"],
-                           "media_expected": len(first["media_links"])}
-                    phase="write_post_and_verify_media"
-                    post, blobs = make_post(row, first["observed_at"], cloud=cloud)
-                    if spool is not None:
-                        # Preserve exact original attachment bytes before all
-                        # remote media writes; never substitute other images.
-                        spool.save(pid,first,post,blobs)
-                    if not post["archive_complete"]:
-                        cloud.stage_partial_media(post,blobs)
-                        partial += 1
-                        # A partial snapshot never becomes a falsely complete
-                        # immutable post. Its encrypted original remains queued.
-                        if not first_remote_verified:
-                            buffered+=1
-                            storage_error_kinds["first_snapshot:encrypted_recovery_pending"] = (
-                                storage_error_kinds.get("first_snapshot:encrypted_recovery_pending",0)+1)
-                            storage_failures += 1
-                            if storage_failures >= 3 and spool is not None:
-                                cloud_available=False
-                            elif storage_failures >= 3:
-                                capture_interrupted=True
-                                break
-                        continue
+                first_remote_verified=True
+                first_blob = cloud.read_first_observation(pid)
+                if first_blob is None:
+                    # A stale 404 from a cloud backend can make a previously
+                    # written immutable original look missing. On conflicting
+                    # readback, inspect the earlier snapshot and never clobber it.
+                    try:
+                        phase="write_first_snapshot"
+                        first_blob = cloud.save_first_observation(
+                            pid,canonical_json(early),prefer_flat=fast_mode)
+                    except RuntimeError:
+                        first_blob = cloud.read_first_observation(pid)
+                        if first_blob is None:
+                            if spool is None:
+                                raise
+                            # The original public post is still visible.
+                            # Fetch its exact media NOW, before it becomes
+                            # unavailable, into a sealed emergency spool.
+                            # This is not counted as a TeraBox success.
+                            first_blob=canonical_json(early)
+                            first_remote_verified=False
+                first = json.loads(first_blob)
+                if (not isinstance(first, dict)
+                        or first.get("id") != pid
+                        or first.get("platform") != row["platform"]
+                        or first.get("source_url") != row["source_url"]
+                        or first.get("posted_at") != row["posted_at"]
+                        or not isinstance(first.get("text"), str)
+                        or not isinstance(first.get("observed_at"), int)
+                        or not isinstance(first.get("media_links"), list)):
+                    raise ValueError("early original capture mismatch; cannot silently replace")
+                if spool is not None:
+                    spool.save(pid,first,verified_remote_first=first_remote_verified)
+                row = {**row, "text": first["text"],
+                       "posted_at": first["posted_at"],
+                       "profile_url": first.get("profile_url", ""),
+                       "media_urls": first["media_links"],
+                       "media_expected": len(first["media_links"])}
+                phase="write_post_and_verify_media"
+                post, blobs = make_post(row, first["observed_at"], cloud=cloud)
+                if spool is not None:
+                    # Preserve exact original attachment bytes before all
+                    # remote media writes; never substitute other images.
+                    spool.save(pid,first,post,blobs)
+                if not post["archive_complete"]:
+                    cloud.stage_partial_media(post,blobs)
+                    partial += 1
+                    # A partial snapshot never becomes a falsely complete
+                    # immutable post. Its encrypted original remains queued.
                     if not first_remote_verified:
-                        # We have preserved this exact public post AND its
-                        # original attachment bytes in the authenticated spool.
-                        # Continue discovery rather than discarding these
-                        # bytes or pretending they already exist in TeraBox.
+                        buffered+=1
                         storage_error_kinds["first_snapshot:encrypted_recovery_pending"] = (
                             storage_error_kinds.get("first_snapshot:encrypted_recovery_pending",0)+1)
                         storage_failures += 1
-                        buffered+=1
                         if storage_failures >= 3 and spool is not None:
                             cloud_available=False
                         elif storage_failures >= 3:
                             capture_interrupted=True
                             break
-                        continue
-                    saved_post = cloud.save_post(post, blobs)
-                    if spool is not None:
-                        spool.discard(pid)
-                    known[pid] = saved_post
-                    known_ids.add(pid)
-                    saved += 1
-                    partial += not saved_post["archive_complete"]
-                except (RuntimeError,ValueError) as error:
-                    # A single failure must not poison other verified posts.
-                    # Only a fixed category, never raw backend output or a
-                    # personal source link, appears in public workflow logs.
-                    kind=public_error_class(error)
-                    label=phase+":"+kind
-                    storage_error_kinds[label]=storage_error_kinds.get(label,0)+1
+                    continue
+                if not first_remote_verified:
+                    # We have preserved this exact public post AND its
+                    # original attachment bytes in the authenticated spool.
+                    # Continue discovery rather than discarding these
+                    # bytes or pretending they already exist in TeraBox.
+                    storage_error_kinds["first_snapshot:encrypted_recovery_pending"] = (
+                        storage_error_kinds.get("first_snapshot:encrypted_recovery_pending",0)+1)
                     storage_failures += 1
-                    if spool is None:
-                        seen_this_scan.discard(pid)
-                    elif spool._path(pid).exists():
-                        buffered+=1
+                    buffered+=1
                     if storage_failures >= 3 and spool is not None:
                         cloud_available=False
                     elif storage_failures >= 3:
-                        capture_interrupted = True
+                        capture_interrupted=True
                         break
                     continue
+                saved_post = cloud.save_post(post, blobs)
+                if spool is not None:
+                    spool.discard(pid)
+                known[pid] = saved_post
+                known_ids.add(pid)
+                saved += 1
+                partial += not saved_post["archive_complete"]
+            except (RuntimeError,ValueError) as error:
+                # A single failure must not poison other verified posts.
+                # Only a fixed category, never raw backend output or a
+                # personal source link, appears in public workflow logs.
+                kind=public_error_class(error)
+                label=phase+":"+kind
+                storage_error_kinds[label]=storage_error_kinds.get(label,0)+1
+                storage_failures += 1
+                if spool is None:
+                    seen_this_scan.discard(pid)
+                elif spool._path(pid).exists():
+                    buffered+=1
+                if storage_failures >= 3 and spool is not None:
+                    cloud_available=False
+                elif storage_failures >= 3:
+                    capture_interrupted = True
+                    break
+                continue
     # Source-first runs already captured the exact publicly available post
     # and original media into AES-GCM buffers. Preserve one separately
     # SHA-readback-verified immutable CIPHERTEXT safety pack NOW, before the
@@ -800,7 +829,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                    "reason": "no new items"}
     result = {"fetched": fetched, "saved_verified": saved, "partial_media": partial,
               "pending_media_retry": partial + failed_early_recoveries,
-              "duplicates": duplicates, "recovered_entries": recovered, "recovered_early_snapshots": early_recovered,
+              "duplicates": duplicates, "source_platform_candidates":platform_candidates,
+              "recovered_entries": recovered, "recovered_early_snapshots": early_recovered,
               "repaired_archive_markers": cloud.repaired_entries,
               "unrecoverable_markers": cloud.unrecoverable_entries,
               "source_query_failures": failures,
