@@ -7,7 +7,8 @@ const $=id=>document.getElementById(id);
 const accountSelect=$("accountSelect"),status=$("loadStatus"),results=$("results");
 const detail=$("postDetail"),detailBody=$("detailBody");
 const state={account:"",section:"posts",offset:0,more:false,loading:false,
-             profile:null,records:[],accounts:[],viewVersion:0};
+             profile:null,records:[],accounts:[],viewVersion:0,
+             firstPageRetries:0,retryTimer:null};
 let detailRequestSeq=0;
 const base=()=>"/api/account-archives/"+encodeURIComponent(state.account);
 const sectionLabels={posts:"게시글·답글",followers:"팔로워",following:"팔로잉"};
@@ -366,6 +367,8 @@ async function openDetail(post){
 }
 function setTab(section){
   // A response for the previous tab must not block or overwrite this tab.
+  if(state.retryTimer!==null){clearTimeout(state.retryTimer);state.retryTimer=null;}
+  state.firstPageRetries=0;
   state.viewVersion+=1;state.loading=false;
   state.section=section;state.offset=0;state.more=false;
   feedSearch.hidden=section!=="posts";
@@ -410,6 +413,23 @@ async function nextPage(){
     if(state.account===selectedAccount&&state.section===selected&&
        state.viewVersion===requestVersion){
       const message=String(error.message||"보관 자료 불러오기 실패");
+      // On the free original ZIP reader a returning tab may temporarily
+      // receive 502/503/504 while the shared immutable bundle is being
+      // read. A bounded retry is better than requiring an operator click;
+      // it NEVER treats unverified/failed responses as saved originals.
+      const transient=/(?:HTTP (?:502|503|504)|failed to fetch|networkerror)/i.test(message);
+      if(offset===0&&selected==="posts"&&transient&&state.firstPageRetries<2){
+        const attempt=++state.firstPageRetries;
+        const delay=attempt===1?1300:3300;
+        setStatus("검증된 보관본 읽기 지연 · 자동 재시도 "+attempt+"/2");
+        state.retryTimer=window.setTimeout(()=>{
+          state.retryTimer=null;
+          if(state.account===selectedAccount&&state.section===selected&&
+             state.viewVersion===requestVersion&&!state.loading)
+            void nextPage();
+        },delay);
+        return;
+      }
       // Preserve already verified cards; retry exactly the failed offset.
       if(offset===0)showMessage(message);
       else setStatus("추가 페이지 조회 실패 · 기존 보관본은 그대로 표시합니다. "+message);
