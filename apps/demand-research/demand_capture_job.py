@@ -679,6 +679,44 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         capture_interrupted = True
                         break
                     continue
+    # Source-first runs already captured the exact publicly available post
+    # and original media into AES-GCM buffers. Preserve one separately
+    # SHA-readback-verified immutable CIPHERTEXT safety pack NOW, before the
+    # short-lived Actions artifact could expire. This is not an individual
+    # saved post, not a completed media backup, and never changes originals.
+    #
+    # Spend bounded spare time AFTER public acquisition, not during it.
+    # A slow/denied provider must never delay first-sighting capture.
+    encrypted_remote_pack_count=0
+    encrypted_remote_pack_failure=""
+    if (defer_remote and spool is not None and
+            os.getenv("DEMAND_FAST_CAPTURE_PACK_REMOTE")=="1"):
+        sealed_files=sorted(spool.directory.glob("*.enc"))
+        remaining=max_fast_seconds-(elapsed_clock()-started_at)
+        if sealed_files and remaining>=30:
+            from recover_spool_artifacts import (
+                preserve_encrypted_batch,with_cloud_budget,safe_failure_category)
+            try:
+                budget=min(70,max(1,int(remaining)-15))
+                with_cloud_budget(
+                    cloud,
+                    lambda:preserve_encrypted_batch(cloud,spool,sealed_files),
+                    max_seconds=budget)
+                encrypted_remote_pack_count=len(sealed_files)
+            except (RuntimeError,ValueError,TypeError,KeyError,
+                    TimeoutError,OSError) as error:
+                # Never include private source IDs, provider paths, or
+                # exception text in public workflow logs.
+                encrypted_remote_pack_failure=safe_failure_category(error)
+        elif sealed_files:
+            encrypted_remote_pack_failure="time_budget_deferred"
+    if defer_remote:
+        print("INTERSECTION_SOURCE_FIRST_SAFETY_PACK",json.dumps({
+            "ciphertexts_remote_sha_verified":encrypted_remote_pack_count,
+            "individual_post_sha_verified":saved,
+            "ciphertext_only_not_viewable":True,
+            "failure_category":encrypted_remote_pack_failure or "none",
+        },sort_keys=True),flush=True)
     # Per-post verified objects are durable independently of the final catalog.
     # Log counts BEFORE publishing so a catalog failure does not obscure which
     # individual objects passed remote SHA256 readback.
@@ -699,6 +737,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         "encrypted_recovery_files":(
             len(list(spool.directory.glob("*.enc"))) if spool is not None else 0),
         "encrypted_only_originals":buffered,
+        "encrypted_remote_pack_ciphertexts_sha_verified":encrypted_remote_pack_count,
+        "encrypted_remote_pack_failure_category":encrypted_remote_pack_failure or "none",
         "private_cloud_circuit_open":not cloud_available and not defer_remote,
         "source_first_capture_mode":defer_remote
     },sort_keys=True),flush=True)
@@ -740,6 +780,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "encrypted_recovery_files":(
                   len(list(spool.directory.glob("*.enc"))) if spool is not None else 0),
               "encrypted_only_originals":buffered,
+              "encrypted_remote_pack_ciphertexts_sha_verified":encrypted_remote_pack_count,
+              "encrypted_remote_pack_failure_category":encrypted_remote_pack_failure or "none",
               "private_cloud_circuit_open":not cloud_available and not defer_remote,
         "source_first_capture_mode":defer_remote,
               "catalog": catalog,
