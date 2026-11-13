@@ -91,7 +91,11 @@ class _BoundedZipRoot:
 _ZIP_SESSION_CACHE=None
 _ZIP_SESSION_LOCK=threading.Lock()
 ZIP_VERIFIED_SESSION_SECONDS=90
-ZIP_UNAVAILABLE_BACKOFF_SECONDS=25
+# A denied private TeraBox source is optional when a separately verified
+# encrypted GitHub ZIP is already readable. Repeating the same slow 30s
+# provider failure per media/profile request made the verified live feed stall.
+# Probe again well within the 5-minute user refresh window, not every 25s.
+ZIP_UNAVAILABLE_BACKOFF_SECONDS=150
 
 
 def _verified_account_bundles(root):
