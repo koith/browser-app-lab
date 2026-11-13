@@ -5,6 +5,7 @@ on:
     paths:
       - "apps/demand-research/test_deployed_pages_browser.py"
       - "apps/demand-research/test_live_render_browser.py"
+      - "apps/demand-research/test_live_public_ranking_browser.py"
       - "apps/demand-research/public_video_trends.js"
       - "apps/demand-research/target_archive_client.js"
       - ".github/workflows/intersection-deployed-pages-qa.yml"
@@ -17,6 +18,7 @@ on:
       - "apps/demand-research/target_archive_client.js"
       - "apps/demand-research/test_deployed_pages_browser.py"
       - "apps/demand-research/test_live_render_browser.py"
+      - "apps/demand-research/test_live_public_ranking_browser.py"
       - ".github/workflows/intersection-deployed-pages-qa.yml"
   workflow_dispatch:
 
@@ -43,7 +45,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Validate read-only deployment QA syntax
-        run: python -m py_compile apps/demand-research/test_deployed_pages_browser.py apps/demand-research/test_live_render_browser.py
+        run: python -m py_compile apps/demand-research/test_deployed_pages_browser.py apps/demand-research/test_live_render_browser.py apps/demand-research/test_live_public_ranking_browser.py
 
   deployed-browser:
     if: github.event_name != 'pull_request'
@@ -84,3 +86,24 @@ jobs:
         run: python -m pip install --disable-pip-version-check playwright==1.56.0
       - name: Verify GitHub Pages Chromium + mobile WebKit separately
         run: python apps/demand-research/test_deployed_pages_browser.py
+
+  # Separate production data QA from synthetic static Pages tests. A blocked
+  # SNS endpoint should be reported RED, not disguised as passing fake rows.
+  real-ranking-browser:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble@sha256:a7f6cf3ae520c9d670ad956572c13747ed5abdbba5123a01526f873ed1662528
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned Playwright Python for real read-only RANK QA
+        run: python -m pip install --disable-pip-version-check playwright==1.56.0
+      - name: Actual deployed public posts, cohort counts and 10/5-column RANK
+        run: python apps/demand-research/test_live_public_ranking_browser.py
