@@ -1,0 +1,75 @@
+name: 4LEAF source UI and gameplay five-task acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/chatroom-cp949-korean-input.cjs'
+      - '.github/workflows/rog-five-native-acceptance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/chatroom-cp949-korean-input.cjs'
+      - '.github/workflows/rog-five-native-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-screen-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    strategy:
+      fail-fast: false
+      matrix:
+        scope: [mainframe, chat-input, chat-foreground, battle]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+      - name: Serve complete native game and verify HTTP
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/rog-acceptance.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl --fail --silent --max-time 2 -I http://127.0.0.1:8765/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/rog-acceptance.log
+          exit 1
+      - name: WORLD-01 original MainFrame assets, route actions and cropped buttons
+        if: matrix.scope == 'mainframe'
+        run: |
+          node apps/4leaf/rog/tests/mainframe-native-toolbar.cjs
+          node apps/4leaf/rog/tests/mainframe-snaplogo-registration.cjs
+      - name: CHT-02 actual Korean chat, photo anchors, 24-line scroll and real user list
+        if: matrix.scope == 'chat-input'
+        run: |
+          node apps/4leaf/rog/tests/chatroom-cp949-korean-input.cjs
+          FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/chatroom-cp949-korean-input.cjs
+          node apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs
+          node apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs
+          FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs
+      - name: CHT-05 six source interiors, native furniture and physical pointer hit tests
+        if: matrix.scope == 'chat-foreground'
+        run: |
+          node apps/4leaf/rog/tests/chatroom-furniture-registration.cjs
+          node apps/4leaf/rog/tests/chatroom-native-furniture-sizes.cjs
+          node apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs
+      - name: BTL-02 original battle 800x600 anchored score, dice and source podium
+        if: matrix.scope == 'battle'
+        run: |
+          node apps/4leaf/rog/tests/battle-anchor-compare.cjs
+          FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/battle-anchor-compare.cjs
+          node apps/4leaf/rog/tests/dice-battle-podium.cjs
+      - name: Preserve real browser screenshots when available
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-${{ matrix.scope }}-browser-evidence
+          if-no-files-found: ignore
+          path: |
+            leaf-*.png
+            apps/4leaf/rog/leaf-*.png
+          retention-days: 10
