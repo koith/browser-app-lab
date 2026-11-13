@@ -322,31 +322,27 @@
  function renderNativeFrame(pawn,frame){
    const img=pawn.querySelector('img.leaf-chess-original-obs');
    if(!img||!frame)return;
-   const id=pawn.dataset.chessmanId;
-   requestedObsFrame.set(pawn,{id,url:frame.url});
-   // The FIRST requested frame must receive a real src synchronously:
-   // the source-foot UI and tested pose use that exact src in the same
-   // task. Only defer subsequent swaps when the CURRENT frame is STILL
-   // downloading. This prevents blank OBS actors without delaying initial
-   // semantic pose/footprint updates.
-   if(img.getAttribute('src')&&img.getAttribute('src')!==frame.url&&
-      !decodedObsUrls.has(frame.url)){
-     ensureDecodedObs(frame.url).then(()=>{
-       const wanted=requestedObsFrame.get(pawn);
-       if(!pawn.isConnected||pawn.querySelector('img.leaf-chess-original-obs')!==img||
-          wanted?.id!==id||wanted?.url!==frame.url||pawn.dataset.chessmanId!==id)return;
-       renderNativeFrame(pawn,frame);
-     }).catch(()=>{
-       const wanted=requestedObsFrame.get(pawn);
-       if(!pawn.isConnected||pawn.querySelector('img.leaf-chess-original-obs')!==img||
-          wanted?.id!==id||wanted?.url!==frame.url||pawn.dataset.chessmanId!==id)return;
-       // Real source fetch failure: existing same-source OBS retry handler
-       // owns the recovery. Do not silently mark an actor source unavailable.
-       img.src=frame.url;
-     });
-     return;
+   const old=img.getAttribute('src')||'';
+   requestedObsFrame.set(pawn,{id:pawn.dataset.chessmanId,url:frame.url});
+   if(old!==frame.url){
+     // Native animation keyframe and current IMG src must change in the
+     // same browser task. Delaying the src made genuine 5-step walk frames
+     // disappear and broke original front-facing card source QA.
+     // Display the PREVIOUS decoded original OBS PNG as a CSS background
+     // until the new source actually loads. No CSS-drawn proxy or borrowed
+     // actor pixel is ever used; the real new src is assigned immediately.
+     if(old.startsWith('./original/OBS/')&&img.complete&&img.naturalWidth>0){
+       img.style.backgroundImage='url("'+old+'")';
+       img.style.backgroundSize='100% 100%';
+       img.style.backgroundRepeat='no-repeat';
+       img.style.backgroundPosition='center';
+       img.dataset.obsHeldSource=old;
+     }
+     img.src=frame.url;
+     // Warm WebKit's decoded image cache without blocking the native
+     // source-key chronology. Future revisits can reuse verified pixels.
+     ensureDecodedObs(frame.url).catch(()=>{});
    }
-   if(img.getAttribute('src')!==frame.url)img.src=frame.url;
    img.style.setProperty('--leaf-obs-width',frame.width+'px');
    img.style.setProperty('--leaf-obs-height',frame.height+'px');
    // The former WEB contact ellipse was always 36px, even for original
@@ -414,6 +410,13 @@
        if(!img.isConnected||pawn.querySelector('img.leaf-chess-original-obs')!==img)return;
        img.dataset.obsRetryCount='0';
        delete img.dataset.obsRetryFor;
+       // The new real PNG decoded successfully: release the prior true
+       // source-frame background rather than leaving an obsolete frame.
+       img.style.removeProperty('background-image');
+       img.style.removeProperty('background-size');
+       img.style.removeProperty('background-repeat');
+       img.style.removeProperty('background-position');
+       delete img.dataset.obsHeldSource;
        if(['/original/OBS/action-full/','/original/OBS/action-full-ext/'].some(dir=>
          (img.getAttribute('src')||'').includes(dir)))
         delete pawn.dataset.fullFrameErrors;
