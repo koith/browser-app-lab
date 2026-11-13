@@ -1,0 +1,100 @@
+name: 4LEAF R20 independent ten-restoration-workstream real-user QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r20-*'
+      - '.github/workflows/rog-r20-ten-workstreams.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r20-*'
+      - '.github/workflows/rog-r20-ten-workstreams.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ten-workstreams:
+    runs-on: ubuntu-latest
+    timeout-minutes: 37
+    strategy:
+      fail-fast: false
+      matrix:
+        scope: [source-10-dice, actor-source-cards, panorama-3-views, native-shop, safe-economy, all-map-depth, native-tiles, source-events, source-image-anchors, seven-original-scenes]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+      - name: Start real original client on local same-origin HTTP
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-r20-source-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-r20-source-http.log
+          exit 1
+      - name: DIE-02 ten original D4/D6 result-face, exact engine outcomes
+        if: matrix.scope == 'source-10-dice'
+        run: |
+          node apps/4leaf/rog/tests/r20-ten-original-roll-results.cjs
+          FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/r20-ten-original-roll-results.cjs
+      - name: ACT-05 and M03 source actor/card and actual map-click ChatTown room entry
+        if: matrix.scope == 'actor-source-cards'
+        run: |
+          node apps/4leaf/rog/tests/r20-card-original-source-safety.cjs
+          node apps/4leaf/rog/tests/chat-map-click-room-entry.cjs
+      - name: M01 and WORLD-02 six original WorldMap regions plus 1938px source street
+        if: matrix.scope == 'panorama-3-views'
+        run: |
+          node apps/4leaf/rog/tests/world-six-original-route-gate.cjs
+          node apps/4leaf/rog/tests/r20-mainstreet-three-panel.cjs
+          node apps/4leaf/rog/tests/mainstreet-source-alpha-hotspots.cjs
+      - name: SHOP-01 real original 2002 3x3 atlas, native tab sprites and shop controls
+        if: matrix.scope == 'native-shop'
+        run: |
+          node apps/4leaf/rog/tests/shop-original-tables.cjs
+          FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/shop-original-tables.cjs
+      - name: SHOP-02 actual purchase, sale, GP, equipped-card and quota rollback
+        if: matrix.scope == 'safe-economy'
+        run: node apps/4leaf/rog/tests/cardshop-native-sale.cjs
+      - name: ACT-04 and BRD-03 all 26 DMP paths and actual six-player original-body contact
+        if: matrix.scope == 'all-map-depth'
+        run: |
+          node apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs
+          node apps/4leaf/rog/tests/r20-six-original-actor-formation.cjs
+      - name: P0-BOARD 32 source TIS pixels, 26 map geometry and no original cropping
+        if: matrix.scope == 'native-tiles'
+        run: |
+          node apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs
+          node apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs
+      - name: RULE-01 actual original event sprites, real DMP and unknown 0170 provenance
+        if: matrix.scope == 'source-events'
+        run: |
+          node apps/4leaf/rog/tests/dice-native-original-source-events.cjs
+          node apps/4leaf/rog/tests/dice-source-map0170-registration.cjs
+      - name: EVID-02 battle and chat original screenshot anchor quantitative bounds
+        if: matrix.scope == 'source-image-anchors'
+        run: |
+          node apps/4leaf/rog/tests/battle-anchor-compare.cjs
+          FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/battle-anchor-compare.cjs
+          node apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs
+      - name: EVID-01 all seven archival photos with reproducible browser scene-state JSON
+        if: matrix.scope == 'seven-original-scenes'
+        run: node apps/4leaf/rog/tests/r20-seven-reference-scene-states.cjs
+      - name: Upload source browser screenshot and provenance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-r20-${{ matrix.scope }}-evidence
+          if-no-files-found: ignore
+          retention-days: 10
+          path: |
+            leaf-r20-*.png
+            leaf-r20-*.json
+            leaf-original*.png
+            leaf-mainstreet*.png
