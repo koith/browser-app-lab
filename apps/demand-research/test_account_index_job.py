@@ -221,3 +221,68 @@ def test_direct_manifest_fallback_rejects_untrusted_branch_and_mismatched_file()
         remote_reader=source)
     assert result is None
     assert len(calls)==1
+
+
+def test_verified_journal_pages_commit_progress_across_multiple_runs_without_deletion(
+        tmp_path,monkeypatch,capsys):
+    from test_demand_archive import FakeCloud,post as make_post
+    from demand_archive import canonical_json,sha256
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","synthetic-private-test")
+    cloud=FakeCloud()
+    base=make_post()
+    for i in range(3):
+        row={**base,"id":str(i+1)*40,
+             "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/qa"+str(i)}
+        cloud.save_post(row)
+    db=tmp_path/"private.sqlite3"
+    marker=tmp_path/"journal.json"
+    totals=[]
+    for _ in range(3):
+        job.catalog_sync_child(db,marker,cloud=cloud,max_items=1,max_seconds=120)
+        receipt=json.loads(marker.read_text())
+        assert receipt["mode"]=="journal_incremental"
+        assert receipt["verified"]==1
+        totals.append(account_index.status(str(db))["source_rows"])
+    assert totals==[1,2,3]
+    assert account_index.status(str(db))["last_catalog_sync"]==0,(
+        "partial journal cannot fake a complete versioned catalog")
+    assert receipt["pending"]==0
+    # The same old original cannot be erased when a future page is empty.
+    job.catalog_sync_child(db,marker,cloud=cloud,max_items=1,max_seconds=120)
+    assert account_index.status(str(db))["source_rows"]==3
+    assert "https://bsky.app" not in capsys.readouterr().out
+
+
+def test_broken_remote_post_sha_never_imports_or_replaces_other_originals(
+        tmp_path,monkeypatch):
+    from test_demand_archive import FakeCloud,post as make_post
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","synthetic-private-test")
+    cloud=FakeCloud()
+    good={**make_post(),"id":"a"*40}
+    bad={**make_post(),"id":"b"*40}
+    cloud.save_post(good)
+    cloud.save_post(bad)
+    db=tmp_path/"archive.sqlite3"
+    out=tmp_path/"receipt.json"
+    job.catalog_sync_child(db,out,cloud=cloud,max_items=1)
+    cloud.objects["posts/"+"b"*40+"/post.json"]=b"tampered-bad-original"
+    job.catalog_sync_child(db,out,cloud=cloud,max_items=1)
+    body=json.loads(out.read_text())
+    assert body["pending"]==1
+    assert body["verified"]==0
+    assert account_index.status(str(db))["source_rows"]==1
+    assert "tampered-bad-original" not in out.read_text()
+
+
+def test_incremental_receipt_cannot_pass_full_catalog_verified_gate(tmp_path):
+    import sys
+    marker=tmp_path/"catalog-sync-result.json"
+    receipt=json.dumps({"accepted":2,"has_posts":True,
+                        "mode":"journal_incremental",
+                        "pending":8,"verified":2})
+    script="import pathlib,sys;pathlib.Path(sys.argv[1]).write_text("+repr(receipt)+")"
+    verdict=job.catalog_sync_bounded(
+        str(tmp_path/"archive.sqlite3"),tmp_path,timeout_seconds=4,
+        worker=[sys.executable,"-c",script,str(marker)])
+    assert verdict=="deferred_journal_pending_8"
+    assert not verdict.startswith("verified_")
