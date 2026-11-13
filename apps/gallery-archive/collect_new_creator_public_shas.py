@@ -22,6 +22,24 @@ def collect(stage,max_pages=2,max_photos=44,root=ROOT,fetch=None):
     capture_fn=fetch or capture
     folder=stage/'source-author-photos'
     report=capture_fn(source,folder,max_pages=max_pages,max_photos=max_photos,workers=3)
+    # The /media tab often lags the creator's live profile (newly published
+    # Nov 11-13 posts were visible in /super_yuisan while /media still showed
+    # an earlier snapshot). Check BOTH normally public tabs using the exact
+    # same author-card filter; never import retweets, quotes or adjacent users.
+    # Both downloads write immutable sha-named individual files in one folder.
+    profile={'id':'public-yui-sns','kind':'teapawt',
+             'url':'https://teapawt.net/super_yuisan','account':'super_yuisan'}
+    profile_report=capture_fn(profile,folder,max_pages=min(max_pages,2),
+                              max_photos=max_photos,workers=3) if fetch is None else None
+    if profile_report is not None:
+        report={**report,
+            'media_tab_source_pages':report.get('source_pages'),
+            'profile_source_pages':profile_report.get('source_pages'),
+            'profile_author_posts':profile_report.get('owner_authored_posts'),
+            'profile_public_media_urls':profile_report.get('distinct_public_media_urls'),
+            'profile_media_failures':profile_report.get('media_failure_types'),
+            'profile_page_failures':profile_report.get('page_error_types'),
+            'source_pages':report.get('source_pages',0)+profile_report.get('source_pages',0)}
     prior=json.loads((Path(root)/'apps/yui-gallery/owner-index.json').read_text())
     local=json.loads((Path(root)/'apps/yui-gallery/stored-albums.json').read_text())
     existing={p['sha256'] for a in prior['albums'] for p in a['images']}
