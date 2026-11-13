@@ -43,12 +43,15 @@ jobs:
         run: |
           node apps/4leaf/rog/tests/r20-ten-original-roll-results.cjs
           FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/r20-ten-original-roll-results.cjs
-      - name: ACT-05 original CHR-owned card source (no invented CardData faces)
+      - name: ACT-05 and M03 source actor/card and actual map-click ChatTown room entry
         if: matrix.scope == 'actor-source-cards'
-        run: node apps/4leaf/rog/tests/r20-card-original-source-safety.cjs
-      - name: WORLD-02 original street three views and seven real chroma-key hotspots
+        run: |
+          node apps/4leaf/rog/tests/r20-card-original-source-safety.cjs
+          node apps/4leaf/rog/tests/chat-map-click-room-entry.cjs
+      - name: M01 and WORLD-02 six original WorldMap regions plus 1938px source street
         if: matrix.scope == 'panorama-3-views'
         run: |
+          node apps/4leaf/rog/tests/world-six-original-route-gate.cjs
           node apps/4leaf/rog/tests/r20-mainstreet-three-panel.cjs
           node apps/4leaf/rog/tests/mainstreet-source-alpha-hotspots.cjs
       - name: SHOP-01 real original 2002 3x3 atlas, native tab sprites and shop controls
@@ -59,9 +62,11 @@ jobs:
       - name: SHOP-02 actual purchase, sale, GP, equipped-card and quota rollback
         if: matrix.scope == 'safe-economy'
         run: node apps/4leaf/rog/tests/cardshop-native-sale.cjs
-      - name: BRD-03 26 native DMP path actor/source alpha occlusion and 4-player depth
+      - name: ACT-04 and BRD-03 all 26 DMP paths and actual six-player original-body contact
         if: matrix.scope == 'all-map-depth'
-        run: node apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs
+        run: |
+          node apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs
+          node apps/4leaf/rog/tests/r20-six-original-actor-formation.cjs
       - name: P0-BOARD 32 source TIS pixels, 26 map geometry and no original cropping
         if: matrix.scope == 'native-tiles'
         run: |
