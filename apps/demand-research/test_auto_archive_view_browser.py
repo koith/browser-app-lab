@@ -27,7 +27,7 @@ POSTS=[
   "text":"Synthetic public post with an audio file and a missing original",
   "profile_url":"https://mastodon.social/@qa-public",
   "source_url":"https://mastodon.social/@qa-public/123",
-  "capture_status":"partial_media","media_expected":2,"media_saved":1,
+  "capture_status":"partial_media","media_expected":3,"media_saved":1,
   "media":[{"kind":"audio","mime":"audio/mpeg","bytes":230,"verified":True,"url":SRC(ID2,0)},
            {"kind":"image","mime":"image/png","bytes":200,"verified":False,
              "url":"https://random-untrusted.example/original.png"}]}
@@ -76,9 +76,10 @@ def exercise(browser_type,label):
         assert page.locator("#posts audio").count()==1
         assert page.locator("#posts .media a").count()==3
         # Two original slots per post: do not silently collapse missing slot 2.
-        assert page.locator("#posts figure.media").count()==4
-        assert page.locator("#posts .media-unavailable").count()==1
-        assert "첨부 2" in page.locator("#posts .media-unavailable").inner_text()
+        assert page.locator("#posts figure.media").count()==5
+        assert page.locator("#posts .media-unavailable").count()==2
+        assert "첨부 2" in page.locator("#posts .media-unavailable").first.inner_text()
+        assert "첨부 3" in page.locator("#posts .media-unavailable").last.inner_text()
         assert "미보관 원본 있음" in page.locator("#posts article.post").last.inner_text()
         assert page.locator("#posts .post-body script").count()==0
         assert "<script>danger()</script>" in page.locator("#posts .post-body").first.text_content()
@@ -96,6 +97,13 @@ def exercise(browser_type,label):
         page.wait_for_function("document.querySelector('#status').textContent.includes('1건 중 1건')",
                                timeout=12000)
         assert page.locator("#posts article.post").count()==1
+        assert page.locator("#posts video").count()==1
+        assert "platform=bluesky" in page.url
+        # The filter deep link survives reload; it never resets to unrelated SNS.
+        page.reload(wait_until="domcontentloaded",timeout=30000)
+        page.locator("#posts article.post").first.wait_for(timeout=12000)
+        assert page.locator("#posts article.post").count()==1
+        assert page.locator("#platform").input_value()=="bluesky"
         assert page.locator("#posts video").count()==1
         # A failed playback stays labeled as an error; never insert a CDN fallback.
         page.locator("#posts img").first.evaluate("(img) => img.dispatchEvent(new Event('error'))")
