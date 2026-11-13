@@ -20766,6 +20766,110 @@
         }
       ],
       "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-rudy2-codename-wolfgirl",
+      "title": "Rudy² – Codename : Wolfgirl",
+      "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/a701dbc15aa09f8a891f.jpg",
+          "sha256": "a701dbc15aa09f8a891fea83de873105f07743cce994ef5c45821159e6ce2c0c",
+          "bytes": 676019,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/87c1fec7a0e7b1f9e859.jpg",
+          "sha256": "87c1fec7a0e7b1f9e8598bf7fbf55d2f9ed180b2edef73962f84677580ef4741",
+          "bytes": 533964,
+          "width": 1500,
+          "height": 1000,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/6c5ac3775a13186bf351.jpg",
+          "sha256": "6c5ac3775a13186bf3519fbf3bbbd23f66751be93897bb1100c2066b11a5837a",
+          "bytes": 633053,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/ef8cf669d20561c9d0dd.jpg",
+          "sha256": "ef8cf669d20561c9d0ddc026acfa6f2d1b4427af09fbc9726ce5c2c951378c44",
+          "bytes": 610652,
+          "width": 1500,
+          "height": 1000,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 5,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/24989d60e802308a4b9a.jpg",
+          "sha256": "24989d60e802308a4b9abe86b4c5e520d69777430c69d76b3f4eb0ad1914fc39",
+          "bytes": 581280,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 6,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/d7065ffe71a6ce5df307.jpg",
+          "sha256": "d7065ffe71a6ce5df3071aa8ed27f870025d7045c433deba674d6af5c083d2b3",
+          "bytes": 675787,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 7,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/b28158eebe311f85f67f.jpg",
+          "sha256": "b28158eebe311f85f67f19d3b5b9bb1aee33af2598a416f246056f62b508ab72",
+          "bytes": 604360,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 8,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/aba7c7dab59004a5ab34.jpg",
+          "sha256": "aba7c7dab59004a5ab34e48080a5880154bc44d9ebf1ba6ce9061edbef102a94",
+          "bytes": 608162,
+          "width": 1500,
+          "height": 1000,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
     }
   ],
   "physical_verified_image_count": 2243

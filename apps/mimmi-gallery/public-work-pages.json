@@ -440,6 +440,16 @@
       "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
       "storage_scope": "public_publisher_samples_only_not_purchased_master",
       "source_claimed_total_edition_photos": null
+    },
+    {
+      "id": "djawa-rudy2-codename-wolfgirl",
+      "title": "Rudy² – Codename : Wolfgirl",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+      "source_claimed_total_edition_photos": 200,
+      "priority": 3,
+      "storage_scope": "officially_public_publisher_samples_only_not_paid_master",
+      "identity_evidence": "DJAWA official Mimmi portfolio explicitly identifies 23rd photo book as Rudy² Codename Wolfgirl with 200 publisher master photographs. The legacy catalogue ID contains percent encoding, which is not a valid gallery-work ID; use this safe alias solely to collect 7 explicitly published sample photos. Exact observed JPG SHA and global existing work duplicates must be verified before addition; full paid edition remains unacquired."
     }
   ]
 }

@@ -6,10 +6,14 @@ on:
     paths:
       - ".github/workflows/gallery-g03-g06-official-corpus.yml"
       - "apps/mimmi-gallery/public-work-pages.json"
+      - "apps/mimmi-gallery/stored-albums.json"
+      - "apps/mimmi-gallery/stored-albums/**"
   pull_request:
     paths:
       - ".github/workflows/gallery-g03-g06-official-corpus.yml"
       - "apps/mimmi-gallery/public-work-pages.json"
+      - "apps/mimmi-gallery/stored-albums.json"
+      - "apps/mimmi-gallery/stored-albums/**"
 permissions:
   contents: write
 concurrency:
@@ -45,15 +49,45 @@ jobs:
             if x['id'] in registered:raise ValueError('duplicate_registered_work_id')
             registered[x['id']]=x
           assert len(urls)==31,len(urls)
+          extra=registered.get('djawa-rudy2-codename-wolfgirl')
+          assert extra and extra['source']=='https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/'
+          assert extra['source_claimed_total_edition_photos']==200
           for aid,url in urls.items():
             rec=registered.get(aid)
             assert rec and (url==rec['source'] or url in rec.get('source_pages',[])),aid
-          print('G03_G06_OFFICIAL_MIMMI_31_KNOWN_PUBLISHER_WORKS_REGISTERED_PASS')
+          print('G03_G06_OFFICIAL_MIMMI_32_KNOWN_PUBLISHER_WORKS_REGISTERED_PASS')
           print('ONE_PERCENT_ESCAPED_RUDY2_WORK_HELD_FOR_EXPLICIT_IDENTITY_REVIEW')
           PY
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/publish_new_public_photos_to_pages.py
           (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
-      - name: Visit all 31 exact publisher works in four bounded 10-work batches
+      - name: Verify eight already staged Rudy2 JPEGs against immutable SHA, bytes and pixels
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          from PIL import Image
+          base=Path('apps/mimmi-gallery')
+          doc=json.loads((base/'stored-albums.json').read_text())
+          album=next(a for a in doc['albums'] if a['id']=='djawa-rudy2-codename-wolfgirl')
+          assert len(album['images'])==8, 'Rudy2 expected physical file count changed'
+          seen=set()
+          for p in album['images']:
+            rel=Path(p['url'])
+            assert not rel.is_absolute() and '..' not in rel.parts
+            assert rel.parts[0]=='stored-albums'
+            target=base/rel
+            raw=target.read_bytes()
+            digest=hashlib.sha256(raw).hexdigest()
+            assert digest==p['sha256'] and len(raw)==p['bytes']
+            assert digest not in seen
+            seen.add(digest)
+            with Image.open(target) as im:
+              im.load()
+              assert im.format=='JPEG'
+              assert im.size==(p['width'],p['height'])
+          print('G03_G06_RUDY2_EIGHT_PHYSICAL_SHA_BYTES_PIXELS_PASS',len(seen))
+          PY
+      - name: Visit all 32 exact publisher works in four bounded 10-work batches
         run: |
           python - <<'PY'
           import json,os,subprocess
@@ -62,6 +96,8 @@ jobs:
           ids=[r['id'] for r in rows if r.get('source','').startswith(
             'https://djawaphoto.com/portfolio/') and '%' not in r.get('source','')]
           assert len(ids)==31,len(ids)
+          ids.append('djawa-rudy2-codename-wolfgirl')
+          assert len(set(ids))==32,len(ids)
           root=Path(os.environ['RUNNER_TEMP'])/'g03-g06-official'
           for batch,offset in enumerate(range(0,len(ids),10),1):
             sample=ids[offset:offset+10]
