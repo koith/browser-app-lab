@@ -145,8 +145,11 @@ restoreImportedWatches();
 // old GitHub Pages interest accounts. Same-tab top-level navigation preserves
 // each origin's own storage. Never run twice in a tab or delete the old list.
 // Manual button remains for browsers that block this first-party round trip.
+// Explicit private archive links must never be hijacked by the optional
+// first-visit legacy Pages watch migration. Keep normal account-mode transfer.
+const requestedArchive=new URLSearchParams(location.search).get("tab")==="archives";
 if(location.hostname==="intersection-originals-free.onrender.com"&&
-   !arrivingFromLegacy&&!read().length){
+   !requestedArchive&&!arrivingFromLegacy&&!read().length){
   try{
     const flag="intersection:watch-origin-migration-attempted:v1";
     if(sessionStorage.getItem(flag)!=="1"){

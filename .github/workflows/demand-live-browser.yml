@@ -13,6 +13,7 @@ on:
       - "apps/demand-research/account_auto_analysis.js"
       - "apps/demand-research/account_index_client.js"
       - "apps/demand-research/test_account_watch_browser.py"
+      - "apps/demand-research/test_watch_migration_browser.py"
       - "apps/demand-research/test_free_discovery_browser.py"
       - ".github/workflows/demand-live-browser.yml"
   pull_request:
@@ -24,6 +25,7 @@ on:
       - "apps/demand-research/account_auto_analysis.js"
       - "apps/demand-research/account_index_client.js"
       - "apps/demand-research/test_account_watch_browser.py"
+      - "apps/demand-research/test_watch_migration_browser.py"
       - ".github/workflows/demand-live-browser.yml"
   workflow_dispatch:
 permissions:
@@ -49,13 +51,15 @@ jobs:
       - name: Install headless Chromium
         run: |
           python -m pip install --disable-pip-version-check playwright==1.56.0
-          python -m playwright install --with-deps chromium
+          python -m playwright install --with-deps chromium webkit
       - name: Grouped posts, attached images and no-password DOM fixture
         run: python apps/demand-research/test_live_browser.py
       - name: Synthetic private gateway social search UI (one request, badge, profile link)
         run: python apps/demand-research/test_private_social_browser.py
       - name: Public account watch mobile/browser QA (source-only, no personal identity merge)
         run: python apps/demand-research/test_account_watch_browser.py
+      - name: First-visit private account deep link must not redirect to Pages
+        run: python apps/demand-research/test_watch_migration_browser.py
       - name: Automatic all-SNS unified feed fixture (no search UI, dedup, date replay)
         run: python apps/demand-research/test_free_discovery_browser.py
       - name: Live autonomous all-SNS integration in Chromium (aggregate-only)

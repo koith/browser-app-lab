@@ -81,7 +81,33 @@ def verify(browser,label):
         page.goto(RENDER+"?tab=accounts#watch_import=malformed")
         assert page.evaluate("window.TEST_WATCHES")==EXPECTED
         assert "watch_import" not in page.url
+        # A FIRST-TIME PRIVATE ARCHIVE DEEP LINK must never be
+        # hijacked by the optional Pages-origin watch migration. Such
+        # redirection lost the requested account archive/mode in production.
+        other=browser.new_context(viewport={"width":390,"height":844})
+        try:
+            deep=other.new_page()
+            pages_requests=[]
+            deep.route(PAGES+"**",lambda route:(
+                pages_requests.append("misdirected") or respond(route)))
+            deep.route(RENDER+"**",respond)
+            deep.goto(RENDER+"?tab=archives&mode=accounts",
+                      wait_until="domcontentloaded",timeout=20000)
+            deep.wait_for_function(
+                "window.TEST_WATCHES !== undefined",timeout=10000)
+            assert deep.url==RENDER+"?tab=archives&mode=accounts", (
+                "direct personal archive deep link must be preserved")
+            assert pages_requests==[], (
+                "archive deep-link MUST NOT open public Pages migration")
+            assert deep.evaluate("window.TEST_WATCHES")==[]
+            assert deep.get_by_role(
+                "button",name="기존 관심 계정 복원").is_visible(), (
+                "user can still explicitly restore their old watch list")
+        finally:
+            other.close()
         assert not problems,problems
+        print("WATCH_ARCHIVE_DIRECT_LINK_PASS",label,
+              "archive_mode_preserved=yes","legacy_redirect=no",flush=True)
         print("WATCH_ORIGIN_MIGRATION_PASS",label,"from_pages=2","render=2",
               "source_retained=yes","duplicates=no","browser_errors=0",flush=True)
     finally:
