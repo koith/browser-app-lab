@@ -181,3 +181,69 @@ def test_release_readback_rejects_403_or_wrong_asset_without_retry(monkeypatch):
     with pytest.raises(BundleInvalid):
         gh.readback_uploaded_release(tag,"nonprivate-fixture-token")
     assert len(calls)==1
+
+
+def test_multiple_signed_history_zips_stay_cached_without_repeat_download(
+        monkeypatch):
+    """An account's six incremental ZIPs cannot evict one another every tab."""
+    raw=create_synthetic_zip(monkeypatch)
+    secret=b"q"*32
+    ciphertext=gh.encrypt(raw,secret)
+    monkeypatch.setattr(gh,"gateway_key",lambda:secret)
+    reads=[]
+    def download(tag,missing_ok=False):
+        reads.append(tag)
+        return ciphertext
+    monkeypatch.setattr(gh,"_download_tag",download)
+    gh._cache.clear()
+    tags=["intersection-github-archive-42340001000-a"+str(i)
+          for i in range(1,7)]
+    try:
+        for tag in tags:
+            assert gh.tagged_bundle(tag).post_count==1
+        assert len(reads)==6
+        for tag in reversed(tags):
+            assert gh.tagged_bundle(tag).post_count==1
+        assert len(reads)==6,"six SHA-authenticated ancestors must be cached"
+        assert len(gh._cache)==6
+        assert sum(gh._bundle_bytes(v[1]) for v in gh._cache.values())<=(
+            gh.MAX_VERIFIED_CACHE_BYTES)
+    finally:
+        gh._cache.clear()
+
+
+def test_verified_zip_lru_enforces_strict_memory_budget(monkeypatch):
+    """No later ZIP can grow the free Render process cache without bound."""
+    raw=create_synthetic_zip(monkeypatch)
+    secret=b"q"*32
+    ciphertext=gh.encrypt(raw,secret)
+    monkeypatch.setattr(gh,"gateway_key",lambda:secret)
+    seen=[]
+    monkeypatch.setattr(gh,"_download_tag",
+        lambda tag,missing_ok=False:seen.append(tag) or ciphertext)
+    gh._cache.clear()
+    monkeypatch.setattr(gh,"MAX_VERIFIED_CACHE_BYTES",len(raw)*2+8)
+    tags=["intersection-github-archive-42340001100-a"+str(i)
+          for i in range(1,4)]
+    try:
+        for tag in tags:gh.tagged_bundle(tag)
+        assert len(gh._cache)==2
+        assert sum(gh._bundle_bytes(v[1]) for v in gh._cache.values())<=(
+            gh.MAX_VERIFIED_CACHE_BYTES)
+        gh.tagged_bundle(tags[0])
+        assert len(seen)==4,"evicted older source must reauthenticate"
+    finally:
+        gh._cache.clear()
+
+
+def test_invalid_zip_must_never_enter_verified_lru(monkeypatch):
+    raw=create_synthetic_zip(monkeypatch)
+    encrypted=gh.encrypt(raw,b"q"*32)
+    tag="intersection-github-archive-42340001200-a1"
+    gh._cache.clear()
+    monkeypatch.setattr(gh,"gateway_key",lambda:b"q"*32)
+    monkeypatch.setattr(gh,"_download_tag",lambda tag,missing_ok=False:
+                        encrypted[:-1]+bytes([encrypted[-1]^1]))
+    with pytest.raises(BundleInvalid):
+        gh.tagged_bundle(tag)
+    assert gh._cache=={}

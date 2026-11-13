@@ -40,9 +40,53 @@ MAGIC = b"INTGB1"
 AAD = b"intersection-github-temporary-account-zip-v1"
 ASSET = "account.enc"
 MAX_CIPHER = MAX_VIEW_ZIP + 64
-CACHE_SECONDS = 90
+# Keep multiple signed immutable incremental ZIPs resident for one normal
+# browsing session. Former one-entry cache forced six consecutive downloads on
+# EVERY feed/graph/media tab request (live Chromium timed out on tab return).
+# A strict 128 MiB upper bound avoids exhausting 512 MiB free Render memory.
+CACHE_SECONDS = 180
+MAX_VERIFIED_CACHE_BYTES = 128_000_000
+MAX_VERIFIED_CACHE_ITEMS = 10
 _cache = {}
 _guard = threading.Lock()
+
+
+def _cached_verified_bundle(key):
+    with _guard:
+        entry=_cache.get(key)
+        if entry is None:
+            return None
+        if time.monotonic()-entry[0]>=CACHE_SECONDS:
+            _cache.pop(key,None)
+            return None
+        # A cache hit is allowed ONLY for a previously AES+SHA+manifest
+        # verified bundle. Update LRU use time, never alter archived bytes.
+        _cache[key]=(time.monotonic(),entry[1])
+        return entry[1]
+
+
+def _bundle_bytes(bundle):
+    return bundle._zip_source.getbuffer().nbytes
+
+
+def _cache_verified_bundle(key,bundle):
+    size=_bundle_bytes(bundle)
+    if size>MAX_VERIFIED_CACHE_BYTES:
+        return bundle
+    with _guard:
+        now=time.monotonic()
+        for old,(stamp,_) in list(_cache.items()):
+            if now-stamp>=CACHE_SECONDS:
+                _cache.pop(old,None)
+        _cache.pop(key,None)
+        while _cache and (
+                len(_cache)>=MAX_VERIFIED_CACHE_ITEMS or
+                sum(_bundle_bytes(value[1]) for value in _cache.values())+size
+                >MAX_VERIFIED_CACHE_BYTES):
+            victim=min(_cache,key=lambda item:_cache[item][0])
+            _cache.pop(victim,None)
+        _cache[key]=(now,bundle)
+    return bundle
 
 
 def enabled():
@@ -176,17 +220,12 @@ def release_bundle(release, *, key=None):
     artifact_id = asset.get("id")
     if not isinstance(artifact_id, int):
         raise BundleInvalid("Unidentified temporary backup asset")
-    with _guard:
-        found = _cache.get(artifact_id)
-        if found is not None and time.monotonic() - found[0] < CACHE_SECONDS:
-            return found[1]
+    cached=_cached_verified_bundle(artifact_id)
+    if cached is not None:
+        return cached
     source = _download(asset)
     bundle = _make_bundle(release["tag_name"], decrypt(source, key or gateway_key()))
-    with _guard:
-        if len(_cache) >= 1:
-            _cache.clear()
-        _cache[artifact_id] = (time.monotonic(), bundle)
-    return bundle
+    return _cache_verified_bundle(artifact_id,bundle)
 
 
 def releases(max_pages=2, *, token=None):
@@ -317,20 +356,16 @@ def _download_tag(tag, *, missing_ok=False):
 
 
 def tagged_bundle(tag, *, missing_ok=False):
-    with _guard:
-        found=_cache.get(tag)
-        if found is not None and time.monotonic()-found[0]<CACHE_SECONDS:
-            return found[1]
+    cached=_cached_verified_bundle(tag)
+    if cached is not None:
+        return cached
     raw=_download_tag(tag,missing_ok=missing_ok)
     if raw is None:
         return None
     # AES-GCM and VerifiedBundle's whole-ZIP+manifest SHA checks establish
     # original integrity even without the rate-limited GitHub REST metadata.
     bundle=_make_bundle(tag,decrypt(raw,gateway_key()))
-    with _guard:
-        if len(_cache)>=1:_cache.clear()
-        _cache[tag]=(time.monotonic(),bundle)
-    return bundle
+    return _cache_verified_bundle(tag,bundle)
 
 
 def latest_bundles(max_accounts=12):
