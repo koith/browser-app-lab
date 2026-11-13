@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T13:26:56.711Z",
+  "updated": "2026-11-13T17:21:11.757365+00:00",
   "storage": "physically stored public previews in GitHub Pages repository, not paid originals",
   "albums": [
     {
@@ -645,6 +645,229 @@
           "quality": "direct_public_original_bytes_not_publisher_master_verified"
         }
       ]
+    },
+    {
+      "id": "yui-event-chinokun-photo",
+      "title": "심유이 — chinokun_photo 공개 행사 사진",
+      "source": "https://teapawt.net/chinokun_photo",
+      "publisher": "사진가 chinokun_photo",
+      "status": "individually_verified_public_photographer_photo",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-event-chinokun-photo/0d16faa92ee7ae9231ff.jpg",
+          "sha256": "0d16faa92ee7ae9231ff3147e54b4d46832690f1b206cd84562f00647d0a8650",
+          "bytes": 842793,
+          "width": 2732,
+          "height": 4096,
+          "origin_page": "https://teapawt.net/chinokun_photo",
+          "source_url": "https://pbs.twimg.com/media/HW2Q0xQacAAFidq.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-event-asura-nii",
+      "title": "심유이 — Asura_Nii 공개 행사 사진",
+      "source": "https://teapawt.net/Asura_Nii",
+      "publisher": "사진가 Asura_Nii",
+      "status": "individually_verified_public_photographer_photo",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-event-asura-nii/7ec33e259abb169efe3d.jpg",
+          "sha256": "7ec33e259abb169efe3df5ea94e785ac3b173dbf438d0d4ac5912c94a81a7273",
+          "bytes": 923838,
+          "width": 2731,
+          "height": 4096,
+          "origin_page": "https://teapawt.net/Asura_Nii",
+          "source_url": "https://pbs.twimg.com/media/HWwV6KSaAAEcpuc.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-event-asura-nii/8d0b3623de4d7260c772.jpg",
+          "sha256": "8d0b3623de4d7260c7722bbab5429a580989bebc71befbc4e6153e1840d3df09",
+          "bytes": 925476,
+          "width": 2731,
+          "height": 4096,
+          "origin_page": "https://teapawt.net/Asura_Nii",
+          "source_url": "https://pbs.twimg.com/media/HWwV7G0bwAA42Ry.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-event-haruokumura8590",
+      "title": "심유이 — haruokumura8590 공개 행사 사진",
+      "source": "https://teapawt.net/haruokumura8590",
+      "publisher": "사진가 haruokumura8590",
+      "status": "individually_verified_public_photographer_photo",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-event-haruokumura8590/f353772f2603192a53f9.jpg",
+          "sha256": "f353772f2603192a53f987c16f51f02448a1d4e85bc9c86b8a0acca8e4bbc34b",
+          "bytes": 786218,
+          "width": 2731,
+          "height": 4096,
+          "origin_page": "https://teapawt.net/haruokumura8590",
+          "source_url": "https://pbs.twimg.com/media/HWsEi2MagAA4K4y.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-event-tears3134",
+      "title": "심유이 — Tears3134 공개 행사 사진",
+      "source": "https://teapawt.net/Tears3134",
+      "publisher": "사진가 Tears3134",
+      "status": "individually_verified_public_photographer_photo",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-event-tears3134/235178ffc39cdda98c65.jpg",
+          "sha256": "235178ffc39cdda98c650775be5e366e788be2185f313f81982657db2a342d06",
+          "bytes": 1136579,
+          "width": 2731,
+          "height": 4096,
+          "origin_page": "https://teapawt.net/Tears3134",
+          "source_url": "https://pbs.twimg.com/media/HWqdq37akAEKMW4.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-event-tears3134/3e5b8b34bec4fc141427.jpg",
+          "sha256": "3e5b8b34bec4fc141427279e0c653561d51700dd3280abcf5fd9660aca8390b5",
+          "bytes": 880545,
+          "width": 2731,
+          "height": 4096,
+          "origin_page": "https://teapawt.net/Tears3134",
+          "source_url": "https://pbs.twimg.com/media/HWqdsVOacAAbFaf.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/yui-event-tears3134/1425eb9ff8f7df794c9f.jpg",
+          "sha256": "1425eb9ff8f7df794c9f4da7c09998a213c445b923f985f65e2c3c1f23212974",
+          "bytes": 1049427,
+          "width": 2731,
+          "height": 4096,
+          "origin_page": "https://teapawt.net/Tears3134",
+          "source_url": "https://pbs.twimg.com/media/HWqdsVSa8AAYz18.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-event-garamdall",
+      "title": "심유이 — garamdall 공개 행사 사진",
+      "source": "https://teapawt.net/garamdall",
+      "publisher": "사진가 garamdall",
+      "status": "individually_verified_public_photographer_photo",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-event-garamdall/406f261266787f1bf7f3.jpg",
+          "sha256": "406f261266787f1bf7f38f16f1093c6fd89281f0127d3c79e574104432ff27bc",
+          "bytes": 1293189,
+          "width": 1500,
+          "height": 2250,
+          "origin_page": "https://teapawt.net/garamdall",
+          "source_url": "https://pbs.twimg.com/media/HWmns2EbEAABw9q.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-event-garamdall/65b46f193517efab0890.jpg",
+          "sha256": "65b46f193517efab08900a18e83dba2dea6653c8d8ed6fcbb41ead46d62a09dd",
+          "bytes": 1332784,
+          "width": 1500,
+          "height": 2250,
+          "origin_page": "https://teapawt.net/garamdall",
+          "source_url": "https://pbs.twimg.com/media/HWmnszxbcAArEGh.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/yui-event-garamdall/09367d2af987a251a142.jpg",
+          "sha256": "09367d2af987a251a1424bd07a543ba1173903561604fb3d6636388783a12f80",
+          "bytes": 1290987,
+          "width": 1500,
+          "height": 2250,
+          "origin_page": "https://teapawt.net/garamdall",
+          "source_url": "https://pbs.twimg.com/media/HWmns2OaEAEhZKK.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-event-bulldokgu",
+      "title": "심유이 — Bulldokgu 공개 행사 사진",
+      "source": "https://teapawt.net/Bulldokgu",
+      "publisher": "사진가 Bulldokgu",
+      "status": "individually_verified_public_photographer_photo",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-event-bulldokgu/97fcb8455de830537bb4.jpg",
+          "sha256": "97fcb8455de830537bb43445b60fd81b958f0827a7d31b3781f96c19593715f0",
+          "bytes": 470029,
+          "width": 1440,
+          "height": 1920,
+          "origin_page": "https://teapawt.net/Bulldokgu",
+          "source_url": "https://pbs.twimg.com/media/HWnIEbJbsAAz9vB.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-event-bulldokgu/79a29040326c37dae473.jpg",
+          "sha256": "79a29040326c37dae47375dc19d4cf2ff04744797cabf89619957e5f9da59bf7",
+          "bytes": 512075,
+          "width": 1440,
+          "height": 1920,
+          "origin_page": "https://teapawt.net/Bulldokgu",
+          "source_url": "https://pbs.twimg.com/media/HWnIEbfbQAA_QXG.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/yui-event-bulldokgu/6b9280d1f33d50cd5c6b.jpg",
+          "sha256": "6b9280d1f33d50cd5c6b8fb2db7e4f5d85ac60ec2495372dcdbad20d183aff1b",
+          "bytes": 388163,
+          "width": 1440,
+          "height": 1920,
+          "origin_page": "https://teapawt.net/Bulldokgu",
+          "source_url": "https://pbs.twimg.com/media/HWh6QtYbYAAhIN6.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/yui-event-bulldokgu/e44b82eec86270f4d08a.jpg",
+          "sha256": "e44b82eec86270f4d08a979736bf37bec4fd3fdc55de4a029a5c12e58af07fd4",
+          "bytes": 635587,
+          "width": 2736,
+          "height": 3648,
+          "origin_page": "https://teapawt.net/Bulldokgu",
+          "source_url": "https://pbs.twimg.com/media/HWh6QtUbQAAlTEJ.jpg?name=orig",
+          "quality": "photographer_public_first_party_media_not_publisher_master",
+          "numbering_provenance": "new_saved_order_not_official_photo_number"
+        }
+      ]
     }
-  ]
+  ],
+  "physical_verified_image_count": 68
 }
