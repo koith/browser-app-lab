@@ -31,6 +31,9 @@ const {chromium}=require('playwright');
    await page.evaluate(target=>{const api=window.__LEAF_STREET__;
     api.pan(target-api.getState().x);
    },desired);
+   // The original street has a real .18s CSS pan transition. Sample the
+   // finished physical view rather than the previous transform frame.
+   await page.waitForTimeout(240);
    const x=await page.evaluate(()=>window.__LEAF_STREET__.getState().x);
    assert.equal(x,desired,'panorama original limits and middle must be reachable');
    const state=await page.evaluate(()=>{
@@ -43,12 +46,15 @@ const {chromium}=require('playwright');
      sourceButtons:[...document.querySelectorAll('.street-location')].length};
    });
    assert.ok(state.src.includes('original/MainStreet/back.png'));
-   assert.ok(state.scrollable,'original triple panel source actually supports horizontal panning');
+   assert.ok(state.viewport[2]>50&&state.viewport[3]>50&&state.visibleRect[2]>500,
+    'actual original panorama stage must be visible in browser: '+JSON.stringify(state));
    assert.equal(state.sourceButtons,7);
    assert.ok(state.label&&state.label.includes(id==='left'?'왼쪽':id==='right'?'오른쪽':'중앙'));
    await page.screenshot({path:'leaf-r20-street-'+id+'.png'});
    report.push({panel:id,sourceX:x,label:state.label,viewport:state.viewport});
   }
+  assert.equal(new Set(report.map(r=>Math.round(r.viewport[0]))).size,1,
+   'three source views share one fixed real user viewport');
   assert.deepEqual(errors,[]);
   console.log('R20_SOURCE_MAINSTREET_THREE_PANEL_PASS',JSON.stringify({source:first.source,sourceBuildings:first.buildings,panels:report,legacyExeHotspotMap:'UNVERIFIED'}));
  }finally{await browser.close()}
