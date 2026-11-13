@@ -1,4 +1,4 @@
-name: G05 Archive Remaining 13 Real Yui Public Publisher Works
+name: G05 Archive All 17 Registered Yui Public Source Works
 on:
   pull_request:
     paths:
@@ -53,6 +53,27 @@ jobs:
                 ensure_ascii=False),flush=True)
             subprocess.run(['python','apps/gallery-archive/publish_new_public_photos_to_pages.py',
                  '--model','yui','--stage',str(stage),'--limit','80','--budget','80000000'],check=True)
+          # These other four directly registered Yui works were never in the
+          # old ShowArtx 403 sweep. They have their own verified identities:
+          # official DJAWA portfolio, photographer X, and Inven public post.
+          other=[r['id'] for r in registry if not r.get('source','').startswith('https://showartx.net/')]
+          assert len(other)==4,other
+          stage=root/'batch3'
+          cmd=['python','apps/gallery-archive/direct_photo_pipeline.py',
+             '--model','yui','--owner','apps/yui-gallery/owner-index.json',
+             '--out',str(stage),'--max-new','80','--max-pages','4',
+             '--render-budget','0','--reviewed-source-only','--page-cycle','7']
+          for aid in other:cmd+=['--album-id',aid]
+          print('G05_4_INDEPENDENT_PUBLIC_PUBLISHER_SOURCES',other,flush=True)
+          subprocess.run(cmd,check=True)
+          report=json.loads((stage/'metadata/collection-audit.json').read_text())
+          for row in report['results']:
+            print('G05_INDEPENDENT_PUBLISHER_REAL_BYTES',
+              json.dumps({k:row.get(k) for k in ('id','pages',
+                'published_image_candidates','individual_files_saved',
+                'failure_categories','failures')},ensure_ascii=False),flush=True)
+          subprocess.run(['python','apps/gallery-archive/publish_new_public_photos_to_pages.py',
+             '--model','yui','--stage',str(stage),'--limit','80','--budget','80000000'],check=True)
           PY
           node apps/gallery-archive/test_saved_photo_union.cjs
           node apps/gallery-archive/test_curated_cover_manifest.cjs
@@ -70,7 +91,7 @@ jobs:
           from pathlib import Path
           root=Path(os.environ['RUNNER_TEMP'])/'g05-public-13'
           total=0
-          for i in (1,2):
+          for i in (1,2,3):
             p=root/('batch'+str(i))
             subprocess.run(['python','apps/gallery-archive/publish_new_public_photos_to_pages.py',
                 '--model','yui','--stage',str(p),'--limit','80','--budget','80000000'],check=True)
