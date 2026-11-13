@@ -15,7 +15,7 @@ jobs:
   actually-archive-missing-public-photos:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 34
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,7 +29,7 @@ jobs:
       - name: Fetch only exactly SHA-pinned public originals and SAVE actual JPEGs
         run: |
           python apps/gallery-archive/recover_recorded_public_photo_bytes.py \
-            --kind both --max-new 90 --max-bytes 75000000
+            --kind both --max-new 220 --max-bytes 190000000
           node apps/gallery-archive/test_saved_photo_union.cjs
           node apps/gallery-archive/test_curated_cover_manifest.cjs
       - name: Report actual new SHA and publisher remaining gap
