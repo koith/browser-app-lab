@@ -39,6 +39,15 @@ jobs:
       - run: |
           npm install --no-save playwright
           npx playwright install ${{ matrix.engine }} --with-deps
+      - name: Serve real 4LEAF client for Chromium/WebKit gameplay tests
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/rog-die01-server.log 2>&1 &
+          for i in $(seq 1 40); do
+            if curl --fail --silent --max-time 2 -I http://127.0.0.1:8765/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/rog-die01-server.log
+          exit 1
       - name: Original D4 x4 and D6 x6 live roll animation result validation
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
