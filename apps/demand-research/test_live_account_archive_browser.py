@@ -220,9 +220,6 @@ def verify(engine, *, label, width, height):
         assert original_present(), (
             "previously visible verified original cannot be recovered after tab round-trip")
         chosen=page.locator(
-            "#results .post-media img, #results .post-media video, "
-            "#results .post-media audio"
-        ).filter(visible=True) if False else page.locator(
             "#results .post-media img[src], #results .post-media video[src], "
             "#results .post-media audio[src]"
         )
@@ -240,9 +237,10 @@ def verify(engine, *, label, width, height):
         assert media_kind in ("img","video","audio"), "unsupported source media node"
         if media_kind=="img":
             page.wait_for_function(
-                "() => {const img=document.querySelector('#results .post-media img');"
-                "return !!img && img.complete && img.naturalWidth > 0;}",
-                timeout=90000,
+                "(expected) => [...document.querySelectorAll('#results .post-media img')]"
+                ".some(img => img.getAttribute('src')===expected "
+                "&& img.complete && img.naturalWidth > 0)",
+                arg=selected_original,timeout=90000,
             )
         else:
             assert exact_original.evaluate("(node) => node.controls === true"), (
