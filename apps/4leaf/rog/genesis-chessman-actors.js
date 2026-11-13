@@ -280,9 +280,55 @@
   const picks=(map[action]||[0]).map(at).filter(Boolean);
   return picks.length?picks:(front?[front]:all.slice(0,1));
  }
+ // Keep a decoded original frame visible while another verified original
+ // OBS PNG is fetched. Rapid source-pose ticks formerly aborted PNG requests
+ // on WebKit, blanking actors 0081/0055 despite genuine source bytes.
+ // This is only an asynchronous WEB frame-loading optimization: never change
+ // native source key order, source PNG content or original-provenance tags.
+ const decodedObsUrls=new Set();
+ const loadingObsUrls=new Map();
+ const requestedObsFrame=new WeakMap();
+ function ensureDecodedObs(url){
+   if(decodedObsUrls.has(url))return Promise.resolve();
+   if(loadingObsUrls.has(url))return loadingObsUrls.get(url).promise;
+   const preloader=new Image();
+   preloader.decoding='async';
+   const entry={preloader,promise:null};
+   entry.promise=new Promise((resolve,reject)=>{
+     preloader.onload=()=>{
+       decodedObsUrls.add(url);loadingObsUrls.delete(url);resolve();
+     };
+     preloader.onerror=()=>{
+       loadingObsUrls.delete(url);reject(new Error('native OBS source failed: '+url));
+     };
+     preloader.src=url;
+     if(preloader.complete&&preloader.naturalWidth>0){
+       decodedObsUrls.add(url);loadingObsUrls.delete(url);resolve();
+     }
+   });
+   if(!decodedObsUrls.has(url))loadingObsUrls.set(url,entry);
+   return entry.promise;
+ }
  function renderNativeFrame(pawn,frame){
    const img=pawn.querySelector('img.leaf-chess-original-obs');
    if(!img||!frame)return;
+   const id=pawn.dataset.chessmanId;
+   requestedObsFrame.set(pawn,{id,url:frame.url});
+   if(img.getAttribute('src')!==frame.url&&!decodedObsUrls.has(frame.url)){
+     ensureDecodedObs(frame.url).then(()=>{
+       const wanted=requestedObsFrame.get(pawn);
+       if(!pawn.isConnected||pawn.querySelector('img.leaf-chess-original-obs')!==img||
+          wanted?.id!==id||wanted?.url!==frame.url||pawn.dataset.chessmanId!==id)return;
+       renderNativeFrame(pawn,frame);
+     }).catch(()=>{
+       const wanted=requestedObsFrame.get(pawn);
+       if(!pawn.isConnected||pawn.querySelector('img.leaf-chess-original-obs')!==img||
+          wanted?.id!==id||wanted?.url!==frame.url||pawn.dataset.chessmanId!==id)return;
+       // Real source fetch failure: existing same-source OBS retry handler.
+       img.src=frame.url;
+     });
+     return;
+   }
    if(img.getAttribute('src')!==frame.url)img.src=frame.url;
    img.style.setProperty('--leaf-obs-width',frame.width+'px');
    img.style.setProperty('--leaf-obs-height',frame.height+'px');
@@ -348,6 +394,7 @@
      // simply because its first network request failed. Retry ONLY the same
      // original source URL; never synthesize a body or an action frame.
      img.addEventListener('load',()=>{
+       if(!img.isConnected||pawn.querySelector('img.leaf-chess-original-obs')!==img)return;
        img.dataset.obsRetryCount='0';
        delete img.dataset.obsRetryFor;
        if(['/original/OBS/action-full/','/original/OBS/action-full-ext/'].some(dir=>
@@ -358,7 +405,8 @@
         ?'ready-legacy-original-OBS': 'ready';
      });
      img.addEventListener('error',()=>{
-       if(!pawn.isConnected)return;
+       if(!pawn.isConnected||!img.isConnected||
+          pawn.querySelector('img.leaf-chess-original-obs')!==img)return;
        const source=String(img.getAttribute('src')||'').split('?')[0];
        if(!source.startsWith('./original/OBS/')||!source.endsWith('.png')){
          pawn.dataset.obsUnavailable='true';
@@ -681,8 +729,10 @@
    delete pawn.dataset.sourceFullUnavailable;
    const previousSourceImage=pawn.querySelector('img.leaf-chess-original-obs');
    if(previousSourceImage){
-    previousSourceImage.dataset.obsRetryCount='0';
-    delete previousSourceImage.dataset.obsRetryFor;
+    // Replace the entire source image when the CHR identity changes. An
+    // in-flight callback for the previous actor must NEVER display its body.
+    previousSourceImage.remove();
+    requestedObsFrame.delete(pawn);
    }
    pawn.dataset.actorSource=originalFor(src)?'OBS/'+originalFor(src).originalMember:'CardData';
    pawn.dataset.actorOriginalModelRecovered=String(!!originalFor(src));
