@@ -1,0 +1,97 @@
+name: G05 Archive Remaining 13 Real Yui Public Publisher Works
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/gallery-g05-all-public-works.yml"
+      - "apps/gallery-archive/direct_photo_pipeline.py"
+permissions:
+  contents: write
+concurrency:
+  group: g05-remaining-13-real-public-yui-${{ github.head_ref }}
+  cancel-in-progress: false
+jobs:
+  physical-yui-photos:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 36
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests==2.32.5 beautifulsoup4==4.14.2 Pillow==11.3.0
+      - name: Verify existing real photo collector and model identity tests
+        run: |
+          python -m py_compile apps/gallery-archive/direct_photo_pipeline.py
+          (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
+      - name: Actually visit 13 registered Yui public photo works, download and validate every observed JPG
+        run: |
+          python - <<'PY'
+          import os,json,subprocess
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'g05-public-13'
+          registry=json.loads(Path('apps/yui-gallery/public-work-pages.json').read_text())['albums']
+          target=[r['id'] for r in registry if r.get('source','').startswith('https://showartx.net/')]
+          assert len(target)==13,(len(target),target)
+          for batch,offset in enumerate(range(0,len(target),8),1):
+            ids=target[offset:offset+8]
+            stage=root/('batch'+str(batch))
+            cmd=['python','apps/gallery-archive/direct_photo_pipeline.py',
+                 '--model','yui','--owner','apps/yui-gallery/owner-index.json',
+                 '--out',str(stage),'--max-new','80','--max-pages','2',
+                 '--render-budget','0','--reviewed-source-only']
+            for aid in ids:cmd+=['--album-id',aid]
+            print('G05_13_PUBLIC_WORKS_BATCH_ACTUAL_REQUEST',batch,ids,flush=True)
+            subprocess.run(cmd,check=True)
+            report=json.loads((stage/'metadata/collection-audit.json').read_text())
+            for row in report['results']:
+              print('G05_PUBLIC_REAL_SOURCE_EVIDENCE',json.dumps({
+                k:row.get(k) for k in ('id','pages','published_image_candidates',
+                  'individual_files_saved','failure_categories','failures')},
+                ensure_ascii=False),flush=True)
+            subprocess.run(['python','apps/gallery-archive/publish_new_public_photos_to_pages.py',
+                 '--model','yui','--stage',str(stage),'--limit','80','--budget','80000000'],check=True)
+          PY
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          node apps/gallery-archive/test_curated_cover_manifest.cjs
+      - name: Commit only newly decoded and SHA-distinct original photo bytes to this PR branch
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          git checkout -B "$BRANCH" "refs/remotes/origin/$BRANCH"
+          python - <<'PY'
+          import os,json,subprocess
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'g05-public-13'
+          total=0
+          for i in (1,2):
+            p=root/('batch'+str(i))
+            subprocess.run(['python','apps/gallery-archive/publish_new_public_photos_to_pages.py',
+                '--model','yui','--stage',str(p),'--limit','80','--budget','80000000'],check=True)
+            actual=json.loads((p/'metadata/pages-publication.json').read_text())
+            total+=actual['new_sha_verified_originals']
+          print('G05_13_REAL_PUBLIC_WORKS_FINAL_NEW_SHA',total,flush=True)
+          PY
+          git add apps/yui-gallery/stored-albums.json apps/yui-gallery/stored-albums/
+          if git diff --cached --quiet; then
+            echo "G05_ALL_13_SOURCE_PHOTOS_ALREADY_PRESENT_OR_NOT_OBTAINABLE" >> "$GITHUB_STEP_SUMMARY"
+          else
+            git commit -m "feat(G05): preserve newly recovered distinct Yui public photo bytes"
+            git push origin "HEAD:refs/heads/$BRANCH"
+            echo "G05_REAL_NEW_YUI_ORIGINAL_JPG_SHA_ADDED" >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g05-13-real-public-yui-source-evidence
+          path: |
+            ${{ runner.temp }}/g05-public-13/batch*/metadata/collection-audit.json
+            ${{ runner.temp }}/g05-public-13/batch*/metadata/pages-publication.json
+          retention-days: 7
+          if-no-files-found: warn
