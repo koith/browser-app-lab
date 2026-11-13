@@ -14,7 +14,13 @@ const BOX={normal:[272,147,111,90],valuable:[430,142,160,123]};
   await page.goto(process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html'));
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_SHOP_STAGE__);
   await page.evaluate(()=>window.__ROG_TEST__.go('shop'));
-  await page.waitForTimeout(600);
+  // WebKit can lay out the native CardShop scene after the first viewport
+  // transition. Never divide anchors by a 0 scale during frame hydration.
+  await page.waitForFunction(()=>{
+   const stage=window.__LEAF_SHOP_STAGE__;
+   const box=document.querySelector('#shop-native-stage')?.getBoundingClientRect();
+   return stage?.getState().scale>0.05&&box?.width>10&&box.height>10;
+  },null,{timeout:15000});
   const state=async()=>page.evaluate(()=>{
    const stage=document.getElementById('shop-native-stage').getBoundingClientRect();
    const scale=window.__LEAF_SHOP_STAGE__.getState().scale;
