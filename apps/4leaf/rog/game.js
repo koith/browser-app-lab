@@ -443,23 +443,28 @@ function shopCanSell(card){
   !profile.team.includes(card.id)&&
   !(match&&!match.finished&&match.players?.some(p=>p.team?.includes(card.id)));
 }
+// 2004 surviving shop_ref screenshot has 4x2 and a third RARE tab, but
+// the extracted 2002 source CHR files do NOT supply a Rare classification.
+// Show an explicit unknown/empty result instead of inventing Rare IDs.
+const shopPageSize=()=>window.__LEAF_SHOP_ERA__?.getState?.().era==='2004'?8:9;
 function shopFiltered(){
- return BASE_CARDS.filter(c=>group==='all'||c.rank===group||(group==='valuable'&&c.rank==='rare'));
+ if(group==='rare')return [];
+ return BASE_CARDS.filter(c=>group==='all'||c.rank===group);
 }
 function selectShopCard(id){
  if(!CARD_MAP[id])return;
  chosenCard=id;
  const cards=shopFiltered(),index=cards.findIndex(c=>c.id===id);
- if(index>=0)shopPage=Math.floor(index/9);
+ if(index>=0)shopPage=Math.floor(index/shopPageSize());
  drawShop();
 }
 function drawShop(){
- const root=$('shop-grid'),cards=shopFiltered(),pages=Math.max(1,Math.ceil(cards.length/9));
+ const root=$('shop-grid'),cards=shopFiltered(),pageSize=shopPageSize(),pages=Math.max(1,Math.ceil(cards.length/pageSize));
  shopPage=Math.max(0,Math.min(pages-1,shopPage));
- if(!cards.slice(shopPage*9,shopPage*9+9).some(c=>c.id===chosenCard)&&cards.length)chosenCard=cards[shopPage*9].id;
+ if(!cards.slice(shopPage*pageSize,shopPage*pageSize+pageSize).some(c=>c.id===chosenCard)&&cards.length)chosenCard=cards[shopPage*pageSize].id;
  root.replaceChildren();
- for(let i=0;i<9;i++){
-   const c=cards[shopPage*9+i],b=document.createElement('button');
+ for(let i=0;i<pageSize;i++){
+   const c=cards[shopPage*pageSize+i],b=document.createElement('button');
    if(!c){
      b.className='shop-card shop-empty';b.disabled=true;b.setAttribute('aria-hidden','true');
      root.append(b);continue;
@@ -497,7 +502,15 @@ function drawShop(){
    b.onclick=()=>{if(!shopFiltered().find(x=>x.id===id))group='all';selectShopCard(id)};
    owned.append(b);
  });
- const c=CARD_MAP[chosenCard]||cards[0]||BASE_CARDS[0];
+ const c=cards.find(c=>c.id===chosenCard)||cards[0]||null;
+ if(!c){
+   $('shop-selected').textContent=group==='rare'
+    ?'2004년 RARE 탭은 원본 사진에서 확인됐지만 카드 목록·분류표는 아직 복구되지 않았습니다.'
+    :'표시할 카드가 없습니다.';
+   $('shop-buy').disabled=true;$('shop-sell').disabled=true;
+   $('shop-buy').textContent='선택할 카드 없음';
+   $('shop-sell').dataset.resaleStatus='unknown-source';
+ }
  if(c){
    $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+(c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 기록 시세':'웹 추정가격');
    $('shop-buy').disabled=profile.owned.includes(c.id)||profile.gp<c.price;
@@ -2241,5 +2254,5 @@ function init(){installBoardControls();installNativeDiceMenu();
      else if(action==='ability')await useAbility();
      else await useItem(index,steps);
    }finally{remoteAct=false}
- }};window.__ROG_TEST__={imageFor,portraitEvidence,startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,resumeGameFromUserAction,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ }};window.__ROG_TEST__={imageFor,portraitEvidence,startGame,drawGame,drawShop,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,resumeGameFromUserAction,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
