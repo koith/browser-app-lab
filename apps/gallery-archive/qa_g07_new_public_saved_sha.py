@@ -83,6 +83,16 @@ def live(browser_type,p):
           const a=stored.find(x=>x.id==='public-yui-sns');
           return a&&a.images.some(p=>p.sha256===sha);
         }""",arg=PHOTO_SHA,timeout=60000)
+        # The gallery appends 48 photo nodes per animation frame to keep
+        # first paint fast. A 467th SNS photo is not in the DOM at the
+        # instant stored[] is hydrated; wait for its real node rather than
+        # treating progressive rendering as missing archive content.
+        page.wait_for_function("""sha=>{
+          const a=stored.find(x=>x.id==='public-yui-sns');
+          const p=a?.images.find(x=>x.sha256===sha);
+          return !!p&&[...document.querySelectorAll('#detailphotos .photo img')]
+            .some(img=>(img.getAttribute('src')||'').includes(p.url));
+        }""",arg=PHOTO_SHA,timeout=45000)
         evidence=page.evaluate("""sha=>{
           const a=stored.find(x=>x.id==='public-yui-sns');
           const p=a.images.find(x=>x.sha256===sha);
