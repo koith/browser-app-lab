@@ -9,7 +9,8 @@ permissions:
   contents: write
 concurrency:
   group: g07-one-free-public-publisher-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-  cancel-in-progress: false
+  # Latest PR source replaces obsolete collector attempts; keep main safe.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   collect-actual-saved-photos:
     # Only this repository's owned PR is permitted to publish committed bytes.
@@ -31,7 +32,7 @@ jobs:
         run: |
           python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
             --owner apps/mimmi-gallery/owner-index.json --out "$RUNNER_TEMP/g07-mimmi" \
-            --max-new 32 --max-pages 8 --render-budget 0 \
+            --max-new 32 --max-pages 4 --render-budget 0 \
             --album-id djawa-my-summer-vacation-vol-5 \
             --album-id v2ph-actor-z7exoo5z \
             --album-id v2ph-actor-z76xe74a \
@@ -43,7 +44,7 @@ jobs:
         run: |
           python apps/gallery-archive/direct_photo_pipeline.py --model mimmi \
             --owner apps/mimmi-gallery/owner-index.json --out "$RUNNER_TEMP/g07-mimmi-part2" \
-            --max-new 32 --max-pages 8 --render-budget 0 \
+            --max-new 32 --max-pages 4 --render-budget 0 \
             --album-id v2ph-sukajan-gal \
             --album-id v2ph-actor-z63984ma \
             --album-id v2ph-actor-a54e445z \
