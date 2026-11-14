@@ -15,7 +15,7 @@ COVERS="https://mimmi-private-gallery-free.onrender.com/api/cover"
 SHA=re.compile(r"^[0-9a-f]{64}$")
 AI=re.compile(r"ai[ -_]*enhanced|ai[ -_]*보정",re.I)
 
-def seeds(root=ROOT):
+def seeds(root=ROOT,all_cuts=False):
     all_albums=[]
     for model in ("mimmi","yui"):
         base=root/(model+"-gallery")
@@ -56,16 +56,28 @@ def seeds(root=ROOT):
             public_photos=unique_public
             samples=[]
             if public_photos:
-                choices=list(dict.fromkeys([0,len(public_photos)//2,len(public_photos)-1]))
+                choices=(list(range(len(public_photos))) if all_cuts else
+                         list(dict.fromkeys([0,len(public_photos)//2,len(public_photos)-1])))
                 for index in choices:
                     p=public_photos[index]
                     samples.append((p["sha256"],
                          GITHUB+"/"+model+"-gallery/"+quote(p["url"],safe="/"),
                          "static-public"))
             else:
-                choices=list(dict.fromkeys([0,len(owned)//2,len(owned)-1]))
+                choices=(list(range(len(owned))) if all_cuts else
+                         list(dict.fromkeys([0,len(owned)//2,len(owned)-1])))
                 for index in choices:
                     p=owned[index]
+                    version=str(p.get("preview_sha256") or p["sha256"])[:24]
+                    samples.append((p["sha256"],
+                        COVERS+"/"+model+"/"+quote(aid,safe="")+"/"+str(p["number"])+
+                        "?v="+version,"public-gateway-cover"))
+            if all_cuts and public_photos:
+                # Static previews and owner catalog may contain different frames.
+                # Search ALL union SHA, not merely first/middle/last public cuts.
+                public_sha={p["sha256"] for p in public_photos}
+                for p in owned:
+                    if p["sha256"] in public_sha:continue
                     version=str(p.get("preview_sha256") or p["sha256"])[:24]
                     samples.append((p["sha256"],
                         COVERS+"/"+model+"/"+quote(aid,safe="")+"/"+str(p["number"])+
@@ -80,5 +92,9 @@ def seeds(root=ROOT):
         0 if album[0]["expected_gap"] is not None else 1,
         -(album[0]["expected_gap"] or 0),album[0]["owner_saved_count"],
         album[0]["model"],album[0]["album_id"]))
+    if all_cuts:
+        # Complete per-photo queue, ordered by sparse album first.
+        # The caller rotates a small bounded window, never all remote requests at once.
+        return [photo for album in all_albums for photo in album]
     return [photo for i in range(3) for album in all_albums
             for photo in album[i:i+1]]
