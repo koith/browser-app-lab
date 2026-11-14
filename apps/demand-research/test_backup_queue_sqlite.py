@@ -136,3 +136,35 @@ def test_bridge_respects_bounded_per_run_budget(monkeypatch):
                         lambda: polls.append(True) or "DISPATCHED")
     assert bridge.drain_available(max_batches=5)=="BATCH_LIMIT"
     assert len(polls)==5
+
+
+def test_queue_page_is_true_fifo_for_same_second(monkeypatch):
+    ids=iter([51,30,12])
+    nanos=iter([1800000000000000001,1800000000000000002,1800000000000000003])
+    monkeypatch.setattr(backup_queue.secrets,"randbelow",lambda _:next(ids))
+    monkeypatch.setattr(backup_queue.time,"time",lambda:1800000000)
+    monkeypatch.setattr(backup_queue.time,"time_ns",lambda:next(nanos))
+    created=[backup_queue.create_request("bluesky",f"ordered-{i}.bsky.social")
+             for i in range(3)]
+    assert created==[1000000051,1000000030,1000000012]
+    page=backup_queue.queue_rows(limit=2,offset=0)
+    assert [r["job_id"] for r in page["items"]]==created[:2]
+    assert page["total"]==3 and page["mode"]=="volatile_sqlite"
+    assert [r["job_id"] for r in backup_queue.queue_rows(limit=2,offset=2)["items"]]==created[2:]
+    assert [r["job_id"] for r in backup_queue.pending(limit=3)]==created
+
+
+def test_old_queue_database_migrates_without_losing_pending(tmp_path,monkeypatch):
+    import sqlite3
+    db=tmp_path/"legacy.sqlite3"
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_SQLITE",str(db))
+    with sqlite3.connect(db) as conn:
+        conn.execute("""CREATE TABLE account_requests (
+          job_id INTEGER PRIMARY KEY,platform TEXT,account TEXT,
+          created_at INTEGER,workflow_run_id INTEGER,accepted_at INTEGER)""")
+        conn.execute("""INSERT INTO account_requests
+          (job_id,platform,account,created_at) VALUES (?,?,?,?)""",
+          (1234567890,"bluesky","legacy.bsky.social",1699999999))
+    rows=backup_queue.queue_rows(limit=5)["items"]
+    assert len(rows)==1 and rows[0]["account"]=="legacy.bsky.social"
+    assert rows[0]["workflow_run_id"] is None
