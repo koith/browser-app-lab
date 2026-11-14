@@ -308,8 +308,12 @@ def create_router(auth):
         except (ValueError,KeyError,TypeError):
             raise HTTPException(400,"Invalid public account selection") from None
         async with _lock:
+            # A previous accepted job is NOT a reason to throttle a different
+            # explicit account selection. The durable queue / GitHub Actions
+            # dispatcher sequences actual work. Only real storage-read denial
+            # gets a short cooldown to avoid hammering the failing provider.
             if _last_request is not None and time.monotonic()-_last_request<45:
-                raise HTTPException(429,"Archive request throttled")
+                raise HTTPException(429,"Private storage is temporarily unavailable")
             try:
                 if backup_queue.enabled():
                     run_id=await asyncio.to_thread(
@@ -324,7 +328,8 @@ def create_router(auth):
                     status_code=503, headers={"Cache-Control":"private, no-store", "Retry-After":"45"})
             except RuntimeError:
                 raise HTTPException(502,"Private archive job could not be scheduled") from None
-            _last_request=time.monotonic()
+            # Do not set the failure throttle after a successfully received
+            # new job. Each acknowledged request has an independent receipt.
         return JSONResponse({"accepted":True,"state":"QUEUED_NOT_VERIFIED",
                              "run_id":run_id,"receipt":receipt,
                              "storage":"github_encrypted_temporary" if github_temp_bundle.enabled() else "private_terabox",

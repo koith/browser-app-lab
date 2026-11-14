@@ -56,6 +56,22 @@ def test_queued_account_remains_pending_until_ack(monkeypatch):
     assert backup_queue.state(job,root)["accepted"]["workflow_run_id"]==42199001234
 
 
+def test_two_pending_accounts_are_independent_and_acceptance_preserves_other(monkeypatch):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    root=FakeCloud()
+    old=backup_queue.create_request("bluesky","first.bsky.social",root)
+    newer=backup_queue.create_request("mastodon","@second@mastodon.social",root)
+    assert old!=newer
+    pending=backup_queue.pending(root,limit=64)
+    assert len(pending)==2
+    assert {x["job_id"] for x in pending}=={old,newer}
+    backup_queue.accept(old,42199000001,root)
+    still=backup_queue.pending(root,limit=64)
+    assert [x["job_id"] for x in still]==[newer]
+    assert backup_queue.state(old,root)["accepted"]["workflow_run_id"]==42199000001
+    assert backup_queue.state(newer,root)["accepted"] is None
+
+
 def test_missing_and_damaged_remote_objects_never_count_as_queued(monkeypatch):
     monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
     root=FakeCloud()

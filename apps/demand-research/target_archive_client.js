@@ -56,7 +56,9 @@
   let gatewayReady=false;
   let submitting=false;
   let currentRun=null;
-  let pollTimer=null;
+  let pendingJobs=[];
+  const pollTimers=new Map(),polling=new Set();
+  let submitSequence=Promise.resolve();
   let connectionAttempting=false;
   let inlineStatus=null;
   function notifyInline(text,state){
@@ -66,23 +68,64 @@
   }
 
   const JOB_KEY="intersection:private-archive-job:v1";
-  function resumeReceipt(){
-    try{
-      const value=JSON.parse(sessionStorage.getItem(JOB_KEY)||"null");
-      if(value&&Number.isSafeInteger(value.run_id)&&value.run_id>0&&
-         typeof value.receipt==="string"&&value.receipt.length<900)
-        return value;
-    }catch{/* Expired or tampered browser-only job receipt. */}
-    return null;
+  const JOBS_KEY="intersection:private-archive-jobs:v2";
+  function safeJob(job){
+    return job&&Number.isSafeInteger(job.run_id)&&job.run_id>0&&
+      typeof job.receipt==="string"&&job.receipt.length<900&&
+      ["bluesky","mastodon"].includes(job.platform)&&
+      typeof job.account==="string"&&job.account.length<400;
   }
-  function saveReceipt(value){
+  function resumeReceipts(){
     try{
-      if(value)sessionStorage.setItem(JOB_KEY,JSON.stringify(value));
-      else sessionStorage.removeItem(JOB_KEY);
-    }catch{/* Private browsing may disable sessionStorage. */}
+      const stored=JSON.parse(sessionStorage.getItem(JOBS_KEY)||"[]");
+      if(Array.isArray(stored)){
+        const unique=new Map();
+        for(const row of stored.slice(-64))if(safeJob(row))
+          unique.set(row.run_id,row);
+        if(unique.size)return [...unique.values()];
+      }
+    }catch{}
+    try{
+      const old=JSON.parse(sessionStorage.getItem(JOB_KEY)||"null");
+      if(safeJob(old))return [old];
+    }catch{}
+    return [];
   }
-  function clearPoll(){
-    if(pollTimer!==null){window.clearTimeout(pollTimer);pollTimer=null;}
+  function saveReceipt(value,finished=null){
+    if(value&&safeJob(value)){
+      if(!pendingJobs.some(job=>job.run_id===value.run_id))
+        pendingJobs.push(value);
+      pendingJobs=pendingJobs.slice(-64);
+    }
+    if(finished){
+      const id=finished.run_id;
+      pendingJobs=pendingJobs.filter(job=>job.run_id!==id);
+    }
+    try{
+      if(pendingJobs.length){
+        sessionStorage.setItem(JOBS_KEY,JSON.stringify(pendingJobs));
+        sessionStorage.setItem(JOB_KEY,JSON.stringify(pendingJobs[pendingJobs.length-1]));
+      }else{
+        sessionStorage.removeItem(JOBS_KEY);
+        sessionStorage.removeItem(JOB_KEY);
+      }
+    }catch{/* Session storage can be disabled; server receipts remain authoritative. */}
+    renderQueueInfo();
+  }
+  const queueInfo=document.createElement("p");
+  queueInfo.className="target-archive-queue-count";
+  queueInfo.setAttribute("role","status");
+  queueInfo.hidden=true;
+  jobStatus.after(queueInfo);
+  function renderQueueInfo(){
+    queueInfo.hidden=!pendingJobs.length;
+    queueInfo.textContent=pendingJobs.length?
+      "접수된 미완료 백업 "+pendingJobs.length+"건 · 이전 작업도 유지하고 순서대로 진행 상태를 확인합니다.":"";
+  }
+  function clearPoll(job){
+    if(!job)return;
+    const timer=pollTimers.get(job.run_id);
+    if(timer!==undefined){window.clearTimeout(timer);pollTimers.delete(job.run_id)}
   }
   function appendViewerLink(container,accountKey,text){
     if(!/^(bluesky|mastodon)-[a-f0-9]{40}$/.test(accountKey))return;
@@ -147,10 +190,16 @@
       libraryRows.textContent="보관 목록을 확인하지 못했습니다. ‘보관함 전체 보기’로 다시 시도할 수 있습니다.";
     }
   }
-  async function pollJob(){
-    clearPoll();
-    if(!gatewayReady||!currentRun)return;
-    const job=currentRun;
+  // Each accepted public account has its OWN signed receipt and poll timer.
+  // A later selected account never cancels or replaces an earlier job.
+  async function pollJob(job=currentRun){
+    if(!gatewayReady||!job||!pendingJobs.includes(job)||polling.has(job.run_id))return;
+    clearPoll(job);polling.add(job.run_id);
+    const visible=(text,kind,accountKey)=>{
+      job.state=kind;
+      if(currentRun===job)showJob(text,kind,accountKey);
+      renderQueueInfo();
+    };
     try{
       const response=await fetch("/api/target-archive/jobs/"+
         encodeURIComponent(String(job.run_id))+"?receipt="+
@@ -158,47 +207,49 @@
           credentials:"same-origin",cache:"no-store",
           headers:{Accept:"application/json"}
         });
-      if(!response.ok)throw Error("진행 상태를 읽지 못했습니다 (HTTP "+response.status+")");
+      if(!response.ok)throw Error("Job status HTTP "+response.status);
       const result=await response.json();
-      if(currentRun!==job)return;
+      if(!pendingJobs.includes(job))return;
       const count=Number(result.posts||0);
       switch(result.state){
         case "QUEUED":
-          showJob(Number(result.queued_seconds||0)>=600
-            ?"백업 요청은 접수됐지만 자동 실행이 10분 넘게 지연됐습니다. 다시 누르지 말고 실행 상태를 확인하세요."
-            :"백업 작업 접수 완료 · GitHub 실행 대기 중 (일정이 지연될 수 있습니다)","queued");break;
+          visible("백업 접수 완료 · 작업 실행 대기 중 · 기존 요청도 계속 진행됩니다.","queued");
+          break;
         case "RUNNING":
-          showJob("백업 진행 중 · 공개 자료를 수집하고 임시 저장소에 암호화 보관합니다.","running");break;
+          visible("백업 진행 중 · 공개 자료를 수집해 암호화 저장합니다.","running");break;
         case "VERIFYING_STORAGE":
-          showJob("파일 전송 완료 여부를 확인 중 · 원본을 다시 읽어 SHA를 검증합니다.","verifying");break;
+          visible("저장된 원본을 다시 읽어 무결성을 검증 중입니다.","verifying");break;
         case "REMOTE_VERIFIED":
         case "PARTIAL_BACKUP":
-          showJob((result.state==="REMOTE_VERIFIED"
-            ?"검증된 임시 백업 · 게시글 "+count+"건 · 원본 "+
-               Number(result.objects||0)+"개 검증"
-            :"백업된 자료 일부 검증됨 · 게시글 "+count+
-              "건 · 수집되지 않은 구간이 남아 있습니다."),"verified",
-            String(result.account_key||""));
-          saveReceipt(null);currentRun=null;
-          await loadLibrary();
+          visible((result.state==="REMOTE_VERIFIED"
+            ?"검증된 백업 · 게시글 "+count+"건 · 원본 "+Number(result.objects||0)+"개"
+            :"일부 백업 완료 · 게시글 "+count+"건 · 미수집 구간 남음"),
+            "verified",String(result.account_key||""));
+          saveReceipt(null,job);
+          if(currentRun===job)currentRun=pendingJobs[pendingJobs.length-1]||null;
+          void loadLibrary();
           return;
         case "NEEDS_RETRY":
-          showJob("이전 백업 요청의 대기 기록이 만료됐습니다. 보관함을 확인하고, 저장된 자료가 없다면 다시 백업해 주세요.","failed");
-          saveReceipt(null);currentRun=null;
-          await loadLibrary();
-          return;
         case "FAILED":
-          showJob("백업 실패 · 기존 보관 자료는 유지됩니다. 다시 실행할 수 있습니다.","failed");
-          saveReceipt(null);currentRun=null;
+          visible(result.state==="NEEDS_RETRY"?
+            "기존 작업 대기 기록이 만료됐습니다. 보관함에서 저장 결과를 확인해 주세요.":
+            "백업 실패 · 다른 접수 작업은 유지되며 이 작업은 재시도할 수 있습니다.","failed");
+          saveReceipt(null,job);
+          if(currentRun===job)currentRun=pendingJobs[pendingJobs.length-1]||null;
           return;
         default:
-          showJob("백업 진행 상태를 확인 중입니다.","running");
+          visible("백업 상태 확인 중입니다.","running");
       }
     }catch{
-      if(currentRun!==job)return;
-      showJob("진행 상태 확인에 실패했습니다. 잠시 뒤 자동으로 다시 확인합니다.","verifying");
+      if(pendingJobs.includes(job))
+        visible("접수된 백업의 진행 상태를 다시 확인 중입니다.","verifying");
+    }finally{
+      polling.delete(job.run_id);
+      if(pendingJobs.includes(job)){
+        const timer=window.setTimeout(()=>{pollTimers.delete(job.run_id);void pollJob(job)},12000);
+        pollTimers.set(job.run_id,timer);
+      }else clearPoll(job);
     }
-    if(currentRun===job)pollTimer=window.setTimeout(pollJob,6000);
   }
 
   function publicHost(host){
@@ -323,11 +374,14 @@
         :"비공개 보관함은 열 수 있지만 새 백업 요청 권한이 설정되지 않았습니다.";
       if(gatewayReady){
         void loadLibrary();
-        const remembered=resumeReceipt();
-        if(remembered){
-          currentRun=remembered;
-          showJob("이전에 요청한 백업의 진행 상태를 확인 중…","running");
-          void pollJob();
+        const remembered=resumeReceipts();
+        if(remembered.length){
+          for(const job of remembered)
+            if(!pendingJobs.some(j=>j.run_id===job.run_id))pendingJobs.push(job);
+          currentRun=pendingJobs[pendingJobs.length-1];
+          showJob("기존 백업 "+pendingJobs.length+"건의 접수·진행 상태를 확인 중…","running");
+          renderQueueInfo();
+          for(const job of pendingJobs)void pollJob(job);
         }
       }
     }catch{
@@ -353,12 +407,6 @@
     if(submitting||connectionAttempting){
       notifyInline("이미 백업 요청을 처리 중입니다. 중복 요청하지 않습니다.","running");
       return {accepted:false,reason:"submitting"};
-    }
-    if(currentRun){
-      const text="이미 접수된 백업 작업이 있습니다. 진행 상태를 확인 중이며 중복 접수하지 않습니다.";
-      message.textContent=text;
-      notifyInline(text,"queued");
-      return {accepted:false,reason:"already_queued"};
     }
     if(!validSelection()){
       account.setAttribute("aria-invalid","true");
@@ -424,10 +472,11 @@
       currentRun={run_id:result.run_id,receipt:result.receipt,
                   platform:platform.value,account:value};
       saveReceipt(currentRun);
-      message.textContent="백업 작업이 접수됐습니다. 완료되면 이 화면에서 저장된 자료를 열 수 있습니다.";
-      showJob("백업 요청 접수 · 실행 순서를 확인 중…","queued");
-      void pollJob();
-      return {accepted:true,state:"QUEUED_NOT_VERIFIED"};
+      message.textContent="새 계정 백업을 접수했습니다. 기존 백업도 계속 진행됩니다.";
+      showJob("백업 접수 완료 · 현재 미완료 요청 "+pendingJobs.length+
+        "건 · 저장 완료 여부는 별도 검증이 필요합니다.","queued");
+      void pollJob(currentRun);
+      return {accepted:true,state:"QUEUED_NOT_VERIFIED",run_id:result.run_id};
     }catch(error){
       message.textContent=String(error.message||"아카이브 요청 실패")+
         " · 계정을 유지한 채 다시 시도할 수 있습니다.";
@@ -439,9 +488,26 @@
       submitting=false;refreshButton();
     }
   }
+  // Keep the browser's POSTs in order. The server's independent queue then
+  // schedules execution; the oldest pending job never blocks new selection.
+  function queueSubmission(selection,onStatus,fromPost){
+    const run=()=>{
+      if(selection){
+        platform.value=selection.platform;
+        account.value=selection.profileUrl;
+        platform.dispatchEvent(new Event("change",{bubbles:true}));
+        account.dispatchEvent(new Event("input",{bubbles:true}));
+      }
+      inlineStatus=typeof onStatus==="function"?onStatus:null;
+      return submitCurrentSelection(fromPost);
+    };
+    const pending=submitSequence.then(run,run);
+    submitSequence=pending.then(()=>{},()=>{});
+    return pending;
+  }
   form.addEventListener("submit",event=>{
     event.preventDefault();
-    void submitCurrentSelection(false);
+    void queueSubmission({platform:platform.value,profileUrl:account.value},null,false);
   });
   // Called by the saved-post modal. The server still validates the POST.
   // Never auto-POST for URL parameters, unverified snippets or cross-origin links.
@@ -456,27 +522,10 @@
       if(typeof onStatus==="function")onStatus("현재 공개 미러에서는 직접 백업을 실행할 수 없습니다. 보관앱에서 열어 실행해야 합니다.","failed");
       return {accepted:false,reason:"public_mirror"};
     }
-    // A queued job belongs to the previously selected account. Do not
-    // overwrite its input or issue a duplicate POST from another modal.
-    if(submitting||connectionAttempting||currentRun){
-      if(typeof onStatus==="function")
-        onStatus("진행 중인 백업 요청이 있습니다. 완료 상태를 먼저 확인해 주세요.","queued");
-      return {accepted:false,reason:"already_running"};
-    }
-    const oldPlatform=platform.value,oldAccount=account.value;
-    platform.value=selection.platform;
-    account.value=selection.profileUrl;
-    if(!validSelection()){
-      platform.value=oldPlatform;
-      account.value=oldAccount;
-      if(typeof onStatus==="function")
-        onStatus("이 게시글의 공개 계정 주소를 검증하지 못해 백업을 시작하지 않았습니다.","failed");
-      return {accepted:false,reason:"invalid_account"};
-    }
-    platform.dispatchEvent(new Event("change",{bubbles:true}));
-    account.dispatchEvent(new Event("input",{bubbles:true}));
-    inlineStatus=typeof onStatus==="function"?onStatus:null;
-    return submitCurrentSelection(true);
+    // Explicitly confirmed new accounts must not be refused because a
+    // previous run has a signed receipt. Queue the next POST behind any
+    // currently submitting request, preserving all earlier job IDs.
+    return queueSubmission(selection,onStatus,true);
   };
   window.addEventListener("intersection:private-session-ready",()=>{
     void check();
