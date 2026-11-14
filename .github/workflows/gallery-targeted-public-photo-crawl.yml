@@ -161,7 +161,7 @@ jobs:
           # Eight previously held real cover/photos per run; reverse images
           # rotate independently for each model, not just repeated first covers.
           python apps/gallery-archive/reverse_image_sweep.py \
-            --model "$MODEL" --seeds 8 \
+            --model "$MODEL" --all-cuts --seeds 8 \
             --offset "$((GITHUB_RUN_NUMBER * 8))" --workers 2 \
             --out "$RUNNER_TEMP/public-image-reverse-sweep.json"
           python apps/gallery-archive/source_alias_search.py \
