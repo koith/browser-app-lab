@@ -74,43 +74,50 @@ def poll_once():
             print("INTERSECTION_ARCHIVE_AUDIT_UNAVAILABLE",flush=True)
     pending=request_json(GATEWAY+"/api/bridge/pending",headers=bridge_headers)
     jobs=pending.get("requests",[])
-    if not isinstance(jobs,list) or len(jobs)>1:
+    if not isinstance(jobs,list) or len(jobs)>4:
         raise RuntimeError("Unexpected private queue response")
     if not jobs:
         return "NO_PENDING"
-    task=jobs[0]
-    if not isinstance(task,dict) or set(task)!={"job_id","platform","account"}:
-        raise RuntimeError("Invalid private queue selection")
-    if type(task["job_id"]) is not int or task["platform"] not in ("bluesky","mastodon"):
-        raise RuntimeError("Invalid selected account backup")
-    if not isinstance(task["account"],str) or not 3<=len(task["account"])<=260:
-        raise RuntimeError("Invalid account input")
-    # GitHub's job-scoped token NEVER goes to Render. It is used only to
-    # dispatch the existing approved workflow on the same public repository.
-    github_token=os.environ["GITHUB_TOKEN"]
-    dispatch=Request(
-        GITHUB+"/actions/workflows/intersection-target-account-bundle.yml/dispatches",
-        method="POST",
-        data=json.dumps({"ref":"main","return_run_details":True,
-             "inputs":{"platform":task["platform"],"account":task["account"],
-                       "max_pages":"all"}}).encode(),
-        headers={"Authorization":"Bearer "+github_token,
-                 "Accept":"application/vnd.github+json",
-                 "Content-Type":"application/json",
-                 "X-GitHub-Api-Version":"2026-03-10",
-                 "User-Agent":"intersection-account-queue"})
-    with urlopen(dispatch,timeout=30) as resp:
-        if resp.status!=200:
-            raise RuntimeError("Exact GitHub workflow run ID unavailable")
-        result=json.load(resp)
-    run_id=result.get("workflow_run_id")
-    if type(run_id) is not int or run_id<=0:
-        raise RuntimeError("Queued run has no trackable GitHub execution")
-    ack=request_json(GATEWAY+"/api/bridge/ack",
-        headers={**bridge_headers,"Content-Type":"application/json"},
-        payload={"job_id":task["job_id"],"workflow_run_id":run_id})
-    if ack.get("accepted") is not True or ack.get("job_id")!=task["job_id"]:
-        raise RuntimeError("Immutable queue acknowledgement failed")
+    seen=set()
+    dispatched=0
+    for task in jobs:
+        if not isinstance(task,dict) or set(task)!={"job_id","platform","account"}:
+            raise RuntimeError("Invalid private queue selection")
+        if (type(task["job_id"]) is not int or
+                task["platform"] not in ("bluesky","mastodon") or
+                task["job_id"] in seen):
+            raise RuntimeError("Invalid selected account backup")
+        seen.add(task["job_id"])
+        if not isinstance(task["account"],str) or not 3<=len(task["account"])<=260:
+            raise RuntimeError("Invalid account input")
+        # Every request gets a distinct run, acceptance marker and signed receipt.
+        # A slow first workflow does not block later dispatches from this poll.
+        github_token=os.environ["GITHUB_TOKEN"]
+        dispatch=Request(
+            GITHUB+"/actions/workflows/intersection-target-account-bundle.yml/dispatches",
+            method="POST",
+            data=json.dumps({"ref":"main","return_run_details":True,
+                 "inputs":{"platform":task["platform"],"account":task["account"],
+                           "max_pages":"all"}}).encode(),
+            headers={"Authorization":"Bearer "+github_token,
+                     "Accept":"application/vnd.github+json",
+                     "Content-Type":"application/json",
+                     "X-GitHub-Api-Version":"2026-03-10",
+                     "User-Agent":"intersection-account-queue"})
+        with urlopen(dispatch,timeout=30) as resp:
+            if resp.status!=200:
+                raise RuntimeError("Exact GitHub workflow run ID unavailable")
+            result=json.load(resp)
+        run_id=result.get("workflow_run_id")
+        if type(run_id) is not int or run_id<=0:
+            raise RuntimeError("Queued run has no trackable GitHub execution")
+        ack=request_json(GATEWAY+"/api/bridge/ack",
+            headers={**bridge_headers,"Content-Type":"application/json"},
+            payload={"job_id":task["job_id"],"workflow_run_id":run_id})
+        if ack.get("accepted") is not True or ack.get("job_id")!=task["job_id"]:
+            raise RuntimeError("Immutable queue acknowledgment failed")
+        dispatched+=1
+    print("INTERSECTION_BACKUP_BRIDGE_DISPATCHED_COUNT",dispatched,flush=True)
     return "DISPATCHED"
 
 
