@@ -120,7 +120,7 @@ def verify(browser_type,label):
                     "() => document.querySelector('#displayName')?.textContent==='코코'",
                     timeout=15000)
                 assert page.locator("html").get_attribute("data-platform")=="bluesky"
-                assert page.locator("#snsProviderTitle").inner_text()=="Bluesky 스타일 보관함"
+                assert page.locator("#snsProviderTitle").inner_text()=="프로필"
                 assert page.locator("#snsProviderSymbol").inner_text()=="🦋"
                 page.wait_for_function(
                     "() => document.querySelector('#results .post-byline strong')?.textContent==='코코'"
