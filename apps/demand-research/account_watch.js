@@ -281,13 +281,51 @@ function prepareBackupSelection(w){
    " 공개 계정을 백업 대상으로 선택했습니다. 위 백업 실행 버튼을 눌러 진행하세요.";
  $("targetArchivePanel").scrollIntoView({behavior:"smooth",block:"center"});
 }
+const avatarCache=new Map(),avatarQueued=new Set(),avatarQueue=[];
+let avatarInFlight=0;
+function safeAvatar(value){
+ try{
+   const url=new URL(String(value||""));
+   return url.protocol==="https:"&&!url.username&&!url.password&&!url.port?url.href:"";
+ }catch{return ""}
+}
+function pumpAvatars(){
+ while(avatarInFlight<2&&avatarQueue.length){
+   const w=avatarQueue.shift();
+   avatarInFlight++;
+   (async()=>{
+     let avatar="";
+     try{
+       if(w.platform==="bluesky"){
+         const json=await getJSON("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?"+
+           new URLSearchParams({actor:w.username}));
+         avatar=safeAvatar(json?.avatar);
+       }else if(w.platform==="mastodon"){
+         const origin=new URL(w.url).origin;
+         const json=await getJSON(origin+"/api/v1/accounts/lookup?"+
+           new URLSearchParams({acct:w.username}));
+         avatar=safeAvatar(json?.avatar_static||json?.avatar);
+       }
+     }catch{/* Service or CORS may not permit a public avatar. */}
+     avatarCache.set(w.key,avatar);
+     avatarInFlight--;scheduleRender();pumpAvatars();
+   })();
+ }
+}
+function queueAvatar(w){
+ if(!["bluesky","mastodon"].includes(w.platform)||
+    avatarCache.has(w.key)||avatarQueued.has(w.key))return;
+ avatarQueued.add(w.key);avatarQueue.push(w);pumpAvatars();
+}
 function watchAvatar(w,snap){
  const row=(snap.verified||[]).find(p=>sameAccount(p,w)&&typeof p.avatarUrl==="string"&&p.avatarUrl);
- if(!row)return "";
- try{
-   const url=new URL(row.avatarUrl);
-   return url.protocol==="https:"&&!url.username&&!url.password?url.href:"";
- }catch{return ""}
+ const direct=safeAvatar(row?.avatarUrl);
+ if(direct)return direct;
+ const publicPosts=remote.get(w.key)?.items||[];
+ const recent=safeAvatar(publicPosts.find(item=>item.avatarUrl)?.avatarUrl);
+ if(recent)return recent;
+ if(!avatarCache.has(w.key))queueAvatar(w);
+ return avatarCache.get(w.key)||"";
 }
 function avatarNode(w,snap){
  const avatar=node("span","account-watch-avatar",w.username.slice(0,1).toUpperCase());
@@ -533,7 +571,9 @@ async function fetchMastodon(w){
      canonical=new URL(String(item.url||""));
      if(canonical.protocol!=="https:"||canonical.hostname!==new URL(origin).hostname)continue;
    }catch{continue}
-   if(posted&&text)posts.push({id:"mastodon:"+origin+":"+item.id,posted,text,url:canonical.href,platform:"mastodon"});
+   if(posted&&text)posts.push({id:"mastodon:"+origin+":"+item.id,posted,text,
+      avatarUrl:safeAvatar(user.avatar_static||user.avatar),
+      url:canonical.href,platform:"mastodon"});
  }
  return posts;
 }
