@@ -39,6 +39,13 @@ const {chromium,webkit}=require('playwright');
   });
   assert.equal(before.move,2,'original full-move chessman required');
   assert.equal(before.vals,2,'two genuine D4 prior to Armageddon');
+  // Native 2002 800×600 game keeps inventory collapsed behind the
+  // authentic selector icon. A hidden DOM item cannot receive real user
+  // pointer input until the original item tray is opened.
+  const toggle=page.locator('#dice-items-toggle');
+  assert.equal(await toggle.getAttribute('aria-expanded'),'false');
+  await toggle.click();
+  assert.equal(await toggle.getAttribute('aria-expanded'),'true');
   await page.locator('#my-items .item-card').first().click();
   await page.locator('#modal-buttons button').filter({hasText:'사용'}).first().click();
   const armageddon=await page.evaluate(()=>{
