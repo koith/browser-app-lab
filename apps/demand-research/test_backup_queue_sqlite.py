@@ -115,3 +115,24 @@ def test_bridge_autoretries_failed_workflow_without_creating_another_request(mon
     assert len(actions)==2
     assert actions[-1][0]=="POST"
     assert actions[-1][1].endswith("/rerun-failed-jobs")
+
+
+def test_bridge_drains_multiple_signed_batches_without_repeating_empty_poll(monkeypatch):
+    import backup_bridge_poller as bridge
+    sequence=iter(["DISPATCHED","DISPATCHED","NO_PENDING"])
+    polls=[]
+    def once():
+        polls.append(True)
+        return next(sequence)
+    monkeypatch.setattr(bridge,"poll_once",once)
+    assert bridge.drain_available(max_batches=5)=="DRAINED"
+    assert len(polls)==3
+
+
+def test_bridge_respects_bounded_per_run_budget(monkeypatch):
+    import backup_bridge_poller as bridge
+    polls=[]
+    monkeypatch.setattr(bridge,"poll_once",
+                        lambda: polls.append(True) or "DISPATCHED")
+    assert bridge.drain_available(max_batches=5)=="BATCH_LIMIT"
+    assert len(polls)==5
