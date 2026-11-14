@@ -1370,7 +1370,9 @@ async function applyItem(index,steps=null){
    if(n===0)return;
    consume(index);advance(p,n);appendMove(p.name+' · '+item.name+' '+n+'칸 이동');
    if(n>0)await resolveTile(p);
-   drawGame();return;
+   // Card was consumed before the async tile, so persist resulting movement
+   // and earned tile effects together; a reload must not reverse the cast.
+   drawGame();persist();return;
  }
  consume(index);
  if(!p.effects)p.effects={};
@@ -1398,7 +1400,9 @@ async function applyItem(index,steps=null){
  case 'keeperA':case 'keeperB':case 'keeperC':
    match.tiles[Math.min(match.tiles.length-2,p.position+6)]=itemId;break;
  }
- appendMove(p.name+' · '+item.name+' 사용');drawGame();
+ // Persist ALL effects after consuming the card. Previous code saved only
+ // item removal; page reload silently lost Armageddon, Dove, Shoe etc.
+ appendMove(p.name+' · '+item.name+' 사용');drawGame();persist();
 }
 function consume(index){const p=activePlayer();p.items.splice(index,1);p.usedItem=true;persist()}
 function advance(user,distance){user.position=Math.min(match.tiles.length-1,Math.max(0,user.position+distance));user.ability=Math.min(100,user.ability+Math.max(0,distance)*4)}
