@@ -7,11 +7,8 @@ const $=id=>document.getElementById(id);
 const host=$("accountsView");if(!host)return;
 const privateDetails=$("accountServerData");
 if(privateDetails){
-  // The server-index panel was unhidden but its <details> stayed closed,
-  // so 316 real accounts and the pagination button were invisible.
-  // Open once on initialization; users can still collapse it manually.
+  // Keep the complete server directory behind an explicit disclosure click.
   privateDetails.hidden=false;
-  privateDetails.open=true;
 }
 const el=(tag,text)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=String(text);return node};
 const panel=el("section");panel.id="privateAccountIndex";
