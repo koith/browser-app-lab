@@ -1,0 +1,52 @@
+name: 4LEAF R23 original OBS predecode and match GOAL one-claim safety
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/r23-goal-idempotence.cjs'
+      - '.github/workflows/rog-r22-obs-predecode.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/r23-goal-idempotence.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-blank-original-attacks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-obs22.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
+          exit 1
+      - name: Source actors that intermittently blanked after an attack
+        run: |
+          LEAF_CARDS=0081,0055,0086,0088 FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
+          FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r20-card-original-source-safety.cjs
+          FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r23-goal-idempotence.cjs
+      - name: Source six-person same-tile contact after decoded swaps
+        run: node apps/4leaf/rog/tests/r20-six-original-actor-formation.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-r22-source-frame-predecode-${{ matrix.browser }}
+          if-no-files-found: ignore
+          path: |
+            leaf-r14-*.png
+            leaf-r20-original-six*.png

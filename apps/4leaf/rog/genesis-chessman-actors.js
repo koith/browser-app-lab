@@ -280,10 +280,69 @@
   const picks=(map[action]||[0]).map(at).filter(Boolean);
   return picks.length?picks:(front?[front]:all.slice(0,1));
  }
+ // Keep a decoded original frame visible while another verified original
+ // OBS PNG is fetched. Rapid source-pose ticks formerly aborted PNG requests
+ // on WebKit, blanking actors 0081/0055 despite genuine source bytes.
+ // This is only an asynchronous WEB frame-loading optimization: never change
+ // native source key order, source PNG content or original-provenance tags.
+ const decodedObsUrls=new Set();
+ const loadingObsUrls=new Map();
+ const requestedObsFrame=new WeakMap();
+ function ensureDecodedObs(url){
+   if(decodedObsUrls.has(url))return Promise.resolve();
+   const existing=loadingObsUrls.get(url);
+   if(existing)return existing.promise;
+   // decode(), unlike load(), resolves only after the original PNG pixels
+   // can actually be painted by WebKit. Keep a bounded URL cache so long
+   // games do not retain an unbounded JS identity set.
+   const preloader=new Image();
+   preloader.decoding='async';
+   const entry={preloader,promise:null};
+   entry.promise=new Promise((resolve,reject)=>{
+     preloader.onload=async()=>{
+       try{
+         if(preloader.decode)await preloader.decode();
+         if(!preloader.naturalWidth)throw Error('zero-width original OBS image');
+         decodedObsUrls.delete(url);
+         decodedObsUrls.add(url);
+         if(decodedObsUrls.size>512)decodedObsUrls.delete(decodedObsUrls.values().next().value);
+         resolve();
+       }catch(error){reject(error)}
+       finally{loadingObsUrls.delete(url)}
+     };
+     preloader.onerror=()=>{
+       loadingObsUrls.delete(url);
+       reject(new Error('native OBS source failed: '+url));
+     };
+     preloader.src=url;
+   });
+   loadingObsUrls.set(url,entry);
+   return entry.promise;
+ }
  function renderNativeFrame(pawn,frame){
    const img=pawn.querySelector('img.leaf-chess-original-obs');
    if(!img||!frame)return;
-   if(img.getAttribute('src')!==frame.url)img.src=frame.url;
+   const old=img.getAttribute('src')||'';
+   requestedObsFrame.set(pawn,{id:pawn.dataset.chessmanId,url:frame.url});
+   if(old!==frame.url){
+     // Native animation keyframe and current IMG src must change in the
+     // same browser task. Delaying the src made genuine 5-step walk frames
+     // disappear and broke original front-facing card source QA.
+     // Display the PREVIOUS decoded original OBS PNG as a CSS background
+     // until the new source actually loads. No CSS-drawn proxy or borrowed
+     // actor pixel is ever used; the real new src is assigned immediately.
+     if(old.startsWith('./original/OBS/')&&img.complete&&img.naturalWidth>0){
+       img.style.backgroundImage='url("'+old+'")';
+       img.style.backgroundSize='100% 100%';
+       img.style.backgroundRepeat='no-repeat';
+       img.style.backgroundPosition='center';
+       img.dataset.obsHeldSource=old;
+     }
+     img.src=frame.url;
+     // Warm WebKit's decoded image cache without blocking the native
+     // source-key chronology. Future revisits can reuse verified pixels.
+     ensureDecodedObs(frame.url).catch(()=>{});
+   }
    img.style.setProperty('--leaf-obs-width',frame.width+'px');
    img.style.setProperty('--leaf-obs-height',frame.height+'px');
    // The former WEB contact ellipse was always 36px, even for original
@@ -348,8 +407,16 @@
      // simply because its first network request failed. Retry ONLY the same
      // original source URL; never synthesize a body or an action frame.
      img.addEventListener('load',()=>{
+       if(!img.isConnected||pawn.querySelector('img.leaf-chess-original-obs')!==img)return;
        img.dataset.obsRetryCount='0';
        delete img.dataset.obsRetryFor;
+       // The new real PNG decoded successfully: release the prior true
+       // source-frame background rather than leaving an obsolete frame.
+       img.style.removeProperty('background-image');
+       img.style.removeProperty('background-size');
+       img.style.removeProperty('background-repeat');
+       img.style.removeProperty('background-position');
+       delete img.dataset.obsHeldSource;
        if(['/original/OBS/action-full/','/original/OBS/action-full-ext/'].some(dir=>
          (img.getAttribute('src')||'').includes(dir)))
         delete pawn.dataset.fullFrameErrors;
@@ -358,7 +425,8 @@
         ?'ready-legacy-original-OBS': 'ready';
      });
      img.addEventListener('error',()=>{
-       if(!pawn.isConnected)return;
+       if(!pawn.isConnected||!img.isConnected||
+          pawn.querySelector('img.leaf-chess-original-obs')!==img)return;
        const source=String(img.getAttribute('src')||'').split('?')[0];
        if(!source.startsWith('./original/OBS/')||!source.endsWith('.png')){
          pawn.dataset.obsUnavailable='true';
@@ -681,8 +749,10 @@
    delete pawn.dataset.sourceFullUnavailable;
    const previousSourceImage=pawn.querySelector('img.leaf-chess-original-obs');
    if(previousSourceImage){
-    previousSourceImage.dataset.obsRetryCount='0';
-    delete previousSourceImage.dataset.obsRetryFor;
+    // Replace the entire source image when the CHR identity changes. An
+    // in-flight callback for the previous actor must NEVER display its body.
+    previousSourceImage.remove();
+    requestedObsFrame.delete(pawn);
    }
    pawn.dataset.actorSource=originalFor(src)?'OBS/'+originalFor(src).originalMember:'CardData';
    pawn.dataset.actorOriginalModelRecovered=String(!!originalFor(src));

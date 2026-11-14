@@ -1900,7 +1900,7 @@ function calculateMatchReward(winner,m=match,now=Date.now()){
  const participants=Math.max(2,Math.min(8,m?.players?.length||2));
  const duration=Math.max(0,now-(Number.isFinite(m?.startedAt)?m.startedAt:now));
  const required=participants*90000;
- const historicalBase=m?.map==='4LEAF'?49:m?.map==='워프 게이트'?29:null;
+ const historicalBase=m?.map==='4LEAF'?49:['워프게이트','워프 게이트'].includes(m?.map)?29:null;
  const estimated=historicalBase===null;
  const fullReward=(historicalBase??29)+Math.max(0,participants-2)*10;
  const percent=winner?.id===0?1:Math.min(1,Math.max(0,(m?.players?.[0]?.position||0)/Math.max(1,(m?.tiles?.length||1)-1)));
@@ -1970,7 +1970,25 @@ function nativeMatchResult(winner,rewardInfo,reward){
  panel.append(details);
  return panel;
 }
-function finishGame(winner){match.finished=true;match.winner=winner.id;match.message=winner.name+'이(가) GOAL에 도착했습니다!';const rewardInfo=calculateMatchReward(winner);const reward=rewardInfo.gp;profile.gp+=reward;if(winner.id===0)profile.wins++;profileUI();persist();chat('SYSTEM',winner.name+'님이 가장 먼저 GOAL에 도착했습니다! GP +'+reward,'system');modal('✦ 주사위의 잔영 · 게임 종료',nativeMatchResult(winner,rewardInfo,reward),[{label:'다시 시작',primary:true,run:()=>navigate('lobby')},{label:'결과 보기',run:()=>drawGame()}]);sfx(925,.4)}
+function finishGame(winner){
+ // A second GOAL callback (e.g. delayed tile recursion or duplicate remote
+ // event) must never credit GP, wins or a modal twice. Reject winners from
+ // an older match; do not turn this into a new historical reward claim.
+ if(!match||match.finished||!match.players.includes(winner))return false;
+ match.finished=true;
+ match.winner=winner.id;
+ match.message=winner.name+'이(가) GOAL에 도착했습니다!';
+ const rewardInfo=calculateMatchReward(winner),reward=rewardInfo.gp;
+ profile.gp+=reward;
+ if(winner.id===0)profile.wins++;
+ profileUI();persist();
+ chat('SYSTEM',winner.name+'님이 가장 먼저 GOAL에 도착했습니다! GP +'+reward,'system');
+ modal('✦ 주사위의 잔영 · 게임 종료',nativeMatchResult(winner,rewardInfo,reward),
+  [{label:'다시 시작',primary:true,run:()=>navigate('lobby')},
+   {label:'결과 보기',run:()=>drawGame()}]);
+ sfx(925,.4);
+ return true;
+}
 function moveValues(p){
  const stats=teamStats(p.team),extra=p.effects.shoe>0?1:0,values=[];
  const sides=stats.move===2?4:6,n=Math.min(4,(stats.move===2?2:1)+extra);
