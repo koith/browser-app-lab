@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "policy": "Store each site-observed spelling with its source. Unverified claims remain pending; source aliases never automatically merge albums.",
+  "model_names": {
+    "mimmi": [
+      {
+        "name": "Mimmi",
+        "source": "https://djawaphoto.com/portfolio-cat/mimmi/",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "밈미",
+        "source": "https://djawaphoto.com/portfolio-cat/mimmi/",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "Mimmi_official",
+        "source": "https://twoucan.com/profile/Mimmi_official",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "Mimmissu17",
+        "source": "https://twoucan.com/profile/Mimmi_official",
+        "proof": "recorded_public_source"
+      }
+    ],
+    "yui": [
+      {
+        "name": "심유이",
+        "source": "https://showartx.net/yui-meow/",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "심혜성",
+        "source": "https://www.chaotuji.com/yui/",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "Yui Sim",
+        "source": "https://www.chaotuji.com/yui/",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "Yui",
+        "source": "https://www.chaotuji.com/yui/",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "ゆい",
+        "source": "https://www.chaotuji.com/yui/",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "沈慧圣",
+        "source": "https://www.chaotuji.com/yui/",
+        "proof": "recorded_public_source"
+      },
+      {
+        "name": "super_yuisan",
+        "source": "https://x.com/super_yuisan",
+        "proof": "recorded_public_source"
+      }
+    ]
+  },
+  "works": {
+    "mimmi:djawa-pop-kitty-party": [
+      {
+        "name": "Pop Kitty Party",
+        "source": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+        "proof": "same_work_source"
+      },
+      {
+        "name": "DJAWA Photo (밈미) × Ceyatic Pop Kitty Party",
+        "source": "https://www.xiantuji.com/mimmi/",
+        "proof": "same_work_source"
+      }
+    ],
+    "mimmi:djawa-nikke-yuni": [
+      {
+        "name": "Nikke : Yuni",
+        "source": "https://djawaphoto.com/portfolio/nikke-yuni/",
+        "proof": "same_work_source"
+      },
+      {
+        "name": "Mimmi Nikke Yuni",
+        "source": "https://www.xiantuji.com/mimmi/",
+        "proof": "same_work_source"
+      }
+    ],
+    "mimmi:djawa-janus-scary-lantern-night": [
+      {
+        "name": "Janus : Scary Lantern Night",
+        "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night/",
+        "proof": "same_work_source"
+      },
+      {
+        "name": "Scary Lantern Night",
+        "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night/",
+        "proof": "same_work_source"
+      }
+    ],
+    "mimmi:djawa-rudy2-codename-wolfgirl": [
+      {
+        "name": "Rudy² – Codename : Wolfgirl",
+        "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+        "proof": "same_work_source"
+      }
+    ],
+    "mimmi:djawa-twin-bunnies-affair": [
+      {
+        "name": "Twin Bunnies Affair",
+        "source": "https://djawaphoto.com/portfolio/twin-bunnies-affair/",
+        "proof": "same_work_source"
+      }
+    ],
+    "yui:yui-meow-public-samples": [
+      {
+        "name": "Yui — Meow",
+        "source": "https://showartx.net/yui-meow/",
+        "proof": "same_work_source"
+      }
+    ],
+    "yui:artgravia-677-yui-public-samples": [
+      {
+        "name": "ArtGravia Vol.677 Yui",
+        "source": "https://showartx.net/artgravia-vol-677-yui/",
+        "proof": "same_work_source"
+      },
+      {
+        "name": "ArtGravia 677 유이",
+        "source": "https://showartx.net/artgravia-vol-677-yui/",
+        "proof": "same_work_source"
+      }
+    ],
+    "yui:crazygiant-player5-public": [
+      {
+        "name": "CRAZY GIANT THE PLAYER ISSUE 5 심혜성",
+        "source": "https://www.crazygiant.co.kr/",
+        "proof": "same_work_source"
+      }
+    ]
+  },
+  "pending_observations": []
+}

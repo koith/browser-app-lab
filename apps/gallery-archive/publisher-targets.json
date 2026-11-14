@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "rule": "Every official declared criterion plus no-watermark and real physical/browser QA must pass. Unknown edition package bytes do not PASS.",
+  "works": [
+    {
+      "model": "mimmi",
+      "album_id": "djawa-pop-kitty-party",
+      "publisher_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+      "declared_photo_count": 123,
+      "declared_width": 8640,
+      "declared_height": 5760,
+      "declared_package_bytes": null,
+      "size_status": "not_declared_on_publisher_page"
+    },
+    {
+      "model": "mimmi",
+      "album_id": "djawa-nikke-yuni",
+      "publisher_page": "https://djawaphoto.com/portfolio/nikke-yuni/",
+      "declared_photo_count": 213,
+      "declared_width": 8640,
+      "declared_height": 5760,
+      "declared_package_bytes": null,
+      "size_status": "not_declared_on_publisher_page"
+    },
+    {
+      "model": "mimmi",
+      "album_id": "djawa-janus-scary-lantern-night",
+      "publisher_page": "https://djawaphoto.com/portfolio/janus-scary-lantern-night/",
+      "declared_photo_count": 88,
+      "declared_width": 8640,
+      "declared_height": 5760,
+      "declared_package_bytes": null,
+      "size_status": "not_declared_on_publisher_page"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from PIL import Image
+from PIL import Image, ImageDraw
 from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue, verified_alternative_candidates, merge_owner_census_sources, _work_token_matched_in_heading, safe_page
 
 
@@ -16,6 +16,20 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_official_djawa_8640_5760_jpeg_not_rejected_as_too_many_pixels(self):
+        """The 49.8 MP publisher edition must be a collectable decoded photo."""
+        im=Image.new('RGB',(8640,5760),(195,170,140))
+        draw=ImageDraw.Draw(im)
+        for x in range(0,8640,96):
+            draw.rectangle((x,0,x+48,5760),fill=((x*13)%256,(x*7)%256,(x*11)%256))
+        raw=BytesIO()
+        im.save(raw,format='JPEG',quality=90)
+        information,preview,fmt=inspect(raw.getvalue())
+        self.assertEqual((information['width'],information['height']),(8640,5760))
+        self.assertEqual(fmt,'JPEG')
+        self.assertGreater(len(preview),100)
+        self.assertLess(information['bytes'],64_000_000)
+
     def test_photographer_original_source_is_scoped_to_exact_yui_post(self):
         from direct_photo_pipeline import (
             YUI_PHOTOGRAPHER_ORIGINAL_X, YUI_PHOTOGRAPHER_PUBLIC_VIEW,
@@ -560,10 +574,15 @@ class DirectTests(unittest.TestCase):
                                  'missing_model_or_volume_context')
 
     def test_independent_origin_fallback_after_original_public_origin_403(self):
+        from direct_photo_pipeline import reviewed_direct_source, reviewed_direct_media
         source='https://showartx.net/artgravia-vol-677-yui/'
         alternate='https://www.nicesss.com/archives/mij/artgravia/469248.html'
         image='https://www.nicewww.com/wp-content/uploads/2026/05/1778813739-c81e728d9d4c2f6.jpg'
         unrelated='https://www.nicewww.com/wp-content/uploads/2026/05/not-the-same-work.jpg'
+        self.assertTrue(reviewed_direct_source(alternate,'yui'))
+        self.assertFalse(reviewed_direct_source(alternate,'mimmi'))
+        self.assertTrue(reviewed_direct_media(image,alternate,'yui'))
+        self.assertFalse(reviewed_direct_media(unrelated,alternate,'yui'))
         raw=f'''<h1>ArtGravia – Vol.677 Yui(유이)</h1><article>
           <img src="{image}"><img src="{unrelated}">
           <aside class="related"><img src="{unrelated}"></aside></article>'''
@@ -597,7 +616,9 @@ class DirectTests(unittest.TestCase):
                     if url==image:return type('R',(),{'content':jpeg})()
                     raise AssertionError('Only exact user-visible assets can be requested')
             client=Client()
-            result=collect(root,'yui',owner,root/'stage',3,3,client,album_ids=['artgravia-677-yui-public-samples'])
+            result=collect(root,'yui',owner,root/'stage',3,3,client,
+                           album_ids=['artgravia-677-yui-public-samples'],
+                           reviewed_source_only=True)
             self.assertEqual(result['new_local_individual_files'],1)
             self.assertEqual(client.calls,[source,alternate,image])
             self.assertEqual(len(list((root/'stage/originals').rglob('*.jpg'))),1)
@@ -984,8 +1005,11 @@ class TargetedPrivateCollectionScopeTests(unittest.TestCase):
         self.assertIsNotNone(pair,'Actual 2-model acquisition list not found')
         for model,part in zip(('mimmi','yui'),pair.groups()):
             ids=re.findall(r'--album-id\s+([a-z0-9-]+)',part)
-            self.assertEqual(len(ids),12,(model,ids))
-            self.assertEqual(len(set(ids)),12,(model,'repeated ID'))
+            # Original 12 must remain, but adding independently registered
+            # sparse albums is intended; a fixed cap prevented replenishment.
+            self.assertGreaterEqual(len(ids),12,(model,ids))
+            self.assertLessEqual(len(ids),60,(model,'Source count must match real collector bound'))
+            self.assertEqual(len(set(ids)),len(ids),(model,'repeated ID'))
             registered=json.loads(
                 (root/'apps'/(model+'-gallery')/'public-work-pages.json').read_text())['albums']
             by_id={a['id']:a for a in registered}

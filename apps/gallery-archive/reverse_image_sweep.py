@@ -76,8 +76,10 @@ def search_one(seed,client=None):
     return {**seed,"search_status":stages,"candidate_pages":approved[:90],
             "off_model_rejected":rejected,"originals_stored":0,"visible_gallery_added":0}
 
-def sweep(root,limit,offset,workers=2,client_factory=None):
-    inventory=seeds(root)
+def sweep(root,limit,offset,workers=2,client_factory=None,model=None,all_cuts=False):
+    inventory=seeds(root,all_cuts=all_cuts)
+    if model is not None:
+        inventory=[entry for entry in inventory if entry['model']==model]
     if not inventory:raise ValueError("No stored seed photographs")
     if limit<1 or limit>48 or offset<0 or workers<1 or workers>3:
         raise ValueError("Bounded public image search budget")
@@ -113,10 +115,12 @@ def main():
     p.add_argument("--seeds",type=int,default=36)
     p.add_argument("--offset",type=int,default=0)
     p.add_argument("--workers",type=int,default=2)
+    p.add_argument("--model",choices=["mimmi","yui"])
+    p.add_argument("--all-cuts",action="store_true")
     p.add_argument("--out",type=Path,required=True)
     args=p.parse_args()
     from reverse_seed_priority import ROOT
-    result=sweep(ROOT,args.seeds,args.offset,args.workers)
+    result=sweep(ROOT,args.seeds,args.offset,args.workers,model=args.model,all_cuts=args.all_cuts)
     args.out.parent.mkdir(parents=True,exist_ok=True)
     args.out.write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n")
     print("IMAGE_FIRST_PRIORITY_SWEEP",json.dumps({
