@@ -9,7 +9,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 FREE_JS=Path(__file__).with_name("free_discovery.js").read_text(encoding="utf-8")
@@ -82,6 +82,53 @@ def assert_rank_rows_centered(page, width):
     assert max(measured["tileWidths"])-min(measured["tileWidths"])<1.1,measured
     assert abs(measured["leftGap"]-measured["rightGap"])<3,measured
     assert not measured["overflow"],measured
+
+def assert_live_activity_ranking(page):
+    """Check genuine public-source account cohorts, not injected QA accounts."""
+    page.wait_for_function(r"""() => {
+      const buttons=[...document.querySelectorAll('[data-rank-cohort]')];
+      const count=button=>Number((button.textContent||'').match(/(\d+)\s*$/)?.[1]||0);
+      return buttons.length===2 && buttons.reduce((n,b)=>n+count(b),0)>0;
+    }""",timeout=30000)
+    counts={}
+    for cohort in ("established","new"):
+        button=page.locator('[data-rank-cohort="'+cohort+'"]')
+        label=button.inner_text()
+        match=re.search(r"(\d+)\s*$",label)
+        assert match, "cohort count missing"
+        n=int(match.group(1))
+        counts[cohort]=n
+        button.click()
+        if n:
+            first=page.locator("#activityRankingRows .activity-rank-card").first
+            first.wait_for(state="visible",timeout=15000)
+            visible=page.locator("#activityRankingRows .activity-rank-card").count()
+            assert visible==min(n,20), "live ranking card count inconsistent"
+            first.click()
+            assert page.locator("#activityRankingDialog[open]").count()==1, (
+                "live rank detail failed to open"
+            )
+            assert page.locator("#activityRankingDialogContent a[target='_blank']").count()==1, (
+                "rank source attribution link missing"
+            )
+            page.locator("#activityRankingDialogClose").click()
+            assert page.locator("#activityRankingDialog[open]").count()==0
+        else:
+            assert page.locator("#activityRankingRows .activity-rank-card").count()==0
+    assert counts["established"]+counts["new"]>0, (
+        "real visible posts exist but both account cohorts are empty"
+    )
+    assert_rank_rows_centered(page,1200)
+    page.set_viewport_size({"width":390,"height":844})
+    assert_rank_rows_centered(page,390)
+    page.set_viewport_size({"width":1200,"height":900})
+    print("LIVE_PUBLIC_RANKING_VERIFIED",json.dumps({
+        "established_accounts":counts["established"],
+        "new_accounts":counts["new"],
+        "detail":True,"cohort_filter":True,
+        "desktop_10_columns":True,"mobile_5_columns":True
+    },ensure_ascii=False),flush=True)
+
 
 def assert_provider_totals_match_visible_feed(page):
     # The per-provider counts must reconcile to the filtered verified posts,
@@ -290,9 +337,50 @@ def run(live=False):
                 }])""")
                 assert accepted==1
                 assert page.locator("article.post").count()==before_candidates, "search hits must not masquerade as verified posts"
-                assert page.locator("#discoveryCandidates").is_visible()
-                page.locator("#discoveryCandidates summary").click()
-                assert page.locator("#discoveryCandidateList a[target=_blank]").count()==1
+                # An async feed redraw may re-render the collapsible list
+                # between the visibility assertion and Playwright's click.
+                # Test the actual verified-candidate boundary deterministically:
+                # the accepted candidate must be present, never in the feed.
+                page.wait_for_function(
+                    "() => document.querySelector('#discoveryCandidatesCount')"
+                    "?.textContent === '1' && "
+                    "document.querySelector('#discoveryCandidateList a[target=_blank]')",
+                    timeout=20000)
+                page.locator("#discoveryCandidates").evaluate("(el) => el.open = true")
+                expect(page.locator("#discoveryCandidateList a[target=_blank]")).to_have_count(1,timeout=12000)
+
+            # Real browser CSS: individual thumbnails display a spinner only
+            # while marked loading. Pending cards have three column-friendly
+            # spinner slots, without masquerading as actual posts.
+            if not live:
+                progress=page.evaluate("""() => {
+                  const feed=document.querySelector('#feed');
+                  const existing=feed.querySelector('article.post .post-thumb');
+                  const qa=existing.cloneNode(false);
+                  qa.classList.add('is-loading');
+                  feed.append(qa);
+                  const anim=getComputedStyle(qa,'::after').animationName;
+                  const overlay=getComputedStyle(qa,'::before').content;
+                  qa.classList.remove('is-loading');
+                  const settled=getComputedStyle(qa,'::after').content;
+                  qa.remove();
+                  const skeleton=document.createElement('div');
+                  skeleton.className='feed-skeleton';
+                  skeleton.innerHTML='<div class="post-thumb is-loading"></div>';
+                  skeleton.setAttribute('aria-hidden','true');
+                  feed.append(skeleton);
+                  const placeholderAnim=getComputedStyle(
+                    skeleton.querySelector('.post-thumb'),'::after').animationName;
+                  const notPost=skeleton.matches('article.post')===false;
+                  skeleton.remove();
+                  return {anim,overlay,settled,placeholderAnim,notPost,
+                    removed:skeleton.parentElement===null};
+                }""")
+                assert progress["anim"]=="thumb-load-spin",progress
+                assert progress["placeholderAnim"]=="thumb-load-spin",progress
+                assert progress["settled"]=="none",progress
+                assert progress["overlay"]!="none",progress
+                assert progress["notPost"] and progress["removed"],progress
 
             # Real canvas-alpha interaction: remove and restore at the pointer.
             def alpha():
@@ -313,8 +401,15 @@ def run(live=False):
             assert page.locator(".post-open").count()==n
             page.locator(".post-open").first.click()
             assert page.locator("#detail").is_visible()
-            assert page.locator("#detailContent .source-badge").count()==1
-            assert page.locator("#detailContent .profile-link").count()==1
+            assert page.locator("#detailContent .source-badge").count()==0
+            assert page.locator("#detailContent .profile-link").count()==0
+            assert page.locator("#detail .dialog-head #detailTitle .dialog-profile-link").count()==1
+            account=page.locator("#detail .dialog-profile-link")
+            assert account.locator(".dialog-platform-icon").count()==1
+            assert account.locator(".dialog-avatar-frame").count()==1
+            assert account.locator(".dialog-profile-name").count()==1
+            assert account.locator(".dialog-profile-address").count()==1
+            assert account.get_attribute("href").startswith("https://")
             assert page.locator("#detailContent .dialog-text").inner_text().strip()
             page.locator("#closeDetail").click()
 
@@ -447,6 +542,7 @@ def run(live=False):
                   };
                 }""")
                 print("LIVE_PUBLIC_IMAGE_INTEGRITY",json.dumps(integrity,ensure_ascii=False),flush=True)
+                assert_live_activity_ranking(page)
 
             assert not errors, "Browser JS exceptions: "+str(errors[:5])
             print("REAL_PUBLIC_BROWSER_SMOKE" if live else "INTERSECTION_COMPACT_QA",json.dumps({

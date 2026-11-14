@@ -839,6 +839,86 @@ main{padding-top:10px}
 .feed-source-notice[hidden],.feed-retry button[hidden]{display:none}
 .feed-retry{display:flex;justify-content:center;margin:6px 0 10px}
 .feed-retry button{background:#fff7db;color:#172349;border:1px solid #aa6623;min-height:35px;padding:6px 13px;font-size:12px}
+
+/* Incremental verified public posts: visible spinner for every unresolved
+   thumbnail and each pending feed slot. Text-only posts never spin. */
+.post-thumb.is-loading::before{content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(120deg,#e7eaf1e6,#f7f5e5d9,#e1e7f1e6);
+  background-size:240% 100%;animation:thumb-load-shimmer 1.65s linear infinite}
+.post-thumb.is-loading::after{content:"";position:absolute;z-index:2;top:50%;left:50%;
+  width:26px;height:26px;margin:-16px 0 0 -16px;border-radius:50%;
+  border:3px solid #aab5d0;border-top-color:#283d8b;
+  animation:thumb-load-spin .72s linear infinite}
+.post-thumb.is-loading img.post-media-img{visibility:hidden}
+@keyframes thumb-load-spin{to{transform:rotate(360deg)}}
+@keyframes thumb-load-shimmer{to{background-position:-240% 0}}
+.feed-skeleton{min-width:0;overflow:hidden;background:#fff;border:1px solid #d9dded;
+  border-radius:10px;pointer-events:none}
+.feed-skeleton .post-thumb{aspect-ratio:1.23/1;background:#e5eaf0}
+.feed-skeleton .skeleton-lines{padding:10px;display:grid;gap:7px}
+.feed-skeleton .skeleton-lines span{display:block;height:8px;border-radius:3px;
+  background:linear-gradient(90deg,#e3e6ed,#f5f4ed,#e3e6ed);background-size:220% 100%;
+  animation:thumb-load-shimmer 1.7s linear infinite}
+.feed-skeleton .skeleton-lines span:last-child{width:65%}
+@media(max-width:720px){.feed-skeleton .post-thumb{aspect-ratio:1/1.05}
+  .feed-skeleton .skeleton-lines{padding:6px;gap:6px}
+  .post-thumb.is-loading::after{width:21px;height:21px;margin:-13px 0 0 -13px}}
+@media(prefers-reduced-motion:reduce){.post-thumb.is-loading::after,
+ .post-thumb.is-loading::before,.feed-skeleton .skeleton-lines span{animation-duration:3s}}
+/* The real social account replaces the generic title and duplicate body badge. */
+#detail .dialog-head{gap:11px}
+#detail .dialog-head #detailTitle{display:flex;flex:1 1 auto;min-width:0;
+  white-space:normal;overflow:hidden;font-size:inherit;letter-spacing:normal}
+#detail .dialog-profile-link{display:flex;align-items:center;gap:7px;min-width:0;
+  max-width:100%;flex:1 1 auto;text-decoration:none;color:inherit}
+#detail a.dialog-profile-link:hover .dialog-profile-name{text-decoration:underline}
+#detail a.dialog-profile-link:focus-visible{outline:3px solid #ffdf08;outline-offset:2px}
+#detail .dialog-platform-icon{flex:0 0 19px;width:19px;height:19px;object-fit:contain}
+#detail .dialog-platform-fallback{flex:0 0 19px;width:19px;height:19px;
+  display:grid;place-items:center;font-size:12px;color:#fff;border:1px solid #8893c0}
+#detail .dialog-avatar-frame{position:relative;flex:0 0 39px;width:39px;height:39px;
+  display:grid;place-items:center;box-sizing:border-box;overflow:hidden;
+  border:2px solid #5ea8f7;background:#182d63;border-radius:50%;
+  color:#fff;font-size:15px;font-weight:900}
+#detail .dialog-avatar-frame img{position:absolute;inset:1px;width:calc(100% - 2px);
+  height:calc(100% - 2px);object-fit:cover;border-radius:inherit;filter:none}
+#detail[data-platform="mastodon"] .dialog-avatar-frame{border-color:#8c7dff}
+#detail[data-platform="instagram"] .dialog-avatar-frame{border-color:#ed6a65;
+  box-shadow:0 0 0 1px #f5b947}
+#detail[data-platform="threads"] .dialog-avatar-frame,
+#detail[data-platform="x"] .dialog-avatar-frame{border-color:#a3adc5}
+#detail[data-platform="misskey"] .dialog-avatar-frame{border-color:#75cda1;border-radius:12px}
+#detail[data-platform="reddit"] .dialog-avatar-frame{border-color:#ed6a39}
+#detail[data-platform="lemmy"] .dialog-avatar-frame{border-color:#53b4c4}
+#detail .dialog-profile-meta{display:grid;min-width:0;flex:1 1 auto;gap:3px;text-align:left}
+#detail .dialog-profile-name{color:#fff;font-size:14px;font-weight:850;line-height:1.12;
+  text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+#detail .dialog-profile-address{display:block;min-width:0;overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis;color:#acb9d7;
+  font-size:10px;font-weight:450;line-height:1.2}
+#detail .dialog-tools{flex:0 0 auto;gap:5px}
+#detail #closeDetail{margin-left:13px}
+@media(max-width:720px){
+ #detail .dialog-head{gap:5px;padding:8px 8px}
+ #detail .dialog-head #detailTitle{font-size:inherit;flex:1 1 auto}
+ #detail .dialog-profile-link{gap:4px}
+ #detail .dialog-platform-icon,#detail .dialog-platform-fallback{width:15px;height:15px;flex-basis:15px}
+ #detail .dialog-avatar-frame{width:31px;height:31px;flex-basis:31px;font-size:12px}
+ #detail .dialog-profile-name{font-size:11px}
+ #detail .dialog-profile-address{font-size:9px}
+ #detail .dialog-tools{gap:3px}
+ #detail #closeDetail{margin-left:9px}
+}
+@media(max-width:365px){
+ #detail .dialog-head #detailTitle{font-size:inherit}
+ #detail .dialog-head #detailTitle::after{content:none}
+ #detail .dialog-platform-icon,#detail .dialog-platform-fallback{width:13px;height:13px;flex-basis:13px}
+ #detail .dialog-avatar-frame{width:27px;height:27px;flex-basis:27px}
+ #detail .dialog-profile-name{font-size:10px}
+ #detail .dialog-profile-address{font-size:8px}
+ #detail .dialog-tools a,#detail .dialog-tools button{font-size:10px;padding:7px 5px}
+ #detail #closeDetail{margin-left:9px}
+}
 </style>
 </head>
 <body>
@@ -1133,7 +1213,7 @@ main{padding-top:10px}
 <div class="date-actions"><div class="presets" id="presets"><button type="button" data-days="7">7일</button><button type="button" data-days="30" class="active">30일</button><button type="button" data-days="90">90일</button></div><button type="button" id="applyDate" class="apply">기간 조회</button></div>
 <span id="dateSummary" class="sr-only">최근 30일</span></div>
 </dialog>
-<dialog id="detail" aria-labelledby="detailTitle"><div class="dialog-head"><b id="detailTitle"><span class="dialog-kicker" aria-hidden="true">POST</span>게시글 상세</b><div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div><button id="closeDetail" type="button" aria-label="게시글 닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
+<dialog id="detail" aria-labelledby="detailTitle"><div class="dialog-head"><b id="detailTitle"><span class="dialog-profile-name">작성자 정보</span></b><div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div><button id="closeDetail" type="button" aria-label="게시글 닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
 <script>
 (function(){
 "use strict";
@@ -1146,6 +1226,7 @@ const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS
 const privateHost=location.hostname!=="koith.github.io";
 const cloudMode=privateHost&&new URLSearchParams(location.search).get("source")==="archive";
 let bskySearchFailureCode="",liveRecoveryState="",fallbackStats=null,verifiedFeedDrawTimer=null;
+let tileCache=new WeakMap(),discoveryLoading=false;
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
@@ -1716,6 +1797,7 @@ function tile(p){
     thumb.append(box);
   }
   function showFallback(){
+    thumb.classList.remove("is-loading");
     thumb.querySelectorAll("img.post-media-img,.thumb-placeholder,.thumb-kind-label").forEach(n=>n.remove());
     article.dataset.noMedia="true";
     // Never substitute an account photo, unrelated photo, or a fabricated
@@ -1734,9 +1816,16 @@ function tile(p){
       img.alt="SNS 원본 게시글 첨부 미리보기";
       img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";
       let next=0;
-      img.addEventListener("error",()=>{next++;if(next<candidates.length)img.src=candidates[next];else showFallback()});
+      thumb.classList.add("is-loading");
+      img.addEventListener("load",()=>thumb.classList.remove("is-loading"));
+      img.addEventListener("error",()=>{
+        next++;
+        if(next<candidates.length)img.src=candidates[next];
+        else showFallback();
+      });
       img.src=candidates[0];
       thumb.append(img);
+      if(img.complete&&img.naturalWidth>0)thumb.classList.remove("is-loading");
     }else showFallback();
   }else showFallback();
   if(first?.type==="video"&&!blocked)thumb.append(el("span","video-mark","▶ 영상"));
@@ -1785,7 +1874,42 @@ function sourceLink(p,text){
 function openDetail(p){
   let node=$("detailContent");node.replaceChildren();
   const actions=$("detailActionBar");actions.replaceChildren();
-  let sourceRow=el("div","dialog-source-row");sourceRow.append(sourceBadge(p),profileLink(p));node.append(sourceRow);
+  const dialog=$("detail");
+  dialog.dataset.platform=String(p.platform||"cloud");
+  const title=$("detailTitle");title.replaceChildren();
+  const meta=SERVICES[p.platform]||SERVICES.cloud;
+  const destination=validUrl(p.profileUrl);
+  const account=el(destination?"a":"span","dialog-profile-link");
+  if(destination){
+    account.href=destination;account.target="_blank";account.rel="noopener noreferrer";
+    account.title="SNS 원본 계정 열기";
+    account.setAttribute("aria-label",meta.name+" 계정 "+String(p.author||"작성자")+" 프로필 열기");
+  }
+  const icon=el("img","dialog-platform-icon");
+  icon.alt=meta.name;icon.src=meta.favicon;
+  icon.addEventListener("error",()=>{
+    icon.replaceWith(el("span","dialog-platform-fallback",meta.name.slice(0,1)));
+  },{once:true});
+  const avatar=el("span","dialog-avatar-frame",String(p.author||"?").trim().slice(0,1)||"?");
+  const avatarSrc=validUrl(p.avatarUrl);
+  if(avatarSrc){
+    const pic=el("img");
+    pic.src=avatarSrc;pic.alt="";pic.loading="eager";pic.referrerPolicy="no-referrer";
+    pic.addEventListener("error",()=>pic.remove(),{once:true});
+    avatar.append(pic);
+  }
+  let accountAddress="계정 주소 미확인";
+  if(destination){
+    try{
+      const url=new URL(destination);
+      accountAddress=url.host+(url.pathname.endsWith("/")?url.pathname.slice(0,-1):url.pathname);
+    }catch{accountAddress=destination}
+  }
+  const profileText=el("span","dialog-profile-meta");
+  profileText.append(el("span","dialog-profile-name",p.author||"작성자"),
+    el("span","dialog-profile-address",accountAddress));
+  account.append(icon,avatar,profileText);
+  title.append(account);
   node.append(el("div","dialog-date",p.discoveryCandidate?"게시일 미확인":niceDate(p.posted)));
   if(p.discoveryCandidate)node.append(el("div","dialog-index-note",
     "검색엔진에서 발견된 공개 게시글 주소입니다. 원문 내용·게시 날짜·현재 공개 상태를 확인하지 못했으므로 선택한 기간에 포함된다고 보장하지 않습니다. 내용은 검색 미리보기입니다."));
@@ -1878,7 +2002,26 @@ function draw(){
   let rows=feedRows(),list=$("feed");list.replaceChildren();
   drawDiscoveredLinks();
   let limit=visibleLimit,frag=document.createDocumentFragment();
-  for(let p of rows.slice(0,limit))frag.append(tile(p));
+  for(const p of rows.slice(0,limit)){
+    // Growing feed counts must not force loaded thumbnails to reload.
+    let card=tileCache.get(p);
+    if(!card){card=tile(p);tileCache.set(p,card)}
+    frag.append(card);
+  }
+  const loadingPosts=!cloudMode&&(busy||
+    (fallbackStats&&["searching","verifying"].includes(fallbackStats.state))||
+    liveRecoveryState==="receiving"||discoveryLoading);
+  list.setAttribute("aria-busy",loadingPosts?"true":"false");
+  if(loadingPosts){
+    for(let i=0;i<3;i++){
+      const placeholder=el("div","feed-skeleton");
+      placeholder.setAttribute("aria-hidden","true");
+      const thumb=el("div","post-thumb is-loading"),lines=el("div","skeleton-lines");
+      lines.append(el("span"),el("span"));
+      placeholder.append(thumb,lines);
+      frag.append(placeholder);
+    }
+  }
   if(!rows.length){
     let label=busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다.";
     if(bskySearchFailureCode&&!cloudMode)
@@ -1972,6 +2115,7 @@ function resetData(){
   if(verifiedFeedDrawTimer!==null){clearTimeout(verifiedFeedDrawTimer);verifiedFeedDrawTimer=null}
   window.INTERSECTION_stopLiveFeedRecovery?.();
   window.INTERSECTION_stopSearchFallback?.();
+  tileCache=new WeakMap();
   posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();
   visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw();
 }
@@ -1983,6 +2127,10 @@ function scheduleVerifiedDraw(){
     draw();
   },180);
 }
+window.INTERSECTION_publicDiscoveryLoading=running=>{
+  discoveryLoading=Boolean(running);
+  if(!cloudMode)scheduleVerifiedDraw();
+};
 window.INTERSECTION_publicFeedRange=()=>({fromMs,toMs,run:runID});
 window.INTERSECTION_searchFallbackStatus=value=>{
   fallbackStats=value&&typeof value==="object"?value:null;
