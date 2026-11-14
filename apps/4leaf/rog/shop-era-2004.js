@@ -12,8 +12,8 @@
  const rare=document.createElement('button');
  rare.type='button';rare.className='group-tab';
  rare.dataset.group='rare';rare.textContent='RARE';
- rare.title='원본 2004 화면에 있는 RARE 분류. 현재 원본 카드 분류표 미복구';
- rare.setAttribute('aria-label','RARE (원본 카드 분류 데이터 미복구)');
+ rare.title='원본 2004 화면의 RARE 탭 · 역사 자료상 출시 RARE 0종 · EXE 분류표 미복구';
+ rare.setAttribute('aria-label','RARE 원본 탭 · 발매 기록 0종 (원본 EXE 분류표 미복구)');
  tabs.append(rare);
  const toolbar=document.createElement('div');
  toolbar.id='shop-era-toggle';toolbar.className='shop-era-toggle';
@@ -52,7 +52,7 @@
    ?' · 1/15 원본 변경가 6종만 확정, 그 외 1/5 기록 유지(1/15 미검증)'
    :' · 1/5 당시 신문 가격 97종(원본 EXE 가격표 아님)';
   provenance.textContent=(era==='2004'
-   ?'2004 캡처 기반 4×2 / RARE 명단 미확보 · 구성 비교용'
+   ?'2004 캡처 기반 4×2 / RARE 명단 미확보(역사상 발매 0종) · 구성 비교용'
    :'2002 PAK 원본 3×3 / 원본 배경·버튼')+note;
  };
  window.addEventListener('leaf-shop-market-change',()=>{
