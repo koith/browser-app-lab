@@ -33,6 +33,17 @@ TILE_CODE=INDEX[TILE_START:TILE_END]
 DETAIL_START=INDEX.index("function confirmPostAccountAction(")
 DETAIL_END=INDEX.index("function closeDetail(){",DETAIL_START)
 POST_DETAIL=INDEX[DETAIL_START:DETAIL_END]
+BLOCK_START=INDEX.index("/* A manually maintained personal exclusion list")
+BLOCK_END=INDEX.index("function matchesText(",BLOCK_START)
+BLOCK_CODE=INDEX[BLOCK_START:BLOCK_END]
+FILTER_END=INDEX.index("/* The main feed",BLOCK_END)
+FILTER_CODE=INDEX[BLOCK_END:FILTER_END]
+BLOCK_HANDLER_START=INDEX.index('$("detailBlockAccount").addEventListener("click"')
+BLOCK_HANDLER_END=INDEX.index('$("openDate").addEventListener("click"',BLOCK_HANDLER_START)
+BLOCK_HANDLERS=INDEX[BLOCK_HANDLER_START:BLOCK_HANDLER_END]
+assert "isManualBlocked(p)" in FILTER_CODE
+assert "localStorage.setItem(MANUAL_BLOCK_STORAGE_KEY" in BLOCK_CODE
+assert '#detail .dialog-foot' in STYLE
 AMBIENT_START=INDEX.index("/* Interactive halftone:")
 AMBIENT_END=INDEX.index("</script>",AMBIENT_START)
 AMBIENT_SCRIPT=INDEX[AMBIENT_START:AMBIENT_END]
@@ -74,7 +85,11 @@ const profileLink=p=>{
 const sourceLink=(p,label)=>{
   const a=el("a","",label||"원문 보기");a.href=p.url;return a;
 };
+let cloudMode=false,detailSelectedPost=null,needle="";
+let posts=[],indexedCandidates=[];
 const suspectedAd=()=>false,hideMedia=()=>false;
+function draw(){window.__visibleFeed=filtered().map(p=>p.id)}
+
 const appendMedia=()=>{};
 window.__trackedPosts=[];
 window.INTERSECTION_watchPublicAccount=selection=>{
@@ -82,8 +97,11 @@ window.INTERSECTION_watchPublicAccount=selection=>{
   return true;
 };
 """
+    harness+=BLOCK_CODE
+    harness+=FILTER_CODE
     harness+=TILE_CODE
     harness+=POST_DETAIL
+    harness+=BLOCK_HANDLERS
     harness+="""
 window.testFixtureThumbnailLifecycle=()=>{
   const row={id:"qa-image",platform:"bluesky",author:"QA",text:"뒷계 test only",
@@ -110,11 +128,28 @@ window.testFixtureThumbnailLifecycle=()=>{
     !failure.querySelector(".post-thumb").classList.contains("is-loading");
   return {before,visible,after,noSpin,failed};
 };
+window.setupManualBlockFeed=()=>{
+  posts=[
+    {id:"a-1",platform:"bluesky",profileUrl:"https://bsky.app/profile/public-test.bsky.social",
+     authorDid:"did:plc:fixed123",text:"뒷계 synthetic one",indexed:"2026-11-14T08:00:00Z"},
+    {id:"a-2",platform:"bluesky",profileUrl:"https://bsky.app/profile/public-test.bsky.social",
+     authorDid:"did:plc:fixed123",text:"뒷계 synthetic two",indexed:"2026-11-14T07:00:00Z"},
+    {id:"a-did",platform:"bluesky",profileUrl:"https://bsky.app/profile/renamed.bsky.social",
+     authorDid:"did:plc:fixed123",text:"뒷계 synthetic renamed",indexed:"2026-11-14T06:00:00Z"},
+    {id:"b-1",platform:"mastodon",profileUrl:"https://mastodon.social/@example",
+     text:"뒷계 synthetic other",indexed:"2026-11-14T05:00:00Z"},
+    {id:"c-1",platform:"mastodon",profileUrl:"https://bsky.app/profile/public-test.bsky.social",
+     text:"뒷계 synthetic same-url-other-platform",indexed:"2026-11-14T04:00:00Z"}
+  ];
+  draw();
+  return window.__visibleFeed;
+};
 window.showFixturePost=(platform="bluesky",candidate=false)=>{
   openDetail({platform,profileUrl:platform==="mastodon"?
       "https://mastodon.social/@example":"https://bsky.app/profile/public-test.bsky.social",
     author:"Synthetic public author",avatarUrl:"https://example.com/fixture-avatar.png",
     url:"https://bsky.app/profile/public-test.bsky.social/post/123",
+    authorDid:platform==="bluesky"?"did:plc:fixed123":"",
     text:"Synthetic public post",posted:"2026-11-14T00:00:00Z",
     media:[],terms:new Set(),discoveryCandidate:candidate,restricted:false});
 };
@@ -127,7 +162,7 @@ window.showFixturePost=(platform="bluesky",candidate=false)=>{
 <button type="button" id="viewPosts" class="active" role="tab" aria-selected="true">게시글</button>
 <button type="button" id="viewAccounts" role="tab" aria-selected="false">계정 분석</button>
 <button type="button" id="viewArchives" role="tab" aria-selected="false">백업 보관함</button>
-</nav><section id="postsView"><div style="height:2500px">POSTS</div></section>
+</nav><button id="manualBlockOpen" type="button">차단 계정 <span id="manualBlockCount">0</span> · 관리</button><section id="postsView"><div style="height:2500px">POSTS</div></section>
 <section id="accountsView" class="hidden"><div id="accountBackupSection">
  <div id="targetArchivePanel">
   <form id="targetArchiveForm">
@@ -146,6 +181,13 @@ window.showFixturePost=(platform="bluesky",candidate=false)=>{
  <div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div>
  <button type="button" id="closeDetail" aria-label="게시글 닫기">×</button></div>
  <div class="dialog-content" id="detailContent"></div>
+ <div class="dialog-foot"><button id="detailBlockAccount" type="button">차단하기</button>
+ <span id="detailBlockStatus" role="status" aria-live="polite"></span></div>
+</dialog><dialog id="manualBlockDialog" aria-labelledby="manualBlockTitle">
+ <div class="manual-block-head"><h2 id="manualBlockTitle">차단 계정 관리</h2>
+ <button id="manualBlockClose" type="button">×</button></div>
+ <div class="manual-block-body"><p>브라우저 전용</p>
+ <ul id="manualBlockList"></ul><p id="manualBlockStatus"></p></div>
 </dialog><dialog id="postActionConfirm" aria-labelledby="postActionConfirmTitle" aria-describedby="postActionConfirmMessage">
  <h3 id="postActionConfirmTitle">계정 작업 확인</h3>
  <p id="postActionConfirmMessage">선택한 공개 계정에 작업을 실행할까요?</p>
@@ -234,6 +276,21 @@ def exercise(browser_type,name,width):
             assert profile.locator(".dialog-profile-name").inner_text()=="Synthetic public author"
             assert profile.locator(".dialog-profile-address").inner_text()=="bsky.app/profile/public-test.bsky.social"
             assert modal.get_attribute("data-platform")=="bluesky"
+            # Real footer positioning and both actions must remain in-place.
+            block=modal.get_by_role("button",name="이 계정 게시물 차단하기")
+            assert block.is_visible(),(host,name)
+            bounds=page.evaluate("""() => {
+              const modal=document.querySelector('#detail').getBoundingClientRect();
+              const foot=document.querySelector('#detail .dialog-foot').getBoundingClientRect();
+              const button=document.querySelector('#detailBlockAccount').getBoundingClientRect();
+              return {modalLeft:modal.left,modalBottom:modal.bottom,
+                footLeft:foot.left,footBottom:foot.bottom,
+                buttonLeft:button.left,buttonBottom:button.bottom,
+                buttonWidth:button.width};
+            }""")
+            assert bounds["buttonLeft"]<=bounds["modalLeft"]+27,bounds
+            assert bounds["buttonBottom"]>=bounds["modalBottom"]-55,bounds
+            assert bounds["buttonWidth"]<120,bounds
             # Source icon, service-style avatar and account name share the
             # exact same clickable profile link; no extra modal navigation.
             page.evaluate("""() => {
@@ -366,6 +423,49 @@ def exercise(browser_type,name,width):
                 page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('공개 미러')",timeout=7000)
                 assert len(posts)==0,"Pages must never cross-origin POST"
             assert page.url==before,"post dialog backup must not change page or tab"
+            assert page.evaluate("window.setupManualBlockFeed()")==[
+                "a-1","a-2","a-did","b-1","c-1"]
+            modal.locator("#detailBlockAccount").click()
+            assert "차단" in confirm.locator("h3").inner_text()
+            assert page.evaluate("window.__visibleFeed")==[
+                "a-1","a-2","a-did","b-1","c-1"],"Must not hide before confirmation"
+            confirm.get_by_role("button",name="취소").click()
+            assert page.evaluate("window.__visibleFeed")==[
+                "a-1","a-2","a-did","b-1","c-1"],"Cancel must not mutate feed"
+            modal.locator("#detailBlockAccount").click()
+            confirm.get_by_role("button",name="확인").click()
+            assert page.evaluate("window.__visibleFeed")==["b-1","c-1"],("same author and DID must all disappear",host)
+            assert page.evaluate("posts.length")==5,"Blocking must NEVER delete originals"
+            assert page.evaluate("JSON.parse(localStorage.getItem(MANUAL_BLOCK_STORAGE_KEY)).length")==1
+            assert modal.get_attribute("open") is not None,"Blocking should not navigate/close detail"
+            assert modal.get_by_role("button",name="이 계정 차단 해제").is_visible()
+            # Closing/reopening this modal keeps the exclusion list and
+            # dedicated manager exposes a one-click reversible unblock.
+            page.evaluate("document.querySelector('#detail').close()")
+            page.locator("#manualBlockOpen").click()
+            assert page.locator("#manualBlockDialog").is_visible()
+            assert page.locator("#manualBlockList li").count()==1
+            page.locator("#manualBlockList button").click()
+            assert page.evaluate("window.__visibleFeed")==[
+                "a-1","a-2","a-did","b-1","c-1"]
+            assert page.evaluate("JSON.parse(localStorage.getItem(MANUAL_BLOCK_STORAGE_KEY)).length")==0
+            page.locator("#manualBlockClose").click()
+            # Run the blocking workflow a second time and confirm persistence
+            # across a full page reload on the same origin.
+            page.evaluate("window.showFixturePost('bluesky')")
+            modal.locator("#detailBlockAccount").click()
+            confirm.get_by_role("button",name="확인").click()
+            assert page.evaluate("window.__visibleFeed")==["b-1","c-1"]
+            page.reload(wait_until="domcontentloaded")
+            page.wait_for_function("typeof window.setupManualBlockFeed==='function'")
+            assert page.evaluate("window.setupManualBlockFeed()")==["b-1","c-1"]
+            assert page.locator("#manualBlockCount").inner_text()=="1"
+            page.evaluate("window.showFixturePost('bluesky')")
+            assert modal.get_by_role("button",name="이 계정 차단 해제").count()==1
+            # Personal presentation filter is never applied to private archive.
+            assert page.evaluate("(()=>{cloudMode=true;const ids=filtered().map(p=>p.id);cloudMode=false;return ids})()")==[
+                "a-1","a-2","a-did","b-1","c-1"]
+
             assert modal.get_attribute("open") is not None
             page.evaluate("document.querySelector('#detail').close()")
             page.evaluate("window.showFixturePost('misskey')")
