@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from PIL import Image
+from PIL import Image, ImageDraw
 from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue, verified_alternative_candidates, merge_owner_census_sources, _work_token_matched_in_heading, safe_page
 
 
@@ -16,6 +16,20 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_official_djawa_8640_5760_jpeg_not_rejected_as_too_many_pixels(self):
+        """The 49.8 MP publisher edition must be a collectable decoded photo."""
+        im=Image.new('RGB',(8640,5760),(195,170,140))
+        draw=ImageDraw.Draw(im)
+        for x in range(0,8640,96):
+            draw.rectangle((x,0,x+48,5760),fill=((x*13)%256,(x*7)%256,(x*11)%256))
+        raw=BytesIO()
+        im.save(raw,format='JPEG',quality=90)
+        information,preview,fmt=inspect(raw.getvalue())
+        self.assertEqual((information['width'],information['height']),(8640,5760))
+        self.assertEqual(fmt,'JPEG')
+        self.assertGreater(len(preview),100)
+        self.assertLess(information['bytes'],64_000_000)
+
     def test_photographer_original_source_is_scoped_to_exact_yui_post(self):
         from direct_photo_pipeline import (
             YUI_PHOTOGRAPHER_ORIGINAL_X, YUI_PHOTOGRAPHER_PUBLIC_VIEW,
@@ -987,6 +1001,7 @@ class TargetedPrivateCollectionScopeTests(unittest.TestCase):
             # Original 12 must remain, but adding independently registered
             # sparse albums is intended; a fixed cap prevented replenishment.
             self.assertGreaterEqual(len(ids),12,(model,ids))
+            self.assertLessEqual(len(ids),60,(model,'Source count must match real collector bound'))
             self.assertEqual(len(set(ids)),len(ids),(model,'repeated ID'))
             registered=json.loads(
                 (root/'apps'/(model+'-gallery')/'public-work-pages.json').read_text())['albums']
