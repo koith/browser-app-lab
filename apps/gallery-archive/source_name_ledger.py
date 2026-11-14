@@ -81,6 +81,20 @@ def ingest_search_report(db, report):
                            observation.get("source",""),
                            observation["proof"],True)
             out[status]+=1
+    # An accepted new host is also searched for the OTHER tracked model.
+    for observation in report.get("cross_model_verified_site_pages",[]):
+        target_model=observation.get("model")
+        work=observation.get("work","")
+        if target_model not in db["model_names"] or not work.startswith(target_model+":"):
+            continue
+        if work not in db["works"]:
+            continue
+        if observation.get("proof")!="unique_named_work_page_model_and_edition":
+            continue
+        album=work.split(":",1)[1]
+        status=observe(db,target_model,album,observation.get("observed_name",""),
+                       observation.get("source",""),observation["proof"],True)
+        out[status]+=1
     return out
 
 
