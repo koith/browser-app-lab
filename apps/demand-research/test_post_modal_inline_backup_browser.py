@@ -7,6 +7,7 @@ No live SNS/TeraBox reads, no credentials or actual backup job is created.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
@@ -14,6 +15,13 @@ from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parent
 INDEX=(ROOT/"index.html").read_text(encoding="utf-8")
 BACKUP=(ROOT/"target_archive_client.js").read_text(encoding="utf-8")
+SW=(ROOT/"intersection-sw.js").read_text(encoding="utf-8")
+# Offline-first Render shell must ship the SAME script version as the page.
+# Otherwise the modal renders a new button but restores the old JS handler.
+CLIENT_SRC=re.search(r'<script src="(target_archive_client\.js\?[^"]+)"',INDEX)
+assert CLIENT_SRC is not None,"Public backup client script reference missing"
+assert '"/'+CLIENT_SRC.group(1)+'"' in SW,"Stale service-worker script URL"
+
 STYLE=INDEX.split("<style>",1)[1].split("</style>",1)[0]
 NAV_START=INDEX.index("/* Core navigation remains usable")
 NAV_END=INDEX.index("</script>",NAV_START)
