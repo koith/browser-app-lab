@@ -29,9 +29,19 @@ HTML="""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 </div>
  <p id="archiveHubStatus"></p>
  <div id="archiveHubActions" hidden><button id="archiveHubReload">새로고침</button>
+ <button id="archiveQueueOpen">백업 대기열 확인</button>
  <a id="archiveHubFullView"></a></div>
  <div id="archiveHubFrameBox" hidden><iframe id="archiveHubFrame"></iframe></div>
-</section></body></html>"""
+</section>
+<dialog id="archiveQueueDialog" aria-labelledby="archiveQueueTitle">
+ <h2 id="archiveQueueTitle">백업 요청 대기열</h2>
+ <button id="archiveQueueClose">닫기</button>
+ <p id="archiveQueueStatus"></p>
+ <ol id="archiveQueueList"></ol>
+ <button id="archiveQueueMore" hidden>더 보기</button>
+ <button id="archiveQueueRefresh">새로고침</button>
+</dialog>
+</body></html>"""
 
 
 def exercise(browser_type,label):
@@ -42,6 +52,7 @@ def exercise(browser_type,label):
             errors=[]
             requests=[]
             allowed={"value":private}
+            queue_denied={"value":False}
             page=browser.new_page(viewport={"width":390,"height":844})
             page.on("pageerror",lambda error:errors.append(str(error)))
             def route_it(route):
@@ -62,6 +73,30 @@ def exercise(browser_type,label):
                         '{"key":"mastodon-'+('b'*40)+'","platform":"mastodon",'
                         '"display_name":"마루","handle":"maru@example.test",'
                         '"profile_snapshot_verified":true}]}')
+                elif parsed.path=="/api/target-archive/queue":
+                    requests.append("queue")
+                    if queue_denied["value"]:
+                        route.fulfill(status=401,content_type="application/json",
+                                      body='{"detail":"Private link required"}')
+                        return
+                    from urllib.parse import parse_qs
+                    offset=int(parse_qs(parsed.query).get("offset",["0"])[0])
+                    rows=[{"job_id":1000000010+i,"platform":"bluesky",
+                           "account":"qa-%02d.bsky.social"%i,
+                           "created_at":1800000000+i,"accepted_at":None,
+                           "workflow_run_id":None,"phase":1,"phase_total":4,
+                           "state":"WAITING","remote_verified":False,
+                           "status":"접수됨 · 작업 실행 순서 대기"} for i in range(22)]
+                    payload={"known":True,"mode":"volatile_sqlite",
+                             "total":22,"offset":offset,"limit":20,
+                             "items":rows[offset:offset+20],"truncated":False}
+                    import json
+                    route.fulfill(status=200,content_type="application/json",
+                                  body=json.dumps(payload))
+                elif parsed.path.startswith("/api/target-archive/jobs/"):
+                    requests.append("signed-own-job")
+                    route.fulfill(status=200,content_type="application/json",
+                                  body='{"state":"REMOTE_VERIFIED","posts":3,"objects":4}')
                 elif parsed.path=="/api/archive-overview":
                     requests.append("overview")
                     route.fulfill(status=200,content_type="application/json",
@@ -113,6 +148,38 @@ def exercise(browser_type,label):
                 # unrelated auto-post catalog overview.
                 assert "overview" not in requests
                 assert page.locator("#archiveHubActions").is_visible()
+                page.locator("#archiveQueueOpen").click()
+                assert page.locator("#archiveQueueDialog").evaluate("(node) => node.open")
+                page.wait_for_function(
+                    "() => document.querySelectorAll('#archiveQueueList li').length===20",
+                    timeout=15000)
+                assert "qa-00.bsky.social" in page.locator("#archiveQueueList li").first.inner_text()
+                assert "단계 1/4" in page.locator("#archiveQueueList li").first.inner_text()
+                page.locator("#archiveQueueMore").click()
+                page.wait_for_function(
+                    "() => document.querySelectorAll('#archiveQueueList li').length===22",
+                    timeout=15000)
+                assert "qa-21.bsky.social" in page.locator("#archiveQueueList li").last.inner_text()
+                assert page.locator("#archiveQueueMore").is_hidden()
+                page.locator("#archiveQueueClose").click()
+                assert not page.locator("#archiveQueueDialog").evaluate("(node) => node.open")
+                # When the global ledger is private, only the requesting
+                # browser's own signed receipts may be shown.
+                queue_denied["value"]=True
+                page.evaluate("""() => {
+                  window.INTERSECTION_getOwnBackupRequests=()=>[{
+                    run_id:5551234,platform:'bluesky',account:'own-qa.bsky.social',
+                    receipt:'fixture-signed-owner-receipt',createdAt:1800000000000,order:0
+                  }];
+                }""")
+                page.locator("#archiveQueueOpen").click()
+                page.wait_for_function(
+                    "() => document.querySelector('#archiveQueueList li')?.textContent?.includes('own-qa.bsky.social')",
+                    timeout=15000)
+                assert "원격 파일·해시 검증 완료" in page.locator("#archiveQueueList li").first.inner_text()
+                assert "전체 서버 대기열은 아닙니다" in page.locator("#archiveQueueStatus").inner_text()
+                assert "signed-own-job" in requests
+                page.locator("#archiveQueueClose").click()
                 page.locator("#archiveModeAuto").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src")=="/auto-archive"
                 page.frame_locator("#archiveHubFrame").locator("#keyword-posts").wait_for(
@@ -156,6 +223,8 @@ def exercise(browser_type,label):
                 # Public Pages must show an in-product archive link to the
                 # dedicated Intersection web app, not a GitHub Actions page.
                 assert page.locator("#archiveHubActions").is_visible()
+                assert page.locator("#archiveQueueOpen").is_hidden()
+                assert "queue" not in requests
                 link=page.locator("#archiveHubFullView")
                 assert link.get_attribute("href")==(
                     "https://intersection-originals-free.onrender.com/"
