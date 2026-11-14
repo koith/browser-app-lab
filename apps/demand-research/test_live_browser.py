@@ -349,6 +349,39 @@ def run(live=False):
                 page.locator("#discoveryCandidates").evaluate("(el) => el.open = true")
                 expect(page.locator("#discoveryCandidateList a[target=_blank]")).to_have_count(1,timeout=12000)
 
+            # Real browser CSS: individual thumbnails display a spinner only
+            # while marked loading. Pending cards have three column-friendly
+            # spinner slots, without masquerading as actual posts.
+            if not live:
+                progress=page.evaluate("""() => {
+                  const feed=document.querySelector('#feed');
+                  const existing=feed.querySelector('article.post .post-thumb');
+                  const qa=existing.cloneNode(false);
+                  qa.classList.add('is-loading');
+                  feed.append(qa);
+                  const anim=getComputedStyle(qa,'::after').animationName;
+                  const overlay=getComputedStyle(qa,'::before').content;
+                  qa.classList.remove('is-loading');
+                  const settled=getComputedStyle(qa,'::after').content;
+                  qa.remove();
+                  const skeleton=document.createElement('div');
+                  skeleton.className='feed-skeleton';
+                  skeleton.innerHTML='<div class="post-thumb is-loading"></div>';
+                  skeleton.setAttribute('aria-hidden','true');
+                  feed.append(skeleton);
+                  const placeholderAnim=getComputedStyle(
+                    skeleton.querySelector('.post-thumb'),'::after').animationName;
+                  const notPost=skeleton.matches('article.post')===false;
+                  skeleton.remove();
+                  return {anim,overlay,settled,placeholderAnim,notPost,
+                    removed:skeleton.parentElement===null};
+                }""")
+                assert progress["anim"]=="thumb-load-spin",progress
+                assert progress["placeholderAnim"]=="thumb-load-spin",progress
+                assert progress["settled"]=="none",progress
+                assert progress["overlay"]!="none",progress
+                assert progress["notPost"] and progress["removed"],progress
+
             # Real canvas-alpha interaction: remove and restore at the pointer.
             def alpha():
                 return page.locator("#dotField").evaluate("""c=>{
@@ -368,8 +401,15 @@ def run(live=False):
             assert page.locator(".post-open").count()==n
             page.locator(".post-open").first.click()
             assert page.locator("#detail").is_visible()
-            assert page.locator("#detailContent .source-badge").count()==1
-            assert page.locator("#detailContent .profile-link").count()==1
+            assert page.locator("#detailContent .source-badge").count()==0
+            assert page.locator("#detailContent .profile-link").count()==0
+            assert page.locator("#detail .dialog-head #detailTitle .dialog-profile-link").count()==1
+            account=page.locator("#detail .dialog-profile-link")
+            assert account.locator(".dialog-platform-icon").count()==1
+            assert account.locator(".dialog-avatar-frame").count()==1
+            assert account.locator(".dialog-profile-name").count()==1
+            assert account.locator(".dialog-profile-address").count()==1
+            assert account.get_attribute("href").startswith("https://")
             assert page.locator("#detailContent .dialog-text").inner_text().strip()
             page.locator("#closeDetail").click()
 

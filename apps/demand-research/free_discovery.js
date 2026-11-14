@@ -167,6 +167,7 @@
   async function start(){
     if(started)return;
     started=true;
+    window.INTERSECTION_publicDiscoveryLoading?.(true);
     const tasks=Object.keys(NETWORKS).flatMap(network=>
       PROVIDERS.map(provider=>({network,provider})));
     const settled=await Promise.allSettled(tasks.map(t=>request(t.provider,t.network)));
@@ -200,6 +201,7 @@
       publish();
     }
     completed=true;
+    window.INTERSECTION_publicDiscoveryLoading?.(false);
     window.INTERSECTION_autoCoverageStatus={
       completed,candidates:records.size,
       datedOriginals:originals.size,
@@ -214,5 +216,8 @@
   });
   // Main feed initializes its date state in an earlier inline script.
   // Start immediately without asking the visitor to click a second control.
-  setTimeout(()=>start().catch(()=>{completed=true}),180);
+  setTimeout(()=>start().catch(()=>{
+    completed=true;
+    window.INTERSECTION_publicDiscoveryLoading?.(false);
+  }),180);
 })();
