@@ -303,6 +303,54 @@ function addQueueRow(item,ordinal){
     "단계 "+step+"/4 · "+String(item.status||"진행 상태 미확인").slice(0,200));
   row.append(head,phases,detail);queueList.append(row);
 }
+async function ownPendingQueue(offset){
+  const read=window.INTERSECTION_getOwnBackupRequests;
+  if(typeof read!=="function")return null;
+  const entries=read().filter(row=>row&&
+    Number.isSafeInteger(row.run_id)&&row.run_id>0&&
+    typeof row.receipt==="string"&&row.receipt.length<900&&
+    ["bluesky","mastodon"].includes(row.platform)&&typeof row.account==="string");
+  if(!entries.length)return null;
+  entries.sort((a,b)=>{
+    const first=Number(a.createdAt)||0,second=Number(b.createdAt)||0;
+    return first&&second?first-second:(a.order||0)-(b.order||0);
+  });
+  const selected=entries.slice(offset,offset+20);
+  const items=await Promise.all(selected.map(async row=>{
+    const item={job_id:row.run_id,platform:row.platform,account:row.account,
+      created_at:(Number(row.createdAt)||0)/1000,phase:1,phase_total:4,
+      state:"WAITING",status:"이 브라우저에서 접수한 작업 · 진행 확인 중"};
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),7500);
+    try{
+      const response=await fetch("/api/target-archive/jobs/"+
+        encodeURIComponent(String(row.run_id))+"?receipt="+encodeURIComponent(row.receipt),{
+          credentials:"same-origin",cache:"no-store",
+          headers:{Accept:"application/json"},signal:controller.signal});
+      if(!response.ok)throw Error("status HTTP "+response.status);
+      const result=await response.json(),state=String(result.state||"");
+      const stages={
+        QUEUED:[1,"접수 완료 · 실행 대기"],
+        RUNNING:[2,"수집·저장 작업 실행 중"],
+        VERIFYING_STORAGE:[3,"실행 완료 · 저장 원본 검증 중"],
+        RETRY_PENDING:[2,"실행 실패 · 재시도 대기"],
+        REMOTE_VERIFIED:[4,"원격 파일·해시 검증 완료"],
+        PARTIAL_BACKUP:[4,"일부 저장본 검증 완료 · 전체 수집 아님"],
+        FAILED:[2,"실행 실패 · 재접수 검토 필요"],
+        NEEDS_RETRY:[1,"기존 접수 기록 만료 · 재접수 필요"]
+      };
+      const stage=stages[state]||[1,"접수 영수증만 확인됨 · 저장 검증 미확인"];
+      item.phase=stage[0];item.state=state||"STATUS_UNAVAILABLE";
+      item.status=stage[1];
+    }catch{
+      item.state="STATUS_UNAVAILABLE";
+      item.status="영수증 보유 · 현재 서버 상태 조회 불가";
+    }finally{clearTimeout(timer)}
+    return item;
+  }));
+  return {known:true,mode:"local_receipts",items,total:entries.length,
+    offset,limit:20,truncated:true};
+}
 async function loadQueue(reset=true){
   if(!queueDialog||!queueStatus||!queueList||queueLoading)return;
   queueLoading=true;
@@ -315,9 +363,19 @@ async function loadQueue(reset=true){
     const response=await fetch("/api/target-archive/queue?"+
       new URLSearchParams({offset:String(offset),limit:"20"}),{
         credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
-    if(!response.ok)throw Error(response.status===401
-      ?"비공개 보관함에 로그인한 뒤 확인하세요.":"대기열 조회 실패 · HTTP "+response.status);
-    const data=await response.json();
+    let data;
+    if(response.ok){
+      data=await response.json();
+      if(!data?.known)data=await ownPendingQueue(offset)||data;
+    }else if([401,403,503].includes(response.status)){
+      // Public archive mode intentionally prohibits revealing every user's
+      // chosen accounts. Signed browser receipts still allow each visitor to
+      // view only their own unfinished requests, without a separate login.
+      data=await ownPendingQueue(offset);
+      if(!data)throw Error("비공개 전체 대기열은 관리자 세션에서만 볼 수 있습니다. 이 브라우저에 남은 접수 영수증도 없습니다.");
+    }else{
+      throw Error("대기열 조회 실패 · HTTP "+response.status);
+    }
     if(reset){queueOffset=0;queueList.replaceChildren();}
     if(!data?.known){
       queueStatus.textContent=String(data?.message||"현재 서버에서 요청 내역을 확인할 수 없습니다.");
@@ -329,7 +387,8 @@ async function loadQueue(reset=true){
     queueOffset=offset+rows.length;
     const total=Number.isFinite(data.total)?data.total:null;
     const warning=data.mode==="volatile_sqlite"
-      ?" · 임시 장부: 서버 재시작 이전 접수 기록은 누락될 수 있습니다.":"";
+      ?" · 임시 장부: 서버 재시작 이전 접수 기록은 누락될 수 있습니다.":data.mode==="local_receipts"
+      ?" · 이 브라우저에 남아 있는 미완료 접수만 표시하며 전체 서버 대기열은 아닙니다.":"";
     queueStatus.textContent=(total===null
       ?"확인 가능한 요청 "+queueOffset+"건"
       :"요청 "+total+"건 중 "+queueOffset+"건 표시")+
