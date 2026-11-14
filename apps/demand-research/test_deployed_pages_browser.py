@@ -106,7 +106,7 @@ def inspect_browser(browser_type, label, width, height):
         overview=page.locator("#accountOverview")
         assert overview.count()==1
         assert overview.evaluate("(node)=>node.open") is False
-        overview.locator("summary").click()
+        overview.locator(":scope > summary").click()
         assert overview.evaluate("(node)=>node.open") is True
         page.locator("#accountAutoSearch").wait_for(state="visible",timeout=12000)
         assert page.locator(".account-section-heading h3").all_inner_texts()==[
