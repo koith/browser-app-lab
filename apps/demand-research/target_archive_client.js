@@ -160,7 +160,7 @@
       const data=await response.json();
       const accounts=Array.isArray(data.accounts)?data.accounts:[];
       libraryRows.replaceChildren();
-      for(const item of accounts.slice(0,8)){
+      for(const item of accounts.slice(0,64)){
         if(!/^(bluesky|mastodon)-[a-f0-9]{40}$/.test(String(item.key||"")))continue;
         const row=document.createElement("div");
         row.className="target-archive-library-row";
