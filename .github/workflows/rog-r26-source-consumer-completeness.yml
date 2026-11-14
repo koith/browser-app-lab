@@ -1,0 +1,33 @@
+name: 4LEAF R26 original PAK UI source SHA and live-consumer completeness
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r26-source-provenance-live-consumers.cjs'
+      - '.github/workflows/rog-r26-source-consumer-completeness.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r26-source-provenance-live-consumers.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-consumers-real-bytes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native 2002 PAK real source manifest and six live visible uses
+        run: node apps/4leaf/rog/tests/m00-original-client-source-role-audit.cjs
+      - name: All static original source image consumer SHA and native sprite frames
+        run: node apps/4leaf/rog/tests/r26-source-provenance-live-consumers.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-r26-native-source-ui-consumer-sha-coverage
+          path: leaf-r26-source-consumer-sha-report.json
+          if-no-files-found: ignore
