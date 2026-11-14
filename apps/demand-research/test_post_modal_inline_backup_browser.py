@@ -423,6 +423,8 @@ def exercise(browser_type,name,width):
                 page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('공개 미러')",timeout=7000)
                 assert len(posts)==0,"Pages must never cross-origin POST"
             assert page.url==before,"post dialog backup must not change page or tab"
+            page.evaluate("document.querySelector('#detail').close()")
+            page.evaluate("window.showFixturePost('bluesky')")
             assert page.evaluate("window.setupManualBlockFeed()")==[
                 "a-1","a-2","a-did","b-1","c-1"]
             modal.locator("#detailBlockAccount").click()
