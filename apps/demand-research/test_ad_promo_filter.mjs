@@ -81,6 +81,6 @@ context.posts=[withoutAlt,...legitimate];
 f.updateAdScores();
 assert.equal(f.suspectedAd(withoutAlt),false,
   "one short hashtagged post must remain visible without ad evidence");
-assert.ok(html.includes("return posts.filter(p=>matchesText(p)&&!suspectedAd(p))"));
+assert.ok(html.includes("return posts.filter(p=>matchesText(p)&&!suspectedAd(p)&&!isManualBlocked(p))"));
 assert.ok(html.includes('!p.restricted&&!suspectedAd(p)).map(p=>({'));
 console.log("INTERSECTION_AD_FILTER_QA_PASS: 2 observed campaigns x50 filtered, alt retained, benign controls");
