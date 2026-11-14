@@ -299,6 +299,80 @@ def create_router(auth):
         return JSONResponse(result,headers={"Cache-Control":"private, no-store"})
 
 
+    @router.get("/api/target-archive/queue")
+    async def queue_detail(request:Request,offset:int=Query(0,ge=0,le=2000),
+                           limit:int=Query(20,ge=1,le=40)):
+        """Oldest-first owner-only request history with source-truthful stages.
+
+        This never reports a GitHub Actions completion as a verified backup.
+        Step count describes workflow *phases*, not downloaded file percent.
+        """
+        auth(request)
+        if not backup_queue.enabled():
+            return JSONResponse({"known":False,"mode":"direct_workflow",
+                "message":"이 실행 방식에는 계정별 접수 장부가 없습니다. 완료한 보관본만 확인할 수 있습니다.",
+                "items":[],"total":None,"offset":offset,"limit":limit,
+                "truncated":False},
+                headers={"Cache-Control":"private, no-store"})
+        try:
+            ledger=await asyncio.wait_for(
+                asyncio.to_thread(backup_queue.queue_rows,limit=limit,offset=offset),
+                timeout=22)
+        except (RuntimeError,QueueStorageDenied,OSError,ValueError,asyncio.TimeoutError):
+            return JSONResponse({"known":False,"mode":"unavailable",
+                "message":"현재 원본 요청 장부를 읽지 못했습니다. 요청 0건이나 백업 완료로 처리하지 않습니다.",
+                "items":[],"total":None,"offset":offset,"limit":limit,
+                "truncated":False},
+                headers={"Cache-Control":"private, no-store"})
+        semaphore=asyncio.Semaphore(3)
+        async def decorate(row):
+            item={"job_id":row["job_id"],"platform":row["platform"],
+                  "account":row["account"],"created_at":row["created_at"],
+                  "accepted_at":row["accepted_at"],
+                  "workflow_run_id":row["workflow_run_id"],
+                  "phase":1,"phase_total":4,"state":"WAITING",
+                  "status":"접수됨 · 작업 실행 순서 대기",
+                  "progress_kind":"phase_only","remote_verified":False}
+            if row["workflow_run_id"] is None:
+                return item
+            item.update({"phase":2,"state":"DISPATCHED",
+                         "status":"GitHub 실행 접수 · 상태 확인 중"})
+            try:
+                async with semaphore:
+                    run=await asyncio.wait_for(
+                        asyncio.to_thread(get_workflow_run,row["workflow_run_id"]),
+                        timeout=9)
+            except (RuntimeError,ValueError,TypeError,asyncio.TimeoutError):
+                item.update({"state":"STATUS_UNAVAILABLE",
+                             "status":"실행 접수됨 · 현재 실행 상태 조회 불가"})
+                return item
+            state=str(run.get("status") or "")
+            conclusion=str(run.get("conclusion") or "")
+            attempts=run.get("run_attempt")
+            if state=="in_progress":
+                item.update({"state":"RUNNING","status":"백업 작업 실행 중"})
+            elif state=="completed" and conclusion=="success":
+                # SHA validation occurs in the existing verified archive
+                # reader. A successful workflow run alone cannot prove it.
+                item.update({"state":"VERIFYING_STORAGE","phase":3,
+                             "status":"실행 완료 · 원본 저장 무결성은 보관함에서 확인"})
+            elif state=="completed" and conclusion in ("failure","timed_out"):
+                retryable=(type(attempts) is int and attempts<3)
+                item.update({"state":"RETRY_PENDING" if retryable else "FAILED",
+                             "status":"실패 · 자동 재시도 대기" if retryable
+                                      else "실행 실패 · 수동 복구 검토 필요"})
+            elif state=="completed" and conclusion=="cancelled":
+                item.update({"state":"CANCELLED",
+                             "status":"실행 취소됨 · 저장 성공 미확인"})
+            else:
+                item.update({"state":"DISPATCHED",
+                             "status":"GitHub 실행 대기 중"})
+            return item
+        ledger["known"]=True
+        ledger["items"]=await asyncio.gather(*(decorate(r) for r in ledger["items"]))
+        return JSONResponse(ledger,headers={"Cache-Control":"private, no-store"})
+
+
     @router.post("/api/target-archive/start")
     async def start(request:Request):
         global _last_request
