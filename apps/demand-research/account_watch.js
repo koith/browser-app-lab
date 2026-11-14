@@ -207,8 +207,10 @@ function chooseWatch(raw,fromPost=false){
    watches.push(p);write();
    $("accountWatchStatus").textContent=SERVICE_LABELS[p.platform]+" 계정을 추적 목록에 추가했습니다.";
  }
- if(fromPost&&$("detail")?.open)$("detail").close();
- setView("accounts");refreshWatch(p,false);return true;
+ // Post popups remain open. Do not switch tabs or close the dialog when
+ // the user explicitly confirmed account tracking inside the post.
+ if(!fromPost)setView("accounts");
+ refreshWatch(p,false);return true;
 }
 window.INTERSECTION_watchPublicAccount=function(p){
  if(!p||!p.profileUrl)return false;
