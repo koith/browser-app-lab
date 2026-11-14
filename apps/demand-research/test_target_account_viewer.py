@@ -428,3 +428,63 @@ def test_reordered_original_files_never_change_source_slots(populated):
     assert [x["url"].rsplit("/",1)[-1] for x in saved]==["0","2"]
     assert viewer.archived_media_slot(pid,{"key":"posts/other/media/0001.jpg"}) is None
     assert viewer.archived_media_slot(pid,{"key":"posts/"+pid+"/media/0017.jpg"}) is None
+
+
+def test_github_sha_reader_does_not_repeat_denied_terabox_probe_each_media(
+        monkeypatch):
+    """Keep verified GitHub access responsive under independent TeraBox 403."""
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer,"_ZIP_SESSION_CACHE",None)
+    calls=[]
+    def denied(_root):
+        calls.append(1)
+        raise RuntimeError("(authorization) synthetic private provider denied")
+    monkeypatch.setattr(viewer,"available_bundles",denied)
+    root=viewer.CloudArchive(remote="archive:DemandResearch",
+                             runner=lambda *a,**k:None)
+    with pytest.raises(RuntimeError):
+        viewer._verified_account_bundles(root)
+    assert len(calls)==1
+    for _ in range(5):
+        with pytest.raises(RuntimeError,match="temporarily unavailable"):
+            viewer._verified_account_bundles(root)
+    assert len(calls)==1,"do not turn each feed/media/profile request into 30s probe"
+    assert 120<=viewer.ZIP_UNAVAILABLE_BACKOFF_SECONDS<300
+    # No permanent denial: next session can retry the TeraBox source.
+    monkeypatch.setattr(
+        viewer,"_ZIP_SESSION_CACHE",
+        (root.remote,viewer.time.monotonic()-
+         viewer.ZIP_UNAVAILABLE_BACKOFF_SECONDS-1,(),True))
+    with pytest.raises(RuntimeError):
+        viewer._verified_account_bundles(root)
+    assert len(calls)==2
+
+
+def test_parallel_archive_reads_allow_only_one_failed_terabox_probe(
+        monkeypatch):
+    """Real Render 403 must not repeat across 8 simultaneous media requests."""
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(viewer,"_ZIP_SESSION_CACHE",None)
+    attempts=[]
+    def once(_root):
+        attempts.append(1)
+        time.sleep(0.04)
+        raise RuntimeError("(authorization) mock provider denied")
+    monkeypatch.setattr(viewer,"available_bundles",once)
+    def request(_):
+        root=viewer.CloudArchive(remote="archive:DemandResearch",
+                                 runner=lambda *a,**kw:None)
+        try:
+            viewer._verified_account_bundles(root)
+        except RuntimeError:
+            return "blocked"
+        return "unexpected_success"
+    with ThreadPoolExecutor(max_workers=8) as workers:
+        outcomes=list(workers.map(request,range(8)))
+    assert len(attempts)==1, (
+        "all simultaneous verified archive requests must share a single "
+        "provider denial instead of starting 8 slow rclone subprocesses")
+    assert outcomes==["blocked"]*8
+    assert viewer._ZIP_SESSION_CACHE[3] is True
