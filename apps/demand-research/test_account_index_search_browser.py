@@ -15,10 +15,13 @@ ORIGIN="https://intersection-qa.invalid/"
 HTML="""<!doctype html><html lang="ko"><head><meta charset="utf-8"></head><body>
 <button id="viewAccounts" type="button">계정 분석</button>
 <section id="accountsView">
+ <details id="accountOverview">
+  <summary>전체 계정 데이터 · 자세히 보기</summary>
   <details id="accountServerData" hidden>
     <summary>서버 계정 인덱스</summary>
     <div id="privateAccountIndexMount"></div>
   </details>
+ </details>
 </section>
 <script src="/account_index_client.js" defer></script>
 </body></html>"""
@@ -64,6 +67,9 @@ def run_case(engine,name):
         page.wait_for_function(
             "() => document.querySelectorAll('#privateAccountRows > div').length===80",
             timeout=18000)
+        assert not page.locator("#accountServerData").evaluate("(el) => el.open")
+        page.locator("#accountOverview > summary").click()
+        page.locator("#accountServerData > summary").click()
         assert page.locator("#accountServerData").evaluate("(el) => el.open")
         page.locator(".account-auto-more").click()
         page.wait_for_function(

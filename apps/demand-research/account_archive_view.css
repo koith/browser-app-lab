@@ -207,3 +207,22 @@ body{background:var(--paper);color:var(--ink)}
  .feed-controls select{flex:1 1 120px}
  .feed-controls button{padding:4px 9px}
 }
+
+
+/* Source-native profile treatment. No generic archive banners/pills inside
+   the SNS viewport: actual retained posts and their provenance stay intact. */
+.sns-provider-top{min-height:51px;margin-top:4px;padding:8px 14px;border-radius:0;
+ border-top:0;border-left:0;border-right:0;gap:12px}
+.sns-provider-symbol{width:30px;height:30px;border-radius:8px;font-size:18px}
+.sns-provider-ident strong{font-size:17px;letter-spacing:-.3px}
+.sns-provider-top .sns-archive-pill,.sns-provider-top .sns-provider-ident>span{display:none}
+:root[data-platform="bluesky"] .sns-provider-top{border-color:#e4e9ee}
+:root[data-platform="bluesky"] .profile-head h2{font-size:24px;font-weight:800}
+:root[data-platform="bluesky"] .archive-content .tabs button.active{border-bottom-width:3px}
+:root[data-platform="bluesky"] .post{padding:13px 16px}
+:root[data-platform="mastodon"] .sns-provider-top{background:#252833;border-color:#393d4a}
+:root[data-platform="mastodon"] .archive-content{background:#252833}
+:root[data-platform="mastodon"] .profile-head h2{font-size:21px;font-weight:790}
+:root[data-platform="mastodon"] .post{border-bottom:1px solid #393d4a}
+.archive-embedded .sns-provider-top{margin-top:0;border-radius:0}
+@media(max-width:650px){.sns-provider-top{padding:8px 12px}}

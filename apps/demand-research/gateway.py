@@ -228,10 +228,24 @@ async def github_pending_requests(request:Request):
         raise HTTPException(503,"Private archive not connected")
     try:
         from backup_queue import pending
-        rows=await asyncio.to_thread(pending,limit=1)
+        rows=await asyncio.to_thread(pending,limit=4)
     except (RuntimeError,ValueError):
         raise HTTPException(503,"Private queue listing unavailable") from None
     return JSONResponse({"requests":rows},
+                        headers={"Cache-Control":"private, no-store"})
+
+
+@app.get("/api/bridge/accepted",include_in_schema=False)
+async def github_accepted_runs(request:Request):
+    _bridge_authenticated(request)
+    if not configured():
+        raise HTTPException(503,"Private archive not connected")
+    try:
+        from backup_queue import accepted_runs
+        runs=await asyncio.to_thread(accepted_runs,limit=64)
+    except (RuntimeError,ValueError,QueueStorageDenied):
+        raise HTTPException(503,"Private accepted-run listing unavailable") from None
+    return JSONResponse({"runs":runs},
                         headers={"Cache-Control":"private, no-store"})
 
 
