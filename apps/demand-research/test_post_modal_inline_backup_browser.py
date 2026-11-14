@@ -33,6 +33,15 @@ TILE_CODE=INDEX[TILE_START:TILE_END]
 DETAIL_START=INDEX.index("function confirmPostAccountAction(")
 DETAIL_END=INDEX.index("function closeDetail(){",DETAIL_START)
 POST_DETAIL=INDEX[DETAIL_START:DETAIL_END]
+AMBIENT_START=INDEX.index("/* Interactive halftone:")
+AMBIENT_END=INDEX.index("</script>",AMBIENT_START)
+AMBIENT_SCRIPT=INDEX[AMBIENT_START:AMBIENT_END]
+DRAW_START=INDEX.index("function draw(){")
+DRAW_END=INDEX.index("/* Public activity ranking:",DRAW_START)
+DRAW_SCRIPT=INDEX[DRAW_START:DRAW_END]
+assert "list.insertBefore(item,cursor)" in DRAW_SCRIPT
+assert 'list.replaceChildren()' not in DRAW_SCRIPT
+assert "content-visibility:auto" in STYLE
 PRIVATE="https://intersection-originals-free.onrender.com"
 PUBLIC="https://koith.github.io/browser-app-lab/apps/demand-research"
 PROFILE="https://bsky.app/profile/public-test.bsky.social"
@@ -369,6 +378,26 @@ def exercise(browser_type,name,width):
                   "pinned_tabs=3","direct_jobs=",len(posts),
                   "no_navigation=YES","synthetic_only=YES",flush=True)
             page.close()
+        # Regression for the former forever-running full-screen Canvas2D.
+        # At rest there should be at most two scheduled frames, not ~15
+        # per 500ms while the visitor tries to scroll the post grid.
+        perf=browser.new_page(viewport={"width":width,"height":850})
+        perf.set_content(
+            "<canvas id='dotField'></canvas><script>"
+            "window.__frames=0;const originalRAF=requestAnimationFrame.bind(window);"
+            "window.requestAnimationFrame=fn=>{window.__frames++;return originalRAF(fn)};"
+            "</script><script>"+AMBIENT_SCRIPT+"</script>",
+            wait_until="load")
+        perf.wait_for_timeout(550)
+        idle=perf.evaluate("window.__frames")
+        assert idle<=3,("idle Canvas redrew while not touched",name,idle)
+        perf.mouse.click(min(width-10,70),90)
+        perf.wait_for_timeout(180)
+        active=perf.evaluate("window.__frames")
+        assert active>idle,("touch ripple did not animate",name,idle,active)
+        perf.close()
+        print("INTERSECTION_SCROLL_IDLE_CANVAS_PASS",name,
+              "idle_frames=",idle,"active_frames=",active,flush=True)
     finally:
         browser.close()
 
