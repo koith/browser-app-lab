@@ -36,6 +36,6 @@ def test_unknown_job_and_invalid_account_not_accepted():
 def test_queue_bounded_and_ordered():
     jobs=[backup_queue.create_request("bluesky",f"public-{i}.bsky.social")
           for i in range(backup_queue._MAX_OPEN)]
-    assert {row["job_id"] for row in backup_queue.pending(limit=20)}==set(jobs)
+    assert {row["job_id"] for row in backup_queue.pending(limit=backup_queue._MAX_OPEN)}==set(jobs)
     with pytest.raises(RuntimeError,match="full"):
         backup_queue.create_request("bluesky","overflow.bsky.social")
