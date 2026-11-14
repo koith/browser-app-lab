@@ -281,42 +281,31 @@ function prepareBackupSelection(w){
    " 공개 계정을 백업 대상으로 선택했습니다. 위 백업 실행 버튼을 눌러 진행하세요.";
  $("targetArchivePanel").scrollIntoView({behavior:"smooth",block:"center"});
 }
-function card(w,data){
+function watchAvatar(w,snap){
+ const row=(snap.verified||[]).find(p=>sameAccount(p,w)&&typeof p.avatarUrl==="string"&&p.avatarUrl);
+ if(!row)return "";
+ try{
+   const url=new URL(row.avatarUrl);
+   return url.protocol==="https:"&&!url.username&&!url.password?url.href:"";
+ }catch{return ""}
+}
+function avatarNode(w,snap){
+ const avatar=node("span","account-watch-avatar",w.username.slice(0,1).toUpperCase());
+ const src=watchAvatar(w,snap);
+ if(src){
+   const img=node("img");img.alt="";img.loading="lazy";img.referrerPolicy="no-referrer";
+   img.addEventListener("error",()=>img.remove(),{once:true});
+   avatar.append(img);img.src=src;
+ }
+ return avatar;
+}
+function card(w,data,snap){
  const root=node("article","account-watch-card");
- const head=node("div","account-watch-head");head.append(makeSource(w),
-   node("strong","account-watch-title","@"+w.username));root.append(head);
- const stats=node("div","account-stats");
- const commerce=dedupedContent(data.posts);
- for(const [label,value] of [["확인 글",data.posts.length],["상품 언급",commerce.matched],["미확인 링크",data.candidates]]){
-    const box=node("div");box.append(node("strong","",metricText(value)),node("span","",label));stats.append(box);
- }
- root.append(stats);
- const last=data.posts[0]?.posted;
- root.append(node("div","account-watch-meta",last?
-    "최근 확인 활동: "+new Date(last).toLocaleDateString("ko-KR"):
-    "기간 내 확인된 글 없음"));
- const actions=node("div","account-watch-actions");
- const inspect=node("button","primary","활동 상세");inspect.type="button";inspect.addEventListener("click",()=>openDetail(w));actions.append(inspect);
- const refresh=node("button","","새 글 확인");refresh.type="button";
- const canRefresh=["bluesky","mastodon","x"].includes(w.platform);
- refresh.disabled=!canRefresh||busyKeys.has(w.key);
- refresh.title=canRefresh?"공개 계정 원문에서 최신 글을 확인":"현재 검색 피드에서 확인된 공개 게시글만 집계";
- refresh.addEventListener("click",()=>refreshWatch(w,true));actions.append(refresh);
- if(w.platform==="bluesky"||w.platform==="mastodon"){
-   const archive=node("button","","백업 대상으로 선택");
-   archive.type="button";
-   archive.addEventListener("click",()=>prepareBackupSelection(w));
-   actions.append(archive);
- }
- actions.append(link("SNS 프로필",w.url));
- const remove=node("button","danger","추적 해제");remove.type="button";
- remove.addEventListener("click",()=>{
-   watches=watches.filter(x=>x.key!==w.key);remote.delete(w.key);write();render();
-   $("accountWatchStatus").textContent="추적 목록에서 해제했습니다. 저장된 공개 프로필 주소도 삭제했습니다.";
-   if($("accountDialog").open&&selectedAccount===w.key)$("accountDialog").close();
- });
- actions.append(remove);root.append(actions);
- if(data.error)root.append(node("div","account-hint","공개 피드 조회 실패 · "+data.error));
+ const open=node("button","account-watch-open");
+ open.type="button";open.setAttribute("aria-label","@"+w.username+" 계정 상세 및 관리");
+ open.append(avatarNode(w,snap),makeSource(w),node("strong","account-watch-title","@"+w.username));
+ open.addEventListener("click",()=>openDetail(w));
+ root.append(open);
  return root;
 }
 function renderDiscovered(snap){
@@ -379,15 +368,44 @@ function render(){
  if(!visible.length){
    frag.append(node("div","account-empty",watches.length?
        "조건과 일치하는 추적 계정이 없습니다.":"추적 계정이 없습니다. 게시글 상세에서 공개 계정을 선택해 추가할 수 있습니다."));
- }else for(const x of visible)frag.append(card(x.w,x));
+ }else for(const x of visible)frag.append(card(x.w,x,snap));
  list.replaceChildren(frag);
 }
 function openDetail(w){
  selectedAccount=w.key;
  const content=$("accountDialogContent"),snap=snapshot(),data=storedActivity(w,snap);
  content.replaceChildren();
- const header=node("div","account-watch-head");header.append(makeSource(w),node("h3","", "@"+w.username));
- content.append(header,link("공개 프로필 열기",w.url));
+ const header=node("div","account-watch-detail-head");
+ header.append(avatarNode(w,snap),makeSource(w),node("h3","", "@"+w.username));
+ const address=node("p","account-watch-address",w.url);
+ const actions=node("div","account-watch-actions account-watch-dialog-actions");
+ actions.append(link("SNS 프로필",w.url));
+ const refresh=node("button","","새 글 확인");refresh.type="button";
+ const canRefresh=["bluesky","mastodon","x"].includes(w.platform);
+ refresh.disabled=!canRefresh||busyKeys.has(w.key);
+ refresh.title=canRefresh?"공개 계정 원문에서 최신 글을 확인":"현재 검색 피드에서 확인된 게시글만 집계";
+ refresh.addEventListener("click",async()=>{
+   refresh.disabled=true;
+   await refreshWatch(w,true);
+   if($("accountDialog").open&&selectedAccount===w.key)openDetail(w);
+ });
+ actions.append(refresh);
+ if(["bluesky","mastodon"].includes(w.platform)){
+   const archive=node("button","","백업 대상으로 선택");archive.type="button";
+   archive.addEventListener("click",()=>{
+     $("accountDialog").close();prepareBackupSelection(w);
+   });
+   actions.append(archive);
+ }
+ const remove=node("button","danger","추적 해제");remove.type="button";
+ remove.addEventListener("click",()=>{
+   watches=watches.filter(x=>x.key!==w.key);
+   remote.delete(w.key);write();render();
+   $("accountWatchStatus").textContent="추적 목록에서 해제했습니다.";
+   $("accountDialog").close();
+ });
+ actions.append(remove);
+ content.append(header,address,actions);
  const commerce=dedupedContent(data.posts);
  content.append(node("p","detail-summary",
   "선택 기간에 실제 확인된 공개 글 "+data.posts.length+"건 · 상품 관련 단어가 있는 고유 글 "+
@@ -418,7 +436,7 @@ function openDetail(w){
  }
  if(!data.posts.length)rows.append(node("p","account-empty","선택 기간에 원문과 날짜가 확인된 게시글이 없습니다."));
  content.append(rows);
- $("accountDialog").showModal();
+ if(!$("accountDialog").open)$("accountDialog").showModal();
 }
 function cleanDate(value){
  const n=Date.parse(String(value||""));
