@@ -48,7 +48,12 @@ def exercise(browser,label):
         assert page.locator("#archiveModeAuto").get_attribute("aria-selected")=="true"
         worker=page.request.get(BASE+"intersection-sw.js",timeout=35000)
         assert worker.status==200,worker.status
-        assert "intersection-public-shell-v1-20261110" in worker.text()
+        # A rolling immutable shell version changes on each deployment.
+        # Validate a versioned, public-only worker, not a stale release date.
+        worker_source=worker.text()
+        assert 'const PREFIX="intersection-public-shell-v1-";' in worker_source
+        assert 'const VERSION="intersection-public-shell-v1-' in worker_source
+        assert "const SCRIPT_PATHS=new Set(" in worker_source
         health=page.request.get(BASE+"health",timeout=35000)
         assert health.status==200 and health.json().get("alive") is True
         if "chromium" in label:
