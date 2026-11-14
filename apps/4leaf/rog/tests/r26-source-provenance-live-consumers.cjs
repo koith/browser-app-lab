@@ -62,9 +62,22 @@ for(const dirent of normalDir){
  }
  consumers.push({file:dirent.name,sourceReferences:refs.length});
 }
-const literalMissing=[],liveAssets=[];
+const literalMissing=[],liveAssets=[],documentedSourcePatterns=[];
 for(const [rel,users] of linkGraph){
  if(!fs.existsSync(path.resolve(root,rel))){
+  // This is explicitly a symbolic example in a code comment. It is NOT
+  // a URL fetched by the browser. Verify the real code's 2-digit source
+  // family instead of reporting a nonexistent literal asset or suppressing
+  // arbitrary missing originals.
+  if(rel==='original/Registry/savaNN.png'&&
+      users.length===1&&users[0]==='registry-native-chroma.js'){
+   const dir=path.resolve(root,'original/Registry');
+   const sourceFamily=fs.readdirSync(dir).filter(x=>/^sava\d{2}\.png$/.test(x));
+   assert.ok(sourceFamily.length>=10,'real original Registry family behind symbolic NN label');
+   documentedSourcePatterns.push({label:rel,sourceFamily:sourceFamily.length,
+    consumers:users,verifiedRealFiles:true});
+   continue;
+  }
   literalMissing.push({rel,consumers:users});continue;
  }
  const source=originalPNG.get(rel)||sourceSprites.get(rel)||entry(rel);
@@ -90,13 +103,14 @@ const summary={
  originalBodyRecords:Object.keys(native.cards).length,
  originalDMPPaths:26,originalTISUnique:32,
  literalMissing:literalMissing.length,
+ documentedSourcePatterns:documentedSourcePatterns.length,
  actual3DMesh:'UNVERIFIED',
  original2004ExecutableCommandRoles:'UNVERIFIED'
 };
 assert.equal(summary.originalBodyRecords,97);
 assert.equal(summary.literalMissing,0);
 assert.ok(summary.nativeAssetReferences>=15,'actual source screenshot UI references need live consumers');
-const result={summary,liveAssets,unavailableOriginalCatalog:missing,
+const result={summary,liveAssets,documentedSourcePatterns,unavailableOriginalCatalog:missing,
  originalSourceSprites:[...sourceSprites.values()],
  dynamicSourcePaths:'UNVERIFIED/LITERAL-ONLY; native 97 CHR and 26 DMP registered separately'};
 fs.writeFileSync(path.resolve(process.cwd(),'leaf-r26-source-consumer-sha-report.json'),
