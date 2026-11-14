@@ -175,6 +175,27 @@ def poll_once():
     return "DISPATCHED"
 
 
+def drain_available(max_batches=5):
+    """Drain multiple safely acknowledged batches during the same OIDC session.
+
+    GitHub scheduled jobs can start hours late. A single credential refresh
+    must not strand all but the first four jobs until the next schedule.
+    Bounded at 20 dispatches per run, under the 12-minute job timeout.
+    Every pass re-reads the durable queue and acknowledges each exact run ID.
+    """
+    if type(max_batches) is not int or not 1<=max_batches<=5:
+        raise ValueError("Invalid bounded dispatch budget")
+    completed=0
+    for batch in range(max_batches):
+        status=poll_once()
+        if status!="DISPATCHED":
+            print("INTERSECTION_BACKUP_BRIDGE_FINISHED_BATCHES",completed,flush=True)
+            return status if completed==0 else "DRAINED"
+        completed+=1
+    print("INTERSECTION_BACKUP_BRIDGE_FINISHED_BATCHES",completed,flush=True)
+    return "BATCH_LIMIT"
+
+
 if __name__=="__main__":
-    result=poll_once()
+    result=drain_available()
     print("INTERSECTION_DURABLE_BACKUP_"+result)
