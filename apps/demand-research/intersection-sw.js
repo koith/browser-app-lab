@@ -4,11 +4,12 @@
  * account records, API JSON, uploaded media, authentication or private bytes.
  */
 "use strict";
-const VERSION="intersection-public-shell-v1-20261114-feed-recovery";
+const VERSION="intersection-public-shell-v1-20261114-index-hydration-v1";
 const PREFIX="intersection-public-shell-v1-";
 const FILES=[
   "/",
   "/live_feed_recovery.js?v=20261114-bsky-outage-v1",
+  "/bsky_search_fallback.js?v=20261114-public-source-hydration-v1",
   "/post_activity_ranking.js",
   "/public_video_trends.js",
   "/target_archive_client.js?v=20261114-inline-backup-v1",
