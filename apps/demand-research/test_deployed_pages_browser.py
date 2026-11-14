@@ -101,6 +101,13 @@ def inspect_browser(browser_type, label, width, height):
         page.locator("#viewAccounts").click()
         # Actual deployed account-analysis page must prioritize three clear
         # user tasks and keep implementation details behind disclosure.
+        # The full account overview intentionally starts collapsed. A user
+        # must expand it before its search input becomes visible.
+        overview=page.locator("#accountOverview")
+        assert overview.count()==1
+        assert overview.evaluate("(node)=>node.open") is False
+        overview.locator("summary").click()
+        assert overview.evaluate("(node)=>node.open") is True
         page.locator("#accountAutoSearch").wait_for(state="visible",timeout=12000)
         assert page.locator(".account-section-heading h3").all_inner_texts()==[
             "전체 계정 현황","관심 계정 관리","계정 백업"]
