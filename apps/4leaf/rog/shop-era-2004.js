@@ -25,10 +25,41 @@
   toolbar.append(b);
  }
  stage.append(toolbar);
+ // The recovered 2002 UI does not contain a time-machine control.
+ // Keep this WEB-only provenance switch visually separate from source art.
+ const marketLabel=document.createElement('label');
+ marketLabel.className='shop-market-date-label';marketLabel.textContent='2003 시세 ';
+ const marketSelect=document.createElement('select');
+ marketSelect.id='shop-market-date';
+ marketSelect.setAttribute('aria-label','2003년 매직카덴 기록 시세 날짜');
+ for(const [value,label] of [['2003-01-05','1월 5일'],['2003-01-15','1월 15일']]){
+  const option=document.createElement('option');option.value=value;option.textContent=label;
+  marketSelect.append(option);
+ }
+ marketSelect.value=window.__LEAF_HISTORIC_MARKET__?.getState().date||'2003-01-05';
+ marketLabel.append(marketSelect);toolbar.append(marketLabel);
+ marketSelect.addEventListener('change',()=>{
+  window.__LEAF_HISTORIC_MARKET__?.setDate(marketSelect.value);
+  renderProvenance();
+ });
  const provenance=document.createElement('div');
  provenance.id='shop-era-provenance';
  provenance.setAttribute('role','status');
  stage.append(provenance);
+ const renderProvenance=()=>{
+  const market=window.__LEAF_HISTORIC_MARKET__?.getState();
+  const note=market?.date==='2003-01-15'
+   ?' · 1/15 원본 변경가 6종만 확정, 그 외 1/5 기록 유지(1/15 미검증)'
+   :' · 1/5 당시 신문 가격 97종(원본 EXE 가격표 아님)';
+  provenance.textContent=(era==='2004'
+   ?'2004 캡처 기반 4×2 / RARE 명단 미확보 · 구성 비교용'
+   :'2002 PAK 원본 3×3 / 원본 배경·버튼')+note;
+ };
+ window.addEventListener('leaf-shop-market-change',()=>{
+  const source=window.__LEAF_HISTORIC_MARKET__?.getState();
+  if(source&&marketSelect.value!==source.date)marketSelect.value=source.date;
+  renderProvenance();
+ });
  let era='2002';
  try{era=localStorage.getItem('4leaf-original-shop-era')==='2004'?'2004':'2002'}catch{}
  const apply=(selected,persist)=>{
@@ -42,9 +73,7 @@
   if(era==='2002'&&rare.classList.contains('selected')){
    tabs.querySelector('[data-group="all"]')?.click();
   }
-  provenance.textContent=era==='2004'
-   ?'2004 캡처 기반 4×2 화면 / RARE 명단 미확보 · 구성 비교용'
-   :'2002 CardShop.pak 원본 3×3 / 원본 버튼·배경';
+  renderProvenance();
   if(persist){try{localStorage.setItem('4leaf-original-shop-era',era)}catch{}}
   window.__ROG_TEST__?.drawShop?.();
   window.dispatchEvent(new CustomEvent('leaf-shop-era-change',{detail:{era,sourceRarity:'unverified'}}));

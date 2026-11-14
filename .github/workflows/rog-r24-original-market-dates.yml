@@ -1,0 +1,51 @@
+name: 4LEAF R24 exact 2003 Magic Carden six source price changes and real purchase QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/original/market-price-snapshots.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/shop-era-2004.*'
+      - 'apps/4leaf/rog/tests/r24-market-timeline-real-shop.cjs'
+      - '.github/workflows/rog-r24-original-market-dates.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/original/market-price-snapshots.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/shop-era-2004.*'
+      - 'apps/4leaf/rog/tests/r24-market-timeline-real-shop.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-market-real-user:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install matching real headless browsers and localhost source
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-r24-http.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
+          exit 1
+      - name: Two dates, six exact original changes, browser purchase, persistence, 2004 layout
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r24-market-timeline-real-shop.cjs
+      - name: Preserve previous 2003 Jan05 source regression (Chromium)
+        if: matrix.browser == 'chromium'
+        run: node apps/4leaf/rog/tests/r20-historical-market-prices.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r24-historical-source-market-${{ matrix.browser }}
+          path: leaf-r24-source-2003-jan15-six-exact-prices-*.png
+          if-no-files-found: ignore

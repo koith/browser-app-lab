@@ -2,6 +2,11 @@
 (function(){
 const $=id=>document.getElementById(id);
 const query=(s,parent=document)=>Array.from(parent.querySelectorAll(s));
+// Original retail listings were time-variable. Only SIX exact prices are
+// verified as changed on Jan 15; other Jan 15 prices must retain Jan 05
+// provenance rather than masquerade as a verified 2003 server price table.
+let historicShopDate='2003-01-05';
+try{if(localStorage.getItem('4leaf-market-date')==='2003-01-15')historicShopDate='2003-01-15'}catch{}
 const routeNames={sky:'포리프 월드맵',city:'켈티카의 거리',rooms:'하이아칸 채팅 타운','dice-channels':'주사위의 잔영 채널 선택',lobby:'주사위의 잔영 대기실',shop:'매직카덴',game:'창세기월드 · 주사위의 잔영','help-screen':'4LEAF 도움말'};
 const BASE_CARDS=[
 {id:'soldier',name:'솔져',move:1,atk:2,def:2,int:1,point:2,price:180,rank:'normal',portrait:'♟',ability:'방어C'},
@@ -19,15 +24,35 @@ const BASE_CARDS=[
 ];
 const CHR_SOURCE=window.ORIGINAL_LEAF_CHESSMEN||[];
 const HISTORIC_SHOP_PRICE_SNAPSHOT=window.ORIGINAL_LEAF_SHOP_PRICE_SNAPSHOT_20030105||null;
+const HISTORIC_SHOP_DELTAS=window.ORIGINAL_LEAF_SHOP_PRICE_CHANGES_20030115||null;
 const historicalShopPrice=c=>{
- const direct=HISTORIC_SHOP_PRICE_SNAPSHOT?.prices?.[c.name];
- if(Number.isSafeInteger(direct)&&direct>0)return {
-  value:direct,evidence:'ARCHIVE-2003-01-05-EXACT-NAME',label:c.name};
- const candidate=HISTORIC_SHOP_PRICE_SNAPSHOT?.orthographicAliases?.[c.id];
- if(candidate?.chrName!==c.name)return null;
- const value=HISTORIC_SHOP_PRICE_SNAPSHOT?.prices?.[candidate.archiveName];
- return Number.isSafeInteger(value)&&value>0?{
-  value,evidence:'ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED',label:candidate.archiveName}:null;
+ let archivedName=c.name,exact=true;
+ let value=HISTORIC_SHOP_PRICE_SNAPSHOT?.prices?.[archivedName];
+ if(!Number.isSafeInteger(value)||value<=0){
+  const alias=HISTORIC_SHOP_PRICE_SNAPSHOT?.orthographicAliases?.[c.id];
+  if(alias?.chrName!==c.name)return null;
+  archivedName=alias.archiveName;exact=false;
+  value=HISTORIC_SHOP_PRICE_SNAPSHOT?.prices?.[archivedName];
+  if(!Number.isSafeInteger(value)||value<=0)return null;
+ }
+ const change=historicShopDate==='2003-01-15'?
+  HISTORIC_SHOP_DELTAS?.changes?.[archivedName]:null;
+ if(change&&change.before===value){
+  return {value:change.after,
+   evidence:exact?'ARCHIVE-2003-01-15-EXACT-CHANGE':'ARCHIVE-2003-01-15-ALIAS-INFERRED',
+   label:archivedName};
+ }
+ return {value,evidence:exact?'ARCHIVE-2003-01-05-EXACT-NAME':'ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED',
+  label:archivedName};
+};
+const shopPriceEvidenceText=c=>{
+ if(c.priceEvidence==='ARCHIVE-2003-01-15-EXACT-CHANGE')return '2003.01.15 변경 시세';
+ if(c.priceEvidence==='ARCHIVE-2003-01-15-ALIAS-INFERRED')
+  return '2003.01.15 변경 시세·명칭 추정('+c.historicalPriceLabel+')';
+ if(c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME')return '2003.01.05 기록 시세';
+ if(c.priceEvidence==='ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED')
+  return '2003.01.05 시세·명칭 추정('+c.historicalPriceLabel+')';
+ return '웹 추정가격 · 원작 시세 미확인';
 };
 const ABILITY_NAMES={19:'공격C',20:'공격B',21:'공격A',22:'방어C',23:'방어B',24:'이동B',25:'방어B',26:'지력B',27:'지력A',28:'능력 없음',30:'순간이동',31:'팀 지력+',32:'키퍼',33:'프리워프',34:'디스트로이',37:'이동C',38:'공격C',39:'공격B',43:'블럭',56:'흑태자의 힘'};
 const LEGACY_IDS={soldier:'c_0096',joan:'c_0078',rashid:'c_0087',narcia:'c_0088',merza:'c_0040',iolyn:'c_0045',christian:'c_0090',saladin:'c_0087',damian:'c_0127',sherazard:'c_0088',ironmask:'c_0091',schwarz:'c_0170'};
@@ -46,6 +71,28 @@ if(CHR_SOURCE.length>50){
  BASE_CARDS.splice(0,BASE_CARDS.length,...originalCards);
 }
 const CARD_MAP=Object.fromEntries(BASE_CARDS.map(c=>[c.id,c]));
+function selectHistoricalMarketDate(date){
+ if(date!=='2003-01-05'&&date!=='2003-01-15')return false;
+ historicShopDate=date;
+ for(const c of BASE_CARDS){
+  if(!c.sourceId)continue;
+  const p=historicalShopPrice({id:c.sourceId,name:c.name});
+  if(!p)continue;
+  c.price=p.value;c.priceEvidence=p.evidence;c.historicalPriceLabel=p.label;
+ }
+ try{localStorage.setItem('4leaf-market-date',date)}catch{}
+ if(document.getElementById('shop-grid'))drawShop();
+ window.dispatchEvent(new CustomEvent('leaf-shop-market-change',
+  {detail:{date,changed:date==='2003-01-15'?6:0,provenance:'source-press-only'}}));
+ return true;
+}
+window.__LEAF_HISTORIC_MARKET__={
+ setDate:selectHistoricalMarketDate,
+ getState:()=>({date:historicShopDate,deltaSource:HISTORIC_SHOP_DELTAS?.source||null,
+  changedPrices:historicShopDate==='2003-01-15'?6:0,
+  otherPricesVerifiedOnSelectedDate:historicShopDate==='2003-01-05',
+  serialRedemptionPriceIsSeparate:true})
+};
 const DEFAULT_PROFILE={name:'Guest',gp:3000,wins:0,owned:CHR_SOURCE.length>50?STARTERS.slice():['soldier','joan','rashid','narcia'],team:CHR_SOURCE.length>50?['c_0078','c_0096','c_0040']:['joan','soldier','narcia']};
 const ITEMS=[
 {id:'valkyrie',name:'발키리의 창',icon:'⚔',hint:'전투 시 상대 주사위 수의 절반만큼 주사위 추가',sourceId:'0008',battle:true},
@@ -485,7 +532,7 @@ function drawShop(){
    b.dataset.cardId=c.id;
    b.dataset.owned=profile.owned.includes(c.id)?'true':'false';
    b.title=c.name+' · '+c.ability+' · '+c.price.toLocaleString()+'GP · '+
-    (c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 기록 시세':c.priceEvidence==='ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED'?'2003.01.05 시세·명칭 추정('+c.historicalPriceLabel+')':'웹 추정가격 · 원작 시세 미확인')+
+    shopPriceEvidenceText(c)+
     ' · '+(profile.owned.includes(c.id)?'보유':'미보유');
    const art=document.createElement('div');art.className='card-art';
    const img=document.createElement('img');img.className='pixel-portrait';img.alt=c.name;assignCardImage(img,c.id);art.append(img);
@@ -521,7 +568,7 @@ function drawShop(){
    $('shop-sell').dataset.resaleStatus='unknown-source';
  }
  if(c){
-   $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+(c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 기록 시세':c.priceEvidence==='ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED'?'2003.01.05 시세·명칭 추정('+c.historicalPriceLabel+')':'웹 추정가격');
+   $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+shopPriceEvidenceText(c);
    $('shop-buy').disabled=profile.owned.includes(c.id)||profile.gp<c.price;
    $('shop-buy').textContent=profile.owned.includes(c.id)?'보유중':(profile.gp<c.price?'GP 부족':'구입하기');
    const sell=$('shop-sell'),canSell=shopCanSell(c);
@@ -2196,9 +2243,13 @@ function init(){installBoardControls();installNativeDiceMenu();
  const c=CARD_MAP[chosenCard];if(!c)return;
  if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);
  if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);
- modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까? ('+
-   (c.priceEvidence==='ARCHIVE-2003-01-05-EXACT-NAME'?'2003.01.05 역사적 시세 기록':c.priceEvidence==='ARCHIVE-2003-01-05-NAME-ALIAS-INFERRED'?'2003.01.05 시세·명칭 매칭 추정':'원작 가격 미확인 · 임시 웹 가격')+')',[
+ const offeredPrice=c.price,offeredDate=historicShopDate;
+ modal('매직카덴',c.name+' 카드를 '+offeredPrice.toLocaleString()+'GP에 구매하시겠습니까? ('+
+   shopPriceEvidenceText(c)+')',[
   {label:'구매',primary:true,run:()=>{
+   if(c.price!==offeredPrice||historicShopDate!==offeredDate)return modal(
+    '매직카덴 시세 변경','구매 확인 중 시장 기준 날짜 또는 카드 가격이 변경되었습니다. 다시 확인하세요.',
+    [{label:'확인',primary:true}]);
    // Revalidate at confirmation too: a pending modal is not an ownership
    // or GP lock, and stale duplicate intent must not overdraw the balance.
    if(profile.owned.includes(c.id))return modal('매직카덴','이미 보유한 카드입니다.',[{label:'확인'}]);
@@ -2215,12 +2266,15 @@ function init(){installBoardControls();installNativeDiceMenu();
   modal('매직카덴','선택한 카드가 없거나, 출전·진행 중 경기·마지막 보유 카드이므로 판매할 수 없습니다.',[{label:'확인'}]);
   return;
  }
- const gp=inferredShopResaleGP(c);
+ const gp=inferredShopResaleGP(c),offerDate=historicShopDate;
  modal('매직카덴',c.name+' 카드를 판매하시겠습니까? 임시 판매가 '+
   gp.toLocaleString()+' GP (원작 재판매 가격 규칙 미확인).',[{label:'판매',primary:true,run:()=>{
    // Protect against double confirmation, intervening game state and
    // resale of a currently equipped/still active match chessman.
    if(!shopCanSell(c))return;
+   if(offerDate!==historicShopDate||gp!==inferredShopResaleGP(c))
+    return modal('매직카덴 시세 변경','판매가가 변경됐습니다. 다시 확인하세요.',
+     [{label:'확인',primary:true}]);
    if(!commitShopTransaction(()=>{
     profile.owned=profile.owned.filter(id=>id!==c.id);
     profile.gp+=gp;
