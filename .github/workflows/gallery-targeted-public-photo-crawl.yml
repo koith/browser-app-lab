@@ -122,6 +122,12 @@ jobs:
               --album-id v2ph-actor-zo5n754z
               --album-id djawa-your-panties
               --album-id djawa-my-summer-vacation-vol-5
+              # Existing works with very few stored cuts; prioritize actual public bytes.
+              --album-id djawa-pop-kitty-party
+              --album-id djawa-nikke-yuni
+              --album-id djawa-janus-scary-lantern-night
+              --album-id djawa-rudy2-codename-wolfgirl
+              --album-id djawa-twin-bunnies-affair
             )
           else
             focus=(
@@ -137,6 +143,7 @@ jobs:
               --album-id artgravia-684-yui-public-samples
               --album-id yui-summer-public-samples
               --album-id yui-meow-public-samples
+              --album-id crazygiant-player5-public
             )
           fi
           # Rotate actual registered pagination, never guess protected URLs.
