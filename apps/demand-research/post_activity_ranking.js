@@ -131,6 +131,7 @@
      return e;
    };
    let visibleCount=20,ranking=[],cohort="established",cohortTouched=false;
+   let providerOutage=false;
    const profileCache=new Map(),pendingProfiles=new Set(),profileRetryAfter=new Map();
    let profileFetchActive=false;
    function mergeProfileEvidence(){
@@ -265,6 +266,7 @@
      list.replaceChildren();
      const show=visibleCount;
      if(!sorted.length)list.append(node("div","activity-ranking-empty",
+       providerOutage?"Bluesky 공개 검색 장애 · 랭킹 집계가 불완전합니다. 0명은 실제 활동 0명이 아닙니다.":
        ranking.some(g=>g.platform==="bluesky"&&pendingProfiles.has(g.profileUrl))?
          "공개 프로필 이력 확인 중…":"해당 분류의 확인된 계정이 없습니다. 신규 활동에는 공개 이력 미확인 계정도 포함됩니다."));
      sorted.slice(0,show).forEach((g,index)=>{
@@ -294,6 +296,7 @@
    }
    function update(){
      let snap;try{snap=win.INTERSECTION_publicRankingSnapshot?.();}catch{}
+     providerOutage=Boolean(snap?.providerOutage);
      ranking=compute(snap);
      mergeProfileEvidence();
      const select=$("activityRankingPlatform"),prev=select.value;
