@@ -48,6 +48,13 @@ const {chromium,webkit}=require('playwright');
   });
   assert.equal(armageddon.user,3);
   assert.equal(armageddon.opponent,2);
+  const storedEffects=await page.evaluate(()=>{
+   const stored=JSON.parse(localStorage.getItem('rog_match'));
+   return stored.players.map(p=>p.effects.armageddon);
+  });
+  assert.deepEqual(storedEffects,[3,2],
+   'real item consumption must persist global Armageddon effects BEFORE user reload');
+
   assert.equal(armageddon.now.length,1,'a movement-2 source chessman has one D4 during Armageddon');
   assert.equal(armageddon.now[0],2,'original D4 side maintained');
   // Item 2: Flipper may only cancel a LOSS, never a winning/tied battle.
