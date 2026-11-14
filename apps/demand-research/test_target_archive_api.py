@@ -116,8 +116,15 @@ def test_authenticated_public_account_dispatch_returns_queued_not_saved(client,m
     assert "." in r.json()["receipt"]
     assert "DEMAND_ARCHIVE_DISPATCH_TOKEN" not in str(r.json())
     assert invoked==[("bluesky","public-test.bsky.social")]
-    assert client.post("/api/target-archive/start",json={
-        "platform":"bluesky","account":"public-test.bsky.social"},headers=headers).status_code==429
+    # An earlier accepted run may remain queued or running. A subsequent
+    # explicitly chosen account must receive its own independent receipt.
+    next_job=client.post("/api/target-archive/start",json={
+        "platform":"mastodon","account":"@other@mastodon.social"},headers=headers)
+    assert next_job.status_code==202,next_job.text
+    assert next_job.json()["accepted"] is True
+    assert next_job.json()["state"]=="QUEUED_NOT_VERIFIED"
+    assert invoked==[("bluesky","public-test.bsky.social"),
+                     ("mastodon","@other@mastodon.social")]
 
 
 def test_rejects_unapproved_platform_and_private_host(client,monkeypatch):
