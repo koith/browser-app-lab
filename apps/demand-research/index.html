@@ -1919,6 +1919,7 @@ function draw(){
    No text, demographic or cross-platform owner identity information. */
  window.INTERSECTION_publicRankingSnapshot=function(){
    return {fromMs,toMs,partial:busy||pending.length>0||nextEnd>fromMs||failed>0||incomplete>0,
+     providerOutage:Boolean(bskySearchFailureCode),
      verified:filtered().filter(p=>p.platform!=="cloud"&&!p.restricted&&!p.adultLabeled&&
        !p.discoveryCandidate&&p.profileUrl&&p.id).map(p=>({
        id:p.id,platform:p.platform,profileUrl:p.profileUrl,author:p.author,
