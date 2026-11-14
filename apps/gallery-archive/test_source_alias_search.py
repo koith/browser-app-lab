@@ -8,7 +8,7 @@ def main():
     w="mimmi:djawa-pop-kitty-party"
     assert page_matches(w,"Mimmi DJAWA × Ceyatic Pop Kitty Party","DJAWA × Mimmi photo book")
     assert not page_matches(w,"Mimmi DJAWA Nikke Yuni","Mimmi other album")
-    assert not page_matches(w,"Pop Kitty Party","Model XYZ, no Mimmi")
+    assert not page_matches(w,"Pop Kitty Party","Model XYZ, unrelated photographer")
     assert exact_work_in_text("mimmi:djawa-nikke-yuni","DJAWA Mimmi Nikke Yuni")
     assert not exact_work_in_text("mimmi:djawa-nikke-yuni","Mimmi Nikke Alice")
     assert page_matches("yui:artgravia-677-yui-public-samples",
