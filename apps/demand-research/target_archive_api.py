@@ -415,8 +415,15 @@ def create_router(auth):
                                         headers={"Cache-Control":"private, no-store"})
                 state="VERIFYING_STORAGE"
             else:
-                state="FAILED"
+                # Trusted bridge can rerun a failed workflow twice with its
+                # ORIGINAL run ID, keeping the signed request receipt valid.
+                attempt=run.get("run_attempt")
+                retryable=(backup_queue.enabled() and
+                           run.get("conclusion") in ("failure","timed_out") and
+                           type(attempt) is int and 1<=attempt<3)
+                state="RETRY_PENDING" if retryable else "FAILED"
         return JSONResponse({"run_id":run_id,"state":state,
+                             "run_attempt":run.get("run_attempt"),
                              "remote_verified":False,
                              "account_key":None,"posts":None,"objects":None},
                             headers={"Cache-Control":"private, no-store"})
