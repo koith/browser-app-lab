@@ -4,7 +4,7 @@
  * account records, API JSON, uploaded media, authentication or private bytes.
  */
 "use strict";
-const VERSION="intersection-public-shell-v1-20261114-confirm-multiqueue-v1";
+const VERSION="intersection-public-shell-v1-20261115-queue-scroll-v1";
 const PREFIX="intersection-public-shell-v1-";
 const FILES=[
   "/",
@@ -15,7 +15,7 @@ const FILES=[
   "/target_archive_client.js?v=20261114-confirm-multiqueue-v1",
   "/free_discovery.js",
   "/account_watch.js?v=20261110-first-tab",
-  "/archive_tab.js?v=20261110-compact-library",
+  "/archive_tab.js?v=20261115-queue-dialog-v1",
   "/account_auto_analysis.js?v=20261105-account-ui-3",
   "/account_index_client.js?v=20261105-account-ui-3",
   "/account_group_client.js?v=20261105-account-ui-3"
