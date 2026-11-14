@@ -6,6 +6,7 @@ No live SNS/TeraBox reads, no credentials or actual backup job is created.
 """
 from __future__ import annotations
 
+import base64
 import json
 import re
 from pathlib import Path
@@ -45,6 +46,13 @@ const el=(tag,klass,text)=>{
   return n;
 };
 const niceDate=()=> "2026.11.14";
+const SERVICES={
+  bluesky:{name:"Bluesky",favicon:"https://example.com/bluesky.svg"},
+  mastodon:{name:"Mastodon",favicon:"https://example.com/mastodon.svg"},
+  misskey:{name:"Misskey",favicon:"https://example.com/misskey.svg"},
+  cloud:{name:"Archive",favicon:"https://example.com/archive.svg"}
+};
+const validUrl=s=>{try{const u=new URL(s);return u.protocol==="https:"?u.href:""}catch{return ""}};
 const sourceBadge=p=>el("span","source-badge",p.platform);
 const profileLink=p=>{
   const a=el("a","dialog-author",p.author);
@@ -62,7 +70,8 @@ const appendMedia=()=>{};
 window.showFixturePost=(platform="bluesky",candidate=false)=>{
   openDetail({platform,profileUrl:platform==="mastodon"?
       "https://mastodon.social/@example":"https://bsky.app/profile/public-test.bsky.social",
-    author:"Synthetic public author",url:"https://bsky.app/profile/public-test.bsky.social/post/123",
+    author:"Synthetic public author",avatarUrl:"https://example.com/fixture-avatar.png",
+    url:"https://bsky.app/profile/public-test.bsky.social/post/123",
     text:"Synthetic public post",posted:"2026-11-14T00:00:00Z",
     media:[],terms:new Set(),discoveryCandidate:candidate,restricted:false});
 };
@@ -90,7 +99,7 @@ window.showFixturePost=(platform="bluesky",candidate=false)=>{
  </div></div><div style="height:2500px"></div></section>
 <section id="archivesView" class="hidden"><div style="height:2500px">ARCHIVES</div></section>
 </main><dialog id="detail" aria-labelledby="detailTitle">
- <div class="dialog-head"><b id="detailTitle"><span class="dialog-kicker" aria-hidden="true">POST</span>게시글 상세</b>
+ <div class="dialog-head"><b id="detailTitle"><span class="dialog-profile-name">작성자 정보</span></b>
  <div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div>
  <button type="button" id="closeDetail" aria-label="게시글 닫기">×</button></div>
  <div class="dialog-content" id="detailContent"></div>
@@ -111,6 +120,12 @@ def exercise(browser_type,name,width):
                 path=parsed.path
                 if path=="/target_archive_client.js":
                     route.fulfill(status=200,content_type="application/javascript",body=BACKUP)
+                elif path.endswith(".svg"):
+                    route.fulfill(status=200,content_type="image/svg+xml",body=
+                      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>')
+                elif path.endswith("/fixture-avatar.png"):
+                    route.fulfill(status=200,content_type="image/png",body=
+                      base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGPUit7yn4GBgYGJAQoAIS4CPGFQl4cAAAAASUVORK5CYII="))
                 elif path=="/api/target-archive/status":
                     route.fulfill(status=200 if host==PRIVATE else 503,
                         content_type="application/json",body='{"enabled":true}' if host==PRIVATE else '{}')
@@ -154,6 +169,30 @@ def exercise(browser_type,name,width):
             assert actions.get_by_role("button",name="계정 추적").count()==1
             assert modal.get_by_role("button",name="게시글 닫기").count()==1
             assert modal.locator(".dialog-content .dialog-backup-btn").count()==0
+            assert modal.locator("#detailContent .dialog-source-row").count()==0
+            assert modal.locator("#detailContent .source-badge").count()==0
+            assert modal.locator("#detailContent .profile-link").count()==0
+            profile=header.locator("#detailTitle a.dialog-profile-link")
+            assert profile.count()==1
+            assert profile.get_attribute("href")==PROFILE
+            assert profile.get_attribute("target")=="_blank"
+            assert profile.locator(".dialog-platform-icon").count()==1
+            assert profile.locator(".dialog-avatar-frame img").count()==1
+            assert profile.locator(".dialog-profile-name").inner_text()=="Synthetic public author"
+            assert profile.locator(".dialog-profile-address").inner_text()=="bsky.app/profile/public-test.bsky.social"
+            assert modal.get_attribute("data-platform")=="bluesky"
+            # Source icon, service-style avatar and account name share the
+            # exact same clickable profile link; no extra modal navigation.
+            page.evaluate("""() => {
+              window.__sourceProfileClicks=0;
+              document.querySelector('#detail .dialog-profile-link')
+                .addEventListener('click',e=>{e.preventDefault();window.__sourceProfileClicks++})
+            }""")
+            profile.locator(".dialog-platform-icon").click()
+            profile.locator(".dialog-avatar-frame").click()
+            profile.locator(".dialog-profile-name").click()
+            assert page.evaluate("window.__sourceProfileClicks")==3
+            assert page.url==before
             # Single strong-contrast action header with buttons on ONE line.
             # Unlike the old body button bar it must remain fixed while only
             # the dialog body scrolls through potentially dozens of images.
