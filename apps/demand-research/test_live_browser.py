@@ -14,6 +14,7 @@ from playwright.sync_api import sync_playwright, expect
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 FREE_JS=Path(__file__).with_name("free_discovery.js").read_text(encoding="utf-8")
 LIVE_JS=Path(__file__).with_name("live_feed_recovery.js").read_text(encoding="utf-8")
+RANK_JS=Path(__file__).with_name("post_activity_ranking.js").read_text(encoding="utf-8")
 PAGE="https://koith.github.io/browser-app-lab/apps/demand-research/"
 TERMS=("뒷계","섹트","일탈계")
 PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGPUit7yn4GBgYGJAQoAIS4CPGFQl4cAAAAASUVORK5CYII=")
@@ -164,6 +165,8 @@ def run(live=False):
             # Test the PR's fallback JS, not a stale GitHub Pages cached release.
             page.route(PAGE+"live_feed_recovery.js**",lambda route:route.fulfill(status=200,
                         content_type="application/javascript",body=LIVE_JS))
+            page.route(PAGE+"post_activity_ranking.js",lambda route:route.fulfill(status=200,
+                        content_type="application/javascript",body=RANK_JS))
             if not live:
                 page.route("https://api.keenable.ai/v1/search/public",
                     lambda route:route.fulfill(status=200,content_type="application/json",
@@ -273,6 +276,9 @@ def run(live=False):
                     assert "Bluesky" in reason and ("HTTP" in reason or "연결 실패" in reason),reason
                     assert "전체 게시물" in reason,reason
                     assert page.locator("#retryFeed").count()==1,"Missing provider retry action"
+                    page.wait_for_function("""() => document.querySelector('#activityRankingRows')
+                      ?.textContent?.includes('랭킹 집계가 불완전')
+                    """,timeout=10000)
                     assert page.locator("article.post").count()==0,"Unverified source must not become a post"
                     assert not errors,errors
                     print("LIVE_PUBLIC_SEARCH_OUTAGE_NOT_ZERO",json.dumps({
