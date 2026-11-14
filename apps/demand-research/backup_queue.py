@@ -47,8 +47,15 @@ def _db():
                account TEXT NOT NULL,
                created_at INTEGER NOT NULL,
                workflow_run_id INTEGER,
-               accepted_at INTEGER
+               accepted_at INTEGER,
+               created_order INTEGER
             )''')
+            # Additive, backward-compatible migration for existing free-tier
+            # queue databases; never modify old request identities.
+            columns={str(row["name"]) for row in conn.execute(
+                "PRAGMA table_info(account_requests)")}
+            if "created_order" not in columns:
+                conn.execute("ALTER TABLE account_requests ADD COLUMN created_order INTEGER")
             yield conn
     finally:
         conn.close()
@@ -172,8 +179,8 @@ def create_request(platform,account,root=None):
             for _ in range(10):
                 job_id=1000000000+secrets.randbelow(9000000000)
                 try:
-                    conn.execute("INSERT INTO account_requests (job_id,platform,account,created_at) VALUES (?,?,?,?)",
-                                 (job_id,platform,account,int(time.time())))
+                    conn.execute("INSERT INTO account_requests (job_id,platform,account,created_at,created_order) VALUES (?,?,?,?,?)",
+                                 (job_id,platform,account,int(time.time()),time.time_ns()))
                     return job_id
                 except sqlite3.IntegrityError:
                     continue
@@ -181,7 +188,8 @@ def create_request(platform,account,root=None):
     root=root or CloudArchive()
     job_id=1000000000+secrets.randbelow(9000000000)
     payload={"schema":1,"job_id":job_id,"platform":platform,
-             "account":account,"created_at":int(time.time())}
+             "account":account,"created_at":int(time.time()),
+             "created_order":time.time_ns()}
     _save_verified(root,_request_key(job_id),payload)
     return job_id
 
@@ -193,7 +201,7 @@ def pending(root=None,limit=1):
         with _db() as conn:
             rows=conn.execute('''SELECT * FROM account_requests
                 WHERE workflow_run_id IS NULL
-                ORDER BY created_at ASC, job_id ASC LIMIT ?''',
+                ORDER BY created_at ASC, COALESCE(created_order,job_id) ASC, job_id ASC LIMIT ?''',
                 (min(max(limit,1),_MAX_OPEN),)).fetchall()
         return [{"job_id":int(row["job_id"]),"platform":row["platform"],
                  "account":row["account"]} for row in rows]
@@ -336,7 +344,7 @@ def queue_rows(root=None, limit=20, offset=0):
         with _db() as conn:
             total=int(conn.execute("SELECT count(*) FROM account_requests").fetchone()[0])
             rows=conn.execute("""SELECT * FROM account_requests
-                 ORDER BY created_at ASC, job_id ASC LIMIT ? OFFSET ?""",
+                 ORDER BY created_at ASC, COALESCE(created_order,job_id) ASC, job_id ASC LIMIT ? OFFSET ?""",
                  (limit,offset)).fetchall()
         items=[]
         for row in rows:
@@ -372,9 +380,10 @@ def queue_rows(root=None, limit=20, offset=0):
         items.append({"schema":1,"job_id":job_id,
                       "platform":record["platform"],"account":record["account"],
                       "created_at":record["created_at"],
+                      "created_order":record.get("created_order",job_id),
                       "workflow_run_id":ack["workflow_run_id"] if ack else None,
                       "accepted_at":ack["accepted_at"] if ack else None})
-    items.sort(key=lambda row:(row["created_at"],row["job_id"]))
+    items.sort(key=lambda row:(row["created_at"],row["created_order"],row["job_id"]))
     return {"items":items[offset:offset+limit],
             "total":len(items) if not truncated else None,
             "mode":"immutable_cloud","offset":offset,"limit":limit,
