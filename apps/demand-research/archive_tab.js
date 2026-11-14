@@ -269,6 +269,161 @@ function changeMode(mode,account=""){
   if(mode==="accounts")void preloadChoices();
   return true;
 }
+/* Explicit read-only queue inspection. Never background-poll all workflows:
+   querying 20 real job statuses is intentionally user-triggered only. */
+const queueOpen=$("archiveQueueOpen"),queueDialog=$("archiveQueueDialog"),
+      queueClose=$("archiveQueueClose"),queueStatus=$("archiveQueueStatus"),
+      queueList=$("archiveQueueList"),queueMore=$("archiveQueueMore"),
+      queueRefresh=$("archiveQueueRefresh");
+let queueLoading=false,queueOffset=0;
+const queueText=(tag,className,value)=>{
+  const node=document.createElement(tag);
+  if(className)node.className=className;
+  if(value!==undefined)node.textContent=String(value);
+  return node;
+};
+function addQueueRow(item,ordinal){
+  const row=queueText("li","archive-queue-row");
+  row.dataset.state=String(item.state||"STATUS_UNAVAILABLE").slice(0,40);
+  const head=queueText("div","archive-queue-row-head");
+  head.append(queueText("strong","archive-queue-name",ordinal+". "+
+    (item.platform==="mastodon"?"Mastodon":"Bluesky")+" · "+String(item.account||"계정 확인 불가").slice(0,260)));
+  const when=Number(item.created_at);
+  head.append(queueText("time","archive-queue-date",
+    Number.isFinite(when)&&when>0
+      ?new Date(when*1000).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})
+      :"접수시각 확인 불가"));
+  const phases=queueText("div","archive-queue-track");
+  phases.dataset.state=row.dataset.state;
+  phases.setAttribute("role","img");
+  const step=Math.min(4,Math.max(0,Number(item.phase)||0));
+  phases.setAttribute("aria-label","진행 단계 "+step+"/4, 파일 저장 비율 아님");
+  for(let i=0;i<4;i++)phases.append(queueText("span",i<step?"filled":""));
+  const detail=queueText("div","archive-queue-detail",
+    "단계 "+step+"/4 · "+String(item.status||"진행 상태 미확인").slice(0,200));
+  row.append(head,phases,detail);queueList.append(row);
+}
+async function ownPendingQueue(offset){
+  const read=window.INTERSECTION_getOwnBackupRequests;
+  if(typeof read!=="function")return null;
+  const entries=read().filter(row=>row&&
+    Number.isSafeInteger(row.run_id)&&row.run_id>0&&
+    typeof row.receipt==="string"&&row.receipt.length<900&&
+    ["bluesky","mastodon"].includes(row.platform)&&typeof row.account==="string");
+  if(!entries.length)return null;
+  entries.sort((a,b)=>{
+    const first=Number(a.createdAt)||0,second=Number(b.createdAt)||0;
+    return first&&second?first-second:(a.order||0)-(b.order||0);
+  });
+  const selected=entries.slice(offset,offset+20);
+  const items=await Promise.all(selected.map(async row=>{
+    const item={job_id:row.run_id,platform:row.platform,account:row.account,
+      created_at:(Number(row.createdAt)||0)/1000,phase:1,phase_total:4,
+      state:"WAITING",status:"이 브라우저에서 접수한 작업 · 진행 확인 중"};
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),7500);
+    try{
+      const response=await fetch("/api/target-archive/jobs/"+
+        encodeURIComponent(String(row.run_id))+"?receipt="+encodeURIComponent(row.receipt),{
+          credentials:"same-origin",cache:"no-store",
+          headers:{Accept:"application/json"},signal:controller.signal});
+      if(!response.ok)throw Error("status HTTP "+response.status);
+      const result=await response.json(),state=String(result.state||"");
+      const stages={
+        QUEUED:[1,"접수 완료 · 실행 대기"],
+        RUNNING:[2,"수집·저장 작업 실행 중"],
+        VERIFYING_STORAGE:[3,"실행 완료 · 저장 원본 검증 중"],
+        RETRY_PENDING:[2,"실행 실패 · 재시도 대기"],
+        REMOTE_VERIFIED:[4,"원격 파일·해시 검증 완료"],
+        PARTIAL_BACKUP:[4,"일부 저장본 검증 완료 · 전체 수집 아님"],
+        FAILED:[2,"실행 실패 · 재접수 검토 필요"],
+        NEEDS_RETRY:[1,"기존 접수 기록 만료 · 재접수 필요"]
+      };
+      const stage=stages[state]||[1,"접수 영수증만 확인됨 · 저장 검증 미확인"];
+      item.phase=stage[0];item.state=state||"STATUS_UNAVAILABLE";
+      item.status=stage[1];
+    }catch{
+      item.state="STATUS_UNAVAILABLE";
+      item.status="영수증 보유 · 현재 서버 상태 조회 불가";
+    }finally{clearTimeout(timer)}
+    return item;
+  }));
+  return {known:true,mode:"local_receipts",items,total:entries.length,
+    offset,limit:20,truncated:false};
+}
+async function loadQueue(reset=true){
+  if(!queueDialog||!queueStatus||!queueList||queueLoading)return;
+  queueLoading=true;
+  if(queueRefresh)queueRefresh.disabled=true;
+  if(queueMore)queueMore.disabled=true;
+  const offset=reset?0:queueOffset;
+  if(reset)queueStatus.textContent="백업 요청 장부와 실행 상태 확인 중…";
+  try{
+    await (window.INTERSECTION_AUTH_READY||Promise.resolve());
+    const response=await fetch("/api/target-archive/queue?"+
+      new URLSearchParams({offset:String(offset),limit:"20"}),{
+        credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
+    let data;
+    if(response.ok){
+      data=await response.json();
+      if(!data?.known)data=await ownPendingQueue(offset)||data;
+    }else if([401,403,503].includes(response.status)){
+      // Public archive mode intentionally prohibits revealing every user's
+      // chosen accounts. Signed browser receipts still allow each visitor to
+      // view only their own unfinished requests, without a separate login.
+      data=await ownPendingQueue(offset);
+      if(!data)throw Error("비공개 전체 대기열은 관리자 세션에서만 볼 수 있습니다. 이 브라우저에 남은 접수 영수증도 없습니다.");
+    }else{
+      throw Error("대기열 조회 실패 · HTTP "+response.status);
+    }
+    if(reset){queueOffset=0;queueList.replaceChildren();}
+    if(!data?.known){
+      queueStatus.textContent=String(data?.message||"현재 서버에서 요청 내역을 확인할 수 없습니다.");
+      if(queueMore)queueMore.hidden=true;
+      return;
+    }
+    const rows=Array.isArray(data.items)?data.items:[];
+    for(let i=0;i<rows.length;i++)addQueueRow(rows[i],offset+i+1);
+    queueOffset=offset+rows.length;
+    const total=Number.isFinite(data.total)?data.total:null;
+    const warning=data.mode==="volatile_sqlite"
+      ?" · 임시 장부: 서버 재시작 이전 접수 기록은 누락될 수 있습니다.":data.mode==="local_receipts"
+      ?" · 이 브라우저에 남아 있는 미완료 접수만 표시하며 전체 서버 대기열은 아닙니다.":"";
+    queueStatus.textContent=(total===null
+      ?"확인 가능한 요청 "+queueOffset+"건"
+      :"요청 "+total+"건 중 "+queueOffset+"건 표시")+
+      " · 오래된 요청부터 정렬"+warning+
+      (data.truncated?" · 원격 장부 일부만 조회됨":"");
+    if(!queueOffset){
+      queueList.append(queueText("li","archive-queue-detail",
+        "현재 서버 장부에서 접수 기록을 찾지 못했습니다. 이전 요청까지 모두 성공했다는 뜻은 아닙니다."));
+    }
+    if(queueMore)queueMore.hidden=total===null
+      ?rows.length<20
+      :queueOffset>=total;
+  }catch(error){
+    queueStatus.textContent="요청 내역을 확인하지 못했습니다: "+
+      String(error?.message||"네트워크 오류").slice(0,100);
+    if(queueMore)queueMore.hidden=true;
+  }finally{
+    queueLoading=false;
+    if(queueRefresh)queueRefresh.disabled=false;
+    if(queueMore)queueMore.disabled=false;
+  }
+}
+if(queueOpen&&queueDialog){
+  queueOpen.hidden=location.hostname==="koith.github.io";
+  queueOpen.addEventListener("click",()=>{
+    if(queueDialog.open)return;
+    queueDialog.showModal();void loadQueue(true);
+  });
+  queueClose?.addEventListener("click",()=>queueDialog.close());
+  queueDialog.addEventListener("click",event=>{
+    if(event.target===queueDialog)queueDialog.close();
+  });
+  queueRefresh?.addEventListener("click",()=>void loadQueue(true));
+  queueMore?.addEventListener("click",()=>void loadQueue(false));
+}
 // Called by successful backup receipt or a saved-account card.
 window.INTERSECTION_openArchive=(account,mode)=>
   changeMode(mode==="auto"?"auto":"accounts",account||"");

@@ -47,8 +47,15 @@ def _db():
                account TEXT NOT NULL,
                created_at INTEGER NOT NULL,
                workflow_run_id INTEGER,
-               accepted_at INTEGER
+               accepted_at INTEGER,
+               created_order INTEGER
             )''')
+            # Additive, backward-compatible migration for existing free-tier
+            # queue databases; never modify old request identities.
+            columns={str(row["name"]) for row in conn.execute(
+                "PRAGMA table_info(account_requests)")}
+            if "created_order" not in columns:
+                conn.execute("ALTER TABLE account_requests ADD COLUMN created_order INTEGER")
             yield conn
     finally:
         conn.close()
@@ -172,8 +179,8 @@ def create_request(platform,account,root=None):
             for _ in range(10):
                 job_id=1000000000+secrets.randbelow(9000000000)
                 try:
-                    conn.execute("INSERT INTO account_requests (job_id,platform,account,created_at) VALUES (?,?,?,?)",
-                                 (job_id,platform,account,int(time.time())))
+                    conn.execute("INSERT INTO account_requests (job_id,platform,account,created_at,created_order) VALUES (?,?,?,?,?)",
+                                 (job_id,platform,account,int(time.time()),time.time_ns()))
                     return job_id
                 except sqlite3.IntegrityError:
                     continue
@@ -181,7 +188,8 @@ def create_request(platform,account,root=None):
     root=root or CloudArchive()
     job_id=1000000000+secrets.randbelow(9000000000)
     payload={"schema":1,"job_id":job_id,"platform":platform,
-             "account":account,"created_at":int(time.time())}
+             "account":account,"created_at":int(time.time()),
+             "created_order":time.time_ns()}
     _save_verified(root,_request_key(job_id),payload)
     return job_id
 
@@ -193,7 +201,7 @@ def pending(root=None,limit=1):
         with _db() as conn:
             rows=conn.execute('''SELECT * FROM account_requests
                 WHERE workflow_run_id IS NULL
-                ORDER BY created_at ASC, job_id ASC LIMIT ?''',
+                ORDER BY created_at ASC, COALESCE(created_order,job_id) ASC, job_id ASC LIMIT ?''',
                 (min(max(limit,1),_MAX_OPEN),)).fetchall()
         return [{"job_id":int(row["job_id"]),"platform":row["platform"],
                  "account":row["account"]} for row in rows]
@@ -317,3 +325,66 @@ def accepted_runs(root=None,limit=64):
             accepted.append((int(row.get("accepted_at") or 0),
                              row["workflow_run_id"]))
     return [run_id for _,run_id in sorted(accepted)]
+
+
+def queue_rows(root=None, limit=20, offset=0):
+    """Oldest-first snapshot of signed backup request records for owner UI.
+
+    This is a read-only view. It does NOT equate a dispatch acknowledgment
+    with successful media preservation or expose tokens/cookies. SQLite's
+    ephemeral nature is reported via mode, never concealed from the user.
+    """
+    if not enabled():
+        raise RuntimeError("No trackable durable account request queue configured")
+    if type(limit) is not int or not 1<=limit<=40:
+        raise ValueError("invalid queue page size")
+    if type(offset) is not int or not 0<=offset<=2000:
+        raise ValueError("invalid queue offset")
+    if sqlite_enabled():
+        with _db() as conn:
+            total=int(conn.execute("SELECT count(*) FROM account_requests").fetchone()[0])
+            rows=conn.execute("""SELECT * FROM account_requests
+                 ORDER BY created_at ASC, COALESCE(created_order,job_id) ASC, job_id ASC LIMIT ? OFFSET ?""",
+                 (limit,offset)).fetchall()
+        items=[]
+        for row in rows:
+            item=_sqlite_record(row)
+            item.update({"workflow_run_id":int(row["workflow_run_id"])
+                           if row["workflow_run_id"] is not None else None,
+                         "accepted_at":int(row["accepted_at"])
+                           if row["accepted_at"] is not None else None})
+            items.append(item)
+        return {"items":items,"total":total,"mode":"volatile_sqlite",
+                "offset":offset,"limit":limit,"truncated":False}
+
+    root=root or CloudArchive()
+    candidates=[]
+    for name in root.names(""):
+        match=_REQUEST.fullmatch(name)
+        if match:
+            candidates.append(int(match.group(1)))
+    if len(candidates)>2000:
+        raise RuntimeError("Too many immutable account requests to enumerate safely")
+    # Remote account queue reads can be slow; never block the owner UI
+    # indefinitely on thousands of private-file downloads. If capped,
+    # report that the complete chronology is NOT available.
+    truncated=len(candidates)>120
+    if truncated:
+        candidates=sorted(candidates)[:120]
+    items=[]
+    for job_id in candidates:
+        record=read_request(root,job_id)
+        if record is None:
+            continue
+        ack=read_acceptance(root,job_id)
+        items.append({"schema":1,"job_id":job_id,
+                      "platform":record["platform"],"account":record["account"],
+                      "created_at":record["created_at"],
+                      "created_order":record.get("created_order",job_id),
+                      "workflow_run_id":ack["workflow_run_id"] if ack else None,
+                      "accepted_at":ack["accepted_at"] if ack else None})
+    items.sort(key=lambda row:(row["created_at"],row["created_order"],row["job_id"]))
+    return {"items":items[offset:offset+limit],
+            "total":len(items) if not truncated else None,
+            "mode":"immutable_cloud","offset":offset,"limit":limit,
+            "truncated":truncated}

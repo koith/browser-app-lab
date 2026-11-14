@@ -356,3 +356,42 @@ def test_failed_queued_job_exposes_retry_pending_until_third_attempt(client,monk
     run["run_attempt"]=3
     final=client.get(uri)
     assert final.json()["state"]=="FAILED"
+
+
+def test_queue_detail_owner_only_and_real_phase_not_fabricated_percent(client,monkeypatch):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    data=[
+      {"job_id":1000000001,"platform":"bluesky","account":"first.bsky.social",
+       "created_at":1800000000,"accepted_at":None,"workflow_run_id":None},
+      {"job_id":1000000002,"platform":"mastodon","account":"second@example.test",
+       "created_at":1800000001,"accepted_at":1800000002,"workflow_run_id":43700000001},
+      {"job_id":1000000003,"platform":"bluesky","account":"third.bsky.social",
+       "created_at":1800000003,"accepted_at":1800000004,"workflow_run_id":43700000002},
+    ]
+    monkeypatch.setattr(target_archive_api.backup_queue,"queue_rows",
+      lambda root=None,limit=20,offset=0:{"items":data[offset:offset+limit],
+          "total":3,"mode":"volatile_sqlite","offset":offset,"limit":limit,"truncated":False})
+    def run(run_id):
+        return {"status":"in_progress","conclusion":None} if run_id==43700000001 else {
+          "status":"completed","conclusion":"success","run_attempt":1}
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",run)
+    resp=client.get("/api/target-archive/queue?limit=2")
+    assert resp.status_code==200,resp.text
+    obj=resp.json()
+    assert obj["known"] is True and obj["total"]==3
+    assert [r["account"] for r in obj["items"]]==[
+        "first.bsky.social","second@example.test"]
+    assert [r["state"] for r in obj["items"]]==["WAITING","RUNNING"]
+    assert obj["items"][0]["phase"]==1 and obj["items"][1]["phase"]==2
+    resp=client.get("/api/target-archive/queue?offset=2&limit=2")
+    assert resp.json()["items"][0]["state"]=="VERIFYING_STORAGE"
+    assert resp.json()["items"][0]["remote_verified"] is False
+    assert "percent" not in str(resp.json()).lower()
+
+
+def test_queue_detail_does_not_expose_other_users_requests(client,monkeypatch):
+    from fastapi.testclient import TestClient
+    monkeypatch.setenv("DEMAND_PUBLIC_ARCHIVE_MODE","1")
+    anonymous=TestClient(gateway.app,base_url="https://testserver")
+    resp=anonymous.get("/api/target-archive/queue")
+    assert resp.status_code==401

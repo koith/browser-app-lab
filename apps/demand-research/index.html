@@ -1024,6 +1024,48 @@ main{padding-top:10px}
 @media(max-width:650px){#accountDialog .account-detail-content{padding:12px}
  .account-watch-dialog-actions button,.account-watch-dialog-actions a{padding:8px;font-size:10px}}
 
+
+/* Post-grid containment: offscreen cards skip layout/paint; Safari and
+   Chromium both preserve the grid's intrinsic row footprint. */
+#postsView .feed>.post{content-visibility:auto;contain-intrinsic-size:auto 320px}
+@media(max-width:720px){
+ #postsView .feed>.post{contain-intrinsic-size:auto 240px}
+}
+/* Account backup request queue uses the same dark header and compact surface
+   as other detail dialogs; no source data is embedded in page HTML. */
+#archiveQueueDialog{width:min(670px,calc(100vw - 22px));max-width:calc(100vw - 22px);
+ max-height:min(83dvh,840px);padding:0;border:2px solid #101432;border-top:4px solid #f5d312;
+ border-radius:13px;background:#fff9f1;box-shadow:0 20px 70px #070c26aa;overflow:hidden}
+#archiveQueueDialog[open]{display:flex;flex-direction:column}
+#archiveQueueDialog::backdrop{background:rgba(4,8,29,.73);backdrop-filter:blur(5px)}
+.archive-queue-header{display:flex;justify-content:space-between;align-items:center;flex:0 0 auto;
+ gap:10px;background:#101b45;color:#fff;padding:11px 15px;border-bottom:3px solid #f5d312}
+.archive-queue-header h2{font-size:15px;line-height:1.4;margin:0;color:#fff}
+#archiveQueueClose{width:36px;min-width:36px;min-height:35px;border:1px solid #8696bd;
+ color:#fff;background:transparent;border-radius:5px;font-size:23px;padding:0}
+.archive-queue-content{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:13px 14px 17px}
+.archive-queue-caption{font-size:11px;line-height:1.55;color:#62718e;margin:0 0 9px}
+#archiveQueueStatus{margin:0 0 12px;font-weight:750;font-size:12px;color:#263b66}
+.archive-queue-list{padding:0;margin:0;list-style:none;display:grid;gap:7px}
+.archive-queue-row{display:grid;gap:5px;background:#fff;border:1px solid #d7deed;border-radius:9px;
+ padding:10px 11px;min-width:0}
+.archive-queue-row-head{display:flex;justify-content:space-between;gap:9px;align-items:center}
+.archive-queue-name{font-size:12px;font-weight:850;color:#142c59;overflow-wrap:anywhere}
+.archive-queue-date{font-size:10px;color:#77839a;white-space:nowrap}
+.archive-queue-detail{font-size:11px;line-height:1.45;color:#52617e}
+.archive-queue-row[data-state="FAILED"]{border-color:#cb7676}
+.archive-queue-row[data-state="RETRY_PENDING"]{border-color:#d2ad68}
+.archive-queue-track{height:5px;display:flex;gap:3px}
+.archive-queue-track span{display:block;height:5px;flex:1;border-radius:3px;background:#e1e7f1}
+.archive-queue-track span.filled{background:#667bc6}
+.archive-queue-track[data-state="FAILED"] span.filled{background:#be6666}
+.archive-queue-track[data-state="RETRY_PENDING"] span.filled{background:#c1a16b}
+.archive-queue-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+.archive-queue-footer button{font-size:11px;padding:8px 11px;min-height:34px;
+ border:1px solid #aab8d4;border-radius:6px;color:#263e77;background:#edf1ff}
+#archiveQueueMore[hidden]{display:none}
+
+#archiveQueueOpen[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -1234,12 +1276,28 @@ main{padding-top:10px}
   <div id="archiveHubStatus" role="status" aria-live="polite">비공개 보관 서버의 연결 상태를 확인 중입니다.</div>
   <div id="archiveHubActions" class="archive-hub-actions" hidden>
     <button type="button" id="archiveHubReload">목록 새로고침</button>
+    <button type="button" id="archiveQueueOpen" aria-haspopup="dialog" aria-controls="archiveQueueDialog">백업 대기열 확인</button>
     <a href="/account-archive" id="archiveHubFullView">보관함 크게 보기</a>
   </div>
   <div id="archiveHubFrameBox" hidden>
     <iframe id="archiveHubFrame" title="저장된 SNS 계정과 게시글·미디어 보관함" loading="lazy" referrerpolicy="no-referrer"></iframe>
   </div>
 </section>
+<dialog id="archiveQueueDialog" aria-labelledby="archiveQueueTitle">
+ <div class="archive-queue-header">
+  <h2 id="archiveQueueTitle">백업 요청 대기열</h2>
+  <button id="archiveQueueClose" type="button" aria-label="대기열 닫기">×</button>
+ </div>
+ <div class="archive-queue-content">
+  <p class="archive-queue-caption">먼저 접수된 순서입니다. 표시된 단계는 처리 과정이며 파일 다운로드 비율(%)이 아닙니다. 실제 저장 성공은 원본 검증 후 확인합니다.</p>
+  <p id="archiveQueueStatus" role="status" aria-live="polite">조회 전</p>
+  <ol id="archiveQueueList" class="archive-queue-list" aria-label="백업 요청 접수 순서"></ol>
+  <div class="archive-queue-footer">
+   <button id="archiveQueueMore" type="button" hidden>다음 요청 더 보기</button>
+   <button id="archiveQueueRefresh" type="button">현황 새로고침</button>
+  </div>
+ </div>
+</dialog>
 </main>
 <script>
 /* Core navigation remains usable if the separate public account-analysis
@@ -1798,12 +1856,16 @@ function filtered(){
 /* The main feed contains dated, source-verified SNS originals only.
    Search snippets have no verified media or timestamp: list separately. */
 function feedRows(){return filtered();}
+let lastDiscoveredSignature="";
 function drawDiscoveredLinks(){
   // A verified X post only supersedes its own X search lead. Threads and
   // Instagram can legitimately use the same opaque post ID string.
   const rows=indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&
     !(p.platform==="x"&&ids.has("x:"+p.postId)));
   const container=$("discoveryCandidates"),list=$("discoveryCandidateList");
+  const signature=(cloudMode?"private:":"public:")+rows.map(p=>p.id).join("|");
+  if(signature===lastDiscoveredSignature)return;
+  lastDiscoveredSignature=signature;
   container.classList.toggle("hidden",cloudMode||rows.length===0);
   $("discoveryCandidatesCount").textContent=String(rows.length);
   list.replaceChildren();
@@ -2154,14 +2216,14 @@ function draw(){
   updateAdScores();
   let matching=posts.filter(matchesText),suspected=matching.filter(suspectedAd).length;
   let hidden=suspected;
-  let rows=feedRows(),list=$("feed");list.replaceChildren();
+  let rows=feedRows(),list=$("feed");
   drawDiscoveredLinks();
-  let limit=visibleLimit,frag=document.createDocumentFragment();
+  let limit=visibleLimit,desired=[];
   for(const p of rows.slice(0,limit)){
-    // Growing feed counts must not force loaded thumbnails to reload.
+    // Reuse stable cards: image decode state survives incremental feed updates.
     let card=tileCache.get(p);
     if(!card){card=tile(p);tileCache.set(p,card)}
-    frag.append(card);
+    desired.push(card);
   }
   const loadingPosts=!cloudMode&&(busy||
     (fallbackStats&&["searching","verifying"].includes(fallbackStats.state))||
@@ -2174,7 +2236,7 @@ function draw(){
       const thumb=el("div","post-thumb is-loading"),lines=el("div","skeleton-lines");
       lines.append(el("span"),el("span"));
       placeholder.append(thumb,lines);
-      frag.append(placeholder);
+      desired.push(placeholder);
     }
   }
   if(!rows.length){
@@ -2188,9 +2250,17 @@ function draw(){
          liveRecoveryState==="connecting"?"실시간 공개 스트림을 연결 중입니다.":
          liveRecoveryState==="receiving"?"수신한 게시물의 공식 원문을 검증 중입니다.":
          "실시간 새 글 스트림의 연결 상태를 확인 중입니다.");
-    frag.append(el("div","empty",label));
+    desired.push(el("div","empty",label));
   }
-  list.append(frag);shown=Math.min(rows.length,limit);
+  // Reconcile existing card nodes instead of remounting the whole feed at
+  // every live batch. This keeps native image decoding and scroll stable.
+  let cursor=list.firstChild;
+  for(const item of desired){
+    if(cursor===item){cursor=cursor.nextSibling;continue;}
+    list.insertBefore(item,cursor);
+  }
+  while(cursor){const next=cursor.nextSibling;cursor.remove();cursor=next;}
+  shown=Math.min(rows.length,limit);
   $("paging").classList.toggle("hidden",!hasMoreResults() || busy);
   $("more").textContent=bskySearchFailureCode&&!cloudMode?
     "검증된 게시글 더 찾기":"더 보기";
@@ -2270,7 +2340,7 @@ function resetData(){
   if(verifiedFeedDrawTimer!==null){clearTimeout(verifiedFeedDrawTimer);verifiedFeedDrawTimer=null}
   window.INTERSECTION_stopLiveFeedRecovery?.();
   window.INTERSECTION_stopSearchFallback?.();
-  tileCache=new WeakMap();
+  tileCache=new WeakMap();lastDiscoveredSignature="";
   posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();
   visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw();
 }
@@ -2571,8 +2641,9 @@ if(cloudMode){
     if(!force&&now-lastFrame<33){frameId=requestAnimationFrame(render);return}
     lastFrame=now;
     ctx.clearRect(0,0,W,H);
-    var dx=reduced.matches?0:Math.sin(now*.00024)*11;
-    var dy=reduced.matches?0:Math.cos(now*.00019)*9;
+    // Keep the ambient atlas still while scrolling; avoid continuous GPU
+    // compositing and Canvas2D repainting on every animation frame.
+    var dx=0,dy=0;
     ctx.drawImage(atlas,Math.round((margin+dx)*scale),
       Math.round((margin+dy)*scale),Math.round(W*scale),Math.round(H*scale),
       0,0,W,H);
@@ -2592,7 +2663,9 @@ if(cloudMode){
       ctx.restore();
       hits=hits.filter(function(h){return now-h.t<idleTime});
     }
-    if(!document.hidden&&(!reduced.matches||hits.length))frameId=requestAnimationFrame(render);
+    // Animate only while a real pointer ripple exists. An idle background
+    // must never consume every frame of an iPhone's scrolling budget.
+    if(!document.hidden&&hits.length)frameId=requestAnimationFrame(render);
     else frameId=0;
   }
   function redraw(){if(!frameId)frameId=requestAnimationFrame(render)}
@@ -2600,7 +2673,9 @@ if(cloudMode){
     if(!e||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return;
     var now=performance.now();
     if(e.type==="pointermove"){
-      if(e.pointerType!=="mouse"&&e.buttons===0)return;
+      // Hover-only mouse moves were creating a 1.75s animation on an idle
+      // page. Only real drag/press movement may repaint the ambient canvas.
+      if(e.buttons===0)return;
       if(now-lastHit<35)return;
       var last=hits[hits.length-1];
       if(last&&Math.hypot(e.clientX-last.x,e.clientY-last.y)<18)return;
@@ -2614,10 +2689,12 @@ if(cloudMode){
   document.addEventListener("pointermove",record,{passive:true});
   document.addEventListener("visibilitychange",redraw,{passive:true});
   window.addEventListener("resize",function(){
-    cancelAnimationFrame(frameId);frameId=0;makeAtlas();redraw();
+    cancelAnimationFrame(frameId);frameId=0;makeAtlas();
   },{passive:true});
   if(reduced.addEventListener)reduced.addEventListener("change",redraw);
-  makeAtlas();redraw();
+  // makeAtlas already paints synchronously. A second rAF loop would repaint
+  // the same static canvas multiple times for no visual change.
+  makeAtlas();
 })();
 </script>
 <script>
@@ -2634,10 +2711,10 @@ if(location.hostname==="intersection-originals-free.onrender.com" &&
 <script src="bsky_search_fallback.js?v=20261114-public-source-hydration-v1" defer></script>
 <script src="post_activity_ranking.js" defer></script>
 <script src="public_video_trends.js" defer></script>
-<script src="target_archive_client.js?v=20261114-confirm-multiqueue-v1" defer></script>
+<script src="target_archive_client.js?v=20261115-own-pending-v1" defer></script>
 <script src="free_discovery.js" defer></script>
 <script src="account_watch.js?v=20261110-first-tab" defer></script>
-<script src="archive_tab.js?v=20261110-compact-library" defer></script>
+<script src="archive_tab.js?v=20261115-queue-dialog-v1" defer></script>
 <script src="account_auto_analysis.js?v=20261105-account-ui-3" defer></script>
 <script src="account_index_client.js?v=20261105-account-ui-3" defer></script>
 <script src="account_group_client.js?v=20261105-account-ui-3" defer></script>

@@ -77,7 +77,7 @@ def run():
             page.select_option("#socialPlatform","x")
             page.select_option("#socialTerm","섹트")
             page.locator("#socialFind").click()
-            page.wait_for_selector("article.post",timeout=20000)
+            page.wait_for_selector('article.post .source-badge[aria-label="출처: X"]',timeout=20000)
             assert len(requested)==1
             assert "platform=x" in requested[0] and "%EC%84%B9%ED%8A%B8" in requested[0]
             assert page.locator('.source-badge[aria-label="출처: X"]').count()==1
