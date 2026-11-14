@@ -4,13 +4,13 @@
  * account records, API JSON, uploaded media, authentication or private bytes.
  */
 "use strict";
-const VERSION="intersection-public-shell-v1-20261110";
+const VERSION="intersection-public-shell-v1-20261114-modal-toolbar";
 const PREFIX="intersection-public-shell-v1-";
 const FILES=[
   "/",
   "/post_activity_ranking.js",
   "/public_video_trends.js",
-  "/target_archive_client.js?v=20261107-queue-read-denial",
+  "/target_archive_client.js?v=20261114-inline-backup-v1",
   "/free_discovery.js",
   "/account_watch.js?v=20261110-first-tab",
   "/archive_tab.js?v=20261110-compact-library",
