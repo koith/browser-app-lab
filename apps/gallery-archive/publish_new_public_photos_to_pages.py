@@ -53,7 +53,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
             raw=stage_file.read_bytes()
             if len(raw)!=photo.get('bytes') or hashlib.sha256(raw).hexdigest()!=digest:
                 raise ValueError('staged original physical SHA mismatch')
-            if len(raw)>8_000_000 or used+len(raw)>budget or len(added)>=limit:
+            if len(raw)>64_000_000 or used+len(raw)>budget or len(added)>=limit:
                 continue
             ext=stage_file.suffix.lower()
             if ext not in ALLOWED_EXT:continue
