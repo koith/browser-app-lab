@@ -1226,7 +1226,7 @@ const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS
 const privateHost=location.hostname!=="koith.github.io";
 const cloudMode=privateHost&&new URLSearchParams(location.search).get("source")==="archive";
 let bskySearchFailureCode="",liveRecoveryState="",fallbackStats=null,verifiedFeedDrawTimer=null;
-let tileCache=new WeakMap();
+let tileCache=new WeakMap(),discoveryLoading=false;
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
@@ -2010,7 +2010,7 @@ function draw(){
   }
   const loadingPosts=!cloudMode&&(busy||
     (fallbackStats&&["searching","verifying"].includes(fallbackStats.state))||
-    liveRecoveryState==="receiving");
+    liveRecoveryState==="receiving"||discoveryLoading);
   list.setAttribute("aria-busy",loadingPosts?"true":"false");
   if(loadingPosts){
     for(let i=0;i<3;i++){
@@ -2127,6 +2127,10 @@ function scheduleVerifiedDraw(){
     draw();
   },180);
 }
+window.INTERSECTION_publicDiscoveryLoading=running=>{
+  discoveryLoading=Boolean(running);
+  if(!cloudMode)scheduleVerifiedDraw();
+};
 window.INTERSECTION_publicFeedRange=()=>({fromMs,toMs,run:runID});
 window.INTERSECTION_searchFallbackStatus=value=>{
   fallbackStats=value&&typeof value==="object"?value:null;
