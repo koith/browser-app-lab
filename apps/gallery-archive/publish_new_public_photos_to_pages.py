@@ -100,6 +100,11 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
             byid[aid]=rec
     if added:
         old['albums']=list(byid.values())
+        # The manifest count must reflect real immutable photo rows, not the
+        # stale cached number before newly acquired individual files.
+        if 'physical_verified_image_count' in old:
+            old['physical_verified_image_count']=sum(
+                len(album.get('images',[])) for album in old['albums'])
         old_path.write_text(json.dumps(old,ensure_ascii=False,indent=2)+'\n')
     result={'model':model,'new_sha_verified_originals':len(added),
        'total_bytes_added':used,'sha_samples':[{'album':a,'sha256':s,'bytes':n} for a,s,n in added],
