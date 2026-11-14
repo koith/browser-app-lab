@@ -175,9 +175,19 @@ def run():
             page.locator(".post-open").first.click()
             assert page.locator("#detail .account-select-watch").is_visible()
             page.locator("#detail .account-select-watch").click()
-            assert page.locator("#accountsView").is_visible()
-            assert not page.locator("#postsView").is_visible()
+            assert page.locator("#postActionConfirm").is_visible()
+            assert page.locator("#accountMetricTracked").text_content()=="0"
+            page.locator("#postActionCancel").click()
+            assert page.locator("#accountMetricTracked").text_content()=="0"
+            page.locator("#detail .account-select-watch").click()
+            page.locator("#postActionAccept").click()
+            assert page.locator("#detail").is_visible()
+            assert page.locator("#postsView").is_visible()
+            assert not page.locator("#accountsView").is_visible()
             assert page.locator("#accountMetricTracked").text_content()=="1"
+            page.locator("#closeDetail").click()
+            page.locator("#viewAccounts").click()
+            assert page.locator("#accountsView").is_visible()
             assert page.locator("#accountWatchList article").count()==1
             page.locator(".account-watch-card").first.get_by_role(
                 "button",name="백업 대상으로 선택").click()
