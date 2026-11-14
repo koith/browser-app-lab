@@ -101,6 +101,18 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Work on the latest PR head: other supported sources may be adding
+          # photos to the same branch. Never force push or lose another model.
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          git reset --hard "refs/remotes/origin/$BRANCH"
+          # Regenerate the publication from the unchanged SHA-verified
+          # staging bytes before committing to the current branch head.
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py \
+            --model mimmi --stage "$RUNNER_TEMP/mimmi-missing-45" \
+            --budget 70000000 --limit 45
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py \
+            --model mimmi --stage "$RUNNER_TEMP/mimmi-45-source" \
+            --budget 30000000 --limit 60
           git add apps/mimmi-gallery/stored-albums.json apps/mimmi-gallery/stored-albums
           if git diff --cached --quiet; then
             echo "G03_MIMMI_OFFICIAL_SAMPLES_ALREADY_SAVED_OR_SOURCE_BLOCKED" >> "$GITHUB_STEP_SUMMARY"
