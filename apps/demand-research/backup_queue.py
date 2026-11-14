@@ -317,3 +317,65 @@ def accepted_runs(root=None,limit=64):
             accepted.append((int(row.get("accepted_at") or 0),
                              row["workflow_run_id"]))
     return [run_id for _,run_id in sorted(accepted)]
+
+
+def queue_rows(root=None, limit=20, offset=0):
+    """Oldest-first snapshot of signed backup request records for owner UI.
+
+    This is a read-only view. It does NOT equate a dispatch acknowledgment
+    with successful media preservation or expose tokens/cookies. SQLite's
+    ephemeral nature is reported via mode, never concealed from the user.
+    """
+    if not enabled():
+        raise RuntimeError("No trackable durable account request queue configured")
+    if type(limit) is not int or not 1<=limit<=40:
+        raise ValueError("invalid queue page size")
+    if type(offset) is not int or not 0<=offset<=2000:
+        raise ValueError("invalid queue offset")
+    if sqlite_enabled():
+        with _db() as conn:
+            total=int(conn.execute("SELECT count(*) FROM account_requests").fetchone()[0])
+            rows=conn.execute("""SELECT * FROM account_requests
+                 ORDER BY created_at ASC, job_id ASC LIMIT ? OFFSET ?""",
+                 (limit,offset)).fetchall()
+        items=[]
+        for row in rows:
+            item=_sqlite_record(row)
+            item.update({"workflow_run_id":int(row["workflow_run_id"])
+                           if row["workflow_run_id"] is not None else None,
+                         "accepted_at":int(row["accepted_at"])
+                           if row["accepted_at"] is not None else None})
+            items.append(item)
+        return {"items":items,"total":total,"mode":"volatile_sqlite",
+                "offset":offset,"limit":limit,"truncated":False}
+
+    root=root or CloudArchive()
+    candidates=[]
+    for name in root.names(""):
+        match=_REQUEST.fullmatch(name)
+        if match:
+            candidates.append(int(match.group(1)))
+    if len(candidates)>2000:
+        raise RuntimeError("Too many immutable account requests to enumerate safely")
+    # Remote account queue reads can be slow; never block the owner UI
+    # indefinitely on thousands of private-file downloads. If capped,
+    # report that the complete chronology is NOT available.
+    truncated=len(candidates)>120
+    if truncated:
+        candidates=sorted(candidates)[:120]
+    items=[]
+    for job_id in candidates:
+        record=read_request(root,job_id)
+        if record is None:
+            continue
+        ack=read_acceptance(root,job_id)
+        items.append({"schema":1,"job_id":job_id,
+                      "platform":record["platform"],"account":record["account"],
+                      "created_at":record["created_at"],
+                      "workflow_run_id":ack["workflow_run_id"] if ack else None,
+                      "accepted_at":ack["accepted_at"] if ack else None})
+    items.sort(key=lambda row:(row["created_at"],row["job_id"]))
+    return {"items":items[offset:offset+limit],
+            "total":len(items) if not truncated else None,
+            "mode":"immutable_cloud","offset":offset,"limit":limit,
+            "truncated":truncated}
