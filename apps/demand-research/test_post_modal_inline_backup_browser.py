@@ -67,6 +67,11 @@ const sourceLink=(p,label)=>{
 };
 const suspectedAd=()=>false,hideMedia=()=>false;
 const appendMedia=()=>{};
+window.__trackedPosts=[];
+window.INTERSECTION_watchPublicAccount=selection=>{
+  window.__trackedPosts.push(selection);
+  return true;
+};
 """
     harness+=TILE_CODE
     harness+=POST_DETAIL
@@ -132,6 +137,11 @@ window.showFixturePost=(platform="bluesky",candidate=false)=>{
  <div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div>
  <button type="button" id="closeDetail" aria-label="게시글 닫기">×</button></div>
  <div class="dialog-content" id="detailContent"></div>
+</dialog><dialog id="postActionConfirm" aria-labelledby="postActionConfirmTitle" aria-describedby="postActionConfirmMessage">
+ <h3 id="postActionConfirmTitle">계정 작업 확인</h3>
+ <p id="postActionConfirmMessage">선택한 공개 계정에 작업을 실행할까요?</p>
+ <div class="post-confirm-buttons"><button id="postActionCancel" type="button">취소</button>
+ <button id="postActionAccept" type="button">확인</button></div>
 </dialog><script>"""+CORE_NAV+"</script><script>"+harness+
             '</script><script src="/target_archive_client.js" defer></script></body></html>')
 
@@ -164,7 +174,7 @@ def exercise(browser_type,name,width):
                     posts.append(json.loads(route.request.post_data))
                     route.fulfill(status=200,content_type="application/json",
                         body=json.dumps({"accepted":True,"state":"QUEUED_NOT_VERIFIED",
-                                         "run_id":123456,"receipt":"synthetic-job-receipt"}))
+                                         "run_id":123456+len(posts),"receipt":"synthetic-job-receipt-"+str(len(posts))}))
                 elif path.startswith("/api/target-archive/jobs/"):
                     route.fulfill(status=200,content_type="application/json",
                                   body='{"state":"QUEUED","queued_seconds":1}')
@@ -280,23 +290,60 @@ def exercise(browser_type,name,width):
             after_offset=scrolled["headerTop"]-scrolled["modalTop"]
             assert abs(after_offset-before_offset)<=2,("header moved inside modal",frame,scrolled)
             assert button.is_visible(),"fixed header backup button scrolled away"
+            # Modal-only tracking: asking and cancelling never changes tabs;
+            # confirming adds only the selected public account.
+            track=modal.get_by_role("button",name="계정 추적")
+            track.click()
+            confirm=page.locator("#postActionConfirm")
+            assert confirm.is_visible()
+            assert "추적" in confirm.locator("h3").inner_text()
+            assert page.evaluate("window.__trackedPosts.length")==0
+            confirm.get_by_role("button",name="취소").click()
+            assert not confirm.is_visible()
+            assert page.evaluate("window.__trackedPosts.length")==0
+            track.click()
+            confirm.get_by_role("button",name="확인").click()
+            assert page.evaluate("window.__trackedPosts.length")==1
+            assert modal.get_attribute("open") is not None
+            assert page.locator("#viewPosts").get_attribute("aria-selected")=="true"
+            assert page.url==before
+            assert modal.locator(".dialog-watch-status").is_visible()
+
+            # No POST before explicit backup confirmation. A previous run must
+            # NEVER block accepting the next independently selected account.
             button.click()
+            assert confirm.is_visible()
+            assert "백업" in confirm.locator("h3").inner_text()
+            assert len(posts)==0,posts
+            confirm.get_by_role("button",name="취소").click()
+            assert len(posts)==0,posts
+            button.click()
+            confirm.get_by_role("button",name="확인").click()
             status=modal.locator(".dialog-backup-status")
             if host==PRIVATE:
-                page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('백업 작업 접수')",timeout=12000)
-                assert len(posts)==1,("expected exactly one direct public account backup",posts)
+                page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('백업 접수 완료')",timeout=15000)
+                assert len(posts)==1,posts
                 assert posts[0]=={"platform":"bluesky","account":PROFILE},posts
-                assert button.is_disabled(),"queued job cannot be clicked twice"
+                assert button.is_disabled(),"Already queued account must not resubmit on double-click"
                 assert "원본 검증 완료" not in status.inner_text()
-                # A second post popup must not duplicate an already queued job.
                 page.evaluate("document.querySelector('#detail').close()")
                 page.evaluate("window.showFixturePost('mastodon')")
-                modal.get_by_role("button",name="이 계정 바로 백업").click()
-                page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('진행 중인 백업 요청')",timeout=5000)
-                assert len(posts)==1,posts
+                second=modal.get_by_role("button",name="이 계정 바로 백업")
+                second.click()
+                assert confirm.is_visible()
+                assert len(posts)==1,"Second request needs confirmation"
+                confirm.get_by_role("button",name="확인").click()
+                page.wait_for_function(
+                    "document.querySelector('#targetArchiveJobStatus')?.textContent?.includes('백업 접수 완료') && "
+                    "document.querySelector('.target-archive-queue-count')?.textContent?.includes('2건')",
+                    timeout=15000)
+                assert len(posts)==2,posts
+                assert posts[1]=={"platform":"mastodon","account":OTHER},posts
+                assert page.locator("#viewPosts").get_attribute("aria-selected")=="true"
+                assert modal.get_attribute("open") is not None
             else:
-                page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('공개 미러')",timeout=5000)
-                assert len(posts)==0,"public Pages must never cross-origin POST"
+                page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('공개 미러')",timeout=7000)
+                assert len(posts)==0,"Pages must never cross-origin POST"
             assert page.url==before,"post dialog backup must not change page or tab"
             assert modal.get_attribute("open") is not None
             page.evaluate("document.querySelector('#detail').close()")
