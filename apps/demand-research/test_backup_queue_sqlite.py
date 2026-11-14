@@ -51,3 +51,17 @@ def test_pending_never_silently_expires_after_seven_days(monkeypatch):
     assert [row["job_id"] for row in rows]==[old,recent]
     backup_queue.accept(old,42340000001)
     assert [row["job_id"] for row in backup_queue.pending(limit=4)]==[recent]
+
+
+def test_overview_distinguishes_unprocessed_and_dispatched():
+    first=backup_queue.create_request("bluesky","one.bsky.social")
+    second=backup_queue.create_request("bluesky","two.bsky.social")
+    assert backup_queue.overview()=={
+        "known":True,"mode":"volatile_sqlite","queued":2,
+        "dispatched":0,"total_requests":2}
+    backup_queue.accept(first,42340000002)
+    current=backup_queue.overview()
+    assert current["queued"]==1
+    assert current["dispatched"]==1
+    assert current["total_requests"]==2
+    assert second in [r["job_id"] for r in backup_queue.pending(limit=4)]
