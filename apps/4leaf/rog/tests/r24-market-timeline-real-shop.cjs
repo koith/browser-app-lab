@@ -26,6 +26,9 @@ for(const [name,[before,after]] of Object.entries(expected)){
  const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  const readCards=async()=>{
+  // Always begin at page one: changing archival dates must not silently
+  // change the paging cursor left by the previous full-shop scan.
+  await page.locator('#shop .group-tab[data-group="all"]').click();
   const found=new Map();
   for(let turn=0;turn<16;turn++){
    const rows=await page.$$eval('#shop-grid .shop-card:not(.shop-empty)',nodes=>nodes.map(n=>({
