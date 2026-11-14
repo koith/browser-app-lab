@@ -331,3 +331,28 @@ def test_missing_transient_queue_without_verified_backup_is_not_endless_queued(c
     assert result.status_code==200
     assert result.json()["state"]=="NEEDS_RETRY"
     assert result.json()["remote_verified"] is False
+
+
+def test_failed_queued_job_exposes_retry_pending_until_third_attempt(client,monkeypatch):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setattr(target_archive_api.backup_queue,"create_request",
+                        lambda *_:1234567890)
+    monkeypatch.setattr(target_archive_api.backup_queue,"state",
+                        lambda *_:{"request":{"job_id":1234567890},
+                                   "accepted":{"workflow_run_id":42660000001}})
+    headers={"Origin":"https://testserver",
+             "X-Archive-Intent":"selected-public-account-v1"}
+    r=client.post("/api/target-archive/start",json={
+        "platform":"bluesky","account":"sample.bsky.social"},headers=headers)
+    assert r.status_code==202,r.text
+    job=r.json()
+    uri="/api/target-archive/jobs/1234567890?receipt="+job["receipt"]
+    run={"id":42660000001,"status":"completed","conclusion":"failure",
+         "run_attempt":1}
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",lambda *_:run)
+    first=client.get(uri)
+    assert first.status_code==200,first.text
+    assert first.json()["state"]=="RETRY_PENDING"
+    run["run_attempt"]=3
+    final=client.get(uri)
+    assert final.json()["state"]=="FAILED"
