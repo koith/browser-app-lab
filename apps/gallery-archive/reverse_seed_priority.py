@@ -122,7 +122,7 @@ def seeds(root=ROOT,all_cuts=False):
         0 if album[0]["expected_gap"] is not None else 1,
         -(album[0]["expected_gap"] or 0),
         album[0].get("union_saved_count",album[0]["owner_saved_count"]),
-        album[0]["model"],album[0]["album_id"]))
+        album[0]["model"],album[0]["album_id"])))
     if all_cuts:
         # Complete per-photo queue, ordered by sparse album first.
         # The caller rotates a small bounded window, never all remote requests at once.
