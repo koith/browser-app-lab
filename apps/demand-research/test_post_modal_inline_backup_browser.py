@@ -27,6 +27,9 @@ STYLE=INDEX.split("<style>",1)[1].split("</style>",1)[0]
 NAV_START=INDEX.index("/* Core navigation remains usable")
 NAV_END=INDEX.index("</script>",NAV_START)
 CORE_NAV=INDEX[NAV_START:NAV_END]
+TILE_START=INDEX.index("function tile(p){")
+TILE_END=INDEX.index("function appendMedia(",TILE_START)
+TILE_CODE=INDEX[TILE_START:TILE_END]
 DETAIL_START=INDEX.index("function openDetail(p){")
 DETAIL_END=INDEX.index("function closeDetail(){",DETAIL_START)
 POST_DETAIL=INDEX[DETAIL_START:DETAIL_END]
@@ -65,8 +68,32 @@ const sourceLink=(p,label)=>{
 const suspectedAd=()=>false,hideMedia=()=>false;
 const appendMedia=()=>{};
 """
+    harness+=TILE_CODE
     harness+=POST_DETAIL
     harness+="""
+window.testFixtureThumbnailLifecycle=()=>{
+  const row={id:"qa-image",platform:"bluesky",author:"QA",text:"뒷계 test only",
+    profileUrl:"https://bsky.app/profile/qa.bsky.social",
+    url:"https://bsky.app/profile/qa.bsky.social/post/1",
+    posted:new Date().toISOString(),terms:new Set(["뒷계"]),
+    media:[{type:"image",url:"https://example.com/pending-qa.png",
+       thumb:"https://example.com/pending-qa.png"}],
+    restricted:false,adultLabeled:false,discoveryCandidate:false};
+  const tileImage=tile(row);
+  const thumb=tileImage.querySelector(".post-thumb");
+  const img=tileImage.querySelector("img.post-media-img");
+  const before=thumb.classList.contains("is-loading");
+  const visible=getComputedStyle(thumb,"::after").animationName;
+  img.dispatchEvent(new Event("load"));
+  const after=!thumb.classList.contains("is-loading");
+  const textOnly=tile({...row,id:"qa-text",media:[]});
+  const noSpin=!textOnly.querySelector(".post-thumb").classList.contains("is-loading");
+  const failure=tile({...row,id:"qa-failed"});
+  failure.querySelector("img.post-media-img").dispatchEvent(new Event("error"));
+  const failed=!!failure.querySelector(".thumb-placeholder")&&
+    !failure.querySelector(".post-thumb").classList.contains("is-loading");
+  return {before,visible,after,noSpin,failed};
+};
 window.showFixturePost=(platform="bluesky",candidate=false)=>{
   openDetail({platform,profileUrl:platform==="mastodon"?
       "https://mastodon.social/@example":"https://bsky.app/profile/public-test.bsky.social",
@@ -157,6 +184,11 @@ def exercise(browser_type,name,width):
                     "node=>node.getBoundingClientRect().top")
                 assert -1<=top<=2,(host,name,label,"tabs not pinned",top)
             page.get_by_role("tab",name="게시글").click()
+            progress=page.evaluate("window.testFixtureThumbnailLifecycle()")
+            assert progress=={
+                "before":True,"visible":"thumb-load-spin","after":True,
+                "noSpin":True,"failed":True
+            },progress
             page.evaluate("window.showFixturePost('bluesky')")
             modal=page.locator("#detail")
             assert modal.get_attribute("open") is not None
