@@ -1,0 +1,29 @@
+name: 4LEAF R31 original CardData 97 portraits vs archived CHR screenshot identity research
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tools/r31_original_portrait_exact_match.py'
+      - '.github/workflows/rog-r31-carddata-archive-portrait-match.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-pixels-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pixel libraries
+        run: pip install --quiet pillow numpy opencv-python-headless requests
+      - name: Original 97 CardData source PNGs vs real saved Flangdre Valuable photo
+        run: python apps/4leaf/rog/tools/r31_original_portrait_exact_match.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-r31-actual-carddata-source-photo-match
+          path: leaf-r31-original-carddata-portrait-source-match.json
+          if-no-files-found: ignore
