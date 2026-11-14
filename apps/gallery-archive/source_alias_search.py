@@ -172,10 +172,48 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5)
             "engine_status":dict(status),"research_only_not_yet_saved":True,
             "physical_originals_stored":0,"gallery_visible_added":0}
 
+def merge_image_reverse_sites(db, report, model, results, session, limit=8):
+    """Follow actual image-search source URLs and independently verify target work.
+
+    This is candidate provenance, not photo-byte acquisition. The real file
+    collector still decodes, deduplicates, stages, verifies and publishes.
+    """
+    accepted=[]
+    if report.get("research_only") is not True or not isinstance(report.get("results"),list):
+        return accepted
+    seen=set()
+    for seed in report["results"]:
+        if seed.get("model")!=model:continue
+        album=seed.get("album_id")
+        work=model+":"+str(album)
+        if work not in db["works"]:continue
+        row=next((r for r in results if r["id"]==album),None)
+        if row is None:continue
+        for link in seed.get("candidate_pages",[]):
+            if len(seen)>=limit:break
+            url=link.get("url") if isinstance(link,dict) else None
+            if not isinstance(url,str) or url in seen or not https_page(url):continue
+            seen.add(url)
+            html,state=load_html(session,url)
+            if html is None:continue
+            heading,context=source_headings(html)
+            if not page_matches(work,heading,context):continue
+            if url not in row["urls"]:row["urls"].append(url)
+            row["observations"].append({
+                "album_id":album,"model":model,"name":heading[:220],
+                "source":url,
+                "proof":"unique_named_work_page_model_and_edition"})
+            accepted.append({"model":model,"album_id":album,"source":url,
+                             "origin":"reverse_photo_source_page_identified"})
+        if len(seen)>=limit:break
+    return accepted
+
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--model",choices=["mimmi","yui"],required=True)
     p.add_argument("--ledger",type=Path,default=LEDGER)
+    p.add_argument("--reverse",type=Path)
     p.add_argument("--offset",type=int,default=0)
     p.add_argument("--per-work",type=int,default=3)
     p.add_argument("--max-pages",type=int,default=12)
@@ -183,8 +221,14 @@ def main():
     a=p.parse_args()
     if not 0<=a.offset or not 1<=a.per_work<=6 or not 1<=a.max_pages<=32:
         raise ValueError("bounded_research_budget_required")
-    report=crawl_names(json.loads(a.ledger.read_text(encoding="utf-8")),
-                       a.model,a.offset,a.per_work,a.max_pages)
+    db=json.loads(a.ledger.read_text(encoding="utf-8"))
+    report=crawl_names(db,a.model,a.offset,a.per_work,a.max_pages)
+    if a.reverse and a.reverse.is_file():
+        matches=merge_image_reverse_sites(db,json.loads(a.reverse.read_text(encoding="utf-8")),
+                                         a.model,report["search_results"],requests.Session())
+        report["image_reverse_sites_verified"]=matches
+        report["targets"]=[{"id":x["id"],"title":x["title"],"urls":x["urls"]}
+                           for x in report["search_results"] if x["urls"]]
     a.out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print("SAME_WORK_MULTILINGUAL_SOURCE_SEARCH",json.dumps({
         "model":a.model,"new_site_hosts":len(report["new_site_hosts"]),
