@@ -73,9 +73,11 @@ const {chromium,webkit}=require('playwright');
     m.players[0].items=['flipper'];m.players[1].items=[];
     m.players.forEach(p=>{p.usedItem=false;p.effects.armageddon=0;p.effects.destroy=0;p.effects.block=0});
     m.players[0].position=12;m.players[1].position=12;
-    T.setMatch(m);window.__R27_BATTLE__=T.resolveBattle(m.players[0],m.players[1],false);
+    T.setMatch(m);T.drawGame();
+    window.__R27_BATTLE__=T.resolveBattle(m.players[0],m.players[1],false);
    },{p0,p1});
-   await page.waitForSelector('#modal:not(.hidden) #modal-buttons button');
+   await page.waitForFunction(()=>[...document.querySelectorAll('#modal-buttons button')]
+    .some(b=>b.textContent.includes('결과 확인')),{timeout:15000});
    const values=await page.locator('#modal-content .battle-dice b').allTextContents();
    const nums=values.map(Number);
    const has=await page.locator('#modal-buttons button').filter({hasText:'오리발 카드'}).count()>0;
