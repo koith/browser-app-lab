@@ -254,3 +254,30 @@ def state(job_id,root=None):
         return None
     receipt=read_acceptance(root,job_id)
     return {"request":request,"accepted":receipt}
+
+
+def overview(root=None):
+    """Count requests, not completed archives, without exposing account IDs."""
+    if not enabled():
+        return {"known":False,"mode":"disabled","queued":None,
+                "dispatched":None,"total_requests":None}
+    if sqlite_enabled():
+        with _db() as conn:
+            row=conn.execute("""SELECT count(*) AS total,
+                sum(CASE WHEN workflow_run_id IS NULL THEN 1 ELSE 0 END) AS queued,
+                sum(CASE WHEN workflow_run_id IS NOT NULL THEN 1 ELSE 0 END) AS dispatched
+                FROM account_requests""").fetchone()
+        return {"known":True,"mode":"volatile_sqlite",
+                "queued":int(row["queued"] or 0),
+                "dispatched":int(row["dispatched"] or 0),
+                "total_requests":int(row["total"] or 0)}
+    root=root or CloudArchive()
+    names=root.names("")
+    request_ids={int(m.group(1)) for name in names
+                 if (m:=_REQUEST.fullmatch(name))}
+    dispatched_ids={int(m.group(1)) for name in names
+                    if (m:=_ACCOUNT.fullmatch(name))}
+    return {"known":True,"mode":"immutable_cloud",
+            "queued":len(request_ids-dispatched_ids),
+            "dispatched":len(request_ids&dispatched_ids),
+            "total_requests":len(request_ids)}
