@@ -374,11 +374,14 @@
         :"비공개 보관함은 열 수 있지만 새 백업 요청 권한이 설정되지 않았습니다.";
       if(gatewayReady){
         void loadLibrary();
-        const remembered=resumeReceipt();
-        if(remembered){
-          currentRun=remembered;
-          showJob("이전에 요청한 백업의 진행 상태를 확인 중…","running");
-          void pollJob();
+        const remembered=resumeReceipts();
+        if(remembered.length){
+          for(const job of remembered)
+            if(!pendingJobs.some(j=>j.run_id===job.run_id))pendingJobs.push(job);
+          currentRun=pendingJobs[pendingJobs.length-1];
+          showJob("기존 백업 "+pendingJobs.length+"건의 접수·진행 상태를 확인 중…","running");
+          renderQueueInfo();
+          for(const job of pendingJobs)void pollJob(job);
         }
       }
     }catch{
@@ -404,12 +407,6 @@
     if(submitting||connectionAttempting){
       notifyInline("이미 백업 요청을 처리 중입니다. 중복 요청하지 않습니다.","running");
       return {accepted:false,reason:"submitting"};
-    }
-    if(currentRun){
-      const text="이미 접수된 백업 작업이 있습니다. 진행 상태를 확인 중이며 중복 접수하지 않습니다.";
-      message.textContent=text;
-      notifyInline(text,"queued");
-      return {accepted:false,reason:"already_queued"};
     }
     if(!validSelection()){
       account.setAttribute("aria-invalid","true");
@@ -475,10 +472,11 @@
       currentRun={run_id:result.run_id,receipt:result.receipt,
                   platform:platform.value,account:value};
       saveReceipt(currentRun);
-      message.textContent="백업 작업이 접수됐습니다. 완료되면 이 화면에서 저장된 자료를 열 수 있습니다.";
-      showJob("백업 요청 접수 · 실행 순서를 확인 중…","queued");
-      void pollJob();
-      return {accepted:true,state:"QUEUED_NOT_VERIFIED"};
+      message.textContent="새 계정 백업을 접수했습니다. 기존 백업도 계속 진행됩니다.";
+      showJob("백업 접수 완료 · 현재 미완료 요청 "+pendingJobs.length+
+        "건 · 저장 완료 여부는 별도 검증이 필요합니다.","queued");
+      void pollJob(currentRun);
+      return {accepted:true,state:"QUEUED_NOT_VERIFIED",run_id:result.run_id};
     }catch(error){
       message.textContent=String(error.message||"아카이브 요청 실패")+
         " · 계정을 유지한 채 다시 시도할 수 있습니다.";
@@ -490,9 +488,26 @@
       submitting=false;refreshButton();
     }
   }
+  // Keep the browser's POSTs in order. The server's independent queue then
+  // schedules execution; the oldest pending job never blocks new selection.
+  function queueSubmission(selection,onStatus,fromPost){
+    const run=()=>{
+      if(selection){
+        platform.value=selection.platform;
+        account.value=selection.profileUrl;
+        platform.dispatchEvent(new Event("change",{bubbles:true}));
+        account.dispatchEvent(new Event("input",{bubbles:true}));
+      }
+      inlineStatus=typeof onStatus==="function"?onStatus:null;
+      return submitCurrentSelection(fromPost);
+    };
+    const pending=submitSequence.then(run,run);
+    submitSequence=pending.then(()=>{},()=>{});
+    return pending;
+  }
   form.addEventListener("submit",event=>{
     event.preventDefault();
-    void submitCurrentSelection(false);
+    void queueSubmission({platform:platform.value,profileUrl:account.value},null,false);
   });
   // Called by the saved-post modal. The server still validates the POST.
   // Never auto-POST for URL parameters, unverified snippets or cross-origin links.
@@ -507,27 +522,10 @@
       if(typeof onStatus==="function")onStatus("현재 공개 미러에서는 직접 백업을 실행할 수 없습니다. 보관앱에서 열어 실행해야 합니다.","failed");
       return {accepted:false,reason:"public_mirror"};
     }
-    // A queued job belongs to the previously selected account. Do not
-    // overwrite its input or issue a duplicate POST from another modal.
-    if(submitting||connectionAttempting||currentRun){
-      if(typeof onStatus==="function")
-        onStatus("진행 중인 백업 요청이 있습니다. 완료 상태를 먼저 확인해 주세요.","queued");
-      return {accepted:false,reason:"already_running"};
-    }
-    const oldPlatform=platform.value,oldAccount=account.value;
-    platform.value=selection.platform;
-    account.value=selection.profileUrl;
-    if(!validSelection()){
-      platform.value=oldPlatform;
-      account.value=oldAccount;
-      if(typeof onStatus==="function")
-        onStatus("이 게시글의 공개 계정 주소를 검증하지 못해 백업을 시작하지 않았습니다.","failed");
-      return {accepted:false,reason:"invalid_account"};
-    }
-    platform.dispatchEvent(new Event("change",{bubbles:true}));
-    account.dispatchEvent(new Event("input",{bubbles:true}));
-    inlineStatus=typeof onStatus==="function"?onStatus:null;
-    return submitCurrentSelection(true);
+    // Explicitly confirmed new accounts must not be refused because a
+    // previous run has a signed receipt. Queue the next POST behind any
+    // currently submitting request, preserving all earlier job IDs.
+    return queueSubmission(selection,onStatus,true);
   };
   window.addEventListener("intersection:private-session-ready",()=>{
     void check();
