@@ -574,10 +574,15 @@ class DirectTests(unittest.TestCase):
                                  'missing_model_or_volume_context')
 
     def test_independent_origin_fallback_after_original_public_origin_403(self):
+        from direct_photo_pipeline import reviewed_direct_source, reviewed_direct_media
         source='https://showartx.net/artgravia-vol-677-yui/'
         alternate='https://www.nicesss.com/archives/mij/artgravia/469248.html'
         image='https://www.nicewww.com/wp-content/uploads/2026/05/1778813739-c81e728d9d4c2f6.jpg'
         unrelated='https://www.nicewww.com/wp-content/uploads/2026/05/not-the-same-work.jpg'
+        self.assertTrue(reviewed_direct_source(alternate,'yui'))
+        self.assertFalse(reviewed_direct_source(alternate,'mimmi'))
+        self.assertTrue(reviewed_direct_media(image,alternate,'yui'))
+        self.assertFalse(reviewed_direct_media(unrelated,alternate,'yui'))
         raw=f'''<h1>ArtGravia – Vol.677 Yui(유이)</h1><article>
           <img src="{image}"><img src="{unrelated}">
           <aside class="related"><img src="{unrelated}"></aside></article>'''
@@ -611,7 +616,9 @@ class DirectTests(unittest.TestCase):
                     if url==image:return type('R',(),{'content':jpeg})()
                     raise AssertionError('Only exact user-visible assets can be requested')
             client=Client()
-            result=collect(root,'yui',owner,root/'stage',3,3,client,album_ids=['artgravia-677-yui-public-samples'])
+            result=collect(root,'yui',owner,root/'stage',3,3,client,
+                           album_ids=['artgravia-677-yui-public-samples'],
+                           reviewed_source_only=True)
             self.assertEqual(result['new_local_individual_files'],1)
             self.assertEqual(client.calls,[source,alternate,image])
             self.assertEqual(len(list((root/'stage/originals').rglob('*.jpg'))),1)
