@@ -1420,7 +1420,9 @@ async function applyItem(index,steps=null){
    if(n===0)return;
    consume(index);advance(p,n);appendMove(p.name+' · '+item.name+' '+n+'칸 이동');
    if(n>0)await resolveTile(p);
-   drawGame();return;
+   // Card was consumed before the async tile, so persist resulting movement
+   // and earned tile effects together; a reload must not reverse the cast.
+   drawGame();persist();return;
  }
  consume(index);
  if(!p.effects)p.effects={};
@@ -1429,7 +1431,13 @@ async function applyItem(index,steps=null){
  case 'dove':p.effects.dove=5;break;
  case 'valkyrie':p.effects.valkyrie=2;break;
  case 'ring':p.effects.ring=(p.effects.ring||0)+1;break;
- case 'armageddon':p.effects.armageddon=2;break;
+ case 'armageddon':
+  // Historical item reduces ALL players: user 3 rounds, other players 2.
+  for(const q of match.players){
+   if(!q.effects)q.effects={};
+   q.effects.armageddon=q===p?3:2;
+  }
+  break;
  case 'charge':p.ability=Math.min(100,p.ability+50);break;
  case 'charge25':p.ability=Math.min(100,p.ability+25);break;
  case 'drain25':case 'drain50':{
@@ -1442,7 +1450,9 @@ async function applyItem(index,steps=null){
  case 'keeperA':case 'keeperB':case 'keeperC':
    match.tiles[Math.min(match.tiles.length-2,p.position+6)]=itemId;break;
  }
- appendMove(p.name+' · '+item.name+' 사용');drawGame();
+ // Persist ALL effects after consuming the card. Previous code saved only
+ // item removal; page reload silently lost Armageddon, Dove, Shoe etc.
+ appendMove(p.name+' · '+item.name+' 사용');drawGame();persist();
 }
 function consume(index){const p=activePlayer();p.items.splice(index,1);p.usedItem=true;persist()}
 function advance(user,distance){user.position=Math.min(match.tiles.length-1,Math.max(0,user.position+distance));user.ability=Math.min(100,user.ability+Math.max(0,distance)*4)}
@@ -1800,8 +1810,16 @@ function combat(attacker,defender,keeper=false){
    options.unshift({label:'체인지 카드',run:()=>{player.items.splice(player.items.indexOf('change'),1);player.usedItem=true;finish({attacker:bValue,defender:aValue,changed:true})}});
  }
  if(selfInvolved&&player.items.includes('bomb')&&!player.usedItem){options.unshift({label:'자폭',run:()=>{player.items.splice(player.items.indexOf('bomb'),1);player.usedItem=true;attacker.position=0;if(Number.isInteger(defender.position))defender.position=0;finish({...results,negated:true,mutualReset:true})}})}
- if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem){
-   options.unshift({label:'오리발 카드',run:()=>{player.items.splice(player.items.indexOf('flipper'),1);player.usedItem=true;finish({...results,negated:true})}});
+ // This item is source-documented ONLY to cancel a LOST battle.
+ // Do not allow a winning or tied user to spend it as a free reroll.
+ const selfValue=attacker.id===player?.id?aValue:bValue;
+ const opponentValue=attacker.id===player?.id?bValue:aValue;
+ if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem&&opponentValue>selfValue){
+   options.unshift({label:'오리발 카드',run:()=>{
+    if(player.usedItem||!player.items.includes('flipper'))return;
+    player.items.splice(player.items.indexOf('flipper'),1);
+    player.usedItem=true;finish({...results,negated:true});
+   }});
  }
 
  if(selfInvolved&&!player.usedItem){
@@ -1881,7 +1899,26 @@ async function resolveBattle(attacker,defender,keeper){
  if(loser?.team?.length)
    window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(loser.id,'hurt',650);
 }
-function grantItem(user){if(user.items.length<5){const itemId=ITEMS[rand(ITEMS.length)].id;user.items.push(itemId);appendMove(user.name+'이(가) 보물상자에서 '+ITEM_MAP[itemId].name+' 획득!')}else appendMove(user.name+'은 아이템이 가득 찼습니다.')}
+// 2002 historical tier -> keeper species / defense die count.
+// Specific random weights were not recovered from the EXE; choose among
+// source-named eligible species without mislabelling tier C as A.
+const SOURCE_KEEPER_TIERS=Object.freeze({
+ keeperC:[['말벌',1],['박쥐',1],['슬라임',1],['가이아버그',2],['좀비',2],['해골',2]],
+ keeperB:[['고렘',3],['아지다하카',3],['슬라임3형제',3],['현혹령',3]],
+ keeperA:[['카르마타',4],['크루거',4],['바루스',5],['이반',5],['마장기',6]]
+});
+const keeperForTier=type=>{
+ const candidates=SOURCE_KEEPER_TIERS[type];
+ if(!candidates?.length)throw Error('Unknown original keeper tier: '+type);
+ return candidates[rand(candidates.length)];
+};
+function grantItem(user){
+ if(user.items.length>=5){appendMove(user.name+'은 아이템이 가득 찼습니다.');return}
+ const list=ITEMS.filter(item=>!item.disabled);
+ const itemId=list[rand(list.length)].id;
+ user.items.push(itemId);
+ appendMove(user.name+'이(가) 보물상자에서 '+ITEM_MAP[itemId].name+' 획득!');
+}
 async function resolveTile(p,depth=0){
  if(!match||match.finished||depth>5)return;
  const pos=p.position,type=match.tiles[pos];
@@ -1899,11 +1936,19 @@ async function resolveTile(p,depth=0){
    }
    if(target!==pos){p.position=target;appendMove(p.name+' 워프: '+(pos+1)+' → '+(target+1)+' 칸');landed=true}
  }else if(type==='chest'){grantItem(p)}
- else if(type==='blessing'){while(p.items.length<5)p.items.push(ITEMS[rand(ITEMS.length)].id);appendMove(p.name+' 신의 축복: 아이템 가득 충전')}
+ else if(type==='blessing'){
+   const obtainable=ITEMS.filter(item=>!item.disabled);
+   while(p.items.length<5)p.items.push(obtainable[rand(obtainable.length)].id);
+   appendMove(p.name+' 신의 축복: 아이템 가득 충전');
+ }
  else if(type==='curse'){p.items=[];appendMove(p.name+' 신의 저주: 모든 아이템 소실')}
  else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.');window.__LEAF_NATIVE_EVENTS__?.show('jail',p.name)}
  else if(type==='kingbomb'){p.position=0;appendMove(p.name+' 왕폭탄 폭발! START 복귀');match.tiles[pos]='normal'}
- else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
+ else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){
+   const [name,def]=keeperForTier(type);
+   await resolveBattle(p,{id:-1,name,def},true);
+   match.tiles[pos]='normal';
+ }
  else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%');if(p.ability===100)window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
  else if(type==='ability100'){
    const ts=teamStats(p.team),count=Math.max(1,Math.min(4,p.team?.length>=3?ts.int:(p.team?.length===2?ts.def:ts.atk)));
@@ -1926,7 +1971,7 @@ async function resolveTile(p,depth=0){
      const incumbent=match.players.find(x=>x!==p&&x.position===pos);
      if(incumbent&&!MAPS[match.map].non&&p.effects.dove<=0&&incumbent.effects.dove<=0)await resolveBattle(p,incumbent,false);
    }else{
-     const monsters=[['말벌',1],['박쥐',1],['슬라임',1],['가이아버그',2],['해골',2],['좀비',2],['고렘',3],['아지다하카',3],['카르마타',4],['크루거',4],['마장기',6]];
+     const monsters=Object.values(SOURCE_KEEPER_TIERS).flat();
      const mob=monsters[rand(monsters.length)];
      await resolveBattle(p,{id:-1,name:mob[0],def:mob[1]},true);
    }
@@ -2041,7 +2086,11 @@ function finishGame(winner){
 }
 function moveValues(p){
  const stats=teamStats(p.team),extra=p.effects.shoe>0?1:0,values=[];
- const sides=stats.move===2?4:6,n=Math.min(4,(stats.move===2?2:1)+extra);
+ // Armageddon halves a movement-2 chessman's D4 dice count to ONE,
+ // never silently switches it to a D6. WEB replay of historical item.
+ const underArmageddon=p.effects.armageddon>0;
+ const sides=stats.move===2?4:6;
+ const n=Math.min(4,((stats.move===2&&!underArmageddon)?2:1)+extra);
  for(let i=0;i<n;i++){
    let v=d(sides);
    if(p.effects.clover)v=(sides===4?3:4)+rand(sides===4?2:3);
