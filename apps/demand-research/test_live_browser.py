@@ -379,7 +379,7 @@ def run(live=False):
                 assert progress["anim"]=="thumb-load-spin",progress
                 assert progress["placeholderAnim"]=="thumb-load-spin",progress
                 assert progress["settled"]=="none",progress
-                assert progress["overlay"]!=="none",progress
+                assert progress["overlay"]!="none",progress
                 assert progress["notPost"] and progress["removed"],progress
 
             # Real canvas-alpha interaction: remove and restore at the pointer.
