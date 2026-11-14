@@ -57,6 +57,13 @@
   let submitting=false;
   let currentRun=null;
   let pollTimer=null;
+  let connectionAttempting=false;
+  let inlineStatus=null;
+  function notifyInline(text,state){
+    if(typeof inlineStatus==="function"){
+      try{inlineStatus(text,state);}catch{/* Modal may have been closed. */}
+    }
+  }
 
   const JOB_KEY="intersection:private-archive-job:v1";
   function resumeReceipt(){
@@ -96,6 +103,7 @@
     label.textContent=text;jobStatus.append(label);
     jobStatus.dataset.state=kind||"running";
     jobStatus.hidden=false;
+    notifyInline(text,kind||"running");
     if(accountKey)appendViewerLink(jobStatus,accountKey,"저장된 자료 열기");
   }
   async function loadLibrary(){
@@ -260,7 +268,7 @@
   }
   function refreshButton(){
     // Never leave users with a dead button or a GitHub Actions detour.
-    submit.disabled=submitting;
+    submit.disabled=submitting||connectionAttempting;
     submit.textContent=isPrivateGateway?"백업 시작":"교집합에서 계정 백업";
     workflow.hidden=true;
   }
@@ -341,33 +349,58 @@
     refreshAccountHint();
     refreshButton();
   });
-  form.addEventListener("submit",async event=>{
-    event.preventDefault();
-    if(submitting)return;
+  async function submitCurrentSelection(fromPost=false){
+    if(submitting||connectionAttempting){
+      notifyInline("이미 백업 요청을 처리 중입니다. 중복 요청하지 않습니다.","running");
+      return {accepted:false,reason:"submitting"};
+    }
+    if(currentRun){
+      const text="이미 접수된 백업 작업이 있습니다. 진행 상태를 확인 중이며 중복 접수하지 않습니다.";
+      message.textContent=text;
+      notifyInline(text,"queued");
+      return {accepted:false,reason:"already_queued"};
+    }
     if(!validSelection()){
       account.setAttribute("aria-invalid","true");
       message.textContent="먼저 공개 SNS 계정 주소 또는 핸들을 입력하세요. "+
         "예: https://bsky.app/profile/example.bsky.social / @user@example.social";
-      account.focus();
-      return;
+      if(!fromPost)account.focus();
+      notifyInline(message.textContent,"failed");
+      return {accepted:false,reason:"invalid_account"};
     }
     account.removeAttribute("aria-invalid");
     if(!gatewayReady){
-      if(!isPrivateGateway){openPrivateBackup();return;}
+      if(!isPrivateGateway){
+        if(fromPost){
+          const text="현재 공개 미러에서는 직접 저장할 수 없습니다. 교집합 전용 보관앱에서 이 게시글을 열어 백업하세요.";
+          message.textContent=text;notifyInline(text,"failed");
+          return {accepted:false,reason:"public_mirror"};
+        }
+        openPrivateBackup();return {accepted:false,reason:"public_mirror"};
+      }
       message.textContent="저장소를 연결 중입니다. 백업 요청을 자동으로 다시 시도합니다.";
-      for(let attempt=0;attempt<4&&!gatewayReady;attempt++){
-        await check();
-        if(!gatewayReady)await new Promise(resolve=>setTimeout(resolve,2500));
+      connectionAttempting=true;
+      refreshButton();
+      try{
+        for(let attempt=0;attempt<4&&!gatewayReady;attempt++){
+          await check();
+          if(!gatewayReady)await new Promise(resolve=>setTimeout(resolve,2500));
+        }
+      }finally{
+        connectionAttempting=false;
+        refreshButton();
       }
       if(!gatewayReady){
-        message.textContent="테라박스 서버가 아직 복구되지 않았습니다. 계정은 유지됩니다. 잠시 후 백업 시작을 다시 눌러 주세요.";
-        return;
+        message.textContent="테라박스 서버가 아직 복구되지 않았습니다. 계정은 유지됩니다. 백업을 접수하지 않았습니다.";
+        notifyInline(message.textContent,"failed");
+        return {accepted:false,reason:"gateway_unavailable"};
       }
     }
     const value=normalizedAccount();
     submitting=true;
     refreshButton();
     message.textContent="비공개 아카이브 작업 요청 중…";
+    notifyInline(message.textContent,"running");
     try{
       const response=await fetch("/api/target-archive/start",{
         method:"POST",credentials:"same-origin",cache:"no-store",
@@ -394,15 +427,57 @@
       message.textContent="백업 작업이 접수됐습니다. 완료되면 이 화면에서 저장된 자료를 열 수 있습니다.";
       showJob("백업 요청 접수 · 실행 순서를 확인 중…","queued");
       void pollJob();
+      return {accepted:true,state:"QUEUED_NOT_VERIFIED"};
     }catch(error){
       message.textContent=String(error.message||"아카이브 요청 실패")+
         " · 계정을 유지한 채 다시 시도할 수 있습니다.";
+      notifyInline(message.textContent,"failed");
       // A transient server error must not leave a permanently disabled
       // button: the account choice remains intact for another attempt.
+      return {accepted:false,reason:"server_error"};
     }finally{
       submitting=false;refreshButton();
     }
+  }
+  form.addEventListener("submit",event=>{
+    event.preventDefault();
+    void submitCurrentSelection(false);
   });
+  // Called by the saved-post modal. The server still validates the POST.
+  // Never auto-POST for URL parameters, unverified snippets or cross-origin links.
+  window.INTERSECTION_startPublicAccountBackup=async (selection,onStatus)=>{
+    if(!selection||typeof selection!=="object"||
+       !["bluesky","mastodon"].includes(selection.platform)||
+       typeof selection.profileUrl!=="string"){
+      if(typeof onStatus==="function")onStatus("지원되는 공개 Bluesky·Mastodon 계정만 백업할 수 있습니다.","failed");
+      return {accepted:false,reason:"unsupported"};
+    }
+    if(!isPrivateGateway){
+      if(typeof onStatus==="function")onStatus("현재 공개 미러에서는 직접 백업을 실행할 수 없습니다. 보관앱에서 열어 실행해야 합니다.","failed");
+      return {accepted:false,reason:"public_mirror"};
+    }
+    // A queued job belongs to the previously selected account. Do not
+    // overwrite its input or issue a duplicate POST from another modal.
+    if(submitting||connectionAttempting||currentRun){
+      if(typeof onStatus==="function")
+        onStatus("진행 중인 백업 요청이 있습니다. 완료 상태를 먼저 확인해 주세요.","queued");
+      return {accepted:false,reason:"already_running"};
+    }
+    const oldPlatform=platform.value,oldAccount=account.value;
+    platform.value=selection.platform;
+    account.value=selection.profileUrl;
+    if(!validSelection()){
+      platform.value=oldPlatform;
+      account.value=oldAccount;
+      if(typeof onStatus==="function")
+        onStatus("이 게시글의 공개 계정 주소를 검증하지 못해 백업을 시작하지 않았습니다.","failed");
+      return {accepted:false,reason:"invalid_account"};
+    }
+    platform.dispatchEvent(new Event("change",{bubbles:true}));
+    account.dispatchEvent(new Event("input",{bubbles:true}));
+    inlineStatus=typeof onStatus==="function"?onStatus:null;
+    return submitCurrentSelection(true);
+  };
   window.addEventListener("intersection:private-session-ready",()=>{
     void check();
   });

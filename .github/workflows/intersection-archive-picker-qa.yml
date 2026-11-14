@@ -20,6 +20,8 @@ on:
       - "apps/demand-research/test_archive_tab_browser.py"
       - "apps/demand-research/test_account_archive_picker_browser.py"
       - "apps/demand-research/test_account_archive_browser.py"
+      - "apps/demand-research/target_archive_client.js"
+      - "apps/demand-research/test_post_modal_inline_backup_browser.py"
       - "apps/demand-research/account_watch.js"
       - "apps/demand-research/test_core_navigation_fallback_browser.py"
       - "apps/demand-research/test_live_archive_picker_smoke.py"
@@ -40,6 +42,8 @@ on:
       - "apps/demand-research/test_archive_tab_browser.py"
       - "apps/demand-research/test_account_archive_picker_browser.py"
       - "apps/demand-research/test_account_archive_browser.py"
+      - "apps/demand-research/target_archive_client.js"
+      - "apps/demand-research/test_post_modal_inline_backup_browser.py"
       - "apps/demand-research/account_watch.js"
       - "apps/demand-research/test_core_navigation_fallback_browser.py"
       - "apps/demand-research/test_live_archive_picker_smoke.py"
@@ -80,6 +84,7 @@ jobs:
           python apps/demand-research/test_archive_tab_browser.py
           python apps/demand-research/test_account_archive_picker_browser.py
           python apps/demand-research/test_account_archive_browser.py
+          python apps/demand-research/test_post_modal_inline_backup_browser.py
           python apps/demand-research/test_core_navigation_fallback_browser.py
       - name: Test auto-capture search races, instant filters and original media slots
         run: |
