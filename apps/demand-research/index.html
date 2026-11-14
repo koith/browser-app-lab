@@ -1981,6 +1981,7 @@ function failPublicSearch(error){
   if(bskySearchFailureCode)return;
   const code=Number(error?.httpStatus||0);
   bskySearchFailureCode=code?"HTTP "+code:"연결 실패·시간초과";
+  window.INTERSECTION_PUBLIC_SEARCH_DOWN=bskySearchFailureCode;
   incomplete++;
   status("Bluesky 검색 실패 · "+bskySearchFailureCode+" · 전체 게시물 0건이 아닙니다");
   draw();
