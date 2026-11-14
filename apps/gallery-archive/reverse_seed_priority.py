@@ -24,6 +24,7 @@ def seeds(root=ROOT,all_cuts=False):
         if owner.get("model")!=model or public.get("model",model)!=model:
             raise ValueError("Wrong stored model inventory")
         public_by_id={a["id"]:a for a in public["albums"]}
+        owner_ids={album.get("id") for album in owner["albums"]}
         for album in owner["albums"]:
             aid=album["id"]
             if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}",aid):continue
@@ -86,11 +87,37 @@ def seeds(root=ROOT,all_cuts=False):
             missing=max(0,expected-len(owned)) if type(expected) is int else None
             all_albums.append([{"model":model,"album_id":aid,"album_title":title,
                  "owner_saved_count":len(owned),"owner_slot_count":occupied_slot_count,"expected_gap":missing,
+                 "union_saved_count":len(set(hashes)|set(seen_public)),
                  "photo_sha256":sha,"public_image_url":url,"seed_kind":kind}
                  for sha,url,kind in samples])
+        if all_cuts:
+            # Static-only public preview works (e.g. Yui Meow) have no owner
+            # metadata and were previously invisible to all reverse searches.
+            for aid,album in public_by_id.items():
+                if aid in owner_ids or not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}",aid):
+                    continue
+                title=album.get("title") or aid
+                if AI.search(title):continue
+                photos=[]
+                distinct=set()
+                for p in album.get("images",[]):
+                    url=p.get("url","")
+                    sha=p.get("sha256","")
+                    if (not isinstance(url,str) or not url.startswith("stored-albums/")
+                            or ".." in url.split("/") or not SHA.fullmatch(str(sha))
+                            or sha in distinct):continue
+                    distinct.add(sha)
+                    photos.append((sha,GITHUB+"/"+model+"-gallery/"+quote(url,safe="/"),"static-public"))
+                if photos:
+                    all_albums.append([{"model":model,"album_id":aid,"album_title":title,
+                        "owner_saved_count":0,"owner_slot_count":0,
+                        "union_saved_count":len(photos),"expected_gap":None,
+                        "photo_sha256":sha,"public_image_url":url,"seed_kind":kind}
+                        for sha,url,kind in photos])
     all_albums.sort(key=lambda album:(
         0 if album[0]["expected_gap"] is not None else 1,
-        -(album[0]["expected_gap"] or 0),album[0]["owner_saved_count"],
+        -(album[0]["expected_gap"] or 0),
+        album[0].get("union_saved_count",album[0]["owner_saved_count"]),
         album[0]["model"],album[0]["album_id"]))
     if all_cuts:
         # Complete per-photo queue, ordered by sparse album first.
