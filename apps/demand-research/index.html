@@ -1933,6 +1933,13 @@ function parseManualBlockStorage(){
   }catch{return new Map()}
 }
 let manualBlockedAccounts=parseManualBlockStorage();
+let manualBlockedDids=new Set();
+function rebuildManualBlockedDids(){
+  manualBlockedDids=new Set([...manualBlockedAccounts.values()]
+    .filter(row=>row.platform==="bluesky"&&row.authorDid)
+    .map(row=>row.authorDid));
+}
+rebuildManualBlockedDids();
 function matchesManualBlock(p,row){
   if(String(p.platform||"").toLowerCase()!==String(row.platform||"").toLowerCase())return false;
   const key=manualAccountKey(p.platform,p.profileUrl);
@@ -1942,8 +1949,12 @@ function matchesManualBlock(p,row){
 }
 function isManualBlocked(p){
   if(cloudMode)return false;
-  for(const row of manualBlockedAccounts.values())if(matchesManualBlock(p,row))return true;
-  return false;
+  // O(1) lookup even after a viewer blocks hundreds of spam accounts.
+  // Every fresh feed draw may examine thousands of public post records.
+  const key=manualAccountKey(p.platform,p.profileUrl);
+  if(key&&manualBlockedAccounts.has(key))return true;
+  return p.platform==="bluesky"&&!!p.authorDid&&
+    manualBlockedDids.has(String(p.authorDid).toLowerCase());
 }
 function setManualBlocked(p,blocked){
   const key=manualAccountKey(p.platform,p.profileUrl);
@@ -1960,6 +1971,7 @@ function setManualBlocked(p,blocked){
   try{localStorage.setItem(MANUAL_BLOCK_STORAGE_KEY,JSON.stringify([...next.values()]))}
   catch{return false}
   manualBlockedAccounts=next;
+  rebuildManualBlockedDids();
   refreshManualBlockViews();
   return true;
 }
@@ -2729,6 +2741,7 @@ $("manualBlockDialog").addEventListener("click",e=>{
 window.addEventListener("storage",e=>{
   if(e.key!==MANUAL_BLOCK_STORAGE_KEY)return;
   manualBlockedAccounts=parseManualBlockStorage();
+  rebuildManualBlockedDids();
   refreshManualBlockViews();
 });
 $("manualBlockCount").textContent=String(manualBlockedAccounts.size);
