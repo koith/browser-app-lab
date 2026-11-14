@@ -249,6 +249,7 @@ def run():
             # Persistence: only profile URLs survive refresh. No content text.
             page.reload(wait_until="domcontentloaded",timeout=30000)
             page.locator("#viewAccounts").click()
+            page.locator("#accountOverview > summary").click()
             assert page.locator("#accountMetricTracked").text_content()=="3"
             saved=page.evaluate("JSON.parse(localStorage.getItem('intersection:public-account-watch:v1'))")
             assert len(saved)==3 and all(isinstance(s,str) for s in saved)
