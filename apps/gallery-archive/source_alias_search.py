@@ -11,7 +11,7 @@ import re
 import time
 from collections import Counter
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlencode
 import requests
 from bs4 import BeautifulSoup
 from source_name_ledger import LEDGER, queries, safe_url, key
@@ -84,7 +84,10 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5)
     visited_urls=set()
     hosts=set()
     status=Counter()
-    for work in [x for x in db["works"] if x.startswith(model+":")]:
+    work_ids=[x for x in db["works"] if x.startswith(model+":")]
+    per_album_pages=max(1,max_pages//max(1,len(work_ids)))
+    for work in work_ids:
+        checked_this_work=0
         album=work.split(":",1)[1]
         terms=queries(db,model,album)
         if not terms:continue
@@ -94,7 +97,7 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5)
         observed=[]
         for term in selected:
             for engine,(endpoint,parameter) in ENGINES.items():
-                html,state=load_html(session,endpoint+"?"+requests.models.RequestEncodingMixin._encode_params({parameter:term}))
+                html,state=load_html(session,endpoint+"?"+urlencode({parameter:term}))
                 status["search_"+state]+=1
                 if html is None:continue
                 for result in hits_from_html(html,engine):
@@ -103,7 +106,8 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5)
                     # URL candidates cannot pass merely on a search title; open source.
                     if not exact_work_in_text(work,result.get("title","")+" "+result.get("snippet","")):continue
                     visited_urls.add(url)
-                    if len(visited_urls)>max_pages:break
+                    if checked_this_work>=per_album_pages:break
+                    checked_this_work+=1
                     source_html,state=load_html(session,url)
                     status["source_"+state]+=1
                     if source_html is None:continue
@@ -114,17 +118,57 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5)
                     observed.append({"album_id":album,"model":model,
                                      "name":heading[:220],"source":url,
                                      "proof":"unique_named_work_page_model_and_edition"})
-                if len(visited_urls)>=max_pages:break
+                if checked_this_work>=per_album_pages:break
                 if delay:time.sleep(delay)
-            if len(visited_urls)>=max_pages:break
+            if checked_this_work>=per_album_pages:break
         results.append({"id":album,"title":db["works"][work][0]["name"],
                         "urls":list(dict.fromkeys(approved)),
                         "observations":observed,"query_count":len(selected)})
-        if len(visited_urls)>=max_pages:break
+    # Every newly useful site is searched again for both tracked models.
+    # This second pass is bounded and rotates through ALL observed model names.
+    cross_site=[]
+    cross_budget=16
+    for site in sorted(hosts)[:2]:
+        for other_model,names in db["model_names"].items():
+            for identity in names:
+                if cross_budget<=0:break
+                cross_budget-=1
+                site_query='site:'+site+' "'+identity["name"]+'"'
+                search_html,state=load_html(session,ENGINES["bing"][0]+"?"+urlencode({"q":site_query}))
+                status["site_"+state]+=1
+                if search_html is None:continue
+                for hit in hits_from_html(search_html,"bing")[:8]:
+                    target=hit["url"]
+                    if not https_page(target) or urlsplit(target).hostname!=site:continue
+                    for work in [x for x in db["works"] if x.startswith(other_model+":")]:
+                        if not exact_work_in_text(work,hit.get("title","")+" "+hit.get("snippet","")):continue
+                        body,source_status=load_html(session,target)
+                        status["site_source_"+source_status]+=1
+                        if body is None:continue
+                        heading,context=source_headings(body)
+                        if not page_matches(work,heading,context):continue
+                        match={"model":other_model,"work":work,"source":target,
+                               "observed_name":heading[:220],
+                               "proof":"unique_named_work_page_model_and_edition"}
+                        if match not in cross_site:cross_site.append(match)
+                        if other_model==model:
+                            album=work.split(":",1)[1]
+                            row=next((x for x in results if x["id"]==album),None)
+                            if row is not None:
+                                if target not in row["urls"]:row["urls"].append(target)
+                                row["observations"].append({
+                                    "album_id":album,"model":model,
+                                    "name":heading[:220],"source":target,
+                                    "proof":"unique_named_work_page_model_and_edition"})
+                        break
+            if cross_budget<=0:break
+        if cross_budget<=0:break
     return {"schema_version":1,"model":model,"targets":[
                 {"id":r["id"],"title":r["title"],"urls":r["urls"]}
                 for r in results if r["urls"]],
             "search_results":results,"new_site_hosts":sorted(hosts),
+            "cross_model_verified_site_pages":cross_site,
+            "cross_site_model_alias_queries":16-cross_budget,
             "engine_status":dict(status),"research_only_not_yet_saved":True,
             "physical_originals_stored":0,"gallery_visible_added":0}
 
