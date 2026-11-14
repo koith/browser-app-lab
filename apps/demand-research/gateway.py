@@ -228,7 +228,7 @@ async def github_pending_requests(request:Request):
         raise HTTPException(503,"Private archive not connected")
     try:
         from backup_queue import pending
-        rows=await asyncio.to_thread(pending,limit=1)
+        rows=await asyncio.to_thread(pending,limit=4)
     except (RuntimeError,ValueError):
         raise HTTPException(503,"Private queue listing unavailable") from None
     return JSONResponse({"requests":rows},
