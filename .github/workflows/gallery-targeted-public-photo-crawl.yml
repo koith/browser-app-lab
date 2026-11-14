@@ -158,9 +158,16 @@ jobs:
           # public same-model/same-edition pages, then pass only candidate sources to
           # the existing byte-level decoder and no-watermark/quality selection chain.
           # A search URL alone NEVER counts as a stored photograph.
+          # Eight previously held real cover/photos per run; reverse images
+          # rotate independently for each model, not just repeated first covers.
+          python apps/gallery-archive/reverse_image_sweep.py \
+            --model "$MODEL" --seeds 8 \
+            --offset "$((GITHUB_RUN_NUMBER * 8))" --workers 2 \
+            --out "$RUNNER_TEMP/public-image-reverse-sweep.json"
           python apps/gallery-archive/source_alias_search.py \
             --model "$MODEL" --offset "$((GITHUB_RUN_NUMBER * 3))" \
             --per-work 3 --max-pages 12 \
+            --reverse "$RUNNER_TEMP/public-image-reverse-sweep.json" \
             --out "$RUNNER_TEMP/source-alias-reverse-evidence.json"
           python apps/gallery-archive/direct_photo_pipeline.py \
             --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" \
@@ -218,6 +225,7 @@ jobs:
           path: |
             ${{ runner.temp }}/stage/metadata/collection-audit.json
             ${{ runner.temp }}/source-alias-reverse-evidence.json
+            ${{ runner.temp }}/public-image-reverse-sweep.json
             ${{ runner.temp }}/stage/metadata/incremental-merge.json
             ${{ runner.temp }}/stage/metadata/remote-verification.json
           retention-days: 14
