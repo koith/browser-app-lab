@@ -13,6 +13,7 @@ from playwright.sync_api import sync_playwright
 
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 FREE_JS=Path(__file__).with_name("free_discovery.js").read_text(encoding="utf-8")
+LIVE_JS=Path(__file__).with_name("live_feed_recovery.js").read_text(encoding="utf-8")
 PAGE="https://koith.github.io/browser-app-lab/apps/demand-research/"
 TERMS=("뒷계","섹트","일탈계")
 PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGPUit7yn4GBgYGJAQoAIS4CPGFQl4cAAAAASUVORK5CYII=")
@@ -113,6 +114,9 @@ def run(live=False):
                         content_type="text/html; charset=utf-8",body=HTML))
             page.route(PAGE+"free_discovery.js",lambda route:route.fulfill(status=200,
                         content_type="application/javascript",body=FREE_JS))
+            # Test the PR's fallback JS, not a stale GitHub Pages cached release.
+            page.route(PAGE+"live_feed_recovery.js**",lambda route:route.fulfill(status=200,
+                        content_type="application/javascript",body=LIVE_JS))
             if not live:
                 page.route("https://api.keenable.ai/v1/search/public",
                     lambda route:route.fulfill(status=200,content_type="application/json",
@@ -208,7 +212,30 @@ def run(live=False):
                 page.route("https://example.com/broken-qa.png",
                     lambda route:route.fulfill(status=404,content_type="text/plain",body="synthetic missing"))
             page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
-            page.wait_for_selector("article.post",timeout=60000)
+            if live:
+                # Anonymous post-search can refuse every query (HTTP 403/5xx).
+                # The real deployment must explicitly flag a partial outage
+                # instead of presenting zero as a complete 30-day inventory.
+                page.wait_for_function("""() => document.querySelector('article.post') ||
+                  document.getElementById('feedSourceNotice')?.hidden === false
+                """,timeout=60000)
+                if page.locator("article.post").count()==0:
+                    warning=page.locator("#feedSourceNotice")
+                    assert warning.is_visible(),"Public feed failure was hidden"
+                    reason=warning.inner_text()
+                    assert "Bluesky" in reason and ("HTTP" in reason or "연결 실패" in reason),reason
+                    assert "전체 게시물" in reason,reason
+                    assert page.locator("#retryFeed").count()==1,"Missing provider retry action"
+                    assert page.locator("article.post").count()==0,"Unverified source must not become a post"
+                    assert not errors,errors
+                    print("LIVE_PUBLIC_SEARCH_OUTAGE_NOT_ZERO",json.dumps({
+                      "provider":"Bluesky","explicit_partial_warning":True,
+                      "retry_present":True,"real_feed_coverage":"UNVERIFIED",
+                      "source_post_count":0
+                    },ensure_ascii=False),flush=True)
+                    return
+            else:
+                page.wait_for_selector("article.post",timeout=60000)
             page.wait_for_function("document.getElementById('applyDate').disabled === false",timeout=120000)
 
             assert page.title()=="INTERSECTION"
@@ -378,7 +405,16 @@ def run(live=False):
                 assert not page.locator("#discoveryCandidates").is_visible(),"verified X post removes unverified search lead"
             else:
                 assert n>=1,"No real public posts"
-                assert thumbnails>0,"No public thumbnails"
+                # A genuine matched feed may contain only text posts.
+                # Inventing preview images is worse than displaying none.
+                if thumbnails==0:
+                    assert page.locator('article.post[data-no-media="true"]').count()>0,(
+                        "No thumbnails and no explicit text-only source state"
+                    )
+                    print("LIVE_PUBLIC_TEXT_ONLY_NO_FAKE_MEDIA",json.dumps({
+                      "posts":n,"real_thumbnail_count":0,
+                      "no_synthetic_preview":True
+                    }),flush=True)
                 assert "B" in page.locator("#count").text_content()
                 assert_provider_totals_match_visible_feed(page)
                 # An <img> element is not proof its bytes loaded. Decode
