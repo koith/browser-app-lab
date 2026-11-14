@@ -13,6 +13,8 @@ const docker=fs.readFileSync(path.join(__dirname,"Dockerfile"),"utf8");
 const gateway=fs.readFileSync(path.join(__dirname,"gateway.py"),"utf8");
 assert.match(html,/src="bsky_search_fallback\.js\?v=20261114-public-source-hydration-v1"/);
 assert.match(sw,/bsky_search_fallback\.js\?v=20261114-public-source-hydration-v1/);
+assert.match(sw,/Network-first avoids serving the previous HTML/);
+assert.doesNotMatch(sw,/ignoreSearch:true/,"Script query version must be respected");
 assert.match(docker,/COPY apps\/demand-research\/bsky_search_fallback\.js \/app\/bsky_search_fallback\.js/);
 assert.match(gateway,/"bsky_search_fallback\.js"/);
 assert.match(html,/window\.INTERSECTION_stopSearchFallback\?\.\(\)/);
