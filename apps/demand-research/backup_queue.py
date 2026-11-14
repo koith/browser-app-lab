@@ -166,8 +166,7 @@ def create_request(platform,account,root=None):
         account=normalized
     if sqlite_enabled():
         with _db() as conn:
-            open_count=conn.execute("SELECT count(*) FROM account_requests WHERE workflow_run_id IS NULL AND created_at>?",
-                                    (int(time.time())-7*86400,)).fetchone()[0]
+            open_count=conn.execute("SELECT count(*) FROM account_requests WHERE workflow_run_id IS NULL").fetchone()[0]
             if open_count>=_MAX_OPEN:
                 raise RuntimeError("Temporary account queue is full")
             for _ in range(10):
@@ -193,9 +192,9 @@ def pending(root=None,limit=1):
     if sqlite_enabled():
         with _db() as conn:
             rows=conn.execute('''SELECT * FROM account_requests
-                WHERE workflow_run_id IS NULL AND created_at>?
+                WHERE workflow_run_id IS NULL
                 ORDER BY created_at ASC, job_id ASC LIMIT ?''',
-                (int(time.time())-7*86400,min(max(limit,1),_MAX_OPEN))).fetchall()
+                (min(max(limit,1),_MAX_OPEN),)).fetchall()
         return [{"job_id":int(row["job_id"]),"platform":row["platform"],
                  "account":row["account"]} for row in rows]
     root=root or CloudArchive()
@@ -255,3 +254,66 @@ def state(job_id,root=None):
         return None
     receipt=read_acceptance(root,job_id)
     return {"request":request,"accepted":receipt}
+
+
+def overview(root=None):
+    """Count requests, not completed archives, without exposing account IDs."""
+    if not enabled():
+        return {"known":False,"mode":"disabled","queued":None,
+                "dispatched":None,"total_requests":None}
+    if sqlite_enabled():
+        with _db() as conn:
+            row=conn.execute("""SELECT count(*) AS total,
+                sum(CASE WHEN workflow_run_id IS NULL THEN 1 ELSE 0 END) AS queued,
+                sum(CASE WHEN workflow_run_id IS NOT NULL THEN 1 ELSE 0 END) AS dispatched
+                FROM account_requests""").fetchone()
+        return {"known":True,"mode":"volatile_sqlite",
+                "queued":int(row["queued"] or 0),
+                "dispatched":int(row["dispatched"] or 0),
+                "total_requests":int(row["total"] or 0)}
+    root=root or CloudArchive()
+    names=root.names("")
+    request_ids={int(m.group(1)) for name in names
+                 if (m:=_REQUEST.fullmatch(name))}
+    dispatched_ids={int(m.group(1)) for name in names
+                    if (m:=_ACCOUNT.fullmatch(name))}
+    return {"known":True,"mode":"immutable_cloud",
+            "queued":len(request_ids-dispatched_ids),
+            "dispatched":len(request_ids&dispatched_ids),
+            "total_requests":len(request_ids)}
+
+
+def accepted_runs(root=None,limit=64):
+    """Return only workflow run IDs for bounded trusted GitHub retry checks.
+
+    The GitHub runner already has a scoped short-lived actions token. Never
+    expose account names or raw queue records via this helper's API.
+    """
+    if not enabled():
+        raise RuntimeError("Durable queue disabled")
+    maximum=min(max(int(limit),1),64)
+    if sqlite_enabled():
+        with _db() as conn:
+            rows=conn.execute("""SELECT workflow_run_id FROM account_requests
+                 WHERE workflow_run_id IS NOT NULL AND accepted_at>=?
+                 ORDER BY accepted_at ASC,job_id ASC LIMIT ?""",
+                 (int(time.time())-30*86400,maximum)).fetchall()
+        return [int(row["workflow_run_id"]) for row in rows]
+    root=root or CloudArchive()
+    names=root.names("")
+    candidates=[]
+    for name in names:
+        matched=_ACCOUNT.fullmatch(name)
+        if matched:
+            candidates.append(int(matched.group(1)))
+    # Each immutable acknowledgement must be independently verified, never
+    # promoted to a successful archive merely because the object exists.
+    if len(candidates)>2000:
+        raise RuntimeError("Too many accepted backup records to scan safely")
+    accepted=[]
+    for job_id in candidates[-maximum:]:
+        row=read_acceptance(root,job_id)
+        if row:
+            accepted.append((int(row.get("accepted_at") or 0),
+                             row["workflow_run_id"]))
+    return [run_id for _,run_id in sorted(accepted)]
