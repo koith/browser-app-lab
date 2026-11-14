@@ -190,10 +190,16 @@
       libraryRows.textContent="보관 목록을 확인하지 못했습니다. ‘보관함 전체 보기’로 다시 시도할 수 있습니다.";
     }
   }
-  async function pollJob(){
-    clearPoll();
-    if(!gatewayReady||!currentRun)return;
-    const job=currentRun;
+  // Each accepted public account has its OWN signed receipt and poll timer.
+  // A later selected account never cancels or replaces an earlier job.
+  async function pollJob(job=currentRun){
+    if(!gatewayReady||!job||!pendingJobs.includes(job)||polling.has(job.run_id))return;
+    clearPoll(job);polling.add(job.run_id);
+    const visible=(text,kind,accountKey)=>{
+      job.state=kind;
+      if(currentRun===job)showJob(text,kind,accountKey);
+      renderQueueInfo();
+    };
     try{
       const response=await fetch("/api/target-archive/jobs/"+
         encodeURIComponent(String(job.run_id))+"?receipt="+
@@ -201,47 +207,49 @@
           credentials:"same-origin",cache:"no-store",
           headers:{Accept:"application/json"}
         });
-      if(!response.ok)throw Error("진행 상태를 읽지 못했습니다 (HTTP "+response.status+")");
+      if(!response.ok)throw Error("Job status HTTP "+response.status);
       const result=await response.json();
-      if(currentRun!==job)return;
+      if(!pendingJobs.includes(job))return;
       const count=Number(result.posts||0);
       switch(result.state){
         case "QUEUED":
-          showJob(Number(result.queued_seconds||0)>=600
-            ?"백업 요청은 접수됐지만 자동 실행이 10분 넘게 지연됐습니다. 다시 누르지 말고 실행 상태를 확인하세요."
-            :"백업 작업 접수 완료 · GitHub 실행 대기 중 (일정이 지연될 수 있습니다)","queued");break;
+          visible("백업 접수 완료 · 작업 실행 대기 중 · 기존 요청도 계속 진행됩니다.","queued");
+          break;
         case "RUNNING":
-          showJob("백업 진행 중 · 공개 자료를 수집하고 임시 저장소에 암호화 보관합니다.","running");break;
+          visible("백업 진행 중 · 공개 자료를 수집해 암호화 저장합니다.","running");break;
         case "VERIFYING_STORAGE":
-          showJob("파일 전송 완료 여부를 확인 중 · 원본을 다시 읽어 SHA를 검증합니다.","verifying");break;
+          visible("저장된 원본을 다시 읽어 무결성을 검증 중입니다.","verifying");break;
         case "REMOTE_VERIFIED":
         case "PARTIAL_BACKUP":
-          showJob((result.state==="REMOTE_VERIFIED"
-            ?"검증된 임시 백업 · 게시글 "+count+"건 · 원본 "+
-               Number(result.objects||0)+"개 검증"
-            :"백업된 자료 일부 검증됨 · 게시글 "+count+
-              "건 · 수집되지 않은 구간이 남아 있습니다."),"verified",
-            String(result.account_key||""));
-          saveReceipt(null);currentRun=null;
-          await loadLibrary();
+          visible((result.state==="REMOTE_VERIFIED"
+            ?"검증된 백업 · 게시글 "+count+"건 · 원본 "+Number(result.objects||0)+"개"
+            :"일부 백업 완료 · 게시글 "+count+"건 · 미수집 구간 남음"),
+            "verified",String(result.account_key||""));
+          saveReceipt(null,job);
+          if(currentRun===job)currentRun=pendingJobs[pendingJobs.length-1]||null;
+          void loadLibrary();
           return;
         case "NEEDS_RETRY":
-          showJob("이전 백업 요청의 대기 기록이 만료됐습니다. 보관함을 확인하고, 저장된 자료가 없다면 다시 백업해 주세요.","failed");
-          saveReceipt(null);currentRun=null;
-          await loadLibrary();
-          return;
         case "FAILED":
-          showJob("백업 실패 · 기존 보관 자료는 유지됩니다. 다시 실행할 수 있습니다.","failed");
-          saveReceipt(null);currentRun=null;
+          visible(result.state==="NEEDS_RETRY"?
+            "기존 작업 대기 기록이 만료됐습니다. 보관함에서 저장 결과를 확인해 주세요.":
+            "백업 실패 · 다른 접수 작업은 유지되며 이 작업은 재시도할 수 있습니다.","failed");
+          saveReceipt(null,job);
+          if(currentRun===job)currentRun=pendingJobs[pendingJobs.length-1]||null;
           return;
         default:
-          showJob("백업 진행 상태를 확인 중입니다.","running");
+          visible("백업 상태 확인 중입니다.","running");
       }
     }catch{
-      if(currentRun!==job)return;
-      showJob("진행 상태 확인에 실패했습니다. 잠시 뒤 자동으로 다시 확인합니다.","verifying");
+      if(pendingJobs.includes(job))
+        visible("접수된 백업의 진행 상태를 다시 확인 중입니다.","verifying");
+    }finally{
+      polling.delete(job.run_id);
+      if(pendingJobs.includes(job)){
+        const timer=window.setTimeout(()=>{pollTimers.delete(job.run_id);void pollJob(job)},12000);
+        pollTimers.set(job.run_id,timer);
+      }else clearPoll(job);
     }
-    if(currentRun===job)pollTimer=window.setTimeout(pollJob,6000);
   }
 
   function publicHost(host){
