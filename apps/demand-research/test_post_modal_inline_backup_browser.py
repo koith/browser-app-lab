@@ -121,10 +121,9 @@ def exercise(browser_type,name,width):
                     route.abort()
             page.route("**/*",route_it)
             page.goto(host+"?tab=posts",wait_until="domcontentloaded",timeout=25000)
-            page.wait_for_function("typeof window.showFixturePost==='function'")
+            page.wait_for_function("typeof window.INTERSECTION_startPublicAccountBackup==='function'")
             if host==PRIVATE:
-                page.locator("#targetArchiveStatus").get_by_text(
-                    "계정 이름",exact=False).wait_for(timeout=10000)
+                page.wait_for_function("document.querySelector('#targetArchiveStatus')?.textContent?.includes('계정 이름')",timeout=10000)
             # Natural document scrolling must never scroll away the three tabs.
             for label in ("게시글","계정 분석","백업 보관함"):
                 page.get_by_role("tab",name=label).click()
@@ -143,7 +142,7 @@ def exercise(browser_type,name,width):
             button.click()
             status=modal.locator(".dialog-backup-status")
             if host==PRIVATE:
-                status.get_by_text("백업 작업 접수",exact=False).wait_for(timeout=12000)
+                page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('백업 작업 접수')",timeout=12000)
                 assert len(posts)==1,("expected exactly one direct public account backup",posts)
                 assert posts[0]=={"platform":"bluesky","account":PROFILE},posts
                 assert button.is_disabled(),"queued job cannot be clicked twice"
@@ -152,10 +151,10 @@ def exercise(browser_type,name,width):
                 page.evaluate("document.querySelector('#detail').close()")
                 page.evaluate("window.showFixturePost('mastodon')")
                 modal.get_by_role("button",name="이 계정 바로 백업").click()
-                status.get_by_text("진행 중인 백업 요청",exact=False).wait_for(timeout=5000)
+                page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('진행 중인 백업 요청')",timeout=5000)
                 assert len(posts)==1,posts
             else:
-                status.get_by_text("공개 미러",exact=False).wait_for(timeout=5000)
+                page.wait_for_function("document.querySelector('#detail .dialog-backup-status')?.textContent?.includes('공개 미러')",timeout=5000)
                 assert len(posts)==0,"public Pages must never cross-origin POST"
             assert page.url==before,"post dialog backup must not change page or tab"
             assert modal.get_attribute("open") is not None
