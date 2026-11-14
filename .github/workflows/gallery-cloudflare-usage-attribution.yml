@@ -1,0 +1,100 @@
+name: Gallery Cloudflare Usage Attribution (read only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/gallery-cloudflare-usage-attribution.yml']
+permissions:
+  contents: read
+jobs:
+  read-usage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Inspect historical invocation totals without changing resources
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, re, urllib.request, urllib.error, collections
+          TOKEN=os.environ.get('CLOUDFLARE_API_TOKEN','').strip()
+          if not TOKEN:
+              print('CF_USAGE_AUDIT TOKEN_UNAVAILABLE')
+              raise SystemExit(0)
+          API='https://api.cloudflare.com/client/v4'
+          def post(q,variables):
+              payload=json.dumps({'query':q,'variables':variables}).encode()
+              req=urllib.request.Request(API+'/graphql',data=payload,method='POST',
+                  headers={'Authorization':'Bearer '+TOKEN,'Content-Type':'application/json','Accept':'application/json'})
+              try:
+                  with urllib.request.urlopen(req,timeout=35) as resp: return json.load(resp)
+              except urllib.error.HTTPError as exc:
+                  print('CF_USAGE_GRAPHQL_HTTP',exc.code);return None
+              except Exception as exc:
+                  print('CF_USAGE_GRAPHQL_TRANSPORT',type(exc).__name__);return None
+          req=urllib.request.Request(API+'/accounts?per_page=50&page=1',
+              headers={'Authorization':'Bearer '+TOKEN,'Accept':'application/json'})
+          try:
+              with urllib.request.urlopen(req,timeout=25) as resp: j=json.load(resp)
+              accounts=j.get('result',[])
+              if j.get('success') is not True or len(accounts)!=1 or not re.fullmatch('[0-9a-f]{32}',accounts[0].get('id','')):
+                  print('CF_USAGE_AUDIT ACCOUNT_NOT_UNAMBIGUOUS');raise SystemExit(0)
+              account=accounts[0]['id']
+          except Exception as exc:
+              print('CF_USAGE_ACCOUNT_READ',type(exc).__name__);raise SystemExit(0)
+          def ok(response):
+              if response is None:return False
+              errors=response.get('errors') or []
+              if errors:
+                  print('CF_USAGE_GRAPHQL_ERRORS',[(e.get('extensions') or {}).get('code','UNKNOWN') for e in errors][:5])
+                  print('CF_USAGE_GRAPHQL_ERROR_CLASS',[re.sub(r'[^A-Za-z0-9_ ]','',str(e.get('message','')))[:120] for e in errors][:3])
+                  return False
+              return True
+          q='''query($accountTag: string, $start: Time, $end: Time) {
+            viewer { accounts(filter: {accountTag: $accountTag}) {
+              workersInvocationsAdaptive(limit: 3000, filter: {
+                datetime_geq: $start, datetime_lt: $end
+              }) {
+                dimensions {scriptName datetimeHour status}
+                sum {requests errors}
+              }
+            }}
+          }'''
+          for start,end in [('2026-11-13T00:00:00Z','2026-11-14T00:00:00Z'),
+                            ('2026-11-14T00:00:00Z','2026-11-15T00:00:00Z')]:
+              data=post(q,{'accountTag':account,'start':start,'end':end})
+              if not ok(data):continue
+              groups=(((data.get('data') or {}).get('viewer') or {}).get('accounts') or [])
+              if len(groups)!=1:
+                  print('CF_USAGE_NO_ACCOUNT_ROWS',start[:10]);continue
+              rows=groups[0].get('workersInvocationsAdaptive',[])
+              by_script=collections.Counter();by_hour=collections.Counter();by_status=collections.Counter()
+              for row in rows:
+                  dim=row.get('dimensions') or {};total=int((row.get('sum') or {}).get('requests') or 0)
+                  by_script[str(dim.get('scriptName') or 'UNKNOWN')]+=total
+                  by_hour[str(dim.get('datetimeHour') or 'UNKNOWN')]+=total
+                  by_status[str(dim.get('status') or 'UNKNOWN')]+=total
+              print('CF_WORKERS_DAILY',start[:10],'group_count',len(rows),
+                  'total_requests',sum(by_script.values()),
+                  'by_script',json.dumps(by_script.most_common()),
+                  'by_status',json.dumps(by_status.most_common()))
+              print('CF_WORKERS_HOURLY',start[:10],json.dumps(sorted(by_hour.items())))
+          q_pages='''query($accountTag: string, $start: Time, $end: Time) {
+             viewer {accounts(filter:{accountTag:$accountTag}) {
+               pagesFunctionsInvocationsAdaptiveGroups(limit:500,filter:{datetime_geq:$start,datetime_lt:$end}) {
+                 dimensions {scriptName datetimeHour}
+                 sum {requests}
+               }
+             }}
+          }'''
+          result=post(q_pages,{'accountTag':account,'start':'2026-11-14T00:00:00Z','end':'2026-11-15T00:00:00Z'})
+          if ok(result):
+              rows=((result.get('data') or {}).get('viewer') or {}).get('accounts') or []
+              if len(rows)==1:
+                  entries=rows[0].get('pagesFunctionsInvocationsAdaptiveGroups') or []
+                  counts=collections.Counter()
+                  for item in entries:
+                      counts[str((item.get('dimensions') or {}).get('scriptName') or 'UNKNOWN')]+=int((item.get('sum') or {}).get('requests') or 0)
+                  print('CF_PAGES_FUNCTIONS_DAILY','2026-11-14',json.dumps(counts.most_common()))
+          PY
