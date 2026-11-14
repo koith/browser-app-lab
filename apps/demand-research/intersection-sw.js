@@ -4,7 +4,7 @@
  * account records, API JSON, uploaded media, authentication or private bytes.
  */
 "use strict";
-const VERSION="intersection-public-shell-v1-20261115-queue-scroll-v1";
+const VERSION="intersection-public-shell-v1-20261115-manual-account-block-v1";
 const PREFIX="intersection-public-shell-v1-";
 const FILES=[
   "/",
