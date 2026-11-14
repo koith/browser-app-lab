@@ -1,0 +1,53 @@
+name: Gallery source aliases and publisher complete gate
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/source_name_ledger.py'
+      - 'apps/gallery-archive/source-names.json'
+      - 'apps/gallery-archive/publisher_completion.py'
+      - 'apps/gallery-archive/publisher-targets.json'
+      - 'apps/gallery-archive/test_source_names_publisher.py'
+      - '.github/workflows/gallery-source-names-gate.yml'
+      - '.github/workflows/gallery-targeted-public-photo-crawl.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/source_name_ledger.py'
+      - 'apps/gallery-archive/source-names.json'
+      - 'apps/gallery-archive/publisher_completion.py'
+      - 'apps/gallery-archive/publisher-targets.json'
+      - '.github/workflows/gallery-source-names-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence_and_physical_audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit-test source spellings and fail-closed edition logic
+        run: |
+          python -m py_compile apps/gallery-archive/source_name_ledger.py apps/gallery-archive/publisher_completion.py apps/gallery-archive/test_source_names_publisher.py
+          python apps/gallery-archive/test_source_names_publisher.py
+      - name: Audit official physical photo targets without claiming completeness
+        run: |
+          python apps/gallery-archive/publisher_completion.py --out /tmp/gallery-publisher-progress.json
+          python - <<'PY'
+          import json,os
+          x=json.load(open('/tmp/gallery-publisher-progress.json'))
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('## Official publisher edition target vs verified physical archive\n\n')
+              for r in x['results']:
+                  f.write(f"- {r['model']}/{r['album_id']}: registered {r['registered_unique_sha']}; repository SHA-verified {r['repo_sha_verified_photos']} / official {r['declared_count']}; {r['status']}\n")
+              f.write('\nSuccessful audit does NOT imply photo collection or COMPLETE. Actual package bytes, watermark and real browser evidence are required.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gallery-publisher-target-physical-audit
+          path: /tmp/gallery-publisher-progress.json
+          if-no-files-found: error
+          retention-days: 30
