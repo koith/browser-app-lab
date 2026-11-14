@@ -196,10 +196,16 @@ def exercise(browser_type,name,width):
             }""")
             scrolled=page.evaluate("""() => ({
               scroll:document.querySelector('#detailContent').scrollTop,
-              headerTop:document.querySelector('#detail .dialog-head').getBoundingClientRect().top
+              headerTop:document.querySelector('#detail .dialog-head').getBoundingClientRect().top,
+              modalTop:document.querySelector('#detail').getBoundingClientRect().top
             })""")
             assert scrolled["scroll"]>100,("dialog body did not scroll",scrolled)
-            assert abs(scrolled["headerTop"]-frame["top"])<=2,("header moved",frame,scrolled)
+            # When a short centered dialog grows taller, the browser recenters
+            # the modal itself. Header fixation is measured relative to the
+            # dialog border, not the changing absolute viewport coordinate.
+            before_offset=frame["top"]-frame["modalTop"]
+            after_offset=scrolled["headerTop"]-scrolled["modalTop"]
+            assert abs(after_offset-before_offset)<=2,("header moved inside modal",frame,scrolled)
             assert button.is_visible(),"fixed header backup button scrolled away"
             button.click()
             status=modal.locator(".dialog-backup-status")
