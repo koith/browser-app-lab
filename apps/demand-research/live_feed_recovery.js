@@ -124,4 +124,6 @@
  window.addEventListener("intersection:public-search-unavailable",()=>{
    enabled=true;resume();
  });
+ // A very fast provider failure may precede deferred-script installation.
+ if(window.INTERSECTION_PUBLIC_SEARCH_DOWN){enabled=true;resume();}
 })();
