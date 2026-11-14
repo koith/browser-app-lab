@@ -9,10 +9,14 @@
   "use strict";
   const receive=window.INTERSECTION_receiveCandidates;
   const acceptX=window.INTERSECTION_acceptPublicX;
-  if(location.hostname!=="koith.github.io"||
-    typeof receive!=="function"||typeof acceptX!=="function")return;
+  // The app runs from both the public Pages mirror and the private Render
+  // gateway. Previously Render was excluded, silently disabling the only
+  // working X/Threads/Instagram discovery route during Bluesky outages.
+  const allowedHost=location.hostname==="koith.github.io"||
+    location.hostname==="intersection-originals-free.onrender.com";
+  if(!allowedHost||typeof receive!=="function"||typeof acceptX!=="function")return;
 
-  const TERMS=["뒷계","섹트","일탈계"];
+  const TERMS=["뒷계","섹트","섹블","일탈계"];
   const NETWORKS={
     x:{hosts:["x.com","twitter.com"],
       pattern:/^\/([A-Za-z0-9_]{1,15})\/status\/([0-9]+)\/?$/i},

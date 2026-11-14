@@ -4,11 +4,12 @@
  * account records, API JSON, uploaded media, authentication or private bytes.
  */
 "use strict";
-const VERSION="intersection-public-shell-v1-20261114-feed-recovery";
+const VERSION="intersection-public-shell-v1-20261114-index-hydration-v1";
 const PREFIX="intersection-public-shell-v1-";
 const FILES=[
   "/",
   "/live_feed_recovery.js?v=20261114-bsky-outage-v1",
+  "/bsky_search_fallback.js?v=20261114-public-source-hydration-v1",
   "/post_activity_ranking.js",
   "/public_video_trends.js",
   "/target_archive_client.js?v=20261114-inline-backup-v1",
@@ -56,22 +57,35 @@ self.addEventListener("fetch",event=>{
   if(request.method!=="GET")return;
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
-  // Only the root shell is eligible for offline-first navigation.
+  // Network-first avoids serving the previous HTML forever after a
+  // successful deploy. If free Render is asleep/offline, recover the last
+  // verified public shell; never cache APIs, personal data, or error pages.
   if(request.mode==="navigate"){
     if(url.pathname!=="/")return;
     event.respondWith((async()=>{
-      const cached=await (await caches.open(VERSION)).match("/");
+      const cache=await caches.open(VERSION);
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),3500);
+      try{
+        const response=await fetch(request,{signal:controller.signal,cache:"no-store"});
+        if(response.ok&&(response.headers.get("content-type")||"").includes("text/html")&&
+          (await response.clone().text()).includes("<title>INTERSECTION</title>")){
+          await cache.put("/",response.clone());
+          return response;
+        }
+      }catch{/* Serve verified public shell only when origin is unavailable. */}
+      finally{clearTimeout(timer)}
+      const cached=await cache.match("/");
       if(cached)return cached;
       return fetch(request);
     })());
-    event.waitUntil(updatePublic("/"));
     return;
   }
   if(!SCRIPT_PATHS.has(url.pathname))return;
   // Scripts are public app code. All /api/*, media and archive routes use
   // native network fetch and cannot be accidentally cached by this worker.
   event.respondWith((async()=>{
-    const cached=await (await caches.open(VERSION)).match(request,{ignoreSearch:true});
+    const cached=await (await caches.open(VERSION)).match(request);
     if(cached)return cached;
     return fetch(request);
   })());

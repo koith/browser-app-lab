@@ -1145,7 +1145,7 @@ const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS
 // is retained for direct bookmarked access to the legacy archive-only feed.
 const privateHost=location.hostname!=="koith.github.io";
 const cloudMode=privateHost&&new URLSearchParams(location.search).get("source")==="archive";
-let bskySearchFailureCode="",liveRecoveryState="";
+let bskySearchFailureCode="",liveRecoveryState="",fallbackStats=null,verifiedFeedDrawTimer=null;
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
@@ -1697,7 +1697,8 @@ function profileLink(p){
 }
 function hasMoreResults(){
   if(feedRows().length>visibleLimit)return true;
-  if(bskySearchFailureCode&&!cloudMode)return false;
+  if(bskySearchFailureCode&&!cloudMode)
+    return Boolean(window.INTERSECTION_hasSearchFallbackMore?.());
   if(cloudMode)return cloudOffset<cloudTotal;
   return !!pending.length||nextEnd>fromMs;
 }
@@ -1883,6 +1884,8 @@ function draw(){
     if(bskySearchFailureCode&&!cloudMode)
       label="Bluesky 검색 서버가 응답하지 않습니다 ("+bskySearchFailureCode+
         "). 0건은 전체 게시물이 없다는 뜻이 아닙니다. "+
+        (fallbackStats?.state==="searching"||fallbackStats?.state==="verifying"?
+         "공개 검색 대체 경로에서 공식 원문을 확인 중입니다. ":"")+
         (liveRecoveryState==="listening"?"실시간 새 공개 게시물을 수신 중입니다.":
          liveRecoveryState==="connecting"?"실시간 공개 스트림을 연결 중입니다.":
          liveRecoveryState==="receiving"?"수신한 게시물의 공식 원문을 검증 중입니다.":
@@ -1891,13 +1894,17 @@ function draw(){
   }
   list.append(frag);shown=Math.min(rows.length,limit);
   $("paging").classList.toggle("hidden",!hasMoreResults() || busy);
-  $("more").textContent="더 보기";
+  $("more").textContent=bskySearchFailureCode&&!cloudMode?
+    "검증된 게시글 더 찾기":"더 보기";
   const notice=$("feedSourceNotice"),retry=$("retryFeed");
   notice.hidden=cloudMode||!bskySearchFailureCode;
   retry.hidden=cloudMode||!bskySearchFailureCode||busy;
   if(!notice.hidden){
     notice.textContent="Bluesky 공개 검색 서버 "+bskySearchFailureCode+
-      " · 기존 게시글의 전체 검색이 중단됐습니다. 이 수치는 전체 게시물 0건이 아닙니다. "+
+      " · 기존 게시글의 전체 검색이 중단됐습니다. 0건은 전체 게시물 수가 아닙니다. "+
+      (fallbackStats?
+        "대체 검색 검증 "+Number(fallbackStats.verified||0)+"건"+
+        " · 검색 페이지 "+Number(fallbackStats.pages||0)+"개 (일부 수집, 전수 미보장). ":"")+
       (liveRecoveryState==="listening"?"공개 실시간 신규 글만 별도 감시 중":
        liveRecoveryState==="receiving"?"공식 게시글 원본 검증 중":
        liveRecoveryState==="connecting"?"공개 실시간 스트림 연결 중":
@@ -1960,14 +1967,30 @@ window.INTERSECTION_publicAccountSnapshot=function(){
 function startBusy(){busy=true;$("applyDate").disabled=true;$("more").disabled=true}
 function endBusy(){busy=false;$("applyDate").disabled=false;$("more").disabled=false}
 function resetData(){
-  bskySearchFailureCode="";liveRecoveryState="";
+  bskySearchFailureCode="";liveRecoveryState="";fallbackStats=null;
+  window.INTERSECTION_PUBLIC_SEARCH_DOWN="";
+  if(verifiedFeedDrawTimer!==null){clearTimeout(verifiedFeedDrawTimer);verifiedFeedDrawTimer=null}
   window.INTERSECTION_stopLiveFeedRecovery?.();
+  window.INTERSECTION_stopSearchFallback?.();
   posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();
   visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw();
 }
+function scheduleVerifiedDraw(){
+  if(verifiedFeedDrawTimer!==null)return;
+  verifiedFeedDrawTimer=setTimeout(()=>{
+    verifiedFeedDrawTimer=null;
+    posts.sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
+    draw();
+  },180);
+}
+window.INTERSECTION_publicFeedRange=()=>({fromMs,toMs,run:runID});
+window.INTERSECTION_searchFallbackStatus=value=>{
+  fallbackStats=value&&typeof value==="object"?value:null;
+  if(!cloudMode)scheduleVerifiedDraw();
+};
 window.INTERSECTION_liveFeedState=state=>{
   liveRecoveryState=String(state||"").slice(0,30);
-  if(!cloudMode)draw();
+  if(!cloudMode)scheduleVerifiedDraw();
 };
 window.INTERSECTION_receiveLiveBskyPost=p=>{
   if(cloudMode||!bskySearchFailureCode||!p||typeof p.record?.text!=="string")return false;
@@ -1975,7 +1998,7 @@ window.INTERSECTION_receiveLiveBskyPost=p=>{
   if(!Number.isFinite(created)||created<fromMs||created>=toMs)return false;
   let added=false;
   for(const term of TERMS)if(p.record.text.includes(term))added=addPost(p,term)||added;
-  if(added){posts.sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));draw();}
+  if(added)scheduleVerifiedDraw();
   return added;
 };
 function failPublicSearch(error){
@@ -2182,7 +2205,9 @@ $("retryFeed").addEventListener("click",()=>{if(!busy&&!cloudMode)loadBatch(true
 $("more").addEventListener("click",()=>{
   if(busy)return;
   if(filtered().length>visibleLimit){visibleLimit+=180;draw()}
-  else if(cloudMode)loadCloud(false);else loadBatch(false);
+  else if(cloudMode)loadCloud(false);
+  else if(bskySearchFailureCode)window.INTERSECTION_resumeSearchFallback?.();
+  else loadBatch(false);
 });
 
 $("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days))});
@@ -2303,6 +2328,7 @@ if(location.hostname==="intersection-originals-free.onrender.com" &&
 }
 </script>
 <script src="live_feed_recovery.js?v=20261114-bsky-outage-v1" defer></script>
+<script src="bsky_search_fallback.js?v=20261114-public-source-hydration-v1" defer></script>
 <script src="post_activity_ranking.js" defer></script>
 <script src="public_video_trends.js" defer></script>
 <script src="target_archive_client.js?v=20261114-inline-backup-v1" defer></script>
