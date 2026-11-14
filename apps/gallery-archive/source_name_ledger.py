@@ -63,6 +63,27 @@ def ingest_discovery(db,report):
                 out[status]+=1
     return out
 
+def ingest_search_report(db, report):
+    """Accumulate different observed source headings only for source pages
+    whose model and exact work/edition were checked before observation."""
+    out={"added":0,"existing":0,"pending":0}
+    model=report.get("model")
+    if model not in db["model_names"]:return out
+    for entry in report.get("search_results",[]):
+        album=entry.get("id")
+        if model+":"+str(album) not in db["works"]:continue
+        for observation in entry.get("observations",[]):
+            if (observation.get("album_id")!=album or
+                    observation.get("model")!=model or
+                    observation.get("proof")!="unique_named_work_page_model_and_edition"):
+                continue
+            status=observe(db,model,album,observation.get("name",""),
+                           observation.get("source",""),
+                           observation["proof"],True)
+            out[status]+=1
+    return out
+
+
 def forms(value):
     text=unicodedata.normalize("NFKC",value).strip()
     compact=re.sub(r"[\[\]()·:–—_/-]+"," ",text)
@@ -90,6 +111,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument("--ledger",type=Path,default=LEDGER)
     parser.add_argument("--discover",type=Path)
+    parser.add_argument("--search-report",type=Path)
     parser.add_argument("--work",help="model:album-id")
     parser.add_argument("--out",type=Path)
     a=parser.parse_args()
@@ -99,12 +121,16 @@ def main():
         summary=ingest_discovery(db,json.loads(a.discover.read_text(encoding="utf-8")))
         if a.out:a.out.write_text(json.dumps(db,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
         print("SOURCE_ALIAS_ACCUMULATION",json.dumps(summary))
+    if a.search_report:
+        summary=ingest_search_report(db,json.loads(a.search_report.read_text(encoding="utf-8")))
+        if a.out:a.out.write_text(json.dumps(db,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+        print("SEARCH_SITE_NAME_ACCUMULATION",json.dumps(summary))
     if a.work:
         model,album=a.work.split(":",1)
         output={"work":a.work,"queries":queries(db,model,album)}
         if a.out:a.out.write_text(json.dumps(output,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
         print(json.dumps(output,ensure_ascii=False))
-    if not a.work and not a.discover:
+    if not a.work and not a.discover and not a.search_report:
         print("SOURCE_NAME_LEDGER_READY",len(db["works"]))
 
 if __name__=="__main__":main()
