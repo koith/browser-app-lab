@@ -1226,6 +1226,7 @@ const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS
 const privateHost=location.hostname!=="koith.github.io";
 const cloudMode=privateHost&&new URLSearchParams(location.search).get("source")==="archive";
 let bskySearchFailureCode="",liveRecoveryState="",fallbackStats=null,verifiedFeedDrawTimer=null;
+let tileCache=new WeakMap();
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
@@ -1796,6 +1797,7 @@ function tile(p){
     thumb.append(box);
   }
   function showFallback(){
+    thumb.classList.remove("is-loading");
     thumb.querySelectorAll("img.post-media-img,.thumb-placeholder,.thumb-kind-label").forEach(n=>n.remove());
     article.dataset.noMedia="true";
     // Never substitute an account photo, unrelated photo, or a fabricated
@@ -1814,9 +1816,16 @@ function tile(p){
       img.alt="SNS 원본 게시글 첨부 미리보기";
       img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";
       let next=0;
-      img.addEventListener("error",()=>{next++;if(next<candidates.length)img.src=candidates[next];else showFallback()});
+      thumb.classList.add("is-loading");
+      img.addEventListener("load",()=>thumb.classList.remove("is-loading"));
+      img.addEventListener("error",()=>{
+        next++;
+        if(next<candidates.length)img.src=candidates[next];
+        else showFallback();
+      });
       img.src=candidates[0];
       thumb.append(img);
+      if(img.complete&&img.naturalWidth>0)thumb.classList.remove("is-loading");
     }else showFallback();
   }else showFallback();
   if(first?.type==="video"&&!blocked)thumb.append(el("span","video-mark","▶ 영상"));
@@ -1865,7 +1874,42 @@ function sourceLink(p,text){
 function openDetail(p){
   let node=$("detailContent");node.replaceChildren();
   const actions=$("detailActionBar");actions.replaceChildren();
-  let sourceRow=el("div","dialog-source-row");sourceRow.append(sourceBadge(p),profileLink(p));node.append(sourceRow);
+  const dialog=$("detail");
+  dialog.dataset.platform=String(p.platform||"cloud");
+  const title=$("detailTitle");title.replaceChildren();
+  const meta=SERVICES[p.platform]||SERVICES.cloud;
+  const destination=validUrl(p.profileUrl);
+  const account=el(destination?"a":"span","dialog-profile-link");
+  if(destination){
+    account.href=destination;account.target="_blank";account.rel="noopener noreferrer";
+    account.title="SNS 원본 계정 열기";
+    account.setAttribute("aria-label",meta.name+" 계정 "+String(p.author||"작성자")+" 프로필 열기");
+  }
+  const icon=el("img","dialog-platform-icon");
+  icon.alt=meta.name;icon.src=meta.favicon;
+  icon.addEventListener("error",()=>{
+    icon.replaceWith(el("span","dialog-platform-fallback",meta.name.slice(0,1)));
+  },{once:true});
+  const avatar=el("span","dialog-avatar-frame",String(p.author||"?").trim().slice(0,1)||"?");
+  const avatarSrc=validUrl(p.avatarUrl);
+  if(avatarSrc){
+    const pic=el("img");
+    pic.src=avatarSrc;pic.alt="";pic.loading="eager";pic.referrerPolicy="no-referrer";
+    pic.addEventListener("error",()=>pic.remove(),{once:true});
+    avatar.append(pic);
+  }
+  let accountAddress="계정 주소 미확인";
+  if(destination){
+    try{
+      const url=new URL(destination);
+      accountAddress=url.host+(url.pathname.endsWith("/")?url.pathname.slice(0,-1):url.pathname);
+    }catch{accountAddress=destination}
+  }
+  const profileText=el("span","dialog-profile-meta");
+  profileText.append(el("span","dialog-profile-name",p.author||"작성자"),
+    el("span","dialog-profile-address",accountAddress));
+  account.append(icon,avatar,profileText);
+  title.append(account);
   node.append(el("div","dialog-date",p.discoveryCandidate?"게시일 미확인":niceDate(p.posted)));
   if(p.discoveryCandidate)node.append(el("div","dialog-index-note",
     "검색엔진에서 발견된 공개 게시글 주소입니다. 원문 내용·게시 날짜·현재 공개 상태를 확인하지 못했으므로 선택한 기간에 포함된다고 보장하지 않습니다. 내용은 검색 미리보기입니다."));
@@ -1958,7 +2002,26 @@ function draw(){
   let rows=feedRows(),list=$("feed");list.replaceChildren();
   drawDiscoveredLinks();
   let limit=visibleLimit,frag=document.createDocumentFragment();
-  for(let p of rows.slice(0,limit))frag.append(tile(p));
+  for(const p of rows.slice(0,limit)){
+    // Growing feed counts must not force loaded thumbnails to reload.
+    let card=tileCache.get(p);
+    if(!card){card=tile(p);tileCache.set(p,card)}
+    frag.append(card);
+  }
+  const loadingPosts=!cloudMode&&(busy||
+    (fallbackStats&&["searching","verifying"].includes(fallbackStats.state))||
+    liveRecoveryState==="receiving");
+  list.setAttribute("aria-busy",loadingPosts?"true":"false");
+  if(loadingPosts){
+    for(let i=0;i<3;i++){
+      const placeholder=el("div","feed-skeleton");
+      placeholder.setAttribute("aria-hidden","true");
+      const thumb=el("div","post-thumb is-loading"),lines=el("div","skeleton-lines");
+      lines.append(el("span"),el("span"));
+      placeholder.append(thumb,lines);
+      frag.append(placeholder);
+    }
+  }
   if(!rows.length){
     let label=busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다.";
     if(bskySearchFailureCode&&!cloudMode)
@@ -2052,6 +2115,7 @@ function resetData(){
   if(verifiedFeedDrawTimer!==null){clearTimeout(verifiedFeedDrawTimer);verifiedFeedDrawTimer=null}
   window.INTERSECTION_stopLiveFeedRecovery?.();
   window.INTERSECTION_stopSearchFallback?.();
+  tileCache=new WeakMap();
   posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();
   visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw();
 }
