@@ -269,6 +269,102 @@ function changeMode(mode,account=""){
   if(mode==="accounts")void preloadChoices();
   return true;
 }
+/* Explicit read-only queue inspection. Never background-poll all workflows:
+   querying 20 real job statuses is intentionally user-triggered only. */
+const queueOpen=$("archiveQueueOpen"),queueDialog=$("archiveQueueDialog"),
+      queueClose=$("archiveQueueClose"),queueStatus=$("archiveQueueStatus"),
+      queueList=$("archiveQueueList"),queueMore=$("archiveQueueMore"),
+      queueRefresh=$("archiveQueueRefresh");
+let queueLoading=false,queueOffset=0;
+const queueText=(tag,className,value)=>{
+  const node=document.createElement(tag);
+  if(className)node.className=className;
+  if(value!==undefined)node.textContent=String(value);
+  return node;
+};
+function addQueueRow(item,ordinal){
+  const row=queueText("li","archive-queue-row");
+  row.dataset.state=String(item.state||"STATUS_UNAVAILABLE").slice(0,40);
+  const head=queueText("div","archive-queue-row-head");
+  head.append(queueText("strong","archive-queue-name",ordinal+". "+
+    (item.platform==="mastodon"?"Mastodon":"Bluesky")+" · "+String(item.account||"계정 확인 불가").slice(0,260)));
+  const when=Number(item.created_at);
+  head.append(queueText("time","archive-queue-date",
+    Number.isFinite(when)&&when>0
+      ?new Date(when*1000).toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})
+      :"접수시각 확인 불가"));
+  const phases=queueText("div","archive-queue-track");
+  phases.dataset.state=row.dataset.state;
+  phases.setAttribute("role","img");
+  const step=Math.min(4,Math.max(0,Number(item.phase)||0));
+  phases.setAttribute("aria-label","진행 단계 "+step+"/4, 파일 저장 비율 아님");
+  for(let i=0;i<4;i++)phases.append(queueText("span",i<step?"filled":""));
+  const detail=queueText("div","archive-queue-detail",
+    "단계 "+step+"/4 · "+String(item.status||"진행 상태 미확인").slice(0,200));
+  row.append(head,phases,detail);queueList.append(row);
+}
+async function loadQueue(reset=true){
+  if(!queueDialog||!queueStatus||!queueList||queueLoading)return;
+  queueLoading=true;
+  if(queueRefresh)queueRefresh.disabled=true;
+  if(queueMore)queueMore.disabled=true;
+  const offset=reset?0:queueOffset;
+  if(reset)queueStatus.textContent="백업 요청 장부와 실행 상태 확인 중…";
+  try{
+    await (window.INTERSECTION_AUTH_READY||Promise.resolve());
+    const response=await fetch("/api/target-archive/queue?"+
+      new URLSearchParams({offset:String(offset),limit:"20"}),{
+        credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
+    if(!response.ok)throw Error(response.status===401
+      ?"비공개 보관함에 로그인한 뒤 확인하세요.":"대기열 조회 실패 · HTTP "+response.status);
+    const data=await response.json();
+    if(reset){queueOffset=0;queueList.replaceChildren();}
+    if(!data?.known){
+      queueStatus.textContent=String(data?.message||"현재 서버에서 요청 내역을 확인할 수 없습니다.");
+      if(queueMore)queueMore.hidden=true;
+      return;
+    }
+    const rows=Array.isArray(data.items)?data.items:[];
+    for(let i=0;i<rows.length;i++)addQueueRow(rows[i],offset+i+1);
+    queueOffset=offset+rows.length;
+    const total=Number.isFinite(data.total)?data.total:null;
+    const warning=data.mode==="volatile_sqlite"
+      ?" · 임시 장부: 서버 재시작 이전 접수 기록은 누락될 수 있습니다.":"";
+    queueStatus.textContent=(total===null
+      ?"확인 가능한 요청 "+queueOffset+"건"
+      :"요청 "+total+"건 중 "+queueOffset+"건 표시")+
+      " · 오래된 요청부터 정렬"+warning+
+      (data.truncated?" · 원격 장부 일부만 조회됨":"");
+    if(!queueOffset){
+      queueList.append(queueText("li","archive-queue-detail",
+        "현재 서버 장부에서 접수 기록을 찾지 못했습니다. 이전 요청까지 모두 성공했다는 뜻은 아닙니다."));
+    }
+    if(queueMore)queueMore.hidden=total===null
+      ?rows.length<20
+      :queueOffset>=total;
+  }catch(error){
+    queueStatus.textContent="요청 내역을 확인하지 못했습니다: "+
+      String(error?.message||"네트워크 오류").slice(0,100);
+    if(queueMore)queueMore.hidden=true;
+  }finally{
+    queueLoading=false;
+    if(queueRefresh)queueRefresh.disabled=false;
+    if(queueMore)queueMore.disabled=false;
+  }
+}
+if(queueOpen&&queueDialog){
+  queueOpen.hidden=location.hostname==="koith.github.io";
+  queueOpen.addEventListener("click",()=>{
+    if(queueDialog.open)return;
+    queueDialog.showModal();void loadQueue(true);
+  });
+  queueClose?.addEventListener("click",()=>queueDialog.close());
+  queueDialog.addEventListener("click",event=>{
+    if(event.target===queueDialog)queueDialog.close();
+  });
+  queueRefresh?.addEventListener("click",()=>void loadQueue(true));
+  queueMore?.addEventListener("click",()=>void loadQueue(false));
+}
 // Called by successful backup receipt or a saved-account card.
 window.INTERSECTION_openArchive=(account,mode)=>
   changeMode(mode==="auto"?"auto":"accounts",account||"");
