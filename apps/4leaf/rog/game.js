@@ -499,9 +499,12 @@ function shopCanSell(card){
   !profile.team.includes(card.id)&&
   !(match&&!match.finished&&match.players?.some(p=>p.team?.includes(card.id)));
 }
-// 2004 surviving shop_ref screenshot has 4x2 and a third RARE tab, but
-// the extracted 2002 source CHR files do NOT supply a Rare classification.
-// Show an explicit unknown/empty result instead of inventing Rare IDs.
+// Historical documentation: the early RARE tier existed, but ZERO
+// Rare chessman cards were actually issued before the tier was removed.
+// Archive https://seore.org/raw/문서:주사위의%20잔영 (secondary
+// retrospective, NOT original 2004 EXE classification data).
+// Keep the original 2004 screenshot's RARE tab with honest empty stock,
+// never fabricate Rare membership from score or price.
 const shopPageSize=()=>window.__LEAF_SHOP_ERA__?.getState?.().era==='2004'?8:9;
 function shopFiltered(){
  if(group==='rare')return [];
@@ -561,7 +564,7 @@ function drawShop(){
  const c=cards.find(c=>c.id===chosenCard)||cards[0]||null;
  if(!c){
    $('shop-selected').textContent=group==='rare'
-    ?'2004년 RARE 탭은 원본 사진에서 확인됐지만 카드 목록·분류표는 아직 복구되지 않았습니다.'
+    ?'2004년 RARE 탭은 원본 사진에 존재합니다. 역사 자료에는 출시된 RARE 체스맨 카드가 0종으로 기록됩니다. 원본 EXE 분류표는 미확인입니다.'
     :'표시할 카드가 없습니다.';
    $('shop-buy').disabled=true;$('shop-sell').disabled=true;
    $('shop-buy').textContent='선택할 카드 없음';
