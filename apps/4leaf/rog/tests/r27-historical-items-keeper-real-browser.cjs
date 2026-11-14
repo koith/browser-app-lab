@@ -112,7 +112,14 @@ const {chromium,webkit}=require('playwright');
     m.tiles[14]=tier;T.setMatch(m);
     window.__R27_TILE__=T.resolveTile(m.players[0]);
    },tier);
-   await page.waitForSelector('#modal:not(.hidden) #modal-content .battle-dice');
+   // Native winBattle 2004 uses a separate visible action tray while
+   // keeping result dice DOM inside the hidden historical dialog shell.
+   // Assert the REAL battle result content, not CSS visibility of the
+   // intentionally hidden dialog (R21 established the same UI contract).
+   await page.waitForFunction(()=>Boolean(
+     document.querySelector('#modal-content .battle-dice .nums')?.textContent
+     && [...document.querySelectorAll('#modal-buttons button')]
+       .some(b=>b.textContent.includes('결과 확인'))));
    const result=await page.evaluate(()=>{
     const dice=document.querySelectorAll('#modal-content .battle-dice .nums');
     const values=(dice[1]?.textContent||'').split('·').filter(Boolean);
