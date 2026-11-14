@@ -347,6 +347,10 @@ def exercise(browser_type,name,width):
                     timeout=15000)
                 assert len(posts)==2,posts
                 assert posts[1]=={"platform":"mastodon","account":OTHER},posts
+                own=page.evaluate("window.INTERSECTION_getOwnBackupRequests()")
+                assert len(own)==2,own
+                assert [job["platform"] for job in own]==["bluesky","mastodon"]
+                assert own[0]["createdAt"]>0 and own[0]["createdAt"]<=own[1]["createdAt"]
                 assert page.locator("#viewPosts").get_attribute("aria-selected")=="true"
                 assert modal.get_attribute("open") is not None
             else:
