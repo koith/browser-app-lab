@@ -20,7 +20,7 @@ from target_account_archive import profile_input
 
 _REQUEST=re.compile(r"account-request-([0-9]{10})\.json\Z")
 _ACCOUNT=re.compile(r"account-request-([0-9]{10})-accepted\.json\Z")
-_MAX_OPEN=12
+_MAX_OPEN=64
 
 
 def enabled():
@@ -167,7 +167,7 @@ def create_request(platform,account,root=None):
     if sqlite_enabled():
         with _db() as conn:
             open_count=conn.execute("SELECT count(*) FROM account_requests WHERE workflow_run_id IS NULL AND created_at>?",
-                                    (int(time.time())-86400,)).fetchone()[0]
+                                    (int(time.time())-7*86400,)).fetchone()[0]
             if open_count>=_MAX_OPEN:
                 raise RuntimeError("Temporary account queue is full")
             for _ in range(10):
@@ -195,7 +195,7 @@ def pending(root=None,limit=1):
             rows=conn.execute('''SELECT * FROM account_requests
                 WHERE workflow_run_id IS NULL AND created_at>?
                 ORDER BY created_at ASC, job_id ASC LIMIT ?''',
-                (int(time.time())-86400,min(max(limit,1),_MAX_OPEN))).fetchall()
+                (int(time.time())-7*86400,min(max(limit,1),_MAX_OPEN))).fetchall()
         return [{"job_id":int(row["job_id"]),"platform":row["platform"],
                  "account":row["account"]} for row in rows]
     root=root or CloudArchive()
