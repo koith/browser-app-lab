@@ -839,6 +839,86 @@ main{padding-top:10px}
 .feed-source-notice[hidden],.feed-retry button[hidden]{display:none}
 .feed-retry{display:flex;justify-content:center;margin:6px 0 10px}
 .feed-retry button{background:#fff7db;color:#172349;border:1px solid #aa6623;min-height:35px;padding:6px 13px;font-size:12px}
+
+/* Incremental verified public posts: visible spinner for every unresolved
+   thumbnail and each pending feed slot. Text-only posts never spin. */
+.post-thumb.is-loading::before{content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(120deg,#e7eaf1e6,#f7f5e5d9,#e1e7f1e6);
+  background-size:240% 100%;animation:thumb-load-shimmer 1.65s linear infinite}
+.post-thumb.is-loading::after{content:"";position:absolute;z-index:2;top:50%;left:50%;
+  width:26px;height:26px;margin:-16px 0 0 -16px;border-radius:50%;
+  border:3px solid #aab5d0;border-top-color:#283d8b;
+  animation:thumb-load-spin .72s linear infinite}
+.post-thumb.is-loading img.post-media-img{visibility:hidden}
+@keyframes thumb-load-spin{to{transform:rotate(360deg)}}
+@keyframes thumb-load-shimmer{to{background-position:-240% 0}}
+.feed-skeleton{min-width:0;overflow:hidden;background:#fff;border:1px solid #d9dded;
+  border-radius:10px;pointer-events:none}
+.feed-skeleton .post-thumb{aspect-ratio:1.23/1;background:#e5eaf0}
+.feed-skeleton .skeleton-lines{padding:10px;display:grid;gap:7px}
+.feed-skeleton .skeleton-lines span{display:block;height:8px;border-radius:3px;
+  background:linear-gradient(90deg,#e3e6ed,#f5f4ed,#e3e6ed);background-size:220% 100%;
+  animation:thumb-load-shimmer 1.7s linear infinite}
+.feed-skeleton .skeleton-lines span:last-child{width:65%}
+@media(max-width:720px){.feed-skeleton .post-thumb{aspect-ratio:1/1.05}
+  .feed-skeleton .skeleton-lines{padding:6px;gap:6px}
+  .post-thumb.is-loading::after{width:21px;height:21px;margin:-13px 0 0 -13px}}
+@media(prefers-reduced-motion:reduce){.post-thumb.is-loading::after,
+ .post-thumb.is-loading::before,.feed-skeleton .skeleton-lines span{animation-duration:3s}}
+/* The real social account replaces the generic title and duplicate body badge. */
+#detail .dialog-head{gap:11px}
+#detail .dialog-head #detailTitle{display:flex;flex:1 1 auto;min-width:0;
+  white-space:normal;overflow:hidden;font-size:inherit;letter-spacing:normal}
+#detail .dialog-profile-link{display:flex;align-items:center;gap:7px;min-width:0;
+  max-width:100%;flex:1 1 auto;text-decoration:none;color:inherit}
+#detail a.dialog-profile-link:hover .dialog-profile-name{text-decoration:underline}
+#detail a.dialog-profile-link:focus-visible{outline:3px solid #ffdf08;outline-offset:2px}
+#detail .dialog-platform-icon{flex:0 0 19px;width:19px;height:19px;object-fit:contain}
+#detail .dialog-platform-fallback{flex:0 0 19px;width:19px;height:19px;
+  display:grid;place-items:center;font-size:12px;color:#fff;border:1px solid #8893c0}
+#detail .dialog-avatar-frame{position:relative;flex:0 0 39px;width:39px;height:39px;
+  display:grid;place-items:center;box-sizing:border-box;overflow:hidden;
+  border:2px solid #5ea8f7;background:#182d63;border-radius:50%;
+  color:#fff;font-size:15px;font-weight:900}
+#detail .dialog-avatar-frame img{position:absolute;inset:1px;width:calc(100% - 2px);
+  height:calc(100% - 2px);object-fit:cover;border-radius:inherit;filter:none}
+#detail[data-platform="mastodon"] .dialog-avatar-frame{border-color:#8c7dff}
+#detail[data-platform="instagram"] .dialog-avatar-frame{border-color:#ed6a65;
+  box-shadow:0 0 0 1px #f5b947}
+#detail[data-platform="threads"] .dialog-avatar-frame,
+#detail[data-platform="x"] .dialog-avatar-frame{border-color:#a3adc5}
+#detail[data-platform="misskey"] .dialog-avatar-frame{border-color:#75cda1;border-radius:12px}
+#detail[data-platform="reddit"] .dialog-avatar-frame{border-color:#ed6a39}
+#detail[data-platform="lemmy"] .dialog-avatar-frame{border-color:#53b4c4}
+#detail .dialog-profile-meta{display:grid;min-width:0;flex:1 1 auto;gap:3px;text-align:left}
+#detail .dialog-profile-name{color:#fff;font-size:14px;font-weight:850;line-height:1.12;
+  text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+#detail .dialog-profile-address{display:block;min-width:0;overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis;color:#acb9d7;
+  font-size:10px;font-weight:450;line-height:1.2}
+#detail .dialog-tools{flex:0 0 auto;gap:5px}
+#detail #closeDetail{margin-left:13px}
+@media(max-width:720px){
+ #detail .dialog-head{gap:5px;padding:8px 8px}
+ #detail .dialog-head #detailTitle{font-size:inherit;flex:1 1 auto}
+ #detail .dialog-profile-link{gap:4px}
+ #detail .dialog-platform-icon,#detail .dialog-platform-fallback{width:15px;height:15px;flex-basis:15px}
+ #detail .dialog-avatar-frame{width:31px;height:31px;flex-basis:31px;font-size:12px}
+ #detail .dialog-profile-name{font-size:11px}
+ #detail .dialog-profile-address{font-size:9px}
+ #detail .dialog-tools{gap:3px}
+ #detail #closeDetail{margin-left:9px}
+}
+@media(max-width:365px){
+ #detail .dialog-head #detailTitle{font-size:inherit}
+ #detail .dialog-head #detailTitle::after{content:none}
+ #detail .dialog-platform-icon,#detail .dialog-platform-fallback{width:13px;height:13px;flex-basis:13px}
+ #detail .dialog-avatar-frame{width:27px;height:27px;flex-basis:27px}
+ #detail .dialog-profile-name{font-size:10px}
+ #detail .dialog-profile-address{font-size:8px}
+ #detail .dialog-tools a,#detail .dialog-tools button{font-size:10px;padding:7px 5px}
+ #detail #closeDetail{margin-left:9px}
+}
 </style>
 </head>
 <body>
@@ -1133,7 +1213,7 @@ main{padding-top:10px}
 <div class="date-actions"><div class="presets" id="presets"><button type="button" data-days="7">7일</button><button type="button" data-days="30" class="active">30일</button><button type="button" data-days="90">90일</button></div><button type="button" id="applyDate" class="apply">기간 조회</button></div>
 <span id="dateSummary" class="sr-only">최근 30일</span></div>
 </dialog>
-<dialog id="detail" aria-labelledby="detailTitle"><div class="dialog-head"><b id="detailTitle"><span class="dialog-kicker" aria-hidden="true">POST</span>게시글 상세</b><div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div><button id="closeDetail" type="button" aria-label="게시글 닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
+<dialog id="detail" aria-labelledby="detailTitle"><div class="dialog-head"><b id="detailTitle"><span class="dialog-profile-name">작성자 정보</span></b><div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div><button id="closeDetail" type="button" aria-label="게시글 닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
 <script>
 (function(){
 "use strict";
