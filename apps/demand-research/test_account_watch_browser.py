@@ -240,7 +240,7 @@ def run():
             page.wait_for_function("document.querySelector('#accountMetricVerified').textContent==='7'",timeout=20000)
             assert len(mast_calls)>=2
             assert "사적 글" not in page.locator("#accountWatchList").inner_text()
-            page.locator(".account-watch-card").filter(has_text="@qa").locator(".account-watch-open").click()
+            page.locator('.account-watch-card:has(.source-badge[aria-label="출처: Mastodon"]) .account-watch-open').click()
             page.locator("#accountDialog").get_by_role("button",name="백업 대상으로 선택").click()
             assert page.locator("#targetArchivePlatform").input_value()=="mastodon"
             assert page.locator("#targetArchiveAccount").input_value()==(
