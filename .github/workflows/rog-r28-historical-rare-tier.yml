@@ -1,0 +1,40 @@
+name: 4LEAF R28 original 2004 Rare UI historically never issued archive acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/shop-era-2004.js'
+      - 'apps/4leaf/rog/tests/r28-rare-archive-real-2004-shop.cjs'
+      - '.github/workflows/rog-r28-historical-rare-tier.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/shop-era-2004.js'
+      - 'apps/4leaf/rog/tests/r28-rare-archive-real-2004-shop.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-rare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-r28.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
+          exit 1
+      - name: Original source two era shop with real Rare never-issued inventory
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r28-rare-archive-real-2004-shop.cjs
+      - name: Real original source live cards and GP transactions remain correct
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r21-source-era-shop.cjs
