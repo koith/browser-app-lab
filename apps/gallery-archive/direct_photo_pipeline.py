@@ -730,11 +730,11 @@ def page_images(raw,url,model):
 
 
 def inspect(raw):
-    if not 5000<=len(raw)<=24_000_000:raise ValueError('source_size_outside_bounds')
+    if not 5000<=len(raw)<=64_000_000:raise ValueError('source_size_outside_bounds')
     with Image.open(BytesIO(raw)) as im:im.verify()
     with Image.open(BytesIO(raw)) as im:
         im.load();w,h=im.size;ext=FORMATS.get(im.format)
-        if not ext or min(w,h)<300 or w*h>40_000_000:raise ValueError('not_full_photo_dimensions_or_format')
+        if not ext or min(w,h)<300 or w*h>80_000_000:raise ValueError('not_full_photo_dimensions_or_format')
         preview=im.convert('RGB');preview.thumbnail((520,520),Image.Resampling.LANCZOS)
         # A flat error image can be a perfectly valid 1024px JPEG.
         if max(ImageStat.Stat(preview.resize((32,32))).stddev)<3:raise ValueError('flat_placeholder')
@@ -916,7 +916,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if len(data)!=row[size] or hashlib.sha256(data).hexdigest()!=row[digest]:raise ValueError('Staged file corrupted during interruption')
             resumed[entry['album']].append(row);seen_sha.add(row['sha256']);seen_urls.add(entry['source']);new_total+=1
     selected=set(album_ids or [])
-    if selected and (len(selected)>12 or any(not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',v) for v in selected)):
+    if selected and (len(selected)>60 or any(not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',v) for v in selected)):
         raise ValueError('Invalid bounded album selection')
     books=sorted((a for a in books.values()
                   if (not focused_only or a.get('visual_reference_required'))
