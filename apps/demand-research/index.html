@@ -2687,10 +2687,12 @@ if(cloudMode){
   document.addEventListener("pointermove",record,{passive:true});
   document.addEventListener("visibilitychange",redraw,{passive:true});
   window.addEventListener("resize",function(){
-    cancelAnimationFrame(frameId);frameId=0;makeAtlas();redraw();
+    cancelAnimationFrame(frameId);frameId=0;makeAtlas();
   },{passive:true});
   if(reduced.addEventListener)reduced.addEventListener("change",redraw);
-  makeAtlas();redraw();
+  // makeAtlas already paints synchronously. A second rAF loop would repaint
+  // the same static canvas multiple times for no visual change.
+  makeAtlas();
 })();
 </script>
 <script>
