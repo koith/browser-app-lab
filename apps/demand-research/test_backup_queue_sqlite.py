@@ -65,3 +65,53 @@ def test_overview_distinguishes_unprocessed_and_dispatched():
     assert current["dispatched"]==1
     assert current["total_requests"]==2
     assert second in [r["job_id"] for r in backup_queue.pending(limit=4)]
+
+
+def test_accepted_workflows_are_available_for_bounded_auto_retry():
+    old=backup_queue.create_request("bluesky","first.bsky.social")
+    new=backup_queue.create_request("bluesky","second.bsky.social")
+    backup_queue.accept(old,42410000001)
+    backup_queue.accept(new,42410000002)
+    assert set(backup_queue.accepted_runs(limit=4))=={42410000001,42410000002}
+
+
+def test_bridge_autoretries_failed_workflow_without_creating_another_request(monkeypatch):
+    import backup_bridge_poller as bridge
+    import io
+    import json
+    monkeypatch.setenv("GITHUB_TOKEN","synthetic-ci-token")
+    monkeypatch.setenv("GITHUB_RUN_NUMBER","0")
+    monkeypatch.setattr(bridge,"oidc_assertion",lambda:"synthetic-oidc-assertion")
+    def api(url,**kwargs):
+        if url.endswith("/api/bridge/pending"):
+            return {"requests":[]}
+        if url.endswith("/api/bridge/accepted"):
+            return {"runs":[42410000001]}
+        raise AssertionError("unexpected bridge endpoint")
+    monkeypatch.setattr(bridge,"request_json",api)
+    actions=[]
+    class Reply:
+        def __init__(self,status,payload):
+            self.status=status
+            self.stream=io.BytesIO(json.dumps(payload).encode())
+        def read(self,*args):
+            return self.stream.read(*args)
+        def __enter__(self):
+            return self
+        def __exit__(self,*args):
+            return False
+    def github(req,**kwargs):
+        actions.append((req.get_method(),req.full_url))
+        if req.get_method()=="GET":
+            return Reply(200,{"id":42410000001,
+                "path":".github/workflows/intersection-target-account-bundle.yml",
+                "event":"workflow_dispatch","head_branch":"main",
+                "status":"completed","conclusion":"failure","run_attempt":1})
+        if req.get_method()=="POST" and req.full_url.endswith("/rerun-failed-jobs"):
+            return Reply(201,{})
+        raise AssertionError("unexpected GitHub request")
+    monkeypatch.setattr(bridge,"urlopen",github)
+    assert bridge.poll_once()=="NO_PENDING"
+    assert len(actions)==2
+    assert actions[-1][0]=="POST"
+    assert actions[-1][1].endswith("/rerun-failed-jobs")
