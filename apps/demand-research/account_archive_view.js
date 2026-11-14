@@ -289,9 +289,13 @@ function postCard(post,inDetail=false){
   const expected=Number.isSafeInteger(Number(post.media_expected))
     ?Math.max(0,Number(post.media_expected)):0;
   const byIndex=new Map();
-  for(const [arrayIndex,item] of stored.entries()){
-    const index=Number.isInteger(item?.index)?item.index:arrayIndex;
-    if(index>=0&&index<16&&!byIndex.has(index))byIndex.set(index,item);
+  for(const item of stored){
+    // An absent source slot is NOT evidence that this is attachment #1.
+    // Fail closed: only the verified server-provided original index may
+    // position an image, even in a partially recovered historical post.
+    const index=item?.index;
+    if(Number.isInteger(index)&&index>=0&&index<16&&!byIndex.has(index))
+      byIndex.set(index,item);
   }
   const count=Math.min(16,Math.max(expected,stored.length,
     ...(byIndex.size?[...byIndex.keys()].map(i=>i+1):[0])));
