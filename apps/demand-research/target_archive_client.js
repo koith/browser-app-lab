@@ -56,7 +56,9 @@
   let gatewayReady=false;
   let submitting=false;
   let currentRun=null;
-  let pollTimer=null;
+  let pendingJobs=[];
+  const pollTimers=new Map(),polling=new Set();
+  let submitSequence=Promise.resolve();
   let connectionAttempting=false;
   let inlineStatus=null;
   function notifyInline(text,state){
@@ -66,23 +68,64 @@
   }
 
   const JOB_KEY="intersection:private-archive-job:v1";
-  function resumeReceipt(){
-    try{
-      const value=JSON.parse(sessionStorage.getItem(JOB_KEY)||"null");
-      if(value&&Number.isSafeInteger(value.run_id)&&value.run_id>0&&
-         typeof value.receipt==="string"&&value.receipt.length<900)
-        return value;
-    }catch{/* Expired or tampered browser-only job receipt. */}
-    return null;
+  const JOBS_KEY="intersection:private-archive-jobs:v2";
+  function safeJob(job){
+    return job&&Number.isSafeInteger(job.run_id)&&job.run_id>0&&
+      typeof job.receipt==="string"&&job.receipt.length<900&&
+      ["bluesky","mastodon"].includes(job.platform)&&
+      typeof job.account==="string"&&job.account.length<400;
   }
-  function saveReceipt(value){
+  function resumeReceipts(){
     try{
-      if(value)sessionStorage.setItem(JOB_KEY,JSON.stringify(value));
-      else sessionStorage.removeItem(JOB_KEY);
-    }catch{/* Private browsing may disable sessionStorage. */}
+      const stored=JSON.parse(sessionStorage.getItem(JOBS_KEY)||"[]");
+      if(Array.isArray(stored)){
+        const unique=new Map();
+        for(const row of stored.slice(-64))if(safeJob(row))
+          unique.set(row.run_id,row);
+        if(unique.size)return [...unique.values()];
+      }
+    }catch{}
+    try{
+      const old=JSON.parse(sessionStorage.getItem(JOB_KEY)||"null");
+      if(safeJob(old))return [old];
+    }catch{}
+    return [];
   }
-  function clearPoll(){
-    if(pollTimer!==null){window.clearTimeout(pollTimer);pollTimer=null;}
+  function saveReceipt(value,finished=null){
+    if(value&&safeJob(value)){
+      if(!pendingJobs.some(job=>job.run_id===value.run_id))
+        pendingJobs.push(value);
+      pendingJobs=pendingJobs.slice(-64);
+    }
+    if(finished){
+      const id=finished.run_id;
+      pendingJobs=pendingJobs.filter(job=>job.run_id!==id);
+    }
+    try{
+      if(pendingJobs.length){
+        sessionStorage.setItem(JOBS_KEY,JSON.stringify(pendingJobs));
+        sessionStorage.setItem(JOB_KEY,JSON.stringify(pendingJobs[pendingJobs.length-1]));
+      }else{
+        sessionStorage.removeItem(JOBS_KEY);
+        sessionStorage.removeItem(JOB_KEY);
+      }
+    }catch{/* Session storage can be disabled; server receipts remain authoritative. */}
+    renderQueueInfo();
+  }
+  const queueInfo=document.createElement("p");
+  queueInfo.className="target-archive-queue-count";
+  queueInfo.setAttribute("role","status");
+  queueInfo.hidden=true;
+  jobStatus.after(queueInfo);
+  function renderQueueInfo(){
+    queueInfo.hidden=!pendingJobs.length;
+    queueInfo.textContent=pendingJobs.length?
+      "접수된 미완료 백업 "+pendingJobs.length+"건 · 이전 작업도 유지하고 순서대로 진행 상태를 확인합니다.":"";
+  }
+  function clearPoll(job){
+    if(!job)return;
+    const timer=pollTimers.get(job.run_id);
+    if(timer!==undefined){window.clearTimeout(timer);pollTimers.delete(job.run_id)}
   }
   function appendViewerLink(container,accountKey,text){
     if(!/^(bluesky|mastodon)-[a-f0-9]{40}$/.test(accountKey))return;
