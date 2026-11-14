@@ -12,7 +12,7 @@ const FILES=[
   "/bsky_search_fallback.js?v=20261114-public-source-hydration-v1",
   "/post_activity_ranking.js",
   "/public_video_trends.js",
-  "/target_archive_client.js?v=20261114-confirm-multiqueue-v1",
+  "/target_archive_client.js?v=20261115-own-pending-v1",
   "/free_discovery.js",
   "/account_watch.js?v=20261110-first-tab",
   "/archive_tab.js?v=20261115-queue-dialog-v1",
