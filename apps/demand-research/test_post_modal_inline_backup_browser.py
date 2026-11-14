@@ -80,12 +80,14 @@ window.testFixtureThumbnailLifecycle=()=>{
        thumb:"https://example.com/pending-qa.png"}],
     restricted:false,adultLabeled:false,discoveryCandidate:false};
   const tileImage=tile(row);
+  document.body.append(tileImage);
   const thumb=tileImage.querySelector(".post-thumb");
   const img=tileImage.querySelector("img.post-media-img");
   const before=thumb.classList.contains("is-loading");
   const visible=getComputedStyle(thumb,"::after").animationName;
   img.dispatchEvent(new Event("load"));
   const after=!thumb.classList.contains("is-loading");
+  tileImage.remove();
   const textOnly=tile({...row,id:"qa-text",media:[]});
   const noSpin=!textOnly.querySelector(".post-thumb").classList.contains("is-loading");
   const failure=tile({...row,id:"qa-failed"});
