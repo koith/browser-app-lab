@@ -1753,7 +1753,7 @@ function openDetail(p){
     actions.append(trackButton);
   }
   if(["bluesky","mastodon"].includes(p.platform)&&p.profileUrl&&
-     !p.discoveryCandidate&&!p.restricted&&!p.archived){
+     !p.discoveryCandidate&&!p.restricted){
     const direct=el("button","dialog-backup-btn","이 계정 바로 백업");
     direct.type="button";
     const result=el("p","dialog-backup-status",
