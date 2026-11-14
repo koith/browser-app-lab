@@ -777,6 +777,63 @@ main{padding-top:10px}
  #archivesView .archive-quick-picker-fields{grid-template-columns:minmax(0,1fr)}
  #archivesView #archiveHubFrame{height:calc(100dvh - 230px);min-height:360px}
 }
+
+/* Post detail is a real inset modal: a single fixed action row, scrollable body,
+   visible surrounding context and an explicit background dim. */
+#detail{width:min(780px,calc(100vw - 52px));max-width:calc(100vw - 52px);
+  max-height:min(80dvh,740px);border:2px solid #101432;border-top:4px solid #f5d312;
+  border-radius:13px;box-shadow:0 20px 70px #070c26aa,0 0 0 3px #ffdc093d;
+  background:#fff9ed;overflow:hidden}
+#detail[open]{display:flex;flex-direction:column}
+#detail::backdrop{background:rgba(4,8,29,.76);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+#detail .dialog-head{position:sticky;top:0;z-index:8;flex:0 0 auto;display:flex;
+  align-items:center;flex-wrap:nowrap;gap:8px;padding:11px 13px;min-height:62px;
+  color:#fff;background:#101b45;border-bottom:3px solid #f5d312;
+  box-shadow:0 6px 18px #10143226}
+#detail .dialog-head b{display:flex;align-items:center;gap:9px;flex:none;min-width:0;
+  color:#fff;font-size:14px;letter-spacing:0;font-weight:900;white-space:nowrap}
+#detail .dialog-kicker{display:inline-grid;place-items:center;background:#ffdd10;
+  color:#101432;padding:5px 6px;font-size:9px;font-weight:950;letter-spacing:.08em}
+#detail .dialog-tools{min-width:0;flex:1 1 auto;display:flex;align-items:center;
+  justify-content:flex-end;gap:6px;white-space:nowrap}
+#detail .dialog-tools a,#detail .dialog-tools button{display:inline-flex;align-items:center;
+  justify-content:center;white-space:nowrap;flex:0 0 auto;text-decoration:none;
+  box-sizing:border-box;min-height:38px;margin:0;padding:8px 11px;font-size:11px;
+  line-height:1.2;font-weight:850;color:#152250;background:#eef1ff;
+  border:1px solid #b8c7ff;border-radius:5px;box-shadow:none}
+#detail .dialog-tools a{background:transparent;color:#fff;border-color:#8b99c3}
+#detail .dialog-tools a:not([href]){opacity:.5;pointer-events:none}
+#detail .dialog-tools .dialog-backup-btn{background:#ffdf08;color:#101432;border-color:#ffdf08}
+#detail .dialog-tools button:disabled{opacity:.48;cursor:not-allowed}
+#detail .dialog-tools a:focus-visible,#detail .dialog-tools button:focus-visible,
+#detail #closeDetail:focus-visible{outline:3px solid #ffdf08;outline-offset:2px}
+#detail #closeDetail{display:grid;place-items:center;flex:0 0 37px;width:37px;
+  min-width:37px;min-height:38px;margin:0;padding:0;font-size:24px;line-height:1;
+  color:#fff;border:1px solid #8494bd;border-radius:5px;background:transparent;box-shadow:none}
+#detail .dialog-content{flex:1 1 auto;min-height:0;max-height:none;
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;padding:17px 19px}
+#detail .dialog-backup-status{display:block;max-width:100%;padding:8px 10px;
+  margin:0 0 12px;background:#eef2ff;border-left:3px solid #344bd1;
+  border-radius:3px;font-size:12px;line-height:1.55;color:#253d6c}
+#detail .dialog-backup-status[hidden]{display:none}
+#detail .dialog-backup-status[data-state="failed"]{border-color:#bd4330;background:#fff0e9;color:#953726}
+#detail .dialog-backup-status[data-state="verified"]{border-color:#157b58;background:#eaf8f1;color:#176146}
+@media(max-width:720px){
+ #detail{width:calc(100vw - 28px);max-width:calc(100vw - 28px);max-height:82dvh}
+ #detail .dialog-head{gap:5px;padding:8px 9px;min-height:54px}
+ #detail .dialog-head b{font-size:12px;gap:0}
+ #detail .dialog-kicker{display:none}
+ #detail .dialog-tools{gap:4px}
+ #detail .dialog-tools a,#detail .dialog-tools button{min-height:36px;padding:7px 8px;font-size:11px}
+ #detail #closeDetail{width:32px;min-width:32px;flex-basis:32px;min-height:36px;font-size:22px}
+ #detail .dialog-content{padding:12px 13px}
+}
+@media(max-width:365px){
+ #detail .dialog-head b{font-size:0}
+ #detail .dialog-head b::after{content:"게시글";font-size:11px}
+ #detail .dialog-tools a,#detail .dialog-tools button{padding:7px 6px;font-size:10px}
+ #detail .dialog-head{gap:4px;padding:8px 7px}
+}
 </style>
 </head>
 <body>
@@ -1069,7 +1126,7 @@ main{padding-top:10px}
 <div class="date-actions"><div class="presets" id="presets"><button type="button" data-days="7">7일</button><button type="button" data-days="30" class="active">30일</button><button type="button" data-days="90">90일</button></div><button type="button" id="applyDate" class="apply">기간 조회</button></div>
 <span id="dateSummary" class="sr-only">최근 30일</span></div>
 </dialog>
-<dialog id="detail" aria-label="게시글 상세"><div class="dialog-head"><b>게시글 상세</b><button id="closeDetail" type="button" aria-label="닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
+<dialog id="detail" aria-labelledby="detailTitle"><div class="dialog-head"><b id="detailTitle"><span class="dialog-kicker" aria-hidden="true">POST</span>게시글 상세</b><div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div><button id="closeDetail" type="button" aria-label="게시글 닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
 <script>
 (function(){
 "use strict";
@@ -1717,6 +1774,7 @@ function sourceLink(p,text){
 }
 function openDetail(p){
   let node=$("detailContent");node.replaceChildren();
+  const actions=$("detailActionBar");actions.replaceChildren();
   let sourceRow=el("div","dialog-source-row");sourceRow.append(sourceBadge(p),profileLink(p));node.append(sourceRow);
   node.append(el("div","dialog-date",p.discoveryCandidate?"게시일 미확인":niceDate(p.posted)));
   if(p.discoveryCandidate)node.append(el("div","dialog-index-note",
@@ -1742,10 +1800,15 @@ function openDetail(p){
       else node.append(el("div","dialog-notice","현재 제공된 이미지·영상 주소가 없습니다. SNS 원문에서 확인하세요."));
     }
   }
-  let actions=el("div","dialog-actions");actions.append(sourceLink(p,"SNS 원문 보기"));
+  const originalLink=sourceLink(p,"원문");
+  originalLink.setAttribute("aria-label","SNS 원문 보기");
+  originalLink.title="SNS 원문 보기 (새 탭)";
+  actions.append(originalLink);
   if(p.profileUrl&&p.platform!=="cloud"){
-    const trackButton=el("button","account-select-watch","계정 추적");
+    const trackButton=el("button","account-select-watch","추적");
     trackButton.type="button";
+    trackButton.setAttribute("aria-label","계정 추적");
+    trackButton.title="계정 추적";
     trackButton.addEventListener("click",()=>{
       if(typeof window.INTERSECTION_watchPublicAccount==="function"){
         window.INTERSECTION_watchPublicAccount({platform:p.platform,profileUrl:p.profileUrl,author:p.author});
@@ -1755,14 +1818,18 @@ function openDetail(p){
   }
   if(["bluesky","mastodon"].includes(p.platform)&&p.profileUrl&&
      !p.discoveryCandidate&&!p.restricted){
-    const direct=el("button","dialog-backup-btn","이 계정 바로 백업");
+    const direct=el("button","dialog-backup-btn","백업");
     direct.type="button";
+    direct.setAttribute("aria-label","이 계정 바로 백업");
+    direct.title="이 계정 바로 백업";
     const result=el("p","dialog-backup-status",
       "공개 게시글·프로필 백업을 이 팝업에서 요청합니다. 접수와 원본 검증 완료는 별도입니다.");
     result.setAttribute("role","status");
     result.setAttribute("aria-live","polite");
+    result.hidden=true;
     direct.addEventListener("click",async()=>{
       if(direct.disabled)return;
+      result.hidden=false;
       const start=window.INTERSECTION_startPublicAccountBackup;
       if(typeof start!=="function"){
         result.dataset.state="failed";
@@ -1785,11 +1852,9 @@ function openDetail(p){
         direct.disabled=false;
       }
     });
-    const inline=el("div","dialog-backup-inline");
-    inline.append(direct,result);
-    node.insertBefore(inline,node.querySelector(".dialog-text"));
-    node.append(actions);
-  }else node.append(actions);
+    actions.append(direct);
+    node.insertBefore(result,node.querySelector(".dialog-text"));
+  }
   document.body.classList.add("modal-open");
   $("detail").showModal();
 }
@@ -1995,7 +2060,11 @@ async function loadCloud(reset){
   }catch(e){status(e.message);if(!posts.length)$("feed").replaceChildren(el("div","empty",e.message))}
   finally{cloudBusy=false;endBusy()}
 }
-$("detail").addEventListener("close",()=>{document.body.classList.remove("modal-open");$("detailContent").replaceChildren()});
+$("detail").addEventListener("close",()=>{
+  document.body.classList.remove("modal-open");
+  $("detailContent").replaceChildren();
+  $("detailActionBar").replaceChildren();
+});
 $("detail").addEventListener("click",e=>{if(e.target===$("detail"))closeDetail()});
 $("closeDetail").addEventListener("click",closeDetail);
 $("openDate").addEventListener("click",()=>{

@@ -7,6 +7,7 @@ No live SNS/TeraBox reads, no credentials or actual backup job is created.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright
@@ -14,6 +15,13 @@ from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parent
 INDEX=(ROOT/"index.html").read_text(encoding="utf-8")
 BACKUP=(ROOT/"target_archive_client.js").read_text(encoding="utf-8")
+SW=(ROOT/"intersection-sw.js").read_text(encoding="utf-8")
+# Offline-first Render shell must ship the SAME script version as the page.
+# Otherwise the modal renders a new button but restores the old JS handler.
+CLIENT_SRC=re.search(r'<script src="(target_archive_client\.js\?[^"]+)"',INDEX)
+assert CLIENT_SRC is not None,"Public backup client script reference missing"
+assert '"/'+CLIENT_SRC.group(1)+'"' in SW,"Stale service-worker script URL"
+
 STYLE=INDEX.split("<style>",1)[1].split("</style>",1)[0]
 NAV_START=INDEX.index("/* Core navigation remains usable")
 NAV_END=INDEX.index("</script>",NAV_START)
@@ -81,9 +89,10 @@ window.showFixturePost=(platform="bluesky",candidate=false)=>{
   <p id="targetArchiveStatus"></p>
  </div></div><div style="height:2500px"></div></section>
 <section id="archivesView" class="hidden"><div style="height:2500px">ARCHIVES</div></section>
-</main><dialog id="detail" aria-label="게시글 상세">
- <div class="dialog-head"><b>게시글 상세</b>
- <button type="button" id="closeDetail">×</button></div>
+</main><dialog id="detail" aria-labelledby="detailTitle">
+ <div class="dialog-head"><b id="detailTitle"><span class="dialog-kicker" aria-hidden="true">POST</span>게시글 상세</b>
+ <div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div>
+ <button type="button" id="closeDetail" aria-label="게시글 닫기">×</button></div>
  <div class="dialog-content" id="detailContent"></div>
 </dialog><script>"""+CORE_NAV+"</script><script>"+harness+
             '</script><script src="/target_archive_client.js" defer></script></body></html>')
@@ -137,8 +146,61 @@ def exercise(browser_type,name,width):
             modal=page.locator("#detail")
             assert modal.get_attribute("open") is not None
             before=page.url
+            header=modal.locator(".dialog-head")
+            actions=modal.locator("#detailActionBar")
             button=modal.get_by_role("button",name="이 계정 바로 백업")
             assert button.count()==1
+            assert actions.get_by_role("link",name="SNS 원문 보기").count()==1
+            assert actions.get_by_role("button",name="계정 추적").count()==1
+            assert modal.get_by_role("button",name="게시글 닫기").count()==1
+            assert modal.locator(".dialog-content .dialog-backup-btn").count()==0
+            # Single strong-contrast action header with buttons on ONE line.
+            # Unlike the old body button bar it must remain fixed while only
+            # the dialog body scrolls through potentially dozens of images.
+            frame=page.evaluate("""() => {
+              const d=document.querySelector('#detail');
+              const h=d.querySelector('.dialog-head');
+              const tools=d.querySelector('#detailActionBar');
+              const nodes=[h.querySelector('b'),...tools.children,
+                           d.querySelector('#closeDetail')];
+              const boxes=nodes.map(n=>n.getBoundingClientRect());
+              const bounds=d.getBoundingClientRect();
+              return {top:h.getBoundingClientRect().top,
+                minTop:Math.min(...boxes.map(r=>r.top)),
+                maxTop:Math.max(...boxes.map(r=>r.top)),
+                minLeft:Math.min(...boxes.map(r=>r.left)),
+                maxRight:Math.max(...boxes.map(r=>r.right)),
+                modalLeft:bounds.left,modalRight:bounds.right,
+                modalHeight:bounds.height,modalTop:bounds.top,
+                sticky:getComputedStyle(h).position,
+                backdrop:getComputedStyle(d,'::backdrop').backgroundColor,
+                headerBg:getComputedStyle(h).backgroundColor,
+                bodyBg:getComputedStyle(d.querySelector('.dialog-content')).backgroundColor
+              };
+            }""")
+            assert frame["sticky"]=="sticky",frame
+            assert frame["maxTop"]-frame["minTop"]<24,("header wrapped",frame)
+            assert frame["minLeft"]>=frame["modalLeft"]-1,frame
+            assert frame["maxRight"]<=frame["modalRight"]+1,("header clipped",frame)
+            assert frame["modalTop"]>=30,("modal covers too much screen",frame)
+            assert frame["modalHeight"]<=page.viewport_size["height"]*.84,frame
+            assert frame["backdrop"] not in ("rgba(0, 0, 0, 0)","transparent"),frame
+            assert frame["headerBg"]!="rgb(255, 249, 237)",frame
+            page.evaluate("""() => {
+              const body=document.querySelector('#detailContent');
+              const long=document.createElement('div');
+              long.style.height='1700px';
+              long.textContent='synthetic body content for scroll testing';
+              body.append(long);
+              body.scrollTop=1000;
+            }""")
+            scrolled=page.evaluate("""() => ({
+              scroll:document.querySelector('#detailContent').scrollTop,
+              headerTop:document.querySelector('#detail .dialog-head').getBoundingClientRect().top
+            })""")
+            assert scrolled["scroll"]>100,("dialog body did not scroll",scrolled)
+            assert abs(scrolled["headerTop"]-frame["top"])<=2,("header moved",frame,scrolled)
+            assert button.is_visible(),"fixed header backup button scrolled away"
             button.click()
             status=modal.locator(".dialog-backup-status")
             if host==PRIVATE:
@@ -177,3 +239,4 @@ if __name__=="__main__":
     with sync_playwright() as playwright:
         exercise(playwright.chromium,"desktop-chromium",1200)
         exercise(playwright.webkit,"mobile-webkit",390)
+        exercise(playwright.webkit,"compact-mobile-webkit",320)
