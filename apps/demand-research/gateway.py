@@ -279,6 +279,13 @@ MIMES={"image/jpeg","image/png","image/webp","image/avif","video/mp4","video/web
 MAX_SIZE=1500000000
 _cache={"at":0.0,"posts":None}
 _lock=asyncio.Lock()
+# Bound a slow TeraBox journal reconstruction to ONE background worker on
+# the 512MiB free gateway. Requests never launch duplicate rclone scans.
+_catalog_task=None
+_catalog_retry_after=0.0
+CATALOG_INITIAL_WAIT_SECONDS=18
+CATALOG_RETRY_COOLDOWN_SECONDS=30
+
 
 def configured():
     return len(TOKEN)>=24 and bool(COOKIE) and REMOTE.startswith("archive:")
@@ -615,18 +622,55 @@ async def remote_bytes(path,cap=15000000):
             proc.kill()
             await proc.wait()
 
+async def _refresh_verified_catalog():
+    """Single bounded in-process task; cloud data never leaves private RAM."""
+    global _catalog_retry_after
+    try:
+        posts=await asyncio.to_thread(CloudArchive(REMOTE).load_catalog)
+        if not isinstance(posts,list):
+            raise ValueError("Verified remote catalog is not a list")
+        # Replace the cache only after complete independent journal readback.
+        # Any failure retains previously verified immutable originals.
+        _cache.update(at=time.time(),posts=posts)
+        _catalog_retry_after=0.0
+        return True
+    except Exception:
+        # Raw provider exceptions, post IDs and source URLs must not enter
+        # publicly readable logs or browser responses.
+        _catalog_retry_after=time.monotonic()+CATALOG_RETRY_COOLDOWN_SECONDS
+        return False
+
+
 async def get_catalog():
+    """Serve last SHA-verified immutable snapshot while one remote refresh runs.
+
+    First access waits a finite amount; subsequent requests attach to the
+    same task instead of spawning multiple huge catalog scans. Historical
+    posts are append-only: serving an older independently verified snapshot
+    is preferable to losing all real posts while a provider times out.
+    """
+    global _catalog_task
     if _cache["posts"] is not None and time.time()-_cache["at"]<90:
         return _cache["posts"]
     async with _lock:
-        if _cache["posts"] is not None and time.time()-_cache["at"]<90:
-            return _cache["posts"]
-        try:
-            posts=await asyncio.to_thread(CloudArchive(REMOTE).load_catalog)
-        except (ValueError,json.JSONDecodeError,RuntimeError) as e:
-            raise HTTPException(502,"Cloud catalog validation failure") from e
-        _cache.update(at=time.time(),posts=posts)
-        return posts
+        if ((_catalog_task is None or _catalog_task.done()) and
+                time.monotonic()>=_catalog_retry_after):
+            _catalog_task=asyncio.create_task(_refresh_verified_catalog())
+        current=_catalog_task
+    if _cache["posts"] is not None:
+        return _cache["posts"]
+    if current is None:
+        raise HTTPException(503,"Verified archive temporarily unavailable")
+    try:
+        verified=await asyncio.wait_for(asyncio.shield(current),
+                                        timeout=CATALOG_INITIAL_WAIT_SECONDS)
+    except asyncio.TimeoutError:
+        # Do not cancel the ONE still-running cloud read. Later retry calls
+        # can reuse its progress; never return unverified candidate posts.
+        raise HTTPException(503,"Verified archive still loading") from None
+    if not verified or _cache["posts"] is None:
+        raise HTTPException(502,"Cloud catalog validation failure")
+    return _cache["posts"]
 
 def media_signature(post_id,index,expires):
     return hmac.new(TOKEN.encode(),(post_id+":"+str(index)+":"+str(expires)).encode(),hashlib.sha256).hexdigest()
@@ -941,7 +985,12 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
                         "media_expected":post.get("media_expected",len(post["media"])),
                         "media_saved":len(post["media"]),
                         "capture_status":"remote_verified" if post.get("archive_complete",True) else "partial_media"})
-    return {"total":len(posts),"offset":offset,"limit":limit,"posts":output,"storage":"TeraBox"}
+    age=max(0,int(time.time()-_cache["at"])) if _cache["posts"] is not None else None
+    return {"total":len(posts),"offset":offset,"limit":limit,"posts":output,
+            "storage":"TeraBox",
+            "verified_catalog_cache_age_seconds":age,
+            "verified_catalog_refresh_pending":bool(_catalog_task is not None
+                                                  and not _catalog_task.done())}
 
 async def remote_stream(path,start,length)->AsyncIterator[bytes]:
     proc=await asyncio.create_subprocess_exec("rclone","cat",REMOTE+"/"+path,"--offset",str(start),"--count",str(length),
