@@ -284,6 +284,21 @@ def create_router(auth):
                              "historical_completeness_guaranteed":False},
                             headers={"Cache-Control":"private, no-store"})
 
+    @router.get("/api/target-archive/queue-summary")
+    async def queue_summary(request:Request):
+        auth(request)
+        if not backup_queue.enabled():
+            result={"known":False,"mode":"direct_workflow",
+                    "queued":None,"dispatched":None,"total_requests":None}
+        else:
+            try:
+                result=await asyncio.to_thread(backup_queue.overview)
+            except (RuntimeError,QueueStorageDenied,OSError):
+                result={"known":False,"mode":"unavailable",
+                        "queued":None,"dispatched":None,"total_requests":None}
+        return JSONResponse(result,headers={"Cache-Control":"private, no-store"})
+
+
     @router.post("/api/target-archive/start")
     async def start(request:Request):
         global _last_request
