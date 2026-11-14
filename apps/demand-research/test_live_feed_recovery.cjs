@@ -46,7 +46,7 @@ async function main(){
       author:{handle:"example.bsky.social"}}]})};
  };
  const sandbox={window,document,navigator,WebSocket,fetch:fakeFetch,URL,Date,JSON,
-   setTimeout(fn){const id=++nextTimer;timers.set(id,fn);return id},
+   AbortController,setTimeout(fn){const id=++nextTimer;timers.set(id,fn);return id},
    clearTimeout(id){timers.delete(id)},console};
  vm.runInNewContext(source,sandbox,{timeout:1200,filename:"live_feed_recovery.js"});
  assert.equal(WebSocket.all.length,0,"Never stream when search is healthy");
