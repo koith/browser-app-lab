@@ -142,7 +142,7 @@ def test_old_queue_database_migrates_without_losing_pending(tmp_path,monkeypatch
           job_id INTEGER PRIMARY KEY,platform TEXT,account TEXT,
           created_at INTEGER,workflow_run_id INTEGER,accepted_at INTEGER)""")
         conn.execute("""INSERT INTO account_requests
-          (job_id,platform,account,created_at) VALUES (?,?,?,?,)""".replace("?,?,?,?,","?,?,?,?"),
+          (job_id,platform,account,created_at) VALUES (?,?,?,?)""",
           (1234567890,"bluesky","legacy.bsky.social",1699999999))
     rows=backup_queue.queue_rows(limit=5)["items"]
     assert len(rows)==1 and rows[0]["account"]=="legacy.bsky.social"
