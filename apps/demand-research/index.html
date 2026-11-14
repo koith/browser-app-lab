@@ -102,6 +102,11 @@ dialog::backdrop{background:#061223bb;backdrop-filter:blur(3px)}
 .dialog-media a{color:#205a90;font-size:13px}
 .dialog-actions{display:flex;gap:8px;border-top:1px solid #e6ebf1;padding-top:14px;margin-top:12px}
 .dialog-actions a{background:#1c4d83;color:white;border-radius:8px;text-decoration:none;padding:11px 15px;font-size:13px;font-weight:650}
+.dialog-actions{flex-wrap:wrap;align-items:center}
+.dialog-backup-btn{background:#233ce8;color:#fff;padding:10px 13px;border-radius:6px;font-size:12px;font-weight:800;min-height:39px}
+.dialog-backup-status{margin:9px 0 0;font-size:12px;line-height:1.55;color:#344a70;overflow-wrap:anywhere}
+.dialog-backup-status[data-state="failed"]{color:#a23b29}
+.dialog-backup-status[data-state="verified"]{color:#1b755d}
 .dialog-notice{font-size:12px;color:#71829a;margin:12px 0}
 @media(max-width:720px){main{padding:9px 7px 48px}.toolbar{padding:11px}.feed{gap:6px}.post{border-radius:8px}.post-body{padding:7px}.post-title{font-size:10px}.post-title .tag{display:none}.post-excerpt{font-size:11px;line-height:1.35;min-height:3.7em;-webkit-line-clamp:3}.post-thumb{aspect-ratio:1/1.05}.post-date{font-size:9px}.date-row{gap:6px}.date-row label{flex:1 1 125px}.presets{width:100%}.presets button{padding:9px 10px}.date-row .apply{flex:1}.dialog-content{padding:13px}.dialog-text{font-size:14px}.dialog-media{grid-template-columns:1fr}dialog{width:calc(100vw - 14px);max-height:calc(100dvh - 14px)}.dialog-content{max-height:calc(100dvh - 72px)}}
 
@@ -408,7 +413,10 @@ main{padding-top:10px}
 .dialog-index-note{padding:11px 12px;margin:7px 0 10px;background:#fff0cd;color:#65400a;font-size:12px;line-height:1.6}
 @media(max-width:720px){.post .index-candidate-mark{font-size:9px;padding:3px}.dialog-index-note{font-size:11px}}
 
-.primary-views{display:flex;gap:8px;margin:2px 0 13px;align-items:center;padding-bottom:8px;border-bottom:2px solid #132541}
+.primary-views{position:sticky;top:0;z-index:60;display:flex;gap:8px;margin:2px -10px 13px;align-items:center;padding:9px 10px 11px;border-bottom:2px solid #132541;background:#f4f2e8;box-shadow:0 3px 9px #13254112;-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px)}
+.primary-views button{min-width:0;flex-shrink:1}
+@media(max-width:720px){.primary-views{margin:0 -7px 10px;padding:7px 8px 10px}}
+#accountOverview,#accountWatchSection,#accountBackupSection{scroll-margin-top:76px}
 .primary-views button{background:#fff4c4;border:2px solid #101e3a;color:#142142;border-radius:0;font-weight:850;padding:10px 16px;box-shadow:3px 3px 0 #122544;min-height:44px}
 .primary-views button.active{background:#2e42df;color:#fff;box-shadow:3px 3px 0 #ffdd27}
 .primary-views #watchCount{display:none}
@@ -1744,7 +1752,41 @@ function openDetail(p){
     });
     actions.append(trackButton);
   }
-  node.append(actions);
+  if(["bluesky","mastodon"].includes(p.platform)&&p.profileUrl&&
+     !p.discoveryCandidate&&!p.restricted){
+    const direct=el("button","dialog-backup-btn","이 계정 바로 백업");
+    direct.type="button";
+    const result=el("p","dialog-backup-status",
+      "공개 게시글·프로필 백업을 이 팝업에서 요청합니다. 접수와 원본 검증 완료는 별도입니다.");
+    result.setAttribute("role","status");
+    result.setAttribute("aria-live","polite");
+    direct.addEventListener("click",async()=>{
+      if(direct.disabled)return;
+      const start=window.INTERSECTION_startPublicAccountBackup;
+      if(typeof start!=="function"){
+        result.dataset.state="failed";
+        result.textContent="백업 연결 기능을 불러오지 못했습니다. 페이지를 새로고침하고 다시 시도하세요.";
+        return;
+      }
+      direct.disabled=true;
+      result.textContent="백업 서버 연결을 확인하고 있습니다…";
+      try{
+        const response=await start({platform:p.platform,profileUrl:p.profileUrl},
+          (text,state)=>{
+            result.dataset.state=state||"running";
+            result.textContent=text;
+          });
+        // Queued != stored. Allow a new try only when nothing was accepted.
+        if(!response?.accepted)direct.disabled=false;
+      }catch{
+        result.dataset.state="failed";
+        result.textContent="백업 요청 상태를 확인하지 못했습니다. 저장 완료로 표시하지 않습니다.";
+        direct.disabled=false;
+      }
+    });
+    actions.append(direct);
+    node.append(actions,result);
+  }else node.append(actions);
   document.body.classList.add("modal-open");
   $("detail").showModal();
 }
