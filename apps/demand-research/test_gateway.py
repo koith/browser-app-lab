@@ -182,6 +182,23 @@ def test_url_only_mode_does_not_require_login_for_public_apis(connected_gateway,
     assert connected_gateway.post("/api/accounts/sync").status_code==401
 
 
+def test_public_live_feed_recovery_script_is_allowlisted_and_render_bundled():
+    # Guard against the production regression where index.html referenced a
+    # newly added JS but Render's strict static allowlist returned HTTP 404.
+    from pathlib import Path
+    client=TestClient(gateway.app,base_url="https://testserver")
+    script=client.get("/live_feed_recovery.js")
+    assert script.status_code==200
+    assert script.headers["content-type"].startswith("application/javascript")
+    assert "jetstream2.us-east.bsky.network" in script.text
+    assert "getPosts" in script.text
+    assert client.get("/gateway.py").status_code==404
+    docker=(Path(__file__).resolve().parent/"Dockerfile").read_text(encoding="utf-8")
+    assert "COPY apps/demand-research/live_feed_recovery.js /app/live_feed_recovery.js" in docker
+    html=client.get("/").text
+    assert 'src="live_feed_recovery.js?v=20261114-bsky-outage-v1"' in html
+
+
 def test_public_bluesky_asset_is_served_without_repeated_404():
     client=TestClient(gateway.app,base_url="https://testserver")
     response=client.get("/assets/bluesky.svg")
