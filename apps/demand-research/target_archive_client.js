@@ -57,6 +57,7 @@
   let submitting=false;
   let currentRun=null;
   let pollTimer=null;
+  let connectionAttempting=false;
   let inlineStatus=null;
   function notifyInline(text,state){
     if(typeof inlineStatus==="function"){
@@ -267,7 +268,7 @@
   }
   function refreshButton(){
     // Never leave users with a dead button or a GitHub Actions detour.
-    submit.disabled=submitting;
+    submit.disabled=submitting||connectionAttempting;
     submit.textContent=isPrivateGateway?"백업 시작":"교집합에서 계정 백업";
     workflow.hidden=true;
   }
@@ -349,7 +350,7 @@
     refreshButton();
   });
   async function submitCurrentSelection(fromPost=false){
-    if(submitting){
+    if(submitting||connectionAttempting){
       notifyInline("이미 백업 요청을 처리 중입니다. 중복 요청하지 않습니다.","running");
       return {accepted:false,reason:"submitting"};
     }
@@ -378,9 +379,16 @@
         openPrivateBackup();return {accepted:false,reason:"public_mirror"};
       }
       message.textContent="저장소를 연결 중입니다. 백업 요청을 자동으로 다시 시도합니다.";
-      for(let attempt=0;attempt<4&&!gatewayReady;attempt++){
-        await check();
-        if(!gatewayReady)await new Promise(resolve=>setTimeout(resolve,2500));
+      connectionAttempting=true;
+      refreshButton();
+      try{
+        for(let attempt=0;attempt<4&&!gatewayReady;attempt++){
+          await check();
+          if(!gatewayReady)await new Promise(resolve=>setTimeout(resolve,2500));
+        }
+      }finally{
+        connectionAttempting=false;
+        refreshButton();
       }
       if(!gatewayReady){
         message.textContent="테라박스 서버가 아직 복구되지 않았습니다. 계정은 유지됩니다. 백업을 접수하지 않았습니다.";
@@ -435,7 +443,7 @@
     event.preventDefault();
     void submitCurrentSelection(false);
   });
-  // Called ONLY by a real click inside the same-origin saved-post modal.
+  // Called by the saved-post modal. The server still validates the POST.
   // Never auto-POST for URL parameters, unverified snippets or cross-origin links.
   window.INTERSECTION_startPublicAccountBackup=async (selection,onStatus)=>{
     if(!selection||typeof selection!=="object"||
@@ -450,7 +458,7 @@
     }
     // A queued job belongs to the previously selected account. Do not
     // overwrite its input or issue a duplicate POST from another modal.
-    if(submitting||currentRun){
+    if(submitting||connectionAttempting||currentRun){
       if(typeof onStatus==="function")
         onStatus("진행 중인 백업 요청이 있습니다. 완료 상태를 먼저 확인해 주세요.","queued");
       return {accepted:false,reason:"already_running"};
