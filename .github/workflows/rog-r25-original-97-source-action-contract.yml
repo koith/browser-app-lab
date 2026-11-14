@@ -1,0 +1,41 @@
+name: 4LEAF ACT-03 97 original CHR native action source-only acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r25-original-97-actions-source-contract.cjs'
+      - '.github/workflows/rog-r25-original-97-source-action-contract.yml'
+      - 'apps/4leaf/rog/native-card-action-sequences.js'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/r25-original-97-actions-source-contract.cjs'
+      - 'apps/4leaf/rog/native-card-action-sequences.js'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-sources-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-r25.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
+          exit 1
+      - name: All 97 source body action families including all source slots
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r25-original-97-actions-source-contract.cjs
+      - name: Actual native player, duel and source-only sample
+        run: LEAF_CARDS=0040,0081,0086,0088,0156 FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r14-chr-98-actor-audit.cjs
