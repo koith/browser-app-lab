@@ -34,7 +34,7 @@ def seeds(root=ROOT,all_cuts=False):
                    if type(x.get("number")) is int and x["number"]>0
                    and SHA.fullmatch(str(x.get("sha256","")))
                    and type(x.get("bytes")) is int and x["bytes"]>1024]
-            if not owned:continue
+            if not owned and not all_cuts:continue
             occupied_slot_count=len(owned)
             unique_owned=[]
             hashes=set()
@@ -114,7 +114,11 @@ def seeds(root=ROOT,all_cuts=False):
                         "union_saved_count":len(photos),"expected_gap":None,
                         "photo_sha256":sha,"public_image_url":url,"seed_kind":kind}
                         for sha,url,kind in photos])
-    all_albums.sort(key=lambda album:(
+    all_albums.sort(key=(lambda album:(
+        album[0]["union_saved_count"] > 20,
+        album[0]["union_saved_count"],
+        -(album[0]["expected_gap"] or 0),
+        album[0]["model"],album[0]["album_id"])) if all_cuts else (lambda album:(
         0 if album[0]["expected_gap"] is not None else 1,
         -(album[0]["expected_gap"] or 0),
         album[0].get("union_saved_count",album[0]["owner_saved_count"]),
