@@ -15,7 +15,10 @@ from demand_archive import CloudArchive, QueueStorageDenied
 
 from target_archive_api import create_router as create_target_archive_router, dispatch_enabled
 
+from public_search_verified import router as public_search_verified_router
+
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
+app.include_router(public_search_verified_router)
 
 @app.get("/health",include_in_schema=False)
 async def liveness():
