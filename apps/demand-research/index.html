@@ -1065,6 +1065,7 @@ main{padding-top:10px}
  border:1px solid #aab8d4;border-radius:6px;color:#263e77;background:#edf1ff}
 #archiveQueueMore[hidden]{display:none}
 
+#archiveQueueOpen[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -1855,12 +1856,16 @@ function filtered(){
 /* The main feed contains dated, source-verified SNS originals only.
    Search snippets have no verified media or timestamp: list separately. */
 function feedRows(){return filtered();}
+let lastDiscoveredSignature="";
 function drawDiscoveredLinks(){
   // A verified X post only supersedes its own X search lead. Threads and
   // Instagram can legitimately use the same opaque post ID string.
   const rows=indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&
     !(p.platform==="x"&&ids.has("x:"+p.postId)));
   const container=$("discoveryCandidates"),list=$("discoveryCandidateList");
+  const signature=(cloudMode?"private:":"public:")+rows.map(p=>p.id).join("|");
+  if(signature===lastDiscoveredSignature)return;
+  lastDiscoveredSignature=signature;
   container.classList.toggle("hidden",cloudMode||rows.length===0);
   $("discoveryCandidatesCount").textContent=String(rows.length);
   list.replaceChildren();
@@ -2335,7 +2340,7 @@ function resetData(){
   if(verifiedFeedDrawTimer!==null){clearTimeout(verifiedFeedDrawTimer);verifiedFeedDrawTimer=null}
   window.INTERSECTION_stopLiveFeedRecovery?.();
   window.INTERSECTION_stopSearchFallback?.();
-  tileCache=new WeakMap();
+  tileCache=new WeakMap();lastDiscoveredSignature="";
   posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();
   visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw();
 }
