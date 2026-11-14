@@ -27,13 +27,13 @@ const modernLedger=(done=[1,2,4,5,6,7,8,9,10,11])=>{
   });
   rows.push('| 무기한 반복 | G-03 | 밈미 신규 수집 | ↻ 상시 |');
   rows.push('| 무기한 반복 | G-12 | 심유이 신규 수집 | ↻ 상시 |');
-  return '<!-- GALLERY_DASHBOARD_START -->\\n'+
-    '## 2026-11-14 최신 유한 원장\\n'+
-    '## 유한 개발 / 상시 수집 — 최신 상태판\\n'+
-    '| 구분 | ID | 범위 | 판정 |\\n'+rows.join('\\n')+
-    '\\n## 자율개발 기준\\n'+
-    '| P0 | G-03 | 구형 체크 | [ ] 예전 미완료 |\\n'+
-    '| P0 | G-11 | 구형 체크 | [ ] 예전 미완료 |\\n'+
+  return '<!-- GALLERY_DASHBOARD_START -->\n'+
+    '## 2026-11-14 최신 유한 원장\n'+
+    '## 유한 개발 / 상시 수집 — 최신 상태판\n'+
+    '| 구분 | ID | 범위 | 판정 |\n'+rows.join('\n')+
+    '\n## 자율개발 기준\n'+
+    '| P0 | G-03 | 구형 체크 | [ ] 예전 미완료 |\n'+
+    '| P0 | G-11 | 구형 체크 | [ ] 예전 미완료 |\n'+
     '<!-- GALLERY_DASHBOARD_END -->';
 };
 const item=(status='completed',conclusion='success',sha=SHA)=>({
