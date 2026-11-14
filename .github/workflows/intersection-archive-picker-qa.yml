@@ -21,6 +21,11 @@ on:
       - "apps/demand-research/test_account_archive_picker_browser.py"
       - "apps/demand-research/test_account_archive_browser.py"
       - "apps/demand-research/target_archive_client.js"
+      - "apps/demand-research/target_archive_api.py"
+      - "apps/demand-research/backup_queue.py"
+      - "apps/demand-research/test_target_archive_api.py"
+      - "apps/demand-research/test_backup_queue.py"
+      - "apps/demand-research/test_account_watch_browser.py"
       - "apps/demand-research/test_post_modal_inline_backup_browser.py"
       - "apps/demand-research/live_feed_recovery.js"
       - "apps/demand-research/bsky_search_fallback.js"
@@ -50,6 +55,11 @@ on:
       - "apps/demand-research/test_account_archive_picker_browser.py"
       - "apps/demand-research/test_account_archive_browser.py"
       - "apps/demand-research/target_archive_client.js"
+      - "apps/demand-research/target_archive_api.py"
+      - "apps/demand-research/backup_queue.py"
+      - "apps/demand-research/test_target_archive_api.py"
+      - "apps/demand-research/test_backup_queue.py"
+      - "apps/demand-research/test_account_watch_browser.py"
       - "apps/demand-research/test_post_modal_inline_backup_browser.py"
       - "apps/demand-research/live_feed_recovery.js"
       - "apps/demand-research/bsky_search_fallback.js"
@@ -90,6 +100,7 @@ jobs:
           cd apps/demand-research
           python -m pytest -q test_target_account_viewer.py
           python -m pytest -q test_github_temp_bundle.py
+          python -m pytest -q test_target_archive_api.py test_backup_queue.py
       - name: Real synthetic Chromium and mobile WebKit UX
         run: |
           set -euo pipefail
@@ -105,6 +116,7 @@ jobs:
           python apps/demand-research/test_account_archive_picker_browser.py
           python apps/demand-research/test_account_archive_browser.py
           python apps/demand-research/test_post_modal_inline_backup_browser.py
+          python apps/demand-research/test_account_watch_browser.py
           python apps/demand-research/test_core_navigation_fallback_browser.py
       - name: Test auto-capture search races, instant filters and original media slots
         run: |
