@@ -20,7 +20,8 @@ assert.match(shell,/feedSourceNotice/);
 assert.match(shell,/Bluesky 공개 검색 실패/);
 assert.match(shell,/INTERSECTION_receiveLiveBskyPost/);
 assert.match(shell,/id="retryFeed"/);
-assert.match(shell,/if\(bskySearchFailureCode&&!cloudMode\)return false/);
+assert.match(shell,/if\(bskySearchFailureCode&&!cloudMode\)/);
+assert.match(shell,/INTERSECTION_hasSearchFallbackMore/);
 
 async function main(){
  const listeners=new Map();
