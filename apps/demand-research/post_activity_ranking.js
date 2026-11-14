@@ -277,12 +277,17 @@
        const thumb=node("span","activity-rank-thumb");
        if(g.latestThumbnail||g.latestAvatar){
          const img=node("img","");
-         img.src=g.latestThumbnail||g.latestAvatar;img.alt="";
-         img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";
-         img.addEventListener("error",()=>{
-           img.remove();thumb.classList.add("activity-rank-thumb-empty");
-         });
-         thumb.append(img);
+         img.alt="";img.loading="lazy";img.decoding="async";
+          img.referrerPolicy="no-referrer";
+          thumb.classList.add("is-loading");
+          img.addEventListener("load",()=>thumb.classList.remove("is-loading"),{once:true});
+          img.addEventListener("error",()=>{
+            thumb.classList.remove("is-loading");
+            img.remove();thumb.classList.add("activity-rank-thumb-empty");
+          },{once:true});
+          thumb.append(img);
+          img.src=g.latestThumbnail||g.latestAvatar;
+          if(img.complete&&img.naturalWidth>0)thumb.classList.remove("is-loading");
        }else thumb.classList.add("activity-rank-thumb-empty");
        card.append(thumb);
        card.addEventListener("click",()=>openDetail(g,index+1));
