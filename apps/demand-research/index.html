@@ -673,9 +673,9 @@ main{padding-top:10px}
 }
 /* Keep text-only public posts compact, not empty image-sized boxes. */
 .post[data-no-media="true"] .post-thumb{aspect-ratio:auto;min-height:86px;max-height:112px}
-.post-thumb .thumb-placeholder{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;width:100%;height:100%;min-height:86px;padding:10px 12px;color:#222544;background:linear-gradient(135deg,#eef0ff,#cdd2ec);text-align:left;overflow:hidden}
-.post-thumb .thumb-placeholder b{font-size:10px;color:#464e82}
-.post-thumb .thumb-placeholder span{font-size:12px;line-height:1.35;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere}
+.post-thumb .thumb-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:100%;height:100%;min-height:86px;padding:10px 12px;color:#747bba;background:linear-gradient(135deg,#eef0ff,#cdd2ec);text-align:center;overflow:hidden}
+.post-thumb .thumb-placeholder b{font-size:11px;font-weight:550;color:#888fc3;letter-spacing:.02em}
+.post-thumb .thumb-placeholder span{display:none}
 .post-thumb .thumb-kind-label{position:absolute;left:3px;bottom:3px;background:#17172bdc;color:white;font-size:9px;padding:2px 4px;z-index:1}
 .post-thumb img.post-media-img{position:relative;z-index:0}
 .discovery-links{margin-top:16px;border:1px solid #161b37;background:#f7f4e7;padding:10px}
@@ -692,7 +692,7 @@ main{padding-top:10px}
 .archive-media-state{font-size:10px;color:#8d3e16;font-weight:750;margin-top:5px}
 .archive-media-state--complete{color:#296c43}
 @media(max-width:720px){.archive-controls form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.archive-controls input{grid-column:1/-1;min-width:0}.archive-controls select{min-width:0}}
-@media(max-width:720px){.post[data-no-media="true"] .post-thumb{min-height:70px;max-height:98px}.post-thumb .thumb-placeholder{min-height:70px;padding:7px}.post-thumb .thumb-placeholder span{font-size:10px}.discovery-link-list{grid-template-columns:1fr}}
+@media(max-width:720px){.post[data-no-media="true"] .post-thumb{min-height:70px;max-height:98px}.post-thumb .thumb-placeholder{min-height:70px;padding:7px}.post-thumb .thumb-placeholder b{font-size:10px}.discovery-link-list{grid-template-columns:1fr}}
 
 /* Public-account history archive can only be dispatched from the private gateway. */
 .target-archive{margin:12px 0;border:1px solid var(--line,#b5b4ac);background:var(--surface,#f6f5ee);padding:14px;min-width:0}
@@ -919,6 +919,26 @@ main{padding-top:10px}
  #detail .dialog-tools a,#detail .dialog-tools button{font-size:10px;padding:7px 5px}
  #detail #closeDetail{margin-left:9px}
 }
+
+/* Small modal-only confirmation layer: original post remains visible/open;
+   no navigation, no destructive archive/account state change before confirm. */
+#postActionConfirm{width:min(370px,calc(100vw - 48px));max-height:calc(100dvh - 90px);
+  border:2px solid #101b45;border-top:4px solid #f5d312;border-radius:12px;
+  background:#fff9ed;box-shadow:0 22px 80px #070b2399;color:#151d3c;padding:21px}
+#postActionConfirm::backdrop{background:rgba(6,10,29,.43)}
+#postActionConfirm h3{font-size:17px;font-weight:850;margin:0 0 10px}
+#postActionConfirm p{font-size:13px;line-height:1.6;margin:0 0 14px;
+  color:#364063;overflow-wrap:anywhere}
+#postActionConfirm .post-confirm-buttons{display:flex;justify-content:flex-end;gap:9px}
+#postActionConfirm button{min-height:40px;padding:9px 15px;font-size:13px;
+  font-weight:800;border-radius:5px}
+#postActionCancel{color:#101b45;background:#e5e8f0;border:1px solid #aeb6c9}
+#postActionAccept{color:#101b45;background:#ffdd10;border:1px solid #d6b80d}
+#detail .dialog-watch-status{margin:5px 0 12px;padding:7px 10px;
+  font-size:12px;line-height:1.5;color:#215a42;border-left:3px solid #238b65;
+  background:#e8f8ef;overflow-wrap:anywhere}
+#detail .dialog-watch-status[data-state="failed"]{border-color:#ad3c30;
+  background:#fff2ee;color:#9a3326}
 </style>
 </head>
 <body>
@@ -1214,6 +1234,14 @@ main{padding-top:10px}
 <span id="dateSummary" class="sr-only">최근 30일</span></div>
 </dialog>
 <dialog id="detail" aria-labelledby="detailTitle"><div class="dialog-head"><b id="detailTitle"><span class="dialog-profile-name">작성자 정보</span></b><div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div><button id="closeDetail" type="button" aria-label="게시글 닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
+<dialog id="postActionConfirm" aria-labelledby="postActionConfirmTitle" aria-describedby="postActionConfirmMessage">
+  <h3 id="postActionConfirmTitle">계정 작업 확인</h3>
+  <p id="postActionConfirmMessage">선택한 공개 계정에 작업을 실행할까요?</p>
+  <div class="post-confirm-buttons">
+    <button id="postActionCancel" type="button">취소</button>
+    <button id="postActionAccept" type="button">확인</button>
+  </div>
+</dialog>
 <script>
 (function(){
 "use strict";
@@ -1793,7 +1821,7 @@ function tile(p){
   function textPreview(message){
     article.dataset.noMedia="true";
     const box=el("div","thumb-placeholder");
-    box.append(el("b","",message),el("span","",String(p.text||"원문을 확인하세요").slice(0,135)));
+    box.append(el("b","",message));
     thumb.append(box);
   }
   function showFallback(){
@@ -1804,7 +1832,7 @@ function tile(p){
     // thumbnail for the media attached to this specific original post.
     const message=blocked?"표시 제한된 미디어":first?.type==="video"?"해당 영상 미리보기 없음":
       first?.type==="external"?"외부 링크 · 게시글 사진 아님":
-      first?"원본 게시글 이미지 불러오기 실패":"첨부 이미지 없는 게시글";
+      first?"원본 게시글 이미지 불러오기 실패":"첨부파일 없음";
     textPreview(message);
   }
   if(!blocked&&first){
@@ -1870,6 +1898,35 @@ function sourceLink(p,text){
   let url=validUrl(p.url);
   if(url){a.href=url;a.target="_blank";a.rel="noopener noreferrer"}else a.removeAttribute("href");
   return a;
+}
+function confirmPostAccountAction(action,p,onConfirm){
+  const confirm=$("postActionConfirm");
+  if(!confirm||confirm.open)return false;
+  const address=validUrl(p.profileUrl)||p.author||"선택 계정";
+  $("postActionConfirmTitle").textContent=action==="track"?"계정 추적 확인":"계정 백업 확인";
+  $("postActionConfirmMessage").textContent=
+    (p.author||"공개 계정")+" ("+address+")을(를) "+
+    (action==="track"?"추적 목록에 추가할까요?":"백업 대기열에 접수할까요?")+
+    " 기존 진행 중인 작업은 중단되지 않습니다.";
+  let settled=false;
+  const accept=$("postActionAccept"),cancel=$("postActionCancel");
+  function finish(ok){
+    if(settled)return;
+    settled=true;
+    confirm.close();
+    if(ok)onConfirm();
+  }
+  const yes=()=>finish(true),no=()=>finish(false);
+  const onClose=()=>{
+    accept.removeEventListener("click",yes);
+    cancel.removeEventListener("click",no);
+    confirm.removeEventListener("close",onClose);
+  };
+  accept.addEventListener("click",yes);
+  cancel.addEventListener("click",no);
+  confirm.addEventListener("close",onClose);
+  confirm.showModal();
+  return true;
 }
 function openDetail(p){
   let node=$("detailContent");node.replaceChildren();
@@ -1943,11 +2000,24 @@ function openDetail(p){
     trackButton.type="button";
     trackButton.setAttribute("aria-label","계정 추적");
     trackButton.title="계정 추적";
-    trackButton.addEventListener("click",()=>{
-      if(typeof window.INTERSECTION_watchPublicAccount==="function"){
-        window.INTERSECTION_watchPublicAccount({platform:p.platform,profileUrl:p.profileUrl,author:p.author});
+    trackButton.addEventListener("click",()=>confirmPostAccountAction("track",p,()=>{
+      const output=el("p","dialog-watch-status");
+      output.setAttribute("role","status");
+      output.setAttribute("aria-live","polite");
+      if(typeof window.INTERSECTION_watchPublicAccount!=="function"){
+        output.dataset.state="failed";
+        output.textContent="추적 기능을 불러오지 못했습니다.";
+      }else{
+        const accepted=window.INTERSECTION_watchPublicAccount({
+          platform:p.platform,profileUrl:p.profileUrl,author:p.author});
+        output.dataset.state=accepted?"ok":"failed";
+        output.textContent=accepted?
+          "이 계정의 추적을 등록했습니다. 현재 게시글 화면을 유지합니다.":
+          "추적 등록에 실패했습니다. 계정 주소나 추적 목록을 확인해 주세요.";
       }
-    });
+      node.querySelector(".dialog-watch-status")?.remove();
+      node.insertBefore(output,node.querySelector(".dialog-text"));
+    }));
     actions.append(trackButton);
   }
   if(["bluesky","mastodon"].includes(p.platform)&&p.profileUrl&&
@@ -1961,7 +2031,7 @@ function openDetail(p){
     result.setAttribute("role","status");
     result.setAttribute("aria-live","polite");
     result.hidden=true;
-    direct.addEventListener("click",async()=>{
+    direct.addEventListener("click",()=>confirmPostAccountAction("backup",p,async()=>{
       if(direct.disabled)return;
       result.hidden=false;
       const start=window.INTERSECTION_startPublicAccountBackup;
@@ -1985,7 +2055,7 @@ function openDetail(p){
         result.textContent="백업 요청 상태를 확인하지 못했습니다. 저장 완료로 표시하지 않습니다.";
         direct.disabled=false;
       }
-    });
+    }));
     actions.append(direct);
     node.insertBefore(result,node.querySelector(".dialog-text"));
   }
@@ -2479,7 +2549,7 @@ if(location.hostname==="intersection-originals-free.onrender.com" &&
 <script src="bsky_search_fallback.js?v=20261114-public-source-hydration-v1" defer></script>
 <script src="post_activity_ranking.js" defer></script>
 <script src="public_video_trends.js" defer></script>
-<script src="target_archive_client.js?v=20261114-inline-backup-v1" defer></script>
+<script src="target_archive_client.js?v=20261114-confirm-multiqueue-v1" defer></script>
 <script src="free_discovery.js" defer></script>
 <script src="account_watch.js?v=20261110-first-tab" defer></script>
 <script src="archive_tab.js?v=20261110-compact-library" defer></script>
