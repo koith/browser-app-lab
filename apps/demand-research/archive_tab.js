@@ -349,7 +349,7 @@ async function ownPendingQueue(offset){
     return item;
   }));
   return {known:true,mode:"local_receipts",items,total:entries.length,
-    offset,limit:20,truncated:true};
+    offset,limit:20,truncated:false};
 }
 async function loadQueue(reset=true){
   if(!queueDialog||!queueStatus||!queueList||queueLoading)return;
