@@ -1,7 +1,8 @@
 'use strict';
 
-// #605: feature-first handoff. Image discovery, crawling and TeraBox writes
-// are paused until the user explicitly reauthorizes them. No timer or chats.
+// #605: finite-feature handoff and independently scheduled perpetual collection.
+// G-03 Mimmi and G-12 Yui are ongoing acquisition, never finite blockers.
+// Actual acquisition happens in the existing hourly autonomous collector.
 // A busy monorepo often supersedes Pages for unrelated apps. Reuse a
 // successfully published Pages revision ONLY when all gallery subtrees have
 // identical Git tree OIDs; the stronger real image/browser checks stay intact.
@@ -69,30 +70,54 @@ module.exports = async function featureHandoff({github, context, core}) {
   const start=body.indexOf(begin), stop=body.indexOf(end);
   const dashboard=start>=0&&stop>start
     ?body.slice(start+begin.length,stop):body;
-  const states=new Map();
-  for(const line of dashboard.split('\n')) {
+  // The active 2026-11-14 table supersedes embedded historical [ ] entries.
+  // Backwards compatibility: older 11-ID ledgers still parse as before.
+  const modernAt=dashboard.indexOf('## 유한 개발 / 상시 수집');
+  const modern=modernAt>=0;
+  const modernEnd=modern?dashboard.indexOf('## 자율개발 기준',modernAt):-1;
+  const active=modern
+    ?dashboard.slice(modernAt,modernEnd>modernAt?modernEnd:undefined)
+    :dashboard;
+  const states=new Map(),perpetual=new Set();
+  for(const line of active.split('\n')) {
     const item=/^- \[([ xX])\] \*\*(G-\d\d)\*\*(?:\s|$)/.exec(line);
-    if(item&&!states.has(item[2])) {
+    if(item&&!states.has(item[2])&&!modern) {
       states.set(item[2],item[1].toLowerCase()==='x');
       continue;
     }
-    if(!line.trim().startsWith('|')) continue;
+    if(!line.trim().startsWith('|'))continue;
     const cells=line.trim().split('|').slice(1,-1).map(x=>x.trim());
-    if(cells.length<4||!/^G-\d\d$/.test(cells[1])) continue;
-    // The fourth column is the global decision. E.g.
-    // "[ ] new Mimmi collection [x] two-photo proof": still NOT DONE.
-    const gate=/\[([ xX])\]/.exec(cells[3]);
-    if(gate&&!states.has(cells[1])) {
-      states.set(cells[1],gate[1].toLowerCase()==='x');
+    if(cells.length<4||!/^G-\d\d$/.test(cells[1]))continue;
+    if(modern) {
+      if(cells[0]==='무기한 반복') {
+        perpetual.add(cells[1]);
+        continue; // It must NEVER be counted as a finite completed G-ID.
+      }
+      if(cells[0]!=='완료형')continue;
     }
+    const gate=/\[([ xX])\]/.exec(cells[3]);
+    if(gate&&!states.has(cells[1]))
+      states.set(cells[1],gate[1].toLowerCase()==='x');
   }
-  for(let i=1;i<=11;i++) {
-    if(!states.has('G-'+String(i).padStart(2,'0')))
-      return log('BLOCK_INCOMPLETE_LEDGER G-'+String(i).padStart(2,'0'));
+  if(modern) {
+    const finite=['G-01','G-02','G-04','G-05','G-06','G-07','G-08','G-09','G-10','G-11'];
+    for(const id of finite)if(!states.has(id))
+      return log('BLOCK_MISSING_FINITE_LEDGER '+id);
+    for(const id of ['G-03','G-12'])if(!perpetual.has(id))
+      return log('BLOCK_MISSING_PERPETUAL_COLLECTION '+id);
+    core.info('GALLERY_FINITE_DASHBOARD_PARSED_DONE '+
+      finite.filter(id=>states.get(id)).length+'/10 PERPETUAL G-03,G-12');
+  } else {
+    for(let i=1;i<=11;i++) {
+      if(!states.has('G-'+String(i).padStart(2,'0')))
+        return log('BLOCK_INCOMPLETE_LEDGER G-'+String(i).padStart(2,'0'));
+    }
+    core.info('GALLERY_DASHBOARD_PARSED_DONE '+[...states].filter(([,done])=>done).length+'/11');
   }
-  core.info('GALLERY_DASHBOARD_PARSED_DONE '+[...states].filter(([,done])=>done).length+'/11');
   const remaining=featureStages.filter(x=>!states.get(x.id));
-  if(!remaining.length) return log('FEATURES_CHECKED_COLLECTION_STILL_PAUSED');
+  if(!remaining.length) return log(modern
+    ?'FINITE_FEATURES_COMPLETE_PERPETUAL_COLLECTION_ACTIVE'
+    :'FEATURES_CHECKED_COLLECTION_STILL_PAUSED');
 
   const sha=(await github.rest.git.getRef({owner,repo,ref:'heads/main'})).data.object.sha;
   // Never run a browser audit before its actual main Pages deployment.
