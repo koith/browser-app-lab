@@ -1,0 +1,90 @@
+name: Gallery Free macOS Direct Real Public Photo Backfill
+on:
+  push:
+    branches: [feat/gallery-cumulative-source-aliases-20261114]
+    paths:
+      - '.github/workflows/gallery-direct-free-real-photo-backfill.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  real_photo_archive:
+    runs-on: macos-15
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi, yui]
+    env:
+      MODEL: ${{ matrix.model }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/gallery-cumulative-source-aliases-20261114
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependencies for real JPG collection
+        run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
+      - name: Search partial names and real reverse-photo source pages
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/real-stage"
+          python apps/gallery-archive/reverse_image_sweep.py --model "$MODEL" --all-cuts --seeds 4 --offset "$((GITHUB_RUN_NUMBER * 4))" --workers 2 --out "$RUNNER_TEMP/reverse-evidence.json" || echo "REVERSE_SOURCE_UNAVAILABLE"
+          python apps/gallery-archive/source_alias_search.py --model "$MODEL" --offset "$((GITHUB_RUN_NUMBER * 3))" --per-work 1 --max-pages 8 --reverse "$RUNNER_TEMP/reverse-evidence.json" --out "$RUNNER_TEMP/source-evidence.json" || echo "ALTERNATE_SEARCH_UNAVAILABLE"
+      - name: Download public photographs as SHA checked individual decoded images
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$MODEL" == "mimmi" ]]; then
+            focus=(--album-id djawa-my-summer-vacation-vol-5 --album-id djawa-pop-kitty-party --album-id djawa-nikke-yuni --album-id djawa-janus-scary-lantern-night --album-id djawa-rudy2-codename-wolfgirl --album-id djawa-twin-bunnies-affair)
+          else
+            focus=(--album-id artgravia-677-yui-public-samples --album-id yui-meow-public-samples --album-id crazygiant-player5-public --album-id djawa-privaty-public-samples --album-id yui-summer-public-samples)
+          fi
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "apps/$MODEL-gallery/owner-index.json" --out "$RUNNER_TEMP/real-stage" --max-new 120 --max-pages 4 --render-budget 0 --reviewed-source-only --reverse-evidence "$RUNNER_TEMP/source-evidence.json" "${focus[@]}"
+      - name: Preserve only immutable decoded public photo original bytes for gallery
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model "$MODEL" --stage "$RUNNER_TEMP/real-stage" --budget 120000000 --limit 120
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          node apps/gallery-archive/test_curated_cover_manifest.cjs
+      - name: Commit actual distinct JPEG files to current PR branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          BRANCH=feat/gallery-cumulative-source-aliases-20261114
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$BRANCH"
+          git reset --hard "origin/$BRANCH"
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py --model "$MODEL" --stage "$RUNNER_TEMP/real-stage" --budget 120000000 --limit 120
+          git add "apps/$MODEL-gallery/stored-albums.json" "apps/$MODEL-gallery/stored-albums/"
+          if git diff --cached --quiet; then
+            echo "MODEL=$MODEL NEW_PHYSICAL_SHA=0" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "feat(gallery): store new $MODEL decoded public photo bytes"
+          for attempt in 1 2 3; do
+            git fetch origin "$BRANCH"
+            git rebase "origin/$BRANCH"
+            if git push origin "HEAD:refs/heads/$BRANCH"; then
+              echo "MODEL=$MODEL SHA-VERIFIED_REAL_PHOTOS_SAVED=yes" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "::error::Actual photo commit push failed"
+          exit 1
+      - name: Report the real bytes and failures without archiving photo ZIPs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-public-photo-audit-${{ matrix.model }}
+          path: |
+            ${{ runner.temp }}/real-stage/metadata/collection-audit.json
+            ${{ runner.temp }}/real-stage/metadata/pages-publication.json
+            ${{ runner.temp }}/source-evidence.json
+          retention-days: 10
+          if-no-files-found: ignore

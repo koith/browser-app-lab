@@ -1,4 +1,4 @@
-name: G05 Archive All 17 Registered Yui Public Source Works
+name: G05 Archive All Registered Yui Public Source Works
 on:
   pull_request:
     paths:
@@ -7,12 +7,12 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: g05-remaining-13-real-public-yui-${{ github.head_ref }}
+  group: g05-all-real-public-yui-${{ github.head_ref }}
   cancel-in-progress: false
 jobs:
   physical-yui-photos:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-24.04
+    runs-on: macos-15
     timeout-minutes: 36
     steps:
       - uses: actions/checkout@v4
@@ -53,18 +53,18 @@ jobs:
                 ensure_ascii=False),flush=True)
             subprocess.run(['python','apps/gallery-archive/publish_new_public_photos_to_pages.py',
                  '--model','yui','--stage',str(stage),'--limit','80','--budget','80000000'],check=True)
-          # These other four directly registered Yui works were never in the
+          # These other independently registered Yui works were never in the
           # old ShowArtx 403 sweep. They have their own verified identities:
           # official DJAWA portfolio, photographer X, and Inven public post.
           other=[r['id'] for r in registry if not r.get('source','').startswith('https://showartx.net/')]
-          assert len(other)==4,other
+          assert len(other)>=4,(len(other),other)
           stage=root/'batch3'
           cmd=['python','apps/gallery-archive/direct_photo_pipeline.py',
              '--model','yui','--owner','apps/yui-gallery/owner-index.json',
              '--out',str(stage),'--max-new','80','--max-pages','4',
              '--render-budget','0','--reviewed-source-only','--page-cycle','7']
           for aid in other:cmd+=['--album-id',aid]
-          print('G05_4_INDEPENDENT_PUBLIC_PUBLISHER_SOURCES',other,flush=True)
+          print('G05_ALL_INDEPENDENT_PUBLIC_PUBLISHER_SOURCES',other,flush=True)
           subprocess.run(cmd,check=True)
           report=json.loads((stage/'metadata/collection-audit.json').read_text())
           for row in report['results']:
