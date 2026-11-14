@@ -217,10 +217,60 @@ jobs:
           name: targeted-source-crawl-audit-${{ matrix.model }}
           path: |
             ${{ runner.temp }}/stage/metadata/collection-audit.json
+            ${{ runner.temp }}/source-alias-reverse-evidence.json
             ${{ runner.temp }}/stage/metadata/incremental-merge.json
             ${{ runner.temp }}/stage/metadata/remote-verification.json
           retention-days: 14
           if-no-files-found: ignore
+  persist-evidenced-site-names:
+    needs: acquire
+    if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: targeted-source-crawl-audit-*
+          path: /tmp/source-site-reports
+      - name: Append only evidence-checked newly observed names without changing album identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,'apps/gallery-archive')
+          from source_name_ledger import ingest_search_report
+          path=Path('apps/gallery-archive/source-names.json')
+          doc=json.loads(path.read_text(encoding='utf-8'))
+          count=0
+          for report in sorted(Path('/tmp/source-site-reports').glob('*/source-alias-reverse-evidence.json')):
+              changes=ingest_search_report(doc,json.loads(report.read_text(encoding='utf-8')))
+              count+=changes['added']
+          if count:
+              path.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('NEW_VERIFIED_SITE_NAME_SPELLINGS',count,flush=True)
+          PY
+          if ! git diff --quiet -- apps/gallery-archive/source-names.json; then
+            git config user.name "gallery-source-ledger[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add apps/gallery-archive/source-names.json
+            git commit -m "data(gallery): accumulate verified names found on new source sites"
+            # A concurrent owner-index commit is expected; rebase safely,
+            # never force-push over an owner catalog.
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          else
+            echo "No newly evidenced source names" >> "$GITHUB_STEP_SUMMARY"
+          fi
   replicate-verified-new-photos:
     # Run once for BOTH models, only after all original+preview copies were
     # independently read back and both private catalog publications succeeded.
