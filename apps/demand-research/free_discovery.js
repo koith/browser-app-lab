@@ -16,7 +16,7 @@
     location.hostname==="intersection-originals-free.onrender.com";
   if(!allowedHost||typeof receive!=="function"||typeof acceptX!=="function")return;
 
-  const TERMS=["뒷계","섹트","일탈계"];
+  const TERMS=["뒷계","섹트","섹블","일탈계"];
   const NETWORKS={
     x:{hosts:["x.com","twitter.com"],
       pattern:/^\/([A-Za-z0-9_]{1,15})\/status\/([0-9]+)\/?$/i},
