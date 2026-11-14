@@ -39,3 +39,15 @@ def test_queue_bounded_and_ordered():
     assert {row["job_id"] for row in backup_queue.pending(limit=backup_queue._MAX_OPEN)}==set(jobs)
     with pytest.raises(RuntimeError,match="full"):
         backup_queue.create_request("bluesky","overflow.bsky.social")
+
+def test_pending_never_silently_expires_after_seven_days(monkeypatch):
+    import time
+    old=backup_queue.create_request("bluesky","older-account.bsky.social")
+    recent=backup_queue.create_request("mastodon","@newer@mastodon.social")
+    with backup_queue._db() as conn:
+        conn.execute("UPDATE account_requests SET created_at=? WHERE job_id=?",
+                     (int(time.time())-9*86400,old))
+    rows=backup_queue.pending(limit=4)
+    assert [row["job_id"] for row in rows]==[old,recent]
+    backup_queue.accept(old,42340000001)
+    assert [row["job_id"] for row in backup_queue.pending(limit=4)]==[recent]
