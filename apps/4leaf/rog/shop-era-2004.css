@@ -15,6 +15,16 @@
 #shop .shop-era-toggle button[aria-pressed="true"]{
  color:#271c3c;background:#f5dca4;border-color:#e7bd73;
 }
+#shop .shop-market-date-label{
+ display:inline-flex;gap:3px;align-items:center;padding:0 5px;
+ white-space:nowrap;color:#fff0d6;font:10px/22px Gulim,'굴림',sans-serif;
+ border-left:1px solid #8294c2;
+}
+#shop #shop-market-date{
+ height:22px;max-width:85px;min-width:73px;
+ font:11px Gulim,'굴림',sans-serif;
+ background:#ede0bb;color:#201633;border:1px solid #8e76aa;
+}
 #shop #shop-era-provenance{
  position:absolute;left:15px;bottom:7px;z-index:39;
  color:#fff0ae;background:#181e45df;padding:2px 7px;
