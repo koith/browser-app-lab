@@ -834,6 +834,11 @@ main{padding-top:10px}
  #detail .dialog-tools a,#detail .dialog-tools button{padding:7px 6px;font-size:10px}
  #detail .dialog-head{gap:4px;padding:8px 7px}
 }
+
+.feed-source-notice{margin:8px 0 10px;padding:11px 12px;border:2px solid #aa6623;background:#fff2d6;color:#372612;font-size:12px;font-weight:750;line-height:1.65}
+.feed-source-notice[hidden],.feed-retry button[hidden]{display:none}
+.feed-retry{display:flex;justify-content:center;margin:6px 0 10px}
+.feed-retry button{background:#fff7db;color:#172349;border:1px solid #aa6623;min-height:35px;padding:6px 13px;font-size:12px}
 </style>
 </head>
 <body>
@@ -896,6 +901,8 @@ main{padding-top:10px}
  </dialog>
 </details>
 <div id="archiveControls" class="archive-controls hidden" aria-label="테라박스 저장 게시글 검색"><form id="archiveSearchForm" autocomplete="off"><input id="archiveQuery" type="search" maxlength="100" placeholder="보관된 게시글 본문 검색" aria-label="보관본 본문 검색"><select id="archivePlatform" aria-label="보관 SNS"><option value="">모든 SNS</option><option value="bluesky">Bluesky</option><option value="mastodon">Mastodon</option><option value="misskey">Misskey</option><option value="lemmy">Lemmy</option></select><select id="archiveMediaStatus" aria-label="첨부 보관 상태"><option value="">전체 보관본</option><option value="complete">첨부 보관 완료</option><option value="partial">첨부 일부 누락</option></select><button type="submit">보관본 검색</button><button id="archiveReset" type="button">초기화</button></form><span id="archiveResults" role="status" aria-live="polite"></span></div>
+<div id="feedSourceNotice" class="feed-source-notice" role="status" aria-live="polite" hidden></div>
+<div class="feed-retry"><button id="retryFeed" type="button" hidden>공개 검색 다시 시도</button></div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
 <details class="discovery-links hidden" id="discoveryCandidates">
@@ -1138,6 +1145,7 @@ const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS
 // is retained for direct bookmarked access to the legacy archive-only feed.
 const privateHost=location.hostname!=="koith.github.io";
 const cloudMode=privateHost&&new URLSearchParams(location.search).get("source")==="archive";
+let bskySearchFailureCode="",liveRecoveryState="";
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
@@ -1689,6 +1697,7 @@ function profileLink(p){
 }
 function hasMoreResults(){
   if(feedRows().length>visibleLimit)return true;
+  if(bskySearchFailureCode&&!cloudMode)return false;
   if(cloudMode)return cloudOffset<cloudTotal;
   return !!pending.length||nextEnd>fromMs;
 }
@@ -1869,10 +1878,31 @@ function draw(){
   drawDiscoveredLinks();
   let limit=visibleLimit,frag=document.createDocumentFragment();
   for(let p of rows.slice(0,limit))frag.append(tile(p));
-  if(!rows.length)frag.append(el("div","empty",busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다."));
+  if(!rows.length){
+    let label=busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다.";
+    if(bskySearchFailureCode&&!cloudMode)
+      label="Bluesky 검색 서버가 응답하지 않습니다 ("+bskySearchFailureCode+
+        "). 0건은 전체 게시물이 없다는 뜻이 아닙니다. "+
+        (liveRecoveryState==="listening"?"실시간 새 공개 게시물을 수신 중입니다.":
+         liveRecoveryState==="connecting"?"실시간 공개 스트림을 연결 중입니다.":
+         liveRecoveryState==="receiving"?"수신한 게시물의 공식 원문을 검증 중입니다.":
+         "실시간 새 글 스트림의 연결 상태를 확인 중입니다.");
+    frag.append(el("div","empty",label));
+  }
   list.append(frag);shown=Math.min(rows.length,limit);
   $("paging").classList.toggle("hidden",!hasMoreResults() || busy);
   $("more").textContent="더 보기";
+  const notice=$("feedSourceNotice"),retry=$("retryFeed");
+  notice.hidden=cloudMode||!bskySearchFailureCode;
+  retry.hidden=cloudMode||!bskySearchFailureCode||busy;
+  if(!notice.hidden){
+    notice.textContent="Bluesky 공개 검색 서버 "+bskySearchFailureCode+
+      " · 기존 게시글의 전체 검색이 중단됐습니다. 이 수치는 전체 게시물 0건이 아닙니다. "+
+      (liveRecoveryState==="listening"?"공개 실시간 신규 글만 별도 감시 중":
+       liveRecoveryState==="receiving"?"공식 게시글 원본 검증 중":
+       liveRecoveryState==="connecting"?"공개 실시간 스트림 연결 중":
+       "실시간 스트림 확인 중");
+  }
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
 
@@ -1928,19 +1958,56 @@ window.INTERSECTION_publicAccountSnapshot=function(){
 };
 function startBusy(){busy=true;$("applyDate").disabled=true;$("more").disabled=true}
 function endBusy(){busy=false;$("applyDate").disabled=false;$("more").disabled=false}
-function resetData(){posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
+function resetData(){
+  bskySearchFailureCode="";liveRecoveryState="";
+  window.INTERSECTION_stopLiveFeedRecovery?.();
+  posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();
+  visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw();
+}
+window.INTERSECTION_liveFeedState=state=>{
+  liveRecoveryState=String(state||"").slice(0,30);
+  if(!cloudMode)draw();
+};
+window.INTERSECTION_receiveLiveBskyPost=p=>{
+  if(cloudMode||!bskySearchFailureCode||!p||typeof p.record?.text!=="string")return false;
+  const created=Date.parse(String(p.record.createdAt||""));
+  if(!Number.isFinite(created)||created<fromMs||created>=toMs)return false;
+  let added=false;
+  for(const term of TERMS)if(p.record.text.includes(term))added=addPost(p,term)||added;
+  if(added){posts.sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));draw();}
+  return added;
+};
+function failPublicSearch(error){
+  if(bskySearchFailureCode)return;
+  const code=Number(error?.httpStatus||0);
+  bskySearchFailureCode=code?"HTTP "+code:"연결 실패·시간초과";
+  window.INTERSECTION_PUBLIC_SEARCH_DOWN=bskySearchFailureCode;
+  incomplete++;
+  status("Bluesky 검색 실패 · "+bskySearchFailureCode+" · 전체 게시물 0건이 아닙니다");
+  draw();
+  window.dispatchEvent(new CustomEvent("intersection:public-search-unavailable",{detail:{code}}));
+}
 async function fetchWindow(segment){
   let url=new URL(API);url.searchParams.set("q",segment.term);url.searchParams.set("sort","latest");url.searchParams.set("limit","100");
   url.searchParams.set("since",new Date(segment.start).toISOString());url.searchParams.set("until",new Date(segment.end).toISOString());
-  for(let attempt=0;attempt<3;attempt++){
-    let controller=new AbortController(),timer=setTimeout(()=>controller.abort(),18000);
+  for(let attempt=0;attempt<2;attempt++){
+    let controller=new AbortController(),timer=setTimeout(()=>controller.abort(),9000);
     try{
       let res=await fetch(url.href,{mode:"cors",cache:"no-store",headers:{"Accept":"application/json"},signal:controller.signal});
-      if((res.status===429||res.status>=500)&&attempt<2){await new Promise(r=>setTimeout(r,500*(attempt+1)));continue}
-      if(!res.ok)throw Error("HTTP "+res.status);
+      if(!res.ok){
+        const error=new Error("Bluesky HTTP "+res.status);
+        error.httpStatus=res.status;
+        if((res.status===429||res.status>=500)&&attempt===0){
+          await new Promise(r=>setTimeout(r,600));continue;
+        }
+        throw error;
+      }
       let j=await res.json();if(!Array.isArray(j.posts))throw Error("Bad API response");
       return j;
-    }catch(e){if(attempt===2||String(e).includes("403")||String(e).includes("400"))throw e;await new Promise(r=>setTimeout(r,300*(attempt+1)))}
+    }catch(e){
+      if(attempt===1||e.httpStatus===403||e.httpStatus===400)throw e;
+      await new Promise(r=>setTimeout(r,300));
+    }
     finally{clearTimeout(timer)}
   }
 }
@@ -1949,7 +2016,7 @@ async function processWork(work,epoch){
   // Search cursor requests previously yielded HTTP 403; split saturated windows.
   let queue=work,done=0,added=0;
   async function worker(){
-    while(queue.length&&requestCount<MAX_REQUESTS&&epoch===runID){
+    while(queue.length&&requestCount<MAX_REQUESTS&&epoch===runID&&!bskySearchFailureCode){
       let item=queue.shift();requestCount++;
       try{
         let j=await fetchWindow(item);
@@ -1962,7 +2029,13 @@ async function processWork(work,epoch){
             queue.unshift({term:item.term,start:middle,end:item.end},{term:item.term,start:item.start,end:middle});
           }else incomplete++;
         }else if(needSplit)incomplete++;
-      }catch(e){failed++}
+      }catch(e){
+        failed++;
+        if(e.httpStatus===403||e.httpStatus===429||e.httpStatus>=500||!e.httpStatus){
+          failPublicSearch(e);
+          queue.length=0;
+        }
+      }
       done++;if(done%3===0||!queue.length){
         status("수집 중 · "+posts.length.toLocaleString()+"건 · 요청 "+requestCount+"/"+MAX_REQUESTS);
         draw();
@@ -2023,7 +2096,8 @@ async function loadBatch(reset){
   pending=r.left;
   updateServiceCounts();
   endBusy();posts.sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
-  if(!pending.length&&nextEnd<=fromMs)status("선택 기간 조회 완료 · "+posts.length.toLocaleString()+"건"+((failed||incomplete)?" · 일부 구간 미확인":""));
+  if(bskySearchFailureCode)status("Bluesky 공개 검색 실패 · "+bskySearchFailureCode+" · 실시간 신규 글은 별도 부분 수집입니다");
+  else if(!pending.length&&nextEnd<=fromMs)status("선택 기간 조회 완료 · "+posts.length.toLocaleString()+"건"+((failed||incomplete)?" · 일부 구간 미확인":""));
   else status("조회 "+daysCovered+"일 · "+posts.length.toLocaleString()+"건 · 이전 기간 추가 수집 가능");
   $("paging").classList.toggle("hidden",!hasMoreResults());
   $("more").textContent="더 보기";
@@ -2103,6 +2177,7 @@ $("socialFind").addEventListener("click",async ()=>{
 });
 $("archiveSearchForm").addEventListener("submit",e=>{e.preventDefault();if(cloudMode&&!cloudBusy)loadCloud(true)});
 $("archiveReset").addEventListener("click",()=>{if(!cloudMode||cloudBusy)return;for(let key of ["archiveQuery","archivePlatform","archiveMediaStatus"])$(key).value="";loadCloud(true)});
+$("retryFeed").addEventListener("click",()=>{if(!busy&&!cloudMode)loadBatch(true)});
 $("more").addEventListener("click",()=>{
   if(busy)return;
   if(filtered().length>visibleLimit){visibleLimit+=180;draw()}
@@ -2226,6 +2301,7 @@ if(location.hostname==="intersection-originals-free.onrender.com" &&
   },{once:true});
 }
 </script>
+<script src="live_feed_recovery.js?v=20261114-bsky-outage-v1" defer></script>
 <script src="post_activity_ranking.js" defer></script>
 <script src="public_video_trends.js" defer></script>
 <script src="target_archive_client.js?v=20261114-inline-backup-v1" defer></script>
