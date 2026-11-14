@@ -52,6 +52,7 @@ def exercise(browser_type,label):
             errors=[]
             requests=[]
             allowed={"value":private}
+            queue_denied={"value":False}
             page=browser.new_page(viewport={"width":390,"height":844})
             page.on("pageerror",lambda error:errors.append(str(error)))
             def route_it(route):
@@ -74,6 +75,10 @@ def exercise(browser_type,label):
                         '"profile_snapshot_verified":true}]}')
                 elif parsed.path=="/api/target-archive/queue":
                     requests.append("queue")
+                    if queue_denied["value"]:
+                        route.fulfill(status=401,content_type="application/json",
+                                      body='{"detail":"Private link required"}')
+                        return
                     from urllib.parse import parse_qs
                     offset=int(parse_qs(parsed.query).get("offset",["0"])[0])
                     rows=[{"job_id":1000000010+i,"platform":"bluesky",
@@ -88,6 +93,10 @@ def exercise(browser_type,label):
                     import json
                     route.fulfill(status=200,content_type="application/json",
                                   body=json.dumps(payload))
+                elif parsed.path.startswith("/api/target-archive/jobs/"):
+                    requests.append("signed-own-job")
+                    route.fulfill(status=200,content_type="application/json",
+                                  body='{"state":"REMOTE_VERIFIED","posts":3,"objects":4}')
                 elif parsed.path=="/api/archive-overview":
                     requests.append("overview")
                     route.fulfill(status=200,content_type="application/json",
@@ -154,6 +163,23 @@ def exercise(browser_type,label):
                 assert page.locator("#archiveQueueMore").is_hidden()
                 page.locator("#archiveQueueClose").click()
                 assert not page.locator("#archiveQueueDialog").evaluate("(node) => node.open")
+                # When the global ledger is private, only the requesting
+                # browser's own signed receipts may be shown.
+                queue_denied["value"]=True
+                page.evaluate("""() => {
+                  window.INTERSECTION_getOwnBackupRequests=()=>[{
+                    run_id:5551234,platform:'bluesky',account:'own-qa.bsky.social',
+                    receipt:'fixture-signed-owner-receipt',createdAt:1800000000000,order:0
+                  }];
+                }""")
+                page.locator("#archiveQueueOpen").click()
+                page.wait_for_function(
+                    "() => document.querySelector('#archiveQueueList li')?.textContent?.includes('own-qa.bsky.social')",
+                    timeout=15000)
+                assert "원격 파일·해시 검증 완료" in page.locator("#archiveQueueList li").first.inner_text()
+                assert "전체 서버 대기열은 아닙니다" in page.locator("#archiveQueueStatus").inner_text()
+                assert "signed-own-job" in requests
+                page.locator("#archiveQueueClose").click()
                 page.locator("#archiveModeAuto").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src")=="/auto-archive"
                 page.frame_locator("#archiveHubFrame").locator("#keyword-posts").wait_for(
