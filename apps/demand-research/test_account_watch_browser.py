@@ -162,8 +162,10 @@ def run():
             assert page.locator("#accountWatchSection").is_visible()
             assert page.locator("#accountBackupSection").is_visible()
             assert page.locator("#accountAutoMount #intersectionAutoAccounts").count()==1
-            assert page.locator("#accountAutoSearch").is_visible()
+            assert page.locator("#accountAutoSearch").is_hidden()
             assert page.locator("#accountServerData").is_hidden()
+            page.locator("#accountOverview > summary").click()
+            assert page.locator("#accountAutoSearch").is_visible()
             assert page.locator("#accountMoreOptions").evaluate("(el)=>el.open") is False
             labels=page.locator(".account-section-heading h3").all_inner_texts()
             assert labels==["전체 계정 현황","관심 계정 관리","계정 백업"],labels
@@ -189,8 +191,9 @@ def run():
             page.locator("#viewAccounts").click()
             assert page.locator("#accountsView").is_visible()
             assert page.locator("#accountWatchList article").count()==1
-            page.locator(".account-watch-card").first.get_by_role(
-                "button",name="백업 대상으로 선택").click()
+            page.locator(".account-watch-card .account-watch-open").first.click()
+            assert page.locator("#accountDialog").is_visible()
+            page.locator("#accountDialog").get_by_role("button",name="백업 대상으로 선택").click()
             assert page.locator("#targetArchivePlatform").input_value()=="bluesky"
             assert page.locator("#targetArchiveAccount").input_value()==(
                 "https://bsky.app/profile/qa-feed.bsky.social")
@@ -201,10 +204,10 @@ def run():
             assert saved==["https://bsky.app/profile/qa-feed.bsky.social"],saved
             # Source-based latest public feed: excludes repost from other account,
             # protects against duplicated posts from various discovery adapters.
-            page.wait_for_function("document.querySelectorAll('.account-watch-card .account-stats strong').length && document.querySelector('.account-watch-card .account-stats strong').textContent==='5'",timeout=22000)
+            page.wait_for_function("document.querySelector('#accountMetricVerified')?.textContent==='5'",timeout=22000)
             assert len(latest_calls)>=1
             assert page.locator("#accountMetricVerified").text_content()=="5"
-            page.locator(".account-watch-card button.primary").click()
+            page.locator(".account-watch-card .account-watch-open").first.click()
             assert page.locator("#accountDialog").is_visible()
             body=page.locator("#accountDialogContent").inner_text()
             assert "상품 관련 단어가 있는 고유 글" in body
@@ -237,8 +240,8 @@ def run():
             page.wait_for_function("document.querySelector('#accountMetricVerified').textContent==='7'",timeout=20000)
             assert len(mast_calls)>=2
             assert "사적 글" not in page.locator("#accountWatchList").inner_text()
-            page.locator(".account-watch-card").filter(has_text="Mastodon").get_by_role(
-                "button",name="백업 대상으로 선택").click()
+            page.locator(".account-watch-card").filter(has_text="@qa").locator(".account-watch-open").click()
+            page.locator("#accountDialog").get_by_role("button",name="백업 대상으로 선택").click()
             assert page.locator("#targetArchivePlatform").input_value()=="mastodon"
             assert page.locator("#targetArchiveAccount").input_value()==(
                 "https://mastodon.social/@qa")
@@ -253,7 +256,8 @@ def run():
             page.wait_for_function("document.querySelectorAll('#accountWatchList article').length===1",timeout=8000)
             assert page.locator("#accountWatchList article").count()==1
             page.locator("#accountWatchSearch").fill("")
-            page.locator(".account-watch-card .danger").first.click()
+            page.locator(".account-watch-card .account-watch-open").first.click()
+            page.locator("#accountDialog").get_by_role("button",name="추적 해제").click()
             assert page.locator("#accountMetricTracked").text_content()=="2"
             # Account audit works without the user choosing profiles to track.
             # 20,000 distinct synthetic accounts test no 36/80-record audit cap.
