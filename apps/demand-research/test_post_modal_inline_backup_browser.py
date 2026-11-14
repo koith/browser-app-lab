@@ -295,7 +295,15 @@ def exercise(browser_type,name,width):
             track=modal.get_by_role("button",name="계정 추적")
             track.click()
             confirm=page.locator("#postActionConfirm")
-            assert confirm.is_visible()
+            debug=page.evaluate("""() => {
+              const d=document.querySelector('#postActionConfirm');
+              const h=document.querySelector('#detail');
+              const r=d?.getBoundingClientRect();
+              return {exists:!!d,open:d?.open,display:d&&getComputedStyle(d).display,
+                width:r?.width,height:r?.height,originalOpen:h?.open,
+                title:d?.querySelector('h3')?.textContent};
+            }""")
+            assert confirm.is_visible(),(debug,errors)
             assert "추적" in confirm.locator("h3").inner_text()
             assert page.evaluate("window.__trackedPosts.length")==0
             confirm.get_by_role("button",name="취소").click()
