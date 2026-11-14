@@ -7,9 +7,11 @@ on:
       - "apps/gallery-archive/global_source_registry.json"
       - "apps/gallery-archive/discover_global_sources.py"
       - "apps/gallery-archive/test_discover_global_sources.py"
+      - "apps/gallery-archive/source_name_ledger.py"
+      - "apps/gallery-archive/source-names.json"
       - ".github/workflows/gallery-global-source-discovery.yml"
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: gallery-global-source-discovery
   cancel-in-progress: false
@@ -33,6 +35,26 @@ jobs:
         run: |
           python apps/gallery-archive/discover_global_sources.py \
             --out "/tmp/gallery-global-source-leads.json" --timeout 18
+      - name: Grow site-observed spelling ledger only on unique same-work evidence
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/source_name_ledger.py \
+            --discover /tmp/gallery-global-source-leads.json \
+            --out /tmp/gallery-source-names-updated.json
+          if ! cmp -s apps/gallery-archive/source-names.json /tmp/gallery-source-names-updated.json; then
+            cp /tmp/gallery-source-names-updated.json apps/gallery-archive/source-names.json
+            git config user.name "gallery-source-ledger[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add apps/gallery-archive/source-names.json
+            git commit -m "data(gallery): retain names from verified matching source catalogues"
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          else
+            echo "No new confirmed source aliases" >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Publish honest acquisition-versus-discovery summary
         shell: bash
         run: |
