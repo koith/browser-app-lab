@@ -1066,6 +1066,40 @@ main{padding-top:10px}
 #archiveQueueMore[hidden]{display:none}
 
 #archiveQueueOpen[hidden]{display:none}
+
+/* User-defined account exclusions only affect latest public search results.
+   They never mutate original posts or existing immutable archive records. */
+.manual-block-tools{display:flex;justify-content:flex-end;margin:1px 0 7px}
+#manualBlockOpen{border:1px solid #bdc4d4;background:#f9f8f2;color:#4a5367;
+  border-radius:5px;font-size:10px;font-weight:700;padding:5px 9px;min-height:28px}
+#manualBlockOpen:focus-visible,#detailBlockAccount:focus-visible{outline:3px solid #e4c600;outline-offset:2px}
+#detail .dialog-foot{flex:0 0 auto;display:flex;align-items:center;gap:12px;
+  min-height:35px;padding:5px 12px;background:#fff9ed;border-top:1px solid #ddd7c9}
+#detailBlockAccount{flex:0 0 auto;min-height:26px;border:1px solid #bdc2cd;
+  padding:4px 8px;font-size:10px;font-weight:650;color:#596276;background:transparent;
+  border-radius:4px;box-shadow:none}
+#detailBlockAccount[data-blocked="true"]{color:#2a4d7d;border-color:#a0b2cf}
+#detailBlockAccount[hidden]{display:none}
+#detailBlockStatus{font-size:10px;color:#536079;line-height:1.4;min-width:0}
+#manualBlockDialog{width:min(530px,calc(100vw - 24px));max-height:80dvh;
+  padding:0;border:2px solid #101b45;border-radius:10px;background:#fffaf0;overflow:hidden}
+#manualBlockDialog[open]{display:flex;flex-direction:column}
+.manual-block-head{flex:0 0 auto;background:#101b45;color:#fff;display:flex;
+  justify-content:space-between;align-items:center;gap:12px;padding:10px 13px}
+.manual-block-head h2{font-size:14px;margin:0;color:#fff}
+#manualBlockClose{font-size:22px;background:transparent;color:#fff;
+  padding:2px 9px;border:1px solid #8696bd;border-radius:4px;min-width:31px}
+.manual-block-body{padding:13px;min-height:0;overflow-y:auto}
+.manual-block-body>p{font-size:11px;color:#5d6880;margin:0 0 11px;line-height:1.6}
+#manualBlockList{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+#manualBlockList li{display:flex;align-items:center;justify-content:space-between;
+  gap:8px;min-width:0;border:1px solid #d8dce4;border-radius:6px;
+  background:white;padding:9px}
+.manual-block-entry{min-width:0;overflow-wrap:anywhere;font-size:11px;color:#34466b}
+.manual-block-entry strong{display:block;font-size:12px;color:#182c56;margin-bottom:2px}
+#manualBlockList button{flex:0 0 auto;font-size:11px;background:#e8effd;color:#22396c;
+  padding:6px 10px;border-radius:4px}
+#manualBlockStatus{font-size:11px;color:#384e72;min-height:16px;margin:8px 0 0}
 </style>
 </head>
 <body>
@@ -1083,6 +1117,7 @@ main{padding-top:10px}
 </nav>
 <div id="postsView" role="tabpanel" aria-labelledby="viewPosts">
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
+<div class="manual-block-tools"><button type="button" id="manualBlockOpen" aria-haspopup="dialog" aria-controls="manualBlockDialog">차단 계정 <span id="manualBlockCount">0</span> · 관리</button></div>
 <section id="activityRanking" class="activity-ranking" aria-labelledby="activityRankingTitle">
  <div class="activity-ranking-top">
   <h2 id="activityRankingTitle">RANK</h2>
@@ -1376,7 +1411,16 @@ main{padding-top:10px}
 <div class="date-actions"><div class="presets" id="presets"><button type="button" data-days="7">7일</button><button type="button" data-days="30" class="active">30일</button><button type="button" data-days="90">90일</button></div><button type="button" id="applyDate" class="apply">기간 조회</button></div>
 <span id="dateSummary" class="sr-only">최근 30일</span></div>
 </dialog>
-<dialog id="detail" aria-labelledby="detailTitle"><div class="dialog-head"><b id="detailTitle"><span class="dialog-profile-name">작성자 정보</span></b><div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div><button id="closeDetail" type="button" aria-label="게시글 닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
+<dialog id="manualBlockDialog" aria-labelledby="manualBlockTitle">
+  <div class="manual-block-head"><h2 id="manualBlockTitle">차단 계정 관리</h2>
+   <button id="manualBlockClose" type="button" aria-label="차단 계정 관리 닫기">×</button></div>
+  <div class="manual-block-body">
+   <p>직접 차단한 계정은 이 브라우저의 최신 게시물 검색에서 제외됩니다. 자동 광고 필터와 별도로 작동하며, 백업된 원본은 삭제하지 않습니다. 다른 기기·브라우저와 자동 동기화되지는 않습니다.</p>
+   <ul id="manualBlockList" aria-label="직접 차단한 SNS 계정"></ul>
+   <p id="manualBlockStatus" role="status" aria-live="polite"></p>
+  </div>
+</dialog>
+<dialog id="detail" aria-labelledby="detailTitle"><div class="dialog-head"><b id="detailTitle"><span class="dialog-profile-name">작성자 정보</span></b><div id="detailActionBar" class="dialog-tools" role="group" aria-label="게시글 주요 작업"></div><button id="closeDetail" type="button" aria-label="게시글 닫기">×</button></div><div class="dialog-content" id="detailContent"></div><div class="dialog-foot"><button id="detailBlockAccount" type="button">차단하기</button><span id="detailBlockStatus" role="status" aria-live="polite"></span></div></dialog>
 <dialog id="postActionConfirm" aria-labelledby="postActionConfirmTitle" aria-describedby="postActionConfirmMessage">
   <h3 id="postActionConfirmTitle">계정 작업 확인</h3>
   <p id="postActionConfirmMessage">선택한 공개 계정에 작업을 실행할까요?</p>
@@ -1397,7 +1441,7 @@ const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS
 const privateHost=location.hostname!=="koith.github.io";
 const cloudMode=privateHost&&new URLSearchParams(location.search).get("source")==="archive";
 let bskySearchFailureCode="",liveRecoveryState="",fallbackStats=null,verifiedFeedDrawTimer=null;
-let tileCache=new WeakMap(),discoveryLoading=false;
+let tileCache=new WeakMap(),discoveryLoading=false,detailSelectedPost=null;
 let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
@@ -1848,9 +1892,127 @@ function suspectedAd(post){
   return (post.adEvidence?.score||0)>=4||isAutomatedTrendDigest(post);
 }
 
+
+/* A manually maintained personal exclusion list, not an automated ad verdict.
+   Scope is this browser origin and the PUBLIC feed; archives are untouched. */
+const MANUAL_BLOCK_STORAGE_KEY="intersection.manual-blocked-accounts.v1";
+const MANUAL_BLOCK_LIMIT=1000;
+function manualAccountKey(platform,profileUrl){
+  const service=String(platform||"").toLowerCase().trim();
+  if(!/^[a-z][a-z0-9_-]{0,24}$/.test(service)||service==="cloud")return "";
+  try{
+    const u=new URL(String(profileUrl||""));
+    if(u.protocol!=="https:"||u.username||u.password||u.port||!u.hostname||u.pathname.length<2)return "";
+    u.search="";u.hash="";
+    // These services expose case-insensitive public profile handles.
+    const host=u.hostname.toLowerCase().replace(/^www\./,"");
+    const path=u.pathname.replace(/\/+$/,"");
+    const normal=(host==="bsky.app"||host==="x.com"||host==="twitter.com"||
+      host==="reddit.com"||host==="threads.com"||host==="threads.net")?
+      path.toLowerCase():path;
+    const normalizedHost=host==="twitter.com"?"x.com":host==="threads.net"?"threads.com":host;
+    return service+"|https://"+normalizedHost+normal;
+  }catch{return ""}
+}
+function parseManualBlockStorage(){
+  try{
+    const entries=JSON.parse(localStorage.getItem(MANUAL_BLOCK_STORAGE_KEY)||"[]");
+    if(!Array.isArray(entries))return new Map();
+    const list=new Map();
+    for(const row of entries.slice(0,MANUAL_BLOCK_LIMIT)){
+      if(!row||typeof row!=="object")continue;
+      const platform=String(row.platform||"").slice(0,30);
+      const profileUrl=String(row.profileUrl||"").slice(0,1500);
+      const key=manualAccountKey(platform,profileUrl);
+      if(!key)continue;
+      list.set(key,{platform,profileUrl,author:String(row.author||"").slice(0,120),
+        authorDid:/^did:[a-z0-9:%._-]{3,180}$/i.test(row.authorDid||"")?
+          row.authorDid.toLowerCase():"",blockedAt:String(row.blockedAt||"").slice(0,35)});
+    }
+    return list;
+  }catch{return new Map()}
+}
+let manualBlockedAccounts=parseManualBlockStorage();
+let manualBlockedDids=new Set();
+function rebuildManualBlockedDids(){
+  manualBlockedDids=new Set([...manualBlockedAccounts.values()]
+    .filter(row=>row.platform==="bluesky"&&row.authorDid)
+    .map(row=>row.authorDid));
+}
+rebuildManualBlockedDids();
+function matchesManualBlock(p,row){
+  if(String(p.platform||"").toLowerCase()!==String(row.platform||"").toLowerCase())return false;
+  const key=manualAccountKey(p.platform,p.profileUrl);
+  return (key&&key===manualAccountKey(row.platform,row.profileUrl))||
+    (p.platform==="bluesky"&&p.authorDid&&row.authorDid&&
+     String(p.authorDid).toLowerCase()===row.authorDid);
+}
+function isManualBlocked(p){
+  if(cloudMode)return false;
+  // O(1) lookup even after a viewer blocks hundreds of spam accounts.
+  // Every fresh feed draw may examine thousands of public post records.
+  const key=manualAccountKey(p.platform,p.profileUrl);
+  if(key&&manualBlockedAccounts.has(key))return true;
+  return p.platform==="bluesky"&&!!p.authorDid&&
+    manualBlockedDids.has(String(p.authorDid).toLowerCase());
+}
+function setManualBlocked(p,blocked){
+  const key=manualAccountKey(p.platform,p.profileUrl);
+  if(!key||cloudMode)return false;
+  const next=new Map(manualBlockedAccounts);
+  if(blocked){
+    if(next.size>=MANUAL_BLOCK_LIMIT&&!next.has(key))return false;
+    next.set(key,{platform:String(p.platform).toLowerCase(),profileUrl:p.profileUrl,
+      author:String(p.author||"").slice(0,120),authorDid:String(p.authorDid||"").slice(0,180),
+      blockedAt:new Date().toISOString()});
+  }else{
+    for(const [itemKey,row] of next)if(matchesManualBlock(p,row))next.delete(itemKey);
+  }
+  try{localStorage.setItem(MANUAL_BLOCK_STORAGE_KEY,JSON.stringify([...next.values()]))}
+  catch{return false}
+  manualBlockedAccounts=next;
+  rebuildManualBlockedDids();
+  refreshManualBlockViews();
+  return true;
+}
+function refreshManualBlockViews(){
+  $("manualBlockCount").textContent=String(manualBlockedAccounts.size);
+  if($("manualBlockDialog").open)renderManualBlockManager();
+  if(detailSelectedPost){
+    const button=$("detailBlockAccount");
+    const blocked=isManualBlocked(detailSelectedPost);
+    button.hidden=cloudMode||!manualAccountKey(detailSelectedPost.platform,detailSelectedPost.profileUrl)||
+      !!detailSelectedPost.archived;
+    button.dataset.blocked=blocked?"true":"false";
+    button.textContent=blocked?"차단 해제":"차단하기";
+    button.setAttribute("aria-label",blocked?"이 계정 차단 해제":"이 계정 게시물 차단하기");
+  }
+  draw();
+}
+function renderManualBlockManager(){
+  const list=$("manualBlockList");list.replaceChildren();
+  const rows=[...manualBlockedAccounts.values()].sort((a,b)=>
+    String(b.blockedAt).localeCompare(String(a.blockedAt)));
+  for(const row of rows){
+    const item=el("li"),meta=el("div","manual-block-entry");
+    meta.append(el("strong","",row.author||row.profileUrl),
+      el("span","",row.platform+" · "+row.profileUrl));
+    const release=el("button","","해제");
+    release.type="button";
+    release.setAttribute("aria-label",String(row.author||row.profileUrl)+" 차단 해제");
+    release.addEventListener("click",()=>{
+      const ok=setManualBlocked(row,false);
+      $("manualBlockStatus").textContent=ok?"차단을 해제했습니다. 게시글 검색에 즉시 반영됩니다.":
+        "차단 해제 저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.";
+    });
+    item.append(meta,release);list.append(item);
+  }
+  if(!rows.length)list.append(el("li","manual-block-entry","직접 차단한 계정이 없습니다."));
+}
+
 function matchesText(p){return !needle||p.text.toLowerCase().includes(needle)}
 function filtered(){
-  return posts.filter(p=>matchesText(p)&&!suspectedAd(p))
+  return posts.filter(p=>matchesText(p)&&!suspectedAd(p)&&!isManualBlocked(p))
     .sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
 }
 /* The main feed contains dated, source-verified SNS originals only.
@@ -1860,7 +2022,7 @@ let lastDiscoveredSignature="";
 function drawDiscoveredLinks(){
   // A verified X post only supersedes its own X search lead. Threads and
   // Instagram can legitimately use the same opaque post ID string.
-  const rows=indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&
+  const rows=indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&!isManualBlocked(p)&&
     !(p.platform==="x"&&ids.has("x:"+p.postId)));
   const container=$("discoveryCandidates"),list=$("discoveryCandidateList");
   const signature=(cloudMode?"private:":"public:")+rows.map(p=>p.id).join("|");
@@ -2050,8 +2212,9 @@ function confirmPostAccountAction(action,p,onConfirm){
   const confirm=$("postActionConfirm");
   if(!confirm||confirm.open)return false;
   const address=validUrl(p.profileUrl)||p.author||"선택 계정";
-  $("postActionConfirmTitle").textContent=action==="track"?"계정 추적 확인":"계정 백업 확인";
-  $("postActionConfirmMessage").textContent=
+  $("postActionConfirmTitle").textContent=action==="block"?"계정 차단 확인":action==="track"?"계정 추적 확인":"계정 백업 확인";
+  $("postActionConfirmMessage").textContent=action==="block"?
+    (p.author||"공개 계정")+" ("+address+")의 게시물을 앞으로 최신 게시물 검색에서 제외할까요? 나중에 차단 목록에서 해제할 수 있습니다.":
     (p.author||"공개 계정")+" ("+address+")을(를) "+
     (action==="track"?"추적 목록에 추가할까요?":"백업 대기열에 접수할까요?")+
     " 기존 진행 중인 작업은 중단되지 않습니다.";
@@ -2076,6 +2239,8 @@ function confirmPostAccountAction(action,p,onConfirm){
   return true;
 }
 function openDetail(p){
+  detailSelectedPost=p;
+  $("detailBlockStatus").textContent="";
   let node=$("detailContent");node.replaceChildren();
   const actions=$("detailActionBar");actions.replaceChildren();
   const dialog=$("detail");
@@ -2206,8 +2371,18 @@ function openDetail(p){
     actions.append(direct);
     node.insertBefore(result,node.querySelector(".dialog-text"));
   }
+  refreshDetailBlockButton();
   document.body.classList.add("modal-open");
   $("detail").showModal();
+}
+function refreshDetailBlockButton(){
+  if(!detailSelectedPost)return;
+  const button=$("detailBlockAccount"),p=detailSelectedPost;
+  const blocked=isManualBlocked(p);
+  button.hidden=cloudMode||!!p.archived||!manualAccountKey(p.platform,p.profileUrl);
+  button.dataset.blocked=blocked?"true":"false";
+  button.textContent=blocked?"차단 해제":"차단하기";
+  button.setAttribute("aria-label",blocked?"이 계정 차단 해제":"이 계정 게시물 차단하기");
 }
 function closeDetail(){
   $("detail").close();document.body.classList.remove("modal-open");$("detailContent").replaceChildren();
@@ -2215,6 +2390,7 @@ function closeDetail(){
 function draw(){
   updateAdScores();
   let matching=posts.filter(matchesText),suspected=matching.filter(suspectedAd).length;
+  let manuallyHidden=matching.filter(p=>!suspectedAd(p)&&isManualBlocked(p)).length;
   let hidden=suspected;
   let rows=feedRows(),list=$("feed");
   drawDiscoveredLinks();
@@ -2283,10 +2459,10 @@ function draw(){
 
   updateServiceCounts();
   let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x+" T"+serviceCounts.threads+" I"+serviceCounts.instagram;
-  let candidates=cloudMode?0:indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)).length;
+  let candidates=cloudMode?0:indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&!isManualBlocked(p)).length;
   // Verified posts and unverified discovery leads are disjoint lists.
   // Never subtract search leads from real post counts (can become negative).
-  $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고·자동 생성글 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
+  $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고·자동 생성글 "+hidden.toLocaleString()+"건 제외":"")+(manuallyHidden?" · 직접 차단 "+manuallyHidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
   window.dispatchEvent(new Event("intersection:feed-updated"));
 }
@@ -2532,12 +2708,44 @@ async function loadCloud(reset){
   finally{cloudBusy=false;endBusy()}
 }
 $("detail").addEventListener("close",()=>{
+  detailSelectedPost=null;
   document.body.classList.remove("modal-open");
   $("detailContent").replaceChildren();
   $("detailActionBar").replaceChildren();
 });
 $("detail").addEventListener("click",e=>{if(e.target===$("detail"))closeDetail()});
 $("closeDetail").addEventListener("click",closeDetail);
+
+$("detailBlockAccount").addEventListener("click",()=>{
+  const p=detailSelectedPost;
+  if(!p||cloudMode||!manualAccountKey(p.platform,p.profileUrl))return;
+  const blocked=isManualBlocked(p);
+  function apply(){
+    const ok=setManualBlocked(p,!blocked);
+    $("detailBlockStatus").textContent=ok?
+      (blocked?"차단을 해제했습니다.":"차단했습니다. 최신 게시물 검색에서 제외됩니다."):
+      "브라우저에 차단 목록을 저장하지 못했습니다.";
+  }
+  if(blocked)apply();
+  else confirmPostAccountAction("block",p,apply);
+});
+$("manualBlockOpen").addEventListener("click",()=>{
+  $("manualBlockStatus").textContent="";
+  renderManualBlockManager();
+  $("manualBlockDialog").showModal();
+});
+$("manualBlockClose").addEventListener("click",()=>$("manualBlockDialog").close());
+$("manualBlockDialog").addEventListener("click",e=>{
+  if(e.target===$("manualBlockDialog"))$("manualBlockDialog").close();
+});
+window.addEventListener("storage",e=>{
+  if(e.key!==MANUAL_BLOCK_STORAGE_KEY)return;
+  manualBlockedAccounts=parseManualBlockStorage();
+  rebuildManualBlockedDids();
+  refreshManualBlockViews();
+});
+$("manualBlockCount").textContent=String(manualBlockedAccounts.size);
+
 $("openDate").addEventListener("click",()=>{
   if(!busy&&!cloudMode)$("dateDialog").showModal();
 });

@@ -8,6 +8,7 @@ on:
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_live_browser.py"
       - "apps/demand-research/test_private_social_browser.py"
+      - "apps/demand-research/test_post_modal_inline_backup_browser.py"
       - "apps/demand-research/free_discovery.js"
       - "apps/demand-research/account_watch.js"
       - "apps/demand-research/account_auto_analysis.js"
@@ -22,6 +23,7 @@ on:
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_live_browser.py"
       - "apps/demand-research/test_private_social_browser.py"
+      - "apps/demand-research/test_post_modal_inline_backup_browser.py"
       - "apps/demand-research/account_watch.js"
       - "apps/demand-research/account_auto_analysis.js"
       - "apps/demand-research/account_index_client.js"
@@ -50,14 +52,17 @@ jobs:
           node --check apps/demand-research/account_auto_analysis.js
           node --check apps/demand-research/account_index_client.js
           python -m py_compile apps/demand-research/test_account_watch_browser.py
+          python -m py_compile apps/demand-research/test_post_modal_inline_backup_browser.py
       - name: Install headless Chromium
         run: |
           python -m pip install --disable-pip-version-check playwright==1.56.0
-          python -m playwright install --with-deps chromium
+          python -m playwright install --with-deps chromium webkit
       - name: Grouped posts, attached images and no-password DOM fixture
         run: python apps/demand-research/test_live_browser.py
       - name: Synthetic private gateway social search UI (one request, badge, profile link)
         run: python apps/demand-research/test_private_social_browser.py
+      - name: Post popup blocklist, modal backup and touch-scroll regression (Chromium/WebKit)
+        run: python apps/demand-research/test_post_modal_inline_backup_browser.py
       - name: Public account watch mobile/browser QA (source-only, no personal identity merge)
         run: python apps/demand-research/test_account_watch_browser.py
       - name: Automatic all-SNS unified feed fixture (no search UI, dedup, date replay)
