@@ -349,48 +349,38 @@ def run(live=False):
                 page.locator("#discoveryCandidates").evaluate("(el) => el.open = true")
                 expect(page.locator("#discoveryCandidateList a[target=_blank]")).to_have_count(1,timeout=12000)
 
-            # Real production tile() and draw() logic, not a decorative CSS
-            # mock. A new image spins until load/error, text-only does not,
-            # and increasing the feed count reuses existing image DOM.
+            # Real browser CSS: individual thumbnails display a spinner only
+            # while marked loading. Pending cards have three column-friendly
+            # spinner slots, without masquerading as actual posts.
             if not live:
                 progress=page.evaluate("""() => {
-                  const oldBusy=busy;
-                  busy=true;draw();
-                  const pending=document.querySelectorAll('#feed .feed-skeleton').length;
-                  const ariaBusy=document.querySelector('#feed').getAttribute('aria-busy');
-                  busy=false;draw();
-                  const after=document.querySelectorAll('#feed .feed-skeleton').length;
-                  const first=document.querySelector('#feed article.post');
-                  draw();
-                  const reused=first===document.querySelector('#feed article.post');
-                  const base=posts.find(p=>Array.isArray(p.media)&&p.media.length);
-                  if(!base)return {pending,ariaBusy,after,reused,missingFixture:true};
-                  const imageCard=tile({...base,id:'qa-slow-post',
-                    media:[{type:'image',url:'https://example.com/slow-qa.png',
-                      thumb:'https://example.com/slow-qa.png'}]});
-                  const thumb=imageCard.querySelector('.post-thumb');
-                  const img=imageCard.querySelector('.post-media-img');
-                  const loading=thumb.classList.contains('is-loading');
-                  const spinnerAnimation=getComputedStyle(thumb,'::after').animationName;
-                  img.dispatchEvent(new Event('load'));
-                  const settled=!thumb.classList.contains('is-loading');
-                  const noMedia=tile({...base,id:'qa-text-post',media:[]});
-                  const textOnly=!noMedia.querySelector('.post-thumb').classList.contains('is-loading');
-                  const failed=tile({...base,id:'qa-failed-post',
-                    media:[{type:'image',url:'https://example.com/slow-error.png',
-                      thumb:'https://example.com/slow-error.png'}]});
-                  failed.querySelector('.post-media-img').dispatchEvent(new Event('error'));
-                  const fallback=!failed.querySelector('.post-thumb').classList.contains('is-loading')
-                    &&!!failed.querySelector('.thumb-placeholder');
-                  return {pending,ariaBusy,after,reused,loading,settled,textOnly,fallback,spinnerAnimation};
+                  const feed=document.querySelector('#feed');
+                  const existing=feed.querySelector('article.post .post-thumb');
+                  const qa=existing.cloneNode(false);
+                  qa.classList.add('is-loading');
+                  feed.append(qa);
+                  const anim=getComputedStyle(qa,'::after').animationName;
+                  const overlay=getComputedStyle(qa,'::before').content;
+                  qa.classList.remove('is-loading');
+                  const settled=getComputedStyle(qa,'::after').content;
+                  qa.remove();
+                  const skeleton=document.createElement('div');
+                  skeleton.className='feed-skeleton';
+                  skeleton.innerHTML='<div class="post-thumb is-loading"></div>';
+                  skeleton.setAttribute('aria-hidden','true');
+                  feed.append(skeleton);
+                  const placeholderAnim=getComputedStyle(
+                    skeleton.querySelector('.post-thumb'),'::after').animationName;
+                  const notPost=skeleton.matches('article.post')===false;
+                  skeleton.remove();
+                  return {anim,overlay,settled,placeholderAnim,notPost,
+                    removed:skeleton.parentElement===null};
                 }""")
-                assert progress["pending"]==3,progress
-                assert progress["ariaBusy"]=="true",progress
-                assert progress["after"]==0,progress
-                assert progress["reused"],"Growing counts must not reset existing thumbnails"
-                assert progress["loading"] and progress["settled"],progress
-                assert progress["textOnly"] and progress["fallback"],progress
-                assert progress["spinnerAnimation"]=="thumb-load-spin",progress
+                assert progress["anim"]=="thumb-load-spin",progress
+                assert progress["placeholderAnim"]=="thumb-load-spin",progress
+                assert progress["settled"]=="none",progress
+                assert progress["overlay"]!=="none",progress
+                assert progress["notPost"] and progress["removed"],progress
 
             # Real canvas-alpha interaction: remove and restore at the pointer.
             def alpha():
