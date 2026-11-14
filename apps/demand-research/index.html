@@ -2673,7 +2673,9 @@ if(cloudMode){
     if(!e||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return;
     var now=performance.now();
     if(e.type==="pointermove"){
-      if(e.pointerType!=="mouse"&&e.buttons===0)return;
+      // Hover-only mouse moves were creating a 1.75s animation on an idle
+      // page. Only real drag/press movement may repaint the ambient canvas.
+      if(e.buttons===0)return;
       if(now-lastHit<35)return;
       var last=hits[hits.length-1];
       if(last&&Math.hypot(e.clientX-last.x,e.clientY-last.y)<18)return;
