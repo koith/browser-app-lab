@@ -79,10 +79,7 @@ function setPlatformTheme(accountKey){
   const provider=String(accountKey||"").startsWith("mastodon-")?"mastodon":"bluesky";
   document.documentElement.dataset.platform=provider;
   $("snsProviderSymbol").textContent=provider==="mastodon"?"M":"🦋";
-  $("snsProviderTitle").textContent=provider==="mastodon"?"Mastodon 스타일 보관함":"Bluesky 스타일 보관함";
-  $("snsProviderSubtitle").textContent=provider==="mastodon"
-    ?"Mastodon 공개 계정 보관본 · 실시간 타임라인 아님"
-    :"Bluesky 공개 계정 보관본 · 실시간 피드 아님";
+  $("snsProviderTitle").textContent="프로필";
   $("detailTitle").textContent=provider==="mastodon"?"보관된 게시물 · 대화":"게시글 · 대화";
 }
 function accountLabel(item){
