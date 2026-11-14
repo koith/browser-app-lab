@@ -18,6 +18,24 @@ const tableLedger=(done=[1,2,4])=>'<!-- GALLERY_DASHBOARD_START -->\n'+
   '\n<!-- GALLERY_DASHBOARD_END -->\n'+
   '\n## Old history: must NEVER overwrite current dashboard status\n'+
   '- [x] **G-10** old entry\n';
+// 2026-11-14: exactly 10 finite G-IDs plus two non-terminating collectors.
+const modernLedger=(done=[1,2,4,5,6,7,8,9,10,11])=>{
+  const finite=[1,2,4,5,6,7,8,9,10,11];
+  const rows=finite.map(n=>{
+    const id='G-'+String(n).padStart(2,'0');
+    return '| 완료형 | '+id+' | 실제 기능 | '+(done.includes(n)?'[x]':'[ ]')+' 수용 |';
+  });
+  rows.push('| 무기한 반복 | G-03 | 밈미 신규 수집 | ↻ 상시 |');
+  rows.push('| 무기한 반복 | G-12 | 심유이 신규 수집 | ↻ 상시 |');
+  return '<!-- GALLERY_DASHBOARD_START -->\n'+
+    '## 2026-11-14 최신 유한 원장\n'+
+    '## 유한 개발 / 상시 수집 — 최신 상태판\n'+
+    '| 구분 | ID | 범위 | 판정 |\n'+rows.join('\n')+
+    '\n## 자율개발 기준\n'+
+    '| P0 | G-03 | 구형 체크 | [ ] 예전 미완료 |\n'+
+    '| P0 | G-11 | 구형 체크 | [ ] 예전 미완료 |\n'+
+    '<!-- GALLERY_DASHBOARD_END -->';
+};
 const item=(status='completed',conclusion='success',sha=SHA)=>({
   id:42,head_sha:sha,head_branch:'main',status,conclusion,event:'workflow_dispatch'
 });
@@ -132,5 +150,18 @@ async function simulate({event='push',body=ledger(),history={},pages=[item()],
                     head_branch:'dev'}],galleryTreesEqual:true});
   assert.deepEqual(r.dispatched,[],
     'non-main Pages success may not authorize gallery QA');
-  console.log('PASS: legacy 13 + table-first 5 + gallery-tree parity 5 handoff cases');
+  // Modern finite completion must not depend on either perpetual collector.
+  r=await simulate({body:modernLedger()});
+  assert.deepEqual(r.dispatched,[], '10/10 finite done: no phantom QA dispatch');
+  assert.ok(r.logs.some(x=>x.includes('GALLERY_FINITE_DASHBOARD_PARSED_DONE 10/10 PERPETUAL G-03,G-12')));
+  assert.ok(r.logs.some(x=>x.includes('FINITE_FEATURES_COMPLETE_PERPETUAL_COLLECTION_ACTIVE')));
+  r=await simulate({body:modernLedger([1,2,4,5,6,7,8,9,10])});
+  assert.deepEqual(r.dispatched,[g11], 'a real unfinished finite G11 still triggers QA');
+  r=await simulate({body:modernLedger().replace('| G-12 |','| BAD |')});
+  assert.deepEqual(r.dispatched,[], 'missing Yui perpetual contract fails closed');
+  assert.ok(r.logs.some(x=>x.includes('BLOCK_MISSING_PERPETUAL_COLLECTION G-12')));
+  r=await simulate({body:modernLedger().replace('| G-05 |','| BAD |')});
+  assert.deepEqual(r.dispatched,[], 'missing finite contract fails closed');
+  assert.ok(r.logs.some(x=>x.includes('BLOCK_MISSING_FINITE_LEDGER G-05')));
+  console.log('PASS: legacy 13 + table-first 5 + gallery-tree parity 5 + perpetual finite 4 handoff cases');
 })().catch(e=>{console.error(e);process.exitCode=1;});
