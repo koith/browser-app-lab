@@ -984,8 +984,10 @@ class TargetedPrivateCollectionScopeTests(unittest.TestCase):
         self.assertIsNotNone(pair,'Actual 2-model acquisition list not found')
         for model,part in zip(('mimmi','yui'),pair.groups()):
             ids=re.findall(r'--album-id\s+([a-z0-9-]+)',part)
-            self.assertEqual(len(ids),12,(model,ids))
-            self.assertEqual(len(set(ids)),12,(model,'repeated ID'))
+            # Original 12 must remain, but adding independently registered
+            # sparse albums is intended; a fixed cap prevented replenishment.
+            self.assertGreaterEqual(len(ids),12,(model,ids))
+            self.assertEqual(len(set(ids)),len(ids),(model,'repeated ID'))
             registered=json.loads(
                 (root/'apps'/(model+'-gallery')/'public-work-pages.json').read_text())['albums']
             by_id={a['id']:a for a in registered}
