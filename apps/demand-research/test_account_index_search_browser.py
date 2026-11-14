@@ -64,6 +64,9 @@ def run_case(engine,name):
         page.wait_for_function(
             "() => document.querySelectorAll('#privateAccountRows > div').length===80",
             timeout=18000)
+        assert not page.locator("#accountServerData").evaluate("(el) => el.open")
+        page.locator("#accountOverview > summary").click()
+        page.locator("#accountServerData > summary").click()
         assert page.locator("#accountServerData").evaluate("(el) => el.open")
         page.locator(".account-auto-more").click()
         page.wait_for_function(
