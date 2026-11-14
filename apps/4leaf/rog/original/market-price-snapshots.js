@@ -163,3 +163,23 @@ window.ORIGINAL_LEAF_SHOP_PRICE_SNAPSHOT_20030105=Object.freeze({
   "흑태자": 115000
 })
 });
+
+/* Six CHANGED exact store prices on 2003-01-15, as published in
+ * contemporaneous 4LEAF Street's archived report. The other 91 values are
+ * NOT asserted unchanged; they retain the older Jan 05 snapshot with its
+ * distinct source attribution. This is NOT the lost live-server price table. */
+window.ORIGINAL_LEAF_SHOP_PRICE_CHANGES_20030115=Object.freeze({
+ date:'2003-01-15',
+ source:'https://4leafmemorial.geld.kr/1454',
+ verifiedChangedEntries:6,
+ sourceType:'2003-primary-contemporary-press-not-live-EXE',
+ exactChangeOnly:true,
+ changes:Object.freeze({
+  '노포크':Object.freeze({before:1350,after:1400}),
+  '마르자나':Object.freeze({before:5100,after:5500}),
+  '자바카스':Object.freeze({before:1150,after:1300}),
+  '크리스티나':Object.freeze({before:1700,after:1900}),
+  '죠안':Object.freeze({before:7000,after:7500}),
+  '흑태자':Object.freeze({before:115000,after:118000})
+ })
+});
