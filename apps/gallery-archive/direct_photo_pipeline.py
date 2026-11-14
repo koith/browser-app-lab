@@ -139,6 +139,10 @@ def reviewed_direct_source(url, model):
               '/board/webzine/2097/2735151',
               '/board/webzine/2097/2706589',
               '/board/webzine/2097/2742111'})
+    if model=='yui' and url=='https://www.nicesss.com/archives/mij/artgravia/469248.html':
+        # Already witnessed: exactly the public ArtGravia Vol.677 Yui sample page.
+        # page_images independently enforces 677, model and 4 observed image URLs.
+        return True
     if model=='yui' and urlsplit(url).hostname=='showartx.net':
         # Only the known, individually registered Yui public-preview works.
         # Their HTML extractor independently proves exact model/volume and
@@ -180,6 +184,14 @@ def reviewed_direct_media(url, page, model):
         return bool(q.scheme=='https' and q.hostname=='upload3.inven.co.kr'
             and not q.fragment and not q.username and not q.password and
             re.fullmatch(r'/[A-Za-z0-9/_-]{5,280}\.(?:jpe?g|png|webp)',q.path,re.I))
+    if model=='yui' and page=='https://www.nicesss.com/archives/mij/artgravia/469248.html':
+        # Reject images from neighboring albums, ads and unrelated posts.
+        return url in {
+            'https://www.nicewww.com/wp-content/uploads/2026/05/1778813739-c81e728d9d4c2f6.jpg',
+            'https://www.nicewww.com/wp-content/uploads/2026/05/1778813742-eccbc87e4b5ce2f.jpg',
+            'https://www.nicewww.com/wp-content/uploads/2026/05/1778813743-a87ff679a2f3e71.jpg',
+            'https://www.nicewww.com/wp-content/uploads/2026/05/1778813745-e4da3b7fbbce234.jpg',
+        }
     if model=='yui' and urlsplit(page).hostname=='showartx.net' and reviewed_direct_source(page,'yui'):
         # Exactly the ordinary public JPG naming patterns of that work;
         # the HTML parser must have observed the URL in its work article.
