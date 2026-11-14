@@ -14,6 +14,8 @@
  const PROFILES="https://public.api.bsky.app/xrpc/app.bsky.actor.getProfiles";
  const POSTS="https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts";
  const TERMS=["뒷계","섹트","섹블","일탈계"];
+ const privateRender=typeof location!=="undefined"&&
+   location.hostname==="intersection-originals-free.onrender.com";
  const SOURCE_LIMIT=40, INITIAL_PAGES=3, MORE_PAGES=3, MAX_PAGES=18;
  let enabled=false,epoch=0,processing=false;
  let cursors=new Map(),seen=new Set(),identity=new Map(),active=new Set();
@@ -128,6 +130,36 @@
      {since:new Date(range.fromMs).toISOString().slice(0,10),
       until:new Date(range.toMs).toISOString().slice(0,10),run:range.run}:null;
  }
+ // Same-origin verification is independent of Safari's cross-origin CORS.
+ // Source links and their text are still untrusted: the Render endpoint itself
+ // resolves source DIDs and hydrates exact official getPosts originals.
+ async function serverRecover(term,token,range){
+   if(!privateRender||!range||token!==epoch)return false;
+   const u=new URL("/api/public-search-verified",location.origin);
+   u.searchParams.set("q",term);
+   u.searchParams.set("since",range.since);
+   u.searchParams.set("until",range.until);
+   const ctrl=new AbortController();active.add(ctrl);
+   const timer=setTimeout(()=>ctrl.abort(),39000);
+   try{
+     const r=await fetch(u.href,{credentials:"omit",cache:"no-store",
+       headers:{"Accept":"application/json"},signal:ctrl.signal});
+     if(!r.ok)throw Error("server search HTTP "+r.status);
+     const data=await r.json();
+     if(token!==epoch||currentRange()?.run!==range.run)return false;
+     for(const p of Array.isArray(data.verified)?data.verified:[]){
+       if(!p?.uri?.startsWith("at://did:")||
+          typeof p.record?.text!=="string"||!p.record.text.includes(term))continue;
+       status.checked++;
+       if(window.INTERSECTION_receiveLiveBskyPost?.(p))status.verified++;
+     }
+     report("verifying");
+     return true;
+   }catch{
+     status.providerFailures++;
+     return false;
+   }finally{clearTimeout(timer);active.delete(ctrl)}
+ }
  async function searchPage(term,token){
    const old=cursors.get(term)||{cursor:"",pages:0,finished:false};
    if(old.finished||old.pages>=MAX_PAGES)return;
@@ -143,7 +175,12 @@
    try{page=await get(u.href,token,"markdown")}
    catch{
      status.providerFailures++;
-     // A provider outage is NOT a completed search; retry a future click.
+     // If iOS CORS fails, use the same-origin independently verified server
+     // source. Its results cannot bypass official AppView identity checks.
+     if(await serverRecover(term,token,range)){
+       old.pages++;old.finished=true;cursors.set(term,old);status.pages++;
+       return;
+     }
      old.pages++;cursors.set(term,old);
      report("unavailable");
      return;
@@ -190,6 +227,10 @@
    enabled=true;epoch++;
    cursors.clear();seen.clear();identity.clear();
    status={state:"searching",verified:0,checked:0,pages:0,providerFailures:0,more:false};
+   const token=epoch,range=currentRange();
+   // Prime one exact public term via our own server so a Render/iOS visitor
+   // can see verified first-party originals even when external CORS is blocked.
+   if(privateRender)void serverRecover("뒷계",token,range);
    void run(INITIAL_PAGES);
  }
  window.INTERSECTION_resumeSearchFallback=()=>{
