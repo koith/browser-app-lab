@@ -48,7 +48,8 @@
    if(seen.has(uri)||queued.has(uri))return;
    if(seen.size>=500)seen.clear();
    seen.add(uri);
-   if(queue.length>=45)queue.shift(); // never grow unbounded on the device
+   if(queue.length>=45){const dropped=queue.shift();queued.delete(dropped);}
+   // Never grow unbounded on the device or leak a queued key.
    queue.push(uri);queued.add(uri);
    if(flushTimer===null)
      flushTimer=setTimeout(flush,900);
@@ -91,7 +92,9 @@
    if(typeof WebSocket!=="function"){report("unavailable");return}
    connecting=true;report("connecting");
    let ws;
-   try{ws=new WebSocket(STREAM)}catch{
+   try{// Official legacy timestamp cursor replays at most a short recent slice.
+   // This can populate the first screen without claiming historical coverage.
+   ws=new WebSocket(STREAM+"&cursor="+String((Date.now()-90000)*1000))}catch{
      connecting=false;retryCount++;retry();return;
    }
    socket=ws;
