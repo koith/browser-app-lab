@@ -1,0 +1,45 @@
+name: 4LEAF R27 original 2002 item restrictions and keeper tiers real-game regression
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/r27-historical-items-keeper-real-browser.cjs'
+      - '.github/workflows/rog-r27-original-items-keeper-tier.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/r27-historical-items-keeper-real-browser.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-original-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-r27.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
+          exit 1
+      - name: Actual item use, flipper both outcomes and native keeper tile tiers
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r27-historical-items-keeper-real-browser.cjs
+      - name: Original 24 versus 24 and bomb or flipper regression
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r21-historic-battle-rule.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: r27-original-item-keeper-${{ matrix.browser }}
+          path: leaf-r27-historical-item-keeper-rule-*.png
+          if-no-files-found: ignore
