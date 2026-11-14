@@ -59,10 +59,7 @@ def _query(term: str, start: str, end: str) -> list[dict]:
     candidates: dict[tuple[str, str], None] = {}
     for handle, rkey in LINK.findall(text):
         handle = handle.lower()
-        if ".." in handle or not handle.endswith(tuple((".social", ".com", ".net", ".org",
-                                                       ".app", ".xyz", ".io", ".dev", ".kr"))):
-            # This narrow check is only for a bounded fallback, not an account
-            # identity inference. User-defined domains can still use direct JS.
+        if ".." in handle or "." not in handle or handle.startswith(".") or handle.endswith("."):
             continue
         candidates[(handle, rkey.lower())] = None
         if len(candidates) >= 25:
