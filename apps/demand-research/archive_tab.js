@@ -68,6 +68,21 @@ function renderChoices(){
     ?"목록은 자동으로 불러왔습니다. 계정을 선택하면 아래 내용이 바로 바뀝니다."
     :"보관된 계정이 없습니다. 계정 분석에서 공개 계정을 백업하세요.";
 }
+async function showQueueSummary(){
+  if(!quickStatus||location.hostname==="koith.github.io")return;
+  try{
+    const response=await fetch("/api/target-archive/queue-summary",{
+      credentials:"same-origin",cache:"no-store",headers:{Accept:"application/json"}});
+    if(!response.ok)return;
+    const data=await response.json();
+    if(!data?.known)return;
+    const pending=Number(data.queued||0),started=Number(data.dispatched||0);
+    quickStatus.textContent="저장 검증 후 열람 가능한 계정 "+choices.length+"개 · "+
+      "백업 대기 "+pending+"건 · 실행 접수 "+started+"건. "+
+      "실행 접수는 저장 성공을 뜻하지 않습니다."+
+      (data.mode==="volatile_sqlite"?" 서버 재시작 전 요청은 누락될 수 있습니다.":"");
+  }catch{/* Existing verified archive picker remains usable. */}
+}
 async function preloadChoices(force=false){
   if(location.hostname==="koith.github.io")return choices;
   if(choicesPending)return choicesPending;
@@ -83,6 +98,7 @@ async function preloadChoices(force=false){
     choices.sort((a,b)=>accountLabel(a).localeCompare(accountLabel(b),"ko-KR"));
     choicesTime=Date.now();
     renderChoices();
+    if(selectedMode()==="accounts")void showQueueSummary();
     if(selectedMode()==="accounts"&&connected){
       if(!chosenAccount()&&choices.length)storeSelectedKey(choices[0].key);
       showArchiveFrame();
