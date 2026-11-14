@@ -78,9 +78,9 @@ def verify(browser_type,label):
             page.locator("#results article.post").first.wait_for(timeout=20000)
             expected_provider="bluesky" if embedded else "mastodon"
             assert page.locator("html").get_attribute("data-platform")==expected_provider
-            assert page.locator("#snsProviderTitle").inner_text().startswith(
-                "Bluesky" if embedded else "Mastodon")
-            assert page.locator("#snsProviderSubtitle").is_visible()
+            assert page.locator("#snsProviderTitle").inner_text()=="프로필"
+            assert page.locator("#snsProviderSubtitle").count()==0
+            assert page.locator(".sns-archive-pill").count()==0
             assert page.locator("#results .post-byline strong").count()==1
             # Profile can finish after the feed: social cards must show the
             # saved author nickname and handle instead of generic "보관 계정".
