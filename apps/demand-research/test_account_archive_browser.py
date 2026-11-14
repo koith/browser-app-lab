@@ -41,7 +41,11 @@ def response_fixture(path,query=""):
              "text":"Synthetic second archived post",
              "source_url":"https://bsky.app/profile/qa.bsky.social/post/def",
              "media_expected":2,"media_saved":0,"archive_complete":False,
-             "media":[{"index":0,"mime":"image/png","verified_sha256":False,"url":None}]},
+             "media":[{"index":0,"mime":"image/png","verified_sha256":False,"url":None},
+                      # A legacy/malformed row contains a URL but NO verified source position:
+                      # the viewer must not guess slot 1 or show this other post's image.
+                      {"mime":"image/png","verified_sha256":True,
+                       "url":"/api/account-archives/"+ACCOUNT+"/media/"+POST+"/0"}]},
             {"id":"e"*40,"kind":"post","revision_of":POST,
              "posted_at":"2026-11-03T02:00:00Z",
              "text":"Synthetic retry-only third post",
@@ -159,6 +163,8 @@ def run(browser_type,name,width,height):
         # Newly added archive search/filter searches full saved history, not page 1.
         assert page.locator("#results .post-media .media-missing").count()==2
         assert "첨부 2" in page.locator("#results .post-media .media-missing").last.inner_text()
+        assert page.locator("#results article.post").nth(1).locator("img").count()==0, (
+            "a missing original slot must not be guessed from compact array order")
         page.locator("#feedQuery").fill("third")
         page.locator("#feedSearch").press("Enter")
         page.locator("#results").get_by_text("Synthetic retry-only third post").wait_for()
