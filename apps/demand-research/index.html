@@ -939,6 +939,91 @@ main{padding-top:10px}
   background:#e8f8ef;overflow-wrap:anywhere}
 #detail .dialog-watch-status[data-state="failed"]{border-color:#ad3c30;
   background:#fff2ee;color:#9a3326}
+
+/* 2026-11: unresolved ranking thumbnails use the same genuine loading cue as feed media. */
+.activity-rank-thumb{position:relative}
+.activity-rank-thumb.is-loading::after{content:"";position:absolute;left:50%;top:50%;z-index:2;
+ width:23px;height:23px;margin:-14px 0 0 -14px;border-radius:50%;
+ border:3px solid #a9b5d1;border-top-color:#293d93;
+ animation:intersection-rank-spin .75s linear infinite;pointer-events:none}
+@keyframes intersection-rank-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.activity-rank-thumb.is-loading::after{animation-duration:2s}}
+
+/* The post header has a dark navy theme: isolate the original source mark on
+   a translucent white square so every provider logo stays recognizable. */
+#detail .dialog-platform-icon,#detail .dialog-platform-fallback{
+ box-sizing:border-box;flex:0 0 31px;width:31px;height:31px;padding:5px;
+ background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.95);
+ border-radius:6px;object-fit:contain;color:#17224c}
+@media(max-width:720px){
+ #detail .dialog-platform-icon,#detail .dialog-platform-fallback{
+  width:27px;height:27px;flex-basis:27px;padding:4px}
+}
+
+/* Progressive disclosure keeps the rarely needed full account index out of
+   the default workflow; individual tracking remains visible. */
+#accountOverview.account-overview-collapsed{padding:0;background:#f6f8fc}
+#accountOverview.account-overview-collapsed>summary{
+ cursor:pointer;list-style:none;padding:12px 15px;font-size:12px;font-weight:800;color:#3c5479}
+#accountOverview.account-overview-collapsed>summary::-webkit-details-marker{display:none}
+#accountOverview.account-overview-collapsed>summary::after{content:"⌄";float:right}
+#accountOverview.account-overview-collapsed[open]>summary::after{content:"⌃"}
+#accountOverview.account-overview-collapsed>.account-section-heading,
+#accountOverview.account-overview-collapsed>#accountAutoMount,
+#accountOverview.account-overview-collapsed>#accountServerData{margin:8px 14px 12px}
+
+/* Tracked accounts: avatar + service mark + name, no persistent dense actions. */
+#accountWatchList.account-watch-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+#accountWatchList .account-watch-card{display:block;padding:0;border-radius:9px;overflow:hidden;min-width:0}
+#accountWatchList .account-watch-open{display:flex;align-items:center;gap:7px;
+ width:100%;min-height:61px;padding:8px 9px;min-width:0;text-align:left;
+ background:#fff;color:#192d55;border:0;border-radius:0;font-size:12px}
+#accountWatchList .account-watch-open:hover{background:#eef3ff}
+.account-watch-avatar{display:grid;place-items:center;flex:none;width:38px;height:38px;
+ background:#e5eefe;color:#3356a4;border:1px solid #d2dfee;border-radius:50%;
+ overflow:hidden;font-weight:850;font-size:15px;position:relative}
+.account-watch-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#accountWatchList .account-watch-open>.source-badge{position:static;display:grid;
+ place-items:center;flex:0 0 22px;width:22px;height:22px;
+ padding:3px;border:1px solid #d5ddec;box-shadow:none;border-radius:5px;background:#fff}
+#accountWatchList .account-watch-open>.source-badge img{width:15px!important;height:15px!important;object-fit:contain}
+#accountWatchList .account-watch-open>.source-badge span{display:none}
+#accountWatchList .account-watch-title{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap;font-size:12px;line-height:1.25;font-weight:800}
+@media(max-width:1040px){#accountWatchList.account-watch-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){
+ #accountWatchList.account-watch-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ #accountWatchList .account-watch-open{min-height:53px;padding:6px 6px;gap:4px}
+ #accountWatchList .account-watch-avatar{width:31px;height:31px;font-size:12px}
+ #accountWatchList .account-watch-open>.source-badge{width:19px;height:19px;flex-basis:19px;padding:2px}
+ #accountWatchList .account-watch-title{font-size:10px}
+}
+
+/* The watch-detail dialog follows the inset post modal's same hierarchy. */
+#accountDialog.account-dialog{width:min(780px,calc(100vw - 30px));max-width:calc(100vw - 30px);
+ max-height:84dvh;border:2px solid #101432;border-top:4px solid #f5d312;border-radius:13px;
+ background:#fff9ed;overflow:hidden;box-shadow:0 20px 70px #070c26aa}
+#accountDialog[open]{display:flex;flex-direction:column}
+#accountDialog::backdrop{background:rgba(4,8,29,.76);backdrop-filter:blur(5px)}
+#accountDialog .dialog-head{flex:0 0 auto;min-height:56px;padding:10px 14px;
+ color:#fff;background:#101b45;border-bottom:3px solid #f5d312}
+#accountDialog .dialog-head b{color:#fff;font-size:14px}
+#accountDialog #closeAccountDialog{background:transparent;color:#fff;border:1px solid #8494bd;
+ border-radius:5px;font-size:22px;min-width:36px}
+#accountDialog .account-detail-content{overflow:auto;min-height:0;max-height:none;padding:16px}
+.account-watch-detail-head{display:flex;align-items:center;gap:10px;min-width:0}
+.account-watch-detail-head .source-badge{position:static;flex:none}
+.account-watch-detail-head h3{overflow-wrap:anywhere;min-width:0}
+.account-watch-address{font-size:11px;color:#52617e;overflow-wrap:anywhere;margin:7px 0}
+.account-watch-dialog-actions{display:flex;flex-wrap:wrap;gap:6px;padding:11px 0;
+ border-bottom:1px solid #d6ddea;margin-bottom:9px}
+.account-watch-dialog-actions button,.account-watch-dialog-actions a{padding:8px 10px;
+ background:#f5f6ff;border:1px solid #aebbd7;color:#203d87;font-size:11px;
+ font-weight:800;text-decoration:none;border-radius:6px}
+.account-watch-dialog-actions .danger{color:#a43e36;border-color:#dabdb8}
+@media(max-width:650px){#accountDialog .account-detail-content{padding:12px}
+ .account-watch-dialog-actions button,.account-watch-dialog-actions a{padding:8px;font-size:10px}}
+
 </style>
 </head>
 <body>
@@ -1034,7 +1119,8 @@ main{padding-top:10px}
       <a href="#accountBackupSection">백업</a>
     </nav>
   </header>
-  <section id="accountOverview" class="account-hub-section" aria-labelledby="accountOverviewTitle">
+  <details id="accountOverview" class="account-hub-section account-overview-collapsed" aria-labelledby="accountOverviewTitle">
+    <summary>전체 계정 데이터 · 자세히 보기</summary>
     <div class="account-section-heading">
       <div class="account-step">01</div>
       <div>
@@ -1048,7 +1134,7 @@ main{padding-top:10px}
       <div id="accountGroupMount"></div>
       <div id="privateAccountIndexMount"></div>
     </details>
-  </section>
+  </details>
   <section id="accountWatchSection" class="account-hub-section" aria-labelledby="accountWatchTitle">
     <div class="account-section-heading">
       <div class="account-step">02</div>
@@ -1132,7 +1218,6 @@ main{padding-top:10px}
 <section id="archivesView" class="archive-hub hidden" role="tabpanel" aria-labelledby="viewArchives">
   <header class="archive-hub-header">
     <h2>백업 보관함</h2>
-    <p>자동으로 저장한 키워드 게시글과 지정 계정의 백업본을 구분해 조회합니다. 실제 원본이 검증된 파일만 열람할 수 있습니다.</p>
   </header>
   <div class="archive-hub-modes" role="tablist" aria-label="보관 자료 종류">
     <button id="archiveModeAuto" type="button" role="tab" aria-selected="true">해시태그 자동 백업</button>

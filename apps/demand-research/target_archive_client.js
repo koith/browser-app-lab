@@ -160,7 +160,7 @@
       const data=await response.json();
       const accounts=Array.isArray(data.accounts)?data.accounts:[];
       libraryRows.replaceChildren();
-      for(const item of accounts.slice(0,8)){
+      for(const item of accounts.slice(0,64)){
         if(!/^(bluesky|mastodon)-[a-f0-9]{40}$/.test(String(item.key||"")))continue;
         const row=document.createElement("div");
         row.className="target-archive-library-row";
@@ -229,6 +229,9 @@
           if(currentRun===job)currentRun=pendingJobs[pendingJobs.length-1]||null;
           void loadLibrary();
           return;
+        case "RETRY_PENDING":
+          visible("백업 실행 실패 · 동일 작업을 최대 2회 자동 재시도하도록 대기 중입니다.","queued");
+          break;
         case "NEEDS_RETRY":
         case "FAILED":
           visible(result.state==="NEEDS_RETRY"?
