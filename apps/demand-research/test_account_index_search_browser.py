@@ -15,10 +15,13 @@ ORIGIN="https://intersection-qa.invalid/"
 HTML="""<!doctype html><html lang="ko"><head><meta charset="utf-8"></head><body>
 <button id="viewAccounts" type="button">계정 분석</button>
 <section id="accountsView">
+ <details id="accountOverview">
+  <summary>전체 계정 데이터 · 자세히 보기</summary>
   <details id="accountServerData" hidden>
     <summary>서버 계정 인덱스</summary>
     <div id="privateAccountIndexMount"></div>
   </details>
+ </details>
 </section>
 <script src="/account_index_client.js" defer></script>
 </body></html>"""
