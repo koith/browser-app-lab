@@ -164,6 +164,14 @@
       "source": "https://showartx.net/yui-summer/",
       "source_claimed_total_edition_photos": 285,
       "identity_evidence": "Public article identifies Model Yui + Product Summer. It displays 12 distinct ordinary public work-specific numbered JPEG preview links. Source page's whole-edition total 285 is not a stored image count. Only actually observed exact work-prefix image URLs in article are eligible. No ads, resizes, membership-only downloads, invented files, or cross-work mixing. Remote SHA readback and real gallery QA required."
+    },
+    {
+      "id": "crazygiant-player5-public",
+      "title": "CRAZY GIANT — THE PLAYER ISSUE 5 · 심혜성 · 공개본",
+      "publisher": "CRAZY GIANT",
+      "priority": 0,
+      "source": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+      "identity_evidence": "Publisher CRAZY GIANT public issue post identifies THE PLAYER ISSUE 5 [심혜성] and shows four public image samples. Only observed ordinary public article images from the exact issue can be acquired. Existing owner 4 SHA are not a claim of full magazine acquisition. Always decode each file, reject duplicate/other issues, remote SHA readback and deploy/browser QA before counting."
     }
   ]
 }
