@@ -27,6 +27,8 @@ on:
       - "apps/demand-research/test_bsky_search_fallback.cjs"
       - "apps/demand-research/test_render_free_discovery.cjs"
       - "apps/demand-research/test_bsky_search_fallback_live_browser.py"
+      - "apps/demand-research/public_search_verified.py"
+      - "apps/demand-research/test_public_search_verified.py"
       - "apps/demand-research/test_live_feed_recovery.cjs"
       - "apps/demand-research/intersection-sw.js"
       - "apps/demand-research/account_watch.js"
@@ -56,6 +58,8 @@ on:
       - "apps/demand-research/test_bsky_search_fallback.cjs"
       - "apps/demand-research/test_render_free_discovery.cjs"
       - "apps/demand-research/test_bsky_search_fallback_live_browser.py"
+      - "apps/demand-research/public_search_verified.py"
+      - "apps/demand-research/test_public_search_verified.py"
       - "apps/demand-research/test_live_feed_recovery.cjs"
       - "apps/demand-research/intersection-sw.js"
       - "apps/demand-research/account_watch.js"
@@ -90,6 +94,7 @@ jobs:
           cd apps/demand-research
           python -m pytest -q test_target_account_viewer.py
           python -m pytest -q test_github_temp_bundle.py
+          python -m pytest -q test_public_search_verified.py
       - name: Real synthetic Chromium and mobile WebKit UX
         run: |
           set -euo pipefail
