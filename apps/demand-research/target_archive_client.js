@@ -473,7 +473,7 @@
          !Number.isSafeInteger(result.run_id)||typeof result.receipt!=="string")
         throw new Error("백업 작업 번호를 확인하지 못했습니다.");
       currentRun={run_id:result.run_id,receipt:result.receipt,
-                  platform:platform.value,account:value};
+                  platform:platform.value,account:value,createdAt:Date.now()};
       saveReceipt(currentRun);
       message.textContent="새 계정 백업을 접수했습니다. 기존 백업도 계속 진행됩니다.";
       showJob("백업 접수 완료 · 현재 미완료 요청 "+pendingJobs.length+
@@ -514,6 +514,15 @@
   });
   // Called by the saved-post modal. The server still validates the POST.
   // Never auto-POST for URL parameters, unverified snippets or cross-origin links.
+  // Only the requesting browser can inspect its own signed job receipts.
+  // Used if the private server ledger requires authentication the visitor
+  // has not supplied. This is not an all-user/global queue substitute.
+  window.INTERSECTION_getOwnBackupRequests=()=>resumeReceipts().map((job,index)=>({
+    run_id:job.run_id,receipt:job.receipt,
+    account:job.account,platform:job.platform,
+    createdAt:Number.isFinite(job.createdAt)?job.createdAt:0,
+    order:index
+  }));
   window.INTERSECTION_startPublicAccountBackup=async (selection,onStatus)=>{
     if(!selection||typeof selection!=="object"||
        !["bluesky","mastodon"].includes(selection.platform)||
