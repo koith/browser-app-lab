@@ -75,50 +75,86 @@ def profile_metadata(profile,api):
 
 
 def public_profile_images(profile,meta,api,archive):
-    """Read original public PDS blob for Bluesky, public avatar/header for Mastodon."""
+    """Capture exact public profile art; use a separately labelled CDN
+    rendition only when the authoritative PDS blob is inaccessible.
+
+    Never manufacture a header from an unrelated image or accept a provider
+    response without immutable SHA-backed storage. An absent 'getProfile'
+    banner URL is NOT proof that the PDS profile record has no banner.
+    """
     images={}
     missing=[]
     record=None
     if profile["platform"]=="bluesky":
         try:
-            record=api.json(profile["pds"]+"/xrpc/com.atproto.repo.getRecord?"+
+            response=api.json(profile["pds"]+"/xrpc/com.atproto.repo.getRecord?"+
                        urlencode({"repo":profile["identity"],
                                   "collection":"app.bsky.actor.profile","rkey":"self"}))
-            if not isinstance(record,dict) or not isinstance(record.get("value"),dict):
-                record=None
-        except (RuntimeError,ValueError,TypeError):
-            record=None
-    for name,field in (("avatar","avatar"),("banner","banner")):
+            if isinstance(response,dict) and isinstance(response.get("value"),dict):
+                record=response["value"]
+                # The raw public PDS profile record is kept privately together
+                # with the appview snapshot, including pronouns, links,
+                # pinned post references, createdAt and actual blob CIDs.
+                meta["profile_record"]=record
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            pass
+    for name in ("avatar","banner"):
         url=meta.get(name+"_url")
-        if not url:
+        blob=record.get(name) if isinstance(record,dict) else None
+        ref=blob.get("ref") if isinstance(blob,dict) else None
+        cid=ref.get("$link") if isinstance(ref,dict) else None
+        mime=blob.get("mimeType") if isinstance(blob,dict) else None
+        if not url and not cid:
             images[name]={"status":"not_set"}
             continue
-        try:
-            if profile["platform"]=="bluesky":
-                blob=(record or {}).get("value",{}).get(field,{})
-                ref=blob.get("ref") if isinstance(blob,dict) else None
-                cid=ref.get("$link") if isinstance(ref,dict) else None
-                mime=blob.get("mimeType") if isinstance(blob,dict) else None
-                if not cid or mime not in ALLOWED_ASSET_MIMES:
-                    raise SourceUnavailable("public profile original blob not exposed")
+        data=None
+        source=None
+        provenance=None
+        original_error=False
+        if profile["platform"]=="bluesky" and cid and mime in ALLOWED_ASSET_MIMES:
+            try:
                 source=profile["pds"]+"/xrpc/com.atproto.sync.getBlob?"+urlencode(
                     {"did":profile["identity"],"cid":cid})
-                _got,data=api.media(source,mime)
-                if sha256(data)!=cid_sha256(cid):
+                _actual,data=api.media(source,mime)
+                if not data or sha256(data)!=cid_sha256(cid):
                     raise SourceUnavailable("profile original CID integrity mismatch")
-            else:
+                provenance="original_pds_blob"
+            except (RuntimeError,ValueError,TypeError,KeyError):
+                data=None
+                original_error=True
+        elif profile["platform"]=="bluesky" and cid:
+            original_error=True
+        # Appview's public CDN rendition (not an original PDS CID) is a
+        # clearly distinguished fallback, rather than a missing profile
+        # image when the source PDS denies unauthenticated reads.
+        if data is None and url:
+            try:
                 source=require_public_https(url)
-                mime,data=api.media(source,None)
-                if mime not in ALLOWED_ASSET_MIMES:
-                    raise SourceUnavailable("unsupported public profile media type")
-            if len(data)>MAX_PROFILE_ASSET or not data:
-                raise SourceUnavailable("profile media size cap exceeded")
-            key="profile/assets/"+sha256(data)+MIMES[mime]
+                actual,body=api.media(source,None)
+                if actual not in ALLOWED_ASSET_MIMES:
+                    raise SourceUnavailable("unsupported public profile image MIME")
+                data=body
+                mime=actual
+                provenance=("public_bluesky_cdn_rendition" if
+                            profile["platform"]=="bluesky" else
+                            "mastodon_public_profile_image")
+            except (RuntimeError,ValueError,TypeError,KeyError):
+                data=None
+        if data is None or not (0<len(data)<=MAX_PROFILE_ASSET) or mime not in ALLOWED_ASSET_MIMES:
+            images[name]={"status":"unavailable","original_attempted":original_error}
+            missing.append(name)
+            continue
+        try:
+            digest=sha256(data)
+            suffix=MIMES[mime]
+            key="profile/assets/"+digest+suffix
             archive.write_immutable(key,data)
             images[name]={"status":"sha256_verified","key":key,"mime":mime,
-                          "sha256":sha256(data),"bytes":len(data),
-                          "source_url":source}
-        except (RuntimeError,ValueError,TypeError):
+                          "sha256":digest,"bytes":len(data),"source_url":source,
+                          "source_tier":provenance}
+            if provenance=="original_pds_blob":
+                images[name]["original_cid"]=cid
+        except (RuntimeError,ValueError,TypeError,KeyError):
             images[name]={"status":"unavailable"}
             missing.append(name)
     return images,missing
@@ -127,8 +163,23 @@ def public_profile_images(profile,meta,api,archive):
 def archive_profile(profile,api,archive):
     meta=profile_metadata(profile,api)
     images,missing=public_profile_images(profile,meta,api,archive)
-    # Preserve complete public provider response privately; viewer only exposes
-    # the chosen profile's own public fields and image archive references.
+    # New public profile fields are captured with their own observed date;
+    # earlier snapshots, bios and artwork remain byte-for-byte immutable.
+    record=meta.pop("profile_record",None)
+    if profile["platform"]=="bluesky" and isinstance(record,dict):
+        meta["pronouns"]=safe_public_text(record.get("pronouns"),200)
+        meta["website"]=safe_public_text(record.get("website"),2048)
+        meta["created_at"]=record.get("createdAt")
+        meta["pinned_post"]=record.get("pinnedPost")
+        meta["links"]=record.get("links",[])
+        meta["profile_record"]=record
+    if profile["platform"]=="mastodon":
+        raw=meta.get("raw") if isinstance(meta.get("raw"),dict) else {}
+        meta["header_description"]=safe_public_text(raw.get("header_description"),1000)
+        meta["avatar_description"]=safe_public_text(raw.get("avatar_description"),1000)
+        meta["locked"]=bool(raw.get("locked"))
+        meta["bot"]=bool(raw.get("bot"))
+        meta["website"]=safe_public_text(raw.get("url"),2048)
     doc={**meta,"assets":images,"captured_at":datetime.now(timezone.utc).isoformat(),
          "complete_media":not missing}
     save_snapshot(archive,"profile/snapshots",doc)
