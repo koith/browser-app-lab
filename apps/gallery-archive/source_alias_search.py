@@ -63,7 +63,9 @@ def hydrate_all_registered_works(db, model, root=None):
             pieces=re.findall(r'[a-z0-9가-힣]{2,}',key(title))
             generic={'mimmi','yui','sim','public','sample','samples',
                      'photo','photos','cosplay','gallery','vol','djawa',
-                     'artgravia','official','the','and','preview'}
+                     'artgravia','official','the','and','preview',
+                     '공개','사진','미리보기','화보','공개본','심유이','심혜성',
+                     '유이','공식','원본','이미지','샘플'}
             distinctive=tuple(dict.fromkeys(x for x in pieces if x not in generic))
             # Require at least one edition marker. A generic person-only source
             # is not evidence of belonging to a particular photobook.
