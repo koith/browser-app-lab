@@ -21,6 +21,28 @@ const {chromium}=require('playwright');
   await page.locator('#game:not(.hidden)').waitFor();
   assert.match(await page.locator('#dice-turn-banner').textContent(),/내 차례/);
   assert.equal(await page.locator('#dice-turn-banner').getAttribute('data-turn-owner'),'local');
+  // Historical photo: player 1P starts in the left source portrait rail;
+  // native IMG/eventmsgbox.png belongs at the top centre, not beneath
+  // a tiny fabricated status strip. The extra cue is WEB accessibility,
+  // visually anchored to the actual active player and no longer covering it.
+  const cue=await page.evaluate(()=>{
+   const el=document.getElementById('dice-turn-banner');
+   const rail=el.closest('.battle-side-card');
+   const badge=el.querySelector('.turn-cue-head');
+   const e=document.getElementById('dice-native-event');
+   const a=el.getBoundingClientRect(),b=rail.getBoundingClientRect(),c=e?.getBoundingClientRect();
+   const overlap=c&&a.left<c.right&&a.right>c.left&&a.top<c.bottom&&a.bottom>c.top;
+   return {slot:rail.dataset.slot,active:rail.classList.contains('active'),
+    fontSize:parseFloat(getComputedStyle(badge).fontSize),
+    top:a.top,left:a.left,railRight:b.right,eventOverlap:!!overlap,
+    role:el.getAttribute('aria-label')};
+  });
+  assert.equal(cue.slot,'1','turn indicator must belong to the actual first player');
+  assert.ok(cue.active,'current player source portrait must be selected');
+  assert.ok(cue.fontSize>=15,'current player status must be readable, not a 10px corner label');
+  assert.ok(cue.left>=cue.railRight,'WEB label must sit next to, not over, source portrait');
+  assert.equal(cue.eventOverlap,false,'native IMG/eventmsgbox art must remain unobstructed');
+  assert.match(cue.role,/내 차례/);
   const before=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch(),c=window.__LEAF_CAMERA__;
    c.panBy(100000,100000);
@@ -51,6 +73,15 @@ const {chromium}=require('playwright');
   if(!(await page.evaluate(()=>window.__ROG_TEST__.getMatch().finished))){
    assert.match(await page.locator('#dice-turn-banner').textContent(),/상대 AI 차례/);
    assert.equal(await page.locator('#dice-turn-banner').getAttribute('data-turn-owner'),'opponent');
+   const opponent=await page.evaluate(()=>{
+    const el=document.getElementById('dice-turn-banner');
+    const card=el.closest('.battle-side-card');
+    return {slot:card?.dataset.slot,side:card?.parentElement?.className,
+     headline:el.querySelector('.turn-cue-head')?.textContent};
+   });
+   assert.equal(opponent.slot,'2','actual AI turn must move the cue to source 2P portrait');
+   assert.match(opponent.side,/right/,'source 2P panel is on the right');
+   assert.match(opponent.headline,/상대 AI 차례/);
   }
   assert.deepEqual(errors,[]);
   console.log('4LEAF_REAL_DICE_TURN_CAMERA_PASS',JSON.stringify({
