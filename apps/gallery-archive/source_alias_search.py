@@ -35,6 +35,45 @@ IDENTITIES={
 }
 SEARCH_MAX_BYTES=2_000_000
 
+def hydrate_all_registered_works(db, model, root=None):
+    """Extend source-name discovery from eight manually seeded works to ALL
+    known registered model+edition records. No invented URLs or actor identity.
+    """
+    root=Path(root or Path(__file__).resolve().parents[2])
+    manifest=root/'apps'/f'{model}-gallery'/'public-work-pages.json'
+    doc=json.loads(manifest.read_text(encoding='utf-8'))
+    rows=doc.get('albums',[])
+    if not isinstance(rows,list):
+        raise ValueError('SOURCE_WORK_REGISTRY_INVALID')
+    count=0
+    for record in rows:
+        aid=record.get('id')
+        title=record.get('title')
+        page=record.get('source')
+        if not (isinstance(aid,str) and re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid)
+                and isinstance(title,str) and len(title.strip())>=3
+                and isinstance(page,str) and safe_url(page)):
+            continue
+        work=f'{model}:{aid}'
+        if work not in db['works']:
+            db['works'][work]=[{'name':title,'source':page,
+                               'proof':'registered_existing_work_title'}]
+            count+=1
+        if work not in IDENTITIES:
+            pieces=re.findall(r'[a-z0-9가-힣]{2,}',key(title))
+            generic={'mimmi','yui','sim','public','sample','samples',
+                     'photo','photos','cosplay','gallery','vol','djawa',
+                     'artgravia','official','the','and','preview',
+                     '공개','사진','미리보기','화보','공개본','심유이','심혜성',
+                     '유이','공식','원본','이미지','샘플'}
+            distinctive=tuple(dict.fromkeys(x for x in pieces if x not in generic))
+            # Require at least one edition marker. A generic person-only source
+            # is not evidence of belonging to a particular photobook.
+            if distinctive:
+                IDENTITIES[work]=distinctive
+    return count
+
+
 def https_page(url):
     if not safe_url(url):return False
     p=urlsplit(url)
@@ -78,13 +117,22 @@ def source_headings(html):
     context=soup.get_text(" ",strip=True)[:3000]
     return heads,context
 
-def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5):
+def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,work_budget=None):
     session=session or requests.Session()
     results=[]
     visited_urls=set()
     hosts=set()
     status=Counter()
     work_ids=[x for x in db["works"] if x.startswith(model+":")]
+    # Search different named works in successive runs. Every reverse-photo
+    # result still enters independent same-work verification below.
+    if work_budget is not None:
+        if not 1<=work_budget<=80:
+            raise ValueError('INVALID_NAME_WORK_BUDGET')
+        if work_ids:
+            start=(offset//max(1,per_work))%len(work_ids)
+            work_ids=[work_ids[(start+i)%len(work_ids)]
+                      for i in range(min(work_budget,len(work_ids)))]
     per_album_pages=max(1,max_pages//max(1,len(work_ids)))
     for work in work_ids:
         checked_this_work=0
@@ -188,7 +236,10 @@ def merge_image_reverse_sites(db, report, model, results, session, limit=8):
         work=model+":"+str(album)
         if work not in db["works"]:continue
         row=next((r for r in results if r["id"]==album),None)
-        if row is None:continue
+        if row is None:
+            row={"id":album,"title":db["works"][work][0]["name"],
+                 "urls":[],"observations":[],"query_count":0}
+            results.append(row)
         for link in seed.get("candidate_pages",[]):
             if len(seen)>=limit:break
             url=link.get("url") if isinstance(link,dict) else None
@@ -218,12 +269,16 @@ def main():
     p.add_argument("--offset",type=int,default=0)
     p.add_argument("--per-work",type=int,default=3)
     p.add_argument("--max-pages",type=int,default=12)
+    p.add_argument("--work-budget",type=int,default=16)
     p.add_argument("--out",type=Path,required=True)
     a=p.parse_args()
-    if not 0<=a.offset or not 1<=a.per_work<=6 or not 1<=a.max_pages<=32 or not 1<=a.reverse_limit<=128:
+    if not 0<=a.offset or not 1<=a.per_work<=6 or not 1<=a.max_pages<=32 or not 1<=a.reverse_limit<=128 or not 1<=a.work_budget<=80:
         raise ValueError("bounded_research_budget_required")
     db=json.loads(a.ledger.read_text(encoding="utf-8"))
-    report=crawl_names(db,a.model,a.offset,a.per_work,a.max_pages)
+    new_works=hydrate_all_registered_works(db,a.model)
+    report=crawl_names(db,a.model,a.offset,a.per_work,a.max_pages,
+                       work_budget=a.work_budget)
+    report['additional_registered_works_searched_by_catalog']=new_works
     if a.reverse and a.reverse.is_file():
         matches=merge_image_reverse_sites(db,json.loads(a.reverse.read_text(encoding="utf-8")),
                                          a.model,report["search_results"],requests.Session(), limit=a.reverse_limit)
