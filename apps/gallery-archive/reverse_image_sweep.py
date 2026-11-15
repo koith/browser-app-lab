@@ -76,6 +76,36 @@ def search_one(seed,client=None):
     return {**seed,"search_status":stages,"candidate_pages":approved[:90],
             "off_model_rejected":rejected,"originals_stored":0,"visible_gallery_added":0}
 
+def diversified_seed_window(inventory, limit, offset):
+    """Search across distinct albums first, then advance each album's cut.
+
+    A sorted all-cuts queue can contain dozens of images from the same album.
+    A small rolling window over that flat queue repeatedly searches just one
+    or two albums, despite hundreds of currently incomplete albums.
+    This round-robin view retains all SHA-distinct seeds and rotates source
+    image positions on subsequent runs, without extra requests.
+    """
+    if not inventory or not 1 <= limit <= 48 or offset < 0:
+        raise ValueError('INVALID_DIVERSE_SEED_WINDOW')
+    by_album = {}
+    for photo in inventory:
+        key = (photo['model'], photo['album_id'])
+        by_album.setdefault(key, []).append(photo)
+    albums = list(by_album)
+    count = min(limit, len(inventory))
+    group_count = len(albums)
+    # Rotate albums on every run; use next cut after a full album-group cycle.
+    cursor = offset % group_count
+    epoch = offset // group_count
+    selected = []
+    for i in range(count):
+        key = albums[(cursor + i) % group_count]
+        round_index = i // group_count
+        images = by_album[key]
+        selected.append(images[(epoch + round_index) % len(images)])
+    return selected
+
+
 def sweep(root,limit,offset,workers=2,client_factory=None,model=None,all_cuts=False):
     inventory=seeds(root,all_cuts=all_cuts)
     if model is not None:
@@ -83,8 +113,7 @@ def sweep(root,limit,offset,workers=2,client_factory=None,model=None,all_cuts=Fa
     if not inventory:raise ValueError("No stored seed photographs")
     if limit<1 or limit>48 or offset<0 or workers<1 or workers>3:
         raise ValueError("Bounded public image search budget")
-    selected=[inventory[(offset+i)%len(inventory)]
-              for i in range(min(limit,len(inventory)))]
+    selected=diversified_seed_window(inventory,limit,offset)
     def run(photo):
         client=client_factory() if client_factory else requests.Session()
         return search_one(photo,client)
