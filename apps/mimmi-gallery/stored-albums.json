@@ -15896,6 +15896,102 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 234,
+          "url": "stored-albums/djawa-nikke-elegg/d2f1420459248908e0d3.jpg",
+          "sha256": "d2f1420459248908e0d3d1a74fa0c1923bb2cfb70cb01a3f90e1467cc76d1ce9",
+          "bytes": 275948,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 235,
+          "url": "stored-albums/djawa-nikke-elegg/c8613453fca3623e573c.jpg",
+          "sha256": "c8613453fca3623e573cfd01011d8cbf52b5ba1ac3bdf815b2f621f20a8d0d00",
+          "bytes": 330051,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 236,
+          "url": "stored-albums/djawa-nikke-elegg/4e97b87634ff1ca0c769.jpg",
+          "sha256": "4e97b87634ff1ca0c76990dec249e633d5e243cbddb5f63b0e0e3fcfaa223694",
+          "bytes": 143281,
+          "width": 1300,
+          "height": 866,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 237,
+          "url": "stored-albums/djawa-nikke-elegg/16c74562bdc612698690.jpg",
+          "sha256": "16c74562bdc612698690526318304b66152802763e75d00c58533ed05d85ba55",
+          "bytes": 236940,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 238,
+          "url": "stored-albums/djawa-nikke-elegg/9061a5d3598b981c0e1f.jpg",
+          "sha256": "9061a5d3598b981c0e1fb4293416f83f9f089d30a53ea94a247071137abffbb9",
+          "bytes": 302016,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 239,
+          "url": "stored-albums/djawa-nikke-elegg/73eef04198409e57332a.jpg",
+          "sha256": "73eef04198409e57332ac7da2e2706c24c4fdcd12c6d48367a84501dc7b4b168",
+          "bytes": 151712,
+          "width": 1300,
+          "height": 866,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 240,
+          "url": "stored-albums/djawa-nikke-elegg/5420c1b3bf82f8a4cd7d.jpg",
+          "sha256": "5420c1b3bf82f8a4cd7de8eeff062509632c8d3791f337f5b12d8c8e90004280",
+          "bytes": 312532,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 241,
+          "url": "stored-albums/djawa-nikke-elegg/d7efab94f3ce733fe4ab.jpg",
+          "sha256": "d7efab94f3ce733fe4abe61fa7046e2a38ef875db289cf0e3069c91e13ca6eb9",
+          "bytes": 302395,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -27410,5 +27506,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2793
+  "physical_verified_image_count": 2801
 }
