@@ -2,6 +2,7 @@
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
+import base64
 import io
 import json
 import os
@@ -70,9 +71,46 @@ class Snapshot:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
         self.rows[model][aid, number] = {k: photo[k] for k in ('number', 'sha256', 'bytes', 'width', 'height')}
-        self.rows[model][aid, number].update(key=key, replica_source=source)
+        # Cloudflare's direct-upload hash is SHA256(base64(file) + extension)[:32].
+        # Persist it only in the account-private Worker catalog so unchanged
+        # static assets can be included in later manifests without downloading.
+        asset_hash = hashlib.sha256(base64.b64encode(raw) + extension.encode('ascii')).hexdigest()[:32]
+        self.rows[model][aid, number].update(key=key, replica_source=source,
+                                             asset_hash=asset_hash)
         self.check_budget()
         return True
+
+    def retain_remote_metadata(self, catalogs):
+        """Reference exact already-deployed originals without network/media reads.
+
+        Requires a catalog previously built with verified asset hashes.
+        Never treats metadata alone as proof that an unknown file exists.
+        """
+        if set(catalogs) != set(MODELS):
+            raise ValueError('INCREMENTAL_CATALOG_MODEL_SET')
+        for model in MODELS:
+            doc = catalogs[model]
+            if doc.get('archive_kind') != KIND or doc.get('model') != model or doc.get('schema_version') != 1:
+                raise ValueError('INCREMENTAL_CATALOG_INVALID')
+            for album in doc['albums']:
+                aid = album['id']
+                if not ID.fullmatch(aid):
+                    raise ValueError('INCREMENTAL_ALBUM_INVALID')
+                for photo in album['images']:
+                    key = (aid, photo['number'])
+                    expected = self.expected[model].get(key)
+                    path = photo.get('key', '')
+                    asset_hash = photo.get('asset_hash')
+                    if (expected is None or signature(expected) != signature(photo)
+                            or not isinstance(asset_hash, str)
+                            or not re.fullmatch('[a-f0-9]{32}', asset_hash)
+                            or not isinstance(path, str)
+                            or not re.fullmatch(r'originals/[a-z0-9-]+/[A-Za-z0-9._ -]+\\.(jpg|jpeg|png|webp)', path)
+                            or not path.startswith('originals/' + aid + '/')
+                            or key in self.rows[model]):
+                        raise ValueError('INCREMENTAL_RETAINED_ORIGINAL_INVALID')
+                    self.rows[model][key] = dict(photo)
+        self.check_budget()
 
     def check_budget(self):
         rows = [p for model in MODELS for p in self.rows[model].values()]
@@ -92,6 +130,10 @@ class Snapshot:
                     by_sha[signature(p)] = p['url']
             count = 0
             for (aid, number), p in self.expected[model].items():
+                # Already verified remote originals are retained by metadata
+                # and must never be fetched or rewritten during a delta build.
+                if (aid, number) in self.rows[model]:
+                    continue
                 path = by_sha.get(signature(p))
                 if path:
                     count += self.add(model, {'id': aid}, p, (base / path).read_bytes(), 'existing-exact-public-copy')
