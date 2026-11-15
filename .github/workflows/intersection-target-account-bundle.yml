@@ -46,7 +46,7 @@ permissions:
 
 jobs:
   dispatch-verified-profile-backfills:
-    if: ${{ inputs.profile_backfill_all == 'true' }}
+    if: ${{ inputs.profile_backfill_all == true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
@@ -69,7 +69,7 @@ jobs:
         working-directory: apps/demand-research
         run: python profile_backfill_dispatch.py
   private-public-account-bundle:
-    if: ${{ inputs.profile_backfill_all != 'true' }}
+    if: ${{ inputs.profile_backfill_all != true }}
     concurrency:
       # Independent immutable ZIP writes must not queue behind journal repair.
       group: intersection-target-zip-production
