@@ -83,7 +83,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,knightDistrict:null,knightBack:false,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
+ const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,offlineRoom:false,knightDistrict:null,knightBack:false,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -108,25 +108,28 @@
   return roomById(state.roomId);
  }
  function roomById(id){
-  return (central.enabled?centralRooms.get(id):state.rooms.find(r=>r.id===id))||
-   canonicalRoom(id)||null;
+  return state.rooms.find(r=>r.id===id)||centralRooms.get(id)||canonicalRoom(id)||null;
  }
+ function locallyStoredRoom(room){return Boolean(room&&state.rooms.some(r=>r.id===room.id))}
+ function centralOutage(error){return [502,503,504].includes(error?.status)||
+  /network|fetch|timeout|timed out|failed to fetch|서버가 연결되지/i.test(String(error?.message||error))}
  // Display the server's actual always-joinable public room IDs even BEFORE
  // the sleeping free central authority wakes. They are real endpoints, not
  // fake occupants. Never manufacture archived 2002 room titles/population.
  function catalogue(){
   const region=state.region,district=state.district;
   const base=canonicalRooms(region,district);
-  const extra=central.enabled?[...centralRooms.values()]:state.rooms;
+  const extra=[...centralRooms.values(),...state.rooms];
   return base.concat(extra.filter(r=>r.region===region&&r.district===district
    &&!base.some(permanent=>permanent.id===r.id))
    .sort((a,b)=>b.created-a.created));
  }
  function roomOccupancy(roomId){
-  return central.enabled?(centralCounts.get(roomId)||0):onlinePeers('room:'+roomId).length;
+  const local=state.rooms.some(r=>r.id===roomId);
+  return central.enabled&&central.ready&&!local?(centralCounts.get(roomId)||0):onlinePeers('offline-room:'+roomId).length;
  }
  function scope(){
-  if(state.view==='room'&&state.roomId)return 'room:'+state.roomId;
+  if(state.view==='room'&&state.roomId)return (state.offlineRoom?'offline-room:':'room:')+state.roomId;
   if(state.view==='directory')return 'district:'+state.region+':'+state.district;
   if(state.view==='town')return 'town:'+state.region;
   if(state.view==='board')return 'board:recordable';
@@ -194,8 +197,9 @@
  let centralPresenceRequest=0,centralPresenceSettled=0;
  function presence(announce=true){
   const self=compactPresence();
-  if(announce&&!central.enabled){sendLocal({kind:'presence',peer:self});sendRTC({kind:'presence',peer:self})}
-  if(central.enabled&&central.ready&&central.joinedId===state.roomId){
+  if(announce&&(!central.enabled||!central.ready||state.offlineRoom)){
+   sendLocal({kind:'presence',peer:self});sendRTC({kind:'presence',peer:self})}
+  if(central.enabled&&central.ready&&!state.offlineRoom&&central.joinedId===state.roomId){
    const roomId=state.roomId,request=++centralPresenceRequest;
    central.presence({nick:self.nick,avatar:self.avatar,facing:self.facing,position:self.position})
     .then(reply=>{
@@ -388,11 +392,11 @@
   if(v.startsWith('/nick ')){$('rename')?.click();return Promise.resolve(true)}
   const content=originalChatToy(v)||(v.startsWith('/me ')?'＊ '+nick()+' '+v.slice(4):v);
   const item={kind:'chat',id:uuid(),scope:state.scope,user:nick(),text:content,sender:tabId,time:now()};
-  if(central.enabled&&state.view==='room'&&(!central.ready||central.joinedId!==state.roomId)){
+  if(central.enabled&&!state.offlineRoom&&state.view==='room'&&(!central.ready||central.joinedId!==state.roomId)){
    systemLine('중앙 채팅방에 실제 입장한 뒤 메시지를 보낼 수 있습니다.');
    return Promise.resolve(false);
   }
-  if(central.enabled&&state.view==='room'){
+  if(central.enabled&&!state.offlineRoom&&state.view==='room'){
    // Only a 201 from the actual central authority counts as delivery.
    // A failed HTTP call cannot erase an unsent draft or invent local history.
    return central.chat(content,clientMessageId).then(result=>{
@@ -416,7 +420,8 @@
  function onlinePeers(sc=state.scope){
   const fresh=[compactPresence()];
   for(const peer of state.peers.values()){
-   if(central.enabled&&peer.source!=='central')continue;
+   if(state.offlineRoom&&peer.source==='central')continue;
+    if(central.enabled&&central.ready&&!state.offlineRoom&&peer.source!=='central')continue;
    if(now()-peer.last<17000&&peer.id!==tabId)fresh.push(peer);
   }
   return fresh.filter(x=>x.scope===sc);
@@ -466,7 +471,7 @@
   const name=$('social-location-title');
   if(name)name.textContent=state.view==='knighttown'?'레코르다블 · 원본 기사단 지역':
    state.view==='board'?('레코르다블 · '+(state.knightDistrict||'기사단 게시판')):
-   state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
+   state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')+(state.offlineRoom?' · 오프라인':'')):
    state.view==='directory'?(state.district+' · 채팅방 목록'):
    (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
@@ -1669,7 +1674,7 @@
      if(!social){if(oldForm)return oldForm.call(form,e);return}
      e.preventDefault();
      const input=$('message'),v=input.value.trim();if(!v)return;
-     if(central.enabled&&state.view==='room'){
+     if(central.enabled&&!state.offlineRoom&&state.view==='room'){
       // Do not lose the draft on a transient error, or dispatch twice while
       // the very same message is still waiting on server confirmation.
       if(form.dataset.centralSending==='true')return;
