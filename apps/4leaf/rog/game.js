@@ -898,6 +898,10 @@ function drawBattlePanels(){
  // the RIGHT. These are genuine match players; empty slots are not NPCs.
  const present=new Map(match.players.map((p,i)=>[i,p]));
  const slots=match.players.length>6?4:3;
+ // Move the one live turn status into the actual current-player source rail.
+ // Never remove it when rebuilding player cards: it must survive every roll.
+ const turnBanner=$('dice-turn-banner');
+ if(turnBanner)turnBanner.remove();
  root.replaceChildren();
  const left=document.createElement('div'),right=document.createElement('div');
  left.className='battle-team-side left';right.className='battle-team-side right';
@@ -937,6 +941,10 @@ function drawBattlePanels(){
    meter.style.width=Math.max(0,Math.min(100,p.ability))+'%';
    info.append(nick,attrs,meter);
    card.append(portrait,info);
+   if(match.active===i&&turnBanner){
+    card.append(turnBanner);
+    card.setAttribute('aria-current','step');
+   }
    card.title=(i+1)+'P '+p.name+' · '+attrs.textContent;
   }else{
    card.setAttribute('aria-label',(i+1)+'번 빈 참가자 슬롯');
@@ -1163,8 +1171,15 @@ function updateTurnGuidance(){
  else{headline='내 차례';detail=busy?'주사위·이동·칸 이벤트 처리 중입니다.':'주사위 굴리기 버튼을 눌러 이동하세요.';owner='local'}
  const banner=$('dice-turn-banner');
  if(banner){banner.dataset.turnOwner=owner;banner.dataset.turnPlayer=String(match.active);
-  const line='라운드 '+match.round+' · '+headline+' · '+player.name+' | '+detail;
-  if(banner.textContent!==line)banner.textContent=line;
+  const title=(match.active+1)+'P · '+headline;
+  const line='라운드 '+match.round+' · '+title+' · '+player.name+' | '+detail;
+  if(banner.dataset.guideText!==line){
+   const heading=document.createElement('strong');heading.className='turn-cue-head';heading.textContent=title;
+   const description=document.createElement('small');description.className='turn-cue-detail';description.textContent=player.name+' · '+detail;
+   banner.replaceChildren(heading,description);
+   banner.dataset.guideText=line;
+  }
+  banner.setAttribute('aria-label',line);
  }
  const indicator=$('turn-indicator');
  if(indicator){indicator.textContent='ROUND '+match.round+' · '+headline+' ('+player.name+')';indicator.dataset.turnOwner=owner}
