@@ -44,6 +44,8 @@ BLOCK_HANDLERS=INDEX[BLOCK_HANDLER_START:BLOCK_HANDLER_END]
 assert "isManualBlocked(p)" in FILTER_CODE
 assert "localStorage.setItem(MANUAL_BLOCK_STORAGE_KEY" in BLOCK_CODE
 assert '#detail .dialog-foot' in STYLE
+assert 'env(safe-area-inset-bottom)' in STYLE,"Safari bottom-safe footer missing"
+assert 'updateViaCache:"none"' in INDEX,"Safari service worker update may reuse stale HTTP cache"
 AMBIENT_START=INDEX.index("/* Interactive halftone:")
 AMBIENT_END=INDEX.index("</script>",AMBIENT_START)
 AMBIENT_SCRIPT=INDEX[AMBIENT_START:AMBIENT_END]

@@ -1070,13 +1070,14 @@ main{padding-top:10px}
 /* User-defined account exclusions only affect latest public search results.
    They never mutate original posts or existing immutable archive records. */
 .manual-block-tools{display:flex;justify-content:flex-end;margin:1px 0 7px}
-#manualBlockOpen{border:1px solid #bdc4d4;background:#f9f8f2;color:#4a5367;
-  border-radius:5px;font-size:10px;font-weight:700;padding:5px 9px;min-height:28px}
+#manualBlockOpen{border:1px solid #798aaa;background:#eef2fb;color:#1d365c;
+  border-radius:5px;font-size:11px;font-weight:800;padding:5px 9px;min-height:28px}
 #manualBlockOpen:focus-visible,#detailBlockAccount:focus-visible{outline:3px solid #e4c600;outline-offset:2px}
 #detail .dialog-foot{flex:0 0 auto;display:flex;align-items:center;gap:12px;
-  min-height:35px;padding:5px 12px;background:#fff9ed;border-top:1px solid #ddd7c9}
-#detailBlockAccount{flex:0 0 auto;min-height:26px;border:1px solid #bdc2cd;
-  padding:4px 8px;font-size:10px;font-weight:650;color:#596276;background:transparent;
+  min-height:39px;padding:6px 12px max(6px,env(safe-area-inset-bottom));
+  background:#fff7e6;border-top:1px solid #d8c5ae}
+#detailBlockAccount{flex:0 0 auto;min-height:28px;border:1px solid #b76c74;
+  padding:4px 9px;font-size:11px;font-weight:800;color:#842b3c;background:#fff0ed;
   border-radius:4px;box-shadow:none}
 #detailBlockAccount[data-blocked="true"]{color:#2a4d7d;border-color:#a0b2cf}
 #detailBlockAccount[hidden]{display:none}
@@ -2911,7 +2912,8 @@ if(cloudMode){
 if(location.hostname==="intersection-originals-free.onrender.com" &&
    "serviceWorker" in navigator){
   window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("/intersection-sw.js",{scope:"/"}).catch(()=>{});
+    navigator.serviceWorker.register("/intersection-sw.js",
+      {scope:"/",updateViaCache:"none"}).catch(()=>{});
   },{once:true});
 }
 </script>
