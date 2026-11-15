@@ -4560,6 +4560,18 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 169,
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/392daaef08bca0e504fb.jpg",
+          "sha256": "392daaef08bca0e504fb89129c605fd44c73cbc71cdf779dc22db440ea1c74a6",
+          "bytes": 300368,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -15844,6 +15856,30 @@
           "bytes": 170884,
           "width": 1300,
           "height": 866,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 232,
+          "url": "stored-albums/djawa-nikke-elegg/a1b661f4165954251331.jpg",
+          "sha256": "a1b661f41659542513315c2cc04220a807a2e23931416f61e4ec9b3fc219718b",
+          "bytes": 301378,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 233,
+          "url": "stored-albums/djawa-nikke-elegg/4f132b1acad6e71db656.jpg",
+          "sha256": "4f132b1acad6e71db6561a5bed7efed5695a5cd1bca5afd37cf7c0797ebf58e1",
+          "bytes": 322089,
+          "width": 1300,
+          "height": 1950,
           "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
@@ -27338,5 +27374,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2787
+  "physical_verified_image_count": 2790
 }
