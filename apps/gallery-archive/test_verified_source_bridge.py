@@ -68,7 +68,13 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
                 {'id':ALBUM,'title':'Pop Kitty Party','images':[
                     {'number':1,'sha256':'1'*64,'bytes':5000}]}]}
             with BytesIO() as b:
-                Image.new('RGB',(450,640),(12,130,200)).save(b,'JPEG',quality=91)
+                # The decoder deliberately rejects flat placeholders. Simulate
+                # an actual detailed photo instead of a single-color test tile.
+                im=Image.new('RGB',(450,640))
+                im.putdata([((x*7+y*5)%256,(x*3+y*11)%256,
+                             (x*13+y*17)%256)
+                            for y in range(640) for x in range(450)])
+                im.save(b,'JPEG',quality=91)
                 raw=b.getvalue()
             source=root/'verified.json'
             source.write_text(json.dumps(evidence()))
