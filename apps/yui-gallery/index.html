@@ -629,6 +629,8 @@ function openAlbum(id,record=true){
 }
 function openViewer(list,i,record=true){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;const p=list[viewerIndex];if(record)remember({album:p.albumId,photo:p.number,fromPhotos:!detailAlbum,mode,publisher:activePublisher});$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer();$('close').focus({preventScroll:true})}
 let viewerGeneration=0,routeTimer=null,historyEntry=0;const viewerRoutes=new Map();
+// The browse DOM survives opening a detail view. Do not rebuild it on Back.
+let routeDOMReady=false;
 function layoutViewer(){
  const p=viewerList[viewerIndex],angle=photoRotation(p),image=$('full'),frame=image.parentElement;
  image.style.cssText='';frame.style.cssText='';
@@ -702,7 +704,43 @@ function step(n){
 function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.album);if(s.photo)q.set('photo',s.photo);if(s.fromPhotos)q.set('from','photos');if(s.publisher)q.set('publisher',s.publisher);if(s.mode&&s.mode!=='albums')q.set('view',s.mode);return location.pathname+location.search+(q.size?'#'+q:'')}
 function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={yui:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
 function goBack(){if(history.state?.yui&&history.state.depth>0)history.back();else{const state={yui:true,depth:0,mode:activePublisher?'publishers':'albums',publisher:history.state?.album?activePublisher:null,scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
-function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums',s.publisher);if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
+function applyRoute(s){
+ $('search-dialog').close();
+ s=viewerRoutes.get(s.key)||s;
+ s={...s,album:canonicalId(s.album)};
+ const targetMode=s.mode||'albums';
+ const targetPublisher=targetMode==='publishers'?(s.publisher||null):null;
+ // Both the album covers and the detail thumbnails are already mounted.
+ // History traversal changes the visible layer, not the underlying image DOM.
+ const reuseBrowse=routeDOMReady&&mode===targetMode&&activePublisher===targetPublisher;
+ const reuseDetail=reuseBrowse&&s.album&&!s.fromPhotos&&detailAlbum?.id===s.album&&!$('detail').hidden;
+ hideViewer();
+ if(!reuseBrowse)setMode(targetMode,s.publisher);
+ routeDOMReady=true;
+ if(s.album&&!s.fromPhotos){
+  if(!reuseDetail)openAlbum(s.album,false);
+ }else if(reuseBrowse){
+  // Show the *same* album-cover or all-photo nodes, retaining decoded images,
+  // lazy-image progress, event handlers, and the saved scroll position.
+  detailRenderGeneration++;
+  detailAlbum=null;
+  document.body.classList.remove('detail-view');
+  $('detail').hidden=true;
+  $('browse').hidden=false;
+  if(activePublisher){
+   const group=publisherGroups().find(g=>g.id===activePublisher);
+   if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
+  }
+ }
+ if(s.photo){
+  const a=stored.find(a=>a.id===s.album);
+  const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];
+  const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));
+  if(i>=0)openViewer(list,i,false);
+ }
+ if(s.searchOpen)showSearch();
+ requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0));
+}
 // Safari can restore a page from back-forward cache with stale in-memory UI.
 // Reconstruct the saved route from the URL when no typed history.state exists.
 function routeFromLocation(){
