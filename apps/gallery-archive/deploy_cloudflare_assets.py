@@ -20,6 +20,7 @@ from urllib.request import Request, build_opener
 from check_cloudflare_connection import reader, account_for, NoRedirect, ProbeError
 from cloudflare_assets_snapshot import Snapshot, MODELS, KIND, checked
 from replica_incremental import local_owner_inventory, inventory_delta
+from cloudflare_incremental_upload import upload_incremental, rollback_to
 
 NAME = 'gallery-archive-free'
 WRANGLER = '4.158.0'
@@ -39,9 +40,9 @@ class CF:
 
     def call(self, tail, method='GET', body=None, raw=False, multipart=None):
         # No subscription, billing mutation, R2 or arbitrary host endpoints.
-        allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content/v2|secrets|subdomain))?|workers/subdomain|subscriptions)',
+        allowed = {'GET': r'(?:workers/scripts(?:/' + NAME + r'/(?:content/v2|secrets|subdomain|deployments))?|workers/subdomain|subscriptions)',
                    'PUT': r'workers/(?:subdomain|scripts/' + NAME + r'(?:/secrets)?)',
-                   'POST': r'workers/(?:workers|scripts/' + NAME + r'/subdomain)'}
+                   'POST': r'workers/(?:workers|scripts/' + NAME + r'/(?:subdomain|assets-upload-session|deployments))'}
         if method not in allowed or not re.fullmatch(allowed[method], tail):
             raise ValueError('UNAPPROVED_CF_CONTROL_CALL')
         if multipart is not None and (method != 'PUT' or tail != 'workers/scripts/' + NAME or body is not None):
@@ -321,6 +322,10 @@ def main(args):
                   'original_reads=0', 'original_verifications=0',
                   'deployments=0', flush=True)
             return
+    incremental = old is not None and all(
+        isinstance(p.get('asset_hash'), str) and re.fullmatch('[a-f0-9]{32}', p['asset_hash'])
+        for model in MODELS for album in old[model]['albums'] for p in album['images'])
+    print('BOUND_ASSET_INCREMENTAL_ELIGIBLE', incremental, flush=True)
     work = Path(args.directory).resolve()
     assets, source = work / 'assets', work / 'source'
     snapshot = Snapshot(ROOT, assets)
@@ -352,16 +357,20 @@ def main(args):
         except (ValueError, TypeError) as error:
             print('CF_EXISTING_WORKER_HEALTH', 'INVALID_RESPONSE_' + type(error).__name__, flush=True)
     retained = {m: 0 for m in MODELS}
-    if old and any(a['images'] for m in MODELS for a in old[m]['albums']):
+    if incremental:
+        snapshot.retain_remote_metadata(old)
+        retained = {m: sum(len(a['images']) for a in old[m]['albums']) for m in MODELS}
+        print('BOUND_ASSET_PHASE', 'retain_old_assets_by_private_manifest', 'media_reads=0', flush=True)
+    elif old and any(a['images'] for m in MODELS for a in old[m]['albums']):
         if base is None:
-            # Never replace an existing replica if its original bytes cannot
-            # first be recovered and checked. No assumption about Write access.
             raise ValueError('EXISTING_REPLICA_READBACK_ROUTE_REQUIRED')
-        print('BOUND_ASSET_PHASE', 'retain_all_previous_verified_originals', flush=True)
+        # One-time migration records the asset upload hashes privately.
+        print('BOUND_ASSET_PHASE', 'one_time_original_hash_bootstrap', flush=True)
         for model in MODELS:
             for album in old[model]['albums']:
                 for photo in album['images']:
-                    snapshot.add(model, album, photo, media_bytes(base, model, album['id'], photo), photo.get('replica_source', 'existing-verified-bound-replica'))
+                    snapshot.add(model, album, photo, media_bytes(base, model, album['id'], photo),
+                                 photo.get('replica_source', 'existing-verified-bound-replica'))
                     retained[model] += 1
     print('BOUND_ASSET_PHASE', 'copy_exact_existing_public_originals', flush=True)
     public = snapshot.public_originals()
@@ -374,42 +383,55 @@ def main(args):
     # Recheck the actual billing state immediately before the deployment.
     if free_account_and_existing(cf) != old:
         raise ValueError('CONCURRENT_REPLICA_CHANGE_REFUSED')
-    print('BOUND_ASSET_PHASE', 'deploy_default_free_worker_and_assets', flush=True)
-    command = ['npx', '--yes', 'wrangler@' + WRANGLER, 'deploy', '--config', str(source / 'wrangler.json')]
-    process = subprocess.run(command, cwd=source, env={**os.environ, 'CLOUDFLARE_ACCOUNT_ID': account,
-        'WRANGLER_SEND_METRICS': 'false'}, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=1200)
-    if process.returncode:
-        clean = re.sub(rb'\x1b\[[0-9;]*[A-Za-z]', b'', process.stdout)
-        codes = sorted(set(re.findall(rb'(?i)code[\s:=\"]+(\d{3,6})', clean)))
-        print('WRANGLER_DEPLOY_FAILED', process.returncode, [x.decode() for x in codes], flush=True)
-        # Wrangler's full diagnostics may contain private file names/account IDs.
-        # Keep only fixed operation labels, never the raw request or response.
-        operations = []
-        for tail, label in ((b'/assets-upload-session', 'CREATE_ASSET_UPLOAD_SESSION'),
-                            (b'/workers/assets/upload', 'UPLOAD_ASSET_BYTES'),
-                            (b'/workers/scripts/' + NAME.encode(), 'UPLOAD_OR_INSPECT_WORKER'),
-                            (b'/workers/subdomain', 'ACCOUNT_SUBDOMAIN'),
-                            (b'/workers/dispatch', 'DISPATCH')):
-            if tail in process.stdout:
-                operations.append(label)
-        print('WRANGLER_FAILED_OPERATION_LABELS', operations, flush=True)
-        # Allowlisted classes only, not arbitrary provider messages or paths.
-        words = clean.lower()
-        categories = [label for needle, label in (
-            (b'authentication error', 'AUTHENTICATION_OR_SCOPE_DENIED'),
-            (b'permission', 'PERMISSION_DIAGNOSTIC_PRESENT'),
-            (b'email', 'EMAIL_DIAGNOSTIC_PRESENT'),
-            (b'onboard', 'ONBOARDING_DIAGNOSTIC_PRESENT'),
-            (b'not exist', 'RESOURCE_ABSENT_DIAGNOSTIC_PRESENT'),
-            (b'not registered', 'REGISTRATION_DIAGNOSTIC_PRESENT'),
-            (b'forbidden', 'HTTP_FORBIDDEN'), (b'403', 'STATUS_403_PRESENT'),
-            (b'free plan', 'FREE_PLAN_DIAGNOSTIC_PRESENT'),
-            (b'invalid', 'INVALID_ARGUMENT_DIAGNOSTIC_PRESENT')) if needle in words]
-        print('WRANGLER_FAILURE_CLASSES', categories, flush=True)
-        from audit_cloudflare_recovery import inspect
-        print('CLOUDFLARE_AFTER_UPLOAD_FAILURE_AUDIT', json.dumps(inspect(token, account), sort_keys=True), flush=True)
-        raise ValueError('WORKER_DEPLOY_NOT_VERIFIED')
-    print('CF_UNROUTED_WORKER_AND_ASSETS_UPLOAD_SUCCEEDED', flush=True)
+    rollback_version = None
+    rollback_cleanup = None
+    if incremental:
+        print('BOUND_ASSET_PHASE', 'deploy_delta_only_preserving_all_old_manifest_entries', flush=True)
+        rollback_version = upload_incremental(cf, source, assets, catalogs)
+        import atexit
+        def rollback_cleanup():
+            try:
+                rollback_to(cf, rollback_version)
+            except Exception:
+                print('CF_INCREMENTAL_ROLLBACK_ATTEMPT_FAILED', flush=True)
+        atexit.register(rollback_cleanup)
+    else:
+        print('BOUND_ASSET_PHASE', 'deploy_default_free_worker_and_assets', flush=True)
+        command = ['npx', '--yes', 'wrangler@' + WRANGLER, 'deploy', '--config', str(source / 'wrangler.json')]
+        process = subprocess.run(command, cwd=source, env={**os.environ, 'CLOUDFLARE_ACCOUNT_ID': account,
+            'WRANGLER_SEND_METRICS': 'false'}, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=1200)
+        if process.returncode:
+            clean = re.sub(rb'\x1b\[[0-9;]*[A-Za-z]', b'', process.stdout)
+            codes = sorted(set(re.findall(rb'(?i)code[\s:=\"]+(\d{3,6})', clean)))
+            print('WRANGLER_DEPLOY_FAILED', process.returncode, [x.decode() for x in codes], flush=True)
+            # Wrangler's full diagnostics may contain private file names/account IDs.
+            # Keep only fixed operation labels, never the raw request or response.
+            operations = []
+            for tail, label in ((b'/assets-upload-session', 'CREATE_ASSET_UPLOAD_SESSION'),
+                                (b'/workers/assets/upload', 'UPLOAD_ASSET_BYTES'),
+                                (b'/workers/scripts/' + NAME.encode(), 'UPLOAD_OR_INSPECT_WORKER'),
+                                (b'/workers/subdomain', 'ACCOUNT_SUBDOMAIN'),
+                                (b'/workers/dispatch', 'DISPATCH')):
+                if tail in process.stdout:
+                    operations.append(label)
+            print('WRANGLER_FAILED_OPERATION_LABELS', operations, flush=True)
+            # Allowlisted classes only, not arbitrary provider messages or paths.
+            words = clean.lower()
+            categories = [label for needle, label in (
+                (b'authentication error', 'AUTHENTICATION_OR_SCOPE_DENIED'),
+                (b'permission', 'PERMISSION_DIAGNOSTIC_PRESENT'),
+                (b'email', 'EMAIL_DIAGNOSTIC_PRESENT'),
+                (b'onboard', 'ONBOARDING_DIAGNOSTIC_PRESENT'),
+                (b'not exist', 'RESOURCE_ABSENT_DIAGNOSTIC_PRESENT'),
+                (b'not registered', 'REGISTRATION_DIAGNOSTIC_PRESENT'),
+                (b'forbidden', 'HTTP_FORBIDDEN'), (b'403', 'STATUS_403_PRESENT'),
+                (b'free plan', 'FREE_PLAN_DIAGNOSTIC_PRESENT'),
+                (b'invalid', 'INVALID_ARGUMENT_DIAGNOSTIC_PRESENT')) if needle in words]
+            print('WRANGLER_FAILURE_CLASSES', categories, flush=True)
+            from audit_cloudflare_recovery import inspect
+            print('CLOUDFLARE_AFTER_UPLOAD_FAILURE_AUDIT', json.dumps(inspect(token, account), sort_keys=True), flush=True)
+            raise ValueError('WORKER_DEPLOY_NOT_VERIFIED')
+        print('CF_UNROUTED_WORKER_AND_ASSETS_UPLOAD_SUCCEEDED', flush=True)
     # Registration is a separate operation. An upload success proves that a
     # previous registration denial did not establish missing Scripts Write.
     base = subdomain(cf, register=True)
@@ -419,6 +441,8 @@ def main(args):
     print('BOUND_ASSET_PHASE', 'configure_worker_only_signing_secret', flush=True)
     keys = cf.call('workers/scripts/' + NAME + '/secrets')['result']
     if not any(k.get('name') == 'SIGNING_KEY' for k in keys):
+        if incremental:
+            raise ValueError('SIGNING_KEY_WAS_NOT_PRESERVED')
         cf.call('workers/scripts/' + NAME + '/secrets', 'PUT',
                 {'name': 'SIGNING_KEY', 'text': secrets.token_urlsafe(48), 'type': 'secret_text'})
     print('BOUND_ASSET_PHASE', 'verify_actual_remote_originals', flush=True)
@@ -461,6 +485,17 @@ def main(args):
         raise ValueError('ACTUAL_WORKER_RELEASE_NOT_OBSERVED')
     print('CF_WORKER_HEALTH_VERIFIED', 'exact_release=yes', flush=True)
     tasks = [(m, a['id'], p) for m in MODELS for a in catalogs[m]['albums'] for p in a['images']]
+    verification_scope = 'full'  # Legacy bootstrap still verifies every original.
+    if incremental:
+        previous = {(m, a['id'], p['number']) for m in MODELS
+                    for a in old[m]['albums'] for p in a['images']}
+        additions = [t for t in tasks if (t[0], t[1], t[2]['number']) not in previous]
+        sentinels = [next(t for t in tasks if t[0] == m and
+                     (t[0], t[1], t[2]['number']) in previous) for m in MODELS]
+        tasks = additions + sentinels
+        verification_scope = 'all_new_plus_previous_model_sentinels'
+        print('CF_INCREMENTAL_VERIFY_SCOPE', 'new', len(additions),
+              'existing_sentinels', len(sentinels), flush=True)
     def verify(task):
         model, album, photo = task
         try:
@@ -495,9 +530,14 @@ def main(args):
               'newly_collected_photos': 0, 'subscriptions_changed': 0,
               'gallery_activated': False, 'full_P0_restored': False}
     (work / 'verification.json').write_text(json.dumps(report, indent=2))
+    report['verification_scope'] = verification_scope
     print('CLOUDFLARE_ACTUAL_ASSET_READBACK', json.dumps(report, sort_keys=True), flush=True)
     if failed:
         raise ValueError('REMOTE_PHOTO_READBACK_FAILED')
+    if rollback_cleanup is not None:
+        import atexit
+        atexit.unregister(rollback_cleanup)
+        print('CF_INCREMENTAL_POSTDEPLOY_VERIFIED_ROLLBACK_DISARMED', flush=True)
 
 
 if __name__ == '__main__':
