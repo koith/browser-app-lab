@@ -214,18 +214,19 @@ def main():
     p.add_argument("--model",choices=["mimmi","yui"],required=True)
     p.add_argument("--ledger",type=Path,default=LEDGER)
     p.add_argument("--reverse",type=Path)
+    p.add_argument("--reverse-limit",type=int,default=8)
     p.add_argument("--offset",type=int,default=0)
     p.add_argument("--per-work",type=int,default=3)
     p.add_argument("--max-pages",type=int,default=12)
     p.add_argument("--out",type=Path,required=True)
     a=p.parse_args()
-    if not 0<=a.offset or not 1<=a.per_work<=6 or not 1<=a.max_pages<=32:
+    if not 0<=a.offset or not 1<=a.per_work<=6 or not 1<=a.max_pages<=32 or not 1<=a.reverse_limit<=128:
         raise ValueError("bounded_research_budget_required")
     db=json.loads(a.ledger.read_text(encoding="utf-8"))
     report=crawl_names(db,a.model,a.offset,a.per_work,a.max_pages)
     if a.reverse and a.reverse.is_file():
         matches=merge_image_reverse_sites(db,json.loads(a.reverse.read_text(encoding="utf-8")),
-                                         a.model,report["search_results"],requests.Session())
+                                         a.model,report["search_results"],requests.Session(), limit=a.reverse_limit)
         report["image_reverse_sites_verified"]=matches
         report["targets"]=[{"id":x["id"],"title":x["title"],"urls":x["urls"]}
                            for x in report["search_results"] if x["urls"]]
