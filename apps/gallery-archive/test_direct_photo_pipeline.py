@@ -16,6 +16,29 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_exact_registered_pixibb_visual_editions_reenter_verified_source_scope(self):
+        from direct_photo_pipeline import (
+            exact_registered_visual_edition_source, reviewed_direct_source)
+        registered=json.loads((Path(__file__).resolve().parents[2]/
+            'apps/mimmi-gallery/public-work-pages.json').read_text())['albums']
+        pages=[row['source'] for row in registered if
+               row.get('visual_reference_required') is True and
+               row['source'].startswith(('https://sexy.pixibb.com/',
+                                         'https://cosplay.pixibb.com/'))]
+        self.assertGreaterEqual(len(pages),8)
+        for page in pages:
+            with self.subTest(page=page):
+                self.assertTrue(exact_registered_visual_edition_source(page,'mimmi'))
+                self.assertTrue(reviewed_direct_source(page,'mimmi'))
+                self.assertFalse(reviewed_direct_source(page,'yui'))
+                self.assertFalse(reviewed_direct_source(page+'?page=2','mimmi'))
+        self.assertFalse(reviewed_direct_source(
+            'https://sexy.pixibb.com/mimmi-unknown-album-999-photos-sexy-girl/','mimmi'))
+        self.assertFalse(reviewed_direct_source(
+            'https://sexy.pixibb.com/login','mimmi'))
+        self.assertFalse(reviewed_direct_source(
+            'https://sexy.pixibb.com/mimmi-white-136-photos-sexy-girl/../something','mimmi'))
+
     def test_official_djawa_8640_5760_jpeg_not_rejected_as_too_many_pixels(self):
         """The 49.8 MP publisher edition must be a collectable decoded photo."""
         im=Image.new('RGB',(8640,5760),(195,170,140))
