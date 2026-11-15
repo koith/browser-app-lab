@@ -443,3 +443,72 @@ def test_proven_method_fallback_rejects_different_existing_flat_bytes():
     with pytest.raises(RuntimeError,match="checksum conflict"):
         archive.write_immutable(key,b"new source payload")
     assert root.objects[physical]==b"different immutable remote original"
+
+
+def test_bluesky_profile_header_and_biography_survive_denied_pds_with_cdn_snapshot():
+    import target_account_enrichment as enrichment
+    root=FakeCloud()
+    profile={"platform":"bluesky","identity":DID,"actor":DID,
+             "pds":"https://pds.testing.example",
+             "profile_url":"https://bsky.app/profile/qa-example.bsky.social"}
+    banner=b"synthetic-public-cdn-banner-image"
+    class PublicAPI:
+        def json(self,url,body=None):
+            if "app.bsky.actor.getProfile" in url:
+                return {"did":DID,"displayName":"Saved Public Name",
+                        "handle":"qa-example.bsky.social",
+                        "description":"Full original biography as published",
+                        "banner":"https://cdn.bsky.app/img/qa-banner",
+                        "followersCount":14,"followsCount":8,"postsCount":2}
+            if "com.atproto.repo.getRecord" in url:
+                return {"value":{"description":"Full original biography as published",
+                        "pronouns":"they/them","website":"https://example.org",
+                        "createdAt":"2026-11-01T00:00:00Z"}}
+            raise AssertionError("unexpected public API URL")
+        def media(self,url,mime):
+            assert url=="https://cdn.bsky.app/img/qa-banner"
+            return "image/png",banner
+    archive=job.account_cloud(root,profile)
+    result=enrichment.archive_profile(profile,PublicAPI(),archive)
+    assert result["profile_verified"] is True
+    assert result["profile_assets_verified"]==1
+    document=json.loads(archive.read("profile/snapshots/"+
+                     archive.names("profile/snapshots")[-1]))
+    assert document["description"]=="Full original biography as published"
+    assert document["pronouns"]=="they/them"
+    assert document["website"]=="https://example.org"
+    assert document["assets"]["banner"]["source_tier"]=="public_bluesky_cdn_rendition"
+    assert document["assets"]["avatar"]["status"]=="not_set"
+    assert archive.read(document["assets"]["banner"]["key"],cap=1024)==banner
+
+
+def test_bluesky_original_profile_banner_captured_even_without_appview_image_url():
+    import target_account_enrichment as enrichment
+    root=FakeCloud()
+    profile={"platform":"bluesky","identity":DID,"actor":DID,
+             "pds":"https://pds.testing.example",
+             "profile_url":"https://bsky.app/profile/qa-example.bsky.social"}
+    banner=b"synthetic-original-profile-header"
+    identifier=cid(banner)
+    class PublicAPI:
+        def json(self,url,body=None):
+            if "app.bsky.actor.getProfile" in url:
+                return {"did":DID,"displayName":"Named account",
+                        "handle":"qa-example.bsky.social","description":"Public bio"}
+            if "com.atproto.repo.getRecord" in url:
+                return {"value":{"banner":{"$type":"blob","mimeType":"image/png",
+                           "ref":{"$link":identifier},"size":len(banner)}}}
+            raise AssertionError("unexpected public API URL")
+        def media(self,url,mime):
+            assert "com.atproto.sync.getBlob" in url
+            assert identifier in url
+            return "image/png",banner
+    archive=job.account_cloud(root,profile)
+    enrichment.archive_profile(profile,PublicAPI(),archive)
+    document=json.loads(archive.read("profile/snapshots/"+
+                     archive.names("profile/snapshots")[-1]))
+    assert document["description"]=="Public bio"
+    assert document["assets"]["banner"]["status"]=="sha256_verified"
+    assert document["assets"]["banner"]["source_tier"]=="original_pds_blob"
+    assert document["assets"]["banner"]["original_cid"]==identifier
+
