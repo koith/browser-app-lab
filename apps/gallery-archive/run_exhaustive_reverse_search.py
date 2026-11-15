@@ -23,6 +23,44 @@ from reverse_image_sweep import search_one
 APP_ROOT = Path(__file__).resolve().parents[1]
 
 
+def inventory_accounting(root, model):
+    """Explain raw owner slots vs usable distinct visual search references."""
+    owner = json.loads((Path(root)/f'{model}-gallery/owner-index.json').read_text(encoding='utf-8'))
+    public = json.loads((Path(root)/f'{model}-gallery/stored-albums.json').read_text(encoding='utf-8'))
+    totals = {'owner_photo_records': 0, 'owner_valid_records': 0,
+              'owner_unique_album_sha': 0, 'owner_duplicate_album_sha': 0,
+              'owner_invalid_sha_or_bytes': 0, 'owner_ai_album_records': 0,
+              'public_photo_records': 0, 'public_valid_records': 0}
+    owner_seen = set()
+    for album in owner.get('albums', []):
+        for p in album.get('images', []):
+            totals['owner_photo_records'] += 1
+            if 'ai enhanced' in album.get('title', '').casefold() or 'ai 보정' in album.get('title', '').casefold():
+                totals['owner_ai_album_records'] += 1
+            sha = p.get('sha256')
+            if (not isinstance(sha, str) or len(sha) != 64
+                    or any(c not in '0123456789abcdef' for c in sha)
+                    or type(p.get('bytes')) is not int or p['bytes'] <= 1024):
+                totals['owner_invalid_sha_or_bytes'] += 1
+                continue
+            totals['owner_valid_records'] += 1
+            key = (album['id'], sha)
+            if key in owner_seen:
+                totals['owner_duplicate_album_sha'] += 1
+            else:
+                owner_seen.add(key)
+    totals['owner_unique_album_sha'] = len(owner_seen)
+    for album in public.get('albums', []):
+        for p in album.get('images', []):
+            totals['public_photo_records'] += 1
+            sha = p.get('sha256')
+            if (isinstance(sha, str) and len(sha) == 64 and
+                    all(c in '0123456789abcdef' for c in sha) and
+                    isinstance(p.get('url'), str) and p['url'].startswith('stored-albums/')):
+                totals['public_valid_records'] += 1
+    return totals
+
+
 def identity(photo):
     return hashlib.blake2s(
         ('\x00'.join((photo['model'], photo['album_id'], photo['photo_sha256']))).encode('utf-8'),
@@ -199,6 +237,7 @@ def main():
         print('ALL_PHOTO_SHA_QUEUE_CENSUS', json.dumps({'model': a.model,
               'unique_photo_sha_per_album': len(queue),
               'distinct_albums': len({x['album_id'] for x in queue}),
+              'accounting': inventory_accounting(APP_ROOT,a.model),
               'source_kind_counts': {kind: sum(1 for x in queue if x.get('seed_kind') == kind)
                  for kind in ('static-public', 'public-gateway-cover')}}, sort_keys=True), flush=True)
         return
