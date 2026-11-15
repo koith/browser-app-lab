@@ -99,6 +99,43 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
             self.assertEqual((root/'stage'/row['key']).read_bytes(),raw)
             self.assertEqual(report['owner_census_source_coverage']['reverse_source_pages_admitted'],1)
 
+    def test_reverse_results_cover_new_named_works_even_outside_original_eight(self):
+        from source_alias_search import (
+            hydrate_all_registered_works, merge_image_reverse_sites,
+            exact_work_in_text)
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            base=root/'apps/mimmi-gallery'
+            base.mkdir(parents=True)
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[
+                {'id':'mimmi-white','title':'Mimmi — White',
+                 'source':'https://djawaphoto.com/portfolio/mimmi-white/'},
+                {'id':'mimmi-summer','title':'Mimmi — Summer',
+                 'source':'https://djawaphoto.com/portfolio/mimmi-summer/'}]}))
+            db={'works':{},'model_names':{'mimmi':[{'name':'Mimmi'}],
+                                          'yui':[{'name':'Yui Sim'}]}}
+            self.assertEqual(hydrate_all_registered_works(db,'mimmi',root),2)
+            self.assertTrue(exact_work_in_text('mimmi:mimmi-white','DJAWA Mimmi White'))
+            self.assertFalse(exact_work_in_text('mimmi:mimmi-white','DJAWA Mimmi Summer'))
+            url='https://www.cosplay-public-gallery.net/djawa-mimmi-white'
+            evidence={'model':'mimmi','research_only':True,'results':[{
+                'model':'mimmi','album_id':'mimmi-white','candidate_pages':[{'url':url}]
+            }]}
+            html_page='<title>DJAWA Mimmi White</title><h1>Mimmi White</h1><article>Official work</article>'
+            class Session:
+                def get(self,requested,**kwargs):
+                    if requested!=url:raise AssertionError(requested)
+                    return type('R',(),{'status_code':200,
+                        'headers':{'Content-Type':'text/html'},
+                        'content':html_page.encode(),'text':html_page})()
+            output=[]
+            added=merge_image_reverse_sites(db,evidence,'mimmi',output,Session(),limit=16)
+            self.assertEqual(len(added),1)
+            self.assertEqual(output[0]['id'],'mimmi-white')
+            self.assertEqual(output[0]['urls'],[url])
+            self.assertEqual(output[0]['observations'][0]['proof'],
+                             'unique_named_work_page_model_and_edition')
+
     def test_no_unreviewed_result_is_automatically_scraped(self):
         doc=evidence()
         doc['search_results']=[]
