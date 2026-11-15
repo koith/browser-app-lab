@@ -117,6 +117,22 @@ def source_headings(html):
     context=soup.get_text(" ",strip=True)[:3000]
     return heads,context
 
+def rotated_work_scope(work_ids, offset, per_work, work_budget):
+    """Cover different work IDs every run, rather than shift by only ONE work.
+
+    Workflow passes offset=run_number*per_work. Previously a 16-work budget
+    shifted the window by one work per run: many albums were never inspected
+    during an otherwise exhaustive 8,000-frame visual search campaign.
+    """
+    if not isinstance(offset,int) or offset<0 or not 1<=per_work<=6 or not 1<=work_budget<=80:
+        raise ValueError('INVALID_PUBLIC_SOURCE_SCOPE')
+    if not work_ids:
+        return []
+    budget=min(work_budget,len(work_ids))
+    start=((offset//per_work)*budget)%len(work_ids)
+    return [work_ids[(start+i)%len(work_ids)] for i in range(budget)]
+
+
 def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,work_budget=None):
     session=session or requests.Session()
     results=[]
@@ -129,10 +145,7 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
     if work_budget is not None:
         if not 1<=work_budget<=80:
             raise ValueError('INVALID_NAME_WORK_BUDGET')
-        if work_ids:
-            start=(offset//max(1,per_work))%len(work_ids)
-            work_ids=[work_ids[(start+i)%len(work_ids)]
-                      for i in range(min(work_budget,len(work_ids)))]
+        work_ids=rotated_work_scope(work_ids,offset,per_work,work_budget)
     per_album_pages=max(1,max_pages//max(1,len(work_ids)))
     for work in work_ids:
         checked_this_work=0
@@ -140,7 +153,7 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
         terms=queries(db,model,album)
         if not terms:continue
         # Persistent external workflow-run number rotates the spelling candidates.
-        selected=[terms[(offset+i)%len(terms)] for i in range(min(per_work,len(terms)))]
+        selected=[terms[((offset//max(1,per_work))+i)%len(terms)] for i in range(min(per_work,len(terms)))]
         approved=[]
         observed=[]
         for term in selected:
