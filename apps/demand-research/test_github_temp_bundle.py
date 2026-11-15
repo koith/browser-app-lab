@@ -337,3 +337,28 @@ def test_missing_signed_ancestor_rejects_history_without_caching(
     state["valid"]=True
     assert gh.matching_bundles(account)==[head,ancestor]
     assert state["lookups"]==4
+
+
+def test_preverified_other_account_release_is_not_downloaded_again(monkeypatch):
+    """The immutable tag-owner index is skip-only and account bound."""
+    import io
+    from types import SimpleNamespace
+    own="bluesky-"+"a"*40
+    other="bluesky-"+"b"*40
+    other_tag="intersection-github-archive-43217770001-a1"
+    own_tag="intersection-github-archive-43217770002-a1"
+    verified=SimpleNamespace(account=own,ancestor_tags=(),_zip_source=io.BytesIO(b"verified"))
+    calls=[]
+    monkeypatch.setattr(gh,"_history_cache",None)
+    monkeypatch.setattr(gh,"atom_tags",lambda:iter([other_tag,own_tag]))
+    monkeypatch.setattr(gh,"_verified_tag_owner",
+                        lambda tag:other if tag==other_tag else None)
+    def load(tag):
+        calls.append(tag)
+        if tag!=own_tag:
+            raise AssertionError("previously verified other account re-downloaded")
+        return verified
+    monkeypatch.setattr(gh,"tagged_bundle",load)
+    assert gh.matching_bundles(own)==[verified]
+    assert calls==[own_tag]
+

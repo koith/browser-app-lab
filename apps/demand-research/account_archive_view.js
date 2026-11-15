@@ -11,7 +11,8 @@ const state={account:"",section:"posts",offset:0,more:false,loading:false,
              firstPageRetries:0,retryTimer:null};
 let detailRequestSeq=0;
 const base=()=>"/api/account-archives/"+encodeURIComponent(state.account);
-const sectionLabels={posts:"게시글·답글",followers:"팔로워",following:"팔로잉"};
+const sectionLabels={posts:"게시글",replies:"답글",media:"미디어",followers:"팔로워",following:"팔로잉"};
+const journalSection=section=>["posts","replies","media"].includes(section);
 const ACCOUNT_KEY=/^(?:bluesky|mastodon)-[a-f0-9]{40}$/;
 const params=new URLSearchParams(location.search);
 const embedded=params.get("embedded")==="1";
@@ -45,7 +46,7 @@ function resetFeedSearch(){
   invalidateSavedPostsView();
   if(feedSearchTimer!==null){clearTimeout(feedSearchTimer);feedSearchTimer=null;}
   persistFeedFilters();
-  if(state.section==="posts")setTab("posts");
+  if(journalSection(state.section))setTab(state.section);
 }
 function scheduleFeedSearch(){
   invalidateSavedPostsView();
@@ -79,7 +80,7 @@ function setPlatformTheme(accountKey){
   const provider=String(accountKey||"").startsWith("mastodon-")?"mastodon":"bluesky";
   document.documentElement.dataset.platform=provider;
   $("snsProviderSymbol").textContent=provider==="mastodon"?"M":"🦋";
-  $("snsProviderTitle").textContent="프로필";
+  $("snsProviderTitle").textContent=provider==="mastodon"?"Mastodon":"Bluesky";
   $("detailTitle").textContent=provider==="mastodon"?"보관된 게시물 · 대화":"게시글 · 대화";
 }
 function accountLabel(item){
@@ -141,13 +142,13 @@ async function get(path){
 function showMessage(message){results.replaceChildren(node("p","placeholder",message));}
 function setStatus(message){status.textContent=message;}
 function resetProfile(){
-  $("displayName").textContent="보관된 프로필을 불러오는 중…";
+  $("displayName").textContent="프로필 확인 중…";
   $("handle").textContent="";$("biography").textContent="";
   $("postCount").textContent="—";$("followerCount").textContent="—";
   $("followingCount").textContent="—";$("profileFields").textContent="";
   $("cover").style.backgroundImage="";$("cover").classList.remove("has-image");
   $("avatar").style.backgroundImage="";$("avatar").textContent="?";
-  $("profileStatus").textContent="프로필 보관본 확인 중";
+  $("profileStatus").textContent="보관된 원본의 프로필 정보를 확인하는 중입니다.";
   $("sourceProfile").hidden=true;
 }
 function syncVisiblePostIdentity(){
@@ -194,6 +195,8 @@ function renderProfile(profile){
     setAccountOption(current);
   }
   $("displayName").textContent=profile.display_name||profile.handle||"공개 프로필";
+  $("snsProviderTitle").textContent=profile.display_name||profile.handle||
+    (state.account.startsWith("mastodon-")?"Mastodon":"Bluesky");
   $("handle").textContent=profile.handle?("@"+profile.handle):"계정 ID "+(profile.identity||"");
   $("biography").textContent=profile.description||"공개 자기소개가 저장되지 않았습니다.";
   $("postCount").textContent=fmt(profile.posts_count);
@@ -220,6 +223,33 @@ function renderProfile(profile){
   $("profileStatus").textContent="PROFILE SNAPSHOT · "+date(profile.captured_at)+
      " · "+assets.join(" · ")+" · 관계 목록/게시글 완전성 별도 확인 필요";
   syncVisiblePostIdentity();
+}
+function showVerifiedPickerPreview(item){
+  // The parent already loaded the source-bound, AES/SHA verified archive
+  // picker. Display its name/handle at once, without pretending that the
+  // full profile, bio, avatar or source ZIP has finished loading.
+  if(!item||item.key!==state.account||!ACCOUNT_KEY.test(item.key))return;
+  const clean=s=>typeof s==="string"?s.replace(/[\r\n\u0000-\u001f]/g," ").trim():"";
+  const name=clean(item.display_name).slice(0,100);
+  const handle=clean(item.handle).replace(/^@+/,"").slice(0,200);
+  if(!name&&!handle)return;
+  if(!state.profile){
+    $("displayName").textContent=name||handle;
+    $("handle").textContent=handle?"@"+handle:"";
+    $("snsProviderTitle").textContent=name||handle;
+    $("profileStatus").textContent="계정 이름·아이디 표시됨 · 원본 프로필 및 게시글 확인 중";
+  }
+}
+if(embedded){
+  window.addEventListener("message",event=>{
+    if(event.origin!==location.origin||event.source!==window.parent)return;
+    const message=event.data;
+    if(message?.type==="intersection:archive-preview")
+      showVerifiedPickerPreview(message.item);
+    if(message?.type==="intersection:archive-switch"&&
+       ACCOUNT_KEY.test(message.account)&&message.account!==state.account)
+      void selectAccount(message.account);
+  });
 }
 function safeMediaPath(value){
   if(typeof value!=="string"||value.length>300)return "";
@@ -397,7 +427,7 @@ function setTab(section){
   state.firstPageRetries=0;
   state.viewVersion+=1;state.loading=false;
   state.section=section;state.offset=0;state.more=false;
-  feedSearch.hidden=section!=="posts";
+  feedSearch.hidden=!journalSection(section);
   for(const btn of document.querySelectorAll("[data-section]")){
     const active=btn.dataset.section===section;
     if(btn.getAttribute("role")==="tab"){
@@ -424,26 +454,28 @@ async function nextPage(){
   const selected=state.section,selectedAccount=state.account,offset=state.offset,
         requestVersion=state.viewVersion;
   try{
+    const isJournal=journalSection(selected);
     const feedParams=new URLSearchParams({
       offset:String(offset),limit:"20",q:feedQuery.value.trim(),
-      kind:feedKind.value,media_status:feedMediaStatus.value});
-    const endpoint=selected==="posts"
+      kind:selected==="replies"?"reply":selected==="media"?"":feedKind.value,
+      media_status:selected==="media"?"has_media":feedMediaStatus.value});
+    const endpoint=isJournal
        ?base()+"/feed?"+feedParams.toString()
        :base()+"/graph/"+selected+"?offset="+offset+"&limit=50";
     const data=await get(endpoint);
     if(state.account!==selectedAccount||state.section!==selected||
        state.viewVersion!==requestVersion)return;
-    const records=selected==="posts"?data.posts:data.accounts;
+    const records=isJournal?data.posts:data.accounts;
     if(!Array.isArray(records))throw Error("보관본 페이지 형식이 올바르지 않습니다.");
     if(offset===0)results.replaceChildren();
-    for(const item of records)results.append(selected==="posts"?postCard(item):personCard(item));
+    for(const item of records)results.append(isJournal?postCard(item):personCard(item));
     if(!records.length&&offset===0)
-      showMessage(selected==="posts"?"보관된 게시글이 없습니다. 백업 실행·완료 여부를 확인하세요.":"조회 가능한 공개 "+sectionLabels[selected]+" 목록이 없습니다.");
+      showMessage(isJournal?"보관된 "+sectionLabels[selected]+"이 없습니다. 백업 실행·완료 여부를 확인하세요.":"조회 가능한 공개 "+sectionLabels[selected]+" 목록이 없습니다.");
     state.offset+=records.length;
     // A stale or malformed cursor cannot create an endless More loop.
     state.more=Boolean(data.more)&&records.length>0&&state.offset>offset;
     $("more").hidden=!state.more;$("more").textContent="더 보기";
-    setStatus(selected==="posts"?"게시글 "+fmt(data.total)+"건 중 "+fmt(state.offset)+"건 표시":
+    setStatus(isJournal?sectionLabels[selected]+" "+fmt(data.total)+"건 중 "+fmt(state.offset)+"건 표시":
        "공개 관계 계정 "+fmt(data.captured_unique)+"명 보관 · "+fmt(state.offset)+"명 표시 (전체 명단 보장 안 됨)");
   }catch(error){
     if(state.account===selectedAccount&&state.section===selected&&
@@ -454,7 +486,7 @@ async function nextPage(){
       // read. A bounded retry is better than requiring an operator click;
       // it NEVER treats unverified/failed responses as saved originals.
       const transient=/(?:HTTP (?:502|503|504)|failed to fetch|networkerror)/i.test(message);
-      if(offset===0&&selected==="posts"&&transient&&state.firstPageRetries<2){
+      if(offset===0&&journalSection(selected)&&transient&&state.firstPageRetries<2){
         const attempt=++state.firstPageRetries;
         const delay=attempt===1?1300:3300;
         setStatus("검증된 보관본 읽기 지연 · 자동 재시도 "+attempt+"/2");
@@ -490,7 +522,9 @@ async function selectAccount(value){
     showMessage("계정을 선택하세요.");setStatus("보관할 계정을 선택하세요.");
     return;
   }
-  resetProfile();showMessage("게시글 보관본을 불러오는 중…");
+  resetProfile();
+  showVerifiedPickerPreview(state.accounts.find(item=>item.key===value));
+  showMessage("게시글 보관본을 불러오는 중…");
   // The remote profile snapshot can take tens of seconds to verify. Start
   // post loading NOW, independently. A stale profile response must never
   // overwrite a newly selected account.

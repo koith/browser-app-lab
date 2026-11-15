@@ -99,6 +99,9 @@ async function preloadChoices(force=false){
     choices.sort((a,b)=>accountLabel(a).localeCompare(accountLabel(b),"ko-KR"));
     choicesTime=Date.now();
     renderChoices();
+    // The picker has already verified the source-bound name/handle.
+    // Send a tiny preview to the child before its full ZIP profile resolves.
+    sendAccountPreview();
     if(selectedMode()==="accounts")void showQueueSummary();
     if(selectedMode()==="accounts"&&connected){
       if(!chosenAccount()&&choices.length)storeSelectedKey(choices[0].key);
@@ -127,8 +130,21 @@ function fullViewUrl(){
 }
 function hidePrivate(){
   frameBox.hidden=true;actions.hidden=true;
+  frame.dataset.accountViewerLoaded="";
   frame.removeAttribute("src");lastSrc="";
   if(frameWakeTimer!==null){clearTimeout(frameWakeTimer);frameWakeTimer=null;}
+}
+function sendAccountPreview(){
+  if(selectedMode()!=="accounts"||
+      frame.dataset.accountViewerLoaded!=="1")return;
+  const key=chosenAccount(),item=choices.find(row=>row.key===key);
+  if(!item||!ACCOUNT.test(key))return;
+  try{
+    frame.contentWindow?.postMessage({
+      type:"intersection:archive-preview",
+      item:{key,display_name:item.display_name||"",handle:item.handle||""}
+    },location.origin);
+  }catch{/* Preview is optional; independently verified API still loads. */}
 }
 frame.addEventListener("load",()=>{
   if(!frame.src||frameBox.hidden)return;
@@ -137,8 +153,15 @@ frame.addEventListener("load",()=>{
   if(!/APPLICATION LOADING|SERVICE WAKING UP|WELCOME TO RENDER/i.test(body)){
     frameWakeRetries=0;
     if(frameWakeTimer!==null){clearTimeout(frameWakeTimer);frameWakeTimer=null;}
+    try{
+      frame.dataset.accountViewerLoaded=
+        frame.contentWindow?.location?.pathname==="/account-archive"&&
+        frame.contentDocument?.querySelector(".archive-content")?"1":"";
+    }catch{frame.dataset.accountViewerLoaded="";}
+    sendAccountPreview();
     return;
   }
+  frame.dataset.accountViewerLoaded="";
   frameBox.hidden=true;
   status.textContent="보관 서버가 재가동 중입니다. 화면을 자동으로 다시 연결합니다.";
   if(frameWakeRetries>=5){
@@ -223,12 +246,34 @@ function showArchiveFrame(force=false){
     return;
   }
   const url=frameUrl();
-  if(force||url!==lastSrc){frame.src=url;lastSrc=url;}
+  if(force||url!==lastSrc){
+    const canSwitch=mode==="accounts"&&!force&&
+      frame.dataset.accountViewerLoaded==="1"&&
+      lastSrc.startsWith("/account-archive?embedded=1");
+    if(canSwitch){
+      // Keep the verified ZIP session, saved media and scrollable iframe
+      // alive when switching selected accounts. Never reload the whole
+      // application merely to change its source-bound account selection.
+      try{
+        frame.contentWindow?.postMessage({
+          type:"intersection:archive-switch",account:chosenAccount()
+        },location.origin);
+        lastSrc=url;
+      }catch{
+        frame.dataset.accountViewerLoaded="";
+        frame.src=url;lastSrc=url;
+      }
+    }else{
+      frame.dataset.accountViewerLoaded="";
+      frame.src=url;lastSrc=url;
+    }
+  }
   frame.title=mode==="auto"?"자동으로 보관한 게시글과 원본 미디어":
     "지정 계정의 게시글·댓글·원본 미디어·프로필 보관본";
   frameBox.hidden=false;
   if(mode==="accounts"){
     if(quick&&quick.options.length)quick.value=chosenAccount();
+    sendAccountPreview();
     status.textContent="선택한 계정의 보관된 프로필·글·미디어를 아래에 바로 표시합니다.";
     void preloadChoices();
   }else{

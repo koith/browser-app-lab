@@ -55,7 +55,8 @@ def response_fixture(path,query=""):
         selected=[p for p in posts if
                   query_text in p["text"].casefold() and
                   (not kind or kind==("revision" if p.get("revision_of") else p["kind"])) and
-                  (not media or media==("complete" if p["archive_complete"] else "partial"))]
+                  (not media or (media=="has_media" and bool(p["media"])) or
+                   media==("complete" if p["archive_complete"] else "partial"))]
         start=int(args.get("offset",["0"])[0])
         # Force 2 records per synthetic page to exercise offset=2 retry.
         end=start+min(2,int(args.get("limit",["20"])[0]))
@@ -145,6 +146,10 @@ def run(browser_type,name,width,height):
         page.get_by_role("heading",name="Synthetic QA").wait_for(timeout=12000)
         assert page.get_by_text("Synthetic biography for browser verification").count()==1
         assert page.locator("#followerCount").inner_text()=="13"
+        assert page.evaluate("document.documentElement.dataset.platform")=="bluesky"
+        assert page.locator("#cover").evaluate(
+            "(el) => getComputedStyle(el).backgroundImage")=="none", (
+            "source-less cover must NOT show an invented green gradient")
         page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for(timeout=10000)
         assert page.locator(".post-media img").count()==1
         # A transient 503 on page 2 must leave page 1 visible, and retry from offset=2.
@@ -186,6 +191,16 @@ def run(browser_type,name,width,height):
         page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for()
         assert page.locator("#results article.post").count()==2
         assert "media_status=partial" not in page.url
+        # Native-like source tabs must filter FULL saved records, not
+        # fake media cards or the current first page alone.
+        page.get_by_role("tab",name="답글",exact=True).click()
+        page.locator("#results").get_by_text("Synthetic second archived post").wait_for()
+        assert page.locator("#results article.post").count()==1
+        page.get_by_role("tab",name="미디어",exact=True).click()
+        page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for()
+        assert page.locator("#results article.post").count()==2
+        page.get_by_role("tab",name="게시글",exact=True).click()
+        page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for()
         # Search a long picker without rewriting the current verified account.
         page.locator("#accountSearch").fill("Synthetic")
         assert page.locator("#accountSelect option").count()==1
@@ -204,14 +219,14 @@ def run(browser_type,name,width,height):
         page.get_by_text("Synthetic comment in private view").wait_for(timeout=5000)
         page.locator("#closeDetail").click()
         assert page.locator("#postDetail[open]").count()==0
-        page.get_by_role("tab",name="팔로워").click()
+        page.locator("#statFollowers").click()
         page.locator("#results .person").get_by_text("Public Reader").wait_for(timeout=5000)
-        page.get_by_role("tab",name="팔로잉").click()
+        page.locator("#statFollowing").click()
         page.locator("#results .person").get_by_text("@reader.bsky.social").wait_for(timeout=5000)
         # Round trips must reuse already SHA-backed cards/media and avoid
         # another cold download of the entire immutable private ZIP.
         first_page_return_failure["armed"]=True
-        page.get_by_role("tab",name="게시글·답글").click()
+        page.get_by_role("tab",name="게시글",exact=True).click()
         page.locator("#results").get_by_text(
             "Synthetic posted image and comment history").wait_for(timeout=12000)
         assert first_page_return_failure["count"]==0, (
@@ -237,7 +252,7 @@ def run(browser_type,name,width,height):
         page.wait_for_timeout(850)
         assert page.locator("#results .person").count()==1,"stale feed must not replace new tab"
         # Closing an old thread and opening another must not display the old replies.
-        page.get_by_role("tab",name="게시글·답글").click()
+        page.get_by_role("tab",name="게시글",exact=True).click()
         page.locator("#results article.post").nth(1).get_by_text("Synthetic second archived post").wait_for(timeout=5000)
         page.locator("#results article.post").first.get_by_role("button",name="댓글·상세 보기").click()
         page.locator("#closeDetail").click()

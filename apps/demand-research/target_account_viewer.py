@@ -297,7 +297,16 @@ def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
         if not isinstance(expected,int) or expected<0:expected=0
         if not isinstance(saved,int) or saved<0:saved=0
         complete=post.get("archive_complete") is True and saved>=expected
-        if media_status and media_status!=("complete" if complete else "partial"):
+        # Native SNS media tab includes only entries with a real archived
+        # source media slot, never text-only posts or fabricated thumbnails.
+        if media_status=="has_media":
+            raw_slots=post.get("media",[])
+            if not isinstance(raw_slots,list) or not any(
+                    isinstance(item,dict) and
+                    archived_media_slot(str(post["id"]),item) is not None
+                    for item in raw_slots[:16]):
+                continue
+        elif media_status and media_status!=("complete" if complete else "partial"):
             continue
         pid=post["id"]
         media=[]
@@ -635,7 +644,7 @@ def create_router(auth):
         auth(request)
         if kind not in ("","post","reply","revision"):
             raise HTTPException(400,"Invalid archived post type")
-        if media_status not in ("","complete","partial"):
+        if media_status not in ("","complete","partial","has_media"):
             raise HTTPException(400,"Invalid media verification filter")
         _,_,archive=open_account(account)
         try:

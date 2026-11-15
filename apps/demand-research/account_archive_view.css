@@ -226,3 +226,89 @@ body{background:var(--paper);color:var(--ink)}
 :root[data-platform="mastodon"] .post{border-bottom:1px solid #393d4a}
 .archive-embedded .sns-provider-top{margin-top:0;border-radius:0}
 @media(max-width:650px){.sns-provider-top{padding:8px 12px}}
+
+
+/* 2026-11 provider-faithful archived profile.
+   A missing SOURCE-VERIFIED banner is intentionally a flat, neutral surface.
+   Never fabricate an account-specific cover with a decorative gradient. */
+:root[data-platform="bluesky"] .cover:not(.has-image){
+  background:#e8f2ff;background-image:none!important;
+}
+:root[data-platform="mastodon"] .cover:not(.has-image){
+  background:#373c52;background-image:none!important;
+}
+:root[data-platform="bluesky"] .sns-provider-top{
+  background:#fff;min-height:51px;border-bottom:1px solid #edf1f5;
+}
+:root[data-platform="mastodon"] .sns-provider-top{
+  background:#262a38;min-height:51px;border-bottom:1px solid #404456;
+}
+:root[data-platform="bluesky"] .sns-provider-symbol{
+  color:#1185e5;background:#e6f3ff;border-radius:50%;
+}
+:root[data-platform="mastodon"] .sns-provider-symbol{
+  color:white;background:#6364ff;border-radius:8px;
+}
+:root[data-platform="bluesky"] .sns-provider-ident strong{
+  font-size:16px;font-weight:780;color:#162235;
+}
+:root[data-platform="mastodon"] .sns-provider-ident strong{
+  font-size:16px;font-weight:780;color:#f1f2fb;
+}
+:root[data-platform="bluesky"] .profile-content,
+:root[data-platform="mastodon"] .profile-content{
+  display:flex;flex-direction:column;
+}
+.profile-content .avatar{order:0}
+.profile-content .profile-head{order:1}
+.profile-content .stats{order:2;gap:14px;flex-wrap:wrap;margin:13px 0 4px}
+.profile-content .bio{order:3;margin:7px 0 4px}
+.profile-content .profile-fields{order:4}
+.profile-content .evidence{order:5}
+:root[data-platform="bluesky"] .profile-head h2{
+  color:#17212e;letter-spacing:-.65px;font-weight:800;
+}
+:root[data-platform="mastodon"] .profile-head h2{
+  color:#f3f4fd;letter-spacing:-.45px;font-weight:750;
+}
+:root[data-platform="bluesky"] .stats strong{
+  color:#182333;font-size:14px;font-weight:800;
+}
+:root[data-platform="bluesky"] .stats span{color:#607184}
+:root[data-platform="mastodon"] .stats strong{
+  color:#f5f5ff;font-size:14px;font-weight:800;
+}
+:root[data-platform="mastodon"] .stats span{color:#a5adbd}
+:root[data-platform="bluesky"] .avatar{background:#e7f2fe;color:#1184e7}
+:root[data-platform="mastodon"] .avatar{background:#353e58;color:#b5b6ff}
+:root[data-platform="bluesky"] .archive-content{
+  background:#fff;border-top:1px solid #edf1f5;
+}
+:root[data-platform="mastodon"] .archive-content{
+  background:#262a38;border-top:1px solid #404456;
+}
+:root[data-platform="bluesky"] .post,.archive-content[data-platform="bluesky"] .post{
+  background:#fff;border-bottom:1px solid #e9edf2;
+}
+:root[data-platform="mastodon"] .post{background:#262a38;border-color:#404456}
+:root[data-platform="bluesky"] .post-type{
+  color:#136eb5;background:#eaf5ff;font-size:11px;
+}
+:root[data-platform="mastodon"] .post-type{
+  color:#c1bfff;background:#373b51;font-size:11px;
+}
+:root[data-platform="bluesky"] .tabs button.active{
+  color:#147ee5;border-bottom:3px solid #147ee5;
+}
+:root[data-platform="mastodon"] .tabs button.active{
+  color:#b9b8ff;border-bottom:3px solid #817aff;
+}
+:root[data-platform="mastodon"] .evidence{background:#35394b;color:#c2c5d1}
+:root[data-platform="bluesky"] .evidence{background:#f2f7fd;color:#58708b}
+@media(max-width:650px){
+  .archive-embedded .cover{height:128px}
+  .archive-embedded .profile-content{padding-top:47px}
+  .profile-content .stats{gap:11px;margin-top:13px}
+  .archive-content .tabs button{flex:1;min-width:0;padding:11px 8px}
+  .profile-content .bio{font-size:13px;line-height:1.55}
+}
