@@ -420,8 +420,9 @@
  function onlinePeers(sc=state.scope){
   const fresh=[compactPresence()];
   for(const peer of state.peers.values()){
-   if(state.offlineRoom&&peer.source==='central')continue;
-    if(central.enabled&&central.ready&&!state.offlineRoom&&peer.source!=='central')continue;
+   const localScope=sc.startsWith('offline-room:');
+   if((state.offlineRoom||localScope)&&peer.source==='central')continue;
+   if(central.enabled&&central.ready&&!state.offlineRoom&&!localScope&&peer.source!=='central')continue;
    if(now()-peer.last<17000&&peer.id!==tabId)fresh.push(peer);
   }
   return fresh.filter(x=>x.scope===sc);
@@ -1715,7 +1716,7 @@
     const route=e.detail?.route;
     if(central.enabled&&central.joinedId&&route!=='rooms'){
      central.leave().catch(e=>console.warn('Central ChatTown leave:',e.message));
-     state.view='directory';state.roomId=null;
+     state.view='directory';state.roomId=null;state.offlineRoom=false;
     }
     if(route==='sky')changeScope('world');
     else if(route==='city')changeScope('city');
@@ -1734,6 +1735,6 @@
  window.__LEAF_SOCIAL__={openRegion,openKnightTown,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
   const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room,true);return room.id;
- },send:publishText,getState:()=>({avatar:state.avatar,region:state.region,district:state.district,view:state.view,scope:state.scope,knightDistrict:state.knightDistrict,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
+ },send:publishText,getState:()=>({avatar:state.avatar,region:state.region,district:state.district,view:state.view,scope:state.scope,knightDistrict:state.knightDistrict,roomId:state.roomId,offlineRoom:state.offlineRoom,centralReady:central.ready===true,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
 })();
