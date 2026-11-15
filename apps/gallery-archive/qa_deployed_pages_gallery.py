@@ -7,6 +7,7 @@ No owner cookies, bearer tokens, bypasses or screenshots are supplied.
 """
 from __future__ import annotations
 import argparse
+import hashlib
 import json
 import time
 from playwright.sync_api import sync_playwright, Error as PlaywrightError, TimeoutError as PlaywrightTimeoutError
@@ -19,8 +20,79 @@ MODELS = {
             "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97",
                           "yui-public-official-x-teapawt")},
     "mimmi": {"min_count": 2526, "raw_owner_index":3214,
-              "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart")},
+              "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart",
+                            "djawa-christmas-special-2021-mimmi")},
 }
+
+
+def verify_deployed_mimmi_new_20(context, page):
+    """Prove *each* newly saved photo is public, byte-exact and browser-decoded.
+
+    A green Pages deployment alone cannot demonstrate that visitor images load.
+    This gate ties the 20 unique JPGs added at commit 927b59f (slots 171-190)
+    to the live public manifest, first-party bytes and actual image pixels.
+    """
+    aid = "djawa-christmas-special-2021-mimmi"
+    origin = "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/"
+    endpoint = f"{ROOT}/apps/mimmi-gallery"
+    response = context.request.get(
+        f"{endpoint}/stored-albums.json", timeout=65000,
+        headers={"Cache-Control": "no-cache"})
+    assert response.status == 200, ("mimmi", "published manifest unavailable", response.status)
+    document = response.json()
+    album = next((a for a in document.get("albums", []) if a.get("id") == aid), None)
+    assert album is not None, ("mimmi", "published Christmas 2021 album absent")
+    records = [
+        photo for photo in album.get("images", [])
+        if isinstance(photo.get("number"), int)
+        and 171 <= photo["number"] <= 190
+        and photo.get("origin_page") == origin
+    ]
+    assert len(records) == 20, ("mimmi", "20 committed cuts missing from published album",
+                                len(records))
+    assert {p["number"] for p in records} == set(range(171, 191))
+    assert len({p["sha256"] for p in records}) == 20
+    browser_inputs = []
+    total_bytes = 0
+    for photo in sorted(records, key=lambda p: p["number"]):
+        path = photo["url"]
+        assert path.startswith(f"stored-albums/{aid}/") and ".." not in path.split("/")
+        url = f"{endpoint}/{path}"
+        result = context.request.get(url, timeout=60000,
+                                     headers={"Cache-Control": "no-cache"})
+        assert result.status == 200, (photo["number"], "published JPG not served", result.status)
+        raw = result.body()
+        assert len(raw) == photo["bytes"], (photo["number"], "public JPG size mismatch")
+        assert hashlib.sha256(raw).hexdigest() == photo["sha256"], (
+            photo["number"], "published JPG SHA mismatch")
+        total_bytes += len(raw)
+        browser_inputs.append({
+            "url": url, "width": photo["width"],
+            "height": photo["height"], "number": photo["number"]
+        })
+    decoded = page.evaluate("""async items => {
+      // The visitor browser, not only the API client, must decode each JPEG.
+      const answers = [];
+      for (const row of items) {
+        const image = new Image();
+        image.src = row.url;
+        try {
+          await image.decode();
+          answers.push({number:row.number, ok:image.complete &&
+            image.naturalWidth===row.width && image.naturalHeight===row.height});
+        } catch {
+          answers.push({number:row.number, ok:false});
+        }
+      }
+      return answers;
+    }""", browser_inputs)
+    assert len(decoded) == 20 and all(row["ok"] for row in decoded), (
+        "mimmi", "published photo pixels failed to decode", decoded)
+    print("DEPLOYED_MIMMI_NEW_20_EXACT_SHA_AND_BROWSER_PIXELS_PASS",
+          json.dumps({"album_id":aid, "sha_distinct_photo_files":20,
+                      "public_total_bytes":total_bytes, "browser":page.context.browser.browser_type.name,
+                      "all_20_individual_jpegs_decoded":True}, ensure_ascii=False),
+          flush=True)
 
 
 def verify_saved_routes(context, page, model):
@@ -229,6 +301,8 @@ def exercise(browser, model: str, rule: dict, engine: str):
         # have a SHA/bytes/dimensions-identical route in its correct work.
         # A visible count or minimal bootstrap can never replace this proof.
         saved_routes = verify_saved_routes(context, page, model)
+        if model == "mimmi":
+            verify_deployed_mimmi_new_20(context, page)
         assert saved_routes["saved_rows_checked"] == owner_raw["physical"], (
             model, "raw owner ledger and displayed exact routes diverged")
         assert "실제 저장본" in counts["banner"], (model, counts)
