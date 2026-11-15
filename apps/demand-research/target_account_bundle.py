@@ -313,6 +313,13 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
                                    archive_key(profile)+"/",prior=prior))
         except (RuntimeError,ValueError,TypeError,KeyError) as error:
             interrupted=type(error).__name__
+    if os.getenv("DEMAND_REQUIRE_PROFILE_SNAPSHOT","0")=="1":
+        if (interrupted is not None or not isinstance(result,dict)
+                or result.get("profile",{}).get("profile_verified") is not True):
+            # A registration-only or post-only delta is not a restored
+            # profile. A failed backfill must not publish an empty release or
+            # present successful bytes as a complete SNS account page.
+            raise RuntimeError("Required public profile snapshot not captured")
     if not store.objects:
         raise RuntimeError("no verifiable public content staged")
     refs=[k for k in store.objects if k.endswith("/post.json")]
