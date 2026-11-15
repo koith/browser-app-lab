@@ -51,7 +51,15 @@
  readyButton.textContent='체스맨·READY 보기';
  const panHint=document.createElement('span');panHint.id='dice-room-pan-hint';
  panHint.textContent='확대 시 빈 배경을 가로로 밀어 다른 영역 보기';
- controls.append(zoomButton,settingsButton,readyButton,panHint);
+ // Web-only accessibility shortcut to the SAME original READY start action:
+ // display only if the original button is clipped in a zoomed phone room.
+ const startShortcut=document.createElement('button');
+ startShortcut.id='dice-room-start-shortcut';startShortcut.type='button';
+ startShortcut.textContent='▶ 게임 시작';
+ startShortcut.setAttribute('aria-label','게임 시작 (원본 READY 버튼과 같은 동작)');
+ startShortcut.hidden=true;
+ startShortcut.onclick=()=>$('start-game')?.click();
+ controls.append(zoomButton,settingsButton,readyButton,startShortcut,panHint);
  wrap.append(controls);
  const view={scale:0,x:0,y:0,fitScale:0};
  function fit(){
@@ -77,6 +85,10 @@
   panHint.hidden=!zoom;
   settingsButton.hidden=!zoom||!wrap.classList.contains('config-open');
   readyButton.hidden=!zoom||!wrap.classList.contains('config-open');
+  const start=$('start-game'),box=start?.getBoundingClientRect(),area=wrap.getBoundingClientRect();
+  const startOnScreen=Boolean(box&&box.width>0&&box.left>=area.left-1&&box.right<=area.right+1&&
+   box.top>=area.top-1&&box.bottom<=area.bottom+1);
+  startShortcut.hidden=!zoom||!wrap.classList.contains('config-open')||startOnScreen;
  }
  function focusPart(part){
   if(!narrow()||!zoomed){fit();return}
