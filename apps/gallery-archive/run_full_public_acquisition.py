@@ -17,6 +17,7 @@ import sys
 ROOT=Path(__file__).resolve().parents[2]
 ARCHIVE=ROOT/'apps/gallery-archive'
 MAX_REGISTERED_PAGES_PER_WORK=5
+MAX_CHROMIUM_WEAK_PAGES_PER_BATCH=2
 PRIORITY={
  'mimmi':(
   'djawa-pop-kitty-party','djawa-nikke-yuni',
@@ -74,11 +75,15 @@ def execute(args):
           '--model',args.model,'--owner',f'apps/{args.model}-gallery/owner-index.json',
           '--out',str(target),'--max-new',str(args.max_per_batch),
           '--max-pages',str(MAX_REGISTERED_PAGES_PER_WORK),
-          '--page-cycle',str(args.run_number),'--render-budget','0',
+          '--page-cycle',str(args.run_number),'--render-budget',
+          str(MAX_CHROMIUM_WEAK_PAGES_PER_BATCH if args.alternate_priority else 0),
           '--reviewed-source-only']
         if source_evidence and source_evidence.is_file():
             command.extend(['--reverse-evidence',str(source_evidence)])
-        if index==0 and args.alternate_priority:
+        # The old first-batch-only guard left every secondary work without
+        # independent Scrapy/Chromium extraction. Keep every work subject to
+        # existing exact-edition, published-HTML and SHA checks instead.
+        if args.alternate_priority:
             command.append('--alternative-engines')
         for aid in ids:
             command.extend(['--album-id',aid])

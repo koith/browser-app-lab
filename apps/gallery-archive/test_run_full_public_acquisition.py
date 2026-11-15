@@ -5,7 +5,8 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
-from run_full_public_acquisition import work_batches, PRIORITY, replay, execute, MAX_REGISTERED_PAGES_PER_WORK
+from run_full_public_acquisition import (work_batches, PRIORITY, replay, execute,
+    MAX_REGISTERED_PAGES_PER_WORK, MAX_CHROMIUM_WEAK_PAGES_PER_BATCH)
 
 ROOT=Path(__file__).resolve().parents[2]
 
@@ -53,6 +54,30 @@ class FullAcquisitionTests(unittest.TestCase):
                 with self.subTest(batch=index):
                     self.assertEqual(
                         invocation[invocation.index('--max-pages')+1],'5')
+
+    def test_alternative_parsers_and_browser_apply_to_every_work_batch(self):
+        # Previously every batch except the first one silently lost Scrapy
+        # and Chromium image recovery despite having verified source pages.
+        self.assertEqual(MAX_CHROMIUM_WEAK_PAGES_PER_BATCH,2)
+        with tempfile.TemporaryDirectory() as temporary:
+            for model in PRIORITY:
+                args=SimpleNamespace(model=model,run_number=1,
+                    stage=Path(temporary)/model,source_evidence=None,
+                    batch_size=7,max_per_batch=48,bytes_per_batch=36000000,
+                    batch_timeout=60,alternate_priority=True,plan_only=False)
+                with patch('run_full_public_acquisition.subprocess.run',
+                           return_value=SimpleNamespace(returncode=1)) as command:
+                    self.assertEqual(execute(args),2)
+                calls=[call.args[0] for call in command.call_args_list]
+                self.assertGreater(len(calls),1)
+                for index,invocation in enumerate(calls):
+                    with self.subTest(model=model,batch=index):
+                        self.assertIn('--alternative-engines',invocation)
+                        self.assertIn('--reviewed-source-only',invocation)
+                        self.assertEqual(
+                            invocation[invocation.index('--render-budget')+1],'2')
+                        self.assertEqual(
+                            invocation[invocation.index('--max-pages')+1],'5')
 
     def test_all_priority_ids_have_explicit_work_source_scope(self):
         for model,ids in PRIORITY.items():
