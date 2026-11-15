@@ -23,6 +23,9 @@ const BASE_CARDS=[
 {id:'schwarz',name:'흑태자',move:2,atk:5,def:3,int:2,point:8,price:26000,rank:'valuable',portrait:'♚',ability:'공격A'}
 ];
 const CHR_SOURCE=window.ORIGINAL_LEAF_CHESSMEN||[];
+// 97 original Naver fan-archive card ranks. Never estimate original rarity
+// from a numeric score or borrow a neighboring CHR's original tier.
+const HISTORIC_SHOP_RANKS=window.ORIGINAL_LEAF_HISTORIC_RARITIES?.cards||{};
 const HISTORIC_SHOP_PRICE_SNAPSHOT=window.ORIGINAL_LEAF_SHOP_PRICE_SNAPSHOT_20030105||null;
 const HISTORIC_SHOP_DELTAS=window.ORIGINAL_LEAF_SHOP_PRICE_CHANGES_20030115||null;
 const historicalShopPrice=c=>{
@@ -64,7 +67,13 @@ if(CHR_SOURCE.length>50){
  .filter(c=>!['근육이','마장기 test','노동자스켈톤'].includes(c.name))
  .map(c=>{
  const historical=historicalShopPrice(c);
- return {id:'c_'+c.id,sourceId:c.id,name:c.name,move:c.move,atk:c.atk,def:c.def,int:c.int,point:Math.max(1,Math.ceil((c.atk+c.def+c.int+c.move)/3)),rank:c.score>=175?'valuable':'normal',
+ const historicRank=HISTORIC_SHOP_RANKS[c.id];
+ const rankProven=historicRank?.chrName===c.name&&['normal','valuable'].includes(historicRank.rank);
+ return {id:'c_'+c.id,sourceId:c.id,name:c.name,move:c.move,atk:c.atk,def:c.def,int:c.int,point:Math.max(1,Math.ceil((c.atk+c.def+c.int+c.move)/3)),
+ rank:rankProven?historicRank.rank:'unverified',
+ rankEvidence:rankProven?'FAN-ARCHIVE-97-POSTS/'+historicRank.sourceMatch:'UNVERIFIED-ORIGINAL-CATEGORY',
+ rankSource:rankProven?historicRank.source:null,
+ rankArchivedName:rankProven?historicRank.sourceName:null,
  price:historical?.value??(HIGH_PRICES[c.name]||Math.max(160,Math.round(c.score*18/10)*10)),
  priceEvidence:historical?.evidence||'WEB-INFERRED-PRICE',historicalPriceLabel:historical?.label||null,
  ability:ABILITY_NAMES[c.abilityId]||'능력 '+c.abilityId,abilityId:c.abilityId,element:['Wands','Swords','Cups','Disks','None'][c.element]||'None',score:c.score,portrait:'♟'};});
@@ -531,10 +540,13 @@ function drawShop(){
    b.className='shop-card'+(chosenCard===c.id?' selected':'');
    // The archived CardShop atlas contains distinct original Normal and
    // Valuable card frames; expose the genuine catalog rarity to the skin.
-   b.dataset.rank=c.rank==='valuable'?'valuable':'normal';
+   b.dataset.rank=c.rank;
+   b.dataset.rankEvidence=c.rankEvidence||'UNVERIFIED-ORIGINAL-CATEGORY';
+   if(c.rankSource)b.dataset.rankSource=c.rankSource;
+   b.dataset.originalChr=c.sourceId||'';
    b.dataset.cardId=c.id;
    b.dataset.owned=profile.owned.includes(c.id)?'true':'false';
-   b.title=c.name+' · '+c.ability+' · '+c.price.toLocaleString()+'GP · '+
+   b.title=c.name+' · '+(c.rank==='unverified'?'등급 미확인':c.rank.toUpperCase()+' / 원작 팬사이트 '+(c.rankEvidence?.endsWith('EXACT')?'동일명 근거':'표기 대조 근거'))+' · '+c.ability+' · '+c.price.toLocaleString()+'GP · '+
     shopPriceEvidenceText(c)+
     ' · '+(profile.owned.includes(c.id)?'보유':'미보유');
    const art=document.createElement('div');art.className='card-art';
@@ -571,7 +583,7 @@ function drawShop(){
    $('shop-sell').dataset.resaleStatus='unknown-source';
  }
  if(c){
-   $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+shopPriceEvidenceText(c);
+   $('shop-selected').textContent=c.name+' · '+(c.rank==='unverified'?'원본 등급 미확인':c.rank.toUpperCase()+' (2013 원본 팬사이트 기록'+(c.rankEvidence?.endsWith('EXACT')?', 이름 일치':', 표기 대조')+')')+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+shopPriceEvidenceText(c);
    $('shop-buy').disabled=profile.owned.includes(c.id)||profile.gp<c.price;
    $('shop-buy').textContent=profile.owned.includes(c.id)?'보유중':(profile.gp<c.price?'GP 부족':'구입하기');
    const sell=$('shop-sell'),canSell=shopCanSell(c);

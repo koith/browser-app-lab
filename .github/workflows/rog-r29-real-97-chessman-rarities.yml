@@ -1,0 +1,50 @@
+name: 4LEAF R29 97 original Normal Valuable archived chessmen real shop acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/original/historical-chessman-ranks.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/sw.js'
+      - 'apps/4leaf/rog/app-version.json'
+      - 'apps/4leaf/rog/tests/r29-native-chessman-rarity-sources.cjs'
+      - '.github/workflows/rog-r29-real-97-chessman-rarities.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/original/historical-chessman-ranks.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/r29-native-chessman-rarity-sources.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-cards-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-r29.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
+          exit 1
+      - name: 97 authentic original Normal and Valuable posts, source-only missing 0156
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r29-native-chessman-rarity-sources.cjs
+      - name: Original 2002/2004 CardShop era purchase and GP remain stable
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r21-source-era-shop.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-2002-97-card-verified-ranks-${{ matrix.browser }}
+          path: leaf-r29-original-tier-*.png
+          if-no-files-found: ignore
