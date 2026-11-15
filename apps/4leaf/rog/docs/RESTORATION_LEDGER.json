@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-14",
+  "updatedAt": "2026-11-15",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -2044,6 +2044,16 @@
         "ACT-03",
         "RULE-02",
         "M07",
+        "M09"
+      ]
+    },
+    {
+      "id": "REQ-20261115-001",
+      "date": "2026-11-15",
+      "origin": "user",
+      "text": "Claude Fable 5.2 real-user Chromium verification: lobby to complete match, and district -> clickable ChatTown room-map entry, visible controls only",
+      "taskIds": [
+        "P0-CHAT",
         "M09"
       ]
     }
@@ -10364,6 +10374,32 @@
       "evidence": [
         "https://github.com/koith/browser-app-lab/pull/1119",
         "https://github.com/koith/browser-app-lab/actions/runs/43538917713"
+      ]
+    },
+    {
+      "seq": 484,
+      "date": "2026-11-15",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261115-001",
+      "taskIds": [
+        "P0-CHAT",
+        "M09"
+      ]
+    },
+    {
+      "seq": 485,
+      "date": "2026-11-15",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "requestId": "REQ-20261115-001",
+      "taskIds": [
+        "P0-CHAT",
+        "M09"
+      ],
+      "details": "Imported Claude Fable 5.2 ZIP: real-user Chromium full matches at four sizes; iPhone portrait offscreen READY one-tap shortcut and map room overlap/initial centering correction. Original source room coordinates UNVERIFIED. Zip SHA evidence saved outside repo; exact WebKit/pages/central server still pending browser QA and public Pages deployment. Canonical completion count unchanged.",
+      "evidence": [
+        "4leaf-realuse-20261115.zip",
+        "apps/4leaf/rog/tests/realuse-dice-full-game.cjs",
+        "apps/4leaf/rog/tests/realuse-chat-map-entry.cjs"
       ]
     }
   ],

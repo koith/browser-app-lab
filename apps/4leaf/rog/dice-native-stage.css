@@ -274,3 +274,10 @@
  #lobby .lobby-room-empty-create{min-height:36px;min-width:100px;
   font-size:12px;touch-action:manipulation}
 }
+
+/* Web-only one-tap start when original READY is clipped on a zoomed phone. */
+#lobby .dice-room-view-controls>#dice-room-start-shortcut{
+ background:linear-gradient(#ffe9a8,#e0a93d)!important;color:#2a1c05!important;
+ border:2px solid #fff3c9!important;font-weight:700!important;
+}
+#lobby .dice-room-view-controls>#dice-room-start-shortcut[hidden]{display:none!important}
