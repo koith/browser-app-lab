@@ -13,8 +13,6 @@ on:
       - 'apps/gallery-archive/deploy_cloudflare_assets.py'
       - 'apps/gallery-archive/replica_incremental.py'
       - 'apps/gallery-archive/test_replica_incremental.py'
-      - 'apps/gallery-archive/replica_incremental.py'
-      - 'apps/gallery-archive/test_replica_incremental.py'
       - 'apps/gallery-archive/test_cloudflare_assets_snapshot.py'
       - 'apps/gallery-archive/audit_cloudflare_recovery.py'
       - 'apps/gallery-archive/test_cloudflare_recovery_audit.py'
@@ -32,6 +30,8 @@ on:
       - 'apps/gallery-archive/cloudflare-owner-gateway/bound-assets*'
       - 'apps/gallery-archive/cloudflare_assets_snapshot.py'
       - 'apps/gallery-archive/deploy_cloudflare_assets.py'
+      - 'apps/gallery-archive/replica_incremental.py'
+      - 'apps/gallery-archive/test_replica_incremental.py'
       - 'apps/gallery-archive/audit_cloudflare_recovery.py'
       - '.github/workflows/gallery-cloudflare-free-assets.yml'
 permissions:
