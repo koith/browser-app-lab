@@ -71,6 +71,9 @@ class FullReverseCoverageTests(unittest.TestCase):
                     result = m.run('mimmi', previous, output, next_state,
                                    budget=10, seconds=60, workers=2)
                     self.assertTrue(result['research_only'])
+                    self.assertEqual(result['model_matched_photo_frames'], 0)
+                    self.assertEqual(result['photo_frames_with_zero_model_matches'], len(result['results']))
+                    self.assertEqual(result['search_engine_outcomes']['yandex_sites']['leads_0'],len(result['results']))
                     self.assertEqual(result['total_seed_frames'], 31)
                     self.assertEqual(result['seed_queries'], len(result['results']))
                     previous.write_text(next_state.read_text())
