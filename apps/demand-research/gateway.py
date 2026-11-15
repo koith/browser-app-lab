@@ -221,6 +221,81 @@ async def issue_temporary_archive_key(request:Request):
                         headers={"Cache-Control":"private, no-store"})
 
 
+@app.post("/api/bridge/archive-index",include_in_schema=False)
+async def import_signed_archive_index(request:Request):
+    """Bind every previously AES/SHA-verified release to its public account.
+
+    Authorized main Actions archive workflow only. This does not grant raw
+    archive reads to the browser and does not assert the saved ZIP is still
+    accessible: each future source read independently revalidates AES/SHA.
+    """
+    header=request.headers.get("authorization","")
+    if not header.startswith("Bearer ") or len(header)>12500:
+        raise HTTPException(403,"Signed archive inventory required")
+    try:
+        verify_bridge_token(header[7:],workflow=ARCHIVE_WORKFLOW)
+    except (ValueError,KeyError,TypeError):
+        raise HTTPException(403,"Archive inventory workflow rejected") from None
+    except Exception:
+        raise HTTPException(503,"Archive inventory identity unavailable") from None
+    raw=await request.body()
+    if not (0<len(raw)<=40000):
+        raise HTTPException(413,"Archive inventory payload invalid")
+    try:
+        payload=json.loads(raw)
+        if not isinstance(payload,dict) or set(payload)!={"rows"}:
+            raise ValueError("invalid rows")
+        rows=payload["rows"]
+        if type(rows) is not list or not 1<=len(rows)<=80:
+            raise ValueError("invalid row count")
+        canonical=[]
+        for item in rows:
+            if type(item) is not dict or set(item)!={
+                "account_key","platform","release_tag","workflow_run_id",
+                "profile_url","display_name","handle","recorded_at",
+                "posts_verified","objects_verified"}:
+                raise ValueError("invalid row shape")
+            account=item["account_key"]
+            tag=item["release_tag"]
+            run=item["workflow_run_id"]
+            match=re.fullmatch(
+                r"intersection-github-archive-([0-9]{6,30})-a[1-9][0-9]{0,3}",str(tag))
+            if (not re.fullmatch(r"(bluesky|mastodon)-[a-f0-9]{40}",str(account))
+                or str(account).split("-",1)[0]!=item["platform"]
+                or not match or type(run) is not int or int(match.group(1))!=run
+                or not isinstance(item["profile_url"],str)
+                or not item["profile_url"].startswith("https://")
+                or len(item["profile_url"])>600
+                or type(item["display_name"]) is not str
+                or len(item["display_name"])>140
+                or type(item["handle"]) is not str or len(item["handle"])>220
+                or type(item["recorded_at"]) is not str or len(item["recorded_at"])>70
+                or type(item["posts_verified"]) is not int
+                or not 0<=item["posts_verified"]<=200000
+                or type(item["objects_verified"]) is not int
+                or not 0<=item["objects_verified"]<=50000):
+                raise ValueError("invalid source-bound row")
+            canonical.append(item)
+    except (ValueError,TypeError,KeyError):
+        raise HTTPException(400,"Invalid verified account index") from None
+    try:
+        from backup_queue import _remote,archive_index_rows
+        def save():
+            wrote=0
+            for row in canonical:
+                result=_remote("archive_index_put",item=row)
+                if result.get("stored") is not True:
+                    raise RuntimeError("Unverified archive index write")
+                wrote+=1
+            archive_index_rows(force=True)
+            return wrote
+        wrote=await asyncio.to_thread(save)
+    except (RuntimeError,ValueError,TypeError):
+        raise HTTPException(503,"Persistent archive index readback unavailable") from None
+    return JSONResponse({"accepted":True,"stored":wrote},
+                        headers={"Cache-Control":"private, no-store"})
+
+
 @app.get("/api/bridge/pending",include_in_schema=False)
 async def github_pending_requests(request:Request):
     _bridge_authenticated(request)
