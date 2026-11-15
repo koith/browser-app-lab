@@ -224,7 +224,7 @@ jobs:
           set -euo pipefail
           for model in mimmi yui; do
             gh api "repos/$GITHUB_REPOSITORY/contents/apps/gallery-archive/verification/reverse-progress-$model.json?ref=gallery-reverse-progress-$model" \
-              --jq '.content' | tr -d '\\n' | base64 -d > "$RUNNER_TEMP/$model-progress.json"
+              --jq '.content' | base64 -d > "$RUNNER_TEMP/$model-progress.json"
           done
           python apps/gallery-archive/exhaustive_campaign_controller.py \
             --mimmi "$RUNNER_TEMP/mimmi-progress.json" \
