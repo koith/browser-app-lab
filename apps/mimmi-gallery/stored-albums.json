@@ -24392,6 +24392,30 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 86,
+          "url": "stored-albums/djawa-rei-beyond-the-heart/2a87cab9ad6211c4b0e4.jpg",
+          "sha256": "2a87cab9ad6211c4b0e487deb9605d0911c519fdba0e78c95078f6014ac5cf79",
+          "bytes": 263722,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 87,
+          "url": "stored-albums/djawa-rei-beyond-the-heart/f12a376c3203cf5182a5.jpg",
+          "sha256": "f12a376c3203cf5182a5c43abef860032235e45bb0eaf8494b9f808b1d8dbb82",
+          "bytes": 379661,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -27374,5 +27398,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2790
+  "physical_verified_image_count": 2792
 }
