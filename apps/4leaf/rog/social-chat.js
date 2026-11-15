@@ -883,7 +883,7 @@
    b.dataset.room=r.id;b.dataset.permanent=String(!!r.preset);
    b.title=r.name+(r.preset?' · 복원 서버 상설방':'')+' · 입장';
    b.setAttribute('aria-label',r.name+' 채팅방 입장');
-   const position=realRoomPosition(i);
+   const position=realRoomPosition(i,rooms.length);
    b.style.left=position.x+'px';b.style.top=position.y+'px';
    const number=document.createElement('span');number.className='social-room-number';
    number.textContent=String(i+1).padStart(2,'0');
@@ -910,8 +910,12 @@
    cells.push({col,row,distance:Math.abs(col-4.5)+Math.abs(row-9.5)});
   return cells.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.col-b.col);
  })();
- function realRoomPosition(index){
-  const cell=liveRoomCells[index%liveRoomCells.length];
+ function realRoomPosition(index,total){
+  // WEB-only coordinates: non-overlapping room cards. No 2002 native
+  // ROOM position table has been recovered; avoid claiming exact fidelity.
+  const count=Math.min(liveRoomCells.length,Math.max(1,Number(total)||index+1));
+  const block=liveRoomCells.slice(0,count).sort((a,b)=>a.row-b.row||a.col-b.col);
+  const cell=block[index%block.length];
   return {x:70+cell.col*130,y:70+cell.row*100};
  }
  function setupRoomMap(){
@@ -924,8 +928,15 @@
   plane.dataset.roomCapacity=String(liveRoomCells.length);
   const key=state.region+':'+state.district;
   const saved=state.roomMapOffsets[key];
-  let x=saved?.x??-(ROOM_MAP.width-viewport.clientWidth)/2;
-  let y=saved?.y??-(ROOM_MAP.height-viewport.clientHeight)/2;
+  // Default map viewport must face the EXISTING room markers. Centering
+  // the much larger blank estate stranded buttons off-screen on phones.
+  const shown=Math.max(1,plane.querySelectorAll('.social-map-rooms>button').length);
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(let i=0;i<shown;i++){const pos=realRoomPosition(i,shown);
+   minX=Math.min(minX,pos.x);maxX=Math.max(maxX,pos.x+118);
+   minY=Math.min(minY,pos.y);maxY=Math.max(maxY,pos.y+84)}
+  let x=saved?.x??viewport.clientWidth/2-(minX+maxX)/2;
+  let y=saved?.y??viewport.clientHeight/2-(minY+maxY)/2;
   const clamp=(v,max)=>Math.max(Math.min(0,v),Math.min(0,max));
   const placeMap=()=>{x=clamp(x,viewport.clientWidth-ROOM_MAP.width);
    y=clamp(y,viewport.clientHeight-ROOM_MAP.height);
