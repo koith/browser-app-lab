@@ -3,8 +3,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
-from run_full_public_acquisition import work_batches, PRIORITY, replay
+from run_full_public_acquisition import work_batches, PRIORITY, replay, execute, MAX_REGISTERED_PAGES_PER_WORK
 
 ROOT=Path(__file__).resolve().parents[2]
 
@@ -33,6 +34,25 @@ class FullAcquisitionTests(unittest.TestCase):
             with patch('run_full_public_acquisition.replay', wraps=replay):
                 for model in PRIORITY:
                     self.assertEqual(replay(model,Path(temporary),1,1000000),0)
+
+    def test_secondary_batch_visits_all_four_registered_pages_not_three(self):
+        # A real Mimmi edition has four verified sources. The old secondary
+        # batch page cap=3 silently skipped one source in each invocation.
+        self.assertEqual(MAX_REGISTERED_PAGES_PER_WORK, 5)
+        with tempfile.TemporaryDirectory() as temporary:
+            args=SimpleNamespace(model='mimmi',run_number=1,
+                stage=Path(temporary),source_evidence=None,batch_size=7,
+                max_per_batch=48,bytes_per_batch=36000000,
+                batch_timeout=60,alternate_priority=False,plan_only=False)
+            with patch('run_full_public_acquisition.subprocess.run',
+                       return_value=SimpleNamespace(returncode=1)) as command:
+                self.assertEqual(execute(args),2)
+            calls=[call.args[0] for call in command.call_args_list]
+            self.assertGreater(len(calls),1)
+            for index,invocation in enumerate(calls):
+                with self.subTest(batch=index):
+                    self.assertEqual(
+                        invocation[invocation.index('--max-pages')+1],'5')
 
     def test_all_priority_ids_have_explicit_work_source_scope(self):
         for model,ids in PRIORITY.items():
