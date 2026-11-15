@@ -312,3 +312,22 @@ body{background:var(--paper);color:var(--ink)}
   .archive-content .tabs button{flex:1;min-width:0;padding:11px 8px}
   .profile-content .bio{font-size:13px;line-height:1.55}
 }
+
+
+/* Immutable profile details remain inside the original SNS-like profile pane. */
+.profile-content #profileExtras{order:5;display:flex;flex-wrap:wrap;gap:8px 12px;margin:7px 0 1px;font-size:12px}
+.profile-content #profileExtras[hidden]{display:none}
+.profile-extra{display:inline-flex;gap:3px;align-items:baseline;max-width:100%;overflow-wrap:anywhere;color:var(--sub)}
+.profile-extra strong{color:var(--ink);font-size:12px}
+.profile-link{color:var(--accent);text-decoration:none;font-weight:700}
+.profile-content #profileHistory{order:6;border-top:1px solid var(--line);margin-top:12px;padding-top:9px}
+.profile-content #profileHistory[hidden]{display:none}
+.profile-content #profileHistory summary{font-size:12px;color:var(--accent);font-weight:750;cursor:pointer;list-style-position:inside}
+.profile-history-list{display:flex;flex-direction:column;gap:5px;margin:10px 0 3px}
+.profile-version{width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;color:var(--ink);
+ background:var(--white);padding:7px 10px;font-size:12px;font-weight:750}
+.profile-version small{display:block;font-size:10px;color:var(--sub);font-weight:450;line-height:1.6}
+.profile-version.active{border-color:var(--accent);background:var(--accent2)}
+.profile-version.active:disabled{opacity:1}
+.profile-content .evidence{order:7}
+.profile-history-list .profile-version:not(:disabled):hover{border-color:var(--accent)}

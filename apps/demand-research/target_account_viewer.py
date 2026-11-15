@@ -147,7 +147,9 @@ def public_profile_fields(doc):
     return {key:doc.get(key) for key in (
         "platform","identity","handle","display_name","description",
         "followers_count","following_count","posts_count","fields",
-        "created_at","captured_at","complete_media","profile_url")}
+        "created_at","indexed_at","captured_at","complete_media",
+        "profile_url","pronouns","website","pinned_post","locked","bot",
+        "header_description","avatar_description")}
 
 
 def sanitize_safe_link(value):
@@ -254,6 +256,99 @@ def latest_snapshot(archive,folder,pattern,cap=300_000):
         except (ValueError,TypeError):
             continue
     return None
+
+
+PROFILE_SNAPSHOT_LIMIT=40
+
+
+def profile_snapshot_history(archive,entry):
+    """Read all bounded, immutable account-bound public profile snapshots.
+
+    A newer unavailable banner never erases a verified previous snapshot.
+    A newer explicitly not-set banner is intentional; historical artwork is
+    accessible by selecting its dated snapshot, not silently shown as current.
+    """
+    names=sorted((name for name in archive.names("profile/snapshots")
+                  if PROFILE_FILE_RE.fullmatch(name)),reverse=True)
+    versions=[]
+    for name in names[:PROFILE_SNAPSHOT_LIMIT]:
+        raw=archive.read("profile/snapshots/"+name,cap=300_000,optional=True)
+        if not raw:
+            continue
+        try:
+            doc=json.loads(raw)
+            if (not isinstance(doc,dict)
+                or doc.get("identity")!=entry.get("identity")
+                or doc.get("platform")!=entry.get("platform")):
+                continue
+            versions.append((name,doc))
+        except (TypeError,ValueError):
+            continue
+    return versions
+
+
+def profile_image_status(asset):
+    if not isinstance(asset,dict):
+        return "not_verified"
+    status=str(asset.get("status") or "not_verified")
+    return status if status in ("sha256_verified","unavailable","not_set") else "not_verified"
+
+
+def profile_view(archive,account,entry,*,snapshot=""):
+    versions=profile_snapshot_history(archive,entry)
+    if snapshot and not PROFILE_FILE_RE.fullmatch(snapshot):
+        raise HTTPException(400,"Invalid profile snapshot")
+    selected=next(((n,d) for n,d in versions if n==snapshot),None) if snapshot else (
+        versions[0] if versions else None)
+    if selected is None:
+        if snapshot:
+            raise HTTPException(404,"Public profile snapshot unavailable")
+        return {"available":False,"profile_url":
+                sanitize_safe_link(entry.get("profile_url")),"history":[]}
+    name,doc=selected
+    view=public_profile_fields(doc)
+    view["available"]=True
+    view["profile_url"]=sanitize_safe_link(entry.get("profile_url"))
+    view["snapshot_id"]=name
+    view["latest_snapshot"]=bool(versions and name==versions[0][0])
+    view["history"]=[{
+        "id":n,"captured_at":d.get("captured_at"),
+        "display_name":str(d.get("display_name") or "")[:100],
+        "has_description":bool(d.get("description")),
+        "assets":{kind:profile_image_status(
+            (d.get("assets") or {}).get(kind))
+            for kind in ("avatar","banner")}}
+        for n,d in versions]
+    view["assets"]={}
+    view["asset_status"]={}
+    for kind in ("avatar","banner"):
+        asset=(doc.get("assets") or {}).get(kind)
+        status=profile_image_status(asset)
+        meta={"status":status}
+        if status=="sha256_verified":
+            tier=str(asset.get("source_tier") or "legacy_source_unclassified")
+            meta.update({"source_tier":tier,"captured_at":doc.get("captured_at")})
+            view["assets"][kind]=(
+                "/api/account-archives/"+account+"/profile-asset/"+kind+
+                "?snapshot="+name)
+        else:
+            view["assets"][kind]=None
+        # Reuse earlier independently verified art ONLY when this current
+        # source read was unavailable, never when the artist removed the art.
+        if status in ("unavailable","not_verified") and not snapshot:
+            for old_name,old_doc in versions[1:]:
+                old_asset=(old_doc.get("assets") or {}).get(kind)
+                if profile_image_status(old_asset)=="sha256_verified":
+                    view["assets"][kind]=(
+                        "/api/account-archives/"+account+"/profile-asset/"+
+                        kind+"?snapshot="+old_name)
+                    meta.update({"historical_fallback":True,
+                                 "captured_at":old_doc.get("captured_at"),
+                                 "source_tier":str(old_asset.get("source_tier") or
+                                                   "legacy_source_unclassified")})
+                    break
+        view["asset_status"][kind]=meta
+    return view
 
 
 def archived_media_slot(pid,item):
@@ -611,27 +706,14 @@ def create_router(auth):
         },headers=CACHE_HEADERS)
 
     @router.get("/api/account-archives/{account}/profile")
-    def profile(request:Request,account:str):
+    def profile(request:Request,account:str,
+                snapshot:str=Query("",max_length=80)):
         auth(request)
         _,entry,archive=open_account(account)
         try:
-            doc=latest_snapshot(archive,"profile/snapshots",PROFILE_FILE_RE)
-            if not doc:
-                return JSONResponse({"available":False,"profile_url":
-                                     sanitize_safe_link(entry.get("profile_url"))},
-                                    headers=CACHE_HEADERS)
-            view=public_profile_fields(doc)
-            view["available"]=True
-            view["profile_url"]=sanitize_safe_link(entry.get("profile_url"))
-            view["assets"]={}
-            for name in ("avatar","banner"):
-                asset=doc.get("assets",{}).get(name,{})
-                if asset.get("status")=="sha256_verified":
-                    view["assets"][name]="/api/account-archives/"+account+"/profile-asset/"+name
-                else:
-                    view["assets"][name]=None
-            return JSONResponse(view,headers=CACHE_HEADERS)
-        except (RuntimeError,ValueError,TypeError):
+            return JSONResponse(profile_view(archive,account,entry,snapshot=snapshot),
+                                headers=CACHE_HEADERS)
+        except (RuntimeError,ValueError,TypeError,KeyError):
             raise HTTPException(502,"Archived public profile unavailable") from None
 
     @router.get("/api/account-archives/{account}/feed")
@@ -715,15 +797,20 @@ def create_router(auth):
             raise HTTPException(502,"Original media read unavailable") from None
 
     @router.get("/api/account-archives/{account}/profile-asset/{kind}")
-    def profile_asset(request:Request,account:str,kind:str):
+    def profile_asset(request:Request,account:str,kind:str,
+                      snapshot:str=Query("",max_length=80)):
         auth(request)
         if kind not in ("avatar","banner"):
             raise HTTPException(400,"Invalid profile media")
-        _,_,archive=open_account(account)
-        doc=latest_snapshot(archive,"profile/snapshots",PROFILE_FILE_RE)
-        if not doc:
+        if snapshot and not PROFILE_FILE_RE.fullmatch(snapshot):
+            raise HTTPException(400,"Invalid profile snapshot")
+        _,entry,archive=open_account(account)
+        versions=profile_snapshot_history(archive,entry)
+        doc=next((row for n,row in versions if n==snapshot),None) if snapshot else (
+            versions[0][1] if versions else None)
+        if doc is None:
             raise HTTPException(404,"Profile snapshot unavailable")
-        asset=doc.get("assets",{}).get(kind,{})
+        asset=(doc.get("assets") or {}).get(kind) or {}
         if (asset.get("status")!="sha256_verified"
                 or not str(asset.get("key","")).startswith("profile/assets/")):
             raise HTTPException(404,"Profile image not archived")

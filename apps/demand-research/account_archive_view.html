@@ -50,6 +50,11 @@
    </div>
    <p id="biography" class="bio">저장된 프로필을 불러오면 이곳에 계정 소개가 표시됩니다.</p>
    <p id="profileFields" class="muted profile-fields"></p>
+   <div id="profileExtras" class="profile-extras" hidden></div>
+   <details id="profileHistory" class="profile-history" hidden>
+    <summary>이 계정의 이전 프로필·헤더·자기소개 기록</summary>
+    <div id="profileHistoryList" class="profile-history-list" role="group" aria-label="저장된 프로필 이력"></div>
+   </details>
    <div class="stats">
     <button id="statPosts" type="button" data-section="posts"><strong id="postCount">—</strong><span>게시글</span></button>
     <button id="statFollowers" type="button" data-section="followers"><strong id="followerCount">—</strong><span>팔로워</span></button>
