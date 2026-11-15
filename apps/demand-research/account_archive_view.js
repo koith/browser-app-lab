@@ -228,7 +228,7 @@ function showVerifiedPickerPreview(item){
   // The parent already loaded the source-bound, AES/SHA verified archive
   // picker. Display its name/handle at once, without pretending that the
   // full profile, bio, avatar or source ZIP has finished loading.
-  if(!embedded||!item||item.key!==state.account||!ACCOUNT_KEY.test(item.key))return;
+  if(!item||item.key!==state.account||!ACCOUNT_KEY.test(item.key))return;
   const clean=s=>typeof s==="string"?s.replace(/[\r\n\u0000-\u001f]/g," ").trim():"";
   const name=clean(item.display_name).slice(0,100);
   const handle=clean(item.handle).replace(/^@+/,"").slice(0,200);
@@ -522,7 +522,9 @@ async function selectAccount(value){
     showMessage("계정을 선택하세요.");setStatus("보관할 계정을 선택하세요.");
     return;
   }
-  resetProfile();showMessage("게시글 보관본을 불러오는 중…");
+  resetProfile();
+  showVerifiedPickerPreview(state.accounts.find(item=>item.key===value));
+  showMessage("게시글 보관본을 불러오는 중…");
   // The remote profile snapshot can take tens of seconds to verify. Start
   // post loading NOW, independently. A stale profile response must never
   // overwrite a newly selected account.
