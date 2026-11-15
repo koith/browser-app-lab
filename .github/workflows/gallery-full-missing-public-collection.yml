@@ -85,7 +85,8 @@ jobs:
           node-version: '24'
       - name: Install free public source parsers and image decoder
         run: |
-          python -m pip install --quiet 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0' 'Scrapy>=2.12,<3'
+          python -m pip install --quiet 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0' 'Scrapy>=2.12,<3' 'playwright==1.62.0'
+          python -m playwright install --with-deps chromium
       - name: Load durable per-model reverse-image checkpoint from separate Git branch
         shell: bash
         run: |
@@ -119,8 +120,8 @@ jobs:
             --budget 256 --max-seconds 3300 --workers 3 --stop-after-full \
             --search-revision 2
           python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
-            --offset "$((RUN_NUMBER * 3))" --per-work 2 --max-pages 18 \
-            --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
+            --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
+            --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
             --out "$STAGE/source-evidence.json"
       - name: Acquire every registered work, prioritizing actual missing cuts
         shell: bash
