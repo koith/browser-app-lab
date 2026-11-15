@@ -41,13 +41,13 @@ jobs:
           for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
           exit 1
       - name: Browser clicks North Hiakhan to map room to chat and exit
-        run: FOURLEAF_BROWSER=\${{ matrix.browser }} node apps/4leaf/rog/tests/realuse-chat-map-entry.cjs
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/realuse-chat-map-entry.cjs
       - name: Browser clicks from CREATE to match over at four device sizes
-        run: FOURLEAF_BROWSER=\${{ matrix.browser }} node apps/4leaf/rog/tests/realuse-dice-full-game.cjs
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/realuse-dice-full-game.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: 4leaf-realuse-claude-\${{ matrix.browser }}
+          name: 4leaf-realuse-claude-${{ matrix.browser }}
           path: |
             realuse-chat-map-*.png
             realuse-dice-*.png
