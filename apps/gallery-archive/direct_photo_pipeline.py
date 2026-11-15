@@ -844,6 +844,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     else:
         # Tiny synthetic test roots need not reproduce every research manifest.
         source_scope={'census_status':'synthetic_fixture_without_registry'}
+    from verified_source_bridge import eligible_source_pages, article_scoped_images
+    verified_discovered={}
     reverse_counts={'reverse_source_pages_admitted':0,
                     'reverse_works_with_source':0,
                     'reverse_unverified_targets_rejected':0}
@@ -851,6 +853,11 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         evidence=json.loads(Path(reverse_evidence).read_text(encoding='utf-8'))
         if evidence.get('model')!=model:
             raise ValueError('Reverse-source model mismatch')
+        # Source-name research already opened the candidate page and verified
+        # its named work and model. Recheck that identity on the fresh HTML
+        # before accepting any image; never trust a search snippet alone.
+        verified_discovered=eligible_source_pages(
+            evidence,model,safe_registered_public_page)
         for target in evidence.get('targets',[]):
             aid=target.get('id')
             if not isinstance(aid,str) or not re.fullmatch(
@@ -892,7 +899,10 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         for book in books.values():
             proposed=list(dict.fromkeys(
                 [book['source']]+book.get('source_pages',[])))
-            approved_pages=[u for u in proposed if reviewed_direct_source(u,model)]
+            proved=verified_discovered.get(book['id'],set())
+            approved_pages=[u for u in proposed
+                            if reviewed_direct_source(u,model) or u in proved]
+            book['verified_discovered_pages']=[u for u in approved_pages if u in proved]
             if not approved_pages:
                 continue
             book['source']=approved_pages[0]
@@ -1114,6 +1124,17 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                                 response.content,book.get('title'),aid,model)):
                         errors.append({'page':page,'reason':'research_work_identity_unverified'})
                         continue
+                dynamic_scoped=set()
+                if reviewed_source_only and page in book.get('verified_discovered_pages',[]):
+                    from public_work_photo_extractor import ordinary_public_https_image
+                    dynamic_scoped=article_scoped_images(
+                        response.content,page,model,aid,book.get('title'),
+                        _work_token_matched_in_heading,ordinary_public_https_image)
+                    urls=list(dict.fromkeys(list(urls)+sorted(dynamic_scoped)))
+                    # Permit only these directly observed article images through
+                    # the conservative historical curator gate, never siblings
+                    # from a generic gallery or guessed numbered URLs.
+                    alt_photo_urls.update(dynamic_scoped)
                 original_urls=list(urls)
                 # An explicit login, wrong work/volume, or missing identity is
                 # still a hard reject. Alternative parsers do not bypass it.
@@ -1179,7 +1200,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     if reviewed_source_only and not reviewed_direct_source(p,model):
                         continue
                     if p not in visited and p not in queue:queue.append(p)
-                if status!='scoped_public_page' and not (eligible and urls):
+                if status!='scoped_public_page' and not (eligible and urls) and not dynamic_scoped:
                     errors.append({'page':page,'reason':status});continue
             except Exception as e:
                 errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});continue
@@ -1193,7 +1214,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if public_media_candidate_on_hold(client,url):
                     deferred_media_due_to_origin_pause+=1
                     continue
-                if reviewed_source_only and not reviewed_direct_media(url,page,model):
+                if reviewed_source_only and not (
+                        reviewed_direct_media(url,page,model) or url in dynamic_scoped):
                     unreviewed_count+=1
                     continue
                 candidate_count+=1
