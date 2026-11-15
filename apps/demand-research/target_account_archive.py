@@ -692,7 +692,11 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
     try:
         profile_stat=archive_profile(profile,api,archive)
     except (RuntimeError,ValueError,TypeError,KeyError):
-        pass
+        if os.getenv("DEMAND_REQUIRE_PROFILE_SNAPSHOT","0")=="1":
+            # A profile-repair job must never report success while silently
+            # dropping the account's published biography, header or avatar.
+            # Existing immutable backups remain untouched and retryable.
+            raise SourceUnavailable("public profile snapshot could not be verified") from None
     for graph_kind in ("followers","following"):
         try:
             graph_stats[graph_kind]=archive_graph(profile,graph_kind,api,archive)
