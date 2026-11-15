@@ -19,6 +19,7 @@ from urllib.request import Request, build_opener
 
 from check_cloudflare_connection import reader, account_for, NoRedirect, ProbeError
 from cloudflare_assets_snapshot import Snapshot, MODELS, KIND, checked
+from replica_incremental import local_owner_inventory, inventory_delta
 
 NAME = 'gallery-archive-free'
 WRANGLER = '4.158.0'
@@ -308,6 +309,18 @@ def main(args):
         # Test the actual script write before expensive owner reads. This also
         # initializes the first Worker before its Assets upload session.
         old = bootstrap_missing_worker(cf, release)
+    # Pure metadata comparison before any Worker /api/v1/sign or /media read.
+    # An unchanged immutable SHA inventory needs neither a redeploy nor a
+    # destructive full-asset manifest replacement.
+    if old is not None:
+        missing, retained = inventory_delta(old, local_owner_inventory(ROOT))
+        print('BOUND_ASSET_INVENTORY_DIFF', 'retained', retained,
+              'missing', {m: len(missing[m]) for m in MODELS}, flush=True)
+        if not any(missing[m] for m in MODELS):
+            print('BOUND_ASSET_UNCHANGED_NOOP',
+                  'original_reads=0', 'original_verifications=0',
+                  'deployments=0', flush=True)
+            return
     work = Path(args.directory).resolve()
     assets, source = work / 'assets', work / 'source'
     snapshot = Snapshot(ROOT, assets)
