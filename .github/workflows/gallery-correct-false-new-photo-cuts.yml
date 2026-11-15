@@ -1,0 +1,67 @@
+name: Gallery Correct 20 Same-Frame Public Photo Duplicates
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/remove_false_new_mimmi_2021_duplicate_cuts.py'
+      - 'apps/gallery-archive/remove_false_new_mimmi_summer_duplicate_cuts.py'
+      - '.github/workflows/gallery-correct-false-new-photo-cuts.yml'
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: gallery-false-new-photo-cut-correction
+  cancel-in-progress: false
+jobs:
+  correct:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Audit exact old-vs-new pixels before modifying the live gallery
+        run: |
+          python -m pip install --quiet 'Pillow==11.3.0'
+          python apps/gallery-archive/test_photo_visual_dedupe.py
+          python apps/gallery-archive/remove_false_new_mimmi_2021_duplicate_cuts.py
+          python apps/gallery-archive/remove_false_new_mimmi_summer_duplicate_cuts.py
+      - name: Recompute correction against latest main, remove only redundant rows and files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3 4; do
+            git fetch origin main
+            git reset --hard origin/main
+            python apps/gallery-archive/remove_false_new_mimmi_2021_duplicate_cuts.py --apply
+            python apps/gallery-archive/remove_false_new_mimmi_summer_duplicate_cuts.py --apply
+            node apps/gallery-archive/test_saved_photo_union.cjs
+            node apps/gallery-archive/test_curated_cover_manifest.cjs
+            git add -A apps/mimmi-gallery/stored-albums.json apps/mimmi-gallery/stored-albums/djawa-christmas-special-2021-mimmi
+            if git diff --cached --quiet; then
+              echo 'GALLERY_FALSE_NEW_PHOTO_CUTS_ALREADY_CORRECTED=true' >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            git commit -m 'fix(gallery): remove 22 measured same-frame Mimmi duplicates, preserve existing originals'
+            if git push origin HEAD:refs/heads/main; then
+              echo "GALLERY_FALSE_NEW_PHOTO_CUTS_CORRECTED_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+              gh workflow run static.yml --ref main
+              gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
+              exit 0
+            fi
+            sleep 3
+          done
+          echo '::error::Main changed during revalidation; no unsafe force push'
+          exit 1
