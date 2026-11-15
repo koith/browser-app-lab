@@ -26,7 +26,7 @@ services:
       - key: DEMAND_ARCHIVE_QUEUE_MODE
         value: "1"
       - key: DEMAND_ARCHIVE_QUEUE_STORE
-        value: sqlite
+        value: supabase
       - key: DEMAND_ACCOUNT_TEMP_STORAGE
         value: github_release
       - key: DEMAND_VIEWER_TOKEN

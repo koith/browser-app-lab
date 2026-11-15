@@ -223,3 +223,77 @@ def test_malformed_cookie_header_is_distinct_from_provider_denial(monkeypatch, c
     assert "outcome=invalid_header" in output
     assert "http_status=unknown" in output
     assert "secret-value" not in output and "Cookie" not in output
+
+
+def test_persistent_queue_durable_roundtrip_without_sqlite_or_terabox(monkeypatch):
+    """Every transition must use independently acknowledged remote records."""
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_STORE","supabase")
+    assert backup_queue.durable_enabled() is True
+    assert backup_queue.sqlite_enabled() is False
+    store={}
+    def transport(op,**values):
+        if op=="create":
+            job_id=values["job_id"]
+            item={**values,"workflow_run_id":None,"accepted_at":None}
+            store[job_id]=item
+            return {"created":True,"request":{**item,"schema":1}}
+        if op=="pending":
+            return {"requests":[{"job_id":k,"platform":v["platform"],
+                                 "account":v["account"]}
+                 for k,v in store.items() if v["workflow_run_id"] is None]}
+        if op=="state":
+            row=store.get(values["job_id"])
+            return {"item":None if row is None else {
+                "request":{**row,"schema":1},
+                "accepted":None if row["workflow_run_id"] is None else {
+                   "schema":1,"job_id":row["job_id"],
+                   "workflow_run_id":row["workflow_run_id"],
+                   "accepted_at":row["accepted_at"]}}}
+        if op=="accept":
+            row=store[values["job_id"]]
+            row.update(workflow_run_id=values["workflow_run_id"],accepted_at=1800000001)
+            return {"accepted":True,"receipt":{"schema":1,
+                "job_id":row["job_id"],"workflow_run_id":row["workflow_run_id"],
+                "accepted_at":row["accepted_at"]}}
+        if op=="overview":
+            queued=sum(v["workflow_run_id"] is None for v in store.values())
+            return {"known":True,"mode":"durable_postgres","total_requests":len(store),
+                    "queued":queued,"dispatched":len(store)-queued}
+        if op=="rows":
+            rows=list(store.values())
+            return {"mode":"durable_postgres","total":len(rows),
+                    "items":rows[values["offset"]:values["offset"]+values["limit"]]}
+        if op=="accepted":
+            return {"runs":[v["workflow_run_id"] for v in store.values()
+                            if v["workflow_run_id"] is not None]}
+        raise AssertionError("Unexpected queue operation: "+op)
+    monkeypatch.setattr(backup_queue,"_remote",transport)
+    first=backup_queue.create_request("bluesky","@first")
+    second=backup_queue.create_request("bluesky","@second")
+    assert first!=second
+    assert len(backup_queue.pending(limit=4))==2
+    assert backup_queue.state(first)["accepted"] is None
+    ack=backup_queue.accept(first,43688000001)
+    assert ack["workflow_run_id"]==43688000001
+    assert backup_queue.pending(limit=4)==[{
+        "job_id":second,"platform":"bluesky","account":"second.bsky.social"}]
+    assert backup_queue.read_request(None,first)["account"]=="first.bsky.social"
+    assert backup_queue.read_acceptance(None,first)["workflow_run_id"]==43688000001
+    assert backup_queue.accepted_runs()==[43688000001]
+    assert backup_queue.queue_rows(limit=20)["total"]==2
+    assert backup_queue.overview()["queued"]==1
+
+
+def test_durable_queue_unavailable_must_never_fall_back_to_ephemeral(monkeypatch):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_STORE","supabase")
+    def unavailable(*args,**kwargs):
+        raise RuntimeError("Persistent backup queue unavailable")
+    monkeypatch.setattr(backup_queue,"_remote",unavailable)
+    with pytest.raises(RuntimeError,match="unavailable"):
+        backup_queue.create_request("bluesky","@unavailable",FakeCloud())
+    with pytest.raises(RuntimeError,match="unavailable"):
+        backup_queue.pending(FakeCloud())
+    with pytest.raises(RuntimeError,match="unavailable"):
+        backup_queue.overview(FakeCloud())
