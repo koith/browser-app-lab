@@ -105,7 +105,7 @@ class Snapshot:
                             or not isinstance(asset_hash, str)
                             or not re.fullmatch('[a-f0-9]{32}', asset_hash)
                             or not isinstance(path, str)
-                            or not re.fullmatch(r'originals/[a-z0-9-]+/[A-Za-z0-9._ -]+\\.(jpg|jpeg|png|webp)', path)
+                            or not re.fullmatch(r'originals/[a-z0-9-]+/[A-Za-z0-9._ -]+\.(jpg|jpeg|png|webp)', path)
                             or not path.startswith('originals/' + aid + '/')
                             or key in self.rows[model]):
                         raise ValueError('INCREMENTAL_RETAINED_ORIGINAL_INVALID')
