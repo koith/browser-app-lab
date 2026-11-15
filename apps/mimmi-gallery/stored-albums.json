@@ -10857,6 +10857,30 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 51,
+          "url": "stored-albums/djawa-in-the-summer-sunshine-part-1/b90a6ba5355578434117.jpg",
+          "sha256": "b90a6ba53555784341172f58e5d96ceeaa6bb6909b78a830db772f63787e6d66",
+          "bytes": 279565,
+          "width": 1300,
+          "height": 1733,
+          "origin_page": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 52,
+          "url": "stored-albums/djawa-in-the-summer-sunshine-part-1/70684a2fa6458881dcf4.jpg",
+          "sha256": "70684a2fa6458881dcf44008a9a4fb3a7c91f06e3c0e8b3fbd9fd1b2bc0fc517",
+          "bytes": 243581,
+          "width": 1300,
+          "height": 1728,
+          "origin_page": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -27758,5 +27782,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2822
+  "physical_verified_image_count": 2824
 }
