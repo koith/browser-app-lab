@@ -102,6 +102,37 @@ class FullReverseCoverageTests(unittest.TestCase):
             self.assertEqual(len(chosen),1)
             self.assertEqual(chosen[0]['photo_sha256'], new['photo_sha256'])
 
+    def test_new_search_revision_rechecks_old_done_shas_once_then_resumes(self):
+        queue=m.complete_queue(fixtures(), 'mimmi')
+        legacy={'schema_version':1,'model':'mimmi','cycle':0,
+                'attempted_ids':[p['seed_id'] for p in queue],
+                'last_cycle_size':len(queue),'last_run_attempts':0}
+        with tempfile.TemporaryDirectory() as t:
+            checkpoint=Path(t)/'prior.json'
+            checkpoint.write_text(json.dumps(legacy))
+            repaired=m.read_progress(checkpoint,'mimmi',
+                                     {p['seed_id'] for p in queue},
+                                     required_revision=2)
+            self.assertEqual(repaired['search_revision'],2)
+            self.assertEqual(repaired['attempted_ids'],[])
+            batch,_=m.plan_batch(queue,repaired,10,stop_after_full=True)
+            self.assertEqual(len(batch),10)
+            # The second batch must continue rather than resetting again.
+            repaired['attempted_ids']=[p['seed_id'] for p in batch]
+            checkpoint.write_text(json.dumps(repaired))
+            resumed=m.read_progress(checkpoint,'mimmi',
+                                    {p['seed_id'] for p in queue},
+                                    required_revision=2)
+            self.assertEqual(resumed['attempted_ids'],repaired['attempted_ids'])
+            next_batch,_=m.plan_batch(queue,resumed,10,stop_after_full=True)
+            self.assertEqual(len(next_batch),10)
+            self.assertFalse({x['seed_id'] for x in batch}&
+                             {x['seed_id'] for x in next_batch})
+            with self.assertRaisesRegex(ValueError,'SEARCH_REVISION_ROLLBACK'):
+                m.read_progress(checkpoint,'mimmi',
+                                {p['seed_id'] for p in queue},
+                                required_revision=1)
+
     def test_first_full_pass_does_not_restart_in_multimodel_campaign(self):
         queue=m.complete_queue(fixtures(), 'yui')
         state={'attempted_ids':[p['seed_id'] for p in queue], 'cycle':0}
