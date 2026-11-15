@@ -456,7 +456,8 @@
      const full=count>=allowedCapacity(roomById(row.dataset.room)?.capacity);
      badge.textContent=count+'/'+allowedCapacity(roomById(row.dataset.room)?.capacity)+'명';
      row.classList.toggle('social-room-full',full);
-     const arrow=row.lastElementChild;if(arrow)arrow.textContent=full?'정원 초과':'입장 ›';
+     const arrow=row.lastElementChild;
+     if(arrow)arrow.textContent=full?'정원 초과':(!central.enabled||!central.ready||locallyStoredRoom(roomById(row.dataset.room))?'로컬 입장 ›':'입장 ›');
     }
   }
   if(state.view==='room')renderOccupants();
@@ -1436,7 +1437,7 @@
    const password=safe(form.get('password'),24),salt=password?uuid():'';
    if(password&&password.length<6){const field=body.querySelector('[name="password"]');field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');field.reportValidity();return}
    const proof=password?await deriveRoomProof(password,salt):'';
-   if(central.enabled){
+   if(central.enabled&&central.ready){
     try{
      const created=await central.create({name,region:state.region,district:state.district,
       capacity:allowedCapacity(form.get('capacity')),background:allowedBackground(form.get('background')),password});
@@ -1444,12 +1445,15 @@
      centralRooms.set(room.id,room);centralCounts.set(room.id,0);
      await central.join(room.id,password);
      closePopup();enterRoom(room);presence();return;
-    }catch(error){systemLine('채팅방 개설 실패: '+error.message);return}
+    }catch(error){
+     if(!centralOutage(error)){systemLine('채팅방 개설 실패: '+error.message);return}
+     systemLine('중앙 서버에 방을 만들지 못했습니다: '+error.message+' · 대신 오프라인 방을 개설합니다.');
+    }
    }
-   const room={id:uuid(),name,region:state.region,district:state.district,owner:nick(),
+   const room={id:'leaf-local-'+uuid(),name,region:state.region,district:state.district,owner:nick(),
     ownerId:tabId,passwordProof:proof,passwordSalt:salt,background:allowedBackground(form.get('background')),capacity:allowedCapacity(form.get('capacity')),created:now()};
    state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});sendRTC({kind:'roomCreated',room});
-   closePopup();enterRoom(room);
+   closePopup();if(enterRoom(room,true))systemLine('오프라인 채팅방 개설 완료 · 중앙 서버의 다른 기기에서는 보이지 않습니다.');
   };
   popup('새로운 4LEAF 채팅방 개설',body);
   // Use recovered ChatRoom/ownerdialog.png as a separate original 2002 UI
@@ -1459,7 +1463,7 @@
  async function closeRoom(roomId){
   const room=roomById(roomId);
   if(!room||room.preset||(room.ownerId?room.ownerId!==tabId:room.owner!==nick()))return;
-  if(central.enabled){
+  if(central.enabled&&!state.offlineRoom){
    try{
     await central.close(roomId);
     centralRooms.delete(roomId);centralCounts.delete(roomId);
@@ -1577,8 +1581,9 @@
   if(!central.enabled)return;
   central.subscribe(event=>{
    if(event.type==='ready'){
-    systemLine('중앙 채팅 서버 접속 완료 · 실제 다른 기기와 방 목록을 공유합니다.');
-   }else if(event.type==='resumed'&&event.room){
+    systemLine(state.offlineRoom?'중앙 서버 연결이 복구됐습니다. 현재 오프라인 방은 유지되며 온라인 채팅은 다시 입장한 뒤 이용할 수 있습니다.':
+     '중앙 채팅 서버 접속 완료 · 실제 다른 기기와 방 목록을 공유합니다.');
+   }else if(event.type==='resumed'&&event.room&&!state.offlineRoom){
     // Restore only a membership acknowledged by the authority, preserving
     // room capacity and owner privileges across browser reloads.
     const room=centralRoom(event.room);
@@ -1599,7 +1604,7 @@
       systemLine('중앙 채팅 서버에 재접속했습니다.');
      }
     }else if(event.type==='membership-lost'){
-     if(state.view==='room'&&state.roomId===event.roomId){
+     if(state.view==='room'&&!state.offlineRoom&&state.roomId===event.roomId){
       state.view='directory';state.roomId=null;state.offlineRoom=false;render();
       systemLine('서버 연결은 복구됐지만 이전 채팅방에는 입장하지 못했습니다. 방 목록에서 다시 선택해 주세요.');
      }
@@ -1624,14 +1629,14 @@
       systemLine(event.room.isOwner?'중앙 서버에서 새 방장 권한을 받았습니다.':'중앙 서버에서 방장 권한이 변경되었습니다.');
      }
     }
-    if(state.view==='room'&&central.joinedId===state.roomId&&!event.roomId){
+    if(state.view==='room'&&!state.offlineRoom&&central.joinedId===state.roomId&&!event.roomId){
      central.leave().catch(()=>{});
      state.view='directory';state.roomId=null;state.offlineRoom=false;render();
      systemLine('접속해 있던 방이 닫히거나 서버에서 퇴장 처리되었습니다.');
      return;
     }
     for(const [id,p] of state.peers)if(p.source==='central')state.peers.delete(id);
-    if(event.roomId===state.roomId&&state.view==='room'&&central.joinedId===state.roomId){
+    if(event.roomId===state.roomId&&state.view==='room'&&!state.offlineRoom&&central.joinedId===state.roomId){
      for(const person of event.peers||[]){
       if(person.id===central.id){
        // An actual two-browser concurrent click can resolve after the
@@ -1728,7 +1733,7 @@
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
  window.__LEAF_SOCIAL__={openRegion,openKnightTown,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
   const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
-  state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
+  state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room,true);return room.id;
  },send:publishText,getState:()=>({avatar:state.avatar,region:state.region,district:state.district,view:state.view,scope:state.scope,knightDistrict:state.knightDistrict,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
 })();
