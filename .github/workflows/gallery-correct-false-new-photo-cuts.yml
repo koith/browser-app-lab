@@ -55,6 +55,7 @@ jobs:
             if git push origin HEAD:refs/heads/main; then
               echo "GALLERY_FALSE_NEW_PHOTO_CUTS_CORRECTED_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
               gh workflow run static.yml --ref main
+              gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
               exit 0
             fi
             sleep 3
