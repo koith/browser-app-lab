@@ -1,0 +1,38 @@
+name: Gallery New SHA vs Existing Photo Visual Uniqueness Audit
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_mimmi_2021_new20_vs_existing.py'
+      - '.github/workflows/gallery-new20-cross-existing-visual-audit.yml'
+  workflow_run:
+    workflows:
+      - 'pages build and deployment'
+      - 'Deploy static content to Pages'
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  published-old-vs-new-pixels:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Decode both old and new stored JPEGs, report actual same-photo candidates
+        run: |
+          python -m pip install --quiet 'Pillow==11.3.0'
+          python apps/gallery-archive/qa_mimmi_2021_new20_vs_existing.py
+      - name: Distinguish unique SHA files from independently verified new photographs
+        run: |
+          echo 'The audit reports possible same-frame matches to previous photos.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'A JPEG with a new SHA-256 is not by itself a new distinct photographic cut.' >> "$GITHUB_STEP_SUMMARY"
