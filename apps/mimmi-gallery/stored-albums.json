@@ -15992,6 +15992,18 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 242,
+          "url": "stored-albums/djawa-nikke-elegg/117fe8c2e4d5e6775ce6.jpg",
+          "sha256": "117fe8c2e4d5e6775ce6988853fde3acdaf5addd94b44de6737de3099d70f4b5",
+          "bytes": 302042,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -27506,5 +27518,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2801
+  "physical_verified_image_count": 2802
 }
