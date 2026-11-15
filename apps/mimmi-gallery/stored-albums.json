@@ -6153,6 +6153,114 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 118,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/60fdd1ab93d1644a6fbb.jpg",
+          "sha256": "60fdd1ab93d1644a6fbbe9e20469299234de5ffbadf4e1d7c259e88bc5644915",
+          "bytes": 126224,
+          "width": 650,
+          "height": 975,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 119,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/ae681a9ccc7bacf6ea66.jpg",
+          "sha256": "ae681a9ccc7bacf6ea662c75f00f0b298cad7bbde5639c0da6e3716038d72506",
+          "bytes": 135638,
+          "width": 683,
+          "height": 1024,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 120,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/ef8f52e5a0734378da99.jpg",
+          "sha256": "ef8f52e5a0734378da99a19c7aa40ab35ed6b2be1d2a17da90a3236dcd22a699",
+          "bytes": 161508,
+          "width": 768,
+          "height": 1152,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 121,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/af96ada61648732cd0d5.jpg",
+          "sha256": "af96ada61648732cd0d535d711cf1de61e92c595edd1828f421040968c334e3e",
+          "bytes": 254329,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 122,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/25f868ccfebf1c8575ac.jpg",
+          "sha256": "25f868ccfebf1c8575ace5e678227629d75f60be6d7a4e14b6325806d6e9c47f",
+          "bytes": 262346,
+          "width": 1024,
+          "height": 1536,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 123,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/4a129a91f2c5e95fb875.jpg",
+          "sha256": "4a129a91f2c5e95fb875721206d7e2a0dc12c7406961bde0646c8fb0be790064",
+          "bytes": 46239,
+          "width": 350,
+          "height": 525,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 124,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/64ae7870ce4a3b8517ef.jpg",
+          "sha256": "64ae7870ce4a3b8517effab7a91d9e69ee047c1e91dfc13f6d60436236e20d7a",
+          "bytes": 128525,
+          "width": 650,
+          "height": 975,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 125,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/d882e6333225109cfc5c.jpg",
+          "sha256": "d882e6333225109cfc5c663b370b3b428c3757488cdce65fad33724972292359",
+          "bytes": 139396,
+          "width": 683,
+          "height": 1024,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 126,
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/2d53cd8fce4d9ecb518c.jpg",
+          "sha256": "2d53cd8fce4d9ecb518c8bcd585be59569426546857fce77d32b6adf3c018ffe",
+          "bytes": 166724,
+          "width": 768,
+          "height": 1152,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -27122,5 +27230,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2769
+  "physical_verified_image_count": 2778
 }
