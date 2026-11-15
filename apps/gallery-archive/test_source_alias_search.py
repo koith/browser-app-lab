@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Local match/identity regression for public site search. No external requests."""
-from source_alias_search import page_matches,exact_work_in_text,https_page,source_headings
+from source_alias_search import page_matches,exact_work_in_text,https_page,source_headings,rotated_work_scope
 from source_name_ledger import LEDGER
 import json
 
@@ -23,6 +23,21 @@ def main():
     title,context=source_headings("<html><title>Mimmi Pop Kitty Party</title><h1>DJAWA × Mimmi</h1><p>full public preview</p></html>")
     assert "Pop Kitty Party" in title and "Mimmi" in context
     assert len(json.loads(LEDGER.read_text())["works"])>=8
+    # A fixed 8-work search budget must cover every registered work across
+    # successive runs, not shift by only one work and repeat the same 7.
+    works=[f'mimmi:work-{i}' for i in range(43)]
+    windows=[rotated_work_scope(works,run*3,3,8) for run in range(6)]
+    assert len(set(w for window in windows for w in window))==43
+    assert set(windows[0]).isdisjoint(set(windows[1]))
+    assert windows[0]!=windows[1]
+    assert rotated_work_scope(works,3,3,8)==works[8:16]
+    assert rotated_work_scope([],0,3,8)==[]
+    try:
+        rotated_work_scope(works,-3,3,8)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('invalid negative source rotation must fail')
     print("PUBLIC_SOURCE_ALIAS_MATCH_AND_IDENTITY_GATES_PASS")
 
 if __name__=="__main__":main()
