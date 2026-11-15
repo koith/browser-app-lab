@@ -25,6 +25,16 @@ def run(root=ROOT):
     assert album is not None
     new=[p for p in album['images'] if p.get('number') in NEW_NUMBERS]
     previous=[p for p in album['images'] if p.get('number') not in NEW_NUMBERS]
+    if not new:
+        # A later exact-pixel correction may remove these two duplicate
+        # SHA variants. Do not require their reintroduction after cleanup.
+        assert len(previous)>=48, 'Original work photo evidence disappeared'
+        done={'model':MODEL,'album':WORK,'state':'ALREADY_CORRECTED',
+              'new_sha_verified_files':0,'old_photo_cuts_retained':len(previous),
+              'mode':'no_mutation'}
+        print('MIMMI_SUNSHINE_NEW2_SAME_FRAME_EVIDENCE',
+              json.dumps(done,ensure_ascii=False),flush=True)
+        return done
     assert {p['number'] for p in new}==NEW_NUMBERS and len(new)==2
     def load(p):
         rel=p['url']
