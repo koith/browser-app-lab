@@ -22,7 +22,6 @@ class WorkVisualIndex:
         self._load()
 
     def _load(self):
-        from io import BytesIO
         from PIL import Image
         aid=self.album['id']
         seen=set()
@@ -44,17 +43,28 @@ class WorkVisualIndex:
                     self.reference_corrupt+=1
                     continue
                 scanned=scan_image(raw)
-                self.entries.append((dict(row),scanned,raw))
+                # Keep only tiny fingerprint + pathname; full originals may
+                # collectively be gigabytes in a public photobook.
+                self.entries.append((dict(row),scanned,path))
             except (OSError,ValueError,Image.DecompressionBombError):
                 self.reference_corrupt+=1
 
     def classify(self, raw):
         """Only a very tight pixel match establishes a duplicate existing cut."""
-        candidate=scan_image(raw)
-        for row,old_scan,old_raw in self.entries:
+        try:
+            candidate=scan_image(raw)
+        except (ValueError,OSError):
+            # Oversize originals are still allowed by the existing physical
+            # decoder; no new runtime failure should block their publication.
+            return None
+        for row,old_scan,old_path in self.entries:
             relation,distance,diff=candidate_relation(old_scan,candidate)
             if (relation!='perceptually_similar_review' or
                     distance is None or distance>3 or diff is None or diff>2.0):
+                continue
+            try:
+                old_raw=old_path.read_bytes()
+            except OSError:
                 continue
             upgrade,evidence=preferred_pair(
                 old_raw,raw,row['sha256'],
@@ -72,4 +82,14 @@ class WorkVisualIndex:
 
     def remember(self, row, raw):
         """Prevent two different encodings of a newly staged cut in one batch."""
-        self.entries.append((dict(row),scan_image(raw),raw))
+        try:
+            scanned=scan_image(raw)
+        except (ValueError,OSError):
+            return
+        rel=row.get('url','')
+        if not isinstance(rel,str):
+            return
+        path=(self.base/rel).resolve()
+        if not path.is_relative_to(self.base):
+            return
+        self.entries.append((dict(row),scanned,path))
