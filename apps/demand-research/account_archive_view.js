@@ -46,7 +46,7 @@ function resetFeedSearch(){
   invalidateSavedPostsView();
   if(feedSearchTimer!==null){clearTimeout(feedSearchTimer);feedSearchTimer=null;}
   persistFeedFilters();
-  if(state.section==="posts")setTab("posts");
+  if(journalSection(state.section))setTab(state.section);
 }
 function scheduleFeedSearch(){
   invalidateSavedPostsView();
