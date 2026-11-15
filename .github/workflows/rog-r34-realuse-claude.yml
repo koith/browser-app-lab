@@ -1,0 +1,54 @@
+name: 4LEAF R34 Claude visible-click full game and ChatTown map real-use QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/chat-room-map-usable.css'
+      - 'apps/4leaf/rog/dice-native-stage.js'
+      - 'apps/4leaf/rog/dice-native-stage.css'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/realuse-*.cjs'
+      - '.github/workflows/rog-r34-realuse-claude.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/chat-room-map-usable.css'
+      - 'apps/4leaf/rog/dice-native-stage.js'
+      - 'apps/4leaf/rog/dice-native-stage.css'
+      - 'apps/4leaf/rog/tests/realuse-*.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-person-visible-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium webkit --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/4leaf-r34.log 2>&1 &
+          for i in $(seq 1 30); do if curl -fsSI http://127.0.0.1:8765/ >/dev/null; then exit 0; fi; sleep 1; done
+          exit 1
+      - name: Browser clicks North Hiakhan to map room to chat and exit
+        run: FOURLEAF_BROWSER=\${{ matrix.browser }} node apps/4leaf/rog/tests/realuse-chat-map-entry.cjs
+      - name: Browser clicks from CREATE to match over at four device sizes
+        run: FOURLEAF_BROWSER=\${{ matrix.browser }} node apps/4leaf/rog/tests/realuse-dice-full-game.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-realuse-claude-\${{ matrix.browser }}
+          path: |
+            realuse-chat-map-*.png
+            realuse-dice-*.png
+          if-no-files-found: ignore
