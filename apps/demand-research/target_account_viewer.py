@@ -593,32 +593,53 @@ def create_router(auth):
             data=[]
             github_failed=False
             terabox_failed=False
+            # Existing independently AES/SHA-verified archive discovery lives
+            # in a durable owner-only registry, not the truncated Atom feed.
+            # This is an inventory hint. Content GETs always verify originals.
             try:
-                data=[bundled_account_picker_row(bundle,bundle.account,
-                                                temporary=True)
-                      for bundle in github_temp_bundle.latest_bundles()]
-            except (RuntimeError,ValueError,TypeError,BundleInvalid):
-                github_failed=True
-            try:
-                root=open_root()
-                index={item["key"]:item for item in data}
-                for bundle in _verified_account_bundles(root):
-                    for account,entry in bundle.accounts.items():
-                        present=index.get(account)
-                        # Exact account identity and independently checked
-                        # whole ZIP SHA already gate both archive backends.
-                        if (present is not None and bundle.post_count<=
-                                present["posts_verified_in_bundle"]):
-                            continue
-                        row=bundled_account_picker_row(bundle,account,
-                                                      temporary=False)
-                        if present is None:
-                            data.append(row)
-                        else:
-                            present.update(row)
-                        index[account]=present if present is not None else row
-            except (RuntimeError,ValueError,TypeError,KeyError,BundleInvalid):
-                terabox_failed=True
+                from backup_queue import archive_index_rows
+                rows=archive_index_rows()
+                data=[{
+                    "key":row["account_key"],"platform":row["platform"],
+                    "profile_url":sanitize_safe_link(row.get("profile_url")),
+                    "display_name":str(row.get("display_name") or "")[:100],
+                    "handle":str(row.get("handle") or "")[:200],
+                    "backup_kind":"github_temp_sha_verified",
+                    "posts_verified_in_bundle":int(row.get("posts_verified",0)),
+                    "objects_verified_in_bundle":int(row.get("objects_verified",0)),
+                    "source_state":"PREVIOUSLY_VERIFIED_RELEASE_INDEX",
+                    "profile_snapshot_verified":bool(
+                        row.get("display_name") or row.get("handle")),
+                    "temporary":True,
+                    "index_requires_original_recheck":True}
+                    for row in rows]
+            except (RuntimeError,ValueError,TypeError,KeyError):
+                data=[]
+            if not data:
+                try:
+                    data=[bundled_account_picker_row(bundle,bundle.account,
+                                                    temporary=True)
+                          for bundle in github_temp_bundle.latest_bundles()]
+                except (RuntimeError,ValueError,TypeError,BundleInvalid):
+                    github_failed=True
+                try:
+                    root=open_root()
+                    index={item["key"]:item for item in data}
+                    for bundle in _verified_account_bundles(root):
+                        for account,entry in bundle.accounts.items():
+                            present=index.get(account)
+                            if (present is not None and bundle.post_count<=
+                                    present["posts_verified_in_bundle"]):
+                                continue
+                            row=bundled_account_picker_row(bundle,account,
+                                                          temporary=False)
+                            if present is None:
+                                data.append(row)
+                            else:
+                                present.update(row)
+                            index[account]=present if present is not None else row
+                except (RuntimeError,ValueError,TypeError,KeyError,BundleInvalid):
+                    terabox_failed=True
             if not data and github_failed and terabox_failed:
                 raise HTTPException(502,"Both verified account indexes unavailable")
             return JSONResponse({"accounts":data},headers=CACHE_HEADERS)
