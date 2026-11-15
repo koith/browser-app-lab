@@ -47,7 +47,7 @@ jobs:
     env:
       MODEL: ${{ matrix.model }}
       RUN_NUMBER: ${{ github.run_number }}
-      STAGE: ${{ runner.temp }}/gallery-public-full
+      STAGE: /tmp/gallery-public-full
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -129,10 +129,10 @@ jobs:
         with:
           name: gallery-full-public-${{ matrix.model }}-audit
           path: |
-            ${{ runner.temp }}/gallery-public-full/reverse-evidence.json
-            ${{ runner.temp }}/gallery-public-full/source-evidence.json
-            ${{ runner.temp }}/gallery-public-full/photos/full-collection-summary.json
-            ${{ runner.temp }}/gallery-public-full/photos/batch-*/metadata/collection-audit.json
-            ${{ runner.temp }}/gallery-public-full/photos/batch-*/metadata/pages-publication.json
+            /tmp/gallery-public-full/reverse-evidence.json
+            /tmp/gallery-public-full/source-evidence.json
+            /tmp/gallery-public-full/photos/full-collection-summary.json
+            /tmp/gallery-public-full/photos/batch-*/metadata/collection-audit.json
+            /tmp/gallery-public-full/photos/batch-*/metadata/pages-publication.json
           retention-days: 7
           if-no-files-found: warn
