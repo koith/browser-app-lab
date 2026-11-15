@@ -46,35 +46,65 @@ def query_page(client,source,params):
         return "network_"+type(e).__name__,[]
 
 def search_one(seed,client=None):
+    """Keep searching when the first engine returns *unrelated* pages.
+
+    The previous fallback used `not links`, so a Yandex page containing
+    unrelated models stopped the Bing search even if zero usable matches
+    were found. Count distinct model-supported URLs, not raw HTML anchors.
+    """
     client=client or requests.Session()
     url=seed["public_image_url"]
+    approved=[]
+    seen=set()
+    rejected=0
+    per_engine={}
+    def accept(items,name):
+        nonlocal rejected
+        accepted_here=0
+        for link in items:
+            if not isinstance(link,dict):
+                continue
+            target=link.get("url")
+            if not isinstance(target,str) or not target.startswith("https://"):
+                continue
+            if identity_supported(seed,link):
+                if target not in seen:
+                    approved.append(link)
+                    seen.add(target)
+                    accepted_here+=1
+            else:
+                rejected+=1
+        per_engine[name]=accepted_here
+
     status,html=query_page(client,SEARCH_URL,{"rpt":"imageview","cbir_page":"sites","url":url})
     links=sites_from_html(html,untrack) if html else []
     if not links and html:
         links=leads_from_html(html)
     stages={"yandex_sites":status if status!="ok" else "leads_"+str(len(links))}
-    if not links and status not in ("captcha_not_bypassed","http_429"):
+    accept(links,"yandex_sites")
+
+    # A nonempty collection of unrelated links is NOT a visual match.
+    if not approved and status not in ("captcha_not_bypassed","http_429"):
         alt_status,alt_html=query_page(client,SEARCH_URL,{"rpt":"imageview","url":url})
         extra=sites_from_html(alt_html,untrack) if alt_html else []
-        if not extra and alt_html:extra=leads_from_html(alt_html)
-        links=extra
+        if not extra and alt_html:
+            extra=leads_from_html(alt_html)
         stages["yandex_general"]=alt_status if alt_status!="ok" else "leads_"+str(len(extra))
-    # Bing remains a genuinely independent fallback.
-    if not links:
+        accept(extra,"yandex_general")
+
+    # Query Bing when Yandex has no match or only one/two distinct leads.
+    # This stays bounded (one Bing request) and does not retry access blocks.
+    if len(approved)<3:
         b_status,b_html=query_page(client,BING_URL,{
             "view":"detailv2","iss":"sbi","FORM":"SBIHMP","sbisrc":"UrlPaste",
             "q":"imgurl:"+url})
         b_links=leads_from_html(b_html) if b_html else []
-        links=b_links
         stages["bing"]=b_status if b_status!="ok" else "leads_"+str(len(b_links))
-    approved=[]
-    rejected=0
-    for link in links:
-        if identity_supported(seed,link):
-            approved.append(link)
-        else: rejected+=1
+        accept(b_links,"bing")
     return {**seed,"search_status":stages,"candidate_pages":approved[:90],
-            "off_model_rejected":rejected,"originals_stored":0,"visible_gallery_added":0}
+            "matched_urls_by_engine":per_engine,
+            "off_model_rejected":rejected,
+            "originals_stored":0,"visible_gallery_added":0}
 
 def diversified_seed_window(inventory, limit, offset):
     """Search across distinct albums first, then advance each album's cut.
