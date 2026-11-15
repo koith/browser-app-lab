@@ -95,13 +95,14 @@ const {chromium}=require('playwright');
    const board=document.getElementById('board-area').getBoundingClientRect();
    return {overlap:!!overlap,fontSize:parseFloat(getComputedStyle(header).fontSize),
     visible:a.width>0&&a.height>0&&a.left>=board.left&&a.right<=board.right,
-    slot:el.closest('.battle-side-card')?.dataset.slot,rect:[a.x,a.y,a.width,a.height],
+    slot:el.closest('.battle-side-card')?.dataset.slot,
+    activeSlot:String(window.__ROG_TEST__.getMatch().active+1),rect:[a.x,a.y,a.width,a.height],
     event:b?[b.x,b.y,b.width,b.height]:null};
   });
   assert.ok(mobile.visible,'phone turn cue must remain visible inside the game viewport '+JSON.stringify(mobile));
   assert.ok(mobile.fontSize>=15,'phone title must not shrink to the old unreadable 10px');
   assert.equal(mobile.overlap,false,'do not obscure native event message on a 390px phone '+JSON.stringify(mobile));
-  assert.equal(mobile.slot,'2','phone cue must track the actual active player');
+  assert.equal(mobile.slot,mobile.activeSlot,'phone cue must track the live actual player even if AI advanced');
   assert.deepEqual(errors,[]);
   console.log('4LEAF_REAL_DICE_TURN_CAMERA_PASS',JSON.stringify({
    panBefore:before.view,rollMove:after.position,actualPawnVisible:true,
