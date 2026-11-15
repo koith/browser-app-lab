@@ -86,9 +86,10 @@
         unique.set(item.run_id,item);
       }
     }
-    try{absorb(JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]"))}catch{}
     try{absorb(JSON.parse(sessionStorage.getItem(JOBS_KEY)||"[]"))}catch{}
     try{absorb([JSON.parse(sessionStorage.getItem(JOB_KEY)||"null")])}catch{}
+    // The persisted history contains newer states than a legacy session row.
+    try{absorb(JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]"))}catch{}
     return [...unique.values()].sort((a,b)=>(Number(a.createdAt)||0)-(Number(b.createdAt)||0)).slice(-MAX_HISTORY);
   }
   function writeHistory(...updates){
@@ -224,10 +225,9 @@
     };
     try{
       const response=await fetch("/api/target-archive/jobs/"+
-        encodeURIComponent(String(job.run_id))+"?receipt="+
-        encodeURIComponent(job.receipt),{
+        encodeURIComponent(String(job.run_id)),{
           credentials:"same-origin",cache:"no-store",
-          headers:{Accept:"application/json"}
+          headers:{Accept:"application/json","X-Archive-Receipt":job.receipt}
         });
       if(!response.ok)throw Error("Job status HTTP "+response.status);
       const result=await response.json();
