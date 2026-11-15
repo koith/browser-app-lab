@@ -155,7 +155,8 @@ frame.addEventListener("load",()=>{
     if(frameWakeTimer!==null){clearTimeout(frameWakeTimer);frameWakeTimer=null;}
     try{
       frame.dataset.accountViewerLoaded=
-        frame.contentWindow?.location?.pathname==="/account-archive"?"1":"";
+        frame.contentWindow?.location?.pathname==="/account-archive"&&
+        frame.contentDocument?.querySelector(".archive-content")?"1":"";
     }catch{frame.dataset.accountViewerLoaded="";}
     sendAccountPreview();
     return;
