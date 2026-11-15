@@ -99,6 +99,16 @@ class FullReverseCoverageTests(unittest.TestCase):
             self.assertEqual(len(chosen),1)
             self.assertEqual(chosen[0]['photo_sha256'], new['photo_sha256'])
 
+    def test_first_full_pass_does_not_restart_in_multimodel_campaign(self):
+        queue=m.complete_queue(fixtures(), 'yui')
+        state={'attempted_ids':[p['seed_id'] for p in queue], 'cycle':0}
+        pending, cycle=m.plan_batch(queue,state,256,stop_after_full=True)
+        self.assertEqual(pending,[])
+        self.assertEqual(cycle,0)
+        repeat, cycle=m.plan_batch(queue,state,256,stop_after_full=False)
+        self.assertEqual(len(repeat),len(queue))
+        self.assertEqual(cycle,1)
+
     def test_wrong_model_and_corrupt_state_abort(self):
         with tempfile.TemporaryDirectory() as t:
             path=Path(t)/'progress.json'
