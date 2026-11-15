@@ -4572,6 +4572,18 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 170,
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/936442a9633bba000933.jpg",
+          "sha256": "936442a9633bba000933a9b4eeaf657a22aa7da0e72273a5d904595ee170e2e7",
+          "bytes": 368768,
+          "width": 1300,
+          "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -27398,5 +27410,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2792
+  "physical_verified_image_count": 2793
 }
