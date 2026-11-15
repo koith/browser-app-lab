@@ -192,9 +192,14 @@ def test_backup_status_header_auth_never_needs_url_receipt(client,monkeypatch):
     status=client.get(url,headers={"X-Archive-Receipt":receipt})
     assert status.status_code==200 and status.json()["state"]=="RUNNING"
     assert client.get(url).status_code==403
-    assert client.get(url,headers={"X-Archive-Receipt":receipt[:-1]+"0"}).status_code==403 or receipt.endswith("0")
+    changed=receipt[:-1]+("1" if receipt.endswith("0") else "0")
+    assert client.get(url,headers={"X-Archive-Receipt":changed}).status_code==403
+    # Invalid-length headers are rejected at input validation (422) and
+    # well-formed but conflicting signed receipts are rejected (403).
     assert client.get(url+"?receipt="+receipt,
-                      headers={"X-Archive-Receipt":"another-signed-value"}).status_code==403
+                      headers={"X-Archive-Receipt":"another-signed-value"}).status_code==422
+    assert client.get(url+"?receipt="+receipt,
+                      headers={"X-Archive-Receipt":changed}).status_code==403
     from fastapi.testclient import TestClient
     anonymous=TestClient(gateway.app,base_url="https://testserver")
     assert anonymous.get(url,headers={"X-Archive-Receipt":receipt}).status_code==401
