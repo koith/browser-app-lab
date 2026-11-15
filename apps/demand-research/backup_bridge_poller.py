@@ -1,5 +1,8 @@
 """Run inside a trusted GitHub Actions job, never in a browser.
 
+Queue recovery dispatch: execute this workflow upon the reviewed main-branch
+bridge update so restored persistent account requests are drained immediately.
+
 The short-lived GITHUB_TOKEN is sent only to api.github.com. The Render
 endpoint receives only a GitHub-signed OIDC identity assertion. Never log
 access tokens or public account identifiers.
