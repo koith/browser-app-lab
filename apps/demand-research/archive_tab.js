@@ -12,6 +12,7 @@ const quickBox=$("archiveAccountPicker"),quick=$("archiveQuickSelect"),
       quickStatus=$("archiveQuickStatus");
 if(!panel||!frame||!status||!frameBox||!actions||!auto||!accounts)return;
 let loading=false,connected=false,lastSrc="",retryCount=0;
+let frameWakeRetries=0,frameWakeTimer=null;
 let choices=[],choicesTime=0,choicesPending=null;
 const ACCOUNT=/^(?:bluesky|mastodon)-[a-f0-9]{40}$/;
 const PRIVATE_APP="https://intersection-originals-free.onrender.com/";
@@ -127,7 +128,39 @@ function fullViewUrl(){
 function hidePrivate(){
   frameBox.hidden=true;actions.hidden=true;
   frame.removeAttribute("src");lastSrc="";
+  if(frameWakeTimer!==null){clearTimeout(frameWakeTimer);frameWakeTimer=null;}
 }
+frame.addEventListener("load",()=>{
+  if(!frame.src||frameBox.hidden)return;
+  let body="";
+  try{body=String(frame.contentDocument?.body?.innerText||"").slice(0,3000)}catch{}
+  if(!/APPLICATION LOADING|SERVICE WAKING UP|WELCOME TO RENDER/i.test(body)){
+    frameWakeRetries=0;
+    if(frameWakeTimer!==null){clearTimeout(frameWakeTimer);frameWakeTimer=null;}
+    return;
+  }
+  frameBox.hidden=true;
+  status.textContent="보관 서버가 재가동 중입니다. 화면을 자동으로 다시 연결합니다.";
+  if(frameWakeRetries>=5){
+    status.textContent="보관 서버 재가동이 지연되고 있습니다. '목록 새로고침'으로 다시 연결할 수 있습니다.";
+    return;
+  }
+  frameWakeRetries++;
+  frameWakeTimer=setTimeout(async()=>{
+    frameWakeTimer=null;
+    if(panel.classList.contains("hidden")||!connected)return;
+    try{
+      const response=await fetch("/health",{cache:"no-store",credentials:"same-origin"});
+      if(!response.ok)throw Error("not ready");
+      frameBox.hidden=false;
+      frame.src=frameUrl();
+    }catch{
+      // Keep the original archive selection, retry only while the tab is open.
+      frameBox.hidden=false;
+      frame.src=frameUrl();
+    }
+  },Math.min(frameWakeRetries*5000,20000));
+});
 let overview=null,overviewTime=0,overviewPending=null;
 async function loadOverview(){
   if(!connected)return;
@@ -301,10 +334,40 @@ function addQueueRow(item,ordinal){
   for(let i=0;i<4;i++)phases.append(queueText("span",i<step?"filled":""));
   const detail=queueText("div","archive-queue-detail",
     "단계 "+step+"/4 · "+String(item.status||"진행 상태 미확인").slice(0,200));
-  row.append(head,phases,detail);queueList.append(row);
+  row.append(head,phases,detail);
+  if(["NEEDS_RETRY","FAILED"].includes(row.dataset.state)&&
+      ["bluesky","mastodon"].includes(item.platform)&&
+      typeof item.account==="string"){
+    const retry=queueText("button","archive-queue-retry","이 계정 다시 백업");
+    retry.type="button";
+    retry.addEventListener("click",async()=>{
+      const submit=window.INTERSECTION_startPublicAccountBackup;
+      if(typeof submit!=="function"){
+        detail.textContent="백업 요청 기능을 연결하지 못했습니다.";
+        return;
+      }
+      retry.disabled=true;
+      detail.textContent="새로운 백업 요청 접수 중…";
+      try{
+        const result=await submit({platform:item.platform,profileUrl:item.account},
+          (message)=>{detail.textContent=String(message||"").slice(0,160);});
+        if(result?.accepted){
+          detail.textContent="재접수 완료 · 이전 실패 기록은 유지됩니다. 새 요청을 대기열에서 확인하세요.";
+          const refresh=()=>void loadQueue(true);
+          setTimeout(refresh,1000);
+        }else retry.disabled=false;
+      }catch{
+        retry.disabled=false;
+        detail.textContent="재접수 실패 · 이전 실패 기록은 유지됩니다.";
+      }
+    });
+    row.append(retry);
+  }
+  queueList.append(row);
 }
 async function ownPendingQueue(offset){
-  const read=window.INTERSECTION_getOwnBackupRequests;
+  const read=window.INTERSECTION_getBackupHistory||
+             window.INTERSECTION_getOwnBackupRequests;
   if(typeof read!=="function")return null;
   const entries=read().filter(row=>row&&
     Number.isSafeInteger(row.run_id)&&row.run_id>0&&
@@ -316,7 +379,7 @@ async function ownPendingQueue(offset){
     return first&&second?first-second:(a.order||0)-(b.order||0);
   });
   const selected=entries.slice(offset,offset+20);
-  const items=await Promise.all(selected.map(async row=>{
+  const fetchOne=async row=>{
     const item={job_id:row.run_id,platform:row.platform,account:row.account,
       created_at:(Number(row.createdAt)||0)/1000,phase:1,phase_total:4,
       state:"WAITING",status:"이 브라우저에서 접수한 작업 · 진행 확인 중"};
@@ -324,9 +387,10 @@ async function ownPendingQueue(offset){
     const timer=setTimeout(()=>controller.abort(),7500);
     try{
       const response=await fetch("/api/target-archive/jobs/"+
-        encodeURIComponent(String(row.run_id))+"?receipt="+encodeURIComponent(row.receipt),{
+        encodeURIComponent(String(row.run_id)),{
           credentials:"same-origin",cache:"no-store",
-          headers:{Accept:"application/json"},signal:controller.signal});
+          headers:{Accept:"application/json","X-Archive-Receipt":row.receipt},
+          signal:controller.signal});
       if(!response.ok)throw Error("status HTTP "+response.status);
       const result=await response.json(),state=String(result.state||"");
       const stages={
@@ -347,7 +411,11 @@ async function ownPendingQueue(offset){
       item.status="영수증 보유 · 현재 서버 상태 조회 불가";
     }finally{clearTimeout(timer)}
     return item;
-  }));
+  };
+  // At most three expensive remote-storage status checks at a time.
+  const items=[];
+  for(let i=0;i<selected.length;i+=3)
+    items.push(...await Promise.all(selected.slice(i,i+3).map(fetchOne)));
   return {known:true,mode:"local_receipts",items,total:entries.length,
     offset,limit:20,truncated:false};
 }
@@ -388,7 +456,7 @@ async function loadQueue(reset=true){
     const total=Number.isFinite(data.total)?data.total:null;
     const warning=data.mode==="volatile_sqlite"
       ?" · 임시 장부: 서버 재시작 이전 접수 기록은 누락될 수 있습니다.":data.mode==="local_receipts"
-      ?" · 이 브라우저에 남아 있는 미완료 접수만 표시하며 전체 서버 대기열은 아닙니다.":"";
+      ?" · 이 브라우저에 보관된 요청 이력이며, 다른 브라우저·과거 유실 기록까지 포함하지 않습니다.":"";
     queueStatus.textContent=(total===null
       ?"확인 가능한 요청 "+queueOffset+"건"
       :"요청 "+total+"건 중 "+queueOffset+"건 표시")+
@@ -423,6 +491,7 @@ if(queueOpen&&queueDialog){
   });
   queueRefresh?.addEventListener("click",()=>void loadQueue(true));
   queueMore?.addEventListener("click",()=>void loadQueue(false));
+  $("targetArchiveQueueOpen")?.addEventListener("click",()=>queueOpen.click());
 }
 // Called by successful backup receipt or a saved-account card.
 window.INTERSECTION_openArchive=(account,mode)=>
