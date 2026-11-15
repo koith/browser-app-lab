@@ -264,6 +264,12 @@ def test_entire_verified_feed_search_kind_media_and_missing_slots(populated):
     assert viewer.feed_data(Journal(),name,0,20,kind="reply")["posts"][0]["id"]==b
     assert viewer.feed_data(Journal(),name,0,20,kind="revision")["posts"][0]["id"]==d
     assert viewer.feed_data(Journal(),name,0,20,kind="post")["posts"][0]["id"]==a
+    # SNS media tab must show real saved attachment positions, never a
+    # text-only post as a fabricated media item.
+    media_only=viewer.feed_data(Journal(),name,0,20,media_status="has_media")
+    assert media_only["total"]==1 and media_only["posts"][0]["id"]==b
+    assert viewer.feed_data(Journal(),name,0,20,kind="post",
+                            media_status="has_media")["total"]==0
     partial=viewer.feed_data(Journal(),name,0,20,media_status="partial")
     assert partial["total"]==1 and partial["posts"][0]["id"]==b
     media=partial["posts"][0]["media"]
