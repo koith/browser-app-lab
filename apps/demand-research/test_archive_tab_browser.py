@@ -177,7 +177,9 @@ def exercise(browser_type,label):
                     "() => document.querySelector('#archiveQueueList li')?.textContent?.includes('own-qa.bsky.social')",
                     timeout=15000)
                 assert "원격 파일·해시 검증 완료" in page.locator("#archiveQueueList li").first.inner_text()
-                assert "전체 서버 대기열은 아닙니다" in page.locator("#archiveQueueStatus").inner_text()
+                assert "다른 브라우저·과거 유실 기록까지 포함하지 않습니다" in page.locator("#archiveQueueStatus").inner_text()
+                # Status receipt is sent privately in an HTTP header, not a URL.
+                assert not any("receipt=" in req for req in requests)
                 assert "signed-own-job" in requests
                 page.locator("#archiveQueueClose").click()
                 page.locator("#archiveModeAuto").click()
