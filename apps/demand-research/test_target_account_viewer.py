@@ -125,8 +125,8 @@ def test_private_account_profile_bio_header_and_original_photo(populated):
     assert p["handle"]=="qa-user.bsky.social"
     assert p["followers_count"]==5
     assert p["following_count"]==3
-    assert p["assets"]["avatar"].endswith("/avatar")
-    assert p["assets"]["banner"].endswith("/banner")
+    assert "/profile-asset/avatar?snapshot=" in p["assets"]["avatar"]
+    assert "/profile-asset/banner?snapshot=" in p["assets"]["banner"]
     assert client.get(p["assets"]["avatar"]).content==PHOTO
     assert client.get(p["assets"]["banner"]).content==BANNER
 
