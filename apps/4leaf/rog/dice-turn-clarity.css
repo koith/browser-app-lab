@@ -86,6 +86,16 @@
   min-height:43px!important;
   padding:5px 7px!important;
  }
+ /* Top-row 1P/2P would otherwise overlap the genuine centred
+  * IMG/eventmsgbox.png source area on a 390px viewport. Keep the original
+  * client art in front of any temporary WEB turn cue. */
+ #app.app-classic-dice #game .battle-side-card[data-slot="1"] .dice-turn-banner,
+ #app.app-classic-dice #game .battle-side-card[data-slot="2"] .dice-turn-banner{
+  top:88px!important;
+ }
+ #app.app-classic-dice #game .battle-side-card:not([data-slot="1"]):not([data-slot="2"]) .dice-turn-banner{
+  top:4px!important;
+ }
  #app.app-classic-dice #game .dice-turn-banner .turn-cue-head{
   font-size:15px!important;
   line-height:19px!important;
