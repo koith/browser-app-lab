@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 from PIL import Image
+from photo_visual_dedupe import WorkVisualIndex
 
 ROOT = Path(__file__).resolve().parents[2]
 ALLOWED_EXT = {'.jpg': 'JPEG','.jpeg': 'JPEG','.png': 'PNG','.webp': 'WEBP'}
@@ -32,6 +33,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
     if stage_doc.get('model')!=model:
         raise ValueError('wrong model staged')
     added=[];used=0
+    visual_indexes={};same_frame_skipped=[];quality_replacement_deferred=[]
     for album in stage_doc.get('albums',[]):
         aid=album.get('id')
         if aid not in ids or not isinstance(aid,str) or not aid.replace('-','').isalnum():
@@ -64,6 +66,21 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                 if im.format!=ALLOWED_EXT[ext] or im.size!=(photo['width'],photo['height']):
                     raise ValueError('staged source decoded image mismatch')
                 if min(im.size)<300:continue
+            # An unrelated SHA can still be the exact same photo cut in a
+            # different compression or size. This is the missing safety gate
+            # that once falsely counted 20 re-encodes as 20 new Mimmi photos.
+            visual=visual_indexes.get(aid)
+            if visual is None:
+                visual=WorkVisualIndex(base,rec)
+                visual_indexes[aid]=visual
+            match=visual.classify(raw)
+            if match:
+                row={'album':aid,'sha256':digest,**match}
+                if match['needs_replacement_transaction']:
+                    quality_replacement_deferred.append(row)
+                else:
+                    same_frame_skipped.append(row)
+                continue
             rel=f'stored-albums/{aid}/{digest[:20]}{ext}'
             dest=base/rel
             if dest.exists() and dest.read_bytes()!=raw:
@@ -94,6 +111,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                     'verified_creator_cached_public_feed_append'}:
                 recorded['numbering_provenance']=provenance
             rec['images'].append(recorded)
+            visual.remember(recorded,raw)
             existing_sha.add(digest);added.append((aid,digest,len(raw)))
             used+=len(raw)
         if rec['images']:
@@ -109,7 +127,11 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
     result={'model':model,'new_sha_verified_originals':len(added),
        'total_bytes_added':used,'sha_samples':[{'album':a,'sha256':s,'bytes':n} for a,s,n in added],
        'real_files_in_pages':bool(added),'private_terabox_readback_verified':False,
-       'photo_source_fallback_prohibited':True}
+       'photo_source_fallback_prohibited':True,
+       'same_frame_duplicate_SHA_files_skipped':len(same_frame_skipped),
+       'quality_upgrades_held_for_verified_replacement':len(quality_replacement_deferred),
+       'same_frame_duplicate_evidence':same_frame_skipped[:25],
+       'quality_upgrade_evidence':quality_replacement_deferred[:25]}
     (stage/'metadata/pages-publication.json').write_text(json.dumps(result,indent=2)+'\n')
     print('G07_ACTUAL_NEW_PUBLIC_PAGES_STORED_SHA',json.dumps(result),flush=True)
     return result
