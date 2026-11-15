@@ -7,7 +7,7 @@ from pathlib import Path
 
 from reverse_seed_priority import seeds
 from reverse_sites_parser import sites_from_html
-from reverse_image_sweep import search_one,sweep,query_page
+from reverse_image_sweep import search_one,sweep,query_page,diversified_seed_window
 from reverse_image_discovery import untrack
 
 def fixture(base):
@@ -77,6 +77,22 @@ def main():
         accepted=search_one(entries[0],FakeClient())
         if entries[0]["model"]=="mimmi":
             assert len(accepted["candidate_pages"])==1,accepted
+        # The real all-cut source queue used to scan 8 frames from just
+        # two albums. Distinct-album coverage must equal the number of
+        # different works up to the limit, without any extra network calls.
+        complete=seeds(base,all_cuts=True)
+        for offset in (0,1,5,17,47):
+            selected=diversified_seed_window(complete,8,offset)
+            assert len(selected)==8,(offset,len(selected))
+            assert len({(x['model'],x['album_id']) for x in selected})==4,selected
+            assert len({(x['model'],x['album_id'],x['photo_sha256']) for x in selected})==8,selected
+        first=diversified_seed_window(complete,4,0)
+        rotated=diversified_seed_window(complete,4,4)
+        assert {x['photo_sha256'] for x in first}!={x['photo_sha256'] for x in rotated}
+        long_scan=sweep(base,8,0,workers=2,client_factory=FakeClient,all_cuts=True)
+        assert long_scan['unique_albums_queried']==4,long_scan
+        assert long_scan['seed_queries']==8,long_scan
+        assert long_scan['physical_photos_new']==0,long_scan
         scan=sweep(base,4,0,workers=2,client_factory=FakeClient)
         assert scan["seed_queries"]==4,scan
         assert scan["unique_albums_queried"]==4,scan
