@@ -23,6 +23,9 @@ on:
       - 'apps/gallery-archive/exhaustive_campaign_controller.py'
       - 'apps/gallery-archive/test_exhaustive_campaign_controller.py'
       - 'apps/gallery-archive/source_alias_search.py'
+      - 'apps/gallery-archive/direct_photo_pipeline.py'
+      - 'apps/gallery-archive/verified_source_bridge.py'
+      - 'apps/gallery-archive/test_verified_source_bridge.py'
 permissions:
   contents: write
   pull-requests: write
@@ -47,6 +50,7 @@ jobs:
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/gallery-archive/test_exhaustive_reverse_search.py
           python apps/gallery-archive/test_exhaustive_campaign_controller.py
+          python apps/gallery-archive/test_verified_source_bridge.py
           python apps/gallery-archive/run_exhaustive_reverse_search.py --model mimmi --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
           python apps/gallery-archive/run_exhaustive_reverse_search.py --model yui --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
           python apps/gallery-archive/run_full_public_acquisition.py --model mimmi --stage "$RUNNER_TEMP/empty" --plan-only
