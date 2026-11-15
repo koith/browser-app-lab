@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from perceptual_duplicate_audit import scan_image, candidate_relation
+from photo_quality_evidence import preferred_pair
 
 ROOT=Path(__file__).resolve().parents[2]
 MODEL="mimmi"
@@ -54,7 +55,7 @@ def run(root=ROOT):
         raise AssertionError(f"Stored image bytes differ from manifest: {wrong}")
     if len(added)!=20 or any(img is None for _,img in added):
         raise AssertionError("A newly added physical photo is inaccessible")
-    strong=[];weak=[];nearest=[]
+    strong=[];weak=[];nearest=[];quality=[]
     for p,candidate in added:
         distances=[]
         for earlier,reference in prior:
@@ -70,6 +71,17 @@ def run(root=ROOT):
             best=min(distances)
             nearest.append({"new_number":p["number"],"prior_number":best[2],
                             "dhash_distance":best[0],"rgb_difference":None if best[1]==999.0 else best[1]})
+            matched=next(old for old,_ in prior if old["number"]==best[2])
+            old_bytes=(base/matched["url"]).read_bytes()
+            new_bytes=(base/p["url"]).read_bytes()
+            superior,evidence=preferred_pair(old_bytes,new_bytes,matched["sha256"])
+            quality.append({"new_number":p["number"],"previous_number":matched["number"],
+                            "new_pixels":[p["width"],p["height"]],"prior_pixels":[matched["width"],matched["height"]],
+                            "new_bytes":p["bytes"],"prior_bytes":matched["bytes"],
+                            "visual_relation":evidence.get("relation"),
+                            "measured_fine_detail_prior":evidence.get("previous_detail"),
+                            "measured_fine_detail_new":evidence.get("candidate_detail"),
+                            "new_is_proven_quality_upgrade":superior})
     report={
         "model":MODEL,"work":WORK,
         "published_photo_slots_prior":len(old),
@@ -82,6 +94,8 @@ def run(root=ROOT):
             p["number"] for p,_ in added
         }-{r["new_number"] for r in strong}),
         "nearest_dhash_candidate_per_new":nearest,
+        "same_photo_quality_comparisons":quality,
+        "new_files_proven_quality_upgrade_count":sum(x["new_is_proven_quality_upgrade"] for x in quality),
         "claim":"SHA-unique and pixel-decoded files are not automatically unique photographs",
         "mutations":0
     }
