@@ -29,7 +29,7 @@ def seeds(root=ROOT,all_cuts=False):
             aid=album["id"]
             if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}",aid):continue
             title=album.get("title") or aid
-            if AI.search(title):continue
+            if AI.search(title) and not all_cuts:continue
             owned=[x for x in album.get("images",[])
                    if type(x.get("number")) is int and x["number"]>0
                    and SHA.fullmatch(str(x.get("sha256","")))
@@ -97,7 +97,7 @@ def seeds(root=ROOT,all_cuts=False):
                 if aid in owner_ids or not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}",aid):
                     continue
                 title=album.get("title") or aid
-                if AI.search(title):continue
+                if AI.search(title) and not all_cuts:continue
                 photos=[]
                 distinct=set()
                 for p in album.get("images",[]):
