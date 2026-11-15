@@ -30,6 +30,8 @@ const {chromium}=require('playwright');
   assert.equal(state.roomId,'leaf-public-north-0-0');
   assert.match(state.scope,/^offline-room:/);
   assert.match(await page.locator('#social-location-title').textContent(),/오프라인/);
+  assert.equal(await page.locator('.social-avatar.self').count(),1,
+   'offline room must render the real local avatar, not an empty interior');
   await page.locator('#message').fill('503 방 입장 및 로컬 채팅 검증');
   await page.locator('#chat-form button[type="submit"]').click();
   assert.match(await page.locator('#chat-log').textContent(),/503 방 입장 및 로컬 채팅 검증/);
