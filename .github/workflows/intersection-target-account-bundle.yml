@@ -56,6 +56,7 @@ jobs:
       TARGET_ACCOUNT: ${{ inputs.account }}
       TARGET_MAX_PAGES: ${{ inputs.max_pages }}
       DEMAND_ACCOUNT_TEMP_STORAGE: github_release
+      DEMAND_REQUIRE_PROFILE_SNAPSHOT: "1"
       GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
