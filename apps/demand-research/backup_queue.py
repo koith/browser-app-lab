@@ -12,6 +12,8 @@ import re
 import secrets
 import time
 import sqlite3
+from urllib.request import Request as UrlRequest, urlopen
+from urllib.error import HTTPError, URLError
 from pathlib import Path
 from contextlib import contextmanager
 
@@ -21,6 +23,44 @@ from target_account_archive import profile_input
 _REQUEST=re.compile(r"account-request-([0-9]{10})\.json\Z")
 _ACCOUNT=re.compile(r"account-request-([0-9]{10})-accepted\.json\Z")
 _MAX_OPEN=64
+_DURABLE_API="https://xkeowpbbsllfuauifdqb.supabase.co/functions/v1/intersection-queue-v1"
+
+
+def durable_enabled():
+    return enabled() and os.getenv("DEMAND_ARCHIVE_QUEUE_STORE","")=="supabase"
+
+
+def _remote(op, **kwargs):
+    """Fail closed unless the independent durable DB confirmed this mutation.
+
+    HTTPS server-to-server credential never leaves Render or enters public JS,
+    nor is it transmitted in the URL/access log. Do not fall back to SQLite.
+    """
+    if not durable_enabled():
+        raise RuntimeError("Durable account queue is not selected")
+    secret=os.getenv("DEMAND_ARCHIVE_QUEUE_SECRET","")
+    if len(secret)<48 or len(secret)>128:
+        raise RuntimeError("Persistent backup queue authentication missing")
+    data=canonical_json({"op":op,**kwargs})
+    if len(data)>4096:
+        raise ValueError("Oversized queue request")
+    request=UrlRequest(_DURABLE_API, data=data,method="POST",headers={
+        "Content-Type":"application/json",
+        "Accept":"application/json",
+        "X-Intersection-Queue-Key":secret,
+        "User-Agent":"intersection-private-backup-queue-v1"})
+    try:
+        with urlopen(request,timeout=12) as response:
+            if response.status!=200:
+                raise RuntimeError("Persistent backup queue operation failed")
+            raw=response.read(262144)
+        result=json.loads(raw)
+        if type(result) is not dict or "error" in result:
+            raise RuntimeError("Persistent backup queue response untrusted")
+        return result
+    except (HTTPError,URLError,TimeoutError,ValueError,TypeError,OSError):
+        raise RuntimeError("Persistent backup queue unavailable") from None
+
 
 
 def enabled():
@@ -109,6 +149,9 @@ def _read_object(root,key):
 
 
 def read_request(root,job_id):
+    if durable_enabled():
+        item=_remote("state",job_id=_num(job_id)).get("item")
+        return item.get("request") if type(item) is dict else None
     if sqlite_enabled():
         with _db() as conn:
             row=conn.execute("SELECT * FROM account_requests WHERE job_id=?",(_num(job_id),)).fetchone()
@@ -129,6 +172,9 @@ def read_request(root,job_id):
 
 
 def read_acceptance(root,job_id):
+    if durable_enabled():
+        item=_remote("state",job_id=_num(job_id)).get("item")
+        return item.get("accepted") if type(item) is dict else None
     if sqlite_enabled():
         with _db() as conn:
             row=conn.execute("SELECT * FROM account_requests WHERE job_id=?",(_num(job_id),)).fetchone()
@@ -171,6 +217,23 @@ def create_request(platform,account,root=None):
     normalized=profile_input(platform,account)
     if platform=="bluesky" and not account.startswith("https://"):
         account=normalized
+    if durable_enabled():
+        created_at=int(time.time())
+        created_order=time.time_ns()//1000  # JavaScript-safe microsecond order
+        for _ in range(6):
+            job_id=1000000000+secrets.randbelow(9000000000)
+            result=_remote("create",job_id=job_id,platform=platform,
+                           account=account,created_at=created_at,
+                           created_order=created_order)
+            record=result.get("request")
+            if (result.get("created") is True and type(record) is dict
+                and record.get("job_id")==job_id
+                and record.get("platform")==platform
+                and record.get("account")==account
+                and record.get("created_at")==created_at):
+                return job_id
+            raise RuntimeError("Durable queue readback was not verified")
+        raise RuntimeError("Unable to allocate persistent account request")
     if sqlite_enabled():
         with _db() as conn:
             open_count=conn.execute("SELECT count(*) FROM account_requests WHERE workflow_run_id IS NULL").fetchone()[0]
@@ -197,6 +260,11 @@ def create_request(platform,account,root=None):
 def pending(root=None,limit=1):
     if not enabled():
         raise RuntimeError("Durable queue disabled")
+    if durable_enabled():
+        rows=_remote("pending",limit=min(max(int(limit),1),_MAX_OPEN)).get("requests")
+        if type(rows) is not list:
+            raise RuntimeError("Persistent queue listing invalid")
+        return rows
     if sqlite_enabled():
         with _db() as conn:
             rows=conn.execute('''SELECT * FROM account_requests
@@ -232,6 +300,14 @@ def accept(job_id,workflow_run_id,root=None):
     _num(job_id)
     if type(workflow_run_id) is not int or workflow_run_id<=0:
         raise ValueError("invalid workflow run")
+    if durable_enabled():
+        result=_remote("accept",job_id=job_id,workflow_run_id=workflow_run_id)
+        receipt=result.get("receipt")
+        if (result.get("accepted") is not True or type(receipt) is not dict
+            or receipt.get("workflow_run_id")!=workflow_run_id
+            or receipt.get("job_id")!=job_id):
+            raise RuntimeError("Persistent queue acknowledgment unverified")
+        return receipt
     if sqlite_enabled():
         with _db() as conn:
             cursor=conn.execute('''UPDATE account_requests SET workflow_run_id=?, accepted_at=?
@@ -252,6 +328,13 @@ def accept(job_id,workflow_run_id,root=None):
 
 def state(job_id,root=None):
     _num(job_id)
+    if durable_enabled():
+        item=_remote("state",job_id=job_id).get("item")
+        if item is not None and (
+            type(item) is not dict or type(item.get("request")) is not dict
+            or item["request"].get("job_id")!=job_id):
+            raise RuntimeError("Persistent queue response invalid")
+        return item
     if sqlite_enabled():
         with _db() as conn:
             row=conn.execute("SELECT * FROM account_requests WHERE job_id=?",(job_id,)).fetchone()
@@ -269,6 +352,11 @@ def overview(root=None):
     if not enabled():
         return {"known":False,"mode":"disabled","queued":None,
                 "dispatched":None,"total_requests":None}
+    if durable_enabled():
+        result=_remote("overview")
+        if result.get("known") is not True or result.get("mode")!="durable_postgres":
+            raise RuntimeError("Persistent queue overview unavailable")
+        return result
     if sqlite_enabled():
         with _db() as conn:
             row=conn.execute("""SELECT count(*) AS total,
@@ -300,6 +388,11 @@ def accepted_runs(root=None,limit=64):
     if not enabled():
         raise RuntimeError("Durable queue disabled")
     maximum=min(max(int(limit),1),64)
+    if durable_enabled():
+        runs=_remote("accepted",limit=maximum).get("runs")
+        if type(runs) is not list or any(type(x) is not int or x<=0 for x in runs):
+            raise RuntimeError("Persistent queue accepted-run inventory invalid")
+        return runs
     if sqlite_enabled():
         with _db() as conn:
             rows=conn.execute("""SELECT workflow_run_id FROM account_requests
@@ -340,6 +433,13 @@ def queue_rows(root=None, limit=20, offset=0):
         raise ValueError("invalid queue page size")
     if type(offset) is not int or not 0<=offset<=2000:
         raise ValueError("invalid queue offset")
+    if durable_enabled():
+        result=_remote("rows",limit=limit,offset=offset)
+        if (result.get("mode")!="durable_postgres" or
+            type(result.get("items")) is not list or
+            type(result.get("total")) is not int):
+            raise RuntimeError("Persistent queue rows unavailable")
+        return result
     if sqlite_enabled():
         with _db() as conn:
             total=int(conn.execute("SELECT count(*) FROM account_requests").fetchone()[0])
