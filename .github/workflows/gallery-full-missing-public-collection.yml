@@ -50,6 +50,7 @@ jobs:
         run: |
           python -m py_compile apps/gallery-archive/run_full_public_acquisition.py
           python apps/gallery-archive/test_run_full_public_acquisition.py
+          python apps/gallery-archive/test_source_alias_search.py
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/gallery-archive/test_exhaustive_reverse_search.py
           python apps/gallery-archive/test_exhaustive_campaign_controller.py
