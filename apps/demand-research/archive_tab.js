@@ -480,7 +480,12 @@ async function loadQueue(reset=true){
   }
 }
 if(queueOpen&&queueDialog){
-  queueOpen.hidden=location.hostname==="koith.github.io";
+  const isPublicMirror=location.hostname==="koith.github.io";
+  queueOpen.hidden=isPublicMirror;
+  if(queueOpen.parentElement)queueOpen.parentElement.hidden=isPublicMirror;
+  const accountQueueButton=$("targetArchiveQueueOpen");
+  if(accountQueueButton?.parentElement)
+    accountQueueButton.parentElement.hidden=isPublicMirror;
   queueOpen.addEventListener("click",()=>{
     if(queueDialog.open)return;
     queueDialog.showModal();void loadQueue(true);
