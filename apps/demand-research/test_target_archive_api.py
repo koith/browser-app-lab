@@ -175,6 +175,36 @@ def test_oneclick_job_progress_requires_signed_same_session_receipt(client,monke
     assert anon.get(uri).status_code==401
 
 
+
+def test_backup_status_header_auth_never_needs_url_receipt(client,monkeypatch):
+    """The signed receipt must stay out of Render HTTP request-path logs."""
+    monkeypatch.setattr(target_archive_api,"dispatch",lambda *_:41999999999)
+    headers={"Origin":"https://testserver",
+             "X-Archive-Intent":"selected-public-account-v1"}
+    result=client.post("/api/target-archive/start",
+        json={"platform":"bluesky","account":"public-test.bsky.social"},
+        headers=headers)
+    assert result.status_code==202
+    receipt=result.json()["receipt"]
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",
+                        lambda run_id:{"status":"in_progress","id":run_id})
+    url="/api/target-archive/jobs/41999999999"
+    status=client.get(url,headers={"X-Archive-Receipt":receipt})
+    assert status.status_code==200 and status.json()["state"]=="RUNNING"
+    assert client.get(url).status_code==403
+    changed=receipt[:-1]+("1" if receipt.endswith("0") else "0")
+    assert client.get(url,headers={"X-Archive-Receipt":changed}).status_code==403
+    # Invalid-length headers are rejected at input validation (422) and
+    # well-formed but conflicting signed receipts are rejected (403).
+    assert client.get(url+"?receipt="+receipt,
+                      headers={"X-Archive-Receipt":"another-signed-value"}).status_code==422
+    assert client.get(url+"?receipt="+receipt,
+                      headers={"X-Archive-Receipt":changed}).status_code==403
+    from fastapi.testclient import TestClient
+    anonymous=TestClient(gateway.app,base_url="https://testserver")
+    assert anonymous.get(url,headers={"X-Archive-Receipt":receipt}).status_code==401
+
+
 def test_finished_workflow_is_not_verification_until_remote_zip_reads_back(client,monkeypatch):
     monkeypatch.setattr(target_archive_api,"dispatch",lambda *_:41999999999)
     headers={"Origin":"https://testserver","X-Archive-Intent":"selected-public-account-v1"}

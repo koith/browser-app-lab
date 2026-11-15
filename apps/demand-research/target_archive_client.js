@@ -69,6 +69,37 @@
 
   const JOB_KEY="intersection:private-archive-job:v1";
   const JOBS_KEY="intersection:private-archive-jobs:v2";
+  // A Render Free restart can erase its SQLite queue. Preserve the signed
+  // request receipts across browser restarts for 30 days, including failed
+  // submissions. These tokens only authorize viewing that exact job.
+  const HISTORY_KEY="intersection:private-archive-history:v1";
+  const HISTORY_MS=30*24*60*60*1000;
+  const MAX_HISTORY=100;
+  function readHistory(){
+    const unique=new Map();
+    function absorb(source){
+      if(!Array.isArray(source))return;
+      for(const item of source.slice(-MAX_HISTORY)){
+        if(!safeJob(item))continue;
+        const date=Number(item.createdAt)||0;
+        if(date>0&&(date>Date.now()+60000||Date.now()-date>HISTORY_MS))continue;
+        unique.set(item.run_id,item);
+      }
+    }
+    try{absorb(JSON.parse(sessionStorage.getItem(JOBS_KEY)||"[]"))}catch{}
+    try{absorb([JSON.parse(sessionStorage.getItem(JOB_KEY)||"null")])}catch{}
+    // The persisted history contains newer states than a legacy session row.
+    try{absorb(JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]"))}catch{}
+    return [...unique.values()].sort((a,b)=>(Number(a.createdAt)||0)-(Number(b.createdAt)||0)).slice(-MAX_HISTORY);
+  }
+  function writeHistory(...updates){
+    const rows=new Map(readHistory().map(row=>[row.run_id,row]));
+    for(const row of updates)if(safeJob(row))rows.set(row.run_id,row);
+    const all=[...rows.values()].slice(-MAX_HISTORY);
+    try{localStorage.setItem(HISTORY_KEY,JSON.stringify(all))}catch{}
+  }
+  const TERMINAL_STATES=new Set(["REMOTE_VERIFIED","PARTIAL_BACKUP","NEEDS_RETRY","FAILED"]);
+
   function safeJob(job){
     return job&&Number.isSafeInteger(job.run_id)&&job.run_id>0&&
       typeof job.receipt==="string"&&job.receipt.length<900&&
@@ -76,20 +107,11 @@
       typeof job.account==="string"&&job.account.length<400;
   }
   function resumeReceipts(){
-    try{
-      const stored=JSON.parse(sessionStorage.getItem(JOBS_KEY)||"[]");
-      if(Array.isArray(stored)){
-        const unique=new Map();
-        for(const row of stored.slice(-64))if(safeJob(row))
-          unique.set(row.run_id,row);
-        if(unique.size)return [...unique.values()];
-      }
-    }catch{}
-    try{
-      const old=JSON.parse(sessionStorage.getItem(JOB_KEY)||"null");
-      if(safeJob(old))return [old];
-    }catch{}
-    return [];
+    const all=readHistory();
+    // Migrate legacy session-only receipts before a new tab or iOS process
+    // destroys that session. Terminal runs remain visible in history.
+    if(all.length)writeHistory(...all);
+    return all.filter(row=>!TERMINAL_STATES.has(row.lastState)).slice(-64);
   }
   function saveReceipt(value,finished=null){
     if(value&&safeJob(value)){
@@ -109,7 +131,8 @@
         sessionStorage.removeItem(JOBS_KEY);
         sessionStorage.removeItem(JOB_KEY);
       }
-    }catch{/* Session storage can be disabled; server receipts remain authoritative. */}
+    }catch{/* Session storage can be disabled; signed receipts still stay in memory. */}
+    writeHistory(...pendingJobs,...(finished?[finished]:[]));
     renderQueueInfo();
   }
   const queueInfo=document.createElement("p");
@@ -202,14 +225,15 @@
     };
     try{
       const response=await fetch("/api/target-archive/jobs/"+
-        encodeURIComponent(String(job.run_id))+"?receipt="+
-        encodeURIComponent(job.receipt),{
+        encodeURIComponent(String(job.run_id)),{
           credentials:"same-origin",cache:"no-store",
-          headers:{Accept:"application/json"}
+          headers:{Accept:"application/json","X-Archive-Receipt":job.receipt}
         });
       if(!response.ok)throw Error("Job status HTTP "+response.status);
       const result=await response.json();
       if(!pendingJobs.includes(job))return;
+      job.lastState=String(result.state||"STATUS_UNAVAILABLE");
+      job.lastCheckedAt=Date.now();
       const count=Number(result.posts||0);
       switch(result.state){
         case "QUEUED":
@@ -249,7 +273,9 @@
     }finally{
       polling.delete(job.run_id);
       if(pendingJobs.includes(job)){
-        const timer=window.setTimeout(()=>{pollTimers.delete(job.run_id);void pollJob(job)},12000);
+        // The former 12-second per-account polling could overwhelm Render's
+        // 512MiB instance when many old receipts were restored at once.
+        const timer=window.setTimeout(()=>{pollTimers.delete(job.run_id);void pollJob(job)},60000);
         pollTimers.set(job.run_id,timer);
       }else clearPoll(job);
     }
@@ -384,7 +410,9 @@
           currentRun=pendingJobs[pendingJobs.length-1];
           showJob("기존 백업 "+pendingJobs.length+"건의 접수·진행 상태를 확인 중…","running");
           renderQueueInfo();
-          for(const job of pendingJobs)void pollJob(job);
+          // The popup can inspect old receipts on demand. Avoid 17 parallel
+          // remote archive scans after a cold start.
+          for(const job of pendingJobs.slice(-3))void pollJob(job);
         }
       }
     }catch{
@@ -517,6 +545,12 @@
   // Only the requesting browser can inspect its own signed job receipts.
   // Used if the private server ledger requires authentication the visitor
   // has not supplied. This is not an all-user/global queue substitute.
+  window.INTERSECTION_getBackupHistory=()=>readHistory().map((job,index)=>({
+    run_id:job.run_id,receipt:job.receipt,
+    account:job.account,platform:job.platform,
+    createdAt:Number.isFinite(job.createdAt)?job.createdAt:0,
+    lastState:job.lastState||"",order:index
+  }));
   window.INTERSECTION_getOwnBackupRequests=()=>resumeReceipts().map((job,index)=>({
     run_id:job.run_id,receipt:job.receipt,
     account:job.account,platform:job.platform,

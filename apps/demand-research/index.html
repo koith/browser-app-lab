@@ -757,6 +757,12 @@ main{padding-top:10px}
 .video-trend-review-actions button:disabled{opacity:.35;cursor:not-allowed}
 .video-trend-more{display:block;margin:0 12px 12px;padding:6px 10px;border-radius:0;background:#151829;color:white;font-size:11px}
 @media(max-width:720px){.video-trend-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:0 7px 9px}.video-trend-meta{padding:6px}.video-trend-meta b{font-size:11px}.video-trend-tools{padding:0 7px 8px}.video-trend-note{padding:0 7px 8px}}
+/* Backup request history must remain accessible while the archive iframe wakes. */
+.archive-queue-shortcut,.target-archive-queue-tools{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:7px 0}
+.archive-queue-shortcut button,.target-archive-queue-tools button{min-height:32px;padding:6px 10px;font-size:12px;font-weight:800;background:#ecf0ff;color:#243ba0;border:1px solid #9aabe6;border-radius:7px}
+.archive-queue-shortcut small{font-size:11px;color:#667187}
+.archive-queue-retry{margin-top:8px;padding:6px 9px;min-height:29px;background:#fff3e8;border:1px solid #c17f50;border-radius:6px;color:#853f17;font-size:11px;font-weight:800}
+.archive-queue-retry:disabled{opacity:.55}
 /* Compact archive controls, without oversized action buttons. */
 #archivesView.archive-hub{padding:12px}
 #archivesView .archive-hub-header h2{font-size:18px}
@@ -1271,6 +1277,7 @@ main{padding-top:10px}
         <p id="targetArchiveInputHint" class="account-privacy">Bluesky: 이름 example, @example, @example.bsky.social 또는 프로필 URL 입력</p>
         <button id="targetArchiveSubmit" type="submit">백업 실행 경로 확인 중…</button>
       </form>
+      <div class="target-archive-queue-tools"><button id="targetArchiveQueueOpen" type="button" aria-haspopup="dialog" aria-controls="archiveQueueDialog">백업 요청별 진행 현황</button></div>
       <span id="targetArchiveStatus" role="status" aria-live="polite">백업 실행 연결을 확인 중입니다.</span>
       <a id="targetArchiveWorkflow" hidden href="https://github.com/koith/browser-app-lab/actions/workflows/intersection-target-account-bundle.yml" target="_blank" rel="noopener noreferrer">관리자 진단용 실행 링크</a>
     </section>
@@ -1310,9 +1317,9 @@ main{padding-top:10px}
     <p id="archiveQuickStatus" role="status" aria-live="polite">계정을 선택하면 아래에 게시글과 프로필이 바로 나타납니다.</p>
   </div>
   <div id="archiveHubStatus" role="status" aria-live="polite">비공개 보관 서버의 연결 상태를 확인 중입니다.</div>
+  <div class="archive-queue-shortcut"><button type="button" id="archiveQueueOpen" aria-haspopup="dialog" aria-controls="archiveQueueDialog">백업 요청별 진행 현황</button><small>여러 계정의 접수·실행·실패·검증 상태</small></div>
   <div id="archiveHubActions" class="archive-hub-actions" hidden>
     <button type="button" id="archiveHubReload">목록 새로고침</button>
-    <button type="button" id="archiveQueueOpen" aria-haspopup="dialog" aria-controls="archiveQueueDialog">백업 대기열 확인</button>
     <a href="/account-archive" id="archiveHubFullView">보관함 크게 보기</a>
   </div>
   <div id="archiveHubFrameBox" hidden>
@@ -2921,10 +2928,10 @@ if(location.hostname==="intersection-originals-free.onrender.com" &&
 <script src="bsky_search_fallback.js?v=20261114-public-source-hydration-v1" defer></script>
 <script src="post_activity_ranking.js" defer></script>
 <script src="public_video_trends.js" defer></script>
-<script src="target_archive_client.js?v=20261115-own-pending-v1" defer></script>
+<script src="target_archive_client.js?v=20261115-backup-history-v2" defer></script>
 <script src="free_discovery.js" defer></script>
 <script src="account_watch.js?v=20261110-first-tab" defer></script>
-<script src="archive_tab.js?v=20261115-queue-dialog-v1" defer></script>
+<script src="archive_tab.js?v=20261115-backup-history-v2" defer></script>
 <script src="account_auto_analysis.js?v=20261105-account-ui-3" defer></script>
 <script src="account_index_client.js?v=20261105-account-ui-3" defer></script>
 <script src="account_group_client.js?v=20261105-account-ui-3" defer></script>

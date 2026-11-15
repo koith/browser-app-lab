@@ -79,7 +79,8 @@ Object.defineProperty(navigator,"clipboard",{
                                                        "run_id":41999000001,
                                                        "receipt":"synthetic-signed-receipt-for-browser-QA"}))
                 elif path.startswith("/api/target-archive/jobs/41999000001"):
-                    job_reads.append(route.request.url)
+                    job_reads.append({"url":route.request.url,
+                                      "receipt":route.request.headers.get("x-archive-receipt")})
                     route.fulfill(status=200,content_type="application/json",
                                   body=json.dumps({"run_id":41999000001,
                                     "state":"REMOTE_VERIFIED","remote_verified":True,
@@ -144,7 +145,11 @@ Object.defineProperty(navigator,"clipboard",{
                 assert page.locator("#targetArchiveAccount").input_value()==(
                     "https://bsky.app/profile/qa-example.bsky.social")
                 assert len(job_reads)>=1
-                assert "receipt=synthetic-signed-receipt" in job_reads[0]
+                assert "receipt=" not in job_reads[0]["url"]
+                assert job_reads[0]["receipt"]=="synthetic-signed-receipt-for-browser-QA"
+                # A verified job remains visible after leaving the page.
+                history=page.evaluate("JSON.parse(localStorage.getItem('intersection:private-archive-history:v1')||'[]')")
+                assert history and history[0]["lastState"]=="REMOTE_VERIFIED"
                 page.locator("#targetArchiveLibrary").wait_for(
                     state="visible",timeout=10000)
                 saved=page.locator("#targetArchiveLibraryRows a").first

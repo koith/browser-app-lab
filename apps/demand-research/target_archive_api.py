@@ -6,7 +6,7 @@ are ever sent to the browser. Submission means QUEUED, not SHA VERIFIED.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request, Query
+from fastapi import APIRouter, HTTPException, Request, Query, Header
 from fastapi.responses import JSONResponse
 from urllib.request import Request as UrlRequest, urlopen
 from urllib.error import HTTPError, URLError
@@ -430,11 +430,17 @@ def create_router(auth):
 
     @router.get("/api/target-archive/jobs/{run_id}")
     async def job_state(request:Request,run_id:int,
-                        receipt:str=Query(...,min_length=80,max_length=900)):
+                        receipt:str|None=Query(None,min_length=80,max_length=900),
+                        archive_receipt:str|None=Header(None,alias="X-Archive-Receipt",
+                                                        min_length=80,max_length=900)):
         auth(request)
         if not 1<=run_id<=999999999999:
             raise HTTPException(400,"Invalid workflow run id")
-        item=read_receipt(request,receipt,run_id)
+        # Keep old query-string receipts valid, but use a header for new
+        # clients. URL receipts used to leak into routine HTTP access logs.
+        if receipt and archive_receipt and not hmac.compare_digest(receipt,archive_receipt):
+            raise HTTPException(403,"Conflicting archive job receipts")
+        item=read_receipt(request,archive_receipt or receipt or "",run_id)
         if not can_start():
             raise HTTPException(503,"Private archive job status unavailable")
         workflow_id=run_id
