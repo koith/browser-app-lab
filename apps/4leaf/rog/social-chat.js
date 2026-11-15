@@ -639,7 +639,7 @@
  function regionState(region){
   state.region=region==='south'?'south':'north';
   state.district=REGIONS[state.region].districts[3][0];
-  state.view='town';state.roomId=null;state.knightBack=false;state.knightDistrict=null;state.position={x:52,y:76};
+  state.view='town';state.roomId=null;state.offlineRoom=false;state.knightBack=false;state.knightDistrict=null;state.position={x:52,y:76};
  }
  function openRegion(region){
   regionState(region);if(sceneInit)render();
@@ -794,7 +794,7 @@
    const count=onlinePeers('district:'+state.region+':'+name).length;
    if(count){const countLabel=document.createElement('span');countLabel.textContent=count+'명';b.append(countLabel)}
    b.onclick=()=>{
-    state.district=name;state.view='directory';state.roomId=null;render();
+    state.district=name;state.view='directory';state.roomId=null;state.offlineRoom=false;render();
     if(central.enabled&&central.ready)
      central.list(state.region,state.district).catch(e=>systemLine('서버 방 목록 조회 실패: '+e.message));
    };
@@ -892,6 +892,7 @@
    const arrow=document.createElement('span');arrow.className='social-room-action';arrow.textContent=r.preset?'상설방 입장 ›':'입장 ›';
    b.append(number,lock,name,occupancy,arrow);
    if(!roomHasSpace(r)){b.classList.add('social-room-full');arrow.textContent='정원 초과'}
+   if(!central.enabled||!central.ready||locallyStoredRoom(r))arrow.textContent='로컬 입장 ›';
    b.onclick=()=>joinRoom(r.id);
    list.append(b);
   }
@@ -959,8 +960,9 @@
    button.onclick=()=>{if(isWebEstate())pan(...steps[button.dataset.pan]);};
   }
  }
- function roomHasSpace(room){
-  if(central.enabled)return central.joinedId===room.id||roomOccupancy(room.id)<allowedCapacity(room.capacity);
+ function roomHasSpace(room,offline=false){
+  if(central.enabled&&central.ready&&!offline&&!locallyStoredRoom(room))
+   return central.joinedId===room.id||roomOccupancy(room.id)<allowedCapacity(room.capacity);
   return state.roomId===room.id&&state.view==='room'||onlinePeers('room:'+room.id).length<allowedCapacity(room.capacity);
  }
  function roomFullNotice(room){
@@ -974,8 +976,11 @@
   const intent=++roomJoinIntent;
   // A remotely cached count is advisory only; the central server must make
   // the final admission decision, including simultaneous joins and vacancies.
-  if(!central.enabled&&!roomHasSpace(room)){roomFullNotice(room);return}
-  if(central.enabled){
+  const localRoom=locallyStoredRoom(room);
+  if((!central.enabled||!central.ready||localRoom)&&!roomHasSpace(room,true)){
+   roomFullNotice(room);return;
+  }
+  if(central.enabled&&central.ready&&!localRoom){
    // A rapid second room click must supersede the first. Serializing the
    // WHOLE UI join (including any compensating leave) avoids a server/scene
    // split where the screen shows room A but the authority already left B.
@@ -996,7 +1001,9 @@
       if(state.view==='directory'&&central.joinedId)
        await central.leave().catch(err=>console.warn('ChatTown rollback:',err.message));
       if(/full|정원/i.test(e.message))roomFullNotice(room);
-      else systemLine('채팅방 입장 실패: '+e.message);
+      else if(room.preset&&centralOutage(e)){
+       if(enterRoom(room,true))systemLine('서버 장애로 오프라인 방에 입장했습니다. 중앙 서버의 다른 기기와 연결되지 않습니다.');
+      }else systemLine('채팅방 입장 실패: '+e.message);
      }
     };
     const pending=roomJoinQueue.then(attempt,attempt);
@@ -1010,25 +1017,25 @@
   if(room.passwordProof){
    askText('비공개 채팅방','방 비밀번호',true,async value=>{
     try{
-     if(await deriveRoomProof(value,room.passwordSalt)===room.passwordProof)enterRoom(room);
+     if(await deriveRoomProof(value,room.passwordSalt)===room.passwordProof)enterRoom(room,true);
      else systemLine('비밀번호가 일치하지 않습니다.');
     }catch{systemLine('비밀번호 검증을 진행할 수 없습니다.')}
    });return;
   }
-  enterRoom(room);
+  if(enterRoom(room,true))systemLine('오프라인 채팅방입니다. 이 브라우저의 다른 탭 또는 직접 연결 사용자끼리만 채팅합니다. 서버 복구 후 방에 재입장하면 온라인으로 연결됩니다.');
  }
  function openDirectory(){
   ++roomJoinIntent; // cancel any outstanding admission for an abandoned directory
   if(central.enabled&&central.joinedId)central.leave().catch(e=>systemLine('퇴장 처리 실패: '+e.message));
-  state.view='directory';state.roomId=null;render();
+  state.view='directory';state.roomId=null;state.offlineRoom=false;render();
   if(central.enabled&&central.ready)
    central.list(state.region,state.district).catch(e=>console.warn('ChatTown directory:',e.message));
  }
- function enterRoom(room){
-  if(central.enabled&&central.joinedId!==room.id)return false;
-  if(!central.enabled&&!roomHasSpace(room)){roomFullNotice(room);return false}
+ function enterRoom(room,offline=(!central.enabled||!central.ready||locallyStoredRoom(room))){
+  if(central.enabled&&!offline&&central.joinedId!==room.id)return false;
+  if(offline&&!roomHasSpace(room,true)){roomFullNotice(room);return false}
   if(room.region!==state.region){state.region=room.region}
-  state.district=room.district;state.roomId=room.id;state.view='room';
+  state.district=room.district;state.roomId=room.id;state.view='room';state.offlineRoom=offline;
   const seats=roomSeats(room.background);
   const hash=[...tabId].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,0);
   // A stable per-user preferred seat may ALREADY contain a real peer.
@@ -1593,7 +1600,7 @@
      }
     }else if(event.type==='membership-lost'){
      if(state.view==='room'&&state.roomId===event.roomId){
-      state.view='directory';state.roomId=null;render();
+      state.view='directory';state.roomId=null;state.offlineRoom=false;render();
       systemLine('서버 연결은 복구됐지만 이전 채팅방에는 입장하지 못했습니다. 방 목록에서 다시 선택해 주세요.');
      }
     }else if(event.type==='rooms'){
@@ -1619,7 +1626,7 @@
     }
     if(state.view==='room'&&central.joinedId===state.roomId&&!event.roomId){
      central.leave().catch(()=>{});
-     state.view='directory';state.roomId=null;render();
+     state.view='directory';state.roomId=null;state.offlineRoom=false;render();
      systemLine('접속해 있던 방이 닫히거나 서버에서 퇴장 처리되었습니다.');
      return;
     }
