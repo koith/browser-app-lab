@@ -1,0 +1,31 @@
+/* WEB accessibility layer. Source 2004 turn-prompt sprite not yet recovered.
+ * Do not substitute a fictional native PNG for essential gameplay state. */
+#game .game-topline #turn-indicator {
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:2px 10px;min-height:23px;
+  font-weight:800;font-size:clamp(11px,1.4vw,14px);
+  color:#fff2ce;background:rgba(12,21,55,.9);
+  border:1px solid rgba(252,224,160,.75);
+  border-radius:3px;white-space:nowrap;
+}
+#game .game-topline #turn-indicator[data-turn-owner="opponent"] {
+  color:#e2eafc;border-color:#9fc2f5;background:rgba(27,35,65,.94);
+}
+#game .dice-turn-banner {
+  position:absolute;top:7px;left:12%;right:12%;z-index:1000000;
+  background:rgba(16,25,56,.94);color:#ffefc9;
+  border:1px solid #dfbb76;border-radius:4px;
+  box-shadow:0 2px 9px rgba(5,6,20,.62);
+  padding:6px 8px;text-align:center;
+  font-size:clamp(11px,1.25vw,14px);font-weight:700;
+  line-height:1.4;letter-spacing:0;
+  pointer-events:none;overflow-wrap:anywhere;
+}
+#game .dice-turn-banner[data-turn-owner="opponent"] {
+  color:#e7eeff;background:rgba(24,33,58,.95);border-color:#94b9e9;
+}
+#game .dice-turn-banner[data-turn-owner="finished"] {color:#d5e9ce;border-color:#94d396}
+@media(max-width:650px) {
+ #game .game-topline #turn-indicator {font-size:10px;padding:1px 3px;min-height:19px;max-width:56vw;overflow:hidden;text-overflow:ellipsis}
+ #game .dice-turn-banner {top:4px;left:8%;right:8%;font-size:10px;padding:4px 5px}
+}

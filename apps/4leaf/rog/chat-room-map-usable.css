@@ -1,0 +1,21 @@
+/* Original room coordinates are NOT recovered. Real-use fix (2026-11-15):
+ * 130x100 px map grid must not render 185x91 translucent cards overlapping
+ * 55px and cutting badges. 118x84 solid buttons are web interaction only. */
+#rooms .social-directory.web-estate-open .social-map-rooms .social-directory-row,
+#rooms .social-directory.web-estate-open .social-map-rooms .social-public-room{
+ box-sizing:border-box!important;
+ width:118px!important;min-width:118px!important;max-width:118px!important;
+ height:84px!important;min-height:84px!important;
+ padding:0!important;
+ background:#253e66!important;
+ border:2px ridge #92b0cf!important;
+ box-shadow:1px 2px 3px #182c46aa!important;
+ overflow:hidden!important;
+}
+#rooms .social-directory.web-estate-open .social-map-rooms .social-directory-row:is(:hover,:focus-visible),
+#rooms .social-directory.web-estate-open .social-map-rooms .social-public-room:is(:hover,:focus-visible){
+ background:#385986!important;border-color:#f3e6b3!important;outline:1px dotted #ffedb5!important;
+}
+#rooms .social-directory.web-estate-open .social-map-rooms b{
+ bottom:18px!important;font-size:11px!important
+}

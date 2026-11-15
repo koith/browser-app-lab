@@ -1,0 +1,61 @@
+name: 4LEAF R35 real usability - central outage rooms and dice camera
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/central-client.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/dice-turn-clarity.css'
+      - 'apps/4leaf/rog/tests/chat-503-real-click.cjs'
+      - 'apps/4leaf/rog/tests/dice-turn-camera-real-click.cjs'
+      - '.github/workflows/rog-r35-critical-playability.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/central-client.js'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/index.html'
+      - '.github/workflows/rog-r35-critical-playability.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  outage-room-real-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate actual runtime parsers
+        run: |
+          node --check apps/4leaf/rog/central-client.js
+          node --check apps/4leaf/rog/social-chat.js
+          node --check apps/4leaf/rog/game.js
+          node --check apps/4leaf/rog/sw.js
+          node --check apps/4leaf/rog/tests/chat-503-real-click.cjs
+          node --check apps/4leaf/rog/tests/dice-turn-camera-real-click.cjs
+      - run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Serve exact PR source tree
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/rog-r35.log 2>&1 &
+          for i in $(seq 1 35); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/rog-r35.log
+          exit 1
+      - name: Real chat map join and CREATE with upstream HTML 503
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chat-503-real-click.cjs
+      - name: Real dice roll resets stray camera and explains turn owner
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/dice-turn-camera-real-click.cjs

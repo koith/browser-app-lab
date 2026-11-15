@@ -83,7 +83,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,knightDistrict:null,knightBack:false,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
+ const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,offlineRoom:false,knightDistrict:null,knightBack:false,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -108,25 +108,28 @@
   return roomById(state.roomId);
  }
  function roomById(id){
-  return (central.enabled?centralRooms.get(id):state.rooms.find(r=>r.id===id))||
-   canonicalRoom(id)||null;
+  return state.rooms.find(r=>r.id===id)||centralRooms.get(id)||canonicalRoom(id)||null;
  }
+ function locallyStoredRoom(room){return Boolean(room&&state.rooms.some(r=>r.id===room.id))}
+ function centralOutage(error){return [502,503,504].includes(error?.status)||
+  /network|fetch|timeout|timed out|failed to fetch|서버가 연결되지/i.test(String(error?.message||error))}
  // Display the server's actual always-joinable public room IDs even BEFORE
  // the sleeping free central authority wakes. They are real endpoints, not
  // fake occupants. Never manufacture archived 2002 room titles/population.
  function catalogue(){
   const region=state.region,district=state.district;
   const base=canonicalRooms(region,district);
-  const extra=central.enabled?[...centralRooms.values()]:state.rooms;
+  const extra=[...centralRooms.values(),...state.rooms];
   return base.concat(extra.filter(r=>r.region===region&&r.district===district
    &&!base.some(permanent=>permanent.id===r.id))
    .sort((a,b)=>b.created-a.created));
  }
  function roomOccupancy(roomId){
-  return central.enabled?(centralCounts.get(roomId)||0):onlinePeers('room:'+roomId).length;
+  const local=state.rooms.some(r=>r.id===roomId);
+  return central.enabled&&central.ready&&!local?(centralCounts.get(roomId)||0):onlinePeers('offline-room:'+roomId).length;
  }
  function scope(){
-  if(state.view==='room'&&state.roomId)return 'room:'+state.roomId;
+  if(state.view==='room'&&state.roomId)return (state.offlineRoom?'offline-room:':'room:')+state.roomId;
   if(state.view==='directory')return 'district:'+state.region+':'+state.district;
   if(state.view==='town')return 'town:'+state.region;
   if(state.view==='board')return 'board:recordable';
@@ -194,8 +197,9 @@
  let centralPresenceRequest=0,centralPresenceSettled=0;
  function presence(announce=true){
   const self=compactPresence();
-  if(announce&&!central.enabled){sendLocal({kind:'presence',peer:self});sendRTC({kind:'presence',peer:self})}
-  if(central.enabled&&central.ready&&central.joinedId===state.roomId){
+  if(announce&&(!central.enabled||!central.ready||state.offlineRoom)){
+   sendLocal({kind:'presence',peer:self});sendRTC({kind:'presence',peer:self})}
+  if(central.enabled&&central.ready&&!state.offlineRoom&&central.joinedId===state.roomId){
    const roomId=state.roomId,request=++centralPresenceRequest;
    central.presence({nick:self.nick,avatar:self.avatar,facing:self.facing,position:self.position})
     .then(reply=>{
@@ -388,11 +392,11 @@
   if(v.startsWith('/nick ')){$('rename')?.click();return Promise.resolve(true)}
   const content=originalChatToy(v)||(v.startsWith('/me ')?'＊ '+nick()+' '+v.slice(4):v);
   const item={kind:'chat',id:uuid(),scope:state.scope,user:nick(),text:content,sender:tabId,time:now()};
-  if(central.enabled&&state.view==='room'&&(!central.ready||central.joinedId!==state.roomId)){
+  if(central.enabled&&!state.offlineRoom&&state.view==='room'&&(!central.ready||central.joinedId!==state.roomId)){
    systemLine('중앙 채팅방에 실제 입장한 뒤 메시지를 보낼 수 있습니다.');
    return Promise.resolve(false);
   }
-  if(central.enabled&&state.view==='room'){
+  if(central.enabled&&!state.offlineRoom&&state.view==='room'){
    // Only a 201 from the actual central authority counts as delivery.
    // A failed HTTP call cannot erase an unsent draft or invent local history.
    return central.chat(content,clientMessageId).then(result=>{
@@ -416,7 +420,9 @@
  function onlinePeers(sc=state.scope){
   const fresh=[compactPresence()];
   for(const peer of state.peers.values()){
-   if(central.enabled&&peer.source!=='central')continue;
+   const localScope=sc.startsWith('offline-room:');
+   if((state.offlineRoom||localScope)&&peer.source==='central')continue;
+   if(central.enabled&&central.ready&&!state.offlineRoom&&!localScope&&peer.source!=='central')continue;
    if(now()-peer.last<17000&&peer.id!==tabId)fresh.push(peer);
   }
   return fresh.filter(x=>x.scope===sc);
@@ -451,7 +457,8 @@
      const full=count>=allowedCapacity(roomById(row.dataset.room)?.capacity);
      badge.textContent=count+'/'+allowedCapacity(roomById(row.dataset.room)?.capacity)+'명';
      row.classList.toggle('social-room-full',full);
-     const arrow=row.lastElementChild;if(arrow)arrow.textContent=full?'정원 초과':'입장 ›';
+     const arrow=row.lastElementChild;
+     if(arrow)arrow.textContent=full?'정원 초과':(!central.enabled||!central.ready||locallyStoredRoom(roomById(row.dataset.room))?'로컬 입장 ›':'입장 ›');
     }
   }
   if(state.view==='room')renderOccupants();
@@ -466,7 +473,7 @@
   const name=$('social-location-title');
   if(name)name.textContent=state.view==='knighttown'?'레코르다블 · 원본 기사단 지역':
    state.view==='board'?('레코르다블 · '+(state.knightDistrict||'기사단 게시판')):
-   state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
+   state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')+(state.offlineRoom?' · 오프라인':'')):
    state.view==='directory'?(state.district+' · 채팅방 목록'):
    (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
@@ -634,7 +641,7 @@
  function regionState(region){
   state.region=region==='south'?'south':'north';
   state.district=REGIONS[state.region].districts[3][0];
-  state.view='town';state.roomId=null;state.knightBack=false;state.knightDistrict=null;state.position={x:52,y:76};
+  state.view='town';state.roomId=null;state.offlineRoom=false;state.knightBack=false;state.knightDistrict=null;state.position={x:52,y:76};
  }
  function openRegion(region){
   regionState(region);if(sceneInit)render();
@@ -789,7 +796,7 @@
    const count=onlinePeers('district:'+state.region+':'+name).length;
    if(count){const countLabel=document.createElement('span');countLabel.textContent=count+'명';b.append(countLabel)}
    b.onclick=()=>{
-    state.district=name;state.view='directory';state.roomId=null;render();
+    state.district=name;state.view='directory';state.roomId=null;state.offlineRoom=false;render();
     if(central.enabled&&central.ready)
      central.list(state.region,state.district).catch(e=>systemLine('서버 방 목록 조회 실패: '+e.message));
    };
@@ -876,7 +883,7 @@
    b.dataset.room=r.id;b.dataset.permanent=String(!!r.preset);
    b.title=r.name+(r.preset?' · 복원 서버 상설방':'')+' · 입장';
    b.setAttribute('aria-label',r.name+' 채팅방 입장');
-   const position=realRoomPosition(i);
+   const position=realRoomPosition(i,rooms.length);
    b.style.left=position.x+'px';b.style.top=position.y+'px';
    const number=document.createElement('span');number.className='social-room-number';
    number.textContent=String(i+1).padStart(2,'0');
@@ -887,6 +894,7 @@
    const arrow=document.createElement('span');arrow.className='social-room-action';arrow.textContent=r.preset?'상설방 입장 ›':'입장 ›';
    b.append(number,lock,name,occupancy,arrow);
    if(!roomHasSpace(r)){b.classList.add('social-room-full');arrow.textContent='정원 초과'}
+   if(!central.enabled||!central.ready||locallyStoredRoom(r))arrow.textContent='로컬 입장 ›';
    b.onclick=()=>joinRoom(r.id);
    list.append(b);
   }
@@ -902,8 +910,12 @@
    cells.push({col,row,distance:Math.abs(col-4.5)+Math.abs(row-9.5)});
   return cells.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.col-b.col);
  })();
- function realRoomPosition(index){
-  const cell=liveRoomCells[index%liveRoomCells.length];
+ function realRoomPosition(index,total){
+  // WEB-only coordinates: non-overlapping room cards. No 2002 native
+  // ROOM position table has been recovered; avoid claiming exact fidelity.
+  const count=Math.min(liveRoomCells.length,Math.max(1,Number(total)||index+1));
+  const block=liveRoomCells.slice(0,count).sort((a,b)=>a.row-b.row||a.col-b.col);
+  const cell=block[index%block.length];
   return {x:70+cell.col*130,y:70+cell.row*100};
  }
  function setupRoomMap(){
@@ -916,8 +928,15 @@
   plane.dataset.roomCapacity=String(liveRoomCells.length);
   const key=state.region+':'+state.district;
   const saved=state.roomMapOffsets[key];
-  let x=saved?.x??-(ROOM_MAP.width-viewport.clientWidth)/2;
-  let y=saved?.y??-(ROOM_MAP.height-viewport.clientHeight)/2;
+  // Default map viewport must face the EXISTING room markers. Centering
+  // the much larger blank estate stranded buttons off-screen on phones.
+  const shown=Math.max(1,plane.querySelectorAll('.social-map-rooms>button').length);
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  for(let i=0;i<shown;i++){const pos=realRoomPosition(i,shown);
+   minX=Math.min(minX,pos.x);maxX=Math.max(maxX,pos.x+118);
+   minY=Math.min(minY,pos.y);maxY=Math.max(maxY,pos.y+84)}
+  let x=saved?.x??viewport.clientWidth/2-(minX+maxX)/2;
+  let y=saved?.y??viewport.clientHeight/2-(minY+maxY)/2;
   const clamp=(v,max)=>Math.max(Math.min(0,v),Math.min(0,max));
   const placeMap=()=>{x=clamp(x,viewport.clientWidth-ROOM_MAP.width);
    y=clamp(y,viewport.clientHeight-ROOM_MAP.height);
@@ -954,9 +973,10 @@
    button.onclick=()=>{if(isWebEstate())pan(...steps[button.dataset.pan]);};
   }
  }
- function roomHasSpace(room){
-  if(central.enabled)return central.joinedId===room.id||roomOccupancy(room.id)<allowedCapacity(room.capacity);
-  return state.roomId===room.id&&state.view==='room'||onlinePeers('room:'+room.id).length<allowedCapacity(room.capacity);
+ function roomHasSpace(room,offline=false){
+  if(central.enabled&&central.ready&&!offline&&!locallyStoredRoom(room))
+   return central.joinedId===room.id||roomOccupancy(room.id)<allowedCapacity(room.capacity);
+  return state.roomId===room.id&&state.view==='room'||onlinePeers((offline||!central.enabled||!central.ready||locallyStoredRoom(room)?'offline-room:':'room:')+room.id).length<allowedCapacity(room.capacity);
  }
  function roomFullNotice(room){
   const body=document.createElement('div');body.className='social-modal-form';
@@ -969,8 +989,11 @@
   const intent=++roomJoinIntent;
   // A remotely cached count is advisory only; the central server must make
   // the final admission decision, including simultaneous joins and vacancies.
-  if(!central.enabled&&!roomHasSpace(room)){roomFullNotice(room);return}
-  if(central.enabled){
+  const localRoom=locallyStoredRoom(room);
+  if((!central.enabled||!central.ready||localRoom)&&!roomHasSpace(room,true)){
+   roomFullNotice(room);return;
+  }
+  if(central.enabled&&central.ready&&!localRoom){
    // A rapid second room click must supersede the first. Serializing the
    // WHOLE UI join (including any compensating leave) avoids a server/scene
    // split where the screen shows room A but the authority already left B.
@@ -991,7 +1014,9 @@
       if(state.view==='directory'&&central.joinedId)
        await central.leave().catch(err=>console.warn('ChatTown rollback:',err.message));
       if(/full|정원/i.test(e.message))roomFullNotice(room);
-      else systemLine('채팅방 입장 실패: '+e.message);
+      else if(room.preset&&centralOutage(e)){
+       if(enterRoom(room,true))systemLine('서버 장애로 오프라인 방에 입장했습니다. 중앙 서버의 다른 기기와 연결되지 않습니다.');
+      }else systemLine('채팅방 입장 실패: '+e.message);
      }
     };
     const pending=roomJoinQueue.then(attempt,attempt);
@@ -1005,25 +1030,25 @@
   if(room.passwordProof){
    askText('비공개 채팅방','방 비밀번호',true,async value=>{
     try{
-     if(await deriveRoomProof(value,room.passwordSalt)===room.passwordProof)enterRoom(room);
+     if(await deriveRoomProof(value,room.passwordSalt)===room.passwordProof)enterRoom(room,true);
      else systemLine('비밀번호가 일치하지 않습니다.');
     }catch{systemLine('비밀번호 검증을 진행할 수 없습니다.')}
    });return;
   }
-  enterRoom(room);
+  if(enterRoom(room,true))systemLine('오프라인 채팅방입니다. 이 브라우저의 다른 탭 또는 직접 연결 사용자끼리만 채팅합니다. 서버 복구 후 방에 재입장하면 온라인으로 연결됩니다.');
  }
  function openDirectory(){
   ++roomJoinIntent; // cancel any outstanding admission for an abandoned directory
   if(central.enabled&&central.joinedId)central.leave().catch(e=>systemLine('퇴장 처리 실패: '+e.message));
-  state.view='directory';state.roomId=null;render();
+  state.view='directory';state.roomId=null;state.offlineRoom=false;render();
   if(central.enabled&&central.ready)
    central.list(state.region,state.district).catch(e=>console.warn('ChatTown directory:',e.message));
  }
- function enterRoom(room){
-  if(central.enabled&&central.joinedId!==room.id)return false;
-  if(!central.enabled&&!roomHasSpace(room)){roomFullNotice(room);return false}
+ function enterRoom(room,offline=(!central.enabled||!central.ready||locallyStoredRoom(room))){
+  if(central.enabled&&!offline&&central.joinedId!==room.id)return false;
+  if(offline&&!roomHasSpace(room,true)){roomFullNotice(room);return false}
   if(room.region!==state.region){state.region=room.region}
-  state.district=room.district;state.roomId=room.id;state.view='room';
+  state.district=room.district;state.roomId=room.id;state.view='room';state.offlineRoom=offline;
   const seats=roomSeats(room.background);
   const hash=[...tabId].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,0);
   // A stable per-user preferred seat may ALREADY contain a real peer.
@@ -1031,7 +1056,7 @@
   // source ChatRoom slot until somebody manually clicked to teleport.
   // Preserve the historic-looking instantaneous seat snap; choose the
   // closest genuinely free reconstructed slot at join time instead.
-  const occupied=new Set(onlinePeers('room:'+room.id)
+  const occupied=new Set(onlinePeers((offline?'offline-room:':'room:')+room.id)
    .filter(peer=>peer.id!==tabId)
    .map(peer=>closestSeat(peer.position?.x??52,peer.position?.y??76,new Set(),seats)));
   const preferred=seats[hash%seats.length];
@@ -1059,7 +1084,7 @@
   menu.style.top=Math.max(4,Math.min(528-96,y*5.28-108))+'px';
  }
  function teleportToFreeSeat(x,y){
-  const others=onlinePeers('room:'+state.roomId).filter(p=>p.id!==tabId);
+  const others=onlinePeers(state.scope).filter(p=>p.id!==tabId);
   const occupied=new Set(others.map(p=>closestSeat(p.position?.x??52,p.position?.y??76)));
   const seat=closestSeat(x,y,occupied);
   state.position={...roomSeats()[seat]};
@@ -1239,7 +1264,7 @@
  function renderOccupants(){
   if(state.view!=='room')return;
   const layer=$('social-avatar-layer');if(!layer)return;
-  const users=onlinePeers('room:'+state.roomId);
+  const users=onlinePeers(state.scope);
   const openMenu=$('social-actor-menu');
   if(openMenu&&!users.some(p=>p.id===openMenu.dataset.peer))closeActorMenu();
   for(const stale of [...layer.querySelectorAll('.social-avatar')]){
@@ -1424,7 +1449,7 @@
    const password=safe(form.get('password'),24),salt=password?uuid():'';
    if(password&&password.length<6){const field=body.querySelector('[name="password"]');field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');field.reportValidity();return}
    const proof=password?await deriveRoomProof(password,salt):'';
-   if(central.enabled){
+   if(central.enabled&&central.ready){
     try{
      const created=await central.create({name,region:state.region,district:state.district,
       capacity:allowedCapacity(form.get('capacity')),background:allowedBackground(form.get('background')),password});
@@ -1432,12 +1457,15 @@
      centralRooms.set(room.id,room);centralCounts.set(room.id,0);
      await central.join(room.id,password);
      closePopup();enterRoom(room);presence();return;
-    }catch(error){systemLine('채팅방 개설 실패: '+error.message);return}
+    }catch(error){
+     if(!centralOutage(error)){systemLine('채팅방 개설 실패: '+error.message);return}
+     systemLine('중앙 서버에 방을 만들지 못했습니다: '+error.message+' · 대신 오프라인 방을 개설합니다.');
+    }
    }
-   const room={id:uuid(),name,region:state.region,district:state.district,owner:nick(),
+   const room={id:'leaf-local-'+uuid(),name,region:state.region,district:state.district,owner:nick(),
     ownerId:tabId,passwordProof:proof,passwordSalt:salt,background:allowedBackground(form.get('background')),capacity:allowedCapacity(form.get('capacity')),created:now()};
    state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});sendRTC({kind:'roomCreated',room});
-   closePopup();enterRoom(room);
+   closePopup();if(enterRoom(room,true))systemLine('오프라인 채팅방 개설 완료 · 중앙 서버의 다른 기기에서는 보이지 않습니다.');
   };
   popup('새로운 4LEAF 채팅방 개설',body);
   // Use recovered ChatRoom/ownerdialog.png as a separate original 2002 UI
@@ -1447,7 +1475,7 @@
  async function closeRoom(roomId){
   const room=roomById(roomId);
   if(!room||room.preset||(room.ownerId?room.ownerId!==tabId:room.owner!==nick()))return;
-  if(central.enabled){
+  if(central.enabled&&!state.offlineRoom){
    try{
     await central.close(roomId);
     centralRooms.delete(roomId);centralCounts.delete(roomId);
@@ -1565,8 +1593,9 @@
   if(!central.enabled)return;
   central.subscribe(event=>{
    if(event.type==='ready'){
-    systemLine('중앙 채팅 서버 접속 완료 · 실제 다른 기기와 방 목록을 공유합니다.');
-   }else if(event.type==='resumed'&&event.room){
+    systemLine(state.offlineRoom?'중앙 서버 연결이 복구됐습니다. 현재 오프라인 방은 유지되며 온라인 채팅은 다시 입장한 뒤 이용할 수 있습니다.':
+     '중앙 채팅 서버 접속 완료 · 실제 다른 기기와 방 목록을 공유합니다.');
+   }else if(event.type==='resumed'&&event.room&&!state.offlineRoom){
     // Restore only a membership acknowledged by the authority, preserving
     // room capacity and owner privileges across browser reloads.
     const room=centralRoom(event.room);
@@ -1587,8 +1616,8 @@
       systemLine('중앙 채팅 서버에 재접속했습니다.');
      }
     }else if(event.type==='membership-lost'){
-     if(state.view==='room'&&state.roomId===event.roomId){
-      state.view='directory';state.roomId=null;render();
+     if(state.view==='room'&&!state.offlineRoom&&state.roomId===event.roomId){
+      state.view='directory';state.roomId=null;state.offlineRoom=false;render();
       systemLine('서버 연결은 복구됐지만 이전 채팅방에는 입장하지 못했습니다. 방 목록에서 다시 선택해 주세요.');
      }
     }else if(event.type==='rooms'){
@@ -1612,14 +1641,14 @@
       systemLine(event.room.isOwner?'중앙 서버에서 새 방장 권한을 받았습니다.':'중앙 서버에서 방장 권한이 변경되었습니다.');
      }
     }
-    if(state.view==='room'&&central.joinedId===state.roomId&&!event.roomId){
+    if(state.view==='room'&&!state.offlineRoom&&central.joinedId===state.roomId&&!event.roomId){
      central.leave().catch(()=>{});
-     state.view='directory';state.roomId=null;render();
+     state.view='directory';state.roomId=null;state.offlineRoom=false;render();
      systemLine('접속해 있던 방이 닫히거나 서버에서 퇴장 처리되었습니다.');
      return;
     }
     for(const [id,p] of state.peers)if(p.source==='central')state.peers.delete(id);
-    if(event.roomId===state.roomId&&state.view==='room'&&central.joinedId===state.roomId){
+    if(event.roomId===state.roomId&&state.view==='room'&&!state.offlineRoom&&central.joinedId===state.roomId){
      for(const person of event.peers||[]){
       if(person.id===central.id){
        // An actual two-browser concurrent click can resolve after the
@@ -1669,7 +1698,7 @@
      if(!social){if(oldForm)return oldForm.call(form,e);return}
      e.preventDefault();
      const input=$('message'),v=input.value.trim();if(!v)return;
-     if(central.enabled&&state.view==='room'){
+     if(central.enabled&&!state.offlineRoom&&state.view==='room'){
       // Do not lose the draft on a transient error, or dispatch twice while
       // the very same message is still waiting on server confirmation.
       if(form.dataset.centralSending==='true')return;
@@ -1698,7 +1727,7 @@
     const route=e.detail?.route;
     if(central.enabled&&central.joinedId&&route!=='rooms'){
      central.leave().catch(e=>console.warn('Central ChatTown leave:',e.message));
-     state.view='directory';state.roomId=null;
+     state.view='directory';state.roomId=null;state.offlineRoom=false;
     }
     if(route==='sky')changeScope('world');
     else if(route==='city')changeScope('city');
@@ -1716,7 +1745,7 @@
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
  window.__LEAF_SOCIAL__={openRegion,openKnightTown,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
   const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
-  state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
- },send:publishText,getState:()=>({avatar:state.avatar,region:state.region,district:state.district,view:state.view,scope:state.scope,knightDistrict:state.knightDistrict,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
+  state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room,true);return room.id;
+ },send:publishText,getState:()=>({avatar:state.avatar,region:state.region,district:state.district,view:state.view,scope:state.scope,knightDistrict:state.knightDistrict,roomId:state.roomId,offlineRoom:state.offlineRoom,centralReady:central.ready===true,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
 })();

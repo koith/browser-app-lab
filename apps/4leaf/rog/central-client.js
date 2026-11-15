@@ -27,8 +27,15 @@
    body:data?JSON.stringify(data):undefined,cache:'no-store',
    ...(typeof AbortSignal!=='undefined'&&typeof AbortSignal.timeout==='function'
     ?{signal:AbortSignal.timeout(30000)}:{})});
-  const reply=await resp.json();
-  if(!resp.ok){const error=new Error(reply.error||'Central chat HTTP '+resp.status);
+  // A free host can return an HTML 503 while waking. Keep the HTTP status
+  // even if the response is not JSON so the UI can offer local-only rooms.
+  let reply;
+  try{reply=await resp.json()}
+  catch{
+   const error=new Error('중앙 채팅 서버 응답 오류 (HTTP '+resp.status+')');
+   error.status=resp.status;throw error;
+  }
+  if(!resp.ok){const error=new Error(reply?.error||'Central chat HTTP '+resp.status);
    error.status=resp.status;throw error;}
   return reply;
  };

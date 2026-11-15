@@ -1146,6 +1146,30 @@ function drawNativeChessmen(){
   };
  }
 }
+// The source client had a visible current-player workflow. In this web
+// reconstruction the tiny English ROUND label was not enough to distinguish
+// an automatic opponent from the user's actionable turn.
+function updateTurnGuidance(){
+ const player=activePlayer();if(!player)return;
+ const opponent=match.mode==='ai'&&player.bot;
+ const role=window.__LEAF_NET__?.role;
+ const remote=match.mode==='network'&&(role==='host'?match.active!==0:role==='guest'?match.active!==1:true);
+ let headline,detail,owner;
+ if(match.finished){headline='경기 종료';detail='결과를 확인하세요.';owner='finished'}
+ else if(opponent){headline='상대 AI 차례';detail=busy?'컴퓨터가 주사위와 이동을 처리하고 있습니다.':
+  match.botAutoplay===false?'AI 자동진행 일시정지 · 아래 주사위로 상대 턴을 직접 진행하세요.':'AI가 주사위를 굴릴 차례입니다.';owner='opponent'}
+ else if(remote){headline='상대방 차례';detail=busy?'상대방 이동 처리 중입니다.':'상대의 조작을 기다리세요.';owner='opponent'}
+ else if(match.mode==='hotseat'){headline=player.name+'님의 차례';detail=busy?'주사위·이동·칸 이벤트 처리 중입니다.':'이 참가자가 주사위를 굴리세요.';owner='local'}
+ else{headline='내 차례';detail=busy?'주사위·이동·칸 이벤트 처리 중입니다.':'주사위 굴리기 버튼을 눌러 이동하세요.';owner='local'}
+ const banner=$('dice-turn-banner');
+ if(banner){banner.dataset.turnOwner=owner;banner.dataset.turnPlayer=String(match.active);
+  const line='라운드 '+match.round+' · '+headline+' · '+player.name+' | '+detail;
+  if(banner.textContent!==line)banner.textContent=line;
+ }
+ const indicator=$('turn-indicator');
+ if(indicator){indicator.textContent='ROUND '+match.round+' · '+headline+' ('+player.name+')';indicator.dataset.turnOwner=owner}
+ const roll=$('roll-btn');if(roll)roll.textContent=opponent&&match.botAutoplay===false?'⚄ AI 턴 직접 굴리기':'⚄ 주사위 굴리기';
+}
 function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);
  const controllingOpponent=match.mode==='ai'&&match.botAutoplay===false;
  const p=(match.mode==='hotseat'||match.mode==='network'||controllingOpponent?activePlayer():match.players[0]),stats=teamStats(p.team);
@@ -1168,7 +1192,7 @@ function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.ma
    match.mode==='network'&&!playerCanAct()?'상대 연결 또는 자신의 차례를 기다리세요.':
    '이번 참가자의 주사위를 굴립니다.';
  }
-$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;syncNativeDiceEvent(match.message);drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
+$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;updateTurnGuidance();$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;syncNativeDiceEvent(match.message);drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
 // An 800px native client camera at 125% fills only a few gigantic tiles
 // on a 390px phone. Preserve each 145x97 native TIS sprite and 70x47 DMP
 // pitch, but show a wider source-world slice at game start on small screens.
@@ -1192,7 +1216,20 @@ function trackActivePawn(){
   // otherwise same-turn movement slowly slides the real pawn off-centre.
   if(mapViewport.autoFollow)window.__LEAF_CAMERA__.viewport(mapViewport.zoom,0,0);
   window.__LEAF_CAMERA__.sync(match,PATH);
-  const actual=window.__LEAF_CAMERA__.getState();
+  let actual=window.__LEAF_CAMERA__.getState();
+  // Roll/tile animations repaint the board often. The active pawn must stay
+  // inside the actual visible camera rectangle; previous manual pans and
+  // small-screen clamps used to leave the actor outside the view entirely.
+  if(mapViewport.autoFollow&&actual.visible){
+   const pawn=activePlayer(),point=PATH[pawn?.position];
+   const v=actual.visible,pX=point?.x/100,pY=point?.y/100;
+   if(Number.isFinite(pX)&&Number.isFinite(pY)&&
+      (pX<v.x||pX>v.x+v.width||pY<v.y||pY>v.y+v.height)){
+    window.__LEAF_CAMERA__.viewport(mapViewport.zoom,0,0);
+    window.__LEAF_CAMERA__.sync(match,PATH);
+    actual=window.__LEAF_CAMERA__.getState();
+   }
+  }
   mapViewport.panX=actual.panX;mapViewport.panY=actual.panY;
   return;
  }
@@ -2143,6 +2180,10 @@ async function takeTurn(){
    return;
  }
  busy=true;const p=match.players[match.active];
+ // Explicitly reclaim the camera when a roll begins. Manual minimap/pan
+ // exploration must never strand the live pawn off-screen during movement.
+ mapViewport.autoFollow=true;mapViewport.panX=0;mapViewport.panY=0;
+ if(window.__LEAF_CAMERA__)window.__LEAF_CAMERA__.viewport(mapViewport.zoom,0,0);
  try{
  drawGame();if(p.bot&&match.mode==='ai'&&match.botAutoplay===true){
   await wait(250);await computerPrepareTurn(p);if(match.finished){busy=false;return}
