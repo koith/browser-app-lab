@@ -12,6 +12,9 @@ on:
       - '.github/workflows/gallery-full-missing-public-collection.yml'
       - 'apps/gallery-archive/run_full_public_acquisition.py'
       - 'apps/gallery-archive/test_run_full_public_acquisition.py'
+      - 'apps/gallery-archive/run_exhaustive_reverse_search.py'
+      - 'apps/gallery-archive/test_exhaustive_reverse_search.py'
+      - 'apps/gallery-archive/source_alias_search.py'
 permissions:
   contents: write
   pull-requests: write
@@ -33,6 +36,9 @@ jobs:
           python -m py_compile apps/gallery-archive/run_full_public_acquisition.py
           python apps/gallery-archive/test_run_full_public_acquisition.py
           python apps/gallery-archive/test_reverse_image_sweep.py
+          python apps/gallery-archive/test_exhaustive_reverse_search.py
+          python apps/gallery-archive/run_exhaustive_reverse_search.py --model mimmi --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
+          python apps/gallery-archive/run_exhaustive_reverse_search.py --model yui --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
           python apps/gallery-archive/run_full_public_acquisition.py --model mimmi --stage "$RUNNER_TEMP/empty" --plan-only
           python apps/gallery-archive/run_full_public_acquisition.py --model yui --stage "$RUNNER_TEMP/empty" --plan-only
   collect:
@@ -63,17 +69,41 @@ jobs:
       - name: Install free public source parsers and image decoder
         run: |
           python -m pip install --quiet 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0' 'Scrapy>=2.12,<3'
-      - name: Find new public image-source pages using real samples and name variations
+      - name: Load durable per-model reverse-image checkpoint from separate Git branch
         shell: bash
         run: |
+          set -euo pipefail
           mkdir -p "$STAGE"
-          python apps/gallery-archive/reverse_image_sweep.py --model "$MODEL" --all-cuts \
-            --seeds 8 --offset "$((RUN_NUMBER * 8))" --workers 2 \
-            --out "$STAGE/reverse-evidence.json" || echo "REVERSE_PUBLIC_SEARCH_NO_NEW_LEADS"
+          branch="gallery-reverse-progress-$MODEL"
+          key="apps/gallery-archive/verification/reverse-progress-$MODEL.json"
+          if ! gh api "repos/$GITHUB_REPOSITORY/branches/$branch" >/dev/null 2>&1; then
+            gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+              -f ref="refs/heads/$branch" -f sha="$GITHUB_SHA" >/dev/null
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/contents/$key?ref=$branch" \
+             --jq '.content' > "$STAGE/state-base64.txt" 2>/dev/null; then
+            tr -d '\n' < "$STAGE/state-base64.txt" | base64 -d > "$STAGE/reverse-state.json"
+          else
+            echo '{}' > "$STAGE/reverse-state.json"
+          fi
+          echo "ALL_OWNER_PHOTO_REVERSE_PROGRESS_LOADED model=$MODEL branch=$branch"
+      - name: Search ALL owned photo SHAs in persistent bounded campaigns, not 8 samples
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Every immutable SHA in both owner and Pages static indexes enters
+          # the queue. 256 is per-run work, NOT a cap on total images indexed.
+          # The checkpoint resumes at the next unsearched image automatically.
+          python apps/gallery-archive/run_exhaustive_reverse_search.py \
+            --model "$MODEL" \
+            --progress "$STAGE/reverse-state.json" \
+            --progress-out "$STAGE/reverse-next.json" \
+            --out "$STAGE/reverse-evidence.json" \
+            --budget 256 --max-seconds 3300 --workers 3
           python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
             --offset "$((RUN_NUMBER * 3))" --per-work 2 --max-pages 18 \
-            --reverse "$STAGE/reverse-evidence.json" \
-            --out "$STAGE/source-evidence.json" || echo "ALIASES_PUBLIC_SEARCH_NO_NEW_LEADS"
+            --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
+            --out "$STAGE/source-evidence.json"
       - name: Acquire every registered work, prioritizing actual missing cuts
         shell: bash
         run: |
@@ -124,6 +154,30 @@ jobs:
             --title "Gallery: newly verified $MODEL public image originals" \
             --body "SHA-verified new public-photo files, requiring Pages browser acceptance."
           echo "MODEL=$MODEL NEW_BYTES_STAGED_PR=yes" >> "$GITHUB_STEP_SUMMARY"
+      - name: Checkpoint image-search cursor only after actual photo collection and safe commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,json,os,pathlib,subprocess
+          model=os.environ['MODEL']
+          repo=os.environ['GITHUB_REPOSITORY']
+          directory=pathlib.Path(os.environ['STAGE'])
+          path=f'apps/gallery-archive/verification/reverse-progress-{model}.json'
+          branch=f'gallery-reverse-progress-{model}'
+          old=subprocess.run(['gh','api',f'repos/{repo}/contents/{path}?ref={branch}',
+                             '--jq','.sha'],capture_output=True,text=True)
+          data={'message':f'checkpoint(gallery): resume all-owner reverse search for {model}',
+                'branch':branch,
+                'content':base64.b64encode((directory/'reverse-next.json').read_bytes()).decode()}
+          if old.returncode==0 and old.stdout.strip():
+              data['sha']=old.stdout.strip()
+          (directory/'checkpoint-upload.json').write_text(json.dumps(data))
+          PY
+          gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/apps/gallery-archive/verification/reverse-progress-$MODEL.json" \
+            --input "$STAGE/checkpoint-upload.json" \
+            --jq '.commit.sha' > "$STAGE/checkpoint-commit-sha.txt"
+          echo "ALL_OWNER_PHOTO_REVERSE_CURSOR_PERSISTED model=$MODEL SHA=$(cat "$STAGE/checkpoint-commit-sha.txt")"
       - name: Preserve audit metadata, never bundle originals as CI artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -131,6 +185,7 @@ jobs:
           name: gallery-full-public-${{ matrix.model }}-audit
           path: |
             /tmp/gallery-public-full/reverse-evidence.json
+            /tmp/gallery-public-full/reverse-next.json
             /tmp/gallery-public-full/source-evidence.json
             /tmp/gallery-public-full/photos/full-collection-summary.json
             /tmp/gallery-public-full/photos/batch-*/metadata/collection-audit.json
