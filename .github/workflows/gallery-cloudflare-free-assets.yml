@@ -11,6 +11,8 @@ on:
       - 'apps/gallery-archive/cloudflare-owner-gateway/**'
       - 'apps/gallery-archive/cloudflare_assets_snapshot.py'
       - 'apps/gallery-archive/deploy_cloudflare_assets.py'
+      - 'apps/gallery-archive/cloudflare_incremental_upload.py'
+      - 'apps/gallery-archive/test_cloudflare_incremental_upload.py'
       - 'apps/gallery-archive/replica_incremental.py'
       - 'apps/gallery-archive/test_replica_incremental.py'
       - 'apps/gallery-archive/test_cloudflare_assets_snapshot.py'
@@ -30,6 +32,8 @@ on:
       - 'apps/gallery-archive/cloudflare-owner-gateway/bound-assets*'
       - 'apps/gallery-archive/cloudflare_assets_snapshot.py'
       - 'apps/gallery-archive/deploy_cloudflare_assets.py'
+      - 'apps/gallery-archive/cloudflare_incremental_upload.py'
+      - 'apps/gallery-archive/test_cloudflare_incremental_upload.py'
       - 'apps/gallery-archive/replica_incremental.py'
       - 'apps/gallery-archive/test_replica_incremental.py'
       - 'apps/gallery-archive/audit_cloudflare_recovery.py'
@@ -52,6 +56,7 @@ jobs:
       - run: python -m pip install 'Pillow==11.3.0'
       - run: python apps/gallery-archive/test_cloudflare_assets_snapshot.py
       - run: python apps/gallery-archive/test_replica_incremental.py
+      - run: python apps/gallery-archive/test_cloudflare_incremental_upload.py
       - run: python apps/gallery-archive/test_cloudflare_recovery_audit.py
       - run: node apps/gallery-archive/cloudflare-owner-gateway/bound-assets.test.mjs
       - run: node apps/gallery-archive/cloudflare-owner-gateway/worker.test.mjs
