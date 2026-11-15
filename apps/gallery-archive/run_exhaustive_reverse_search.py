@@ -103,12 +103,13 @@ def complete_queue(inventory, model):
     return queue
 
 
-def read_progress(path, model, ids):
+def read_progress(path, model, ids, required_revision=1):
     path = Path(path)
     data = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
     if not data:
         data = {'schema_version': 1, 'model': model, 'cycle': 0,
-                'attempted_ids': [], 'last_cycle_size': 0}
+                'attempted_ids': [], 'last_cycle_size': 0,
+                'search_revision': required_revision}
     if data.get('schema_version') != 1 or data.get('model') != model:
         raise ValueError('CHECKPOINT_SCHEMA_OR_MODEL_MISMATCH')
     attempted = data.get('attempted_ids')
@@ -120,8 +121,23 @@ def read_progress(path, model, ids):
         raise ValueError('CORRUPT_CHECKPOINT_DUPLICATES')
     if type(data.get('cycle')) is not int or data['cycle'] < 0:
         raise ValueError('CORRUPT_CHECKPOINT_CYCLE')
-    # Retain only SHA IDs still represented in the current gallery catalog.
-    data['attempted_ids'] = [x for x in attempted if x in ids]
+    if type(required_revision) is not int or not 1 <= required_revision <= 100:
+        raise ValueError('INVALID_SEARCH_REVISION')
+    stored_revision = data.get('search_revision', 1)
+    if type(stored_revision) is not int or not 1 <= stored_revision <= 100:
+        raise ValueError('CORRUPT_STORED_SEARCH_REVISION')
+    if stored_revision > required_revision:
+        raise ValueError('SEARCH_REVISION_ROLLBACK_BLOCKED')
+    if stored_revision < required_revision:
+        # The previous search implementation was defective: unrelated links
+        # suppressed Bing fallback. Preserve the old file in Git history,
+        # but a new search revision must re-examine every archived photo.
+        data['attempted_ids'] = []
+        data['cycle'] = 0
+        data['last_run_attempts'] = 0
+    else:
+        data['attempted_ids'] = [x for x in attempted if x in ids]
+    data['search_revision'] = required_revision
     return data
 
 
@@ -144,11 +160,12 @@ def plan_batch(queue, state, budget, stop_after_full=False):
     return remaining[:budget], cycle
 
 
-def run(model, progress_path, out_path, next_path, budget, seconds, workers, stop_after_full=False):
+def run(model, progress_path, out_path, next_path, budget, seconds, workers, stop_after_full=False, search_revision=1):
     if not 1 <= workers <= 3 or not 60 <= seconds <= 4800:
         raise ValueError('PUBLIC_SEARCH_CONCURRENCY_OR_TIME_OUT_OF_BOUNDS')
     queue = complete_queue(seeds(APP_ROOT, all_cuts=True), model)
-    state = read_progress(progress_path, model, {p['seed_id'] for p in queue})
+    state = read_progress(progress_path, model, {p['seed_id'] for p in queue},
+                          required_revision=search_revision)
     selected, cycle = plan_batch(queue, state, budget, stop_after_full=stop_after_full)
     started = time.monotonic()
     scanned = []
@@ -204,6 +221,7 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
             target = engine_outcomes.setdefault(engine, {})
             target[label] = target.get(label, 0) + 1
     report = {'schema_version': 1, 'model': model,
+              'search_revision': search_revision,
               'method': 'all-owner-plus-static-photo-sha-round-robin',
               'generated_at': datetime.now(timezone.utc).isoformat(),
               'total_seed_frames': len(queue),
@@ -252,6 +270,7 @@ def main():
     p.add_argument('--workers', type=int, default=3)
     p.add_argument('--plan-only', action='store_true')
     p.add_argument('--stop-after-full', action='store_true')
+    p.add_argument('--search-revision', type=int, default=1)
     a = p.parse_args()
     if a.plan_only:
         queue = complete_queue(seeds(APP_ROOT, all_cuts=True), a.model)
@@ -263,7 +282,7 @@ def main():
                  for kind in ('static-public', 'public-gateway-cover')}}, sort_keys=True), flush=True)
         return
     run(a.model, a.progress, a.out, a.progress_out, a.budget, a.max_seconds, a.workers,
-        stop_after_full=a.stop_after_full)
+        stop_after_full=a.stop_after_full, search_revision=a.search_revision)
 
 
 if __name__ == '__main__':
