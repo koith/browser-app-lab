@@ -16,6 +16,9 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/gallery-full-missing-public-collection.yml'
+      # An exact registered source gate change must start a real collection
+      # on the newly approved sites; waiting for the next cron wastes recall.
+      - 'apps/gallery-archive/direct_photo_pipeline.py'
   pull_request:
     paths:
       - '.github/workflows/gallery-full-missing-public-collection.yml'
