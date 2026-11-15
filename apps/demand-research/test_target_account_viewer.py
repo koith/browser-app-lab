@@ -493,3 +493,47 @@ def test_reordered_original_files_never_change_source_slots(populated):
     assert [x["url"].rsplit("/",1)[-1] for x in saved]==["0","2"]
     assert viewer.archived_media_slot(pid,{"key":"posts/other/media/0001.jpg"}) is None
     assert viewer.archived_media_slot(pid,{"key":"posts/"+pid+"/media/0017.jpg"}) is None
+
+
+def test_saved_biography_and_header_versions_survive_later_unavailable_capture(populated):
+    client,root,archive,name=populated
+    original=archive.names("profile/snapshots")[-1]
+    enrich.save_snapshot(archive,"profile/snapshots",{
+        "platform":"bluesky","identity":DID,"handle":"qa-user.bsky.social",
+        "display_name":"Updated QA","description":"Updated long public biography",
+        "pronouns":"they/them","website":"https://example.com/profile",
+        "followers_count":7,"following_count":5,"posts_count":12,
+        "captured_at":"2026-11-15T00:00:00Z",
+        "assets":{"avatar":{"status":"unavailable"},
+                  "banner":{"status":"unavailable"}}})
+    latest=client.get("/api/account-archives/"+name+"/profile")
+    assert latest.status_code==200
+    page=latest.json()
+    assert page["description"]=="Updated long public biography"
+    assert page["pronouns"]=="they/them"
+    assert page["assets"]["banner"].endswith("snapshot="+original)
+    assert page["asset_status"]["banner"]["historical_fallback"] is True
+    assert page["asset_status"]["avatar"]["historical_fallback"] is True
+    assert len(page["history"])==2
+    assert client.get(page["assets"]["banner"]).content==BANNER
+    earlier=client.get("/api/account-archives/"+name+"/profile?snapshot="+original)
+    assert earlier.status_code==200
+    assert earlier.json()["description"]=="Public biography sample"
+    assert earlier.json()["assets"]["banner"].endswith("snapshot="+original)
+    assert client.get("/api/account-archives/"+name+
+                      "/profile?snapshot=wrong.json").status_code==400
+    assert client.get("/api/account-archives/"+name+
+                      "/profile-asset/banner?snapshot=wrong.json").status_code==400
+    # A later explicitly removed header MUST NOT be silently resurrected.
+    enrich.save_snapshot(archive,"profile/snapshots",{
+        "platform":"bluesky","identity":DID,"display_name":"Updated QA",
+        "description":"","captured_at":"2026-11-16T00:00:00Z",
+        "assets":{"banner":{"status":"not_set"},
+                  "avatar":{"status":"not_set"}}})
+    removed=client.get("/api/account-archives/"+name+"/profile").json()
+    assert removed["description"]==""
+    assert removed["assets"]["banner"] is None
+    assert len(removed["history"])==3
+    # The prior saved artwork and previous biography remain retrievable.
+    assert client.get("/api/account-archives/"+name+
+                      "/profile?snapshot="+original).json()["description"]=="Public biography sample"
