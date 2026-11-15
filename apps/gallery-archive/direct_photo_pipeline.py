@@ -123,11 +123,41 @@ def safe_registered_public_page(url,model=None):
         return False
 
 
+def exact_registered_visual_edition_source(url, model):
+    """Enable only previously recorded public PixiBB SAME-WORK source pages.
+
+    The older storage-reviewed page filter accidentally dropped nearly every
+    registered PixiBB edition from the 3-anchor visual collector, even though
+    a public URL was already saved in the work registry. No arbitrary PixiBB
+    search, pagination guess, protected album or user profile is admitted.
+    """
+    if model!='mimmi' or not safe_registered_public_page(url,model):
+        return False
+    page=urlsplit(url)
+    if (page.hostname not in ('sexy.pixibb.com','cosplay.pixibb.com') or
+            page.query or page.fragment or page.username or page.password or
+            page.port not in (None,443)):
+        return False
+    path=ROOT/'apps/mimmi-gallery/public-work-pages.json'
+    if not path.is_file():
+        return False
+    try:
+        works=json.loads(path.read_text(encoding='utf-8')).get('albums',[])
+    except (OSError,ValueError):
+        return False
+    return any(
+        work.get('visual_reference_required') is True and
+        url in [work.get('source'),*(work.get('source_pages') or [])]
+        for work in works)
+
+
 def reviewed_direct_source(url, model):
     """Eligible *storage* origins. Other public hosts remain discovery leads."""
     from official_sample_recovery import _publisher_page
     from urllib.parse import urlsplit
     if model=='mimmi' and url=='https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/':
+        return True
+    if exact_registered_visual_edition_source(url,model):
         return True
     if model=='yui' and urlsplit(url).hostname=='www.inven.co.kr':
         # Four individually reviewed, public Korean posts whose article
