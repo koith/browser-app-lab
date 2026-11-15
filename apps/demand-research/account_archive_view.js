@@ -150,6 +150,10 @@ function resetProfile(){
   $("avatar").style.backgroundImage="";$("avatar").textContent="?";
   $("profileStatus").textContent="보관된 원본의 프로필 정보를 확인하는 중입니다.";
   $("sourceProfile").hidden=true;
+  $("profileExtras").hidden=true;
+  $("profileExtras").replaceChildren();
+  $("profileHistory").hidden=true;
+  $("profileHistoryList").replaceChildren();
 }
 function syncVisiblePostIdentity(){
   // The feed loads independently of remote profile verification. When posts
@@ -176,12 +180,87 @@ function syncVisiblePostIdentity(){
     }
   }
 }
+function renderExtraProfileFields(profile){
+  const area=$("profileExtras");
+  area.replaceChildren();
+  const addText=(label,value)=>{
+    if(typeof value!=="string"||!value.trim())return;
+    const row=node("span","profile-extra");
+    row.append(node("strong","",label+" "),node("span","",value.trim().slice(0,1000)));
+    area.append(row);
+  };
+  if(profile.platform==="bluesky"){
+    addText("호칭",profile.pronouns);
+    const pinned=profile.pinned_post?.uri;
+    if(typeof pinned==="string"&&pinned.startsWith("at://"+profile.identity+"/app.bsky.feed.post/")){
+      const rkey=pinned.split("/").pop();
+      const src=validLink(profile.profile_url);
+      if(src&&/^[A-Za-z0-9._~-]{1,100}$/.test(rkey||"")){
+        const row=node("span","profile-extra");
+        row.append(anchor(src.replace(/\/$/,"")+"/post/"+rkey,"고정 게시물 원문","profile-link"));
+        area.append(row);
+      }
+    }
+  }
+  if(profile.platform==="mastodon"){
+    if(profile.bot===true)addText("계정 유형","자동화 계정");
+    if(profile.locked===true)addText("팔로우 상태","승인 필요");
+    addText("헤더 설명",profile.header_description);
+    addText("프로필 사진 설명",profile.avatar_description);
+  }
+  const site=validLink(profile.website);
+  if(site){
+    const row=node("span","profile-extra");
+    row.append(anchor(site,"공개 웹사이트","profile-link"));
+    area.append(row);
+  }
+  if(typeof profile.created_at==="string"&&profile.created_at)
+    addText("가입 기록",date(profile.created_at));
+  area.hidden=!area.childNodes.length;
+}
+function renderProfileHistory(profile){
+  const details=$("profileHistory"),list=$("profileHistoryList");
+  list.replaceChildren();
+  const versions=Array.isArray(profile.history)?profile.history:[];
+  details.hidden=versions.length<2;
+  if(details.hidden)return;
+  const selectedAccount=state.account;
+  for(const version of versions){
+    if(!version||typeof version.id!=="string"||
+       !/^snap-[0-9]{20}-[a-f0-9]{16}\.json$/.test(version.id))continue;
+    const active=version.id===profile.snapshot_id;
+    const button=node("button","profile-version"+(active?" active":""),date(version.captured_at)||"보관 시각 미상");
+    button.type="button";button.disabled=active;
+    button.setAttribute("aria-current",active?"true":"false");
+    const badges=[];
+    if(version.assets?.banner==="sha256_verified")badges.push("헤더 이미지");
+    if(version.assets?.avatar==="sha256_verified")badges.push("프로필 사진");
+    if(version.has_description)badges.push("자기소개");
+    button.append(node("small","",badges.length?badges.join(" · "):"텍스트·이미지 일부 미보관"));
+    button.addEventListener("click",async()=>{
+      if(state.account!==selectedAccount)return;
+      button.disabled=true;
+      $("profileStatus").textContent="선택한 이전 프로필 기록의 원본을 확인하고 있습니다.";
+      try{
+        const previous=await get(base()+"/profile?snapshot="+encodeURIComponent(version.id));
+        if(state.account!==selectedAccount)return;
+        renderProfile(previous);
+      }catch{
+        if(state.account===selectedAccount)
+          $("profileStatus").textContent="이전 프로필 기록을 확인하지 못했습니다. 원본은 변경하지 않았습니다.";
+      }finally{button.disabled=false;}
+    });
+    list.append(button);
+  }
+}
+
 function renderProfile(profile){
   if(!profile.available){
     $("displayName").textContent="아직 프로필 보관본 없음";
     $("handle").textContent="";
     $("biography").textContent="백업 작업을 실행해 공개 프로필이 저장되면 표시됩니다.";
     $("profileStatus").textContent="UNVERIFIED · 프로필 백업 미확인";
+    $("profileHistory").hidden=true;$("profileExtras").hidden=true;
     if(profile.profile_url){
       const a=$("sourceProfile");a.href=validLink(profile.profile_url)||"#";a.hidden=!validLink(profile.profile_url);
     }
@@ -198,13 +277,16 @@ function renderProfile(profile){
   $("snsProviderTitle").textContent=profile.display_name||profile.handle||
     (state.account.startsWith("mastodon-")?"Mastodon":"Bluesky");
   $("handle").textContent=profile.handle?("@"+profile.handle):"계정 ID "+(profile.identity||"");
-  $("biography").textContent=profile.description||"공개 자기소개가 저장되지 않았습니다.";
+  $("biography").textContent=typeof profile.description==="string"&&profile.description.trim()
+    ?profile.description:"수집된 프로필에 등록된 자기소개가 없습니다.";
   $("postCount").textContent=fmt(profile.posts_count);
   $("followerCount").textContent=fmt(profile.followers_count);
   $("followingCount").textContent=fmt(profile.following_count);
   const fields=profile.fields;
   $("profileFields").textContent=Array.isArray(fields)?
     fields.slice(0,12).map(f=>(f.name||"")+": "+(f.value||"").replace(/<[^>]*>/g,"")).join("\n"):"";
+  renderExtraProfileFields(profile);
+  renderProfileHistory(profile);
   const external=validLink(profile.profile_url),a=$("sourceProfile");
   a.hidden=!external;
   if(external)a.href=external;
@@ -218,10 +300,22 @@ function renderProfile(profile){
     $("cover").style.backgroundImage='url("'+banner+'")';
     $("cover").classList.add("has-image");
   }
-  const assets=[avatar?"프로필 원본 SHA 검증됨":"프로필 사진 미보관",
-                banner?"헤더 원본 SHA 검증됨":"헤더 사진 미보관"];
-  $("profileStatus").textContent="PROFILE SNAPSHOT · "+date(profile.captured_at)+
-     " · "+assets.join(" · ")+" · 관계 목록/게시글 완전성 별도 확인 필요";
+  function assetEvidence(kind,present){
+    const meta=profile.asset_status?.[kind]||{};
+    const label=kind==="avatar"?"프로필 사진":"헤더 이미지";
+    if(!present)return label+(meta.status==="not_set"?" 미설정":" 미보관");
+    if(meta.historical_fallback)
+      return label+" · 이전 저장본("+date(meta.captured_at)+")";
+    if(meta.source_tier==="public_bluesky_cdn_rendition")
+      return label+" · 공개 CDN 화질본 SHA 검증";
+    if(meta.source_tier==="original_pds_blob")
+      return label+" · PDS 원본 SHA 검증";
+    return label+" · 저장본 SHA 검증";
+  }
+  const assets=[assetEvidence("avatar",avatar),assetEvidence("banner",banner)];
+  $("profileStatus").textContent=(profile.latest_snapshot?"최신 프로필 보관본":"이전 프로필 보관본")+
+    " · "+date(profile.captured_at)+" · "+assets.join(" · ")+
+    " · 다른 시점 기록은 아래 이력에서 선택";
   syncVisiblePostIdentity();
 }
 function showVerifiedPickerPreview(item){
