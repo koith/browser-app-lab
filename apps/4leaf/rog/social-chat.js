@@ -965,7 +965,7 @@
  function roomHasSpace(room,offline=false){
   if(central.enabled&&central.ready&&!offline&&!locallyStoredRoom(room))
    return central.joinedId===room.id||roomOccupancy(room.id)<allowedCapacity(room.capacity);
-  return state.roomId===room.id&&state.view==='room'||onlinePeers('room:'+room.id).length<allowedCapacity(room.capacity);
+  return state.roomId===room.id&&state.view==='room'||onlinePeers((offline||!central.enabled||!central.ready||locallyStoredRoom(room)?'offline-room:':'room:')+room.id).length<allowedCapacity(room.capacity);
  }
  function roomFullNotice(room){
   const body=document.createElement('div');body.className='social-modal-form';
@@ -1045,7 +1045,7 @@
   // source ChatRoom slot until somebody manually clicked to teleport.
   // Preserve the historic-looking instantaneous seat snap; choose the
   // closest genuinely free reconstructed slot at join time instead.
-  const occupied=new Set(onlinePeers('room:'+room.id)
+  const occupied=new Set(onlinePeers((offline?'offline-room:':'room:')+room.id)
    .filter(peer=>peer.id!==tabId)
    .map(peer=>closestSeat(peer.position?.x??52,peer.position?.y??76,new Set(),seats)));
   const preferred=seats[hash%seats.length];
@@ -1073,7 +1073,7 @@
   menu.style.top=Math.max(4,Math.min(528-96,y*5.28-108))+'px';
  }
  function teleportToFreeSeat(x,y){
-  const others=onlinePeers('room:'+state.roomId).filter(p=>p.id!==tabId);
+  const others=onlinePeers(state.scope).filter(p=>p.id!==tabId);
   const occupied=new Set(others.map(p=>closestSeat(p.position?.x??52,p.position?.y??76)));
   const seat=closestSeat(x,y,occupied);
   state.position={...roomSeats()[seat]};
@@ -1253,7 +1253,7 @@
  function renderOccupants(){
   if(state.view!=='room')return;
   const layer=$('social-avatar-layer');if(!layer)return;
-  const users=onlinePeers('room:'+state.roomId);
+  const users=onlinePeers(state.scope);
   const openMenu=$('social-actor-menu');
   if(openMenu&&!users.some(p=>p.id===openMenu.dataset.peer))closeActorMenu();
   for(const stale of [...layer.querySelectorAll('.social-avatar')]){
