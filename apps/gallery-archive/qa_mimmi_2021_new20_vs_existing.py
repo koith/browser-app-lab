@@ -25,8 +25,21 @@ def run(root=ROOT):
         raise AssertionError("Original work unavailable; cannot claim new cuts")
     new=[p for p in album["images"] if p.get("number") in NEW_NUMBERS]
     old=[p for p in album["images"] if p.get("number") not in NEW_NUMBERS]
+    if not new:
+        # The one-time corrective workflow already removed the 20 false-new
+        # rows. Future Pages QA must remain green without bringing them back.
+        outcome={"model":MODEL,"work":WORK,"state":"ALREADY_CORRECTED",
+                 "published_photo_slots_prior":len(old),
+                 "published_photo_slots_new_SHA_unique":0,
+                 "strong_same_frame_review_candidates":[],
+                 "new_files_proven_quality_upgrade_count":0,
+                 "unavailable_prior_reference_numbers":[],
+                 "mutations":0}
+        print("MIMMI_2021_NEW20_VS_EXISTING_VISUAL_EVIDENCE",
+              json.dumps(outcome,ensure_ascii=False),flush=True)
+        return outcome
     if len(new)!=20 or {p["number"] for p in new}!=NEW_NUMBERS:
-        raise AssertionError("Committed 20 JPEG slots not present")
+        raise AssertionError("Partially corrected duplicate rows; refuse unsafe cleanup")
     if not old:
         raise AssertionError("No prior work photos available for comparison")
     cache={};missing=[];wrong=[]
