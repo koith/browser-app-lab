@@ -18,6 +18,16 @@ ORIGIN='https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/'
 def correct(root=ROOT, apply=False):
     root=Path(root)
     evidence=run(root)
+    if evidence.get('state')=='ALREADY_CORRECTED':
+        result={'model':MODEL,'work':WORK,'removed_duplicate_photo_rows':0,
+                'retained_existing_photo_rows':evidence['published_photo_slots_prior'],
+                'physical_duplicate_files_eligible_for_git_revert':0,
+                'independent_new_cuts_removed':0,
+                'proven_quality_upgrades_lost':0,
+                'mode':'already_corrected'}
+        print('GALLERY_REMOVE_20_FALSE_NEW_CUTS',
+              json.dumps(result,ensure_ascii=False),flush=True)
+        return result
     new_count=evidence['published_photo_slots_new_SHA_unique']
     matches={r['new_number'] for r in evidence['strong_same_frame_review_candidates']}
     assert new_count==len(NEW_NUMBERS)==len(matches), (
