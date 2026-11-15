@@ -204,14 +204,14 @@ def run(browser_type,name,width,height):
         page.get_by_text("Synthetic comment in private view").wait_for(timeout=5000)
         page.locator("#closeDetail").click()
         assert page.locator("#postDetail[open]").count()==0
-        page.get_by_role("tab",name="팔로워").click()
+        page.locator("#statFollowers").click()
         page.locator("#results .person").get_by_text("Public Reader").wait_for(timeout=5000)
-        page.get_by_role("tab",name="팔로잉").click()
+        page.locator("#statFollowing").click()
         page.locator("#results .person").get_by_text("@reader.bsky.social").wait_for(timeout=5000)
         # Round trips must reuse already SHA-backed cards/media and avoid
         # another cold download of the entire immutable private ZIP.
         first_page_return_failure["armed"]=True
-        page.get_by_role("tab",name="게시글·답글").click()
+        page.get_by_role("tab",name="게시글",exact=True).click()
         page.locator("#results").get_by_text(
             "Synthetic posted image and comment history").wait_for(timeout=12000)
         assert first_page_return_failure["count"]==0, (
@@ -237,7 +237,7 @@ def run(browser_type,name,width,height):
         page.wait_for_timeout(850)
         assert page.locator("#results .person").count()==1,"stale feed must not replace new tab"
         # Closing an old thread and opening another must not display the old replies.
-        page.get_by_role("tab",name="게시글·답글").click()
+        page.get_by_role("tab",name="게시글",exact=True).click()
         page.locator("#results article.post").nth(1).get_by_text("Synthetic second archived post").wait_for(timeout=5000)
         page.locator("#results article.post").first.get_by_role("button",name="댓글·상세 보기").click()
         page.locator("#closeDetail").click()
