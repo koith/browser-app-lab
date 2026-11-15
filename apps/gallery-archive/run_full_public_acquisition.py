@@ -16,6 +16,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[2]
 ARCHIVE=ROOT/'apps/gallery-archive'
+MAX_REGISTERED_PAGES_PER_WORK=5
 PRIORITY={
  'mimmi':(
   'djawa-pop-kitty-party','djawa-nikke-yuni',
@@ -72,7 +73,7 @@ def execute(args):
         command=[sys.executable,str(ARCHIVE/'direct_photo_pipeline.py'),
           '--model',args.model,'--owner',f'apps/{args.model}-gallery/owner-index.json',
           '--out',str(target),'--max-new',str(args.max_per_batch),
-          '--max-pages',str(5 if index==0 else 3),
+          '--max-pages',str(MAX_REGISTERED_PAGES_PER_WORK),
           '--page-cycle',str(args.run_number),'--render-budget','0',
           '--reviewed-source-only']
         if source_evidence and source_evidence.is_file():
