@@ -99,6 +99,24 @@ def main():
         assert scan["gallery_photos_new"]==0,scan
         assert scan["physical_photos_new"]==0,scan
         assert scan["research_only"],scan
+    # An unrelated Yandex image-result page must not suppress Bing's
+    # independent model-matched result. This was the live zero-yield bug.
+    class UnrelatedFirstEngine:
+        def get(self,url,params=None,**kw):
+            if "yandex.com" in url:
+                return FakeResponse('<a href="https://www.v2ph.com/album/other-coser.html">Other model only</a>')
+            assert "bing.com" in url, url
+            return FakeResponse('<a href="https://www.v2ph.com/album/mimmi-red-shirt.html">DJAWA Mimmi Red Shirt</a>')
+    seed={"model":"mimmi","album_id":"djawa-red-shirt",
+          "album_title":"Mimmi Red Shirt","photo_sha256":"a"*64,
+          "public_image_url":"https://example.org/public.jpg","owner_saved_count":3}
+    recovered=search_one(seed,UnrelatedFirstEngine())
+    assert recovered["matched_urls_by_engine"]["yandex_sites"]==0,recovered
+    assert recovered["matched_urls_by_engine"]["bing"]==1,recovered
+    assert recovered["off_model_rejected"]>=1,recovered
+    assert len(recovered["candidate_pages"])==1,recovered
+    assert recovered["candidate_pages"][0]["url"].endswith("mimmi-red-shirt.html"),recovered
+    assert recovered["originals_stored"]==recovered["visible_gallery_added"]==0
     print("IMAGE_FIRST_AGGRESSIVE_SOURCE_FIXTURE_PASS")
 
 if __name__=="__main__":
