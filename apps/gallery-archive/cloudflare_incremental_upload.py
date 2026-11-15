@@ -21,7 +21,7 @@ from cloudflare_assets_snapshot import MODELS, KIND, signature
 NAME = 'gallery-archive-free'
 API = 'https://api.cloudflare.com/client/v4'
 HEX32 = re.compile(r'[a-f0-9]{32}')
-PATH = re.compile(r'/(?:mimmi|yui)/originals/[a-z0-9-]+/[A-Za-z0-9._ -]+\\.(?:jpg|jpeg|png|webp)')
+PATH = re.compile(r'/(?:mimmi|yui)/originals/[a-z0-9-]+/[A-Za-z0-9._ -]+\.(?:jpg|jpeg|png|webp)')
 SAFE_SOURCE_PARTS = ('entry.mjs', 'worker.mjs', 'private-s3.mjs', 'bound-assets.mjs',
                      'private-mimmi-catalog.txt', 'private-yui-catalog.txt')
 
@@ -87,10 +87,10 @@ def multipart(parts):
     for name, mime, raw in parts:
         if not re.fullmatch('[A-Za-z0-9_.-]{1,100}', name):
             raise ValueError('MULTIPART_NAME_INVALID')
-        chunks.append((f'--{boundary}\\r\\n'
-                       f'Content-Disposition: form-data; name="{name}"; filename="{name}"\\r\\n'
-                       f'Content-Type: {mime}\\r\\n\\r\\n').encode() + raw + b'\\r\\n')
-    chunks.append(f'--{boundary}--\\r\\n'.encode())
+        chunks.append((f'--{boundary}\r\n'
+                       f'Content-Disposition: form-data; name="{name}"; filename="{name}"\r\n'
+                       f'Content-Type: {mime}\r\n\r\n').encode() + raw + b'\r\n')
+    chunks.append(f'--{boundary}--\r\n'.encode())
     return 'multipart/form-data; boundary=' + boundary, b''.join(chunks)
 
 
