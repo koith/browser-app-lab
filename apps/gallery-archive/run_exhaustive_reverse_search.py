@@ -192,7 +192,16 @@ def main():
     p.add_argument('--budget', type=int, default=256)
     p.add_argument('--max-seconds', type=int, default=3300)
     p.add_argument('--workers', type=int, default=3)
+    p.add_argument('--plan-only', action='store_true')
     a = p.parse_args()
+    if a.plan_only:
+        queue = complete_queue(seeds(APP_ROOT, all_cuts=True), a.model)
+        print('ALL_PHOTO_SHA_QUEUE_CENSUS', json.dumps({'model': a.model,
+              'unique_photo_sha_per_album': len(queue),
+              'distinct_albums': len({x['album_id'] for x in queue}),
+              'source_kind_counts': {kind: sum(1 for x in queue if x.get('seed_kind') == kind)
+                 for kind in ('static-public', 'public-gateway-cover')}}, sort_keys=True), flush=True)
+        return
     run(a.model, a.progress, a.out, a.progress_out, a.budget, a.max_seconds, a.workers)
 
 
