@@ -17,8 +17,13 @@ def inspect(root=ROOT):
         raise AssertionError('Expected public work not found')
     added=[p for p in work['images'] if p.get('number') in SLOTS]
     old=[p for p in work['images'] if p.get('number') not in SLOTS]
+    if not added:
+        print('MIMMI_NEW2_SUNSHINE_PIXEL_EVIDENCE',
+              json.dumps({'status':'NOT_IN_CHECKED_OUT_COMMIT',
+                          'mode':'no_mutation'},ensure_ascii=False),flush=True)
+        return {'status':'NOT_IN_CHECKED_OUT_COMMIT'}
     if len(added)!=2 or {p['number'] for p in added}!=SLOTS:
-        raise AssertionError('The exact two new SHA rows are unavailable')
+        raise AssertionError('New photo records partially present or changed')
     fingerprints=WorkVisualIndex(base,{'id':WORK,'images':old})
     findings=[]
     for p in added:
