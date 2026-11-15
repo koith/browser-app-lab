@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'apps/gallery-archive/remove_false_new_mimmi_2021_duplicate_cuts.py'
+      - 'apps/gallery-archive/remove_false_new_mimmi_summer_duplicate_cuts.py'
       - '.github/workflows/gallery-correct-false-new-photo-cuts.yml'
 permissions:
   contents: write
@@ -34,6 +35,7 @@ jobs:
           python -m pip install --quiet 'Pillow==11.3.0'
           python apps/gallery-archive/test_photo_visual_dedupe.py
           python apps/gallery-archive/remove_false_new_mimmi_2021_duplicate_cuts.py
+          python apps/gallery-archive/remove_false_new_mimmi_summer_duplicate_cuts.py
       - name: Recompute correction against latest main, remove only redundant rows and files
         shell: bash
         run: |
@@ -44,6 +46,7 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             python apps/gallery-archive/remove_false_new_mimmi_2021_duplicate_cuts.py --apply
+            python apps/gallery-archive/remove_false_new_mimmi_summer_duplicate_cuts.py --apply
             node apps/gallery-archive/test_saved_photo_union.cjs
             node apps/gallery-archive/test_curated_cover_manifest.cjs
             git add -A apps/mimmi-gallery/stored-albums.json apps/mimmi-gallery/stored-albums/djawa-christmas-special-2021-mimmi
@@ -51,7 +54,7 @@ jobs:
               echo 'GALLERY_FALSE_NEW_PHOTO_CUTS_ALREADY_CORRECTED=true' >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
-            git commit -m 'fix(gallery): remove 20 measured same-frame Mimmi duplicates, preserve existing originals'
+            git commit -m 'fix(gallery): remove 22 measured same-frame Mimmi duplicates, preserve existing originals'
             if git push origin HEAD:refs/heads/main; then
               echo "GALLERY_FALSE_NEW_PHOTO_CUTS_CORRECTED_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
               gh workflow run static.yml --ref main
