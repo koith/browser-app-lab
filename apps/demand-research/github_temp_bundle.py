@@ -61,6 +61,36 @@ HISTORY_MAX_BYTES = 140_000_000
 _history_guard = threading.RLock()
 _history_cache = None
 
+# The chooser has already AES/ZIP/SHA-verified each displayed account.
+# Keep a small metadata-only index so opening the selected account does NOT
+# re-download another user's 20-80 MB encrypted release merely to discover
+# its identity. The hint is skip-only; a selected tag is verified on read.
+_VERIFIED_TAG_OWNER_TTL=600
+_verified_tag_owners={}
+_tag_owner_guard=threading.Lock()
+
+def _remember_verified_tag_owner(tag,bundle):
+    if not TAG.fullmatch(str(tag)) or not isinstance(bundle,VerifiedBundle):
+        return
+    with _tag_owner_guard:
+        now=time.monotonic()
+        _verified_tag_owners[tag]=(now,bundle.account)
+        if len(_verified_tag_owners)>256:
+            for key,(stamp,_) in list(_verified_tag_owners.items()):
+                if now-stamp>_VERIFIED_TAG_OWNER_TTL:
+                    _verified_tag_owners.pop(key,None)
+            while len(_verified_tag_owners)>256:
+                oldest=min(_verified_tag_owners,key=lambda k:_verified_tag_owners[k][0])
+                _verified_tag_owners.pop(oldest,None)
+
+def _verified_tag_owner(tag):
+    with _tag_owner_guard:
+        entry=_verified_tag_owners.get(tag)
+        if entry and time.monotonic()-entry[0]<_VERIFIED_TAG_OWNER_TTL:
+            return entry[1]
+        _verified_tag_owners.pop(tag,None)
+        return None
+
 
 def _cached_verified_bundle(key):
     with _guard:
@@ -233,9 +263,11 @@ def release_bundle(release, *, key=None):
         raise BundleInvalid("Unidentified temporary backup asset")
     cached=_cached_verified_bundle(artifact_id)
     if cached is not None:
+        _remember_verified_tag_owner(release["tag_name"],cached)
         return cached
     source = _download(asset)
     bundle = _make_bundle(release["tag_name"], decrypt(source, key or gateway_key()))
+    _remember_verified_tag_owner(release["tag_name"],bundle)
     return _cache_verified_bundle(artifact_id,bundle)
 
 
@@ -298,6 +330,11 @@ def matching_bundles(account, max_versions=500):
             return list(cached[2])
         matches={}
         for tag in atom_tags():
+            owner=_verified_tag_owner(tag)
+            if owner is not None and owner!=account:
+                # This tag was already independently verified for another
+                # public account during the same server session.
+                continue
             try:
                 bundle=tagged_bundle(tag)
             except (BundleInvalid,RuntimeError,ValueError,zipfile.BadZipFile):
@@ -389,6 +426,7 @@ def _download_tag(tag, *, missing_ok=False):
 def tagged_bundle(tag, *, missing_ok=False):
     cached=_cached_verified_bundle(tag)
     if cached is not None:
+        _remember_verified_tag_owner(tag,cached)
         return cached
     raw=_download_tag(tag,missing_ok=missing_ok)
     if raw is None:
@@ -396,6 +434,7 @@ def tagged_bundle(tag, *, missing_ok=False):
     # AES-GCM and VerifiedBundle's whole-ZIP+manifest SHA checks establish
     # original integrity even without the rate-limited GitHub REST metadata.
     bundle=_make_bundle(tag,decrypt(raw,gateway_key()))
+    _remember_verified_tag_owner(tag,bundle)
     return _cache_verified_bundle(tag,bundle)
 
 
