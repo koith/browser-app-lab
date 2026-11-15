@@ -125,12 +125,16 @@ def read_progress(path, model, ids):
     return data
 
 
-def plan_batch(queue, state, budget):
+def plan_batch(queue, state, budget, stop_after_full=False):
     if type(budget) is not int or not 1 <= budget <= 512:
         raise ValueError('SEARCH_BUDGET_OUT_OF_BOUNDS')
     covered = set(state['attempted_ids'])
     remaining = [p for p in queue if p['seed_id'] not in covered]
     cycle = state['cycle']
+    if not remaining and stop_after_full:
+        # During the initial exhaustive campaign, do not restart a completed
+        # model just because the other model still has pending photographs.
+        return [], cycle
     if not remaining:
         # Start a full repeat only AFTER all currently stored images had a
         # search attempt; new photos from the owner catalog join automatically.
@@ -140,12 +144,12 @@ def plan_batch(queue, state, budget):
     return remaining[:budget], cycle
 
 
-def run(model, progress_path, out_path, next_path, budget, seconds, workers):
+def run(model, progress_path, out_path, next_path, budget, seconds, workers, stop_after_full=False):
     if not 1 <= workers <= 3 or not 60 <= seconds <= 4800:
         raise ValueError('PUBLIC_SEARCH_CONCURRENCY_OR_TIME_OUT_OF_BOUNDS')
     queue = complete_queue(seeds(APP_ROOT, all_cuts=True), model)
     state = read_progress(progress_path, model, {p['seed_id'] for p in queue})
-    selected, cycle = plan_batch(queue, state, budget)
+    selected, cycle = plan_batch(queue, state, budget, stop_after_full=stop_after_full)
     started = time.monotonic()
     scanned = []
     # Finish each bounded group before saving results. If the runner ends
@@ -231,6 +235,7 @@ def main():
     p.add_argument('--max-seconds', type=int, default=3300)
     p.add_argument('--workers', type=int, default=3)
     p.add_argument('--plan-only', action='store_true')
+    p.add_argument('--stop-after-full', action='store_true')
     a = p.parse_args()
     if a.plan_only:
         queue = complete_queue(seeds(APP_ROOT, all_cuts=True), a.model)
@@ -241,7 +246,8 @@ def main():
               'source_kind_counts': {kind: sum(1 for x in queue if x.get('seed_kind') == kind)
                  for kind in ('static-public', 'public-gateway-cover')}}, sort_keys=True), flush=True)
         return
-    run(a.model, a.progress, a.out, a.progress_out, a.budget, a.max_seconds, a.workers)
+    run(a.model, a.progress, a.out, a.progress_out, a.budget, a.max_seconds, a.workers,
+        stop_after_full=a.stop_after_full)
 
 
 if __name__ == '__main__':

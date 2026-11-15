@@ -1,6 +1,12 @@
 name: Gallery Full Missing Public Photos — Collect Real Files
 on:
   workflow_dispatch:
+    inputs:
+      campaign_step:
+        description: 'Bounded continuation step for the exhaustive SHA queue'
+        required: false
+        default: '0'
+        type: string
   schedule:
     - cron: '27 0,8,16 * * *'
   push:
@@ -14,10 +20,13 @@ on:
       - 'apps/gallery-archive/test_run_full_public_acquisition.py'
       - 'apps/gallery-archive/run_exhaustive_reverse_search.py'
       - 'apps/gallery-archive/test_exhaustive_reverse_search.py'
+      - 'apps/gallery-archive/exhaustive_campaign_controller.py'
+      - 'apps/gallery-archive/test_exhaustive_campaign_controller.py'
       - 'apps/gallery-archive/source_alias_search.py'
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 concurrency:
   group: gallery-full-missing-public-photos
   cancel-in-progress: false
@@ -37,6 +46,7 @@ jobs:
           python apps/gallery-archive/test_run_full_public_acquisition.py
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/gallery-archive/test_exhaustive_reverse_search.py
+          python apps/gallery-archive/test_exhaustive_campaign_controller.py
           python apps/gallery-archive/run_exhaustive_reverse_search.py --model mimmi --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
           python apps/gallery-archive/run_exhaustive_reverse_search.py --model yui --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
           python apps/gallery-archive/run_full_public_acquisition.py --model mimmi --stage "$RUNNER_TEMP/empty" --plan-only
@@ -99,7 +109,7 @@ jobs:
             --progress "$STAGE/reverse-state.json" \
             --progress-out "$STAGE/reverse-next.json" \
             --out "$STAGE/reverse-evidence.json" \
-            --budget 256 --max-seconds 3300 --workers 3
+            --budget 256 --max-seconds 3300 --workers 3 --stop-after-full
           python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
             --offset "$((RUN_NUMBER * 3))" --per-work 2 --max-pages 18 \
             --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
@@ -192,3 +202,43 @@ jobs:
             /tmp/gallery-public-full/photos/batch-*/metadata/pages-publication.json
           retention-days: 7
           if-no-files-found: warn
+  continue_until_exhausted:
+    needs: [offline, collect]
+    # Don't spawn more runs on a failed collection, invalid checkpoint,
+    # manual pull request or unrelated branch. The previous original stays safe.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && needs.collect.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CAMPAIGN_STEP: ${{ inputs.campaign_step || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read both immutable checkpoints and decide if any SHA remains
+        id: control
+        shell: bash
+        run: |
+          set -euo pipefail
+          for model in mimmi yui; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/apps/gallery-archive/verification/reverse-progress-$model.json?ref=gallery-reverse-progress-$model" \
+              --jq '.content' | base64 -d > "$RUNNER_TEMP/$model-progress.json"
+          done
+          python apps/gallery-archive/exhaustive_campaign_controller.py \
+            --mimmi "$RUNNER_TEMP/mimmi-progress.json" \
+            --yui "$RUNNER_TEMP/yui-progress.json" \
+            --step "$CAMPAIGN_STEP" --max-steps 64 \
+            --github-output "$GITHUB_OUTPUT"
+      - name: Dispatch immediate next batch, not wait 8 hours
+        if: steps.control.outputs.dispatch == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run gallery-full-missing-public-collection.yml \
+            --ref main -f campaign_step="${{ steps.control.outputs.next_step }}"
+          echo "GALLERY_FULL_REVERSE_NEXT_BATCH_DISPATCHED step=${{ steps.control.outputs.next_step }}"
+      - name: Record exhausted corpus if no photo SHA remains
+        if: steps.control.outputs.all_attempted == 'true'
+        run: echo 'GALLERY_FULL_REVERSE_FIRST_PASS_ALL_SHA_ATTEMPTED=true' >> "$GITHUB_STEP_SUMMARY"
