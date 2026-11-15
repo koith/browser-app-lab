@@ -4,6 +4,7 @@ from hashlib import sha256
 from io import BytesIO
 from pathlib import Path
 import tempfile
+from unittest.mock import patch
 from PIL import Image, ImageDraw
 from photo_visual_dedupe import WorkVisualIndex
 
@@ -43,8 +44,13 @@ def main():
         assert index.classify(candidate) is None
         new={'number':2,'url':f'stored-albums/{aid}/new.png',
              'sha256':sha256(candidate).hexdigest()}
+        (base/new['url']).write_bytes(candidate)
         index.remember(new,candidate)
         assert index.classify(encoded(unrelated,'JPEG',quality=96,subsampling=0))
+        with patch('photo_visual_dedupe.scan_image',
+                   side_effect=ValueError('oversize_image')):
+            assert index.classify(b'oversize') is None
+            index.remember(new,b'oversize')
     print('GALLERY_VISUAL_DUPLICATE_PROTECTION_SHA_CHANGED_SAME_CUT_REJECTED_PASS')
 
 
