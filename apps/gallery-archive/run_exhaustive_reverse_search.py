@@ -194,6 +194,15 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
     readable = sum(any(str(x).startswith('leads_') for x in r['search_status'].values())
                    for r in scanned)
     sources = len({c['url'] for r in scanned for c in r.get('candidate_pages', [])})
+    # A readable HTML page is not the same as an actual reverse-image match.
+    # In particular, leads_0 can be the generic search UI without any photo.
+    matched_frames = sum(bool(r.get('candidate_pages')) for r in scanned)
+    engine_outcomes = {}
+    for row in scanned:
+        for engine, outcome in row.get('search_status', {}).items():
+            label = str(outcome)
+            target = engine_outcomes.setdefault(engine, {})
+            target[label] = target.get(label, 0) + 1
     report = {'schema_version': 1, 'model': model,
               'method': 'all-owner-plus-static-photo-sha-round-robin',
               'generated_at': datetime.now(timezone.utc).isoformat(),
@@ -202,6 +211,9 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
               'readable_search_results': readable,
               'unique_albums_queried': len({r['album_id'] for r in scanned}),
               'source_pages_accepted': sources,
+              'model_matched_photo_frames': matched_frames,
+              'photo_frames_with_zero_model_matches': len(scanned)-matched_frames,
+              'search_engine_outcomes': engine_outcomes,
               'off_model_rejected': sum(r['off_model_rejected'] for r in scanned),
               'physical_photos_new': 0, 'gallery_photos_new': 0,
               'research_only': True,
@@ -220,7 +232,11 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
     print('ALL_OWNER_PHOTOS_REVERSE_SEARCH', json.dumps(
         {**report['coverage'], 'model': model,
          'searched_this_run': len(scanned),
-         'search_pages_accepted': sources, 'readable': readable,
+         'search_pages_accepted': sources,
+         'frames_with_model_matched_sources': matched_frames,
+         'frames_without_model_matched_sources': len(scanned)-matched_frames,
+         'engine_outcomes': engine_outcomes,
+         'readable_html_not_verified_visual_match': readable,
          'photo_files_downloaded': 0}, ensure_ascii=False), flush=True)
     return report
 
