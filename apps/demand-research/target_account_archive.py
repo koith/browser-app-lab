@@ -529,7 +529,11 @@ def normalize_record(profile, raw):
                 "blobs":atproto_blobs(value),"raw":raw}
     if not isinstance(raw.get("account"),dict) or str(raw["account"].get("id")) != profile["actor"]:
         return None
-    if raw.get("visibility")!="public" or raw.get("sensitive") or raw.get("reblog"):
+    if raw.get("visibility")!="public":
+        return None
+    shared=raw.get("reblog")
+    if shared is not None and (not isinstance(shared,dict)
+                               or shared.get("visibility")!="public"):
         return None
     sid=str(raw.get("id",""))
     if not sid.isdigit():
@@ -541,7 +545,8 @@ def normalize_record(profile, raw):
         require_public_https(uri)
     except ValueError:
         return None
-    attachments=raw.get("media_attachments") or []
+    source_record=shared if isinstance(shared,dict) else raw
+    attachments=source_record.get("media_attachments") or []
     refs=[]
     if not isinstance(attachments,list):
         return None
@@ -558,8 +563,9 @@ def normalize_record(profile, raw):
     return {"id":post_key(platform,profile["identity"]+":"+sid),
             "original_id":profile["identity"]+":"+sid,
             "source_url":uri,"posted_at":raw.get("created_at"),
-            "text":text_only(raw.get("content","")),
-            "kind":"reply" if raw.get("in_reply_to_id") else "post",
+            "text":text_only(source_record.get("content","")),
+            "kind":"reblog" if shared else
+                   ("reply" if raw.get("in_reply_to_id") else "post"),
             "reply_to":str(raw.get("in_reply_to_id") or ""),
             "blobs":refs,"raw":raw}
 
@@ -575,6 +581,7 @@ def content_fingerprint(item):
         payload={"value":raw.get("value"),"cid":raw.get("cid")}
     else:
         payload={"content":raw.get("content"),"spoiler_text":raw.get("spoiler_text"),
+                 "sensitive":raw.get("sensitive"),"reblog":raw.get("reblog"),
                  "edited_at":raw.get("edited_at"),
                  "media_attachments":raw.get("media_attachments"),
                  "poll":raw.get("poll") and
@@ -644,7 +651,13 @@ def save_public_record(cloud, profile, item, api):
     if not post["archive_complete"]:
         if media:
             cloud.stage_partial_media(post,payloads)
-        raise SourceUnavailable("original media incomplete; cursor not advanced")
+        cloud.write_immutable("metadata/media-pending/"+pid+".json",
+            canonical_json({"id":pid,"platform":profile["platform"],
+              "original_id":item["original_id"],"expected":len(blobs),
+              "recorded_at":datetime.now(timezone.utc).isoformat()}))
+        # Source record and available exact media are immutable. Completion
+        # marker is deferred until ALL original attachment slots verify.
+        return None
     cloud.save_post(post,payloads)
     return post
 
@@ -709,6 +722,37 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
     saved=duplicates=restricted=media_pending=pages=0
     deadline=clock()+MAX_RUNTIME
     head_pages=0
+    pending_repaired=0
+    pending_names=sorted(n for n in archive.names("metadata/media-pending")
+                         if re.fullmatch(r"[a-f0-9]{40}\\.json",n))
+    for name in pending_names[:8]:
+        if clock()>=deadline:break
+        pid=name[:-5]
+        if archive.read("metadata/entries/"+pid+".json",cap=1024,optional=True):
+            continue
+        if archive.read("metadata/media-resolved/"+pid+".json",cap=1024,optional=True):
+            continue
+        raw=archive.read("metadata/source-records/"+pid+".json",
+                         cap=MAX_SOURCE_BYTES,optional=True)
+        if raw is None:
+            media_pending+=1
+            continue
+        try:
+            item=normalize_record(profile,json.loads(raw))
+            if item is None or item["id"]!=pid:
+                media_pending+=1
+                continue
+            restored=save_public_record(archive,profile,item,api)
+            if restored is not None:
+                archive.write_immutable("metadata/media-resolved/"+pid+".json",
+                    canonical_json({"id":pid,"sha256":
+                        sha256(canonical_json(restored))}))
+                pending_repaired+=1
+                saved+=1
+            else:
+                media_pending+=1
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            media_pending+=1
 
     def save_observed(records):
         nonlocal saved,duplicates,restricted,media_pending
@@ -755,8 +799,10 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                 except (ValueError,KeyError,TypeError) as error:
                     raise SourceUnavailable("archived record verification failed") from error
             try:
-                save_public_record(archive,profile,item,api)
-                saved+=1
+                if save_public_record(archive,profile,item,api) is None:
+                    media_pending+=1
+                else:
+                    saved+=1
             except SourceUnavailable:
                 media_pending+=1
                 raise
@@ -799,7 +845,18 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
             cursor=next_cursor
             if exhausted:
                 break
-        status="COMPLETE_CURRENT_PUBLIC_CURSOR" if pages and not cursor else "RESUME_NEEDED"
+        outstanding=0
+        for name in archive.names("metadata/media-pending"):
+            if not re.fullmatch(r"[a-f0-9]{40}\\.json",name):continue
+            pid=name[:-5]
+            if (archive.read("metadata/entries/"+pid+".json",cap=1024,optional=True)
+                or archive.read("metadata/media-resolved/"+pid+".json",
+                                cap=1024,optional=True)):
+                continue
+            outstanding+=1
+        status=("RESUME_NEEDED_MEDIA" if outstanding else
+                ("COMPLETE_CURRENT_PUBLIC_CURSOR" if pages and not cursor
+                 else "RESUME_NEEDED"))
         # Bounded comment/thread backlog scans retain progress even when
         # the selected source has thousands of historical posts.
         try:
@@ -816,6 +873,8 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                           "posts_verified":saved,"previously_saved":duplicates,
                           "excluded_not_public":restricted,
                           "media_pending":media_pending,
+                          "media_pending_total":locals().get("outstanding",media_pending),
+                          "media_repaired":pending_repaired,
                           "profile_verified":profile_stat["profile_verified"],
                           "profile_assets_verified":profile_stat["profile_assets_verified"],
                           "profile_assets_unavailable":profile_stat["profile_assets_unavailable"],
@@ -827,7 +886,9 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                          sort_keys=True),flush=True)
     return {"platform":platform,"pages_verified":pages,"latest_pages_scanned":head_pages,
             "posts_verified":saved,
-            "previously_saved":duplicates,"status":status,
+            "previously_saved":duplicates,"media_pending":media_pending,
+            "media_pending_total":locals().get("outstanding",media_pending),
+            "media_repaired":pending_repaired,"status":status,
             "profile":profile_stat,"graph":graph_stats,
             "threads":locals().get("thread_stats",{})}
 
