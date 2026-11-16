@@ -77,7 +77,8 @@ jobs:
             echo "healthy=false" >> "$GITHUB_OUTPUT"
             echo "Cold/incomplete gallery: existing-owner authenticated recovery is required." >> "$GITHUB_STEP_SUMMARY"
           fi
-      # Cold scheduled restores also need this authenticated refresh before recovery.\n      - name: Securely refresh Render storage session without exposing cookies or viewer passwords
+      # Cold scheduled restores also need this authenticated refresh before recovery.
+      - name: Securely refresh Render storage session without exposing cookies or viewer passwords
         if: steps.ready.outputs.healthy != 'true'
         id: direct_owner_session
         continue-on-error: true
