@@ -14,7 +14,8 @@ import subprocess
 import threading
 import time
 from pathlib import Path
-from urllib.parse import urlsplit
+from html.parser import HTMLParser
+from urllib.parse import quote, urlsplit
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, FileResponse, Response
 from demand_archive import CloudArchive, sha256
@@ -367,6 +368,190 @@ def archived_media_slot(pid,item):
     return slot if 0<=slot<16 else None
 
 
+
+class _PublicHtmlParts(HTMLParser):
+    """Minimal safe Mastodon rich-text tokens, never provider HTML."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts=[]
+        self.link=""
+    def handle_starttag(self,tag,attrs):
+        if tag=="a":
+            props=dict(attrs)
+            self.link=sanitize_safe_link(props.get("href",""))
+        elif tag in ("br","p"):
+            self.parts.append({"text":"\\n","href":""})
+    def handle_endtag(self,tag):
+        if tag=="a":self.link=""
+        elif tag in ("p","div"):
+            self.parts.append({"text":"\\n","href":""})
+    def handle_data(self,data):
+        if data:self.parts.append({"text":data[:12000],"href":self.link})
+
+
+def _safe_atproto_post_url(uri):
+    if not isinstance(uri,str):
+        return ""
+    m=re.fullmatch(r"at://(did:plc:[a-z2-7]{24})/app.bsky.feed.post/([A-Za-z0-9_-]{3,100})",uri)
+    return ("https://bsky.app/profile/"+m.group(1)+"/post/"+m.group(2)
+            if m else "")
+
+
+def _bsky_facet_parts(record,text):
+    raw=text.encode("utf-8")
+    facets=record.get("facets") or []
+    if not isinstance(facets,list):
+        return [{"text":text,"href":""}]
+    links=[]
+    for facet in facets[:100]:
+        if not isinstance(facet,dict):continue
+        span=facet.get("index") or {}
+        if not isinstance(span,dict):continue
+        begin=span.get("byteStart")
+        end=span.get("byteEnd")
+        if not (type(begin) is int and type(end) is int
+                and 0<=begin<end<=len(raw)):continue
+        href=""
+        features=facet.get("features") or []
+        if not isinstance(features,list):continue
+        for feature in features[:4]:
+            if not isinstance(feature,dict):continue
+            kind=feature.get("$type")
+            if kind=="app.bsky.richtext.facet#link":
+                href=sanitize_safe_link(feature.get("uri"))
+            elif kind=="app.bsky.richtext.facet#mention":
+                did=feature.get("did","")
+                if isinstance(did,str) and re.fullmatch(r"did:plc:[a-z2-7]{24}",did):
+                    href="https://bsky.app/profile/"+did
+            elif kind=="app.bsky.richtext.facet#tag":
+                tag=feature.get("tag","")
+                if isinstance(tag,str) and 0<len(tag)<=80:
+                    href="https://bsky.app/hashtag/"+quote(tag,safe="")
+            if href:break
+        if href:links.append((begin,end,href))
+    links.sort()
+    parts=[]
+    cursor=0
+    for begin,end,href in links:
+        if begin<cursor:continue
+        if begin>cursor:
+            parts.append({"text":raw[cursor:begin].decode("utf-8","replace"),"href":""})
+        parts.append({"text":raw[begin:end].decode("utf-8","replace"),"href":href})
+        cursor=end
+    if cursor<len(raw):
+        parts.append({"text":raw[cursor:].decode("utf-8","replace"),"href":""})
+    return parts or [{"text":text,"href":""}]
+
+
+def _source_ui(archive,post):
+    """Reconstruct only UI details saved with this exact immutable post.
+
+    Never fetch a live SNS during archival viewing, or invent missing
+    captions, engagement numbers, screenshots, quoted content or poll votes.
+    """
+    out={"rich_text":[],"content_warning":"","sensitive":False,
+         "alt_text":[],"external_card":None,"quoted_post":None,
+         "poll":None,"reblog":None,"engagement":None}
+    pid=post.get("id","")
+    if not HEX40.fullmatch(str(pid)):
+        return out
+    try:
+        raw=archive.read("metadata/source-records/"+pid+".json",
+                         cap=3_000_000,optional=True)
+        source=json.loads(raw) if raw else None
+    except (RuntimeError,ValueError,TypeError,KeyError):
+        source=None
+    if not isinstance(source,dict):return out
+    text=str(post.get("text") or "")
+    if post.get("platform")=="bluesky":
+        if source.get("uri")!=post.get("original_id"):
+            # An edited immutable logical record has its own source snapshot
+            # but retains the original ATProto URI.
+            return out
+        record=source.get("value")
+        if not isinstance(record,dict):return out
+        out["rich_text"]=_bsky_facet_parts(record,text)
+        labels=record.get("labels") or {}
+        values=labels.get("values",[]) if isinstance(labels,dict) else []
+        if isinstance(values,list) and any(
+                isinstance(x,dict) and x.get("val") in
+                ("porn","sexual","nudity","graphic-media") for x in values):
+            out["sensitive"]=True
+            out["content_warning"]="게시자가 지정한 민감 콘텐츠"
+        embed=record.get("embed") or {}
+        if isinstance(embed,dict):
+            item=embed.get("media") if embed.get("$type")=="app.bsky.embed.recordWithMedia" else embed
+            if isinstance(item,dict):
+                illustrations=item.get("images",[])
+                if isinstance(illustrations,list):
+                    out["alt_text"]=[str(x.get("alt") or "")[:1600] if isinstance(x,dict)
+                                     else "" for x in illustrations[:16]]
+                ext=item.get("external")
+                if isinstance(ext,dict):
+                    url=sanitize_safe_link(ext.get("uri"))
+                    if url:
+                        out["external_card"]={
+                           "url":url,"title":str(ext.get("title") or "")[:300],
+                           "description":str(ext.get("description") or "")[:500]}
+            record_ref=(embed.get("record") or {})
+            if isinstance(record_ref,dict):
+                nested=record_ref.get("record") if isinstance(record_ref.get("record"),dict) else record_ref
+                link=_safe_atproto_post_url(nested.get("uri"))
+                if link:out["quoted_post"]={"url":link}
+    elif post.get("platform")=="mastodon":
+        published=source.get("id")
+        if not isinstance(published,(str,int)) or (
+                ":"+str(published)!=str(post.get("original_id",""))[-len(str(published))-1:]):
+            return out
+        embedded=source.get("reblog")
+        display=embedded if isinstance(embedded,dict) and embedded.get("visibility")=="public" else source
+        if embedded and display is embedded:
+            owner=display.get("account") or {}
+            if isinstance(owner,dict):
+                out["reblog"]={
+                    "name":str(owner.get("display_name") or owner.get("acct") or "")[:200],
+                    "handle":str(owner.get("acct") or "")[:200],
+                    "url":sanitize_safe_link(owner.get("url"))}
+        markup=display.get("content") or ""
+        if isinstance(markup,str):
+            parser=_PublicHtmlParts()
+            try:
+                parser.feed(markup[:100_000])
+                out["rich_text"]=parser.parts[:300]
+            except (TypeError,ValueError):
+                pass
+        warning=display.get("spoiler_text") or source.get("spoiler_text") or ""
+        out["content_warning"]=str(warning)[:1000]
+        out["sensitive"]=bool(source.get("sensitive") or display.get("sensitive") or warning)
+        media=display.get("media_attachments") or []
+        if isinstance(media,list):
+            out["alt_text"]=[str(m.get("description") or "")[:1600]
+                             if isinstance(m,dict) else "" for m in media[:16]]
+        card=display.get("card")
+        if isinstance(card,dict):
+            link=sanitize_safe_link(card.get("url"))
+            if link:
+                out["external_card"]={"url":link,
+                    "title":str(card.get("title") or "")[:300],
+                    "description":str(card.get("description") or "")[:500]}
+        poll=display.get("poll")
+        if isinstance(poll,dict) and isinstance(poll.get("options"),list):
+            out["poll"]={"multiple":poll.get("multiple") is True,
+                         "expired":poll.get("expired") is True,
+                         "options":[{"title":str(option.get("title") or "")[:250],
+                             "votes_count":option.get("votes_count")
+                                if type(option.get("votes_count")) is int else None}
+                          for option in poll["options"][:20]
+                          if isinstance(option,dict)]}
+        out["engagement"]={
+            name:display.get(name) if type(display.get(name)) is int else None
+            for name in ("replies_count","reblogs_count","favourites_count")}
+    if not out["rich_text"]:
+        out["rich_text"]=[{"text":text,"href":""}]
+    return out
+
+
+
 def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
     """Filter the COMPLETE verified account journal before pagination.
 
@@ -424,6 +609,7 @@ def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
                 "verified_sha256":bool(verified)})
         media.sort(key=lambda value:value["index"])
         matching.append({
+            **_source_ui(archive,post),
             "id":pid,"posted_at":post.get("posted_at"),"text":text,
             "source_url":sanitize_safe_link(post.get("source_url")),
             "profile_url":sanitize_safe_link(post.get("profile_url")),
