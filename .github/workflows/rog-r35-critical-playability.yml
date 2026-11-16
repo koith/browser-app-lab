@@ -9,6 +9,7 @@ on:
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/dice-turn-clarity.css'
       - 'apps/4leaf/rog/tests/chat-503-real-click.cjs'
+      - 'apps/4leaf/rog/tests/chat-ready-then-503-public-room.cjs'
       - 'apps/4leaf/rog/tests/dice-turn-camera-real-click.cjs'
       - '.github/workflows/rog-r35-critical-playability.yml'
   push:
@@ -38,6 +39,7 @@ jobs:
           node --check apps/4leaf/rog/game.js
           node --check apps/4leaf/rog/sw.js
           node --check apps/4leaf/rog/tests/chat-503-real-click.cjs
+          node --check apps/4leaf/rog/tests/chat-ready-then-503-public-room.cjs
           node --check apps/4leaf/rog/tests/dice-turn-camera-real-click.cjs
       - run: |
           npm install --no-save playwright
@@ -55,6 +57,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/chat-503-real-click.cjs
+      - name: Real custom public chat room enters locally after central READY then HTML 503; create errors visible
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chat-ready-then-503-public-room.cjs
       - name: Real dice roll resets stray camera and explains turn owner
         env:
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
