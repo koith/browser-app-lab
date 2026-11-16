@@ -20,6 +20,8 @@ MARKER = "<!-- intersection-evidence-status-v1 -->"
 # Update one known bot-owned status comment, not all 71 historical comments.
 STATUS_COMMENT_ID = 6619616433
 MAX_STATUS_CHARS = 5000
+MAX_PRIMARY_LEDGER_CHARS = 6000
+
 PREFIX = "https://api.github.com"
 CAPTURE = "demand-fast-capture.yml"
 REPLAY = "demand-replay-encrypted.yml"
@@ -116,6 +118,16 @@ def top_level_task_counts(issue_body):
                 return 0,0  # duplicate parent task: fail closed
             seen[key]=(state=="x")
     return sum(seen.values()),len(seen)
+
+
+def validate_primary_ledger(body):
+    """No oversized or incomplete core task board may silently pass."""
+    if len(body or "") > MAX_PRIMARY_LEDGER_CHARS:
+        raise ValueError("Issue #607 primary ledger oversized")
+    done, total = top_level_task_counts(body or "")
+    if total != 10:
+        raise ValueError("Issue #607 core checklist incomplete or duplicated")
+    return done
 
 
 def render(repo, run_groups, summaries, issue_body, now):
@@ -402,6 +414,7 @@ def main():
         os.getenv("GH_TOKEN", ""),
     )
     issue = gh.request(f"/repos/{gh.repo}/issues/{ISSUE_NUMBER}")
+    validate_primary_ledger(issue.get("body") or "")
     groups = {}
     summaries = {}
     for filename, marker, job in (

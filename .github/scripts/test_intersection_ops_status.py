@@ -245,6 +245,37 @@ class StatusBoardTests(unittest.TestCase):
                 gh.upsert_comment(ops.MARKER+"x"*ops.MAX_STATUS_CHARS)
             request.assert_not_called()
 
+    def test_ledger_current_size_and_preserved_history(self):
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[2]
+        base = root / "apps/demand-research"
+        active = (base / "OPERATIONS_BACKLOG.md").read_text(encoding="utf-8")
+        old = (base / "history" /
+               "OPERATIONS_BACKLOG_full_2026-11-16.md").read_text(
+                   encoding="utf-8")
+        assert len(active) < 5_000
+        assert len(old) > 12_800
+        assert "INT-11" in active and "INT-13" in active
+        assert old.count("## P0") >= 1
+        assert old.count("INT-01") > 1
+        assert "history/OPERATIONS_BACKLOG_full_2026-11-16.md" in active
+
+    def test_core_ledger_cap_and_verified_only_parent_count(self):
+        rows = "## P0 — current\n"
+        rows += "".join(
+            f"- [{'x' if i == 10 else ' '}] **INT-{i:02d}** task\n"
+            for i in range(1, 11)
+        )
+        rows += "## Historical notes (not current)\n"
+        rows += "- [x] **INT-01** old subtask\n" * 9
+        self.assertEqual(ops.validate_primary_ledger(rows), 1)
+        self.assertEqual(ops.top_level_task_counts(rows), (1, 10))
+        with self.assertRaisesRegex(ValueError, "oversized"):
+            ops.validate_primary_ledger(rows + "x" * 7_000)
+        with self.assertRaisesRegex(ValueError, "incomplete"):
+            ops.validate_primary_ledger("## P0\n- [x] **INT-10** incomplete")
+
+
 
 if __name__ == "__main__":
     unittest.main()
