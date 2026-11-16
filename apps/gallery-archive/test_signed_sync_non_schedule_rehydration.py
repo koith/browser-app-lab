@@ -40,5 +40,14 @@ last=action("Reject partial 214-photo rehydration after any successful session r
 assert "probe_private_owner_runtime.py" in last
 assert "LIVE_EXACT_214_RAM_READINESS_CONFIRMED_AFTER_SIGNED_RESCUE" in last
 
+for name in ("mimmi", "yui"):
+    for inventory in ("owner-index.json", "stored-albums.json"):
+        assert f"apps/{name}-gallery/{inventory}" in source, (
+            name, inventory, "real owner inventory updates must trigger rehydration"
+        )
+assert "workflows: [\"Deploy static content to Pages\"]" not in source, (
+    "Unrelated Pages completions must not spawn idle recovery runs"
+)
+
 assert "cancel-in-progress: false" in source,"No interruption of in-progress owner photo writes"
 print("SIGNED_SYNC_ALL_EVENT_TYPES_REQUIRE_214_EXACT_ORIGINALS_PASS")
