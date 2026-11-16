@@ -10,8 +10,9 @@ on:
   schedule:
     - cron: '27 0,8,16 * * *'
   # This file's main push trigger starts one bounded new first pass when
-  # a repaired search revision is deployed. The immutable per-model checkpoint
-  # remembers revision 2, so later runs resume, never repeat each seed.
+  # a repaired search revision is deployed. Revision 3 permits newly found
+  # safe public domains previously dropped by the hardcoded source allowlist;
+  # every SHA is re-examined once, then checkpointed across later runs.
   push:
     branches: [main]
     paths:
@@ -122,7 +123,7 @@ jobs:
             --progress-out "$STAGE/reverse-next.json" \
             --out "$STAGE/reverse-evidence.json" \
             --budget 256 --max-seconds 3300 --workers 3 --stop-after-full \
-            --search-revision 2
+            --search-revision 3
           python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
             --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
             --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
