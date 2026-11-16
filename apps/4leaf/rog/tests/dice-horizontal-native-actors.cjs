@@ -122,14 +122,15 @@ const path=require('node:path');
    };
   });
   const fit=await page.evaluate(()=>window.__LEAF_PHONE_FIT__?.getState?.());
-  assert.deepEqual([fit.deviceWidth,fit.deviceHeight],[844,390]);
-  assert.ok(fit.landscape&&landscape.screen[1]>=600&&landscape.screen[1]<=602,'landscape phone uses design viewport');
+  assert.ok(fit.deviceWidth<=844&&fit.deviceHeight<=390&&fit.scale>0&&fit.scale<.7,'original frame fits visible landscape area');
+  assert.ok(fit.landscape&&fit.layoutWidth===800&&fit.layoutHeight===600&&landscape.screen[1]===390,'entire 800x600 design frame scales into the real landscape viewport');
   assert.equal(landscape.tiles,104,'turning the iPhone cannot erase original DMP source cells');
   assert.ok(landscape.originalSizes,'landscape must preserve exact native 145x97 TIS PNG pixels');
   assert.ok(landscape.actorRigs.length===2&&landscape.actorRigs.every(a=>
    ['original-obs-sprite','original-card-portrait-fallback'].includes(a)),
    'rotation may not replace actual CHR actor with fabricated web figure');
-  assert.ok(landscape.board.visible&&landscape.board.h>=80,
+  assert.ok(landscape.app.x>=-2&&landscape.app.x+landscape.app.w<=844+2&&landscape.app.y>=-2&&landscape.app.y+landscape.app.h<=390+2,'whole original window must fit without zoom or clipping');
+   assert.ok(landscape.board.visible&&landscape.board.h>=80,
    'physical board must remain visible on rotated phone: '+JSON.stringify(landscape));
   assert.ok(landscape.visibleTiles>=1,'at least one native tile should be on-screen');
   assert.ok(landscape.roll.visible&&landscape.roll.y>=0&&
