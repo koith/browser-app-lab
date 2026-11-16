@@ -71,6 +71,9 @@ def profile_metadata(profile,api):
             "posts_count":raw.get("statuses_count"),
             "created_at":raw.get("created_at"),
             "fields":raw.get("fields",[]),
+            "show_media":raw.get("show_media"),
+            "show_media_replies":raw.get("show_media_replies"),
+            "show_featured":raw.get("show_featured"),
             "raw":raw}
 
 
