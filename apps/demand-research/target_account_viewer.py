@@ -459,7 +459,10 @@ def _source_ui(archive,post):
         raw=archive.read("metadata/source-records/"+pid+".json",
                          cap=3_000_000,optional=True)
         source=json.loads(raw) if raw else None
-    except (RuntimeError,ValueError,TypeError,KeyError):
+    except (RuntimeError,ValueError,TypeError,KeyError,AttributeError):
+        # In-memory search-only test journals and historic lightweight
+        # catalog readers expose no source-record API. Keep their already
+        # SHA-verified post text and never invent extra provider metadata.
         source=None
     if not isinstance(source,dict):return out
     text=str(post.get("text") or "")
