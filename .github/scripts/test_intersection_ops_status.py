@@ -189,5 +189,61 @@ class StatusBoardTests(unittest.TestCase):
         self.assertEqual(ops.safe_run_status(run(4, "failure")), "FAILURE")
 
 
+    def test_primary_completed_count_ignores_past_subtasks_and_subchecklists(self):
+        text = (
+            "## P0 — current\\n"
+            "- [ ] **INT-01** original bytes not verified\\n"
+            "- [ ] **INT-02** capture latency pending\\n"
+            "## P1 — current\\n"
+            "- [x] **INT-05** actual browser proof\\n"
+            "## P2 — current\\n"
+            "- [x] **INT-10** original rank proof\\n"
+            "## 2026-11-03 legacy notes\\n"
+            "- [x] **INT-01 old subtask** not original restoration\\n"
+            "- [x] **INT-02 old subtask** not rate guarantee\\n"
+            "- [x] **INT-03** code-only patch\\n"
+        )
+        self.assertEqual(ops.top_level_task_counts(text), (2,4))
+        self.assertEqual(ops.top_level_task_counts(
+            text.replace("- [x] **INT-10** original", "- [x] **INT-05** original")),
+            (0,0), "duplicates in top-level parent section fail closed")
+
+    def test_preserved_original_607_snapshot_reports_one_of_ten(self):
+        root=Path(__file__).resolve().parents[2]
+        original=(root/"apps/demand-research/history/"
+                  "issue-607-original-2026-11-16.md").read_text("utf-8")
+        self.assertGreater(len(original),23000)
+        self.assertEqual(ops.top_level_task_counts(original),(1,10))
+        current=(root/"apps/demand-research/"
+                 "ISSUE_607_CURRENT_TASKS.md")
+        if current.exists():
+            self.assertEqual(
+                ops.top_level_task_counts(current.read_text("utf-8")),(1,10))
+
+    def test_existing_bot_comment_uses_direct_update_not_71_comment_scan(self):
+        gh=ops.GitHub(REPO,"test-token-not-real")
+        calls=[]
+        def fake(path,*,method="GET",data=None,**kwargs):
+            calls.append((path,method))
+            if path.endswith("/issues/comments/"+str(ops.STATUS_COMMENT_ID)):
+                return {"id":ops.STATUS_COMMENT_ID,"body":ops.MARKER+" OLD",
+                        "user":{"login":"github-actions[bot]","type":"Bot"}}
+            if method=="PATCH":
+                self.assertEqual(data["body"],ops.MARKER+" NEW")
+                return {}
+            self.fail("Must not scan history or append fresh comment")
+        with patch.object(gh,"request",side_effect=fake):
+            self.assertEqual(gh.upsert_comment(ops.MARKER+" NEW"),"updated")
+        self.assertEqual(len(calls),2)
+        self.assertEqual(calls[-1][1],"PATCH")
+
+    def test_oversized_status_board_rejected_before_comment_write(self):
+        gh=ops.GitHub(REPO,"test-token-not-real")
+        with patch.object(gh,"request") as request:
+            with self.assertRaisesRegex(ValueError,"oversized"):
+                gh.upsert_comment(ops.MARKER+"x"*ops.MAX_STATUS_CHARS)
+            request.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
