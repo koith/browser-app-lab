@@ -26,7 +26,7 @@ const approx=(got,want,name,tol=4)=>assert.ok(Math.abs(got-want)<=tol, name+' na
   await page.evaluate(()=>{
    const raw=JSON.parse(localStorage.getItem('rog_profile'));
    const owned=window.ORIGINAL_LEAF_CHESSMEN.filter(c=>c.move>=1&&c.move<=2&&c.atk>=1&&c.def>=1)
-    .slice(0,23).map(c=>'c_'+c.id);
+    .slice(-23).map(c=>'c_'+c.id);
    raw.owned=[...new Set([...raw.owned,...owned])];
    raw.gp=1000000;
    localStorage.setItem('rog_profile',JSON.stringify(raw));
