@@ -503,7 +503,7 @@ def normalize_record(profile, raw):
         if value.get("labels",{}).get("values") if isinstance(value.get("labels"),dict) else False:
             labels=value["labels"]["values"]
             if any(isinstance(x,dict) and x.get("val") in
-                   ("!hide","!takedown","porn","sexual","nudity") for x in labels):
+                   ("!hide","!takedown") for x in labels):
                 return None
         rkey=uri.rsplit("/",1)[-1]
         if not re.fullmatch(r"[A-Za-z0-9_-]{3,100}",rkey):
@@ -517,7 +517,14 @@ def normalize_record(profile, raw):
                 "blobs":atproto_blobs(value),"raw":raw}
     if not isinstance(raw.get("account"),dict) or str(raw["account"].get("id")) != profile["actor"]:
         return None
-    if raw.get("visibility")!="public" or raw.get("sensitive") or raw.get("reblog"):
+    if raw.get("visibility")!="public":
+        return None
+    # Public posts with a Mastodon CW/sensitive flag are still public.
+    # Keep their public source snapshot, but the viewer must initially
+    # conceal the sensitive body and attachments behind a user click.
+    shared=raw.get("reblog")
+    if shared is not None and (not isinstance(shared,dict)
+                               or shared.get("visibility")!="public"):
         return None
     sid=str(raw.get("id",""))
     if not sid.isdigit():
@@ -529,7 +536,8 @@ def normalize_record(profile, raw):
         require_public_https(uri)
     except ValueError:
         return None
-    attachments=raw.get("media_attachments") or []
+    source_record=shared if isinstance(shared,dict) else raw
+    attachments=source_record.get("media_attachments") or []
     refs=[]
     if not isinstance(attachments,list):
         return None
@@ -546,8 +554,9 @@ def normalize_record(profile, raw):
     return {"id":post_key(platform,profile["identity"]+":"+sid),
             "original_id":profile["identity"]+":"+sid,
             "source_url":uri,"posted_at":raw.get("created_at"),
-            "text":text_only(raw.get("content","")),
-            "kind":"reply" if raw.get("in_reply_to_id") else "post",
+            "text":text_only(source_record.get("content","")),
+            "kind":"reblog" if shared else
+                   ("reply" if raw.get("in_reply_to_id") else "post"),
             "reply_to":str(raw.get("in_reply_to_id") or ""),
             "blobs":refs,"raw":raw}
 
@@ -563,6 +572,7 @@ def content_fingerprint(item):
         payload={"value":raw.get("value"),"cid":raw.get("cid")}
     else:
         payload={"content":raw.get("content"),"spoiler_text":raw.get("spoiler_text"),
+                 "sensitive":raw.get("sensitive"),"reblog":raw.get("reblog"),
                  "edited_at":raw.get("edited_at"),
                  "media_attachments":raw.get("media_attachments"),
                  "poll":raw.get("poll") and
