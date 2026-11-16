@@ -461,10 +461,15 @@ def test_public_self_labelled_bluesky_posts_are_not_silently_dropped():
         assert normalized["text"]=="Synthetic labelled PUBLIC post"
         assert normalized["raw"]["value"]["labels"]["values"][0]["val"]==label
 
-    for prohibited in ("!hide","!takedown"):
-        post=blue_row("withheld001","Synthetic provider-withheld post")
-        post["value"]["labels"]={"values":[{"val":prohibited}]}
-        assert job.normalize_record(profile,post) is None
+    # The capture layer must not invent a second moderation decision for
+    # a publicly returned record. If the provider withholds a record it will
+    # not be returned by its ordinary public endpoint at all.
+    for label in ("!hide","!takedown","custom-app-label"):
+        post=blue_row("label1234","Provider-returned public source record")
+        post["value"]["labels"]={"values":[{"val":label}]}
+        item=job.normalize_record(profile,post)
+        assert item is not None and item["text"]=="Provider-returned public source record"
+        assert item["raw"]["value"]["labels"]["values"][0]["val"]==label
 
 
 def test_public_labelled_posts_reach_private_encrypted_bundle(monkeypatch):
@@ -512,6 +517,8 @@ def test_public_mastodon_cw_post_is_captured_not_silently_dropped():
     assert record is not None and record["kind"]=="post"
     assert record["text"]=="경고가 있는 공개 게시글"
     assert record["raw"]["spoiler_text"]=="콘텐츠 경고"
+    assert job.normalize_record(profile,{**raw,"visibility":"unlisted"}) is not None
+    assert job.normalize_record(profile,{**raw,"visibility":"direct"}) is None
     assert job.normalize_record(profile,{**raw,"visibility":"private"}) is None
 
 
@@ -531,6 +538,8 @@ def test_public_mastodon_reblogs_are_preserved_as_owner_timeline_actions():
     result=job.normalize_record(profile,outer)
     assert result and result["kind"]=="reblog"
     assert result["text"]=="공개된 다른 사용자 원문"
+    assert job.normalize_record(profile,{**outer,
+        "reblog":{**original,"visibility":"unlisted"}}) is not None
     assert job.normalize_record(profile,{**outer,
         "reblog":{**original,"visibility":"private"}}) is None
 
@@ -567,3 +576,22 @@ def test_one_unavailable_media_does_not_hide_later_posts_and_repairs_append_only
     assert archive.read("posts/"+safe_id+"/post.json")==safe_before
     assert len(archive.load_catalog())==2
 
+
+
+def test_mastodon_public_history_request_does_not_exclude_reblogs_or_replies():
+    """Provider query must actually request all public timeline actions."""
+    from urllib.parse import urlsplit,parse_qs
+    profile={"platform":"mastodon","identity":"mastodon.example:20200",
+        "actor":"20200","pds":"https://mastodon.example"}
+    class PublicAPI:
+        urls=[]
+        def json(self,url):
+            self.urls.append(url)
+            return []
+    api=PublicAPI()
+    rows,cursor=job.page_records(profile,None,api)
+    assert rows==[] and cursor is None
+    params=parse_qs(urlsplit(api.urls[-1]).query)
+    assert params.get("exclude_reblogs")!=["true"]
+    assert params.get("exclude_replies")!=["true"]
+    assert "only_media" not in params

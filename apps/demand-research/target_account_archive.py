@@ -478,7 +478,9 @@ def page_records(profile, cursor, api):
                                         or not 0<len(next_cursor)<=512):
             raise SourceUnavailable("invalid public record cursor")
         return rows,next_cursor
-    params={"limit":40,"exclude_reblogs":"true","exclude_replies":"false"}
+    # Do not suppress any provider-returned, publicly accessible timeline
+    # action at the API boundary. Preserve boosts and replies alongside posts.
+    params={"limit":40,"exclude_reblogs":"false","exclude_replies":"false"}
     if cursor:
         if not str(cursor).isdigit():
             raise ValueError("unsafe Mastodon cursor")
@@ -506,17 +508,11 @@ def normalize_record(profile, raw):
             return None
         if value.get("$type") not in (None,"app.bsky.feed.post"):
             return None
-        # Public self-labels such as porn/sexual/nudity describe content,
-        # not an access restriction. The original record retains its labels
-        # for the private archive viewer to display. Dropping all such
-        # records incorrectly makes a publicly accessible account look empty.
-        # Never import provider-withheld, hidden or taken-down records.
-        label_doc=value.get("labels")
-        labels=label_doc.get("values",[]) if isinstance(label_doc,dict) else []
-        if isinstance(labels,list) and any(
-                isinstance(x,dict) and x.get("val") in ("!hide","!takedown")
-                for x in labels):
-            return None
+        # A public source record must never be dropped on the basis of
+        # self-labels or locally interpreted moderation labels. Retain all
+        # labels verbatim in the immutable source JSON so the read-only
+        # viewer can show source warnings. The upstream service remains
+        # authoritative about which records it actually makes accessible.
         rkey=uri.rsplit("/",1)[-1]
         if not re.fullmatch(r"[A-Za-z0-9_-]{3,100}",rkey):
             return None
@@ -529,11 +525,14 @@ def normalize_record(profile, raw):
                 "blobs":atproto_blobs(value),"raw":raw}
     if not isinstance(raw.get("account"),dict) or str(raw["account"].get("id")) != profile["actor"]:
         return None
-    if raw.get("visibility")!="public":
+    # Mastodon's 'unlisted' statuses are publicly readable when returned
+    # by the ordinary unauthenticated public API. Followers-only/direct
+    # statuses are NOT; we never authenticate or bypass authorization.
+    if raw.get("visibility") not in ("public","unlisted"):
         return None
     shared=raw.get("reblog")
     if shared is not None and (not isinstance(shared,dict)
-                               or shared.get("visibility")!="public"):
+                               or shared.get("visibility") not in ("public","unlisted")):
         return None
     sid=str(raw.get("id",""))
     if not sid.isdigit():
