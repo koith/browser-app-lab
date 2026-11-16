@@ -177,6 +177,17 @@ def rotated_work_scope(work_ids, offset, per_work, work_budget):
     return [work_ids[(start+i)%len(work_ids)] for i in range(budget)]
 
 
+def rotated_site_scope(hosts,offset,per_work,budget=2):
+    if offset<0 or per_work<1 or budget<1:
+        raise ValueError('INVALID_PUBLIC_CROSS_SITE_SCOPE')
+    domains=sorted(set(hosts))
+    if not domains:
+        return []
+    start=(offset//per_work)%len(domains)
+    return [domains[(start+i)%len(domains)]
+            for i in range(min(budget,len(domains)))]
+
+
 def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,work_budget=None):
     session=session or requests.Session()
     results=[]
@@ -241,8 +252,7 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
     # discovered source domain. Rotate the two-site budget by run number
     # so that all new sites receive a same-work cross-model check eventually.
     domains=sorted(hosts)
-    start=(offset//max(1,per_work))%len(domains) if domains else 0
-    rotated=[domains[(start+i)%len(domains)] for i in range(min(2,len(domains)))]
+    rotated=rotated_site_scope(domains,offset,per_work,budget=2)
     for site in rotated:
         for other_model,names in db["model_names"].items():
             for identity in names:
