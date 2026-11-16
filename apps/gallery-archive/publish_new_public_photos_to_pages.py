@@ -14,7 +14,7 @@ import re
 from pathlib import Path
 from PIL import Image
 from photo_visual_dedupe import WorkVisualIndex
-from direct_photo_pipeline import safe_registered_public_page
+from public_work_photo_extractor import ordinary_public_https_image
 
 ROOT = Path(__file__).resolve().parents[2]
 ALLOWED_EXT = {'.jpg': 'JPEG','.jpeg': 'JPEG','.png': 'PNG','.webp': 'WEBP'}
@@ -58,7 +58,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                 or not isinstance(pages,list) or not 1<=len(pages)<=12
                 or not isinstance(src,str) or src not in pages
                 or not all(isinstance(u,str) and
-                           safe_registered_public_page(u,model) for u in pages)):
+                           ordinary_public_https_image(u,u) is not None for u in pages)):
             raise ValueError('UNVERIFIED_NEW_WORK_PUBLICATION_SOURCE')
         approved_new[aid]={'id':aid,'title':title,
                             'source':src,
