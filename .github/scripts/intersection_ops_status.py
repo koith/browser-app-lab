@@ -105,11 +105,11 @@ def top_level_task_counts(issue_body):
     seen={}
     for line in issue_body.splitlines():
         if line.startswith("## "):
-            active=bool(re.match(r"^## P[012]\\b",line))
+            active=bool(re.match(r"^## P[012]\b",line))
             continue
         if not active:
             continue
-        match=re.match(r"^- \\[([ x])\\] \\*\\*(INT-[0-9]{2})\\*\\*",line)
+        match=re.match(r"^- \[([ x])\] \*\*(INT-[0-9]{2})\*\*",line)
         if match:
             state,key=match.groups()
             if key in seen:
