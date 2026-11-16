@@ -234,11 +234,14 @@ def test_exact_original_blob_CID_hash_rejects_substitution_without_checkpoint():
             return mime,b"wrong CDN-transformed bytes"
     api=WrongMedia({None:([p],None)})
     cloud=FakeCloud()
-    with pytest.raises(job.SourceUnavailable,match="original media incomplete"):
-        job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
+    state=job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
     archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
-    assert not archive.names("metadata/checkpoints")
+    assert state["status"]=="RESUME_NEEDED_MEDIA", (
+        "a SHA-mismatched original must not be presented as complete")
+    assert archive.names("metadata/checkpoints"), (
+        "missing media cannot block collection of later public pages")
     assert len(archive.names("metadata/source-records"))==1
+    assert len(archive.names("metadata/media-pending"))==1
     assert not archive.names("metadata/entries")
 
 
