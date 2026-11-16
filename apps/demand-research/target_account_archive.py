@@ -874,6 +874,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                          sort_keys=True),flush=True)
     return {"platform":platform,"pages_verified":pages,"posts_verified":saved,
             "previously_saved":duplicates,"media_pending":media_pending,
+            "media_pending_total":locals().get("outstanding",media_pending),
             "media_repaired":pending_repaired,"status":status,
             "profile":profile_stat,"graph":graph_stats,
             "threads":locals().get("thread_stats",{})}
