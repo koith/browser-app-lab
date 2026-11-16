@@ -1362,7 +1362,37 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         },ensure_ascii=False),flush=True)
         print('DIRECT_INDIVIDUAL_PHOTO_COLLECTION',model,aid,'saved',len(images),'failures',len(errors),flush=True)
     if browser is not None:browser.close()
-    catalog={'schema_version':1,'model':model,'storage':'owner-private-terabox-sha-verified-bytes','albums':new_albums}
+    # Persist the independently verified edition-page proof alongside the
+    # actual image bytes. The publisher must not silently discard an album
+    # merely because it was discovered AFTER public-work-pages.json was built.
+    # Equally, a search snippet or arbitrary staged album ID cannot register
+    # a new publication: only work pages whose exact edition/model were
+    # verified by source_alias_search and admitted by this collector.
+    publication_registry=json.loads((base/'public-work-pages.json').read_text())
+    registered_ids={a['id'] for a in publication_registry.get('albums',[])}
+    approved_new_works=[]
+    for album in new_albums:
+        aid=album['id']
+        if aid in registered_ids:
+            continue
+        source_book=books.get(aid)
+        if not source_book:
+            continue
+        authorized=sorted(
+            set(verified_discovered.get(aid,set())) &
+            set(source_book.get('verified_discovered_pages',[])))
+        if not authorized:
+            continue
+        approved_new_works.append({
+            'id':aid,
+            'title':source_book.get('title') or album.get('title') or aid,
+            'source':authorized[0],
+            'proof':'unique_named_work_page_model_and_edition',
+            'verified_same_work_pages':authorized[:12]})
+    catalog={'schema_version':1,'model':model,
+             'storage':'owner-private-terabox-sha-verified-bytes',
+             'albums':new_albums,
+             'verified_new_work_sources':approved_new_works}
     metadata=out/'metadata';metadata.mkdir(parents=True,exist_ok=True)
     (metadata/'catalog.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
     report={'model':model,'generated_at':datetime.now(timezone.utc).isoformat(),'new_local_individual_files':new_total,
