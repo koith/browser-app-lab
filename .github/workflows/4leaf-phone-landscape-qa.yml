@@ -1,0 +1,64 @@
+name: 4LEAF phone landscape integration QA
+
+on:
+  pull_request:
+    paths:
+      - "apps/4leaf/rog/index.html"
+      - "apps/4leaf/rog/mobile-*.js"
+      - "apps/4leaf/rog/mobile-*.css"
+      - "apps/4leaf/rog/social-chat.js"
+      - "apps/4leaf/rog/sw.js"
+      - "apps/4leaf/rog/tests/realuse-*.cjs"
+      - ".github/workflows/4leaf-phone-landscape-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phone-real-use:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax validation
+        run: |
+          node --check apps/4leaf/rog/mobile-original-fit.js
+          node --check apps/4leaf/rog/social-chat.js
+          node --check apps/4leaf/rog/tests/realuse-chat-map-entry.cjs
+          node --check apps/4leaf/rog/tests/realuse-dice-full-game.cjs
+          node --check apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
+      - name: Install Playwright
+        working-directory: apps/4leaf/rog
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps ${{ matrix.engine }}
+      - name: Start local site
+        run: |
+          python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/4leaf-http.log 2>&1 &
+          for attempt in {1..30}; do
+            curl -fsS http://127.0.0.1:8765/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/4leaf-http.log
+          exit 1
+      - name: Phone frame, portrait prompt and chat overlay
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+        run: node apps/4leaf/rog/tests/mobile-landscape-viewport-smoke.cjs
+      - name: Real click-through room map and chat
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+        run: node apps/4leaf/rog/tests/realuse-chat-map-entry.cjs
+      - name: One complete match on phone landscape
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          LEAF_VIEWS: iphone-landscape
+        run: node apps/4leaf/rog/tests/realuse-dice-full-game.cjs

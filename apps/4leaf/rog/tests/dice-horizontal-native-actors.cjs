@@ -121,7 +121,9 @@ const path=require('node:path');
     visibleTiles:boards.filter(t=>getComputedStyle(t).visibility==='visible').length
    };
   });
-  assert.deepEqual(landscape.screen,[844,390]);
+  const fit=await page.evaluate(()=>window.__LEAF_PHONE_FIT__?.getState?.());
+  assert.deepEqual([fit.deviceWidth,fit.deviceHeight],[844,390]);
+  assert.ok(fit.landscape&&landscape.screen[1]>=600&&landscape.screen[1]<=602,'landscape phone uses design viewport');
   assert.equal(landscape.tiles,104,'turning the iPhone cannot erase original DMP source cells');
   assert.ok(landscape.originalSizes,'landscape must preserve exact native 145x97 TIS PNG pixels');
   assert.ok(landscape.actorRigs.length===2&&landscape.actorRigs.every(a=>
@@ -131,7 +133,7 @@ const path=require('node:path');
    'physical board must remain visible on rotated phone: '+JSON.stringify(landscape));
   assert.ok(landscape.visibleTiles>=1,'at least one native tile should be on-screen');
   assert.ok(landscape.roll.visible&&landscape.roll.y>=0&&
-   landscape.roll.y+landscape.roll.h<=390&&landscape.roll.topmost,
+   landscape.roll.y+landscape.roll.h<=landscape.screen[1]&&landscape.roll.topmost,
    'real original roll control must stay completely on-screen and touchable in landscape: '+
    JSON.stringify(landscape));
   await page.screenshot({path:'leaf-iphone-landscape-original-board-input.png'});
