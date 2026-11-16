@@ -96,6 +96,7 @@ def main():
     assert mod.untrack("https://127.0.0.1/private") is None
     assert mod.untrack("https://metadata.google.internal/secret") is None
     assert mod.untrack("https://new-public-gallery.org:8080/book") is None
+    assert mod.untrack("https://new-public-gallery.org:badport/book") is None
     additional=mod.leads_from_html(
         '<a href="'+fresh+'">Mimmi new source</a>'
         '<a href="https://www.bing.com/images/search?q=other">Search UI</a>')
