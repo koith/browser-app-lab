@@ -116,6 +116,28 @@ const approx=(got,want,name,tol=4)=>assert.ok(Math.abs(got-want)<=tol, name+' na
   await page.waitForFunction(id=>JSON.parse(localStorage.getItem('rog_profile')).owned.includes(id),cardId);
   const bought=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')));
   assert.equal(bought.gp,1000000-price);
+  // Recreate the SAME source CHR ownership, selected card, price, summary
+  // and real GP on both eras, without screenshot-based fake UI state.
+  const kept=await page.evaluate(()=>({
+   id:document.querySelector('#shop-grid .shop-card.selected')?.dataset.cardId,
+   info:document.querySelector('#shop-selected')?.textContent,
+   gp:document.querySelector('#shop-gp')?.textContent,
+   owned:JSON.parse(localStorage.getItem('rog_profile')).owned
+  }));
+  assert.equal(kept.id,cardId);
+  assert.ok(kept.info.includes(price.toLocaleString('ko-KR')));
+  await page.locator('#shop-era-toggle button[data-era="2002"]').click();
+  await page.waitForFunction(()=>window.__LEAF_SHOP_ERA__.getState().era==='2002');
+  const cross=await page.evaluate(()=>({
+   id:document.querySelector('#shop-grid .shop-card.selected')?.dataset.cardId,
+   info:document.querySelector('#shop-selected')?.textContent,
+   gp:document.querySelector('#shop-gp')?.textContent,
+   owned:JSON.parse(localStorage.getItem('rog_profile')).owned
+  }));
+  assert.deepEqual(cross,kept,'same saved source card, price, selected info and GP between 2004 and genuine 2002 UI');
+  await page.locator('#shop-era-toggle button[data-era="2004"]').click();
+  await page.waitForFunction(()=>window.__LEAF_SHOP_ERA__.getState().era==='2004');
+  assert.equal(await page.locator('#shop-grid .shop-card').count(),8);
   await page.locator('#shop-prev').evaluate(el=>el.scrollIntoView());
   await page.locator('#shop-next').click();
   assert.match(await page.locator('#shop-page').textContent(),/^2 \/ /);
