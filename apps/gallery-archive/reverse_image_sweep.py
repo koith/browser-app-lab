@@ -78,10 +78,24 @@ def search_one(seed,client=None):
             target=link.get("url")
             if not isinstance(target,str) or not target.startswith("https://"):
                 continue
-            if identity_supported(seed,link):
-                if target not in seen:
-                    approved.append(link)
-                    seen.add(target)
+            named_identity=identity_supported(seed,link)
+            # Structured CBIR PagesIncluding/Sites objects attribute an actual
+            # image to a host page even when its result card/URL is numeric.
+            # Do not discard those BEFORE the downstream collector can open
+            # the page and independently verify the model and exact edition.
+            # Generic search HTML, SimilarImages and arbitrary API links may
+            # NEVER use this bypass.
+            structured_visual=(link.get("source_engine") in (
+                "yandex_sites","bing_visual_pages_including")
+                and isinstance(link.get("matched_image_url"),str)
+                and untrack(link["matched_image_url"]) is not None)
+            safe_page=untrack(target)
+            if safe_page and (named_identity or structured_visual):
+                if safe_page not in seen:
+                    approved.append({**link,"url":safe_page,
+                                     "visual_host_page_only_unverified_edition":
+                                     bool(structured_visual and not named_identity)})
+                    seen.add(safe_page)
                     accepted_here+=1
             else:
                 rejected+=1
