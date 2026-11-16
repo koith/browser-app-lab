@@ -50,7 +50,7 @@ function absNear(actual,target,span,label){assert.ok(Number.isFinite(actual)&&Ma
    ['mini','x',0,2],['mini','y',448,2],['mini','w',172,2],['mini','h',152,2],
    ['chat','x',172,2],['chat','y',448,2],['chat','w',406,2],['chat','h',152,2],
    ['chessmen','x',578,2],['chessmen','y',448,2],['chessmen','w',222,2],['chessmen','h',152,2],
-   ['event','x',278,3],['event','y',37,3],['event','w',244,2],['event','h',52,2]
+   // Event panel is genuine IMG/eventmsgbox.png; on the WEB board it sits\n   // 37px below the original 30px menu => ABSOLUTE y67, not y37. This\n   // is WEB placement; historical native y is not proven by a battle still.\n   ['event','x',278,3],['event','y',67,3],['event','w',244,2],['event','h',52,2]
   ];
   const measured=targets.map(([id,key,expected,slack])=>({id,key,expected,actual:geometry[id]?.[key],delta:(geometry[id]?.[key]??0)-expected,slack}));
   console.log('DICE-ORIGINAL-800X600-RECTS '+JSON.stringify(geometry));
@@ -68,6 +68,26 @@ function absNear(actual,target,span,label){assert.ok(Number.isFinite(actual)&&Ma
   await page.locator('#roll-btn').click();
   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.players[0].position>0,null,{timeout:30000});
   assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position))>before);
+  // Native reference board.jpg/battle.jpg depicts a duel, not a fresh roll.
+  // Inspect the actual live combat state separately: no WEB-only speech
+  // bubble or event tray may cover the genuine BATTLE and VS source art.
+  await page.evaluate(()=>{
+   const T=window.__ROG_TEST__,m=T.getMatch();
+   m.players[0].position=5;m.players[1].position=5;
+   T.setMatch(m);
+   T.resolveBattle(m.players[0],m.players[1]).catch(e=>console.error('source trace battle',e));
+  });
+  await page.waitForSelector('#battle-visual',{timeout:12000});
+  const battleOverlays=await page.evaluate(()=>({
+   battle:!!document.querySelector('#battle-visual'),
+   eventVisibility:getComputedStyle(document.querySelector('#dice-native-event')).visibility,
+   turnVisibility:getComputedStyle(document.querySelector('#dice-turn-banner')).visibility,
+   sourcePodiums:document.querySelectorAll('#battle-visual .leaf-native-winbattle-podiums').length
+  }));
+  console.log('BATTLE-2004-SOURCE-OVERLAY '+JSON.stringify(battleOverlays));
+  assert.equal(battleOverlays.eventVisibility,'hidden','original battle heading must not be covered by event tray');
+  assert.equal(battleOverlays.turnVisibility,'hidden','native battle score cannot be covered by WEB turn bubble');
+  await makeOverlay('battle',source('battle.jpg'),await page.locator('#app').screenshot({type:'jpeg',quality:58}));
   await page.evaluate(()=>{
    window.__LEAF_SOCIAL__.openRegion('north');
    window.__ROG_TEST__.go('rooms');
