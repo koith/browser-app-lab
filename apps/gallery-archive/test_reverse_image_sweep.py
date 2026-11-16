@@ -3,6 +3,7 @@
 import html
 import json
 import tempfile
+from unittest.mock import patch
 from pathlib import Path
 
 from reverse_seed_priority import seeds
@@ -137,6 +138,25 @@ def main():
     assert len(recovered["candidate_pages"])==1,recovered
     assert recovered["candidate_pages"][0]["url"].endswith("mimmi-red-shirt.html"),recovered
     assert recovered["originals_stored"]==recovered["visible_gallery_added"]==0
+    # Neither the Yandex nor Bing HTML landing page carries usable work
+    # links: Lens must be tried, and a blocked Lens must not suppress TinEye.
+    class NoHtmlMatches:
+        def get(self,url,params=None,**kw):
+            return FakeResponse('<html>Empty visual search landing page</html>')
+    with patch('reverse_image_sweep.lens_query',return_value={
+        'status':'http_429','links':[]}) as lens, patch(
+        'reverse_image_sweep.tineye_query',return_value={
+            'status':'leads_found','links':[{
+                'url':'https://new-public-gallery.org/mimmi-red-shirt',
+                'label':'Mimmi Red Shirt','visual_match_score':99.0}]}) as tineye:
+        recovered=search_one(seed,NoHtmlMatches())
+    assert lens.call_count==tineye.call_count==1
+    assert recovered['search_status']['lens_public']=='http_429',recovered
+    assert recovered['search_status']['tineye_public']=='leads_found',recovered
+    assert recovered['matched_urls_by_engine']['tineye_public']==1,recovered
+    assert len(recovered['candidate_pages'])==1,recovered
+    assert recovered['originals_stored']==0 and recovered['visible_gallery_added']==0
+
     print("IMAGE_FIRST_AGGRESSIVE_SOURCE_FIXTURE_PASS")
 
 if __name__=="__main__":
