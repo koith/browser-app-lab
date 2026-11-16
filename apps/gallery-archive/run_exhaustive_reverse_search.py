@@ -135,8 +135,24 @@ def read_progress(path, model, ids, required_revision=1):
         data['attempted_ids'] = []
         data['cycle'] = 0
         data['last_run_attempts'] = 0
+        data['retry_pending_ids'] = []
+        data['unverified_after_retry_ids'] = []
     else:
         data['attempted_ids'] = [x for x in attempted if x in ids]
+    # Keep a durable one-retry queue for inaccessible search results. A
+    # network/captcha failure is an ATTEMPT, not an exhausted reverse query.
+    for field in ('retry_pending_ids', 'unverified_after_retry_ids'):
+        values = data.get(field, [])
+        if (not isinstance(values, list) or len(values) != len(set(values))
+                or any(not isinstance(k, str) or len(k) != 32
+                       or any(c not in '0123456789abcdef' for c in k)
+                       for k in values)):
+            raise ValueError('CORRUPT_REVERSE_'+field.upper())
+        data[field] = [k for k in values if k in ids] if stored_revision == required_revision else []
+    if set(data['retry_pending_ids']) & set(data['unverified_after_retry_ids']):
+        raise ValueError('REVERSE_RETRY_AND_UNVERIFIED_OVERLAP')
+    if set(data['retry_pending_ids']) - set(data['attempted_ids']):
+        raise ValueError('REVERSE_PENDING_RETRY_NOT_ATTEMPTED')
     data['search_revision'] = required_revision
     return data
 
@@ -147,17 +163,17 @@ def plan_batch(queue, state, budget, stop_after_full=False):
     covered = set(state['attempted_ids'])
     remaining = [p for p in queue if p['seed_id'] not in covered]
     cycle = state['cycle']
-    if not remaining and stop_after_full:
-        # During the initial exhaustive campaign, do not restart a completed
-        # model just because the other model still has pending photographs.
+    if remaining:
+        return remaining[:budget], cycle
+    # Once all photos have received a first attempt, retry only the ones where
+    # *every* engine was inaccessible. No endless challenge retries.
+    retries = set(state.get('retry_pending_ids', []))
+    if retries:
+        return [p for p in queue if p['seed_id'] in retries][:budget], cycle
+    if stop_after_full:
         return [], cycle
-    if not remaining:
-        # Start a full repeat only AFTER all currently stored images had a
-        # search attempt; new photos from the owner catalog join automatically.
-        covered.clear()
-        remaining = queue[:]
-        cycle += 1
-    return remaining[:budget], cycle
+    # Start a new cycle only after all ordinary cuts AND bounded retries.
+    return queue[:budget], cycle + 1
 
 
 def run(model, progress_path, out_path, next_path, budget, seconds, workers, stop_after_full=False, search_revision=1):
@@ -200,16 +216,31 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
     new_ids = [r['seed_id'] for r in scanned]
     if len(new_ids) != len(set(new_ids)) or any(p not in {x['seed_id'] for x in selected} for p in new_ids):
         raise ValueError('REVERSE_SEARCH_UNEXPECTED_SEED_ID')
+    # Generic search HTML may say leads_0; that is not a visual match, but
+    # it is a readable search response. Hard failures get ONE deferred retry.
+    def readable_result(row):
+        return any(str(v).startswith('leads_')
+                   for v in row.get('search_status', {}).values())
+    readable = sum(readable_result(r) for r in scanned)
+    old_pending = set(state.get('retry_pending_ids', []))
+    old_unverified = set(state.get('unverified_after_retry_ids', []))
+    newly_blocked = {r['seed_id'] for r in scanned
+                     if not readable_result(r) and r['seed_id'] not in old_pending}
+    still_blocked = {r['seed_id'] for r in scanned
+                     if not readable_result(r) and r['seed_id'] in old_pending}
+    retried = set(new_ids) & old_pending
+    pending = (old_pending - retried) | newly_blocked
+    unverified = old_unverified | still_blocked
     state.update({'cycle': cycle,
                   'attempted_ids': [p['seed_id'] for p in queue
                                     if p['seed_id'] in already or p['seed_id'] in set(new_ids)],
+                  'retry_pending_ids': [p['seed_id'] for p in queue
+                                        if p['seed_id'] in pending],
+                  'unverified_after_retry_ids': [p['seed_id'] for p in queue
+                                                 if p['seed_id'] in unverified],
                   'last_cycle_size': len(queue),
                   'last_run_attempts': len(scanned),
                   'updated_at': datetime.now(timezone.utc).isoformat()})
-    # A public search returned readable HTML if at least one engine found a
-    # valid response, even when there are no matching source pages.
-    readable = sum(any(str(x).startswith('leads_') for x in r['search_status'].values())
-                   for r in scanned)
     sources = len({c['url'] for r in scanned for c in r.get('candidate_pages', [])})
     # A readable HTML page is not the same as an actual reverse-image match.
     # In particular, leads_0 can be the generic search UI without any photo.
@@ -245,6 +276,8 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
                            'unique_photo_sha_queued': len(queue),
                            'attempted_this_cycle': len(state['attempted_ids']),
                            'remaining_this_cycle': len(queue)-len(state['attempted_ids']),
+                           'pending_unreadable_retry': len(pending),
+                           'unverified_after_retry': len(unverified),
                            'blocked_or_unreadable_this_run': len(scanned)-readable,
                            'scan_budget': budget},
               'results': scanned}
