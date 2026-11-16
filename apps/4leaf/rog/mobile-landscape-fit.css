@@ -180,3 +180,32 @@ html[data-leaf-phone-fit="portrait"] #leaf-phone-rotate{
  font:700 21px/1.5 Gulim,Dotum,sans-serif;text-align:center;
  color:#fff;background:#1b1941f5;
 }
+
+
+/* 2026-11-17 real-play regression: when a normal turn lands on another
+ * player, combat() moves the authoritative #modal-buttons into a battle
+ * actions tray within #board-area. The visually hidden battle-present
+ * modal backdrop must NOT intercept those live controls. In a transformed
+ * 800x600 phone frame position:fixed inside the tray incorrectly changes
+ * its containing block and can leave the buttons under the backdrop.
+ * Keep the same buttons and handlers: restore native-board positioning.
+ */
+html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #modal.battle-present{
+ pointer-events:none!important;
+ background:transparent!important;
+}
+html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #board-area>.leaf-native-battle-actions{
+ position:absolute!important;
+ left:50%!important;
+ right:auto!important;
+ top:auto!important;
+ bottom:6px!important;
+ transform:translateX(-50%)!important;
+ z-index:110!important;
+ pointer-events:auto!important;
+}
+html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #board-area>.leaf-native-battle-actions #modal-buttons,
+html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #board-area>.leaf-native-battle-actions #modal-buttons button{
+ position:relative!important;
+ pointer-events:auto!important;
+}
