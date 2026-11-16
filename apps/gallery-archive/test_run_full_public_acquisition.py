@@ -121,6 +121,23 @@ class FullAcquisitionTests(unittest.TestCase):
             self.assertEqual(doc['batches'][1]['collector_returncode'],124)
             self.assertEqual(doc['batches'][1]['collection_error'],'collector_timeout')
 
+    def test_success_exit_without_finalized_catalog_is_not_photo_acquisition(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage=Path(temporary)
+            args=SimpleNamespace(model='yui',run_number=1,
+                stage=stage,source_evidence=None,batch_size=7,
+                max_per_batch=48,bytes_per_batch=36000000,
+                batch_timeout=60,alternate_priority=False,plan_only=False)
+            with patch('run_full_public_acquisition.subprocess.run',
+                       return_value=SimpleNamespace(returncode=0)):
+                self.assertEqual(execute(args),2)
+            audit=json.loads((stage/'full-collection-summary.json').read_text())
+            self.assertEqual(audit['registered_works_visited'],0)
+            self.assertFalse(audit['collection_all_batches_success'])
+            self.assertEqual(audit['incomplete_batch_count'],len(audit['batches']))
+            self.assertTrue(all(x.get('collection_error')=='missing_finalized_stage_catalog'
+                                for x in audit['batches']))
+
     def test_replay_skips_catalogs_from_timed_out_or_unpublished_batches(self):
         with tempfile.TemporaryDirectory() as temporary:
             stage=Path(temporary)
