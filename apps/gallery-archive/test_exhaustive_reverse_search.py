@@ -72,6 +72,11 @@ class FullReverseCoverageTests(unittest.TestCase):
                                    budget=10, seconds=60, workers=2)
                     self.assertTrue(result['research_only'])
                     self.assertEqual(result['model_matched_photo_frames'], 0)
+                    self.assertEqual(result['name_supported_source_frames_unverified_visual'], 0)
+                    self.assertEqual(result['verified_same_photo_matches'], 0)
+                    self.assertTrue(result['coverage']['attempted_is_not_verified_match'])
+                    self.assertEqual(result['readable_html_without_name_supported_source'],
+                                     len(result['results']))
                     self.assertEqual(result['photo_frames_with_zero_model_matches'], len(result['results']))
                     self.assertEqual(result['search_engine_outcomes']['yandex_sites']['leads_0'],len(result['results']))
                     self.assertEqual(result['total_seed_frames'], 31)
