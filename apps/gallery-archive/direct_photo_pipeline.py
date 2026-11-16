@@ -1368,8 +1368,16 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     # Equally, a search snippet or arbitrary staged album ID cannot register
     # a new publication: only work pages whose exact edition/model were
     # verified by source_alias_search and admitted by this collector.
-    publication_registry=json.loads((base/'public-work-pages.json').read_text())
-    registered_ids={a['id'] for a in publication_registry.get('albums',[])}
+    registry_path=base/'public-work-pages.json'
+    if registry_path.is_file():
+        publication_registry=json.loads(registry_path.read_text())
+        registered_ids={a['id'] for a in publication_registry.get('albums',[])}
+    elif root.resolve()==ROOT.resolve():
+        raise ValueError('REAL_PUBLIC_WORK_REGISTRY_MISSING')
+    else:
+        # Synthetic offline collector fixtures often contain only the owner
+        # and one relevant source page, not the complete production registry.
+        registered_ids=set()
     approved_new_works=[]
     for album in new_albums:
         aid=album['id']
