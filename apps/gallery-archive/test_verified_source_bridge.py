@@ -228,6 +228,7 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
         matched,remaining,stats=review_source_backlog(
             db,state,'mimmi',result,sess,limit=1)
         self.assertEqual(len(matched),1,matched)
+        self.assertEqual(len(remaining['source_verified_pages']),1)
         self.assertEqual(stats['source_page_candidates_reviewed_this_run'],1)
         self.assertEqual(stats['source_page_candidates_pending_next_run'],1)
         self.assertEqual(remaining['source_pending_pages'][0]['link']['url'],second)
@@ -237,7 +238,18 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
         self.assertEqual(len(matched2),1,matched2)
         self.assertEqual(done['source_pending_pages'],[])
         self.assertEqual(stats2['source_page_candidates_pending_next_run'],0)
+        self.assertEqual(len(done['source_verified_pages']),2)
         self.assertEqual(len(result[0]['urls']),2)
+        # Simulate next run with all SHA searches and page review already
+        # completed but the previous image-byte download failed. Durable
+        # source proof must still enter the collector's same-work input.
+        from source_alias_search import reuse_verified_source_history
+        fresh=[]
+        self.assertEqual(reuse_verified_source_history(
+            db,'mimmi',fresh,done['source_verified_pages']),2)
+        self.assertEqual(eligible_source_pages({'schema_version':1,
+            'model':'mimmi','search_results':fresh},'mimmi',
+            safe_registered_public_page),{ALBUM:{SOURCE,second}})
         # Research leaves must still independently pass exact-work/source
         # proof before any image URL is allowed to enter storage.
         self.assertEqual(eligible_source_pages({'schema_version':1,
