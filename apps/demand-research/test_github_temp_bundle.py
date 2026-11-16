@@ -362,3 +362,24 @@ def test_preverified_other_account_release_is_not_downloaded_again(monkeypatch):
     assert gh.matching_bundles(own)==[verified]
     assert calls==[own_tag]
 
+
+
+def test_durable_exact_release_tag_survives_truncated_atom_feed(monkeypatch):
+    import io
+    from types import SimpleNamespace
+    import backup_queue
+    account="bluesky-"+"a"*40
+    tag="intersection-github-archive-43687951260-a1"
+    bundle=SimpleNamespace(account=account,ancestor_tags=(),
+                           _zip_source=io.BytesIO(b"already verified"))
+    calls=[]
+    monkeypatch.setattr(gh,"_history_cache",None)
+    monkeypatch.setattr(backup_queue,"archive_index_tag",lambda selected:tag)
+    monkeypatch.setattr(gh,"atom_tags",lambda:iter(()))
+    monkeypatch.setattr(gh,"tagged_bundle",lambda value:(
+        calls.append(value),bundle)[1])
+    assert gh.matching_bundles(account)==[bundle]
+    assert calls==[tag]
+    assert gh.matching_bundles(account)==[bundle], (
+        "SHA-backed session cache should not re-download unchanged original")
+    assert calls==[tag]

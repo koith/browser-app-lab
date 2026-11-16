@@ -537,3 +537,29 @@ def test_saved_biography_and_header_versions_survive_later_unavailable_capture(p
     # The prior saved artwork and previous biography remain retrievable.
     assert client.get("/api/account-archives/"+name+
                       "/profile?snapshot="+original).json()["description"]=="Public biography sample"
+
+
+def test_all_owner_verified_accounts_listed_without_recent_atom_limit(populated,monkeypatch):
+    client,*_=populated
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    import backup_queue
+    rows=[{
+       "account_key":"bluesky-"+format(n,"040x"),
+       "platform":"bluesky","release_tag":
+            "intersection-github-archive-"+str(43687950000+n)+"-a1",
+       "workflow_run_id":43687950000+n,
+       "profile_url":"https://bsky.app/profile/did:plc:"+"a"*24,
+       "display_name":"Verified source "+str(n),
+       "handle":"synthetic"+str(n)+".bsky.social",
+       "posts_verified":2,"objects_verified":5}
+       for n in range(1,15)]
+    monkeypatch.setattr(backup_queue,"archive_index_rows",lambda:rows)
+    def no_release_download(*_args,**_kwargs):
+        raise AssertionError("owner picker re-downloaded encrypted releases")
+    monkeypatch.setattr(viewer.github_temp_bundle,"latest_bundles",no_release_download)
+    response=client.get("/api/account-archives")
+    assert response.status_code==200
+    records=response.json()["accounts"]
+    assert len(records)==14
+    assert len({item["key"] for item in records})==14
+    assert all(item["index_requires_original_recheck"] for item in records)

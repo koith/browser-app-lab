@@ -63,6 +63,51 @@ def _remote(op, **kwargs):
 
 
 
+# This is only an inventory of earlier independently verified encrypted
+# account ZIPs, not raw archived contents. Rows are never treated as media
+# unless the exact ciphertext, AES tag, ZIP manifest and SHA all verify.
+_ARCHIVE_INDEX_CACHE=(0,())
+_ARCHIVE_INDEX_LOCK=None
+_ARCHIVE_INDEX_TTL=180
+
+def archive_index_rows(*,force=False):
+    global _ARCHIVE_INDEX_CACHE,_ARCHIVE_INDEX_LOCK
+    if _ARCHIVE_INDEX_LOCK is None:
+        import threading
+        _ARCHIVE_INDEX_LOCK=threading.Lock()
+    with _ARCHIVE_INDEX_LOCK:
+        now=time.monotonic()
+        stamp,previous=_ARCHIVE_INDEX_CACHE
+        if not force and stamp and now-stamp<_ARCHIVE_INDEX_TTL:
+            return list(previous)
+        raw=_remote("archive_index_list")
+        if raw.get("mode")!="durable_sha_verified_actions" or type(raw.get("items")) is not list:
+            raise RuntimeError("Durable verified archive inventory invalid")
+        rows=[]
+        for item in raw["items"]:
+            if (type(item) is not dict or
+                not re.fullmatch(r"(?:bluesky|mastodon)-[a-f0-9]{40}",
+                                 str(item.get("account_key",""))) or
+                not re.fullmatch(r"intersection-github-archive-[0-9]{6,30}-a[1-9][0-9]{0,3}",
+                                 str(item.get("release_tag",""))) or
+                item["account_key"].split("-",1)[0]!=item.get("platform")):
+                raise RuntimeError("Durable verified archive inventory row malformed")
+            rows.append(item)
+        _ARCHIVE_INDEX_CACHE=(now,tuple(rows))
+        return list(rows)
+
+
+def archive_index_tag(account):
+    if not re.fullmatch(r"(?:bluesky|mastodon)-[a-f0-9]{40}",str(account)):
+        return None
+    try:
+        return next((item["release_tag"] for item in archive_index_rows()
+                    if item["account_key"]==account),None)
+    except (RuntimeError,ValueError,TypeError):
+        return None
+
+
+
 def enabled():
     return os.getenv("DEMAND_ARCHIVE_QUEUE_MODE","")=="1"
 

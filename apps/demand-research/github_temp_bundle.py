@@ -329,7 +329,22 @@ def matching_bundles(account, max_versions=500):
                 and len(cached[2])<=max_versions):
             return list(cached[2])
         matches={}
-        for tag in atom_tags():
+        # Resolve the exact signed release tag through the durable inventory,
+        # even when GitHub's short Atom feed has already evicted that tag.
+        # A tag is only a hint; tagged_bundle() still enforces AES-GCM,
+        # ZIP+manifest SHA and exact source-account identity.
+        try:
+            from backup_queue import archive_index_tag
+            signed_tag=archive_index_tag(account)
+        except (RuntimeError,ValueError,TypeError):
+            signed_tag=None
+        def candidates():
+            if signed_tag:
+                yield signed_tag
+            for observed in atom_tags():
+                if observed!=signed_tag:
+                    yield observed
+        for tag in candidates():
             owner=_verified_tag_owner(tag)
             if owner is not None and owner!=account:
                 # This tag was already independently verified for another
