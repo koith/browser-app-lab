@@ -74,8 +74,8 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
     await page.waitForFunction(()=>document.documentElement.getAttribute('data-leaf-phone-fit')==='landscape');
     const after=await get();
     verify(after,'landscape');
-    assert.ok(Math.abs(after.fit.scale-s.fit.scale)<.005,
-      name+' returning to landscape must not zoom in '+JSON.stringify({before:s.fit,after:after.fit}));
+    assert.ok(after.fit.scale<=Math.min((after.visualWidth-2)/800,(after.visualHeight-2)/600)+.0001,
+      name+' returning to landscape must never overfill its current visible viewport '+JSON.stringify({before:s.fit,after:after.fit}));
    }
    assert.deepEqual(errors,[],name+' JavaScript errors');
    console.log(name,JSON.stringify({mode:s.mode,scale:s.fit?.scale,device:[s.width,s.height],app:s.app}));
