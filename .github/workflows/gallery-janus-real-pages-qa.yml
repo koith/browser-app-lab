@@ -5,18 +5,14 @@ on:
       - 'apps/gallery-archive/qa_mimmi_janus_real_pages.py'
       - 'apps/gallery-archive/qa_local_lightbox_live.py'
       - '.github/workflows/gallery-janus-real-pages-qa.yml'
-  workflow_run:
-    workflows: ['Deploy static content to Pages']
-    types: [completed]
+  workflow_dispatch:
+  # Archived Janus-only acceptance: no replay on EVERY unrelated Pages deploy.
 permissions:
   contents: read
 jobs:
   janus-seven-saved-originals:
     if: >-
-      github.event_name == 'pull_request' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository)
+      github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 18
     strategy:
@@ -26,16 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - name: Ensure exact deployed SHA has the new fixture
         id: source
         shell: bash
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-            test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
-          fi
+          test "$(git rev-parse HEAD)" = "${{ github.sha }}"
           if [[ -f apps/gallery-archive/qa_mimmi_janus_real_pages.py ]]; then
             echo 'available=true' >> "$GITHUB_OUTPUT"
           else
