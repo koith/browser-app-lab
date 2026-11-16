@@ -3600,9 +3600,9 @@
       "id": "SHOP-01",
       "priority": "P1",
       "title": "원작 Normal/Valuable/Rare 상점 탭·목록 복원",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M02",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 shop_ref.png은 카드 4×2+등급 탭·오른쪽 목록/소유자·정보, 현재 화면은 3×3 카드 그리드/착용 목록이라 구성 차이 큼 | 구현 목표: 원본 카드 8칸 보기/페이지/가격·선택·카드 정보·구매/판매 버튼을 원본 544x?? 클라이언트 GUI 기준 정렬; 원본 설치 팩 CardShop/cardshopback.png 794x404 자체의 카드 뒷면은 3×3 9개로 검증. 원작 2003~2004 별도 shop_ref.png 캡처의 4×2와 버전/장면이 다를 수 있어 실제 원본 9개를 삭제하지 않음. 판매 버튼 y481 source sprite 새 UI 연결. 이후 어떤 원작 클라이언트 버전이 최종 수용 기준인지 확인 필요.; 2026-11-02 original table sprites & stage hotspot positions 272,147 / 430,142 applied (selection use inferred); later version Rare tab not applied.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 shop_ref.png은 카드 4×2+등급 탭·오른쪽 목록/소유자·정보, 현재 화면은 3×3 카드 그리드/착용 목록이라 구성 차이 큼 | 구현 목표: 원본 카드 8칸 보기/페이지/가격·선택·카드 정보·구매/판매 버튼을 원본 544x?? 클라이언트 GUI 기준 정렬; 원본 설치 팩 CardShop/cardshopback.png 794x404 자체의 카드 뒷면은 3×3 9개로 검증. 원작 2003~2004 별도 shop_ref.png 캡처의 4×2와 버전/장면이 다를 수 있어 실제 원본 9개를 삭제하지 않음. 판매 버튼 y481 source sprite 새 UI 연결. 이후 어떤 원작 클라이언트 버전이 최종 수용 기준인지 확인 필요.; 2026-11-02 original table sprites & stage hotspot positions 272,147 / 430,142 applied (selection use inferred); later version Rare tab not applied. | 2026-11-16 PR #1219 merged a13c1ed85eae4f5829a811227d47a6253afb393b: archived 541×402 2004 4×2 CardShop screenshot direct 794×404 photo-to-native coordinate trace; original 2002 3×3 native PAK remains separate. 2004 Normal/Valuable/Rare tiers, 8 source CHR cards, authentic GP, actual scroll, selected-card info and real BUY/SELL physical hits validated. Full 2004 background art, original CardData portraits, historical generic resale remain separately tracked under M02/ACT-05/SHOP-02.",
       "acceptance": [
         "동일 카드 보유·선택 상태에서 탭/카드 개수/결과 정보·스크롤/현금 표시까지 원작 비교"
       ],
@@ -3610,11 +3610,21 @@
         "../assets/shop_ref.png",
         "tests/genesis-asset-roles.cjs",
         "apps/4leaf/rog/original/CardShop/cardshopback.png",
-        "apps/4leaf/rog/original/CardShop/cardshopbutton.png"
+        "apps/4leaf/rog/original/CardShop/cardshopbutton.png",
+        "apps/4leaf/rog/docs/SHOP01_2004_HISTORICAL_SCREENSHOT_ACCEPTANCE_2026-11-16.md",
+        "apps/4leaf/rog/tests/shop01-2004-real-screen-acceptance.cjs",
+        "apps/4leaf/rog/shop-era-2004.css",
+        "https://github.com/koith/browser-app-lab/pull/1219",
+        "https://github.com/koith/browser-app-lab/actions/runs/43831244442"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-ARCHIVAL-541x402-SCREENSHOT-LANDMARKS/2002-SOURCE-PAK/CHROMIUM-WEBKIT-REAL-SHOP-STATE; WHOLE-2004-IMAGE-CARDDATA-FACE-M02-ACT05-UNVERIFIED",
+      "lastReviewed": "2026-11-16",
+      "verifiedAcceptance": {
+        "sourceComparison": "Original 2004 shop_ref.png original IHDR 541x402, 794/541 scale and y44 origin. Verified 15+ independent Normal/Valuable/Rare, first/second row four-by-two card positions, inventory list/scroller, card detail, GP and BUY/SELL physical regions against archived screenshot (4-6 native px tolerance). Independent intact 2002 genuine CardShop/cardshopback.png 794x404 3x3 and cardshopbutton.png 500x510 atlas preserved. Exact face identity/full 2004 skin not claimed and remains ACT-05/M02.",
+        "implementation": "PR #1219 merged main a13c1ed85eae4f5829a811227d47a6253afb393b. apps/4leaf/rog/shop-era-2004.css source-photo landmark corrections; tests/shop01-2004-real-screen-acceptance.cjs; R21 source-era shop test; SHOP-01 2004 photo geometry evidence document. Source era toggle preserves genuine 2002 shop and game economy.",
+        "runtimeTest": "GitHub Actions 43831244442 success two real browsers Chromium+WebKit: source IHDR 541x402; 3 tabs/4x2 real cards; 27 live owned inventory rows and real scrolling; No fake Rare actors; 2004 purchase and saved GP; 2002 mode switch preserving exact selected card/price/GP; serial resale existing suite. Final CSS 2px border removal rechecked in https://github.com/koith/browser-app-lab/actions/runs/43831674559.",
+        "deployment": "Source PR #1219 merged and read back main a13c1ed85eae4f5829a811227d47a6253afb393b, beta.87 / PWA v174. Public Pages latest-bundle deployment workflow https://github.com/koith/browser-app-lab/actions/runs/43832179192 pending full CDN readback; DO NOT MERGE THIS STATUS PR until verified."
+      },
       "dependencies": [
         "WORLD-01"
       ],
@@ -10410,6 +10420,20 @@
         "apps/4leaf/rog/world-social.css",
         "apps/4leaf/rog/tests/chat-ready-then-503-public-room.cjs",
         ".github/workflows/rog-r35-critical-playability.yml"
+      ]
+    },
+    {
+      "seq": 486,
+      "date": "2026-11-16",
+      "type": "STATUS_CHANGED",
+      "taskId": "SHOP-01",
+      "from": "in_progress",
+      "to": "done",
+      "details": "SHOP-01 source-era tabs, original 2004 screenshot traced 4x2 cards, real info/list/GP and two-engine state transitions accepted by primary source and Playwright. PR #1219 main a13c1ed85eae4f5829a811227d47a6253afb393b. Do not merge this status branch until latest browser CI and Pages public beta87 release verified. M02/SHOP-02/ACT-05 remain separately open.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/1219",
+        "https://github.com/koith/browser-app-lab/actions/runs/43831244442",
+        "apps/4leaf/rog/docs/SHOP01_2004_HISTORICAL_SCREENSHOT_ACCEPTANCE_2026-11-16.md"
       ]
     }
   ],
