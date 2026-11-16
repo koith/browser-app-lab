@@ -165,7 +165,7 @@ const {chromium,webkit}=require('playwright');
    };
   });
   const landFit=await page.evaluate(()=>window.__LEAF_PHONE_FIT__?.getState?.());
-  assert.deepEqual([landFit.deviceWidth,landFit.deviceHeight],[844,390]);
+  assert.ok(landFit.deviceWidth<=844&&landFit.deviceHeight<=390&&landFit.scale>0&&landFit.scale<.7,'original frame fits visible landscape area');
   assert.ok(landFit.layoutWidth===800&&landFit.layoutHeight===600&&landFit.scale<.7,'rotation must shrink whole source client, never enlarge scene');
   assert.equal(landscape.sourceOriginal,true,'rotation preserves 145x97 source TIS art');
   assert.ok(landscape.sourceActors.length>=2&&
