@@ -113,3 +113,13 @@
 #shop .shop-owned-toggle[aria-expanded="true"]:hover{
  border-color:#fff0b7!important;background:#d9e4ff16!important;
 }
+
+/* Source-own OBS frame-0 preview is decoded in native bottom-up orientation.
+ * The raw PNG stays untouched for source SHA integrity, but the CardShop
+ * thumbnail must show feet below the face. This affects ONLY authentic
+ * CHR-owned bodies in shops, not neutral cardback or Game actor direction.
+ * Historical CardData/chm_N face identity is still UNVERIFIED/ACT-05. */
+#shop .pixel-portrait[data-card-art-evidence="verified-CHR-own-body-not-CardData-portrait"],
+#shop .shop-owned-portrait[data-card-art-evidence="verified-CHR-own-body-not-CardData-portrait"]{
+ transform:scaleY(-1)!important;transform-origin:center center!important;
+}

@@ -230,7 +230,10 @@
 #shop .shop-native-stage[data-era="2004"] .shop-detail{
  left:32px!important;top:260px!important;
  width:342px!important;height:126px!important;
- padding:8px!important;overflow:hidden!important;
+ /* BUY/SELL are real original source buttons positioned OUTSIDE the Card Info
+    rectangle. Hidden overflow clipped both: screenshot QA caught no visible
+    buttons despite the semantic click handler succeeding. */
+ padding:8px!important;overflow:visible!important;
 }
 #shop .shop-native-stage[data-era="2004"] #shop-selected{
  width:321px!important;height:98px!important;max-height:98px!important;
