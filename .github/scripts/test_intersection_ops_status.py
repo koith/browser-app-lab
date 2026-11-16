@@ -227,14 +227,14 @@ class StatusBoardTests(unittest.TestCase):
         def fake(path,*,method="GET",data=None,**kwargs):
             calls.append((path,method))
             if path.endswith("/issues/comments/"+str(ops.STATUS_COMMENT_ID)):
-                return {"id":ops.STATUS_COMMENT_ID,"body":ops.MARKER+" OLD",
+                return {"id":ops.STATUS_COMMENT_ID,"body":ops.MARKER+"\nOLD",
                         "user":{"login":"github-actions[bot]","type":"Bot"}}
             if method=="PATCH":
-                self.assertEqual(data["body"],ops.MARKER+" NEW")
+                self.assertEqual(data["body"],ops.MARKER+"\nNEW")
                 return {}
             self.fail("Must not scan history or append fresh comment")
         with patch.object(gh,"request",side_effect=fake):
-            self.assertEqual(gh.upsert_comment(ops.MARKER+" NEW"),"updated")
+            self.assertEqual(gh.upsert_comment(ops.MARKER+"\nNEW"),"updated")
         self.assertEqual(len(calls),2)
         self.assertEqual(calls[-1][1],"PATCH")
 
