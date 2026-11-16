@@ -18,6 +18,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 import requests
+from public_work_photo_extractor import ordinary_public_https_image
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = "https://koith.github.io/browser-app-lab/apps"
@@ -38,7 +39,8 @@ KNOWN_SOURCES = {
     "sood42.com", "www.cosp.jp", "cosp.jp",
 }
 SEARCH_DOMAINS = {"google.com", "www.google.com", "lens.google.com",
-                  "www.bing.com", "bing.com", "tineye.com", "www.tineye.com"}
+                  "www.bing.com", "bing.com", "tineye.com", "www.tineye.com",
+                  "yandex.com", "www.yandex.com"}
 SHA = re.compile(r"^[a-f0-9]{64}$")
 
 
@@ -107,17 +109,24 @@ def untrack(url: str) -> str | None:
             p = urlsplit(url)
         except ValueError:
             return None
-        if p.scheme != "https" or not p.hostname or p.username or p.password:
+        if (p.scheme != "https" or not p.hostname or p.username or p.password
+                or p.port not in (None, 443)):
             return None
-        if p.hostname in SEARCH_DOMAINS and p.path in ("/url", "/search"):
-            q = parse_qs(p.query)
-            nested = (q.get("q") or q.get("url") or [""])[0]
-            if nested.startswith("https://"):
-                url = nested
-                continue
-        if p.hostname in KNOWN_SOURCES:
-            return p._replace(fragment="").geturl()
-        return None
+        if p.hostname in SEARCH_DOMAINS:
+            if p.path in ("/url", "/search"):
+                q = parse_qs(p.query)
+                nested = (q.get("q") or q.get("url") or [""])[0]
+                if nested.startswith("https://"):
+                    url = nested
+                    continue
+            # Search UI / captcha links must never be counted as sources.
+            return None
+        # The hardcoded KNOWN_SOURCES allowlist previously silently rejected
+        # *every* newly discovered public site, defeating global source search.
+        # Reuse the already exercised public-host safety rules. This accepts a
+        # candidate PAGE, not a verified same-image match or downloaded photo.
+        candidate = p._replace(fragment="").geturl()
+        return ordinary_public_https_image(candidate, candidate)
     return None
 
 
