@@ -1409,8 +1409,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             continue
         approved_new_works.append({
             'id':aid,
-            'title':old_albums[aid]['title'] if aid in old_albums
-                    else source_book.get('title') or album.get('title') or aid,
+            'title':(old_albums.get(aid,{}).get('title')
+                     or source_book.get('title') or album.get('title') or aid),
             'source':authorized[0],
             'proof':proof,
             'verified_same_work_pages':authorized[:12]})
