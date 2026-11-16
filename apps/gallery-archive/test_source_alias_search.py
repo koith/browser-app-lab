@@ -30,6 +30,12 @@ def main():
     assert https_page("https://example.org/album/mimmi?preview=1")
     title,context=source_headings("<html><title>Mimmi Pop Kitty Party</title><h1>DJAWA × Mimmi</h1><p>full public preview</p></html>")
     assert "Pop Kitty Party" in title and "Mimmi" in context
+    # A page with only OG metadata is still an explicitly named SAME-WORK
+    # source; the publisher's image bytes must be checked later.
+    meta_only='<html><head><meta property="og:title" content="DJAWA Mimmi Pop Kitty Party">'
+    meta_only+='<meta name="description" content="Official Mimmi photo edition"></head></html>'
+    meta_heading,meta_context=source_headings(meta_only)
+    assert page_matches(w,meta_heading,meta_context)
     assert len(json.loads(LEDGER.read_text())["works"])>=8
     # A fixed 8-work search budget must cover every registered work across
     # successive runs, not shift by only one work and repeat the same 7.
