@@ -411,11 +411,11 @@ class _PublicHtmlParts(HTMLParser):
             props=dict(attrs)
             self.link=sanitize_safe_link(props.get("href",""))
         elif tag in ("br","p"):
-            self.parts.append({"text":"\\n","href":""})
+            self.parts.append({"text":"\n","href":""})
     def handle_endtag(self,tag):
         if tag=="a":self.link=""
         elif tag in ("p","div"):
-            self.parts.append({"text":"\\n","href":""})
+            self.parts.append({"text":"\n","href":""})
     def handle_data(self,data):
         if data:self.parts.append({"text":data[:12000],"href":self.link})
 
