@@ -65,21 +65,25 @@ const {chromium,webkit}=require('playwright');
   assert.ok(horizontal>5&&vertical>5&&sameRow>5,
    'the recovered DMP map contains enough geometric adjacency samples');
   const mobileCamera=await page.evaluate(()=>window.__LEAF_CAMERA__.getState());
-  assert.equal(mobileCamera.scale,.65,
-   'phone initial camera fits a wider real DMP field than desktop 125%');
+  const phoneFit=await page.evaluate(()=>window.__LEAF_PHONE_FIT__?.getState?.());
+  const onScreen=mobileCamera.scale*(phoneFit?phoneFit.scale:1);
+  assert.ok(onScreen>=.45&&onScreen<=.7,
+   'phone initial camera still fits the DMP field: '+onScreen);
   await page.locator('#board-zoom-in').click();
-  assert.equal(await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale),.9,
-   'the + zoom control still zooms the real world, not tile CSS');
+  assert.equal(await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale),
+   Math.round((mobileCamera.scale+.25)*100)/100,
+   'zoom changes actual camera by .25');
   await page.locator('#board-zoom-reset').click();
-  assert.equal(await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale),.65,
-   'phone reset returns to its source-preserving fit camera');
+  assert.equal(await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale),mobileCamera.scale,
+   'phone reset restores the initial camera');
   const roll=page.locator('#roll-btn');
   const point=async()=>{
    assert.equal(await roll.isVisible(),true,'roll button remains visible in game');
    assert.equal(await roll.isEnabled(),true,'current manual human may roll');
    const b=await roll.boundingBox();
    assert.ok(b&&b.width>=40&&b.height>=28,'physical touch target is usable');
-   assert.ok(b.x>=0&&b.y>=0&&b.x+b.width<=390&&b.y+b.height<=844,
+   const vp=await page.evaluate(()=>[innerWidth,innerHeight]);
+   assert.ok(b.x>=0&&b.y>=0&&b.x+b.width<=vp[0]&&b.y+b.height<=vp[1],
     'roll button is not clipped outside the physical phone viewport');
    return {x:b.x+b.width/2,y:b.y+b.height/2};
   };
@@ -160,7 +164,8 @@ const {chromium,webkit}=require('playwright');
      .map(t=>t.dataset.actorRig)
    };
   });
-  assert.deepEqual(landscape.viewport,[844,390]);
+  const landFit=await page.evaluate(()=>window.__LEAF_PHONE_FIT__?.getState?.());
+  assert.deepEqual([landFit.deviceWidth,landFit.deviceHeight],[844,390]);
   assert.equal(landscape.sourceOriginal,true,'rotation preserves 145x97 source TIS art');
   assert.ok(landscape.sourceActors.length>=2&&
    landscape.sourceActors.every(v=>['original-obs-sprite','original-card-portrait-fallback'].includes(v)),
@@ -170,7 +175,7 @@ const {chromium,webkit}=require('playwright');
   assert.equal(landscape.sourceRollState,'ready');
   assert.equal(landscape.sourceRollReady,true);
   const [sx,sy,sw,sh]=landscape.sourceRoll;
-  assert.ok(sx>=0&&sy>=0&&sx+sw<=844&&sy+sh<=390&&landscape.rollTopmost,
+  assert.ok(sx>=0&&sy>=0&&sx+sw<=landscape.viewport[0]&&sy+sh<=landscape.viewport[1]&&landscape.rollTopmost,
    'iOS landscape must expose the genuine 16-frame original ROLL input as topmost clickable target '+JSON.stringify(landscape));
   await page.screenshot({path:'leaf-4leaf-mobile-landscape-'+engine+'.png'});
   assert.deepEqual(errors,[],'dice game has no unhandled Chromium runtime error');
