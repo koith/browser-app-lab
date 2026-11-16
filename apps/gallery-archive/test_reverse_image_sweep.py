@@ -92,7 +92,9 @@ def main():
         visited=set()
         for run in range((len(census)+7)//8):
             batch=diversified_seed_window(complete,8,run*8)
-            assert not visited.intersection(map(key,batch)),(run,batch)
+            remaining=len(census)-len(visited)
+            # Final batch may wrap only AFTER the remaining new SHA cuts.
+            assert not visited.intersection(map(key,batch[:remaining])),(run,batch)
             visited.update(map(key,batch))
         assert visited==census,(len(visited),len(census))
         assert len({(x['model'],x['album_id']) for x in diversified_seed_window(complete,8,0)})==4
