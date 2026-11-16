@@ -153,8 +153,8 @@ class TextOnly(HTMLParser):
         self.data=[]
         self.suppressed=0
     def separator(self):
-        if self.data and self.data[-1]!="\\n":
-            self.data.append("\\n")
+        if self.data and self.data[-1]!="\n":
+            self.data.append("\n")
     def handle_starttag(self,tag,attrs):
         if tag in ("script","style"):
             self.suppressed+=1
