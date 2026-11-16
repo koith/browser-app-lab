@@ -1,6 +1,7 @@
-/* 4LEAF 800x600 phone-fit v2.
- * No synthetic viewport widths, no scene enlargement, no cropped HUD.
- * Uniform scale applies to the entire application, including game controls.
+/* Per-scene iPhone landscape correction. Original art stays native-sized
+ * in its own coordinate space: 794x404 Channel/Map/Room, 796x528 World,
+ * 800x600 battle. The web MainFrame wallpaper can extend horizontally.
+ * No original source image is distorted or cut to fake 16:9 art.
  */
 #leaf-phone-chat-toggle,#leaf-phone-rotate{display:none}
 html[data-leaf-phone-fit]{
@@ -19,109 +20,163 @@ html[data-leaf-phone-fit] body{
 html[data-leaf-phone-fit] #app{
  box-sizing:border-box!important;
  position:fixed!important;
- left:calc(50% - 400px)!important;
- top:calc(50% - 300px)!important;
- width:800px!important;
+ left:var(--leaf-left,calc(50% - 400px))!important;
+ top:var(--leaf-top,calc(50% - 300px))!important;
+ width:var(--leaf-layout-width,800px)!important;
  max-width:none!important;
- min-width:800px!important;
- height:600px!important;
+ min-width:0!important;
+ height:var(--leaf-layout-height,600px)!important;
  max-height:none!important;
- min-height:600px!important;
+ min-height:0!important;
  margin:0!important;
- transform:scale(var(--leaf-fit-scale, .64))!important;
+ padding:0!important;
+ transform:scale(var(--leaf-fit-scale,.64))!important;
  transform-origin:center center!important;
  overflow:hidden!important;
  display:flex!important;
  flex-direction:column!important;
+ background:#263969 url('./original/MainFrame/wallpaper.png') 0 0/321px 240px repeat!important;
 }
-/* iOS Safari auto-zooms focused controls below 16 CSS pixels. Preserve
- * the fitted whole screen instead of unexpectedly zooming into chat inputs. */
 @supports (-webkit-touch-callout: none){
  html[data-leaf-phone-fit] #app input,
  html[data-leaf-phone-fit] #app textarea,
- html[data-leaf-phone-fit] #app select{
-  font-size:16px!important;
- }
+ html[data-leaf-phone-fit] #app select{font-size:16px!important}
 }
 html[data-leaf-phone-fit="landscape"] #app>.titlebar,
 html[data-leaf-phone-fit="landscape"] #app>.statusbar{display:none!important}
 html[data-leaf-phone-fit="landscape"] #app>.toolbar{
  flex:0 0 36px!important;
+ width:100%!important;
  height:36px!important;
  min-height:36px!important;
 }
 html[data-leaf-phone-fit="landscape"] #app>.workspace{
+ display:flex!important;
  flex:1 1 auto!important;
+ width:100%!important;
  height:auto!important;
  min-height:0!important;
- width:100%!important;
- display:flex!important;
  overflow:hidden!important;
+ background:#253766 url('./original/MainFrame/wallpaper.png') repeat;
 }
-html[data-leaf-phone-fit="landscape"] #app .sidebar{display:none!important}
+html[data-leaf-phone-fit="landscape"] #app:not(.app-classic-dice)>.workspace>.sidebar{
+ display:none!important;
+}
 html[data-leaf-phone-fit="landscape"] #app main#main{
  position:relative!important;
- display:flex!important;
  flex:1 1 auto!important;
- flex-direction:column!important;
- min-height:0!important;
  width:100%!important;
+ max-width:none!important;
+ min-width:0!important;
+ height:100%!important;
+ min-height:0!important;
+ margin:0!important;
+ padding:0!important;
  border-right:0!important;
+ display:flex!important;
+ flex-direction:column!important;
  overflow:hidden!important;
+ background:#253766 url('./original/MainFrame/wallpaper.png') repeat;
 }
+/* Regression guard: v2 forced display:flex with its default ROW direction,
+ * pushing the Region TOWN SELECT banner to the LEFT of the original art.
+ * Every actual scene must stack its children vertically, not side by side. */
 html[data-leaf-phone-fit="landscape"] #app #main>section:not(.hidden){
- display:flex;
+ box-sizing:border-box!important;
+ position:relative!important;
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:stretch!important;
  flex:1 1 auto!important;
+ width:100%!important;
+ min-width:0!important;
  height:auto!important;
  min-height:0!important;
  max-height:100%!important;
  overflow:hidden!important;
 }
-/* All major scenes stay inside the original client instead of stretching to
- * the 2.16:1 device width. Messenger overlays the source viewport. */
-html[data-leaf-phone-fit="landscape"] #app #main>.messenger{
+/* Use the exact native 794x404 scene's height. No made-up navy stripes above
+ * or below it, nor a 200px text column beside it. */
+html[data-leaf-phone-fit="landscape"][data-leaf-phone-scene="genesis-404"]
+ #lobby .lobby-scene{
+ width:100%!important;
+ height:404px!important;
+ min-height:404px!important;
+ flex:1 1 404px!important;
+ overflow:hidden!important;
+ background:#253969 url('./original/MainFrame/wallpaper.png') repeat!important;
+}
+html[data-leaf-phone-fit="landscape"][data-leaf-phone-scene="genesis-404"]
+ #dice-channels .dice-channel-viewport{
+ width:100%!important;
+ height:404px!important;
+ min-height:404px!important;
+ flex:1 1 404px!important;
+ overflow:hidden!important;
+ background:#253969 url('./original/MainFrame/wallpaper.png') repeat!important;
+}
+html[data-leaf-phone-fit="landscape"][data-leaf-phone-scene="genesis-404"]
+ #dice-channels .dice-channel-banner{
+ box-sizing:border-box!important;
  position:absolute!important;
- left:0!important;
- right:0!important;
- bottom:0!important;
- height:150px!important;
- max-height:150px!important;
- z-index:400!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:flex-end!important;
+ z-index:40!important;
+ top:4px!important;
+ right:8px!important;
+ left:auto!important;
+ width:auto!important;
+ min-width:0!important;
+ height:auto!important;
+ min-height:0!important;
+ margin:0!important;
+ padding:0!important;
+ border:0!important;
+ background:transparent!important;
+ pointer-events:none!important;
+}
+html[data-leaf-phone-fit="landscape"][data-leaf-phone-scene="genesis-404"]
+ #dice-channels .dice-channel-banner>span{display:none!important}
+html[data-leaf-phone-fit="landscape"][data-leaf-phone-scene="genesis-404"]
+ #dice-channel-back{pointer-events:auto!important}
+/* Chat town stage uses the original 794x404 bitmap while retaining the
+ * interactive room map and its existing native header/buttons. */
+html[data-leaf-phone-fit="landscape"][data-leaf-phone-scene="chat-town-404"]
+ #rooms .social-layout{
+ flex:1 1 auto!important;
+ width:100%!important;
+ height:404px!important;
+ min-height:0!important;
+ overflow:hidden!important;
+}
+html[data-leaf-phone-fit="landscape"] #app:not(.app-classic-dice) #main>.messenger{
+ position:absolute!important;
+ left:0!important;right:0!important;bottom:0!important;
+ height:150px!important;max-height:150px!important;
+ min-height:0!important;
+ z-index:410!important;
  display:none!important;
  opacity:.97!important;
 }
-html[data-leaf-phone-fit="landscape"][data-leaf-chat-open="true"] #app #main>.messenger{
- display:flex!important;
-}
+html[data-leaf-phone-fit="landscape"][data-leaf-chat-open="true"]
+ #app:not(.app-classic-dice) #main>.messenger{display:flex!important}
 html[data-leaf-phone-fit="landscape"] #leaf-phone-chat-toggle{
- display:block;
- position:fixed;
- right:calc(env(safe-area-inset-right, 0px) + 8px);
- top:calc(env(safe-area-inset-top, 0px) + 8px);
- z-index:600;
- padding:2px 9px;
- min-width:64px;
- height:30px;
+ display:block;position:fixed;z-index:600;
+ right:calc(env(safe-area-inset-right,0px) + 8px);
+ top:calc(env(safe-area-inset-top,0px) + 8px);
+ min-width:65px;height:31px;padding:2px 9px;
  font:700 13px/22px Gulim,Dotum,sans-serif;
- color:#fff;
- background:#2b4c8cf2;
- border:1px solid #dce7ff;
- border-radius:5px;
+ color:#fff;background:#2b4c8cf2;
+ border:1px solid #dce7ff;border-radius:5px;
  box-shadow:0 1px 4px #0009;
 }
 html[data-leaf-phone-fit="landscape"]:has(#game:not(.hidden)) #leaf-phone-chat-toggle{
  display:none!important;
 }
 html[data-leaf-phone-fit="portrait"] #leaf-phone-rotate{
- position:fixed;
- inset:0;
- display:flex;
- align-items:center;
- justify-content:center;
- padding:16px;
- z-index:800;
- font:700 21px/1.5 Gulim,Dotum,sans-serif;
- text-align:center;
- color:#fff;
- background:#1b1941f5;
+ position:fixed;inset:0;display:flex;align-items:center;
+ justify-content:center;padding:16px;z-index:800;
+ font:700 21px/1.5 Gulim,Dotum,sans-serif;text-align:center;
+ color:#fff;background:#1b1941f5;
 }
