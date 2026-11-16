@@ -208,6 +208,25 @@ def read_progress(path, model, ids, required_revision=1):
         raise ValueError('CORRUPT_SOURCE_REVIEW_CURSOR')
     data['source_pending_pages']=sources
     data['last_source_pages_reviewed']=last_reviewed
+    # The previous flow forgot a verified source once its single-run image
+    # collection failed. Keep bounded proof-bearing source page identities on
+    # the same durable branch for later ordinary public revalidation.
+    verified=data.get('source_verified_pages',[])
+    if not isinstance(verified,list) or len(verified)>2000:
+        raise ValueError('INVALID_VERIFIED_SOURCE_PAGE_HISTORY')
+    pairs=set()
+    for entry in verified:
+        if (not isinstance(entry,dict)
+                or not isinstance(entry.get('album_id'),str)
+                or not isinstance(entry.get('url'),str)
+                or not entry['url'].startswith('https://')
+                or len(entry['url'])>2200):
+            raise ValueError('CORRUPT_VERIFIED_SOURCE_PAGE_HISTORY')
+        pair=(entry['album_id'],entry['url'])
+        if pair in pairs:
+            raise ValueError('DUPLICATE_VERIFIED_SOURCE_PAGE_HISTORY')
+        pairs.add(pair)
+    data['source_verified_pages']=verified
     data['search_revision'] = required_revision
     return data
 
