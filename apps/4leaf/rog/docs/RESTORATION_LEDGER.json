@@ -3602,7 +3602,7 @@
       "title": "원작 Normal/Valuable/Rare 상점 탭·목록 복원",
       "status": "done",
       "milestone": "M02",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 shop_ref.png은 카드 4×2+등급 탭·오른쪽 목록/소유자·정보, 현재 화면은 3×3 카드 그리드/착용 목록이라 구성 차이 큼 | 구현 목표: 원본 카드 8칸 보기/페이지/가격·선택·카드 정보·구매/판매 버튼을 원본 544x?? 클라이언트 GUI 기준 정렬; 원본 설치 팩 CardShop/cardshopback.png 794x404 자체의 카드 뒷면은 3×3 9개로 검증. 원작 2003~2004 별도 shop_ref.png 캡처의 4×2와 버전/장면이 다를 수 있어 실제 원본 9개를 삭제하지 않음. 판매 버튼 y481 source sprite 새 UI 연결. 이후 어떤 원작 클라이언트 버전이 최종 수용 기준인지 확인 필요.; 2026-11-02 original table sprites & stage hotspot positions 272,147 / 430,142 applied (selection use inferred); later version Rare tab not applied. | 2026-11-16 PR #1219 merged a13c1ed85eae4f5829a811227d47a6253afb393b; physical source BUY/SELL visibility + source-own CHR upright thumbnail correction #1221 merged a8deac55d3de27b33ecf188d04f68502d77b8f61 beta88/v175: archived 541×402 2004 4×2 CardShop screenshot direct 794×404 photo-to-native coordinate trace; original 2002 3×3 native PAK remains separate. 2004 Normal/Valuable/Rare tiers, 8 source CHR cards, authentic GP, actual scroll, selected-card info and real BUY/SELL physical hits validated. Full 2004 background art, original CardData portraits, historical generic resale remain separately tracked under M02/ACT-05/SHOP-02.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 shop_ref.png은 카드 4×2+등급 탭·오른쪽 목록/소유자·정보, 현재 화면은 3×3 카드 그리드/착용 목록이라 구성 차이 큼 | 구현 목표: 원본 카드 8칸 보기/페이지/가격·선택·카드 정보·구매/판매 버튼을 원본 544x?? 클라이언트 GUI 기준 정렬; 원본 설치 팩 CardShop/cardshopback.png 794x404 자체의 카드 뒷면은 3×3 9개로 검증. 원작 2003~2004 별도 shop_ref.png 캡처의 4×2와 버전/장면이 다를 수 있어 실제 원본 9개를 삭제하지 않음. 판매 버튼 y481 source sprite 새 UI 연결. 이후 어떤 원작 클라이언트 버전이 최종 수용 기준인지 확인 필요.; 2026-11-02 original table sprites & stage hotspot positions 272,147 / 430,142 applied (selection use inferred); later version Rare tab not applied. | 2026-11-16 PR #1219 merged a13c1ed85eae4f5829a811227d47a6253afb393b; physical source BUY/SELL visibility + source-own CHR upright thumbnail correction #1221 merged a8deac55d3de27b33ecf188d04f68502d77b8f61 beta88/v175: archived 541×402 2004 4×2 CardShop screenshot direct 794×404 photo-to-native coordinate trace; original 2002 3×3 native PAK remains separate. 2004 Normal/Valuable/Rare tiers, 8 source CHR cards, authentic GP, actual scroll, selected-card info and real BUY/SELL physical hits validated. Full 2004 background art, original CardData portraits, historical generic resale remain separately tracked under M02/ACT-05/SHOP-02. | 2026-11-16 FINAL VERIFIED: beta.88/v175 publicly visible in Pages deployed main 378df44105d469f5d8117a56f276a92e004e3b70 with exact five same-source Git blobs as implementation a8deac55d3de27b33ecf188d04f68502d77b8f61; final physical purchase/sell source art+2 browsers PASS. SHOP-01 source layout/interactive state acceptance complete; 2004 total skin and missing facial map / generic resale remain M02, ACT-05, SHOP-02.",
       "acceptance": [
         "동일 카드 보유·선택 상태에서 탭/카드 개수/결과 정보·스크롤/현금 표시까지 원작 비교"
       ],
@@ -3618,15 +3618,17 @@
         "https://github.com/koith/browser-app-lab/actions/runs/43831244442",
         "https://github.com/koith/browser-app-lab/pull/1221",
         "https://github.com/koith/browser-app-lab/actions/runs/43834266980",
-        "https://github.com/koith/browser-app-lab/actions/runs/43835444796"
+        "https://github.com/koith/browser-app-lab/actions/runs/43835444796",
+        "https://github.com/koith/browser-app-lab/actions/runs/43872380084",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-541x402-SCREENSHOT-LANDMARKS/2002-SOURCE-PAK/CHROMIUM-WEBKIT-REAL-SHOP-STATE; WHOLE-2004-IMAGE-CARDDATA-FACE-M02-ACT05-UNVERIFIED",
       "lastReviewed": "2026-11-16",
       "verifiedAcceptance": {
         "sourceComparison": "Original 2004 shop_ref.png original IHDR 541x402, 794/541 scale and y44 origin. Verified 15+ independent Normal/Valuable/Rare, first/second row four-by-two card positions, inventory list/scroller, card detail, GP and BUY/SELL physical regions against archived screenshot (4-6 native px tolerance). Independent intact 2002 genuine CardShop/cardshopback.png 794x404 3x3 and cardshopbutton.png 500x510 atlas preserved. Exact face identity/full 2004 skin not claimed and remains ACT-05/M02.",
         "implementation": "PR #1219 source-photo 4x2 card/tier/list/GP geometry merged a13c1ed85eae4f5829a811227d47a6253afb393b, plus PR #1221 real source BUY/SELL previously clipped at y333 fixed and verified original CHR preview inversion corrected without source byte modification merged main a8deac55d3de27b33ecf188d04f68502d77b8f61, beta88/PWA v175; tests/shop01-2004-real-screen-acceptance.cjs actual physical elementFromPoint, original 541x402 photo anchors, and 2002 native atlas unchanged.",
-        "runtimeTest": "Chromium and WebKit GitHub Actions #43831674559 both success on source photo anchors, actual 27 owned CHR, GP, 2002/2004 cross-era selected card and purchase. Additional true visual source button physical hit and upright source actor regression #43834266980 and final merged-main #43835444796 pending; HOLD canonical status merge until these pass.",
-        "deployment": "PR #1219 and #1221 merged, final main a8deac55d3de27b33ecf188d04f68502d77b8f61, beta88 / PWA v175. Public Pages readback is PENDING; verify https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json beta88/v175 and gallery-deployment.json exact source SHA (or latter descendant with unchanged 4LEAF subtree) before merging status."
+        "runtimeTest": "PASSED at final merged-source PR branch and resulting main implementation: real Playwright Chromium+WebKit SHOP-01 screenshot coordinate/4x2/3-tier/inventory scroll/source 2002 shop/price/selected card and saved GP, physical BUY/SELL elementFromPoint hit target and upright original CHR source art. Runs https://github.com/koith/browser-app-lab/actions/runs/43831674559 , https://github.com/koith/browser-app-lab/actions/runs/43834266980 and final source https://github.com/koith/browser-app-lab/actions/runs/43835444796 — all two-browser jobs SUCCESS.",
+        "deployment": "VERIFIED public https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json serves 0.86.0-beta.88 / PWA v175; published https://koith.github.io/browser-app-lab/gallery-deployment.json source_commit 378df44105d469f5d8117a56f276a92e004e3b70 matches latest published main, successful native GitHub Pages deployment https://github.com/koith/browser-app-lab/actions/runs/43872380084 . GitHub main source implementation SHA a8deac55d3de27b33ecf188d04f68502d77b8f61 and latest published main both expose IDENTICAL Git blob hashes for shop-era-2004.css, cardshop-original-2003.css, SHOP01 test script, app-version.json and sw.js, confirmed direct GitHub readback. Earlier failed a8de-era static deploy is superseded by this actual public page."
       },
       "dependencies": [
         "WORLD-01"
@@ -10432,13 +10434,16 @@
       "taskId": "SHOP-01",
       "from": "in_progress",
       "to": "done",
-      "details": "SHOP-01 archived 541x402 2004 screenshot real CardShop 4x2/tabs/info/scroll/GP and both 2002 source 3x3 eras; PR #1219 and #1221 (physical BUY/SELL & upright original CHR card art), final a8deac55d3de27b33ecf188d04f68502d77b8f61. Do not merge canonical completion until new two-engine visual QA and public Pages beta88/v175 SHA readback succeed; parent M02, SHOP-02, ACT-05 separately open.",
+      "details": "EXISTING SHOP-01 done: historical independent 2004 541×402 photo trace of 3 source tier tabs and 4×2 cards, original 2002 3×3 atlas separately preserved, actual owned inventory scroll/card info/GP/physical clickable source BUY+SELL, and authentic CHR source previews. PR #1219 and #1221 merged. Two-browser real Playwright runs #43831674559, #43834266980, #43835444796 passed. Public Pages beta.88/PWA v175 observed at published main 378df44105d469f5d8117a56f276a92e004e3b70 with all key original shop source blobs identical to final implementation a8deac55d3de27b33ecf188d04f68502d77b8f61. Non-equivalent 2004 background/full pixel and unverified CardData/economy remain M02/ACT-05/SHOP-02.",
       "evidence": [
         "https://github.com/koith/browser-app-lab/pull/1219",
         "https://github.com/koith/browser-app-lab/actions/runs/43831244442",
         "apps/4leaf/rog/docs/SHOP01_2004_HISTORICAL_SCREENSHOT_ACCEPTANCE_2026-11-16.md",
         "https://github.com/koith/browser-app-lab/pull/1221",
-        "https://github.com/koith/browser-app-lab/actions/runs/43834266980"
+        "https://github.com/koith/browser-app-lab/actions/runs/43834266980",
+        "https://github.com/koith/browser-app-lab/actions/runs/43835444796",
+        "https://github.com/koith/browser-app-lab/actions/runs/43872380084",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
       ]
     }
   ],
