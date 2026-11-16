@@ -28,6 +28,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
     old=json.loads(old_path.read_text())
     registered=json.loads((base/'public-work-pages.json').read_text())
     approved_registered={a['id']:a for a in registered['albums']}
+    owner_by_id={a['id']:a for a in owner['albums']}
     existing_sha={p['sha256'] for a in owner['albums'] for p in a['images']}
     existing_sha.update(p['sha256'] for a in old['albums'] for p in a['images'])
     byid={a['id']:a for a in old['albums']}
@@ -54,7 +55,12 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                 or not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid)
                 or aid in approved_registered or aid in approved_new
                 or not isinstance(title,str) or len(title.strip())<4
-                or entry.get('proof')!='unique_named_work_page_model_and_edition'
+                or entry.get('proof') not in (
+                    'unique_named_work_page_model_and_edition',
+                    'owner_catalog_work_with_reviewed_public_source')
+                or (entry.get('proof')=='owner_catalog_work_with_reviewed_public_source'
+                    and (aid not in owner_by_id
+                         or owner_by_id[aid].get('title')!=title))
                 or not isinstance(pages,list) or not 1<=len(pages)<=12
                 or not isinstance(src,str) or src not in pages
                 or not all(isinstance(u,str) and
@@ -62,7 +68,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
             raise ValueError('UNVERIFIED_NEW_WORK_PUBLICATION_SOURCE')
         approved_new[aid]={'id':aid,'title':title,
                             'source':src,
-                            'proof':'unique_named_work_page_model_and_edition'}
+                            'proof':entry['proof']}
     added=[];used=0
     visual_indexes={};same_frame_skipped=[];quality_replacement_deferred=[]
     for album in stage_doc.get('albums',[]):
