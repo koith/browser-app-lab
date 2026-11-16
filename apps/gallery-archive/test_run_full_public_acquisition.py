@@ -24,6 +24,44 @@ class FullAcquisitionTests(unittest.TestCase):
                 self.assertEqual(len(seen),len(known))
                 self.assertEqual(seen[:len(PRIORITY[model])],list(PRIORITY[model]))
 
+    def test_cross_registry_verified_source_work_is_not_lost_by_batch_filter(self):
+        # A reverse hit may prove an owner edition that was never placed in
+        # public-work-pages.json. It must be passed into --album-id, or even
+        # perfect reverse image discovery will produce ZERO new photos.
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            base=root/'apps/yui-gallery'
+            base.mkdir(parents=True)
+            (base/'public-work-pages.json').write_text(json.dumps({
+                'albums':[{'id':'public-yui-sns','title':'Public Yui SNS',
+                           'source':'https://official-photo.example.com/yui'}]}))
+            article='https://public-photos-archive.org/artgravia-777-yui'
+            verified={'schema_version':1,'model':'yui',
+                      'search_results':[{'id':'artgravia-777-yui',
+                      'urls':[article],
+                      'observations':[{
+                          'model':'yui','album_id':'artgravia-777-yui',
+                          'source':article,
+                          'proof':'unique_named_work_page_model_and_edition'}]}]}
+            evidence=root/'source-evidence.json'
+            evidence.write_text(json.dumps(verified))
+            batches=work_batches('yui',1,root,7,source_evidence=evidence)
+            observed=[aid for block in batches for aid in block]
+            self.assertEqual(set(observed),
+                             {'public-yui-sns','artgravia-777-yui'})
+            self.assertEqual(len(observed),2)
+            # A snippet-only lead is NOT evidence sufficient to schedule an
+            # unregistered work or fetch its photos.
+            verified['search_results'][0]['observations'][0]['proof']='search_snippet_only'
+            evidence.write_text(json.dumps(verified))
+            unknown=[aid for group in work_batches('yui',1,root,7,
+                                  source_evidence=evidence) for aid in group]
+            self.assertEqual(unknown,['public-yui-sns'])
+            verified['model']='mimmi'
+            evidence.write_text(json.dumps(verified))
+            with self.assertRaisesRegex(ValueError,'EVIDENCE_MODEL_OR_SCHEMA'):
+                work_batches('yui',1,root,7,source_evidence=evidence)
+
     def test_rotation_changes_secondary_work_order_without_losing_any(self):
         for model in PRIORITY:
             first=work_batches(model,1,ROOT,7)
