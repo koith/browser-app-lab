@@ -35,6 +35,7 @@ jobs:
           node --check apps/4leaf/rog/tests/realuse-chat-map-entry.cjs
           node --check apps/4leaf/rog/tests/realuse-dice-full-game.cjs
           node --check apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
+          node --check apps/4leaf/rog/tests/mobile-landscape-native-scenes.cjs
       - name: Install Playwright
         working-directory: apps/4leaf/rog
         run: |
@@ -53,6 +54,10 @@ jobs:
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
         run: node apps/4leaf/rog/tests/mobile-landscape-viewport-smoke.cjs
+      - name: Reproduce 3 Safari screenshots and verify native scene fit
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+        run: node apps/4leaf/rog/tests/mobile-landscape-native-scenes.cjs
       - name: Real click-through room map and chat
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
