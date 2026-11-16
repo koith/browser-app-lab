@@ -6,18 +6,32 @@ from reverse_full_corpus_ab import full_census,partition,all_album_seeds,search_
 def test():
     c=full_census(ROOT)
     s=c['summary']
-    assert s['owner_albums_by_model']=={'yui':32,'mimmi':80},s
+    import json
+    from reverse_seed_priority import seeds as full_photo_inventory
+    # Never hard-code owner album counts: Yui's published owner index grew
+    # from 32 to 41 works and an outdated test rejected real new photos.
+    expected_owner={model:len(json.loads(
+        (ROOT/'apps'/f'{model}-gallery'/'owner-index.json').read_text())['albums'])
+        for model in ('yui','mimmi')}
+    assert s['owner_albums_by_model']==expected_owner,s
     assert s['missing_owner_albums_without_photo_seed']==0,s
-    assert s['all_title_work_leads']==30,s
-    assert s['unique_albums_with_seeds']==112,s
-    assert s['all_public_reverse_photo_seeds']>=112,s
+    expected_title_count=len(json.loads(
+        (ROOT/'apps/gallery-archive/visual-work-leads.json').read_text())['works'])
+    assert s['all_title_work_leads']==expected_title_count,s
+    expected_rows=full_photo_inventory(ROOT/'apps',all_cuts=True)
+    expected_keys={(x['model'],x['album_id'],x['photo_sha256']) for x in expected_rows}
+    actual_keys={(x['model'],x['album_id'],x['owner_sha256']) for x in c['seeds']}
+    # Prove equality against the live registered owner+public SHA union.
+    assert actual_keys==expected_keys,(len(actual_keys),len(expected_keys))
+    assert s['all_public_reverse_photo_seeds']==len(expected_keys),s
+    assert s['unique_albums_with_seeds']>=sum(expected_owner.values()),s
     for shards in (1,5,8,16):
         grouped=[x for model in ('yui','mimmi') for shard in range(shards)
                     for x in c['seeds'] if x['model']==model and partition(x,shards)==shard]
         titles=[x for model in ('yui','mimmi') for shard in range(shards)
                     for x in c['title_leads'] if x['model']==model and partition(x,shards)==shard]
         assert len(grouped)==len(c['seeds']),shards
-        assert len(titles)==30,shards
+        assert len(titles)==expected_title_count,shards
         assert len({(x['model'],x['album_id'],x['owner_sha256']) for x in grouped})==len(grouped)
     import reverse_full_corpus_ab as m
     funcs=[m.multi_search,m.lens_query,m.tineye_query,m.yandex_site_search]

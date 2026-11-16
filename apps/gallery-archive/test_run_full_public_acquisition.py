@@ -1,5 +1,6 @@
 """No-network safety gate for broad, two-model physical image collection."""
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -78,6 +79,30 @@ class FullAcquisitionTests(unittest.TestCase):
                             invocation[invocation.index('--render-budget')+1],'2')
                         self.assertEqual(
                             invocation[invocation.index('--max-pages')+1],'5')
+
+    def test_one_timed_out_batch_does_not_abort_other_album_batches(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage=Path(temporary)/'stage'
+            args=SimpleNamespace(model='mimmi',run_number=1,
+                stage=stage,source_evidence=None,batch_size=7,
+                max_per_batch=48,bytes_per_batch=36000000,
+                batch_timeout=60,alternate_priority=False,plan_only=False)
+            attempts=[]
+            def fake_run(command,**kwargs):
+                attempts.append(command)
+                if len(attempts)==2:
+                    raise subprocess.TimeoutExpired(command, kwargs['timeout'])
+                return SimpleNamespace(returncode=0)
+            with patch('run_full_public_acquisition.subprocess.run',
+                       side_effect=fake_run):
+                self.assertEqual(execute(args),0)
+            doc=json.loads((stage/'full-collection-summary.json').read_text())
+            self.assertEqual(doc['timed_out_batches'],[1])
+            self.assertFalse(doc['collection_complete_without_batch_timeouts'])
+            self.assertEqual(doc['state'],'LOCAL_STAGED_PARTIAL_TIMEOUT_NOT_FULLY_SEARCHED')
+            self.assertGreater(len(attempts),2)
+            self.assertEqual(doc['batches'][1]['collector_returncode'],124)
+            self.assertEqual(doc['batches'][1]['collection_error'],'collector_timeout')
 
     def test_all_priority_ids_have_explicit_work_source_scope(self):
         for model,ids in PRIORITY.items():

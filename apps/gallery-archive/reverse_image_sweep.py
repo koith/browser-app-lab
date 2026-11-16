@@ -14,7 +14,8 @@ from urllib.parse import urlsplit,urljoin
 import requests
 from reverse_seed_priority import seeds
 from reverse_sites_parser import sites_from_html
-from reverse_image_discovery import untrack, leads_from_html, identity_supported
+from reverse_image_discovery import (untrack, leads_from_html, identity_supported,
+                                     lens_query, tineye_query)
 
 RESEARCH_UA="PersonalPublicPhotoSourceResearch/1.0"
 SEARCH_URL="https://yandex.com/images/search"
@@ -27,10 +28,19 @@ def query_page(client,source,params):
             r=client.get(current,params=params if hop==0 else None,timeout=(9,26),allow_redirects=False,
                          headers={"User-Agent":RESEARCH_UA,"Accept":"text/html"})
             if r.status_code not in (301,302,303,307,308):break
-            target=urljoin(current,r.headers.get('Location',''));parsed=urlsplit(target)
-            if (parsed.scheme!='https' or parsed.hostname!=urlsplit(source).hostname or
-                parsed.username or parsed.password or parsed.port not in (None,443) or
-                any(word in parsed.path.casefold() for word in ('captcha','challenge','login','signin','verify'))):
+            try:
+                target=urljoin(current,r.headers.get('Location',''))
+                parsed=urlsplit(target)
+                # A malformed Location port raises only when .port is read.
+                permitted=(parsed.scheme=='https'
+                           and parsed.hostname==urlsplit(source).hostname
+                           and not parsed.username and not parsed.password
+                           and parsed.port in (None,443)
+                           and not any(word in parsed.path.casefold() for word in
+                                       ('captcha','challenge','login','signin','verify')))
+            except (ValueError,TypeError):
+                permitted=False
+            if not permitted:
                 return 'redirect_access_boundary_not_followed',[]
             current=target
         else:return 'redirect_limit',[]
@@ -101,39 +111,54 @@ def search_one(seed,client=None):
         b_links=leads_from_html(b_html) if b_html else []
         stages["bing"]=b_status if b_status!="ok" else "leads_"+str(len(b_links))
         accept(b_links,"bing")
+    # The HTML landing page above is not the complete Bing Visual Search
+    # knowledge API. When it yields no model-supported pages, try the
+    # independently implemented public Lens and TinEye URL-result flows.
+    # Each is at most one ordinary request; never bypass access challenges.
+    if not approved:
+        for engine,query in (("lens_public",lens_query),("tineye_public",tineye_query)):
+            try:
+                outcome=query(client,url)
+                stages[engine]=str(outcome.get('status','unknown'))
+                accept(outcome.get('links',[]) or [],engine)
+            except (requests.RequestException,ValueError,TypeError) as exc:
+                stages[engine]='error_'+type(exc).__name__
+                per_engine[engine]=0
     return {**seed,"search_status":stages,"candidate_pages":approved[:90],
             "matched_urls_by_engine":per_engine,
             "off_model_rejected":rejected,
             "originals_stored":0,"visible_gallery_added":0}
 
 def diversified_seed_window(inventory, limit, offset):
-    """Search across distinct albums first, then advance each album's cut.
+    """Deterministic, complete round-robin photo queue with contiguous windows.
 
-    A sorted all-cuts queue can contain dozens of images from the same album.
-    A small rolling window over that flat queue repeatedly searches just one
-    or two albums, despite hundreds of currently incomplete albums.
-    This round-robin view retains all SHA-distinct seeds and rotates source
-    image positions on subsequent runs, without extra requests.
+    Workflows call this with offset=run_number*limit. Previously the album
+    cursor and an epoch derived from album count could revisit an album's
+    even-numbered photos indefinitely while never searching odd-numbered
+    ones. Flatten every distinct (model, album, SHA) once, interleaving
+    albums for early diversity, and slice by global photo position instead.
     """
     if not inventory or not 1 <= limit <= 48 or offset < 0:
         raise ValueError('INVALID_DIVERSE_SEED_WINDOW')
     by_album = {}
+    seen = set()
     for photo in inventory:
         key = (photo['model'], photo['album_id'])
+        identity = (key, photo['photo_sha256'])
+        if identity in seen:
+            continue
+        seen.add(identity)
         by_album.setdefault(key, []).append(photo)
     albums = list(by_album)
-    count = min(limit, len(inventory))
-    group_count = len(albums)
-    # Rotate albums on every run; use next cut after a full album-group cycle.
-    cursor = offset % group_count
-    epoch = offset // group_count
-    selected = []
-    for i in range(count):
-        key = albums[(cursor + i) % group_count]
-        round_index = i // group_count
-        images = by_album[key]
-        selected.append(images[(epoch + round_index) % len(images)])
-    return selected
+    max_cuts = max(len(group) for group in by_album.values())
+    ordered = []
+    for photo_index in range(max_cuts):
+        for key in albums:
+            group = by_album[key]
+            if photo_index < len(group):
+                ordered.append(group[photo_index])
+    count = min(limit, len(ordered))
+    return [ordered[(offset + i) % len(ordered)] for i in range(count)]
 
 
 def sweep(root,limit,offset,workers=2,client_factory=None,model=None,all_cuts=False):

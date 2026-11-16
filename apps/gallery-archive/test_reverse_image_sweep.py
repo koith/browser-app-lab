@@ -3,6 +3,7 @@
 import html
 import json
 import tempfile
+from unittest.mock import patch
 from pathlib import Path
 
 from reverse_seed_priority import seeds
@@ -56,7 +57,8 @@ def main():
     normal=RedirectClient('/images/search?q=public')
     assert query_page(normal,'https://www.bing.com/images/search',{})[0]=='ok'
     assert normal.calls==2
-    for location in ['https://other.example/result','/captcha/verify','/login']:
+    for location in ['https://other.example/result','/captcha/verify','/login',
+                     'https://www.bing.com:badport/images/search']:
         boundary=RedirectClient(location)
         assert query_page(boundary,'https://www.bing.com/images/search',{})[0]=='redirect_access_boundary_not_followed'
         assert boundary.calls==1
@@ -84,8 +86,27 @@ def main():
         for offset in (0,1,5,17,47):
             selected=diversified_seed_window(complete,8,offset)
             assert len(selected)==8,(offset,len(selected))
-            assert len({(x['model'],x['album_id']) for x in selected})==4,selected
             assert len({(x['model'],x['album_id'],x['photo_sha256']) for x in selected})==8,selected
+        # With an offset incremented by 8 per scheduled run, every immutable
+        # photo must be reached before any photo is revisited.
+        key=lambda p:(p['model'],p['album_id'],p['photo_sha256'])
+        census={key(p) for p in complete}
+        visited=set()
+        for run in range((len(census)+7)//8):
+            batch=diversified_seed_window(complete,8,run*8)
+            remaining=len(census)-len(visited)
+            # Final batch may wrap only AFTER the remaining new SHA cuts.
+            assert not visited.intersection(map(key,batch[:remaining])),(run,batch)
+            visited.update(map(key,batch))
+        assert visited==census,(len(visited),len(census))
+        assert len({(x['model'],x['album_id']) for x in diversified_seed_window(complete,8,0)})==4
+        # Regression: the old epoch=offset//album_count skipped half of a
+        # ten-photo single-album archive (offset 0,8,16,...).
+        single=[{'model':'mimmi','album_id':'only','photo_sha256':f'{i:064x}'}
+                for i in range(10)]
+        reached={key(p) for run in range(2)
+                 for p in diversified_seed_window(single,8,run*8)}
+        assert len(reached)==10,reached
         first=diversified_seed_window(complete,4,0)
         rotated=diversified_seed_window(complete,4,4)
         assert {x['photo_sha256'] for x in first}!={x['photo_sha256'] for x in rotated}
@@ -117,6 +138,25 @@ def main():
     assert len(recovered["candidate_pages"])==1,recovered
     assert recovered["candidate_pages"][0]["url"].endswith("mimmi-red-shirt.html"),recovered
     assert recovered["originals_stored"]==recovered["visible_gallery_added"]==0
+    # Neither the Yandex nor Bing HTML landing page carries usable work
+    # links: Lens must be tried, and a blocked Lens must not suppress TinEye.
+    class NoHtmlMatches:
+        def get(self,url,params=None,**kw):
+            return FakeResponse('<html>Empty visual search landing page</html>')
+    with patch('reverse_image_sweep.lens_query',return_value={
+        'status':'http_429','links':[]}) as lens, patch(
+        'reverse_image_sweep.tineye_query',return_value={
+            'status':'leads_found','links':[{
+                'url':'https://new-public-gallery.org/mimmi-red-shirt',
+                'label':'Mimmi Red Shirt','visual_match_score':99.0}]}) as tineye:
+        recovered=search_one(seed,NoHtmlMatches())
+    assert lens.call_count==tineye.call_count==1
+    assert recovered['search_status']['lens_public']=='http_429',recovered
+    assert recovered['search_status']['tineye_public']=='leads_found',recovered
+    assert recovered['matched_urls_by_engine']['tineye_public']==1,recovered
+    assert len(recovered['candidate_pages'])==1,recovered
+    assert recovered['originals_stored']==0 and recovered['visible_gallery_added']==0
+
     print("IMAGE_FIRST_AGGRESSIVE_SOURCE_FIXTURE_PASS")
 
 if __name__=="__main__":

@@ -41,7 +41,9 @@ def main():
         root = Path(path)
         fixture(root)
         seeds = mod.physical_seeds(root)
-        assert len(seeds) == 8, seeds  # 1 + 3, twice
+        assert len(seeds) == 22, len(seeds)  # 1 + 10 SHA-distinct, twice
+        assert len({(x['model'],x['album_id'],x['photo_sha256']) for x in seeds})==22
+        assert len([x for x in seeds if x['album_id']=='large'])==20
         assert seeds[0]["album_id"] == "tiny"
         assert all(s["public_image_url"].startswith(mod.PAGES + "/") for s in seeds)
         assert all("private.example" not in s["public_image_url"] for s in seeds)
@@ -85,6 +87,20 @@ def main():
     assert mod.untrack("http://cosmeitu.com/mimmi") is None
     assert mod.untrack("https://private.example/path") is None
     assert mod.untrack("https://x:secret@cosmeitu.com/mimmi") is None
+    # A safe, previously unknown gallery domain must survive discovery so
+    # its actual model/edition page can be checked downstream.
+    fresh="https://new-public-gallery.org/photobook/mimmi-red-shirt"
+    assert mod.untrack(fresh) == fresh
+    assert mod.untrack("https://www.google.com/url?q="+fresh) == fresh
+    assert mod.untrack("https://yandex.com/images/search?rpt=imageview") is None
+    assert mod.untrack("https://127.0.0.1/private") is None
+    assert mod.untrack("https://metadata.google.internal/secret") is None
+    assert mod.untrack("https://new-public-gallery.org:8080/book") is None
+    assert mod.untrack("https://new-public-gallery.org:badport/book") is None
+    additional=mod.leads_from_html(
+        '<a href="'+fresh+'">Mimmi new source</a>'
+        '<a href="https://www.bing.com/images/search?q=other">Search UI</a>')
+    assert len(additional)==1 and additional[0]["url"]==fresh,additional
 
     class FakeResponse:
         status_code = 200

@@ -10,7 +10,7 @@ import json
 import re
 from urllib.parse import urljoin, urlsplit
 
-from bs4 import BeautifulSoup
+
 
 MODEL_WORDS = {
     'yui': re.compile(r'(?<![a-z])yui(?![a-z])|심혜성|심유이|沈慧圣|super_yuisan', re.I),
@@ -128,6 +128,7 @@ def recover_public_work_photo_urls(raw, page, model, trusted_work=False):
     """
     if not trusted_work:
         return [], 'not_registered_work'
+    from bs4 import BeautifulSoup  # Only extraction needs bs4; URL checks are stdlib-only.
     soup=BeautifulSoup(raw,'html.parser')
     titles=' '.join(tag.get_text(' ',strip=True)
                     for tag in soup.select('h1,title,h2[itemprop=headline]'))

@@ -72,6 +72,11 @@ class FullReverseCoverageTests(unittest.TestCase):
                                    budget=10, seconds=60, workers=2)
                     self.assertTrue(result['research_only'])
                     self.assertEqual(result['model_matched_photo_frames'], 0)
+                    self.assertEqual(result['name_supported_source_frames_unverified_visual'], 0)
+                    self.assertEqual(result['verified_same_photo_matches'], 0)
+                    self.assertTrue(result['coverage']['attempted_is_not_verified_match'])
+                    self.assertEqual(result['readable_html_without_name_supported_source'],
+                                     len(result['results']))
                     self.assertEqual(result['photo_frames_with_zero_model_matches'], len(result['results']))
                     self.assertEqual(result['search_engine_outcomes']['yandex_sites']['leads_0'],len(result['results']))
                     self.assertEqual(result['total_seed_frames'], 31)
@@ -142,6 +147,50 @@ class FullReverseCoverageTests(unittest.TestCase):
         repeat, cycle=m.plan_batch(queue,state,256,stop_after_full=False)
         self.assertEqual(len(repeat),len(queue))
         self.assertEqual(cycle,1)
+
+    def test_unreadable_engines_retry_once_and_preserve_unverified_ids(self):
+        def search_unavailable(seed):
+            return {**seed, 'search_status': {
+                'yandex_sites':'http_503','bing':'network_ConnectionError'},
+                'candidate_pages':[], 'off_model_rejected':0}
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            previous,report,next_state=[root/n for n in ('previous.json','report.json','next.json')]
+            with patch.object(m,'seeds',return_value=fixtures()), patch.object(
+                    m,'search_one',side_effect=search_unavailable):
+                first=m.run('mimmi',previous,report,next_state,31,60,2,
+                            stop_after_full=True,search_revision=3)
+                self.assertEqual(first['coverage']['pending_unreadable_retry'],31)
+                self.assertEqual(first['coverage']['remaining_this_cycle'],0)
+                previous.write_text(next_state.read_text())
+                second=m.run('mimmi',previous,report,next_state,31,60,2,
+                             stop_after_full=True,search_revision=3)
+                self.assertEqual(second['coverage']['pending_unreadable_retry'],0)
+                self.assertEqual(second['coverage']['unverified_after_retry'],31)
+                self.assertEqual(second['seed_queries'],31)
+                previous.write_text(next_state.read_text())
+                third=m.run('mimmi',previous,report,next_state,31,60,2,
+                            stop_after_full=True,search_revision=3)
+                self.assertEqual(third['seed_queries'],0)
+                self.assertEqual(third['coverage']['unverified_after_retry'],31)
+
+    def test_readable_result_clears_pending_retry(self):
+        queue=m.complete_queue(fixtures(),'yui')
+        retry_seed=queue[0]['seed_id']
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)
+            previous,report,next_state=[root/n for n in ('progress.json','report.json','next.json')]
+            previous.write_text(json.dumps({
+                'schema_version':1,'model':'yui','cycle':0,'search_revision':3,
+                'attempted_ids':[p['seed_id'] for p in queue],
+                'retry_pending_ids':[retry_seed], 'unverified_after_retry_ids':[]}))
+            with patch.object(m,'seeds',return_value=fixtures()), patch.object(
+                m,'search_one',side_effect=search_fake):
+                result=m.run('yui',previous,report,next_state,5,60,2,
+                             stop_after_full=True,search_revision=3)
+            self.assertEqual(result['seed_queries'],1)
+            self.assertEqual(result['coverage']['pending_unreadable_retry'],0)
+            self.assertEqual(result['coverage']['unverified_after_retry'],0)
 
     def test_wrong_model_and_corrupt_state_abort(self):
         with tempfile.TemporaryDirectory() as t:
