@@ -103,6 +103,42 @@ def complete_queue(inventory, model):
     return queue
 
 
+MAX_PENDING_SOURCE_PAGES=120000
+
+def append_source_pages(previous, scanned, model):
+    """Durably retain every unique URL until actual source-page review.
+
+    The old collector verified at most 96 pages from up to 256 searched SHA
+    photographs, then threw away all unreviewed leads while advancing the SHA
+    checkpoint. Retain the bounded, deduplicated backlog between runs.
+    """
+    pending=list(previous)
+    seen={p['link']['url'] for p in pending}
+    for row in scanned:
+        if row.get('model')!=model:
+            raise ValueError('MIXED_REVERSE_SOURCE_MODEL')
+        for link in row.get('candidate_pages',[]):
+            if not isinstance(link,dict):
+                continue
+            url=link.get('url')
+            if not isinstance(url,str) or not url.startswith('https://') or len(url)>2200:
+                continue
+            if url in seen:continue
+            # Store only fields relevant to independent edition verification.
+            keep={k:v for k,v in link.items()
+                  if k in ('url','label','matched_image_url','matched_width',
+                            'matched_height','source_engine',
+                            'visual_host_page_only_unverified_edition')
+                  and (v is None or isinstance(v,(str,int,float,bool)))}
+            if len(str(keep))>3500:
+                continue
+            pending.append({'album_id':str(row['album_id'])[:150],'link':keep})
+            seen.add(url)
+            if len(pending)>MAX_PENDING_SOURCE_PAGES:
+                raise ValueError('SOURCE_BACKLOG_CAPACITY_EXCEEDED_NOT_DISCARDED')
+    return pending
+
+
 def read_progress(path, model, ids, required_revision=1):
     path = Path(path)
     data = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
@@ -153,6 +189,44 @@ def read_progress(path, model, ids, required_revision=1):
         raise ValueError('REVERSE_RETRY_AND_UNVERIFIED_OVERLAP')
     if set(data['retry_pending_ids']) - set(data['attempted_ids']):
         raise ValueError('REVERSE_PENDING_RETRY_NOT_ATTEMPTED')
+    sources=data.get('source_pending_pages',[])
+    if not isinstance(sources,list) or len(sources)>MAX_PENDING_SOURCE_PAGES:
+        raise ValueError('INVALID_SOURCE_PAGE_BACKLOG')
+    urls=set()
+    for entry in sources:
+        if (not isinstance(entry,dict)
+                or not isinstance(entry.get('album_id'),str)
+                or not isinstance(entry.get('link'),dict)
+                or not isinstance(entry['link'].get('url'),str)
+                or not entry['link']['url'].startswith('https://')
+                or len(entry['link']['url'])>2200
+                or entry['link']['url'] in urls):
+            raise ValueError('CORRUPT_SOURCE_PAGE_BACKLOG')
+        urls.add(entry['link']['url'])
+    last_reviewed=data.get('last_source_pages_reviewed',0)
+    if type(last_reviewed) is not int or last_reviewed<0:
+        raise ValueError('CORRUPT_SOURCE_REVIEW_CURSOR')
+    data['source_pending_pages']=sources
+    data['last_source_pages_reviewed']=last_reviewed
+    # The previous flow forgot a verified source once its single-run image
+    # collection failed. Keep bounded proof-bearing source page identities on
+    # the same durable branch for later ordinary public revalidation.
+    verified=data.get('source_verified_pages',[])
+    if not isinstance(verified,list) or len(verified)>2000:
+        raise ValueError('INVALID_VERIFIED_SOURCE_PAGE_HISTORY')
+    pairs=set()
+    for entry in verified:
+        if (not isinstance(entry,dict)
+                or not isinstance(entry.get('album_id'),str)
+                or not isinstance(entry.get('url'),str)
+                or not entry['url'].startswith('https://')
+                or len(entry['url'])>2200):
+            raise ValueError('CORRUPT_VERIFIED_SOURCE_PAGE_HISTORY')
+        pair=(entry['album_id'],entry['url'])
+        if pair in pairs:
+            raise ValueError('DUPLICATE_VERIFIED_SOURCE_PAGE_HISTORY')
+        pairs.add(pair)
+    data['source_verified_pages']=verified
     data['search_revision'] = required_revision
     return data
 
@@ -219,7 +293,10 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
     # Generic search HTML may say leads_0; that is not a visual match, but
     # it is a readable search response. Hard failures get ONE deferred retry.
     def readable_result(row):
-        return any(str(v).startswith('leads_')
+        # A genuine Bing PagesIncluding response is readable even if Yandex
+        # and generic Bing HTML are denied. Generic HTML navigation is never
+        # treated as structured visual-search evidence.
+        return any(str(v).startswith(('leads_','visual_pages_'))
                    for v in row.get('search_status', {}).values())
     readable = sum(readable_result(r) for r in scanned)
     old_pending = set(state.get('retry_pending_ids', []))
@@ -240,11 +317,19 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
                                                  if p['seed_id'] in unverified],
                   'last_cycle_size': len(queue),
                   'last_run_attempts': len(scanned),
+                  'last_source_pages_reviewed': 0,
+                  'source_pending_pages': append_source_pages(
+                      state.get('source_pending_pages',[]),scanned,model),
                   'updated_at': datetime.now(timezone.utc).isoformat()})
     sources = len({c['url'] for r in scanned for c in r.get('candidate_pages', [])})
     # A readable HTML page is not the same as an actual reverse-image match.
     # In particular, leads_0 can be the generic search UI without any photo.
     matched_frames = sum(bool(r.get('candidate_pages')) for r in scanned)
+    named_frames = sum(any(not p.get('visual_host_page_only_unverified_edition')
+                           for p in r.get('candidate_pages',[])) for r in scanned)
+    structured_unlabeled_frames = sum(any(
+        p.get('visual_host_page_only_unverified_edition')
+        for p in r.get('candidate_pages',[])) for r in scanned)
     engine_outcomes = {}
     for row in scanned:
         for engine, outcome in row.get('search_status', {}).items():
@@ -262,11 +347,13 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
               'source_pages_accepted': sources,
               # These are name-supported source-page hints, NOT proof that
               # the exact referenced image visually matched any source image.
-              'model_matched_photo_frames': matched_frames,
-              'photo_frames_with_zero_model_matches': len(scanned)-matched_frames,
-              'name_supported_source_frames_unverified_visual': matched_frames,
+              'model_matched_photo_frames': named_frames,
+              'photo_frames_with_zero_model_matches': len(scanned)-named_frames,
+              'name_supported_source_frames_unverified_visual': named_frames,
+              'structured_visual_host_page_frames_unverified_edition': structured_unlabeled_frames,
+              'photo_frames_with_any_source_leads': matched_frames,
               'verified_same_photo_matches': 0,
-              'readable_html_without_name_supported_source': max(0, readable-matched_frames),
+              'readable_html_without_name_supported_source': max(0, readable-named_frames),
               'search_engine_outcomes': engine_outcomes,
               'off_model_rejected': sum(r['off_model_rejected'] for r in scanned),
               'physical_photos_new': 0, 'gallery_photos_new': 0,
@@ -278,6 +365,7 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
                            'remaining_this_cycle': len(queue)-len(state['attempted_ids']),
                            'pending_unreadable_retry': len(pending),
                            'unverified_after_retry': len(unverified),
+                           'pending_source_page_reviews': len(state['source_pending_pages']),
                            'blocked_or_unreadable_this_run': len(scanned)-readable,
                            'scan_budget': budget},
               'results': scanned}
@@ -290,8 +378,9 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
         {**report['coverage'], 'model': model,
          'searched_this_run': len(scanned),
          'search_pages_accepted': sources,
-         'frames_with_model_matched_sources': matched_frames,
-         'frames_without_model_matched_sources': len(scanned)-matched_frames,
+         'frames_with_model_matched_sources': named_frames,
+         'frames_without_model_matched_sources': len(scanned)-named_frames,
+         'unlabeled_structured_image_host_frames': structured_unlabeled_frames,
          'engine_outcomes': engine_outcomes,
          'readable_html_not_verified_visual_match': readable,
          'photo_files_downloaded': 0}, ensure_ascii=False), flush=True)

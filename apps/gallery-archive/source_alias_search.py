@@ -382,11 +382,88 @@ def merge_image_reverse_sites(db, report, model, results, session, limit=8, stat
     return accepted
 
 
+def review_source_backlog(db,state,model,results,session,limit=96):
+    """Review bounded pending host pages and return the remaining checkpoint.
+
+    Every pending page is preserved in a durable Git checkpoint BEFORE this
+    network step; if the step times out nothing is removed. Failed/mismatched
+    pages are not treated as verified sources. A run reviews a fixed page
+    window and never silently drops the unvisited suffix.
+    """
+    if (state.get('schema_version')!=1 or state.get('model')!=model
+            or not isinstance(state.get('source_pending_pages'),list)
+            or not 1<=limit<=128):
+        raise ValueError('INVALID_REVERSE_SOURCE_BACKLOG_STATE')
+    pending=state['source_pending_pages']
+    chosen=pending[:limit]
+    for entry in chosen:
+        if (not isinstance(entry,dict) or not isinstance(entry.get('album_id'),str)
+                or not isinstance(entry.get('link'),dict)):
+            raise ValueError('INVALID_SOURCE_PAGE_BACKLOG_ENTRY')
+    pseudo={'research_only':True,'results':[{
+        'model':model,'album_id':x['album_id'],'candidate_pages':[x['link']]
+    } for x in chosen]}
+    statistics={}
+    accepted=merge_image_reverse_sites(
+        db,pseudo,model,results,session,limit=limit,stats_out=statistics)
+    verified=list(state.get('source_verified_pages',[]))
+    keys={(x['album_id'],x['url']) for x in verified}
+    for item in accepted:
+        key=(item['album_id'],item['source'])
+        if key not in keys:
+            verified.append({'album_id':key[0],'url':key[1]})
+            keys.add(key)
+    if len(verified)>2000:
+        raise ValueError('VERIFIED_SOURCE_HISTORY_CAPACITY_NOT_SILENTLY_DROPPED')
+    after={**state,'source_pending_pages':pending[len(chosen):],
+           'source_verified_pages':verified,
+           'last_source_pages_reviewed':len(chosen)}
+    statistics['verified_page_sources_reusable_next_run']=len(verified)
+    statistics['source_page_candidates_reviewed_this_run']=len(chosen)
+    statistics['source_page_candidates_pending_next_run']=len(after['source_pending_pages'])
+    return accepted,after,statistics
+
+
+def reuse_verified_source_history(db,model,results,history):
+    """Reuse verified article URLs across runs; physical collector rechecks.
+
+    Saving only the lead's review-completed status would lose a proven
+    same-edition source whenever byte download times out later that run.
+    This cache is a research lead, NOT already downloaded photos.
+    """
+    restored=0
+    for entry in history:
+        if not isinstance(entry,dict):
+            continue
+        aid=entry.get('album_id')
+        url=entry.get('url')
+        work=f'{model}:{aid}'
+        if work not in db['works'] or not isinstance(url,str) or not https_page(url):
+            continue
+        row=next((x for x in results if x['id']==aid),None)
+        if row is None:
+            row={'id':aid,'title':db['works'][work][0]['name'],
+                 'urls':[],'observations':[],'query_count':0}
+            results.append(row)
+        if url not in row['urls']:
+            row['urls'].append(url)
+        if not any(obs.get('source')==url
+                   and obs.get('proof')=='unique_named_work_page_model_and_edition'
+                   for obs in row['observations']):
+            row['observations'].append({
+                'model':model,'album_id':aid,'source':url,
+                'proof':'unique_named_work_page_model_and_edition',
+                'name':row['title'],'durable_source_review_history':True})
+            restored+=1
+    return restored
+
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--model",choices=["mimmi","yui"],required=True)
     p.add_argument("--ledger",type=Path,default=LEDGER)
     p.add_argument("--reverse",type=Path)
+    p.add_argument("--reverse-progress",type=Path)
     p.add_argument("--reverse-limit",type=int,default=8)
     p.add_argument("--offset",type=int,default=0)
     p.add_argument("--per-work",type=int,default=3)
@@ -401,16 +478,41 @@ def main():
     report=crawl_names(db,a.model,a.offset,a.per_work,a.max_pages,
                        work_budget=a.work_budget)
     report['additional_registered_works_searched_by_catalog']=new_works
-    if a.reverse and a.reverse.is_file():
+    next_source_state=None
+    if a.reverse_progress:
+        if not a.reverse_progress.is_file():
+            raise ValueError('MISSING_REVERSE_SOURCE_PROGRESS')
+        state=json.loads(a.reverse_progress.read_text(encoding='utf-8'))
+        matches,next_source_state,reverse_stats=review_source_backlog(
+            db,state,a.model,report['search_results'],requests.Session(),
+            limit=a.reverse_limit)
+        report['image_reverse_resolution_stats']=reverse_stats
+        report['image_reverse_sites_verified']=matches
+        report['verified_source_pages_reused']=reuse_verified_source_history(
+            db,a.model,report['search_results'],
+            next_source_state.get('source_verified_pages',[]))
+    elif a.reverse and a.reverse.is_file():
         reverse_stats={}
         matches=merge_image_reverse_sites(db,json.loads(a.reverse.read_text(encoding="utf-8")),
                                          a.model,report["search_results"],requests.Session(),
                                          limit=a.reverse_limit,stats_out=reverse_stats)
         report["image_reverse_resolution_stats"]=reverse_stats
         report["image_reverse_sites_verified"]=matches
+    if a.reverse_progress or a.reverse:
         report["targets"]=[{"id":x["id"],"title":x["title"],"urls":x["urls"]}
                            for x in report["search_results"] if x["urls"]]
     a.out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    # Update the on-disk pending cursor only after the completed source
+    # research report is safely written. The outer workflow commits this
+    # changed cursor and verifies it with GitHub readback before collection.
+    if next_source_state is not None:
+        # A timeout or cancellation must never truncate the only locally
+        # staged checkpoint. Replace the file atomically after full encoding.
+        pending_temp=a.reverse_progress.with_suffix('.reviewed-tmp')
+        pending_temp.write_text(json.dumps(
+            next_source_state,ensure_ascii=False,separators=(',',':'))+'\n',
+            encoding='utf-8')
+        pending_temp.replace(a.reverse_progress)
     print("SAME_WORK_MULTILINGUAL_SOURCE_SEARCH",json.dumps({
         "model":a.model,"new_site_hosts":len(report["new_site_hosts"]),
         "target_source_pages":sum(len(x["urls"]) for x in report["targets"]),

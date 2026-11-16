@@ -34,13 +34,27 @@ def decide(states, step, max_steps=64):
                 or set(pending)-set(state['attempted_ids']) or
                 set(pending)&set(unverified)):
             raise ValueError('CORRUPT_REVERSE_RETRY_STATE_'+model)
+        sources=state.get('source_pending_pages',[])
+        source_done=state.get('last_source_pages_reviewed',0)
+        if (not isinstance(sources,list) or len(sources)>120000
+                or type(source_done) is not int or source_done<0
+                or any(not isinstance(x,dict)
+                       or not isinstance(x.get('link'),dict)
+                       or not isinstance(x['link'].get('url'),str)
+                       or not isinstance(x.get('album_id'),str) for x in sources)
+                or len({x['link']['url'] for x in sources})!=len(sources)):
+            raise ValueError('CORRUPT_SOURCE_REVIEW_CHECKPOINT_'+model)
         summary[model]={'total':total,'attempted':unique,
-                        'remaining':total-unique+len(pending),
+                        'remaining':total-unique+len(pending)+len(sources),
                         'pending_retry':len(pending),
+                        'pending_source_page_reviews':len(sources),
                         'unverified_after_retry':len(unverified),
-                        'last_run_attempts':state['last_run_attempts']}
+                        'last_run_attempts':state['last_run_attempts'],
+                        'last_source_pages_reviewed':source_done}
     unfinished=any(v['remaining']>0 for v in summary.values())
-    progressed=any(v['last_run_attempts']>0 for v in summary.values())
+    progressed=any(v['last_run_attempts']>0 or
+                   v['last_source_pages_reviewed']>0
+                   for v in summary.values())
     within_budget=step<max_steps
     return {'dispatch':unfinished and progressed and within_budget,
             'all_attempted':not unfinished,
