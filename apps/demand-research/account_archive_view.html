@@ -51,6 +51,11 @@
    <p id="biography" class="bio">저장된 프로필을 불러오면 이곳에 계정 소개가 표시됩니다.</p>
    <div id="profileFields" class="profile-fields" aria-label="보관된 공개 프로필 상세 항목"></div>
    <div id="profileExtras" class="profile-extras" hidden></div>
+   <div class="stats">
+    <button id="statPosts" type="button" data-section="posts"><strong id="postCount">—</strong><span>게시글</span></button>
+    <button id="statFollowers" type="button" data-section="followers"><strong id="followerCount">—</strong><span>팔로워</span></button>
+    <button id="statFollowing" type="button" data-section="following"><strong id="followingCount">—</strong><span>팔로잉</span></button>
+   </div>
 
   </div>
  </section>
@@ -97,11 +102,7 @@
     <summary>이 계정의 이전 프로필·헤더·자기소개 기록</summary>
     <div id="profileHistoryList" class="profile-history-list" role="group" aria-label="저장된 프로필 이력"></div>
    </details>
-   <div class="stats">
-    <button id="statPosts" type="button" data-section="posts"><strong id="postCount">—</strong><span>게시글</span></button>
-    <button id="statFollowers" type="button" data-section="followers"><strong id="followerCount">—</strong><span>팔로워</span></button>
-    <button id="statFollowing" type="button" data-section="following"><strong id="followingCount">—</strong><span>팔로잉</span></button>
-   </div>
+
    <details class="profile-audit">
      <summary>백업 검증 정보</summary>
      <p id="profileStatus" class="evidence">보관 여부 확인 전 · 미확인 자료는 표시하지 않습니다.</p>
