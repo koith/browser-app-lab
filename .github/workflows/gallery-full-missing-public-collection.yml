@@ -58,6 +58,7 @@ jobs:
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/gallery-archive/test_exhaustive_reverse_search.py
           python apps/gallery-archive/test_exhaustive_campaign_controller.py
+          python apps/gallery-archive/test_gallery_full_workflow_order.py
           python apps/gallery-archive/test_verified_source_bridge.py
           python apps/gallery-archive/run_exhaustive_reverse_search.py --model mimmi --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
           python apps/gallery-archive/run_exhaustive_reverse_search.py --model yui --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
@@ -124,11 +125,7 @@ jobs:
             --out "$STAGE/reverse-evidence.json" \
             --budget 256 --max-seconds 3300 --workers 3 --stop-after-full \
             --search-revision 3
-          python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
-            --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
-            --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
-            --out "$STAGE/source-evidence.json"
-      - name: Persist search attempts immediately, even if later photo collection times out
+      - name: Persist reverse-search progress before ANY downstream network research
         shell: bash
         run: |
           set -euo pipefail
@@ -179,6 +176,21 @@ jobs:
           assert observed==expected, 'REVERSE_CHECKPOINT_READBACK_MISMATCH'
           PY
           echo "ALL_OWNER_PHOTO_REVERSE_CURSOR_PERSISTED_AND_READBACK model=$MODEL SHA=$(cat "$STAGE/checkpoint-commit-sha.txt")"
+      - name: Discover edition-specific public source pages using saved reverse evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This may be slow or inaccessible. The full per-SHA reverse cursor
+          # has already been durably committed and read back above.
+          if ! timeout 420s python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
+            --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
+            --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
+            --out "$STAGE/source-evidence.json"; then
+            # Optional source-name enrichment must NOT prevent the independent
+            # registered public work collector or block the next SHA batch.
+            echo "::warning::SOURCE_ALIAS_SEARCH_UNAVAILABLE model=$MODEL; registered sources still scanned"
+            printf '{"schema_version":1,"model":"%s","targets":[],"search_results":[],"research_only_not_yet_saved":true,"source_alias_status":"unavailable"}\n' "$MODEL" > "$STAGE/source-evidence.json"
+          fi
       - name: Acquire every registered work, prioritizing actual missing cuts
         shell: bash
         run: |
