@@ -21569,6 +21569,42 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 204,
+          "url": "stored-albums/djawa-nikke-alice/d84d1b9297e4dcb69a7e.jpg",
+          "sha256": "d84d1b9297e4dcb69a7e7d442ef395fd2cd38e6bdd9bc74d9c289f720ea78789",
+          "bytes": 139154,
+          "width": 1067,
+          "height": 1600,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-alice/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 224,
+          "url": "stored-albums/djawa-nikke-alice/0be22d16e279c2dcb9b7.jpg",
+          "sha256": "0be22d16e279c2dcb9b723b2176fa51b711f8ed9bec39e35fc05a5ac1e40d1c9",
+          "bytes": 142385,
+          "width": 1067,
+          "height": 1600,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-alice/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 233,
+          "url": "stored-albums/djawa-nikke-alice/a27c5e2f92d8ff3e6a4f.jpg",
+          "sha256": "a27c5e2f92d8ff3e6a4f94fe0d7e3802cf20bfc6e1c1acb563abb146c3dbdb50",
+          "bytes": 203966,
+          "width": 1067,
+          "height": 1600,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-alice/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -29102,5 +29138,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2934
+  "physical_verified_image_count": 2937
 }
