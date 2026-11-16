@@ -21,6 +21,7 @@ assert "probe_private_owner_runtime.py" in ready and "healthy=false" in ready
 session=action("Securely refresh Render storage session without exposing cookies or viewer passwords")
 assert "continue-on-error: true" in session
 assert "steps.ready.outputs.healthy != 'true'" in session
+assert "github.event_name != 'schedule'" not in session, "Cold scheduled recovery must refresh its expired owner session"
 assert "verify_render_gallery_read.py" in session
 
 for name in (
