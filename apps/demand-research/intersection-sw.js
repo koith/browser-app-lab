@@ -4,7 +4,7 @@
  * account records, API JSON, uploaded media, authentication or private bytes.
  */
 "use strict";
-const VERSION="intersection-public-shell-v1-20261115-native-view-fast-v1";
+const VERSION="intersection-public-shell-v1-20261116-yadanra-exclusion-v1";
 const PREFIX="intersection-public-shell-v1-";
 const FILES=[
   "/",
@@ -28,7 +28,11 @@ async function publicResponse(path){
   if(path==="/"){
     if(!type.includes("text/html"))return null;
     // Never cache a Render waking/loading placeholder or an error page.
-    if(!(await response.clone().text()).includes("<title>INTERSECTION</title>"))return null;
+    const html=await response.clone().text();
+    // A live-fallback shell without the installed hard phrase gate would
+    // reintroduce already blocked posts during a Render free-tier wake.
+    if(!html.includes("<title>INTERSECTION</title>")||
+       !html.includes("LIVE_HARD_EXCLUDED_PHRASES"))return null;
   }else if(!type.includes("javascript"))return null;
   return response;
 }
@@ -68,10 +72,13 @@ self.addEventListener("fetch",event=>{
       const timer=setTimeout(()=>controller.abort(),3500);
       try{
         const response=await fetch(request,{signal:controller.signal,cache:"no-store"});
-        if(response.ok&&(response.headers.get("content-type")||"").includes("text/html")&&
-          (await response.clone().text()).includes("<title>INTERSECTION</title>")){
-          await cache.put("/",response.clone());
-          return response;
+        if(response.ok&&(response.headers.get("content-type")||"").includes("text/html")){
+          const shell=await response.clone().text();
+          if(shell.includes("<title>INTERSECTION</title>")&&
+             shell.includes("LIVE_HARD_EXCLUDED_PHRASES")){
+            await cache.put("/",response.clone());
+            return response;
+          }
         }
       }catch{/* Serve verified public shell only when origin is unavailable. */}
       finally{clearTimeout(timer)}
