@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "model": "yui",
+  "scope": "explicitly observed published public preview photos only; NOT paid publisher full albums",
+  "observed_with": "public HTML image src on each exact album page, 2026-11-16",
+  "albums": [
+    {
+      "id": "yui-meow-public-samples",
+      "name": "Yui - Meow",
+      "source": "https://showartx.net/yui-meow/",
+      "declared_publisher_photos": 180,
+      "public_image_observations": [
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_180.jpg",
+          "source_filename_number": 180
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_170.jpg",
+          "source_filename_number": 170
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_163.jpg",
+          "source_filename_number": 163
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_141.jpg",
+          "source_filename_number": 141
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_136.jpg",
+          "source_filename_number": 136
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_130.jpg",
+          "source_filename_number": 130
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_123.jpg",
+          "source_filename_number": 123
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_115.jpg",
+          "source_filename_number": 115
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_102.jpg",
+          "source_filename_number": 102
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_89.jpg",
+          "source_filename_number": 89
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_72.jpg",
+          "source_filename_number": 72
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_62.jpg",
+          "source_filename_number": 62
+        }
+      ]
+    },
+    {
+      "id": "yui-pure-public-samples",
+      "name": "Yui - Pure",
+      "source": "https://showartx.net/yui-pure/",
+      "declared_publisher_photos": 136,
+      "public_image_observations": [
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_116.jpg",
+          "source_filename_number": 116
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_89.jpg",
+          "source_filename_number": 89
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_81.jpg",
+          "source_filename_number": 81
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_75.jpg",
+          "source_filename_number": 75
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_66.jpg",
+          "source_filename_number": 66
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_58.jpg",
+          "source_filename_number": 58
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_44.jpg",
+          "source_filename_number": 44
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_37.jpg",
+          "source_filename_number": 37
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_26.jpg",
+          "source_filename_number": 26
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_11.jpg",
+          "source_filename_number": 11
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_3.jpg",
+          "source_filename_number": 3
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_pure_131.jpg",
+          "source_filename_number": 131
+        }
+      ]
+    },
+    {
+      "id": "yui-summer-public-samples",
+      "name": "Yui - Summer",
+      "source": "https://showartx.net/yui-summer/",
+      "declared_publisher_photos": 285,
+      "public_image_observations": [
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_282.jpg",
+          "source_filename_number": 282
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_268.jpg",
+          "source_filename_number": 268
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_245.jpg",
+          "source_filename_number": 245
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_208.jpg",
+          "source_filename_number": 208
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_190.jpg",
+          "source_filename_number": 190
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_170.jpg",
+          "source_filename_number": 170
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_162.jpg",
+          "source_filename_number": 162
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_152.jpg",
+          "source_filename_number": 152
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_132.jpg",
+          "source_filename_number": 132
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_105.jpg",
+          "source_filename_number": 105
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_87.jpg",
+          "source_filename_number": 87
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2025/09/Yui_Sum_46.jpg",
+          "source_filename_number": 46
+        }
+      ]
+    },
+    {
+      "id": "yui-become-beautiful-public-samples",
+      "name": "Yui - Become Beautiful",
+      "source": "https://showartx.net/yui-become-beautiful/",
+      "declared_publisher_photos": 93,
+      "public_image_observations": [
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_92.jpg",
+          "source_filename_number": 92
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_82.jpg",
+          "source_filename_number": 82
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_77.jpg",
+          "source_filename_number": 77
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_73.jpg",
+          "source_filename_number": 73
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_70.jpg",
+          "source_filename_number": 70
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_65.jpg",
+          "source_filename_number": 65
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_61.jpg",
+          "source_filename_number": 61
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_46.jpg",
+          "source_filename_number": 46
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_28.jpg",
+          "source_filename_number": 28
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_21.jpg",
+          "source_filename_number": 21
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_9.jpg",
+          "source_filename_number": 9
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/06/yui_beautiful_3.jpg",
+          "source_filename_number": 3
+        }
+      ]
+    },
+    {
+      "id": "yui-asuna-qipao-public-samples",
+      "name": "Yui - Asuna Qipao",
+      "source": "https://showartx.net/yui-asuna-qipao/",
+      "declared_publisher_photos": 69,
+      "public_image_observations": [
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_62.jpg",
+          "source_filename_number": 62
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_58.jpg",
+          "source_filename_number": 58
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_53.jpg",
+          "source_filename_number": 53
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_42.jpg",
+          "source_filename_number": 42
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_39.jpg",
+          "source_filename_number": 39
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_32.jpg",
+          "source_filename_number": 32
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_27.jpg",
+          "source_filename_number": 27
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_18.jpg",
+          "source_filename_number": 18
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_12.jpg",
+          "source_filename_number": 12
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_5.jpg",
+          "source_filename_number": 5
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_1.jpg",
+          "source_filename_number": 1
+        },
+        {
+          "url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Asuna-Qipao_67.jpg",
+          "source_filename_number": 67
+        }
+      ]
+    }
+  ]
+}
