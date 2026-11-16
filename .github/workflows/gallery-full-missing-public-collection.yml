@@ -124,11 +124,7 @@ jobs:
             --out "$STAGE/reverse-evidence.json" \
             --budget 256 --max-seconds 3300 --workers 3 --stop-after-full \
             --search-revision 3
-          python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
-            --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
-            --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
-            --out "$STAGE/source-evidence.json"
-      - name: Persist search attempts immediately, even if later photo collection times out
+      - name: Persist reverse-search progress before ANY downstream network research
         shell: bash
         run: |
           set -euo pipefail
@@ -179,6 +175,16 @@ jobs:
           assert observed==expected, 'REVERSE_CHECKPOINT_READBACK_MISMATCH'
           PY
           echo "ALL_OWNER_PHOTO_REVERSE_CURSOR_PERSISTED_AND_READBACK model=$MODEL SHA=$(cat "$STAGE/checkpoint-commit-sha.txt")"
+      - name: Discover edition-specific public source pages using saved reverse evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This may be slow or inaccessible. The full per-SHA reverse cursor
+          # has already been durably committed and read back above.
+          python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
+            --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
+            --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
+            --out "$STAGE/source-evidence.json"
       - name: Acquire every registered work, prioritizing actual missing cuts
         shell: bash
         run: |
