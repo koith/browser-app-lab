@@ -1383,7 +1383,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         aid=album['id']
         if aid in registered_ids:
             continue
-        source_book=books.get(aid)
+        # The collector sorts work records into a list before this stage;
+        # never treat that final ordered list as the earlier dictionary.
+        source_book=next((b for b in books if b.get('id')==aid),None)
         if not source_book:
             continue
         authorized=sorted(
