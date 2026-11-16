@@ -10,11 +10,8 @@ on:
       - "apps/gallery-archive/qa_g07_new_public_saved_sha.py"
       - ".github/workflows/gallery-g07-live-new-20-pixels.yml"
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - "Deploy static content to Pages"
-      - "pages build and deployment"
-    types: [completed]
+  # A completed 20-photo historical acceptance test is NOT a release gate.
+  # Run on its own code changes or explicitly via workflow_dispatch only.
 permissions:
   contents: read
 jobs:
@@ -22,10 +19,7 @@ jobs:
     if: |
       github.event_name == 'workflow_dispatch' ||
       github.event_name == 'push' ||
-      github.event_name == 'pull_request' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository)
+      github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 27
     strategy:
@@ -36,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - name: Check whether this exact release includes G07 physical photos

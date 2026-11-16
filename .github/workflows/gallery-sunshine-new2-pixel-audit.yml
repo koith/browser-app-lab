@@ -5,24 +5,18 @@ on:
     paths:
       - 'apps/gallery-archive/qa_sunshine_two_actual_new_cuts.py'
       - '.github/workflows/gallery-sunshine-new2-pixel-audit.yml'
-  workflow_run:
-    workflows: ['pages build and deployment','Deploy static content to Pages']
-    types: [completed]
+  # Historic two-photo QA runs on source change or explicit manual request.
 permissions:
   contents: read
 jobs:
   distinct-photo-cut-evidence:
-    if: >-
-      github.event_name != 'workflow_run' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository)
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
