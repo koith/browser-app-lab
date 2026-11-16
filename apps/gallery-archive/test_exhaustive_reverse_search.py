@@ -138,6 +138,46 @@ class FullReverseCoverageTests(unittest.TestCase):
                                 {p['seed_id'] for p in queue},
                                 required_revision=1)
 
+    def test_revision_four_rechecks_prior_image_sha_after_new_visual_backend(self):
+        queue=m.complete_queue(fixtures(),'yui')
+        previous={'schema_version':1,'model':'yui','cycle':0,
+                  'attempted_ids':[p['seed_id'] for p in queue],
+                  'search_revision':3,'retry_pending_ids':[],
+                  'unverified_after_retry_ids':[]}
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)
+            prior,result,next_state=[root/n for n in ('prior.json','result.json','next.json')]
+            prior.write_text(json.dumps(previous))
+            restored=m.read_progress(prior,'yui',
+                                     {p['seed_id'] for p in queue},
+                                     required_revision=4)
+            self.assertEqual(restored['attempted_ids'],[])
+            self.assertEqual(restored['search_revision'],4)
+            # This is a *visual host page*, but source-edition identity is
+            # still unverified until the downstream page has been opened.
+            def structured_only(seed):
+                return {**seed,'search_status':{
+                    'yandex_sites':'http_503','bing_visual':'visual_pages_1'},
+                    'candidate_pages':[{
+                        'url':'https://public-example.org/photos/231',
+                        'matched_image_url':'https://cdn.public-example.org/231.jpg',
+                        'source_engine':'bing_visual_pages_including',
+                        'visual_host_page_only_unverified_edition':True}],
+                    'off_model_rejected':0,'originals_stored':0,
+                    'visible_gallery_added':0}
+            with patch.object(m,'seeds',return_value=fixtures()),patch.object(
+                    m,'search_one',side_effect=structured_only):
+                report=m.run('yui',prior,result,next_state,3,60,2,
+                             stop_after_full=True,search_revision=4)
+            self.assertEqual(report['seed_queries'],3)
+            self.assertEqual(report['readable_search_results'],3)
+            self.assertEqual(report['structured_visual_host_page_frames_unverified_edition'],3)
+            self.assertEqual(report['model_matched_photo_frames'],0)
+            self.assertEqual(report['photo_frames_with_any_source_leads'],3)
+            self.assertEqual(report['verified_same_photo_matches'],0)
+            self.assertEqual(report['coverage']['pending_unreadable_retry'],0)
+            self.assertEqual(json.loads(next_state.read_text())['search_revision'],4)
+
     def test_first_full_pass_does_not_restart_in_multimodel_campaign(self):
         queue=m.complete_queue(fixtures(), 'yui')
         state={'attempted_ids':[p['seed_id'] for p in queue], 'cycle':0}
