@@ -651,10 +651,12 @@ def save_public_record(cloud, profile, item, api):
     if not post["archive_complete"]:
         if media:
             cloud.stage_partial_media(post,payloads)
-        cloud.write_immutable("metadata/media-pending/"+pid+".json",
-            canonical_json({"id":pid,"platform":profile["platform"],
-              "original_id":item["original_id"],"expected":len(blobs),
-              "recorded_at":datetime.now(timezone.utc).isoformat()}))
+        pending_key="metadata/media-pending/"+pid+".json"
+        if cloud.read(pending_key,cap=2048,optional=True) is None:
+            cloud.write_immutable(pending_key,
+                canonical_json({"id":pid,"platform":profile["platform"],
+                  "original_id":item["original_id"],"expected":len(blobs),
+                  "recorded_at":datetime.now(timezone.utc).isoformat()}))
         # Source record and available exact media are immutable. Completion
         # marker is deferred until ALL original attachment slots verify.
         return None
