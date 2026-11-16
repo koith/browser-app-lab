@@ -10,9 +10,11 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 from PIL import Image
 from photo_visual_dedupe import WorkVisualIndex
+from public_work_photo_extractor import ordinary_public_https_image
 
 ROOT = Path(__file__).resolve().parents[2]
 ALLOWED_EXT = {'.jpg': 'JPEG','.jpeg': 'JPEG','.png': 'PNG','.webp': 'WEBP'}
@@ -25,20 +27,59 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
     old_path=base/'stored-albums.json'
     old=json.loads(old_path.read_text())
     registered=json.loads((base/'public-work-pages.json').read_text())
-    ids={a['id'] for a in registered['albums']}
+    approved_registered={a['id']:a for a in registered['albums']}
+    owner_by_id={a['id']:a for a in owner['albums']}
     existing_sha={p['sha256'] for a in owner['albums'] for p in a['images']}
     existing_sha.update(p['sha256'] for a in old['albums'] for p in a['images'])
     byid={a['id']:a for a in old['albums']}
     stage_doc=json.loads((stage/'metadata/catalog.json').read_text())
     if stage_doc.get('model')!=model:
         raise ValueError('wrong model staged')
+    # Exact-work discovery may identify a model's edition missing from the
+    # older static registered-work list. An image can already have passed
+    # SHA/decoder/edition validation and STILL be lost here if we only admit
+    # old registered IDs. Require provenance recorded by the SAME collector
+    # and reject unreviewed or ambiguous new IDs.
+    claimed=stage_doc.get('verified_new_work_sources',[])
+    if not isinstance(claimed,list) or len(claimed)>100:
+        raise ValueError('INVALID_STAGED_NEW_WORK_PROVENANCE')
+    approved_new={}
+    for entry in claimed:
+        if not isinstance(entry,dict):
+            raise ValueError('INVALID_STAGED_NEW_WORK_PROVENANCE')
+        aid=entry.get('id')
+        src=entry.get('source')
+        title=entry.get('title')
+        pages=entry.get('verified_same_work_pages')
+        if (not isinstance(aid,str)
+                or not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid)
+                or aid in approved_registered or aid in approved_new
+                or not isinstance(title,str) or len(title.strip())<4
+                or entry.get('proof') not in (
+                    'unique_named_work_page_model_and_edition',
+                    'owner_catalog_work_with_reviewed_public_source')
+                or (entry.get('proof')=='owner_catalog_work_with_reviewed_public_source'
+                    and (aid not in owner_by_id
+                         or owner_by_id[aid].get('title')!=title))
+                or not isinstance(pages,list) or not 1<=len(pages)<=12
+                or not isinstance(src,str) or src not in pages
+                or not all(isinstance(u,str) and
+                           ordinary_public_https_image(u,u) is not None for u in pages)):
+            raise ValueError('UNVERIFIED_NEW_WORK_PUBLICATION_SOURCE')
+        approved_new[aid]={'id':aid,'title':title,
+                            'source':src,
+                            'proof':entry['proof']}
     added=[];used=0
     visual_indexes={};same_frame_skipped=[];quality_replacement_deferred=[]
     for album in stage_doc.get('albums',[]):
         aid=album.get('id')
-        if aid not in ids or not isinstance(aid,str) or not aid.replace('-','').isalnum():
+        if (not isinstance(aid,str) or
+                not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid)):
             continue
-        source=next(a for a in registered['albums'] if a['id']==aid)
+        source=approved_registered.get(aid) or approved_new.get(aid)
+        if source is None:
+            # Unverified search results remain research leads, not photos.
+            continue
         rec=byid.get(aid)
         if rec is None:
             rec={'id':aid,'title':source.get('title') or album.get('title') or aid,
@@ -125,6 +166,8 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                 len(album.get('images',[])) for album in old['albums'])
         old_path.write_text(json.dumps(old,ensure_ascii=False,indent=2)+'\n')
     result={'model':model,'new_sha_verified_originals':len(added),
+       'new_verified_source_work_ids':sorted({aid for aid,sha,n in added
+                                             if aid in approved_new}),
        'total_bytes_added':used,'sha_samples':[{'album':a,'sha256':s,'bytes':n} for a,s,n in added],
        'real_files_in_pages':bool(added),'private_terabox_readback_verified':False,
        'photo_source_fallback_prohibited':True,

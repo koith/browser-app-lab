@@ -1362,7 +1362,62 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         },ensure_ascii=False),flush=True)
         print('DIRECT_INDIVIDUAL_PHOTO_COLLECTION',model,aid,'saved',len(images),'failures',len(errors),flush=True)
     if browser is not None:browser.close()
-    catalog={'schema_version':1,'model':model,'storage':'owner-private-terabox-sha-verified-bytes','albums':new_albums}
+    # Persist the independently verified edition-page proof alongside the
+    # actual image bytes. The publisher must not silently discard an album
+    # merely because it was discovered AFTER public-work-pages.json was built.
+    # Equally, a search snippet or arbitrary staged album ID cannot register
+    # a new publication: only work pages whose exact edition/model were
+    # verified by source_alias_search and admitted by this collector.
+    registry_path=base/'public-work-pages.json'
+    if registry_path.is_file():
+        publication_registry=json.loads(registry_path.read_text())
+        registered_ids={a['id'] for a in publication_registry.get('albums',[])}
+    elif root.resolve()==ROOT.resolve():
+        raise ValueError('REAL_PUBLIC_WORK_REGISTRY_MISSING')
+    else:
+        # Synthetic offline collector fixtures often contain only the owner
+        # and one relevant source page, not the complete production registry.
+        registered_ids=set()
+    approved_new_works=[]
+    for album in new_albums:
+        aid=album['id']
+        if aid in registered_ids:
+            continue
+        # The collector sorts work records into a list before this stage;
+        # never treat that final ordered list as the earlier dictionary.
+        source_book=next((b for b in books if b.get('id')==aid),None)
+        if not source_book:
+            continue
+        authorized=sorted(
+            set(verified_discovered.get(aid,set())) &
+            set(source_book.get('verified_discovered_pages',[])))
+        if authorized:
+            proof='unique_named_work_page_model_and_edition'
+        elif aid in old_albums:
+            # Another large class of misses: the owner's edition already has
+            # archived SHA originals but was omitted from the small static
+            # public-work-pages list. The existing reviewed public source is
+            # still valid collection evidence for that SAME owner edition.
+            # Never promote merely researched/unreviewed generic pages.
+            authorized=[u for u in dict.fromkeys(
+                [source_book['source']]+source_book.get('source_pages',[]))
+                if reviewed_direct_source(u,model)]
+            proof='owner_catalog_work_with_reviewed_public_source'
+        else:
+            continue
+        if not authorized:
+            continue
+        approved_new_works.append({
+            'id':aid,
+            'title':(old_albums.get(aid,{}).get('title')
+                     or source_book.get('title') or album.get('title') or aid),
+            'source':authorized[0],
+            'proof':proof,
+            'verified_same_work_pages':authorized[:12]})
+    catalog={'schema_version':1,'model':model,
+             'storage':'owner-private-terabox-sha-verified-bytes',
+             'albums':new_albums,
+             'verified_new_work_sources':approved_new_works}
     metadata=out/'metadata';metadata.mkdir(parents=True,exist_ok=True)
     (metadata/'catalog.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
     report={'model':model,'generated_at':datetime.now(timezone.utc).isoformat(),'new_local_individual_files':new_total,
