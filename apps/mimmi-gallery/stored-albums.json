@@ -21437,6 +21437,54 @@
           "source_url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_03-2.jpg",
           "quality": "historically_sha_pinned_public_bytes_not_paid_master",
           "numbering_provenance": "observed_public_source_photo_not_publisher_master"
+        },
+        {
+          "number": 189,
+          "url": "stored-albums/djawa-nikke-alice/1486de1a3adcdc9458d2.jpg",
+          "sha256": "1486de1a3adcdc9458d2d7d19a54fb3690ec25626667eec36634992f5880fc86",
+          "bytes": 117923,
+          "width": 1024,
+          "height": 682,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-alice/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 192,
+          "url": "stored-albums/djawa-nikke-alice/443862d5369e9bcb527b.jpg",
+          "sha256": "443862d5369e9bcb527baa351f191f73b88295e0508add288bfceef8990b3bb3",
+          "bytes": 121643,
+          "width": 1024,
+          "height": 682,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-alice/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 194,
+          "url": "stored-albums/djawa-nikke-alice/a90e31c62b9c76a5d1ca.jpg",
+          "sha256": "a90e31c62b9c76a5d1ca1436ffe1d5369000204ef8292d68be6c61bcffbd8463",
+          "bytes": 111012,
+          "width": 1024,
+          "height": 682,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-alice/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 196,
+          "url": "stored-albums/djawa-nikke-alice/4c3b2a528803fb17e29a.jpg",
+          "sha256": "4c3b2a528803fb17e29acf486655b2a92201417310525065d68a15cf162def8c",
+          "bytes": 231409,
+          "width": 1024,
+          "height": 1536,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-alice/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -28970,5 +29018,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2923
+  "physical_verified_image_count": 2927
 }
