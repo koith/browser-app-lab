@@ -11,8 +11,8 @@ const state={account:"",section:"posts",offset:0,more:false,loading:false,
              firstPageRetries:0,retryTimer:null};
 let detailRequestSeq=0;
 const base=()=>"/api/account-archives/"+encodeURIComponent(state.account);
-const sectionLabels={posts:"게시글",replies:"답글",media:"미디어",followers:"팔로워",following:"팔로잉"};
-const journalSection=section=>["posts","replies","media"].includes(section);
+const sectionLabels={posts:"게시글",replies:"답글",activity:"활동",media:"미디어",videos:"동영상",featured:"고정됨",followers:"팔로워",following:"팔로잉"};
+const journalSection=section=>["posts","replies","activity","media","videos","featured"].includes(section);
 const ACCOUNT_KEY=/^(?:bluesky|mastodon)-[a-f0-9]{40}$/;
 const params=new URLSearchParams(location.search);
 const embedded=params.get("embedded")==="1";
@@ -78,6 +78,13 @@ function renderAccountChoices(){
 }
 function setPlatformTheme(accountKey){
   const provider=String(accountKey||"").startsWith("mastodon-")?"mastodon":"bluesky";
+  const mastodon=provider==="mastodon";
+  for(const btn of document.querySelectorAll(".tabs [data-section]")){
+    const section=btn.dataset.section;
+    btn.hidden=mastodon?!(["activity","media","featured"].includes(section)):
+                        !(["posts","replies","media","videos"].includes(section));
+  }
+  $("mastodonActivityControls").hidden=!mastodon;
   document.documentElement.dataset.platform=provider;
   $("snsProviderSymbol").textContent=provider==="mastodon"?"M":"🦋";
   $("snsProviderTitle").textContent=provider==="mastodon"?"Mastodon":"Bluesky";
@@ -280,6 +287,15 @@ function renderProfile(profile){
   $("biography").textContent=typeof profile.description==="string"&&profile.description.trim()
     ?profile.description:"수집된 프로필에 등록된 자기소개가 없습니다.";
   $("postCount").textContent=fmt(profile.posts_count);
+  if(profile.platform==="mastodon"){
+    const featured=document.querySelector('.tabs [data-section="featured"]');
+    const mediaTab=document.querySelector('.tabs [data-section="media"]');
+    if(featured)featured.hidden=profile.show_featured===false;
+    if(mediaTab)mediaTab.hidden=profile.show_media===false;
+    if((state.section==="media"&&profile.show_media===false)||
+       (state.section==="featured"&&profile.show_featured===false))
+      setTab("activity");
+  }
   $("followerCount").textContent=fmt(profile.followers_count);
   $("followingCount").textContent=fmt(profile.following_count);
   const fields=profile.fields;
@@ -354,7 +370,7 @@ function safeMediaPath(value){
         ?url.pathname:"";
   }catch{return "";}
 }
-function mediaElement(item,index){
+function mediaElement(item,index,altText=""){
   const slot=node("div","media-slot");
   const mime=String(item?.mime||""),url=item?.verified_sha256===true?safeMediaPath(item.url):"";
   if(!url||!(/^(image|video|audio)\//).test(mime)){
@@ -366,7 +382,7 @@ function mediaElement(item,index){
   if(mime.startsWith("image/")){
     el=node("img");
     el.src=url;el.loading="lazy";el.decoding="async";
-    el.alt="SHA-256 검증된 보관 원본 이미지 · 첨부 "+(index+1);
+    el.alt=altText||("원본 보관 이미지 · 첨부 "+(index+1));
     el.addEventListener("click",()=>window.open(url,"_blank","noopener,noreferrer"));
   }else if(mime.startsWith("video/")){
     el=node("video");el.controls=true;el.preload="metadata";el.playsInline=true;el.src=url;
@@ -382,68 +398,145 @@ function mediaElement(item,index){
   slot.append(el);
   return slot;
 }
+function richPostBody(post){
+  const p=node("p","post-body");
+  const parts=Array.isArray(post.rich_text)?post.rich_text:[];
+  if(!parts.length){p.textContent=post.text||"(텍스트 없음)";return p;}
+  for(const part of parts.slice(0,300)){
+    if(!part||typeof part.text!=="string")continue;
+    const content=part.text.slice(0,30000),href=validLink(part.href||"");
+    if(href)p.append(anchor(href,content,"post-inline-link"));
+    else p.append(document.createTextNode(content));
+  }
+  if(!p.textContent.trim())p.textContent=post.text||"(텍스트 없음)";
+  return p;
+}
+function engagementBar(post,inDetail){
+  const row=node("div","post-bottom");
+  const stats=post.engagement||{};
+  const actions=[
+    ["reply","↩",stats.replies_count,"답글"],
+    ["repost","⇄",stats.reblogs_count,"공유"],
+    ["like","♡",stats.favourites_count,"좋아요"]];
+  for(const [type,icon,count,label] of actions){
+    const span=node("span","post-metric post-metric-"+type);
+    span.setAttribute("aria-label",label+(Number.isInteger(count)?" "+fmt(count)+"개":" · 수치 미보관"));
+    span.append(node("span","post-metric-icon",icon));
+    if(Number.isInteger(count))span.append(node("span","",fmt(count)));
+    row.append(span);
+  }
+  if(!inDetail){
+    const btn=node("button","post-action post-action-reply","대화 보기");
+    btn.type="button";btn.setAttribute("aria-label","댓글·상세 보기");
+    btn.addEventListener("click",()=>openDetail(post));row.append(btn);
+  }
+  if(post.source_url){
+    const original=anchor(post.source_url,"원문","post-action post-action-source");
+    original.setAttribute("aria-label","SNS 원문");row.append(original);
+  }
+  return row;
+}
 function postCard(post,inDetail=false){
   const card=node("article","post");
-  card.dataset.kind=post.revision_of?"revision":post.kind==="reply"?"reply":"post";
+  card.dataset.kind=post.revision_of?"revision":post.kind||"post";
   const head=node("header","post-head");
   const icon=node("span","post-avatar",
-                  (state.profile?.display_name||state.profile?.handle||"A").charAt(0));
-  const savedAvatar=state.profile?.assets?.avatar||"";
-  if(typeof savedAvatar==="string"&&savedAvatar.startsWith("/api/account-archives/")){
-    icon.style.backgroundImage='url("'+savedAvatar+'")';icon.textContent="";
+     (state.profile?.display_name||state.profile?.handle||"A").charAt(0));
+  const avatar=state.profile?.assets?.avatar||"";
+  if(typeof avatar==="string"&&avatar.startsWith("/api/account-archives/")){
+    icon.style.backgroundImage='url("'+avatar+'")';icon.textContent="";
   }
-  head.append(icon);
   const metadata=node("div","post-meta"),byline=node("div","post-byline");
   byline.append(node("strong","",state.profile?.display_name||state.profile?.handle||"보관 계정"));
-  if(state.profile?.handle)byline.append(node("span","post-handle","@"+state.profile.handle));
+  if(state.profile?.handle)
+    byline.append(node("span","post-handle","@"+state.profile.handle));
   metadata.append(byline,node("time","post-date",date(post.posted_at)));
-  head.append(metadata,node("span","post-type",
-    post.revision_of?"수정 이력":post.kind==="reply"?"↳ 답글":"보관 게시글"));
-  card.append(head,node("p","post-body",post.text||"(텍스트 없음)"));
-  if(post.revision_of){
-    card.append(node("p","notice","이전 원문은 그대로 보관 · 변경본 추가 저장 "+
-      (date(post.captured_at)||"")));
+  head.append(icon,metadata);
+  const tag=post.revision_of?"수정 기록":post.kind==="reply"?"답글":
+            post.kind==="reblog"?"리블로그":"";
+  if(tag)head.append(node("span","post-type",tag));
+  if(post.pinned || (state.profile?.pinned_post?.uri&&
+      state.profile.pinned_post.uri===post.original_id))
+    card.append(node("div","post-pinned","⌑ 고정된 게시물"));
+  if(post.reblog){
+    const share=node("div","post-reblog-note");
+    share.append(node("span","","⇄ "+(post.reblog.name||post.reblog.handle||"원문 작성자")+"님의 글을 공유"));
+    if(post.reblog.url)share.append(anchor(post.reblog.url," 작성자","post-inline-link"));
+    card.append(share);
   }
-  // A server may know that an attachment existed without retaining its
-  // bytes. Never collapse or reorder those missing original positions.
+  card.append(head);
+  const content=node("div","post-content");
+  if(post.content_warning){
+    content.append(node("p","content-warning","⚠ "+post.content_warning));
+  }
+  const rich=richPostBody(post);
+  const mediaAssets=node("div","post-attachments");
+  if(post.revision_of)
+    mediaAssets.append(node("p","notice","이전 보관본은 유지되며 수정 내용은 별도 기록됩니다."));
   const stored=Array.isArray(post.media)?post.media:[];
   const expected=Number.isSafeInteger(Number(post.media_expected))
     ?Math.max(0,Number(post.media_expected)):0;
   const byIndex=new Map();
   for(const item of stored){
-    // An absent source slot is NOT evidence that this is attachment #1.
-    // Fail closed: only the verified server-provided original index may
-    // position an image, even in a partially recovered historical post.
-    const index=item?.index;
-    if(Number.isInteger(index)&&index>=0&&index<16&&!byIndex.has(index))
-      byIndex.set(index,item);
+    const i=item?.index;
+    if(Number.isInteger(i)&&i>=0&&i<16&&!byIndex.has(i))byIndex.set(i,item);
   }
   const count=Math.min(16,Math.max(expected,stored.length,
     ...(byIndex.size?[...byIndex.keys()].map(i=>i+1):[0])));
   if(count){
-    const grid=node("div","post-media");
-    grid.dataset.count=String(count);
-    for(let i=0;i<count;i++)grid.append(mediaElement(byIndex.get(i),i));
-    card.append(grid);
+    const grid=node("div","post-media");grid.dataset.count=String(count);
+    for(let i=0;i<count;i++)
+      grid.append(mediaElement(byIndex.get(i),i,
+        Array.isArray(post.alt_text)?post.alt_text[i]||"":""));
+    mediaAssets.append(grid);
   }
-  const bottom=node("div","post-bottom");
-  if(!inDetail){
-    const btn=node("button","post-action post-action-reply","댓글·상세 보기");
-    btn.type="button";btn.setAttribute("aria-label","댓글·상세 보기");
-    btn.addEventListener("click",()=>openDetail(post));
-    bottom.append(btn);
+  if(post.external_card?.url){
+    const external=node("div","post-external-card");
+    external.append(anchor(post.external_card.url,
+      post.external_card.title||"공개 링크","post-card-title"));
+    if(post.external_card.description)
+      external.append(node("p","post-card-summary",post.external_card.description));
+    mediaAssets.append(external);
   }
-  if(post.source_url){
-    const sourceLink=anchor(post.source_url,"SNS 원문 ↗","post-action post-action-source");
-    sourceLink.setAttribute("aria-label","SNS 원문");
-    bottom.append(sourceLink);
+  if(post.quoted_post?.url){
+    const quoteBox=node("div","post-quote");
+    quoteBox.append(node("span","post-quote-label","인용 게시물"));
+    quoteBox.append(anchor(post.quoted_post.url,"원본 인용 게시물 보기","post-inline-link"));
+    mediaAssets.append(quoteBox);
   }
-  bottom.append(node("span","media-state",
-    post.archive_complete?"첨부 "+fmt(post.media_saved)+"/"+fmt(post.media_expected)+"개 검증":
-      "첨부 "+fmt(post.media_saved)+"/"+fmt(post.media_expected)+"개 · 일부 미보관"));
-  card.append(bottom);
+  if(post.poll && Array.isArray(post.poll.options)){
+    const poll=node("div","post-poll");
+    poll.append(node("strong","", "보관된 투표"+(post.poll.expired?" · 종료":"")));
+    for(const option of post.poll.options.slice(0,20)){
+      const label=option.title+(Number.isInteger(option.votes_count)?
+        " · "+fmt(option.votes_count)+"표":"");
+      poll.append(node("div","post-poll-option",label));
+    }
+    mediaAssets.append(poll);
+  }
+  content.append(rich,mediaAssets);
+  if(post.sensitive){
+    content.classList.add("post-sensitive");
+    const reveal=node("button","reveal-sensitive","콘텐츠 경고 · 내용 보기");
+    reveal.type="button";
+    reveal.setAttribute("aria-expanded","false");
+    reveal.addEventListener("click",()=>{
+      const shown=!content.classList.contains("revealed");
+      content.classList.toggle("revealed",shown);
+      reveal.textContent=shown?"내용 가리기":"콘텐츠 경고 · 내용 보기";
+      reveal.setAttribute("aria-expanded",String(shown));
+    });
+    card.append(reveal);
+  }
+  card.append(content,engagementBar(post,inDetail));
+  const meta=node("div","archive-meta");
+  meta.append(node("span","media-state",post.archive_complete?
+    "원본 첨부 "+fmt(post.media_saved)+"/"+fmt(post.media_expected)+" 검증":
+    "첨부 일부 미보관 "+fmt(post.media_saved)+"/"+fmt(post.media_expected)));
+  card.append(meta);
   return card;
 }
+
 function personCard(person){
   const row=node("article","person");
   row.append(node("div","person-icon",
@@ -522,6 +615,7 @@ function setTab(section){
   state.viewVersion+=1;state.loading=false;
   state.section=section;state.offset=0;state.more=false;
   feedSearch.hidden=!journalSection(section);
+  $("mastodonActivityControls").hidden=section!=="activity";
   for(const btn of document.querySelectorAll("[data-section]")){
     const active=btn.dataset.section===section;
     if(btn.getAttribute("role")==="tab"){
@@ -549,10 +643,17 @@ async function nextPage(){
         requestVersion=state.viewVersion;
   try{
     const isJournal=journalSection(selected);
+    const feedKindFilter=selected==="replies"?"reply":
+      selected==="activity"?$("mastodonActivity").value:
+      selected==="featured"?"featured":
+      selected==="media"&&state.profile?.platform==="mastodon"&&
+        state.profile.show_media_replies===false?"post":
+      selected==="media"||selected==="videos"?"":feedKind.value||"post";
+    const mediaFilter=selected==="media"?"has_media":
+      selected==="videos"?"has_video":feedMediaStatus.value;
     const feedParams=new URLSearchParams({
       offset:String(offset),limit:"20",q:feedQuery.value.trim(),
-      kind:selected==="replies"?"reply":selected==="media"?"":feedKind.value,
-      media_status:selected==="media"?"has_media":feedMediaStatus.value});
+      kind:feedKindFilter,media_status:mediaFilter});
     const endpoint=isJournal
        ?base()+"/feed?"+feedParams.toString()
        :base()+"/graph/"+selected+"?offset="+offset+"&limit=50";
@@ -608,8 +709,9 @@ async function selectAccount(value){
   $("more").hidden=true;$("more").disabled=false;
   detailRequestSeq+=1;
   if(detail.open)detail.close();
-  state.account=value||"";state.profile=null;state.offset=0;state.section="posts";
+  state.account=value||"";state.profile=null;state.offset=0;
   setPlatformTheme(state.account);
+  state.section=state.account.startsWith("mastodon-")?"activity":"posts";
   if(value)setAccountUrl(value);
   if(!value){
     resetProfile();$("displayName").textContent="계정을 선택하세요";
@@ -622,7 +724,7 @@ async function selectAccount(value){
   // The remote profile snapshot can take tens of seconds to verify. Start
   // post loading NOW, independently. A stale profile response must never
   // overwrite a newly selected account.
-  setTab("posts");
+  setTab(state.section);
   try{
     const profile=await get(base()+"/profile");
     if(state.account!==value)return;
@@ -688,6 +790,9 @@ feedSearch.addEventListener("submit",event=>{event.preventDefault();resetFeedSea
 feedQuery.addEventListener("input",scheduleFeedSearch);
 feedKind.addEventListener("change",resetFeedSearch);
 feedMediaStatus.addEventListener("change",resetFeedSearch);
+$("mastodonActivity").addEventListener("change",()=>{
+  if(state.section==="activity")setTab("activity");
+});
 $("feedReset").addEventListener("click",()=>{
   feedQuery.value="";feedKind.value="";feedMediaStatus.value="";
   resetFeedSearch();

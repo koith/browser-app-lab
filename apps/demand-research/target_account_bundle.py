@@ -317,7 +317,12 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
         raise RuntimeError("no verifiable public content staged")
     refs=[k for k in store.objects if k.endswith("/post.json")]
     if not refs and not prior:
-        raise RuntimeError("no public post original staged in first bundle")
+        # A public profile-only account, or a source whose media is only
+        # partially retrievable, is still worth preserving. Never call its
+        # absent post bytes complete or fabricate a finished post journal.
+        has_profile=any("/profile/snapshots/" in key for key in store.objects)
+        if not has_profile:
+            raise RuntimeError("no public post or independently stored profile staged")
     account_name=next((k.split("/")[2] for k in store.objects
                        if k.startswith("account-archives/"+platform+"/")),None)
     if not account_name:
@@ -341,7 +346,17 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
             "remote_sha256_verified":True,
             "remote_zip_bytes":remote["bytes"],
             "source_state":manifest["capture_state"],
-            "source_partial":interrupted is not None}
+            "source_partial":(interrupted is not None or
+                result is None or result.get("status")!="COMPLETE_CURRENT_PUBLIC_CURSOR"),
+            "unresolved_media_records":(result or {}).get("media_pending_total",0),
+            "profile_snapshot_verified":(result or {}).get("profile",{}).get(
+                "profile_verified") is True,
+            "profile_assets_unavailable":(result or {}).get("profile",{}).get(
+                "profile_assets_unavailable",0),
+            "graph_more_pages":any(v.get("more_public_pages") is not False
+                for v in (result or {}).get("graph",{}).values()),
+            "threads_pending":(result or {}).get("threads",{}).get(
+                "threads_pending",True)}
     marker="TARGET_ACCOUNT_GITHUB_TEMP_SHA_VERIFIED" if github_temp else "TARGET_ACCOUNT_BUNDLE_REMOTE_VERIFIED"
     print(marker+" "+json.dumps(totals,sort_keys=True),flush=True)
     if interrupted and not github_temp:

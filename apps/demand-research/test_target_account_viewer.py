@@ -563,3 +563,57 @@ def test_all_owner_verified_accounts_listed_without_recent_atom_limit(populated,
     assert len(records)==14
     assert len({item["key"] for item in records})==14
     assert all(item["index_requires_original_recheck"] for item in records)
+
+
+def test_bluesky_immutable_facets_quote_and_alt_render_without_live_provider(populated):
+    client,_,archive,name=populated
+    uri="at://"+DID+"/app.bsky.feed.post/test100"
+    phrase="안녕 😊 안전한 링크"
+    start=len("안녕 😊 ".encode("utf-8"))
+    end=len(phrase.encode("utf-8"))
+    source={"uri":uri,"value":{
+        "$type":"app.bsky.feed.post","text":phrase,
+        "facets":[{"index":{"byteStart":start,"byteEnd":end},
+                   "features":[{"$type":"app.bsky.richtext.facet#link",
+                                "uri":"https://example.org/source"}]}],
+        "embed":{"$type":"app.bsky.embed.recordWithMedia",
+                 "record":{"record":{"uri":"at://"+DID+
+                          "/app.bsky.feed.post/quote001"}},
+                 "media":{"images":[{"alt":"원본 작성자의 이미지 설명"}]}}}}
+    archive.write_immutable("metadata/source-records/"+PID+".json",canonical_json(source))
+    post={"id":PID,"platform":"bluesky","original_id":uri,"text":phrase}
+    result=viewer._source_ui(archive,post)
+    assert "".join(x["text"] for x in result["rich_text"])==phrase
+    assert result["rich_text"][-1]["href"]=="https://example.org/source"
+    assert result["alt_text"]==["원본 작성자의 이미지 설명"]
+    assert result["quoted_post"]["url"].endswith("/post/quote001")
+    assert result["sensitive"] is False
+
+
+def test_saved_mastodon_cw_poll_and_boost_have_verified_safe_text():
+    source={"id":"1234","visibility":"public","sensitive":True,
+            "spoiler_text":"콘텐츠 주의",
+            "content":'<p>첫줄 <a href="https://valid.example/source">연결</a></p>',
+            "pinned":True,"media_attachments":[{"description":"텍스트 설명"}],
+            "poll":{"expired":True,"options":[{"title":"찬성","votes_count":3},
+                                               {"title":"반대","votes_count":2}]},
+            "favourites_count":7,"reblogs_count":1,"replies_count":2}
+    class SyntheticArchive:
+        def read(self,_,*,cap,optional):return canonical_json(source)
+    post={"id":"b"*40,"platform":"mastodon","original_id":"mastodon.example:1234",
+          "text":"첫줄 연결"}
+    result=viewer._source_ui(SyntheticArchive(),post)
+    assert result["sensitive"] is True
+    assert result["content_warning"]=="콘텐츠 주의"
+    assert result["pinned"] is True
+    assert any(p["href"]=="https://valid.example/source" for p in result["rich_text"])
+    assert result["poll"]["options"][0]["votes_count"]==3
+    assert result["alt_text"]==["텍스트 설명"]
+    assert result["engagement"]["replies_count"]==2
+
+
+def test_source_links_never_accept_javascript_or_internal_network():
+    html=viewer._PublicHtmlParts()
+    html.feed('<a href="javascript:alert(1)">악성</a><a href="https://public.example">공개</a>')
+    assert html.parts[0]["text"]=="악성" and not html.parts[0]["href"]
+    assert html.parts[1]["href"]=="https://public.example"

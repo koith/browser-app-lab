@@ -13,6 +13,7 @@ PAGE="https://testserver/account-archive"
 ACCOUNT="bluesky-"+"a"*40
 POST="b"*40
 POST2="f"*40
+POST4="d"*40
 
 
 def response_fixture(path,query=""):
@@ -37,17 +38,19 @@ def response_fixture(path,query=""):
             "media_expected":1,"media_saved":1,"archive_complete":True,
             "media":[{"index":0,"kind":"image","mime":"image/png","verified_sha256":True,
                       "url":"/api/account-archives/"+ACCOUNT+"/media/"+POST+"/0"}]},
+            {"id":POST4,"kind":"post","posted_at":"2026-11-03T00:30:00Z",
+             "text":"Synthetic second nonreply post",
+             "source_url":"https://bsky.app/profile/qa.bsky.social/post/second",
+             "media_expected":2,"media_saved":0,"archive_complete":False,
+             "media":[{"index":0,"mime":"image/png","verified_sha256":False,"url":None},
+                      {"mime":"image/png","verified_sha256":False,"url":None}]},
+            {"id":"e"*40,"kind":"post","posted_at":"2026-11-03T02:00:00Z",
+             "text":"Synthetic retry-only third post",
+             "media_expected":0,"media_saved":0,"archive_complete":True,"media":[]},
             {"id":POST2,"kind":"reply","posted_at":"2026-11-03T01:00:00Z",
              "text":"Synthetic second archived post",
              "source_url":"https://bsky.app/profile/qa.bsky.social/post/def",
-             "media_expected":2,"media_saved":0,"archive_complete":False,
-             "media":[{"index":0,"mime":"image/png","verified_sha256":False,"url":None},
-                      {"mime":"image/png","verified_sha256":True,
-                       "url":"/api/account-archives/"+ACCOUNT+"/media/"+POST+"/0"}]},
-            {"id":"e"*40,"kind":"post","revision_of":POST,
-             "posted_at":"2026-11-03T02:00:00Z",
-             "text":"Synthetic retry-only third post",
-             "media_expected":0,"media_saved":0,"archive_complete":True,"media":[]}
+             "media_expected":2,"media_saved":0,"archive_complete":False,"media":[]}
         ]
         query_text=args.get("q",[""])[0].casefold()
         kind=args.get("kind",[""])[0]
@@ -68,7 +71,7 @@ def response_fixture(path,query=""):
                 "accounts":[{"id":"did:plc:"+"d"*24,"handle":"reader.bsky.social",
                              "display_name":"Public Reader",
                              "profile_url":"https://bsky.app/profile/reader.bsky.social"}]}
-    if path.endswith("/threads/"+POST2):
+    if path.endswith("/threads/"+POST4) or path.endswith("/threads/"+POST2):
         return {"captured":True,"truncated":False,"captured_at":"2026-11-04T00:00:00Z",
                 "replies":[{"id":"reply2","text":"Synthetic second comment",
                             "display_name":"Second Reader","posted_at":"2026-11-04T01:00:00Z"}]}
@@ -168,6 +171,7 @@ def run(browser_type,name,width,height):
         assert "첨부 2" in page.locator("#results .post-media .media-missing").last.inner_text()
         assert page.locator("#results article.post").nth(1).locator("img").count()==0, (
             "index-free media cannot impersonate an original position")
+        page.locator(".archive-tools summary").click()
         page.locator("#feedQuery").fill("third")
         page.locator("#feedSearch").press("Enter")
         page.locator("#results").get_by_text("Synthetic retry-only third post").wait_for()
@@ -185,6 +189,7 @@ def run(browser_type,name,width,height):
         # Reload keeps saved filters and chosen private account, not blank results.
         page.reload(wait_until="domcontentloaded",timeout=30000)
         page.locator("#results").get_by_text("Synthetic second archived post").wait_for()
+        page.locator(".archive-tools summary").click()
         assert page.locator("#feedKind").input_value()=="reply"
         assert page.locator("#feedMediaStatus").input_value()=="partial"
         page.locator("#feedReset").click()
@@ -253,7 +258,7 @@ def run(browser_type,name,width,height):
         assert page.locator("#results .person").count()==1,"stale feed must not replace new tab"
         # Closing an old thread and opening another must not display the old replies.
         page.get_by_role("tab",name="게시글",exact=True).click()
-        page.locator("#results article.post").nth(1).get_by_text("Synthetic second archived post").wait_for(timeout=5000)
+        page.locator("#results article.post").nth(1).get_by_text("Synthetic second nonreply post").wait_for(timeout=5000)
         page.locator("#results article.post").first.get_by_role("button",name="댓글·상세 보기").click()
         page.locator("#closeDetail").click()
         page.locator("#results article.post").nth(1).get_by_role("button",name="댓글·상세 보기").click()
