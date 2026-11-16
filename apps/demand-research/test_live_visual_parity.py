@@ -15,6 +15,8 @@ import json
 import math
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
+import ipaddress
 from PIL import Image, ImageChops, ImageStat
 from playwright.sync_api import sync_playwright, Error as BrowserError
 
@@ -52,12 +54,34 @@ def choose_provider_accounts():
             # Do not permit an archive API to point the browser at internal
             # hosts. Mastodon HTTPS source was independently checked by
             # source registration; never accept non-HTTPS.
-            if (profile.get("available") is True and isinstance(source,str)
-                    and source.startswith("https://") and
-                    len(source)<=600 and
-                    profile.get("handle")):
-                selected[provider]=(row["key"],source,profile)
-                break
+            if (profile.get("available") is not True or
+                    not isinstance(source,str) or len(source)>600 or
+                    not profile.get("handle")):
+                continue
+            try:
+                parsed=urlsplit(source)
+                host=parsed.hostname or ""
+                if (parsed.scheme!="https" or parsed.port not in (None,443)
+                        or parsed.username or parsed.password or parsed.fragment):
+                    continue
+                if provider=="bluesky":
+                    if host!="bsky.app" or not parsed.path.startswith("/profile/"):
+                        continue
+                else:
+                    identity=str(profile.get("identity") or "")
+                    expected_host=identity.rsplit(":",1)[0]
+                    if host!=expected_host or not host or host.endswith(
+                            (".local",".internal",".localhost")):
+                        continue
+                try:
+                    ipaddress.ip_address(host)
+                    continue
+                except ValueError:
+                    pass
+            except ValueError:
+                continue
+            selected[provider]=(row["key"],source,profile)
+            break
     return selected
 
 
