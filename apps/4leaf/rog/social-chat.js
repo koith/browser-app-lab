@@ -907,7 +907,7 @@
  const liveRoomCells=(()=>{
   const cells=[];
   for(let row=0;row<20;row++)for(let col=0;col<10;col++)
-   cells.push({col,row,distance:Math.abs(col-4.5)+Math.abs(row-9.5)});
+   cells.push({col,row,distance:Math.abs(col-4.5)+2.2*Math.abs(row-9.5)});
   return cells.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.col-b.col);
  })();
  function realRoomPosition(index,total){
