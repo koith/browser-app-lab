@@ -62,10 +62,19 @@ def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=Non
         proven=eligible_source_pages(evidence,model,safe_registered_public_page)
         if len(proven)>100:
             raise ValueError('EXCESSIVE_VERIFIED_NEW_SOURCE_WORKS')
-        for aid in sorted(proven):
+        target_rows=evidence.get('targets',[])
+        if not isinstance(target_rows,list) or len(target_rows)>200:
+            raise ValueError('INVALID_VERIFIED_TARGET_ROWS')
+        target_urls={row['id']:set(row.get('urls',[]))
+                     for row in target_rows
+                     if isinstance(row,dict) and isinstance(row.get('id'),str)
+                     and isinstance(row.get('urls'),list)}
+        for aid,source_urls in sorted(proven.items()):
             if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid):
                 raise ValueError('UNSAFE_VERIFIED_SOURCE_ALBUM_ID')
-            if aid not in all_ids:
+            # Collector reads targets as its work registry. Do not schedule
+            # work that the collector cannot create from a proven target URL.
+            if source_urls & target_urls.get(aid,set()) and aid not in all_ids:
                 all_ids.append(aid)
     priority=[aid for aid in PRIORITY[model] if aid in all_ids]
     rest=[aid for aid in all_ids if aid not in priority]
