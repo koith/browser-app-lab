@@ -512,3 +512,49 @@ def test_bluesky_original_profile_banner_captured_even_without_appview_image_url
     assert document["assets"]["banner"]["source_tier"]=="original_pds_blob"
     assert document["assets"]["banner"]["original_cid"]==identifier
 
+
+
+def test_public_mastodon_cw_post_is_captured_not_silently_dropped():
+    profile={"platform":"mastodon","identity":"writer@mastodon.example",
+             "actor":"20200","pds":"https://mastodon.example",
+             "profile_url":"https://mastodon.example/@writer"}
+    raw={"id":"992","visibility":"public","sensitive":True,
+         "spoiler_text":"콘텐츠 경고","content":"<p>경고가 있는 공개 게시글</p>",
+         "url":"https://mastodon.example/@writer/992",
+         "account":{"id":"20200","acct":"writer"},
+         "created_at":"2026-11-03T00:00:00Z","media_attachments":[]}
+    record=job.normalize_record(profile,raw)
+    assert record is not None and record["kind"]=="post"
+    assert record["text"]=="경고가 있는 공개 게시글"
+    assert record["raw"]["spoiler_text"]=="콘텐츠 경고"
+    assert job.normalize_record(profile,{**raw,"visibility":"private"}) is None
+
+
+def test_public_mastodon_reblogs_are_preserved_as_owner_timeline_actions():
+    profile={"platform":"mastodon","identity":"writer@mastodon.example",
+             "actor":"20200","pds":"https://mastodon.example",
+             "profile_url":"https://mastodon.example/@writer"}
+    original={"id":"82","visibility":"public","content":"<p>공개된 다른 사용자 원문</p>",
+              "account":{"id":"20299","acct":"source"},
+              "media_attachments":[]}
+    outer={"id":"888","visibility":"public","sensitive":False,
+           "content":"","reblog":original,
+           "created_at":"2026-11-03T00:00:00Z",
+           "url":"https://mastodon.example/@writer/888",
+           "account":{"id":"20200","acct":"writer"}}
+    result=job.normalize_record(profile,outer)
+    assert result and result["kind"]=="reblog"
+    assert result["text"]=="공개된 다른 사용자 원문"
+    assert job.normalize_record(profile,{**outer,
+        "reblog":{**original,"visibility":"private"}}) is None
+
+
+def test_public_bluesky_label_warns_without_excluding_published_source():
+    profile={"platform":"bluesky","identity":DID,"actor":DID,
+             "profile_url":"https://bsky.app/profile/"+DID}
+    public=blue_row("label123","Synthetic publicly labeled post")
+    public["value"]["labels"]={"values":[{"val":"sexual"}]}
+    assert job.normalize_record(profile,public) is not None
+    restricted=blue_row("hidden12","Original hidden by moderation")
+    restricted["value"]["labels"]={"values":[{"val":"!hide"}]}
+    assert job.normalize_record(profile,restricted) is None
