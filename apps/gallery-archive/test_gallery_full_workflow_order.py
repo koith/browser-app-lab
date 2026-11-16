@@ -18,6 +18,10 @@ stages={
 }
 assert stages['reverse'] < stages['checkpoint'] < stages['sources'] < stages['collect'], stages
 assert 'ALL_OWNER_PHOTO_REVERSE_CURSOR_PERSISTED_AND_READBACK' in workflow
+# Every material change to visual backend must replay all previously scanned
+# SHA records. A v3 exhausted cursor must NOT strand the new v4 engine.
+assert '--search-revision 4' in workflow, 'new Bing PagesIncluding would never query old records'
+assert '--search-revision 3' not in workflow
 assert 'SOURCE_ALIAS_SEARCH_UNAVAILABLE' in workflow
 assert 'timeout 420s python apps/gallery-archive/source_alias_search.py' in workflow
 assert 'source_alias_status' in workflow
