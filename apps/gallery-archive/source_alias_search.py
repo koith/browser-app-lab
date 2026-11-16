@@ -332,6 +332,18 @@ def merge_image_reverse_sites(db, report, model, results, session, limit=8, stat
             # registered edition under an alternate published name.
             hint=str(link.get("label",""))+" "+url
             possible=[work for work in catalog if exact_work_in_text(work,hint)]
+            # A *structured* same-photo host-page result can have no work
+            # name in its search-card label or numeric URL. It is still
+            # worth opening ONE bounded page and independently verifying
+            # its actual model and edition heading. Generic Bing/Yandex
+            # HTML links do NOT receive this privilege.
+            structured=(link.get('source_engine') in (
+                'yandex_sites','bing_visual_pages_including')
+                and isinstance(link.get('matched_image_url'),str)
+                and link['matched_image_url'].startswith('https://'))
+            if not possible and structured:
+                possible=catalog
+                stats['structured_visual_host_page_without_edition_hint']+=1
             if not possible:
                 stats['no_exact_edition_hint']+=1
                 continue
