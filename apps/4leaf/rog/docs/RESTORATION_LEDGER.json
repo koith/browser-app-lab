@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-14",
+  "updatedAt": "2026-11-16",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -2046,6 +2046,21 @@
         "M07",
         "M09"
       ]
+    },
+    {
+      "id": "REQ-20261116-CHAT-AND-DICE-FURTHER-RESTORATION",
+      "date": "2026-11-16",
+      "origin": "2026-11-16 사용자 요청",
+      "text": "직전 주잔 대기실 체스맨 정보표 작업의 실제 범위를 명확히 보고하고, 주잔 외 나머지 원작 복원도 실제 구현을 계속하라. 원본 스크린샷/실사용 검증 없이 완성 판정하지 말 것.",
+      "taskIds": [
+        "P0-CHAT",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M09",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -2424,7 +2439,7 @@
       "title": "상설 채팅방 원작 화면 정밀 복원",
       "status": "in_progress",
       "milestone": "M03",
-      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달; 2026-10-18 실제 Chromium 통합회귀 발견: 원본 ringbtn.png 캐릭터정보 메뉴가 원본 매직카덴 툴바(상위 CSS 쌓임맥락) 아래 가려짐. 2004 ChatRoom 프레임 CSS :has() 특이성 재조정으로 메뉴가 열릴 때만 z=150, 닫히면 본래 z=106. 브라우저 실제 elementFromPoint 클릭 QA 성공. 전체 채팅 원작 픽셀 동등성은 아직 미완료.; 2026-10-18: Real 2004 ChatRoom source room3 seat 9 torso now receives clicks instead of source toolbar. All scene screenshot pixel fidelity/multiuser seating still outstanding. | 2026-11-02 public beta.39 QA: chat scroll physical wheel retry test now actually retries four times before reporting failure; runtime chat code unchanged, public revalidation pending.",
+      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달; 2026-10-18 실제 Chromium 통합회귀 발견: 원본 ringbtn.png 캐릭터정보 메뉴가 원본 매직카덴 툴바(상위 CSS 쌓임맥락) 아래 가려짐. 2004 ChatRoom 프레임 CSS :has() 특이성 재조정으로 메뉴가 열릴 때만 z=150, 닫히면 본래 z=106. 브라우저 실제 elementFromPoint 클릭 QA 성공. 전체 채팅 원작 픽셀 동등성은 아직 미완료.; 2026-10-18: Real 2004 ChatRoom source room3 seat 9 torso now receives clicks instead of source toolbar. All scene screenshot pixel fidelity/multiuser seating still outstanding. | 2026-11-02 public beta.39 QA: chat scroll physical wheel retry test now actually retries four times before reporting failure; runtime chat code unchanged, public revalidation pending. | 2026-11-16 beta85 후보: real central listed user-created public room -> 503 -> clearly offline local entry; locked server room cannot bypass password; native owner create server failure appears on original live input field; map entry errors surface in existing map hint. New real Chromium regression and CI submitted; original 2004 screenshot/published Pages equivalence still UNVERIFIED.",
       "acceptance": [
         "원본 794×528/2004 화면의 입력·가구·좌석·상설 목록을 실제 참가자 그대로 재현"
       ],
@@ -2435,7 +2450,9 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39123213181",
         "https://github.com/koith/browser-app-lab/pull/113",
         "https://github.com/koith/browser-app-lab/pull/118",
-        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs"
+        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs",
+        "apps/4leaf/rog/tests/chat-ready-then-503-public-room.cjs",
+        "apps/4leaf/rog/world-social.css"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -10364,6 +10381,35 @@
       "evidence": [
         "https://github.com/koith/browser-app-lab/pull/1119",
         "https://github.com/koith/browser-app-lab/actions/runs/43538917713"
+      ]
+    },
+    {
+      "seq": 484,
+      "date": "2026-11-16",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261116-CHAT-AND-DICE-FURTHER-RESTORATION",
+      "taskIds": [
+        "P0-CHAT",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M09",
+        "P0-RELEASE"
+      ],
+      "details": "원작 Room CHESSMAN INFO 8+4칸 PR #1201은 대기실 정보 UI/선택 기능 한정. 실 전투 말·말판·카메라 원작 동등성은 별도 미완료 18건에 포함."
+    },
+    {
+      "seq": 485,
+      "date": "2026-11-16",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "P0-CHAT",
+      "details": "실제 중앙 서버에 연결되어 목록으로 받은 사용자 공개방도 JOIN 502/503 시 출처를 명확히 표시한 로컬 방 입장 허용. 비공개 서버방은 오프라인 비밀번호 검증을 가장하지 않음. 원본 ownerdialog의 실제 이름 필드에 서버 CREATE 4xx 실패를 브라우저 유효성 오류로 표시하고 입력 변경 시 재시도 복구. 지도 내부 기존 안내줄에 실제 입장 실패 이유 노출. Chromium 실제 클릭 회귀 테스트, CI 제출. 실서버/Pages/원작 픽셀 비교는 아직 미수용. 기존 P0-CHAT 작업의 세부 구현으로 집계하며 신규 완료 건수 0.",
+      "evidence": [
+        "apps/4leaf/rog/social-chat.js",
+        "apps/4leaf/rog/world-social.css",
+        "apps/4leaf/rog/tests/chat-ready-then-503-public-room.cjs",
+        ".github/workflows/rog-r35-critical-playability.yml"
       ]
     }
   ],
