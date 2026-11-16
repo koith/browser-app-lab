@@ -16,6 +16,7 @@ from reverse_seed_priority import seeds
 from reverse_sites_parser import sites_from_html
 from reverse_image_discovery import (untrack, leads_from_html, identity_supported,
                                      lens_query, tineye_query)
+from bing_visual_knowledge import bing_visual_query
 
 RESEARCH_UA="PersonalPublicPhotoSourceResearch/1.0"
 SEARCH_URL="https://yandex.com/images/search"
@@ -105,12 +106,20 @@ def search_one(seed,client=None):
     # Query Bing when Yandex has no match or only one/two distinct leads.
     # This stays bounded (one Bing request) and does not retry access blocks.
     if len(approved)<3:
-        b_status,b_html=query_page(client,BING_URL,{
-            "view":"detailv2","iss":"sbi","FORM":"SBIHMP","sbisrc":"UrlPaste",
-            "q":"imgurl:"+url})
-        b_links=leads_from_html(b_html) if b_html else []
-        stages["bing"]=b_status if b_status!="ok" else "leads_"+str(len(b_links))
-        accept(b_links,"bing")
+        # A search results HTML page is NOT the Bing visual search result.
+        # The image knowledge JSON PagesIncluding module actually attributes
+        # host pages to the submitted photo. Only that module gets the
+        # bing_visual_* provenance; generic HTML links remain research leads.
+        visual=bing_visual_query(client,url)
+        stages["bing_visual"]=visual["status"]
+        accept(visual.get("links",[]),"bing_visual")
+        if len(approved)<3:
+            b_status,b_html=query_page(client,BING_URL,{
+                "view":"detailv2","iss":"sbi","FORM":"SBIHMP",
+                "sbisrc":"UrlPaste","q":"imgurl:"+url})
+            b_links=leads_from_html(b_html) if b_html else []
+            stages["bing"]=b_status if b_status!="ok" else "html_links_"+str(len(b_links))
+            accept(b_links,"bing")
     # The HTML landing page above is not the complete Bing Visual Search
     # knowledge API. When it yields no model-supported pages, try the
     # independently implemented public Lens and TinEye URL-result flows.
