@@ -35,6 +35,20 @@ class CampaignControllerTests(unittest.TestCase):
         self.assertFalse(a['dispatch'])
         self.assertTrue(a['max_steps_reached'])
 
+    def test_pending_unreadable_retry_keeps_campaign_running_once(self):
+        mimmi=state('mimmi',10,10,5)
+        mimmi['retry_pending_ids']=[f'{i:032x}' for i in range(3)]
+        a=decide({'mimmi':mimmi,'yui':state('yui',10,10,0)},step=8)
+        self.assertTrue(a['dispatch'])
+        self.assertEqual(a['models']['mimmi']['pending_retry'],3)
+        self.assertEqual(a['models']['mimmi']['remaining'],3)
+        mimmi['retry_pending_ids']=[]
+        mimmi['unverified_after_retry_ids']=[f'{i:032x}' for i in range(3)]
+        a=decide({'mimmi':mimmi,'yui':state('yui',10,10,0)},step=9)
+        self.assertFalse(a['dispatch'])
+        self.assertTrue(a['all_attempted'])
+        self.assertEqual(a['models']['mimmi']['unverified_after_retry'],3)
+
     def test_invalid_checkpoint_aborts_rather_than_research_from_scratch(self):
         with self.assertRaisesRegex(ValueError,'INVALID_CAMPAIGN'):
             decide({'mimmi':state('yui',9,1,1),'yui':state('yui',5,1,1)},step=1)
