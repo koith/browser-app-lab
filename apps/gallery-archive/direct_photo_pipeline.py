@@ -336,13 +336,21 @@ def rotated_registered_page_queue(primary, source_pages, max_pages, page_cycle=0
 
 
 
+def _source_page_heading(raw):
+    """Observed article headline including Open Graph tags (not search snippets)."""
+    soup=BeautifulSoup(raw,'html.parser')
+    texts=[t.get_text(' ',strip=True) for t in soup.select('h1,title')]
+    texts.extend((t.get('content') or '') for t in soup.select(
+        'meta[property="og:title"],meta[name="twitter:title"]')[:4])
+    return ' '.join(texts)
+
+
 def _work_token_matched_in_heading(raw,work_title,album_id,model):
     """A legacy source earns new-cut admission only for its named edition.
 
     A generic Yui/Mimmi timeline or photo article is not album identity proof.
     """
-    soup=BeautifulSoup(raw,'html.parser')
-    heading=' '.join(t.get_text(' ',strip=True) for t in soup.select('h1,title')).casefold()
+    heading=_source_page_heading(raw).casefold()
     if not MODEL_PATTERNS[model].search(heading):
         return False
     # Neither the model name nor generic publishing terms distinguish a work.
@@ -1137,8 +1145,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if page in book.get('reverse_unverified_pages',[]):
                     # Search-engine matches are only leads, never proof of a
                     # model, edition or photo. Verify source article firsthand.
-                    reverse_heading=' '.join(h.get_text(' ',strip=True)
-                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
+                    reverse_heading=_source_page_heading(response.content)
                     if not (PUBLIC_STRONG_MODEL[model].search(reverse_heading)
                             and _work_token_matched_in_heading(
                                 response.content,book.get('title'),aid,model)):
@@ -1152,8 +1159,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if (urlsplit(page).hostname in RESEARCH_WORK_HOSTS or
                         urlsplit(page).hostname not in PAGE_HOSTS
                         and urlsplit(page).hostname not in X_PUBLIC_HOSTS):
-                    title_line=' '.join(h.get_text(' ',strip=True)
-                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
+                    title_line=_source_page_heading(response.content)
                     if not (PUBLIC_STRONG_MODEL[model].search(title_line)
                             and _work_token_matched_in_heading(
                                 response.content,book.get('title'),aid,model)):
