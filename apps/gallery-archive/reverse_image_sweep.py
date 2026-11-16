@@ -27,10 +27,19 @@ def query_page(client,source,params):
             r=client.get(current,params=params if hop==0 else None,timeout=(9,26),allow_redirects=False,
                          headers={"User-Agent":RESEARCH_UA,"Accept":"text/html"})
             if r.status_code not in (301,302,303,307,308):break
-            target=urljoin(current,r.headers.get('Location',''));parsed=urlsplit(target)
-            if (parsed.scheme!='https' or parsed.hostname!=urlsplit(source).hostname or
-                parsed.username or parsed.password or parsed.port not in (None,443) or
-                any(word in parsed.path.casefold() for word in ('captcha','challenge','login','signin','verify'))):
+            try:
+                target=urljoin(current,r.headers.get('Location',''))
+                parsed=urlsplit(target)
+                # A malformed Location port raises only when .port is read.
+                permitted=(parsed.scheme=='https'
+                           and parsed.hostname==urlsplit(source).hostname
+                           and not parsed.username and not parsed.password
+                           and parsed.port in (None,443)
+                           and not any(word in parsed.path.casefold() for word in
+                                       ('captcha','challenge','login','signin','verify')))
+            except (ValueError,TypeError):
+                permitted=False
+            if not permitted:
                 return 'redirect_access_boundary_not_followed',[]
             current=target
         else:return 'redirect_limit',[]
