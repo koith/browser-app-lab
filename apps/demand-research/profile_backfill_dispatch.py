@@ -10,7 +10,11 @@ from __future__ import annotations
 import json
 import os
 import time
+import re
+from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+from verified_bundle_reader import BundleAccountCloud
+from target_account_enrichment import PROFILE_FILE_RE
 
 import github_temp_bundle
 from target_account_archive import profile_input
@@ -40,7 +44,39 @@ def saved_accounts(bundles):
             continue
         if len(selected)>=MAX_ACCOUNTS:
             raise RuntimeError("verified account inventory exceeds safe one-shot bound")
-        selected[bundle.account]={"platform":platform,"account":url}
+        tag=getattr(bundle,"archive_tag",None)
+        if not isinstance(tag,str) or not github_temp_bundle.TAG.fullmatch(tag):
+            raise RuntimeError("Selected verified archive has no exact signed release tag")
+        run_id=int(github_temp_bundle.TAG.fullmatch(tag).group(1))
+        # Every field comes from the very same AES/SHA-verified private ZIP.
+        # Metadata from another account or a live unverified API is refused.
+        details={"display_name":"","handle":""}
+        try:
+            archive=BundleAccountCloud(bundle)
+            names=sorted((n for n in archive.names("profile/snapshots")
+                          if PROFILE_FILE_RE.fullmatch(n)),reverse=True)
+            for name in names[:4]:
+                raw=archive.read("profile/snapshots/"+name,cap=300000,optional=True)
+                if not raw:continue
+                document=json.loads(raw)
+                if (isinstance(document,dict) and
+                    document.get("platform")==platform and
+                    document.get("identity")==entry.get("identity")):
+                    details["display_name"]=str(document.get("display_name") or "")[:140]
+                    details["handle"]=str(document.get("handle") or "")[:220]
+                    break
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            pass
+        selected[bundle.account]={
+            "platform":platform,"account":url,
+            "index_row":{
+                "account_key":bundle.account,"platform":platform,
+                "release_tag":tag,"workflow_run_id":run_id,
+                "profile_url":url,"display_name":details["display_name"],
+                "handle":details["handle"],
+                "recorded_at":str(bundle.recorded_at or "")[:70],
+                "posts_verified":int(bundle.post_count),
+                "objects_verified":int(bundle.object_count)}}
     return list(selected.values())
 
 
@@ -68,6 +104,37 @@ def dispatch_one(selected,token):
     return True
 
 
+def import_durable_index(accounts):
+    if not 1<=len(accounts)<=MAX_ACCOUNTS:
+        raise RuntimeError("Invalid signed account inventory size")
+    endpoint=os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
+    secret=os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]
+    proof_url=endpoint+("&" if "?" in endpoint else "?")+urlencode({
+        "audience":"intersection-originals-free/credential-v1"})
+    proof=Request(proof_url,headers={"Authorization":"Bearer "+secret})
+    with urlopen(proof,timeout=15) as response:
+        jwt=json.loads(response.read(16000)).get("value")
+    if not isinstance(jwt,str) or len(jwt)<100:
+        raise RuntimeError("Trusted GitHub archive inventory identity unavailable")
+    destination="https://intersection-originals-free.onrender.com/api/bridge/archive-index"
+    body=json.dumps({"rows":[item["index_row"] for item in accounts]},
+                    sort_keys=True,ensure_ascii=False,separators=(",",":")).encode()
+    req=Request(destination,data=body,method="POST",headers={
+        "Authorization":"Bearer "+jwt,
+        "Content-Type":"application/json",
+        "Accept":"application/json",
+        "User-Agent":"intersection-archive-verification-inventory-v1"})
+    with urlopen(req,timeout=180) as response:
+        if response.status!=200:
+            raise RuntimeError("Signed durable archive inventory rejected")
+        result=json.loads(response.read(10000))
+    if result.get("accepted") is not True or result.get("stored")!=len(accounts):
+        raise RuntimeError("Durable account inventory independent readback failed")
+    print("PUBLIC_PROFILE_SIGNED_DURABLE_INDEX",
+          json.dumps({"indexed":len(accounts),"verified_from_zip":True}),
+          flush=True)
+
+
 def main():
     if os.getenv("GITHUB_REPOSITORY")!=TARGET_REPO:
         raise RuntimeError("trusted repository context required")
@@ -84,6 +151,12 @@ def main():
           json.dumps({"accounts":len(accounts),
                       "release_scan_limit":MAX_RELEASES_TO_VERIFY}),
           flush=True)
+    import_durable_index(accounts)
+    if os.getenv("PROFILE_INDEX_ONLY","").lower() in ("true","1"):
+        print("PUBLIC_PROFILE_INDEX_ONLY_COMPLETE",
+              json.dumps({"accounts":len(accounts),"captures_dispatched":0}),
+              flush=True)
+        return
     accepted=0
     for item in accounts:
         # Do not print account names, URLs, profile descriptions or tokens.

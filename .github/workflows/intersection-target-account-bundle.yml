@@ -8,6 +8,11 @@ on:
         required: false
         type: boolean
         default: false
+      profile_index_only:
+        description: "Refresh the full SHA-verified account picker without launching capture jobs"
+        required: false
+        type: boolean
+        default: false
       platform:
         description: "SNS public account service"
         required: false
@@ -46,7 +51,7 @@ permissions:
 
 jobs:
   dispatch-verified-profile-backfills:
-    if: ${{ inputs.profile_backfill_all == true }}
+    if: ${{ inputs.profile_backfill_all == true || inputs.profile_index_only == true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     permissions:
@@ -56,6 +61,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ github.token }}
       GITHUB_REPOSITORY: ${{ github.repository }}
+      PROFILE_INDEX_ONLY: ${{ inputs.profile_index_only }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,7 +75,7 @@ jobs:
         working-directory: apps/demand-research
         run: python profile_backfill_dispatch.py
   private-public-account-bundle:
-    if: ${{ inputs.profile_backfill_all != true }}
+    if: ${{ inputs.profile_backfill_all != true && inputs.profile_index_only != true }}
     concurrency:
       # Independent immutable ZIP writes must not queue behind journal repair.
       group: intersection-target-zip-production
