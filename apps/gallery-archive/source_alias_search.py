@@ -71,6 +71,37 @@ def hydrate_all_registered_works(db, model, root=None):
             # is not evidence of belonging to a particular photobook.
             if distinctive:
                 IDENTITIES[work]=distinctive
+    # An owner archive can contain many works absent from the smaller list
+    # of currently approved public sources. Its independently catalogued
+    # edition title is still useful for finding (but not automatically
+    # downloading) exact-work source pages.
+    owner_manifest=root/'apps'/f'{model}-gallery'/'owner-index.json'
+    if owner_manifest.is_file():
+        owner_doc=json.loads(owner_manifest.read_text(encoding='utf-8'))
+        if owner_doc.get('model')!=model:
+            raise ValueError('OWNER_SOURCE_TITLE_MODEL_MISMATCH')
+        for row in owner_doc.get('albums',[]):
+            aid=row.get('id')
+            title=row.get('title')
+            if not (isinstance(aid,str) and re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid)
+                    and isinstance(title,str) and len(title.strip())>=4
+                    and isinstance(row.get('images'),list) and row['images']):
+                continue
+            if re.search(r'AI Enhanced|AI 보정|미분류|unclassified',title,re.I):
+                continue
+            work=f'{model}:{aid}'
+            if work in db['works']:
+                continue
+            generic={'mimmi','yui','sim','public','sample','samples','photo','photos',
+                     'cosplay','gallery','vol','djawa','artgravia','official',
+                     'the','and','preview','공개','사진','미리보기','화보','공개본',
+                     '심유이','심혜성','유이','공식','원본','이미지','샘플'}
+            pieces=re.findall(r'[a-z0-9가-힣]{2,}',key(title))
+            distinctive=tuple(dict.fromkeys(t for t in pieces if t not in generic))
+            if not distinctive:continue
+            db['works'][work]=[{'name':title,'proof':'owner_catalog_work_title'}]
+            if work not in IDENTITIES:IDENTITIES[work]=distinctive
+            count+=1
     return count
 
 
