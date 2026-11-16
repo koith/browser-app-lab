@@ -535,7 +535,7 @@ const shopResaleQuote=card=>profile.serialRedeemed.includes(card?.id)
  ?{gp:1000,source:'original-2003-serial-redemption-1000gp',
    label:'원작 2003년 시리얼 등록 카드 재판매 1,000 GP'}
  :{gp:inferredShopResaleGP(card),source:'inferred-web-price-not-original',
-   label:'임시 판매가 '+inferredShopResaleGP(card).toLocaleString()+' GP (일반 카드 원작 판매가 미확인)'};
+   label:'임시 판매가 '+inferredShopResaleGP(card).toLocaleString()+' GP (일반 카드 원작 재판매 가격 규칙 미확인)'};
 // An inventory/GP change must not become visible until it is durable.
 // On localStorage quota/permission failure, restore exactly the previous
 // in-memory balances; a later page reload must not silently undo a purchase
