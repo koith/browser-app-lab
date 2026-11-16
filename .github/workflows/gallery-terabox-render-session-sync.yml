@@ -17,11 +17,8 @@ on:
       - 'apps/gallery-archive/restore_known_owner_cache.py'
       - 'apps/gallery-archive/probe_private_owner_runtime.py'
   schedule:
-    # Poll below Render Free's 15-minute idle spin-down without new paid infra.
+    # Keep existing recovery polling; do not trigger it after unrelated Pages builds.
     - cron: '7,17,27,37,47,57 * * * *'
-  workflow_run:
-    workflows: ["Deploy static content to Pages"]
-    types: [completed]
 permissions:
   contents: read
   id-token: write
@@ -80,8 +77,8 @@ jobs:
             echo "healthy=false" >> "$GITHUB_OUTPUT"
             echo "Cold/incomplete gallery: existing-owner authenticated recovery is required." >> "$GITHUB_STEP_SUMMARY"
           fi
-      - name: Securely refresh Render storage session without exposing cookies or viewer passwords
-        if: github.event_name != 'schedule' && steps.ready.outputs.healthy != 'true'
+      # Cold scheduled restores also need this authenticated refresh before recovery.\n      - name: Securely refresh Render storage session without exposing cookies or viewer passwords
+        if: steps.ready.outputs.healthy != 'true'
         id: direct_owner_session
         continue-on-error: true
         shell: bash
