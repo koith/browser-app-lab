@@ -56,7 +56,22 @@ function absNear(actual,target,span,label){assert.ok(Number.isFinite(actual)&&Ma
   console.log('DICE-ORIGINAL-800X600-RECTS '+JSON.stringify(geometry));
   console.log('DICE-ORIGINAL-800X600-ANCHORS '+JSON.stringify(measured));
   for(const t of measured)absNear(t.actual,t.expected,t.slack,t.id+'.'+t.key);
-  assert.ok(geometry.turn&&geometry.turn.w>=110,'readable real turn cue is still present');
+  // No extra modern popup in the 2004 still. The visible native 244x52
+  // event sprite carries the live turn instead, over the authentic bitmap.
+  const nativeStatus=await page.evaluate(()=>{
+   const bubble=document.querySelector('#dice-turn-banner');
+   const event=document.querySelector('#dice-native-event');
+   const heading=event.querySelector('.dice-native-turn-heading');
+   return {inventedBubbleOpacity:getComputedStyle(bubble).opacity,
+    sourceBitmap:getComputedStyle(event).backgroundImage,
+    heading:heading?.textContent,headingFont:parseFloat(getComputedStyle(heading).fontSize),
+    body:event.querySelector('.dice-native-event-detail')?.textContent};
+  });
+  assert.equal(nativeStatus.inventedBubbleOpacity,'0','WEB bubble must NOT paint on 2004 native board');
+  assert.match(nativeStatus.sourceBitmap,/original\\/IMG\\/eventmsgbox\\.png/);
+  assert.match(nativeStatus.heading,/1P.+차례/);
+  assert.ok(nativeStatus.headingFont>=16,'large readable turn in actual native-source event frame');
+  console.log('DICE-ORIGINAL-SOURCE-TURN-STATUS '+JSON.stringify(nativeStatus));
   const currentDice=await page.locator('#app').screenshot({type:'jpeg',quality:58});
   await makeOverlay('dice',source('board.jpg'),currentDice);
   // The native ROLL control MUST remain inside reference centre x365..435 and y389..439.
