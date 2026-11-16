@@ -171,6 +171,10 @@
  * This restores layout anchors only, not unavailable 2004 per-face art,
  * source shop background layers or original 2004 EXE economic mechanics.
  */
+#shop .shop-native-stage[data-era="2004"]{
+ /* Original shop_ref has no extra 2px HTML ridge around this source client. */
+ border:0!important;
+}
 #shop .shop-native-stage[data-era="2004"] .shop-grid{
  left:47px!important;top:56px!important;
  width:325px!important;height:182px!important;
@@ -234,10 +238,10 @@
  overflow-y:auto!important;
 }
 #shop .shop-native-stage[data-era="2004"] .shop-detail #shop-buy{
- left:370px!important;top:71px!important;
+ left:368px!important;top:71px!important;
 }
 #shop .shop-native-stage[data-era="2004"] .shop-detail #shop-sell{
- left:473px!important;top:71px!important;
+ left:471px!important;top:71px!important;
 }
 #shop .shop-native-stage[data-era="2004"] .shop-keeper .money{
  left:402px!important;top:294px!important;
