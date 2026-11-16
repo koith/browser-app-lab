@@ -198,11 +198,15 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
                 if html is None:continue
                 for result in hits_from_html(html,engine):
                     url=result["url"]
-                    if url in visited_urls or not https_page(url):continue
+                    # A publisher page can appear as a hit for several
+                    # editions. Rejecting it for work A must not prevent
+                    # re-checking it for work B. De-duplicate within EACH
+                    # work, not across the entire model catalog.
+                    if (work,url) in visited_urls or not https_page(url):continue
                     # URL candidates cannot pass merely on a search title; open source.
                     if not exact_work_in_text(work,result.get("title","")+" "+result.get("snippet","")):continue
-                    visited_urls.add(url)
                     if checked_this_work>=per_album_pages:break
+                    visited_urls.add((work,url))
                     checked_this_work+=1
                     source_html,state=load_html(session,url)
                     status["source_"+state]+=1
