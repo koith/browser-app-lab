@@ -331,3 +331,87 @@ body{background:var(--paper);color:var(--ink)}
 .profile-version.active:disabled{opacity:1}
 .profile-content .evidence{order:7}
 .profile-history-list .profile-version:not(:disabled):hover{border-color:var(--accent)}
+
+
+/* Native-structure archive, 2026-11. Preserve local verified originals and
+   never render a fabricated social action or unsafe remote embed. */
+.tabs [hidden],.mastodon-activity-controls[hidden]{display:none!important}
+:root[data-platform="bluesky"] .main{max-width:620px}
+:root[data-platform="mastodon"] .main{max-width:680px}
+:root[data-platform="bluesky"] .profile{border-color:#eef0f3}
+:root[data-platform="bluesky"] .cover{height:clamp(116px,30vw,180px);
+ background-position:center;background-size:cover}
+:root[data-platform="mastodon"] .cover{height:clamp(145px,40vw,222px);
+ background-position:center;background-size:cover}
+:root[data-platform="bluesky"] .avatar{width:92px;height:92px;top:-46px;
+ border:4px solid #fff}
+:root[data-platform="mastodon"] .avatar{width:91px;height:91px;top:-46px;
+ border:4px solid #262a38}
+:root[data-platform="bluesky"] .profile-content{padding-top:56px}
+:root[data-platform="mastodon"] .profile-content{padding-top:58px}
+:root[data-platform="bluesky"] .profile-head h2{font-size:23px;line-height:1.2}
+:root[data-platform="mastodon"] .profile-head h2{font-size:22px;line-height:1.2}
+:root[data-platform="bluesky"] .bio{color:#253343;font-size:14px;line-height:1.55}
+:root[data-platform="mastodon"] .bio{color:#edeef8;font-size:14px;line-height:1.55}
+:root[data-platform="mastodon"] .stats{border-top:1px solid #3d4152;
+ border-bottom:1px solid #3d4152;padding:11px 0}
+:root[data-platform="bluesky"] .tabs{border-bottom:1px solid #e7ebf0}
+:root[data-platform="bluesky"] .archive-content .tabs button{font-size:13px;
+ min-height:46px;padding:12px 5px;font-weight:700}
+:root[data-platform="mastodon"] .archive-content .tabs button{
+ border-color:transparent;color:#abaec2;min-height:49px;font-size:13px}
+:root[data-platform="mastodon"] .archive-content .tabs button.active{
+ color:#e3dfff;border-bottom-color:#9092ff}
+.mastodon-activity-controls{display:flex;align-items:center;gap:11px;
+ border-bottom:1px solid var(--line);padding:10px 15px;background:var(--white)}
+.mastodon-activity-controls label{font-size:12px;font-weight:700;color:var(--sub)}
+.mastodon-activity-controls select{background:var(--paper);color:var(--ink);
+ border:1px solid var(--line);padding:7px 12px;border-radius:9px;font-size:13px}
+:root[data-platform="mastodon"] .post-head{margin-bottom:8px}
+.post-pinned,.post-reblog-note{font-size:12px;color:var(--sub);
+ margin:0 0 8px 54px;font-weight:650;line-height:1.45}
+.post-reblog-note .post-inline-link{font-weight:600}
+.post-content{margin:0 0 7px 53px;min-width:0}
+.post-content .post-body{font-size:14px;line-height:1.56;white-space:pre-wrap;
+ overflow-wrap:anywhere;margin:0 0 9px;color:var(--ink)}
+.post-inline-link{color:var(--accent);text-decoration:none}
+.post-inline-link:hover{text-decoration:underline}
+.post-attachments{display:flex;flex-direction:column;gap:7px}
+.post-external-card,.post-quote,.post-poll{border:1px solid var(--line);
+ border-radius:12px;padding:12px 13px;background:var(--white);font-size:12px}
+.post-card-title{display:block;color:var(--ink);font-size:13px;
+ text-decoration:none;font-weight:700;overflow-wrap:anywhere}
+.post-card-summary{color:var(--sub);margin:5px 0 0;line-height:1.5}
+.post-quote-label{display:block;color:var(--sub);margin-bottom:4px;font-size:11px}
+.post-poll strong{display:block;margin-bottom:9px}
+.post-poll-option{padding:8px 11px;margin-top:5px;border-radius:7px;
+ background:var(--accent2);border:1px solid var(--line)}
+.content-warning{color:var(--sub);font-size:12px;font-weight:700;
+ margin:6px 0 9px}
+.post-content.post-sensitive:not(.revealed) .post-body,
+.post-content.post-sensitive:not(.revealed) .post-attachments{display:none}
+.reveal-sensitive{margin:0 0 8px 53px;color:var(--accent);
+ background:var(--accent2);border:1px solid var(--line);
+ border-radius:8px;padding:9px 14px;font-size:12px;font-weight:760}
+.post-bottom{margin-left:53px;margin-top:6px;display:flex;
+ align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap}
+.post-metric{display:inline-flex;gap:5px;align-items:center;color:var(--sub);
+ font-size:11px;min-width:25px}
+.post-metric-icon{font-size:19px;font-family:system-ui;line-height:1}
+.post-action{white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.post-bottom .post-action-source{font-weight:500;color:var(--sub)}
+.post-bottom .post-action-reply{font-weight:650;color:var(--accent)}
+.archive-meta{margin:7px 0 0 53px;line-height:1.4}
+.archive-meta .media-state{color:var(--sub);font-size:10px}
+:root[data-platform="mastodon"] .post-metric{color:#aab0c4}
+:root[data-platform="mastodon"] .post-quote,:root[data-platform="mastodon"] .post-poll,
+:root[data-platform="mastodon"] .post-external-card{background:#2a2e3d}
+@media(max-width:650px){
+  .post-content,.post-bottom,.archive-meta,.post-pinned,.post-reblog-note{margin-left:49px}
+  .reveal-sensitive{margin-left:49px}
+  .post-bottom{gap:7px}
+  .post-metric{font-size:10px}
+  .post-metric-icon{font-size:17px}
+  .post-bottom .post-action{font-size:10px}
+  :root[data-platform="bluesky"] .profile-content{padding-top:50px}
+}
