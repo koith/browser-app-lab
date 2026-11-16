@@ -264,7 +264,7 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
             "engine_status":dict(status),"research_only_not_yet_saved":True,
             "physical_originals_stored":0,"gallery_visible_added":0}
 
-def merge_image_reverse_sites(db, report, model, results, session, limit=8):
+def merge_image_reverse_sites(db, report, model, results, session, limit=8, stats_out=None):
     """Resolve source-page identities across the *registered work catalog*.
 
     The reverse seed may be an unclassified or differently named preview
@@ -275,7 +275,9 @@ def merge_image_reverse_sites(db, report, model, results, session, limit=8):
     trusted source scope.
     """
     accepted=[]
+    stats=Counter()
     if report.get("research_only") is not True or not isinstance(report.get("results"),list):
+        if stats_out is not None:stats_out.update(stats)
         return accepted
     catalog=[work for work in db["works"] if work.startswith(model+":")]
     seen=set()
@@ -285,21 +287,32 @@ def merge_image_reverse_sites(db, report, model, results, session, limit=8):
         seed_id=seed.get("album_id")
         for link in seed.get("candidate_pages",[])[:90]:
             if attempts>=limit:break
+            stats['candidate_pages_seen']+=1
             url=link.get("url") if isinstance(link,dict) else None
-            if not isinstance(url,str) or url in seen or not https_page(url):continue
+            if not isinstance(url,str) or url in seen or not https_page(url):
+                stats['invalid_or_duplicate_links']+=1
+                continue
             # Search-title evidence is a cheap prefilter, NOT source identity
             # proof. A seed from an unrelated ID can still expose the exact
             # registered edition under an alternate published name.
             hint=str(link.get("label",""))+" "+url
             possible=[work for work in catalog if exact_work_in_text(work,hint)]
-            if not possible:continue
+            if not possible:
+                stats['no_exact_edition_hint']+=1
+                continue
+            stats['exact_edition_hint_candidates']+=1
             seen.add(url)
             attempts+=1
             html,state=load_html(session,url)
-            if html is None:continue
+            if html is None:
+                stats['source_unreadable_'+str(state)[:50]]+=1
+                continue
+            stats['source_pages_opened']+=1
             heading,context=source_headings(html)
             confirmed=[work for work in possible if page_matches(work,heading,context)]
-            if len(confirmed)!=1:continue
+            if len(confirmed)!=1:
+                stats['wrong_or_ambiguous_source_edition']+=1
+                continue
             work=confirmed[0]
             album=work.split(":",1)[1]
             row=next((r for r in results if r["id"]==album),None)
@@ -315,7 +328,10 @@ def merge_image_reverse_sites(db, report, model, results, session, limit=8):
             accepted.append({"model":model,"album_id":album,"source":url,
                              "reverse_seed_album_id":seed_id,
                              "origin":"reverse_photo_source_page_identified"})
+            stats['accepted_verified_same_work_pages']+=1
+            if seed_id!=album:stats['cross_album_seed_recovered']+=1
         if attempts>=limit:break
+    if stats_out is not None:stats_out.update(stats)
     return accepted
 
 
@@ -339,8 +355,11 @@ def main():
                        work_budget=a.work_budget)
     report['additional_registered_works_searched_by_catalog']=new_works
     if a.reverse and a.reverse.is_file():
+        reverse_stats={}
         matches=merge_image_reverse_sites(db,json.loads(a.reverse.read_text(encoding="utf-8")),
-                                         a.model,report["search_results"],requests.Session(), limit=a.reverse_limit)
+                                         a.model,report["search_results"],requests.Session(),
+                                         limit=a.reverse_limit,stats_out=reverse_stats)
+        report["image_reverse_resolution_stats"]=reverse_stats
         report["image_reverse_sites_verified"]=matches
         report["targets"]=[{"id":x["id"],"title":x["title"],"urls":x["urls"]}
                            for x in report["search_results"] if x["urls"]]
