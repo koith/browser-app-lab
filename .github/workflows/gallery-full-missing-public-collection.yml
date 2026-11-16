@@ -20,6 +20,7 @@ on:
       # An exact registered source gate change must start a real collection
       # on the newly approved sites; waiting for the next cron wastes recall.
       - 'apps/gallery-archive/direct_photo_pipeline.py'
+      - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
   pull_request:
     paths:
       - '.github/workflows/gallery-full-missing-public-collection.yml'
@@ -35,6 +36,8 @@ on:
       - 'apps/gallery-archive/test_exhaustive_campaign_controller.py'
       - 'apps/gallery-archive/source_alias_search.py'
       - 'apps/gallery-archive/direct_photo_pipeline.py'
+      - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
+      - 'apps/gallery-archive/test_verified_dynamic_work_publish.py'
       - 'apps/gallery-archive/verified_source_bridge.py'
       - 'apps/gallery-archive/test_verified_source_bridge.py'
 permissions:
@@ -65,6 +68,8 @@ jobs:
           python apps/gallery-archive/test_exhaustive_campaign_controller.py
           python apps/gallery-archive/test_gallery_full_workflow_order.py
           python apps/gallery-archive/test_verified_source_bridge.py
+          python apps/gallery-archive/test_verified_dynamic_work_publish.py
+          python apps/gallery-archive/test_publish_photo_provenance.py
           python apps/gallery-archive/run_exhaustive_reverse_search.py --model mimmi --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
           python apps/gallery-archive/run_exhaustive_reverse_search.py --model yui --progress /tmp/exhaustive-none.json --progress-out /tmp/exhaustive-none-next.json --out /tmp/exhaustive-none-search.json --plan-only
           python apps/gallery-archive/run_full_public_acquisition.py --model mimmi --stage "$RUNNER_TEMP/empty" --plan-only
