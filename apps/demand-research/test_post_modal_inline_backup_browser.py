@@ -33,6 +33,10 @@ TILE_CODE=INDEX[TILE_START:TILE_END]
 DETAIL_START=INDEX.index("function confirmPostAccountAction(")
 DETAIL_END=INDEX.index("function closeDetail(){",DETAIL_START)
 POST_DETAIL=INDEX[DETAIL_START:DETAIL_END]
+HARD_BLOCK_START=INDEX.index("const LIVE_HARD_EXCLUDED_PHRASES=")
+HARD_BLOCK_END=INDEX.index("const DAY=",HARD_BLOCK_START)
+HARD_BLOCK_CODE=INDEX[HARD_BLOCK_START:HARD_BLOCK_END]
+assert "야단라" in HARD_BLOCK_CODE
 BLOCK_START=INDEX.index("/* A manually maintained personal exclusion list")
 BLOCK_END=INDEX.index("function matchesText(",BLOCK_START)
 BLOCK_CODE=INDEX[BLOCK_START:BLOCK_END]
@@ -99,6 +103,7 @@ window.INTERSECTION_watchPublicAccount=selection=>{
   return true;
 };
 """
+    harness+=HARD_BLOCK_CODE
     harness+=BLOCK_CODE
     harness+=FILTER_CODE
     harness+=TILE_CODE
@@ -466,6 +471,16 @@ def exercise(browser_type,name,width):
             assert page.locator("#manualBlockCount").inner_text()=="1"
             page.evaluate("window.showFixturePost('bluesky')")
             assert modal.get_by_role("button",name="이 계정 차단 해제").count()==1
+            # Exact production live feed hard block is independent of
+            # user-managed account exclusions and must retain the sources.
+            assert page.evaluate("""(()=>{const before=posts.length;
+              posts.push({id:'excluded-1',text:'뒷계 #야 단 라 새 글',
+                platform:'bluesky',author:'QA',indexed:'2026-11-16T14:00:00Z'});
+              const hidden=!filtered().some(p=>p.id==='excluded-1');
+              const retained=posts.length===before+1;
+              posts.pop();
+              return hidden&&retained;
+            })()"""),"forbidden term must disappear from feed without deleting backup"
             # Personal presentation filter is never applied to private archive.
             assert page.evaluate("(()=>{cloudMode=true;const ids=filtered().map(p=>p.id);cloudMode=false;return ids})()")==[
                 "a-1","a-2","a-did","b-1","c-1"]
