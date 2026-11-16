@@ -107,33 +107,35 @@ def search_one(seed,client=None):
             "originals_stored":0,"visible_gallery_added":0}
 
 def diversified_seed_window(inventory, limit, offset):
-    """Search across distinct albums first, then advance each album's cut.
+    """Deterministic, complete round-robin photo queue with contiguous windows.
 
-    A sorted all-cuts queue can contain dozens of images from the same album.
-    A small rolling window over that flat queue repeatedly searches just one
-    or two albums, despite hundreds of currently incomplete albums.
-    This round-robin view retains all SHA-distinct seeds and rotates source
-    image positions on subsequent runs, without extra requests.
+    Workflows call this with offset=run_number*limit. Previously the album
+    cursor and an epoch derived from album count could revisit an album's
+    even-numbered photos indefinitely while never searching odd-numbered
+    ones. Flatten every distinct (model, album, SHA) once, interleaving
+    albums for early diversity, and slice by global photo position instead.
     """
     if not inventory or not 1 <= limit <= 48 or offset < 0:
         raise ValueError('INVALID_DIVERSE_SEED_WINDOW')
     by_album = {}
+    seen = set()
     for photo in inventory:
         key = (photo['model'], photo['album_id'])
+        identity = (key, photo['photo_sha256'])
+        if identity in seen:
+            continue
+        seen.add(identity)
         by_album.setdefault(key, []).append(photo)
     albums = list(by_album)
-    count = min(limit, len(inventory))
-    group_count = len(albums)
-    # Rotate albums on every run; use next cut after a full album-group cycle.
-    cursor = offset % group_count
-    epoch = offset // group_count
-    selected = []
-    for i in range(count):
-        key = albums[(cursor + i) % group_count]
-        round_index = i // group_count
-        images = by_album[key]
-        selected.append(images[(epoch + round_index) % len(images)])
-    return selected
+    max_cuts = max(len(group) for group in by_album.values())
+    ordered = []
+    for photo_index in range(max_cuts):
+        for key in albums:
+            group = by_album[key]
+            if photo_index < len(group):
+                ordered.append(group[photo_index])
+    count = min(limit, len(ordered))
+    return [ordered[(offset + i) % len(ordered)] for i in range(count)]
 
 
 def sweep(root,limit,offset,workers=2,client_factory=None,model=None,all_cuts=False):
