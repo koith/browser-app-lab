@@ -159,7 +159,11 @@ def main():
     # The same numeric URL from generic search HTML is NOT verified visual
     # evidence and must never bypass model/edition hints.
     with patch('reverse_image_sweep.bing_visual_query',return_value={
-        'status':'http_403','links':[]}):
+        'status':'http_403','links':[]}), patch(
+        'reverse_image_sweep.lens_query',return_value={
+            'status':'http_403','links':[]}), patch(
+        'reverse_image_sweep.tineye_query',return_value={
+            'status':'http_403','links':[]}):
         generic_only=search_one(seed,EmptyPublicSearchHTML())
     assert generic_only['candidate_pages']==[],generic_only
 
