@@ -14,6 +14,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, urlencode
 import requests
 from bs4 import BeautifulSoup
+from public_work_photo_extractor import ordinary_public_https_image
 from source_name_ledger import LEDGER, queries, safe_url, key
 from visual_work_discovery import ENGINES, hits_from_html
 
@@ -71,11 +72,45 @@ def hydrate_all_registered_works(db, model, root=None):
             # is not evidence of belonging to a particular photobook.
             if distinctive:
                 IDENTITIES[work]=distinctive
+    # An owner archive can contain many works absent from the smaller list
+    # of currently approved public sources. Its independently catalogued
+    # edition title is still useful for finding (but not automatically
+    # downloading) exact-work source pages.
+    owner_manifest=root/'apps'/f'{model}-gallery'/'owner-index.json'
+    if owner_manifest.is_file():
+        owner_doc=json.loads(owner_manifest.read_text(encoding='utf-8'))
+        if owner_doc.get('model')!=model:
+            raise ValueError('OWNER_SOURCE_TITLE_MODEL_MISMATCH')
+        for row in owner_doc.get('albums',[]):
+            aid=row.get('id')
+            title=row.get('title')
+            if not (isinstance(aid,str) and re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid)
+                    and isinstance(title,str) and len(title.strip())>=4
+                    and isinstance(row.get('images'),list) and row['images']):
+                continue
+            if re.search(r'AI Enhanced|AI 보정|미분류|unclassified',title,re.I):
+                continue
+            work=f'{model}:{aid}'
+            if work in db['works']:
+                continue
+            generic={'mimmi','yui','sim','public','sample','samples','photo','photos',
+                     'cosplay','gallery','vol','djawa','artgravia','official',
+                     'the','and','preview','공개','사진','미리보기','화보','공개본',
+                     '심유이','심혜성','유이','공식','원본','이미지','샘플'}
+            pieces=re.findall(r'[a-z0-9가-힣]{2,}',key(title))
+            distinctive=tuple(dict.fromkeys(t for t in pieces if t not in generic))
+            if not distinctive:continue
+            db['works'][work]=[{'name':title,'proof':'owner_catalog_work_title'}]
+            if work not in IDENTITIES:IDENTITIES[work]=distinctive
+            count+=1
     return count
 
 
 def https_page(url):
-    if not safe_url(url):return False
+    # Reverse search returns untrusted public page hints. Never request a
+    # private/local/cloud-metadata host; reuse the existing public-origin
+    # guard also used by image discovery and physical collection.
+    if not safe_url(url) or ordinary_public_https_image(url,url) is None:return False
     p=urlsplit(url)
     return (not any(s in p.path.lower() for s in EXCLUDE) and
             not re.search(r"\.(?:zip|rar|7z|pdf|exe|jpe?g|png|webp)(?:$|/)",p.path,re.I))
@@ -112,9 +147,18 @@ def load_html(session,url,timeout=12):
 def source_headings(html):
     soup=BeautifulSoup(html[:SEARCH_MAX_BYTES],"html.parser")
     title=soup.title.get_text(" ",strip=True) if soup.title else ""
-    headlines=[x.get_text(" ",strip=True) for x in soup.select("h1,h2,meta[property='og:title']")[:8]]
-    heads=" ".join([title]+headlines)
-    context=soup.get_text(" ",strip=True)[:3000]
+    headlines=[x.get_text(" ",strip=True) for x in soup.select("h1,h2")[:8]]
+    # A genuine public article may publish its exact edition only in the
+    # HTML Open Graph / Twitter metadata; get_text() on <meta> is empty.
+    # Use those observed fields, then still require independently matching
+    # model+edition and page-scoped photos before staging any file.
+    meta_titles=[x.get("content") or "" for x in soup.select(
+        'meta[property="og:title"],meta[name="twitter:title"]')[:4]]
+    meta_descriptions=[x.get("content") or "" for x in soup.select(
+        'meta[property="og:description"],meta[name="description"]')[:4]]
+    heads=" ".join([title]+headlines+meta_titles)
+    context=" ".join([soup.get_text(" ",strip=True),*meta_titles,
+                      *meta_descriptions])[:3000]
     return heads,context
 
 def rotated_work_scope(work_ids, offset, per_work, work_budget):
@@ -163,11 +207,15 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
                 if html is None:continue
                 for result in hits_from_html(html,engine):
                     url=result["url"]
-                    if url in visited_urls or not https_page(url):continue
+                    # A publisher page can appear as a hit for several
+                    # editions. Rejecting it for work A must not prevent
+                    # re-checking it for work B. De-duplicate within EACH
+                    # work, not across the entire model catalog.
+                    if (work,url) in visited_urls or not https_page(url):continue
                     # URL candidates cannot pass merely on a search title; open source.
                     if not exact_work_in_text(work,result.get("title","")+" "+result.get("snippet","")):continue
-                    visited_urls.add(url)
                     if checked_this_work>=per_album_pages:break
+                    visited_urls.add((work,url))
                     checked_this_work+=1
                     source_html,state=load_html(session,url)
                     status["source_"+state]+=1
@@ -233,43 +281,74 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
             "engine_status":dict(status),"research_only_not_yet_saved":True,
             "physical_originals_stored":0,"gallery_visible_added":0}
 
-def merge_image_reverse_sites(db, report, model, results, session, limit=8):
-    """Follow actual image-search source URLs and independently verify target work.
+def merge_image_reverse_sites(db, report, model, results, session, limit=8, stats_out=None):
+    """Resolve source-page identities across the *registered work catalog*.
 
-    This is candidate provenance, not photo-byte acquisition. The real file
-    collector still decodes, deduplicates, stages, verifies and publishes.
+    The reverse seed may be an unclassified or differently named preview
+    album. Old code discarded the entire hit unless seed.album_id exactly
+    matched a registered work ID; that discarded real image-source leads.
+    Check same-model edition hints and independently verify the actual public
+    page's heading/context. Ambiguous or generic-person pages never enter the
+    trusted source scope.
     """
     accepted=[]
+    stats=Counter()
     if report.get("research_only") is not True or not isinstance(report.get("results"),list):
+        if stats_out is not None:stats_out.update(stats)
         return accepted
+    catalog=[work for work in db["works"] if work.startswith(model+":")]
     seen=set()
+    attempts=0
     for seed in report["results"]:
         if seed.get("model")!=model:continue
-        album=seed.get("album_id")
-        work=model+":"+str(album)
-        if work not in db["works"]:continue
-        row=next((r for r in results if r["id"]==album),None)
-        if row is None:
-            row={"id":album,"title":db["works"][work][0]["name"],
-                 "urls":[],"observations":[],"query_count":0}
-            results.append(row)
-        for link in seed.get("candidate_pages",[]):
-            if len(seen)>=limit:break
+        seed_id=seed.get("album_id")
+        for link in seed.get("candidate_pages",[])[:90]:
+            if attempts>=limit:break
+            stats['candidate_pages_seen']+=1
             url=link.get("url") if isinstance(link,dict) else None
-            if not isinstance(url,str) or url in seen or not https_page(url):continue
+            if not isinstance(url,str) or url in seen or not https_page(url):
+                stats['invalid_or_duplicate_links']+=1
+                continue
+            # Search-title evidence is a cheap prefilter, NOT source identity
+            # proof. A seed from an unrelated ID can still expose the exact
+            # registered edition under an alternate published name.
+            hint=str(link.get("label",""))+" "+url
+            possible=[work for work in catalog if exact_work_in_text(work,hint)]
+            if not possible:
+                stats['no_exact_edition_hint']+=1
+                continue
+            stats['exact_edition_hint_candidates']+=1
             seen.add(url)
+            attempts+=1
             html,state=load_html(session,url)
-            if html is None:continue
+            if html is None:
+                stats['source_unreadable_'+str(state)[:50]]+=1
+                continue
+            stats['source_pages_opened']+=1
             heading,context=source_headings(html)
-            if not page_matches(work,heading,context):continue
+            confirmed=[work for work in possible if page_matches(work,heading,context)]
+            if len(confirmed)!=1:
+                stats['wrong_or_ambiguous_source_edition']+=1
+                continue
+            work=confirmed[0]
+            album=work.split(":",1)[1]
+            row=next((r for r in results if r["id"]==album),None)
+            if row is None:
+                row={"id":album,"title":db["works"][work][0]["name"],
+                     "urls":[],"observations":[],"query_count":0}
+                results.append(row)
             if url not in row["urls"]:row["urls"].append(url)
             row["observations"].append({
                 "album_id":album,"model":model,"name":heading[:220],
-                "source":url,
+                "source":url,"reverse_seed_album_id":seed_id,
                 "proof":"unique_named_work_page_model_and_edition"})
             accepted.append({"model":model,"album_id":album,"source":url,
+                             "reverse_seed_album_id":seed_id,
                              "origin":"reverse_photo_source_page_identified"})
-        if len(seen)>=limit:break
+            stats['accepted_verified_same_work_pages']+=1
+            if seed_id!=album:stats['cross_album_seed_recovered']+=1
+        if attempts>=limit:break
+    if stats_out is not None:stats_out.update(stats)
     return accepted
 
 
@@ -293,8 +372,11 @@ def main():
                        work_budget=a.work_budget)
     report['additional_registered_works_searched_by_catalog']=new_works
     if a.reverse and a.reverse.is_file():
+        reverse_stats={}
         matches=merge_image_reverse_sites(db,json.loads(a.reverse.read_text(encoding="utf-8")),
-                                         a.model,report["search_results"],requests.Session(), limit=a.reverse_limit)
+                                         a.model,report["search_results"],requests.Session(),
+                                         limit=a.reverse_limit,stats_out=reverse_stats)
+        report["image_reverse_resolution_stats"]=reverse_stats
         report["image_reverse_sites_verified"]=matches
         report["targets"]=[{"id":x["id"],"title":x["title"],"urls":x["urls"]}
                            for x in report["search_results"] if x["urls"]]

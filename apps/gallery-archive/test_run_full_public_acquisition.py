@@ -24,6 +24,55 @@ class FullAcquisitionTests(unittest.TestCase):
                 self.assertEqual(len(seen),len(known))
                 self.assertEqual(seen[:len(PRIORITY[model])],list(PRIORITY[model]))
 
+    def test_cross_registry_verified_source_work_is_not_lost_by_batch_filter(self):
+        # A reverse hit may prove an owner edition that was never placed in
+        # public-work-pages.json. It must be passed into --album-id, or even
+        # perfect reverse image discovery will produce ZERO new photos.
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            base=root/'apps/yui-gallery'
+            base.mkdir(parents=True)
+            (base/'public-work-pages.json').write_text(json.dumps({
+                'albums':[{'id':'public-yui-sns','title':'Public Yui SNS',
+                           'source':'https://official-photo.example.com/yui'}]}))
+            article='https://public-photos-archive.org/artgravia-777-yui'
+            verified={'schema_version':1,'model':'yui',
+                      'targets':[{'id':'artgravia-777-yui','title':'ArtGravia 777 Yui',
+                                  'urls':[article]}],
+                      'search_results':[{'id':'artgravia-777-yui',
+                      'urls':[article],
+                      'observations':[{
+                          'model':'yui','album_id':'artgravia-777-yui',
+                          'source':article,
+                          'proof':'unique_named_work_page_model_and_edition'}]}]}
+            evidence=root/'source-evidence.json'
+            evidence.write_text(json.dumps(verified))
+            batches=work_batches('yui',1,root,7,source_evidence=evidence)
+            observed=[aid for block in batches for aid in block]
+            self.assertEqual(set(observed),
+                             {'public-yui-sns','artgravia-777-yui'})
+            self.assertEqual(len(observed),2)
+            # Discovery observed an edition but forgot to include the
+            # target row consumed by the physical collector. Do not fake
+            # a successful collection attempt for a nonexistent work.
+            remembered_targets=verified.pop('targets')
+            evidence.write_text(json.dumps(verified))
+            no_target=[aid for group in work_batches('yui',1,root,7,
+                               source_evidence=evidence) for aid in group]
+            self.assertEqual(no_target,['public-yui-sns'])
+            verified['targets']=remembered_targets
+            # A snippet-only lead is NOT evidence sufficient to schedule an
+            # unregistered work or fetch its photos.
+            verified['search_results'][0]['observations'][0]['proof']='search_snippet_only'
+            evidence.write_text(json.dumps(verified))
+            unknown=[aid for group in work_batches('yui',1,root,7,
+                                  source_evidence=evidence) for aid in group]
+            self.assertEqual(unknown,['public-yui-sns'])
+            verified['model']='mimmi'
+            evidence.write_text(json.dumps(verified))
+            with self.assertRaisesRegex(ValueError,'EVIDENCE_MODEL_OR_SCHEMA'):
+                work_batches('yui',1,root,7,source_evidence=evidence)
+
     def test_rotation_changes_secondary_work_order_without_losing_any(self):
         for model in PRIORITY:
             first=work_batches(model,1,ROOT,7)
@@ -88,10 +137,20 @@ class FullAcquisitionTests(unittest.TestCase):
                 max_per_batch=48,bytes_per_batch=36000000,
                 batch_timeout=60,alternate_priority=False,plan_only=False)
             attempts=[]
+            collector_calls=[]
             def fake_run(command,**kwargs):
                 attempts.append(command)
-                if len(attempts)==2:
-                    raise subprocess.TimeoutExpired(command, kwargs['timeout'])
+                if command[1].endswith('direct_photo_pipeline.py'):
+                    collector_calls.append(command)
+                    if len(collector_calls)==2:
+                        raise subprocess.TimeoutExpired(command, kwargs['timeout'])
+                    root=Path(command[command.index('--out')+1])/'metadata'
+                    root.mkdir(parents=True,exist_ok=True)
+                    (root/'catalog.json').write_text('{"albums":[]}')
+                else:
+                    root=Path(command[command.index('--stage')+1])/'metadata'
+                    (root/'pages-publication.json').write_text(json.dumps({
+                        'new_sha_verified_originals':0,'total_bytes_added':0}))
                 return SimpleNamespace(returncode=0)
             with patch('run_full_public_acquisition.subprocess.run',
                        side_effect=fake_run):
@@ -99,10 +158,70 @@ class FullAcquisitionTests(unittest.TestCase):
             doc=json.loads((stage/'full-collection-summary.json').read_text())
             self.assertEqual(doc['timed_out_batches'],[1])
             self.assertFalse(doc['collection_complete_without_batch_timeouts'])
-            self.assertEqual(doc['state'],'LOCAL_STAGED_PARTIAL_TIMEOUT_NOT_FULLY_SEARCHED')
+            self.assertEqual(doc['state'],'LOCAL_STAGED_PARTIAL_INCOMPLETE_BATCHES')
+            self.assertFalse(doc['collection_all_batches_success'])
+            self.assertEqual(doc['incomplete_batch_count'],1)
+            self.assertEqual(doc['registered_works_scheduled'],43)
+            recovered=doc['batches'][1]['recovery_scheduled_work_ids']
+            self.assertEqual(len(recovered),3)
+            self.assertEqual(doc['single_work_recovery_scheduled'],3)
+            self.assertEqual(doc['single_work_recovery_succeeded'],3)
+            self.assertEqual(doc['registered_works_visited'],
+                             43-len(doc['batches'][1]['works'])+3)
+            self.assertEqual(doc['registered_work_ids_in_incomplete_batches'],
+                             [x for x in doc['batches'][1]['works'] if x not in recovered])
+            self.assertEqual(len(doc['registered_work_ids_in_incomplete_batches']),4)
+            # Retrying the timed-out group must use its own bounded per-work
+            # timeout, never silently rerun all seven works for 420 seconds.
+            followups=[row for row in doc['batches'] if row['single_work_recovery']]
+            self.assertEqual([row['works'][0] for row in followups],recovered)
             self.assertGreater(len(attempts),2)
             self.assertEqual(doc['batches'][1]['collector_returncode'],124)
             self.assertEqual(doc['batches'][1]['collection_error'],'collector_timeout')
+
+    def test_success_exit_without_finalized_catalog_is_not_photo_acquisition(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage=Path(temporary)
+            args=SimpleNamespace(model='yui',run_number=1,
+                stage=stage,source_evidence=None,batch_size=7,
+                max_per_batch=48,bytes_per_batch=36000000,
+                batch_timeout=60,alternate_priority=False,plan_only=False)
+            with patch('run_full_public_acquisition.subprocess.run',
+                       return_value=SimpleNamespace(returncode=0)):
+                self.assertEqual(execute(args),2)
+            audit=json.loads((stage/'full-collection-summary.json').read_text())
+            self.assertEqual(audit['registered_works_visited'],0)
+            self.assertFalse(audit['collection_all_batches_success'])
+            self.assertEqual(audit['incomplete_batch_count'],len(audit['batches']))
+            self.assertTrue(all(x.get('collection_error')=='missing_finalized_stage_catalog'
+                                for x in audit['batches']))
+
+    def test_replay_skips_catalogs_from_timed_out_or_unpublished_batches(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage=Path(temporary)
+            for name in ('batch-00','batch-01','batch-02'):
+                folder=stage/name/'metadata'
+                folder.mkdir(parents=True)
+                (folder/'catalog.json').write_text('{"albums":[]}')
+            (stage/'full-collection-summary.json').write_text(json.dumps({
+                'model':'mimmi','batches':[
+                    {'batch':0,'collector_returncode':124,'collection_error':'collector_timeout'},
+                    {'batch':1,'collector_returncode':0,'publisher_returncode':0},
+                    {'batch':2,'collector_returncode':0,'publisher_returncode':1}]}))
+            with patch('publish_new_public_photos_to_pages.publish',
+                       return_value={'new_sha_verified_originals':3}) as publishing:
+                self.assertEqual(replay('mimmi',stage,48,36000000),3)
+                self.assertEqual(publishing.call_count,1)
+                self.assertEqual(publishing.call_args.args[1].name,'batch-01')
+
+    def test_replay_rejects_unverified_catalog_if_summary_was_lost(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            stage=Path(temporary)
+            folder=stage/'batch-00/metadata'
+            folder.mkdir(parents=True)
+            (folder/'catalog.json').write_text('{"albums":[]}')
+            with self.assertRaisesRegex(ValueError,'UNVERIFIED_COLLECTION_STAGE'):
+                replay('mimmi',stage,48,36000000)
 
     def test_all_priority_ids_have_explicit_work_source_scope(self):
         for model,ids in PRIORITY.items():

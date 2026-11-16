@@ -336,13 +336,21 @@ def rotated_registered_page_queue(primary, source_pages, max_pages, page_cycle=0
 
 
 
+def _source_page_heading(raw):
+    """Observed article headline including Open Graph tags (not search snippets)."""
+    soup=BeautifulSoup(raw,'html.parser')
+    texts=[t.get_text(' ',strip=True) for t in soup.select('h1,title')]
+    texts.extend((t.get('content') or '') for t in soup.select(
+        'meta[property="og:title"],meta[name="twitter:title"]')[:4])
+    return ' '.join(texts)
+
+
 def _work_token_matched_in_heading(raw,work_title,album_id,model):
     """A legacy source earns new-cut admission only for its named edition.
 
     A generic Yui/Mimmi timeline or photo article is not album identity proof.
     """
-    soup=BeautifulSoup(raw,'html.parser')
-    heading=' '.join(t.get_text(' ',strip=True) for t in soup.select('h1,title')).casefold()
+    heading=_source_page_heading(raw).casefold()
     if not MODEL_PATTERNS[model].search(heading):
         return False
     # Neither the model name nor generic publishing terms distinguish a work.
@@ -894,9 +902,14 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     r'[a-z0-9][a-z0-9-]{1,100}',aid):
                 reverse_counts['reverse_unverified_targets_rejected']+=1
                 continue
+            # A target row alone is only a candidate. Admit ONLY URLs also
+            # present in this exact model+edition's independently opened
+            # article observations. The previous code incremented
+            # reverse_source_pages_admitted even for unproven target URLs.
+            independently_verified=verified_discovered.get(aid,set())
             links=list(dict.fromkeys(
                 u for u in target.get('urls',[])
-                if safe_registered_public_page(u,model)))
+                if u in independently_verified and safe_registered_public_page(u,model)))
             if not links:
                 reverse_counts['reverse_unverified_targets_rejected']+=1
                 continue
@@ -1132,8 +1145,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if page in book.get('reverse_unverified_pages',[]):
                     # Search-engine matches are only leads, never proof of a
                     # model, edition or photo. Verify source article firsthand.
-                    reverse_heading=' '.join(h.get_text(' ',strip=True)
-                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
+                    reverse_heading=_source_page_heading(response.content)
                     if not (PUBLIC_STRONG_MODEL[model].search(reverse_heading)
                             and _work_token_matched_in_heading(
                                 response.content,book.get('title'),aid,model)):
@@ -1147,8 +1159,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if (urlsplit(page).hostname in RESEARCH_WORK_HOSTS or
                         urlsplit(page).hostname not in PAGE_HOSTS
                         and urlsplit(page).hostname not in X_PUBLIC_HOSTS):
-                    title_line=' '.join(h.get_text(' ',strip=True)
-                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
+                    title_line=_source_page_heading(response.content)
                     if not (PUBLIC_STRONG_MODEL[model].search(title_line)
                             and _work_token_matched_in_heading(
                                 response.content,book.get('title'),aid,model)):
@@ -1250,7 +1261,12 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     continue
                 candidate_count+=1
                 old=historic.get((aid,url))
-                if book.get('curated_images_only') and not old and url not in alt_photo_urls:
+                if (book.get('curated_images_only') and not old
+                        and url not in alt_photo_urls and url not in dynamic_scoped):
+                    # Existing owner work does not authorize arbitrary new
+                    # media. However, an independently exact-work-verified
+                    # reverse source with directly observed article images
+                    # *does* authorize those specific public image URLs.
                     unreviewed_count+=1;continue
                 if url in seen_urls:continue
                 seen_urls.add(url);variant=bool(old and old.get('public_full_variant'))

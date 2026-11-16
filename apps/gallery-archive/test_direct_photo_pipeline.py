@@ -173,9 +173,14 @@ class DirectTests(unittest.TestCase):
             lead=root/'reverse.json'
             page='https://public-gallery.example.org/summer/source-page'
             asset='https://images.public-gallery.example.org/summer/17.jpg'
-            lead.write_text(json.dumps({'model':'yui','targets':[{
-                'id':'missing-summer','title':'Yui Sim Summer',
-                'urls':[page],'owner_registered':False}]}))
+            lead.write_text(json.dumps({
+                'schema_version':1,'model':'yui',
+                'targets':[{'id':'missing-summer','title':'Yui Sim Summer',
+                            'urls':[page],'owner_registered':False}],
+                'search_results':[{'id':'missing-summer','urls':[page],
+                    'observations':[{'model':'yui','album_id':'missing-summer',
+                        'source':page,
+                        'proof':'unique_named_work_page_model_and_edition'}]}]}))
             before=photo(10);new=photo(99)
             owner={'model':'yui','schema_version':1,'albums':[{
               'id':'older-gallery','images':[{'number':1,
