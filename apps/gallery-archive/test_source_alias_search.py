@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Local match/identity regression for public site search. No external requests."""
 from source_alias_search import (page_matches,exact_work_in_text,https_page,
-                                 source_headings,rotated_work_scope,crawl_names)
+                                 source_headings,rotated_work_scope,
+                                 rotated_site_scope,crawl_names)
 from source_name_ledger import LEDGER
 from unittest.mock import patch
 import json
@@ -79,6 +80,21 @@ def main():
     by_id={v['id']:v['urls'] for v in result['search_results']}
     assert by_id['djawa-pop-kitty-party']==[],result
     assert by_id['djawa-nikke-yuni']==[source],result
+
+    # A newly observed source host must not be stuck permanently behind
+    # the same alphabetically first two domains on every scheduled run.
+    domains=[f'gallery-{i}.public-photo.example.org' for i in range(5)]
+    visits=[rotated_site_scope(domains,run*3,3,2) for run in range(5)]
+    assert all(len(x)==2 for x in visits),visits
+    assert {site for pair in visits for site in pair}==set(domains),visits
+    assert visits[0]!=visits[1]
+    assert rotated_site_scope([],0,3)==[]
+    try:
+        rotated_site_scope(domains,-1,3)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('invalid negative site scope must abort')
 
     print("PUBLIC_SOURCE_ALIAS_MATCH_AND_IDENTITY_GATES_PASS")
 
