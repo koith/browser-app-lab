@@ -33,7 +33,10 @@ def pages_including(payload):
     for tag in tags[:10]:
         if not isinstance(tag,dict):
             continue
-        for action in tag.get("actions",[])[:24]:
+        actions=tag.get("actions",[])
+        if not isinstance(actions,list):
+            continue
+        for action in actions[:24]:
             if not isinstance(action,dict) or action.get("actionType")!="PagesIncluding":
                 continue
             found_module=True
@@ -75,7 +78,7 @@ def bing_visual_query(client,image_url):
     """One bounded public POST. Never upload local bytes or follow redirects."""
     if not isinstance(image_url,str) or not image_url.startswith("https://"):
         return {"status":"invalid_public_photo_url","links":[]}
-    if not hasattr(client,"post"):
+    if not callable(getattr(client,"post",None)):
         return {"status":"post_not_supported","links":[]}
     referer=(WEB_URL+"?view=detailv2&iss=sbi&FORM=SBIHMP&sbisrc=UrlPaste"
              "&q=imgurl:"+quote_plus(image_url)+"&idpbck=1")

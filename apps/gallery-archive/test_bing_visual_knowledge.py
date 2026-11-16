@@ -80,6 +80,23 @@ class BingVisualTests(unittest.TestCase):
         self.assertEqual(bing_visual_query(object(),PHOTO)["status"],
                          "post_not_supported")
 
+    def test_malformed_provider_tags_are_ignored_not_worker_crashes(self):
+        broken={"tags":[{"actions":None},
+                        {"actions":"not-a-list"},
+                        {"actions":[None,7,{"actionType":"PagesIncluding",
+                                      "data":{"value":None}}]},
+                        {"actions":[{"actionType":"PagesIncluding","data":{
+                            "value":"not-a-list"}}]}]}
+        rows,found=pages_including(broken)
+        self.assertTrue(found)
+        self.assertEqual(rows,[])
+        client=Client(Response(broken))
+        self.assertEqual(bing_visual_query(client,PHOTO),
+                         {"status":"visual_pages_0","links":[]})
+        self.assertEqual(bing_visual_query(
+            type('Missing',(),{'post':None})(),PHOTO)["status"],
+            "post_not_supported")
+
     def test_unstructured_response_never_masquerades_as_reverse_matches(self):
         client=Client(Response({"tags":[{"actions":[
             {"actionType":"SimilarImages","data":{"value":[

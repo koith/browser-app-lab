@@ -177,6 +177,17 @@ def rotated_work_scope(work_ids, offset, per_work, work_budget):
     return [work_ids[(start+i)%len(work_ids)] for i in range(budget)]
 
 
+def rotated_site_scope(hosts,offset,per_work,budget=2):
+    if offset<0 or per_work<1 or budget<1:
+        raise ValueError('INVALID_PUBLIC_CROSS_SITE_SCOPE')
+    domains=sorted(set(hosts))
+    if not domains:
+        return []
+    start=(offset//per_work)%len(domains)
+    return [domains[(start+i)%len(domains)]
+            for i in range(min(budget,len(domains)))]
+
+
 def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,work_budget=None):
     session=session or requests.Session()
     results=[]
@@ -237,7 +248,12 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
     # This second pass is bounded and rotates through ALL observed model names.
     cross_site=[]
     cross_budget=16
-    for site in sorted(hosts)[:2]:
+    # The former sorted(hosts)[:2] permanently ignored every other
+    # discovered source domain. Rotate the two-site budget by run number
+    # so that all new sites receive a same-work cross-model check eventually.
+    domains=sorted(hosts)
+    rotated=rotated_site_scope(domains,offset,per_work,budget=2)
+    for site in rotated:
         for other_model,names in db["model_names"].items():
             for identity in names:
                 if cross_budget<=0:break
@@ -277,6 +293,8 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
                 for r in results if r["urls"]],
             "search_results":results,"new_site_hosts":sorted(hosts),
             "cross_model_verified_site_pages":cross_site,
+            "cross_site_domains_total":len(domains),
+            "cross_site_domains_scanned":rotated,
             "cross_site_model_alias_queries":16-cross_budget,
             "engine_status":dict(status),"research_only_not_yet_saved":True,
             "physical_originals_stored":0,"gallery_visible_added":0}
@@ -314,6 +332,18 @@ def merge_image_reverse_sites(db, report, model, results, session, limit=8, stat
             # registered edition under an alternate published name.
             hint=str(link.get("label",""))+" "+url
             possible=[work for work in catalog if exact_work_in_text(work,hint)]
+            # A *structured* same-photo host-page result can have no work
+            # name in its search-card label or numeric URL. It is still
+            # worth opening ONE bounded page and independently verifying
+            # its actual model and edition heading. Generic Bing/Yandex
+            # HTML links do NOT receive this privilege.
+            structured=(link.get('source_engine') in (
+                'yandex_sites','bing_visual_pages_including')
+                and isinstance(link.get('matched_image_url'),str)
+                and link['matched_image_url'].startswith('https://'))
+            if not possible and structured:
+                possible=catalog
+                stats['structured_visual_host_page_without_edition_hint']+=1
             if not possible:
                 stats['no_exact_edition_hint']+=1
                 continue
