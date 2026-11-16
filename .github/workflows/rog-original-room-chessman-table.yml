@@ -1,0 +1,60 @@
+name: 4LEAF original 2004 Room CHESSMAN INFO - real source and gameplay
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/dice-native-room-chessmen.*'
+      - 'apps/4leaf/rog/tests/native-room-chessman-source-table.cjs'
+      - 'apps/4leaf/rog/index.html'
+      - '.github/workflows/rog-original-room-chessman-table.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/dice-native-room-chessmen.*'
+      - 'apps/4leaf/rog/tests/native-room-chessman-source-table.cjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-chessman-info:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Parse original room source implementation
+        run: |
+          node --check apps/4leaf/rog/game.js
+          node --check apps/4leaf/rog/dice-native-room-chessmen.js
+          node --check apps/4leaf/rog/tests/native-room-chessman-source-table.cjs
+      - name: Install native browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.engine }} --with-deps
+      - name: Serve true 2002 source PNGs and live page
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/4leaf-room-source.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/original/Room/roomback.png >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/4leaf-room-source.log
+          exit 1
+      - name: Trace native chessman table, equip real card, reload saved profile, enter actual DMP match
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/native-room-chessman-source-table.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-original-2004-room-chessman-${{ matrix.engine }}
+          path: leaf-native-room-2004-populated-*.png
+          retention-days: 21
