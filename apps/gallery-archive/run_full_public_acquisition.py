@@ -32,8 +32,14 @@ PRIORITY={
 }
 
 
-def work_batches(model, run_number, base=ROOT, batch_size=7):
-    """Always prioritize low-inventory works; rotate remaining full corpus."""
+def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=None):
+    """Prioritize gaps and include independently proven new source-edition IDs.
+
+    The stored-source registry is deliberately smaller than the owner-index.
+    A verified reverse result for an owner work that was absent from that
+    registry must still reach --album-id, or the downstream extractor will
+    silently discard its evidence even though the source was found.
+    """
     if model not in PRIORITY or batch_size<1:
         raise ValueError('INVALID_COLLECTION_MODEL_OR_BATCH')
     path=Path(base)/f'apps/{model}-gallery/public-work-pages.json'
@@ -44,6 +50,23 @@ def work_batches(model, run_number, base=ROOT, batch_size=7):
     all_ids=[a['id'] for a in works]
     if len(all_ids)!=len(set(all_ids)):
         raise ValueError('DUPLICATE_PUBLIC_WORK_IDS')
+    # A name-search result alone must never register an album. Require the
+    # exact edition page proof that the physical collector checks again.
+    if source_evidence is not None and Path(source_evidence).is_file():
+        import re
+        from verified_source_bridge import eligible_source_pages
+        from direct_photo_pipeline import safe_registered_public_page
+        evidence=json.loads(Path(source_evidence).read_text(encoding='utf-8'))
+        if evidence.get('model')!=model or evidence.get('schema_version')!=1:
+            raise ValueError('EXTERNAL_SOURCE_EVIDENCE_MODEL_OR_SCHEMA_MISMATCH')
+        proven=eligible_source_pages(evidence,model,safe_registered_public_page)
+        if len(proven)>100:
+            raise ValueError('EXCESSIVE_VERIFIED_NEW_SOURCE_WORKS')
+        for aid in sorted(proven):
+            if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid):
+                raise ValueError('UNSAFE_VERIFIED_SOURCE_ALBUM_ID')
+            if aid not in all_ids:
+                all_ids.append(aid)
     priority=[aid for aid in PRIORITY[model] if aid in all_ids]
     rest=[aid for aid in all_ids if aid not in priority]
     if rest:
@@ -56,7 +79,8 @@ def work_batches(model, run_number, base=ROOT, batch_size=7):
 
 
 def execute(args):
-    batches=work_batches(args.model,args.run_number,ROOT,args.batch_size)
+    batches=work_batches(args.model,args.run_number,ROOT,args.batch_size,
+                         source_evidence=args.source_evidence)
     stage=Path(args.stage).resolve()
     if args.plan_only:
         print('GALLERY_MISSING_FULL_PLAN',json.dumps({
