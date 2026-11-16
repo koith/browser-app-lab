@@ -60,7 +60,10 @@
     <button id="statFollowers" type="button" data-section="followers"><strong id="followerCount">—</strong><span>팔로워</span></button>
     <button id="statFollowing" type="button" data-section="following"><strong id="followingCount">—</strong><span>팔로잉</span></button>
    </div>
-   <p id="profileStatus" class="evidence">보관 여부 확인 전 · 미확인 자료는 표시하지 않습니다.</p>
+   <details class="profile-audit">
+     <summary>백업 검증 정보</summary>
+     <p id="profileStatus" class="evidence">보관 여부 확인 전 · 미확인 자료는 표시하지 않습니다.</p>
+    </details>
   </div>
  </section>
  <section class="archive-content" aria-label="계정 보관 콘텐츠">
@@ -81,7 +84,9 @@
       <option value="activity_posts_replies">게시글·답글</option>
     </select>
   </div>
-  <form id="feedSearch" class="feed-controls" autocomplete="off" aria-label="저장된 게시글 검색과 필터">
+  <details class="archive-tools">
+   <summary>보관본 검색 · 필터</summary>
+   <form id="feedSearch" class="feed-controls" autocomplete="off" aria-label="저장된 게시글 검색과 필터">
    <input id="feedQuery" maxlength="100" type="search" aria-label="보관된 모든 게시글 본문 검색" placeholder="모든 보관 글에서 검색">
    <select id="feedKind" aria-label="게시물 유형"><option value="">모든 글</option>
     <option value="post">게시글</option><option value="reply">답글</option><option value="revision">수정 이력</option>
@@ -90,7 +95,8 @@
     <option value="complete">첨부 검증 완료</option><option value="partial">일부 미보관</option>
    </select>
    <button id="feedReset" type="button">초기화</button>
-  </form>
+   </form>
+  </details>
   <div id="results" class="results" aria-live="polite">
     <p class="placeholder">보관된 계정을 선택해 주세요.</p>
   </div>
