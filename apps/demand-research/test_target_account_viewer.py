@@ -646,7 +646,7 @@ def test_all_mastodon_source_profile_fields_and_paragraphs_render_as_safe_cards(
        "mastodon-"+"a"*40,
        {"platform":"mastodon","identity":identity,
         "profile_url":"https://mastodon.example/@writer"})
-    assert result["description"]=="first line\\nsecond line"
+    assert result["description"]=="first line\nsecond line"
     assert len(result["fields_rendered"])==3
     assert result["fields_rendered"][1]["parts"][0]=={
         "text":"example.org","href":"https://example.org"}
