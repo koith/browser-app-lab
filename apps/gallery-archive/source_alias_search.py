@@ -147,9 +147,18 @@ def load_html(session,url,timeout=12):
 def source_headings(html):
     soup=BeautifulSoup(html[:SEARCH_MAX_BYTES],"html.parser")
     title=soup.title.get_text(" ",strip=True) if soup.title else ""
-    headlines=[x.get_text(" ",strip=True) for x in soup.select("h1,h2,meta[property='og:title']")[:8]]
-    heads=" ".join([title]+headlines)
-    context=soup.get_text(" ",strip=True)[:3000]
+    headlines=[x.get_text(" ",strip=True) for x in soup.select("h1,h2")[:8]]
+    # A genuine public article may publish its exact edition only in the
+    # HTML Open Graph / Twitter metadata; get_text() on <meta> is empty.
+    # Use those observed fields, then still require independently matching
+    # model+edition and page-scoped photos before staging any file.
+    meta_titles=[x.get("content","") for x in soup.select(
+        'meta[property="og:title"],meta[name="twitter:title"]')[:4]]
+    meta_descriptions=[x.get("content","") for x in soup.select(
+        'meta[property="og:description"],meta[name="description"]')[:4]]
+    heads=" ".join([title]+headlines+meta_titles)
+    context=" ".join([soup.get_text(" ",strip=True),*meta_titles,
+                      *meta_descriptions])[:3000]
     return heads,context
 
 def rotated_work_scope(work_ids, offset, per_work, work_budget):
