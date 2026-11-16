@@ -41,7 +41,9 @@ def main():
         root = Path(path)
         fixture(root)
         seeds = mod.physical_seeds(root)
-        assert len(seeds) == 8, seeds  # 1 + 3, twice
+        assert len(seeds) == 22, len(seeds)  # 1 + 10 SHA-distinct, twice
+        assert len({(x['model'],x['album_id'],x['photo_sha256']) for x in seeds})==22
+        assert len([x for x in seeds if x['album_id']=='large'])==20
         assert seeds[0]["album_id"] == "tiny"
         assert all(s["public_image_url"].startswith(mod.PAGES + "/") for s in seeds)
         assert all("private.example" not in s["public_image_url"] for s in seeds)
