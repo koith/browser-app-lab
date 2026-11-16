@@ -98,7 +98,6 @@ html[data-leaf-phone-fit="landscape"] #leaf-phone-chat-toggle{
  border-radius:5px;
  box-shadow:0 1px 4px #0009;
 }
-html[data-leaf-phone-fit="landscape"]:has(#social-avatar-layer .social-avatar) #leaf-phone-chat-toggle,
 html[data-leaf-phone-fit="landscape"]:has(#game:not(.hidden)) #leaf-phone-chat-toggle{
  display:none!important;
 }
