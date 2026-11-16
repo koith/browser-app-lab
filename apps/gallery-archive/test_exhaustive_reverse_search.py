@@ -214,6 +214,49 @@ class FullReverseCoverageTests(unittest.TestCase):
                 self.assertEqual(third['seed_queries'],0)
                 self.assertEqual(third['coverage']['unverified_after_retry'],31)
 
+    def test_source_leads_are_durably_queued_without_dropping_unreviewed_urls(self):
+        # Source-page collection may review only 96 candidates this run.
+        # Keep ALL other unique discovered pages in the persisted cursor,
+        # including pages from previously scanned SHA photos.
+        def with_sources(seed):
+            num=int(seed['photo_sha256'],16)
+            return {**seed,'search_status':{'bing_visual':'visual_pages_1'},
+                    'candidate_pages':[{'url':f'https://photo-source.org/work/{num}',
+                        'label':'Mimmi same photo','matched_image_url':
+                            f'https://cdn.photo-source.org/{num}.jpg',
+                        'source_engine':'bing_visual_pages_including'}],
+                    'off_model_rejected':0,'originals_stored':0,
+                    'visible_gallery_added':0}
+        with tempfile.TemporaryDirectory() as t:
+            root=Path(t)
+            prior,result,next_state=[root/n for n in ('prior.json','result.json','next.json')]
+            with patch.object(m,'seeds',return_value=fixtures()),patch.object(
+                    m,'search_one',side_effect=with_sources):
+                first=m.run('mimmi',prior,result,next_state,8,60,2,
+                            stop_after_full=True,search_revision=4)
+                saved=json.loads(next_state.read_text())
+                self.assertEqual(first['coverage']['pending_source_page_reviews'],8)
+                self.assertEqual(len(saved['source_pending_pages']),8)
+                prior.write_text(next_state.read_text())
+                second=m.run('mimmi',prior,result,next_state,8,60,2,
+                             stop_after_full=True,search_revision=4)
+                saved=json.loads(next_state.read_text())
+                # The two runs' work IDs are different, but many share a
+                # displayed numeric photo position; URLs are deduplicated.
+                self.assertEqual(len(saved['source_pending_pages']),
+                                 len({p['link']['url'] for p in saved['source_pending_pages']}))
+                self.assertGreaterEqual(len(saved['source_pending_pages']),8)
+                self.assertEqual(saved['last_source_pages_reviewed'],0)
+                self.assertGreater(second['seed_queries'],0)
+            damaged={**saved,'source_pending_pages':[{
+                'album_id':'test','link':{'url':'https://photo-source.org/1'}},
+                {'album_id':'another','link':{'url':'https://photo-source.org/1'}}]}
+            prior.write_text(json.dumps(damaged))
+            with self.assertRaisesRegex(ValueError,'CORRUPT_SOURCE_PAGE_BACKLOG'):
+                m.read_progress(prior,'mimmi',
+                                {p['seed_id'] for p in m.complete_queue(fixtures(),'mimmi')},
+                                required_revision=4)
+
     def test_readable_result_clears_pending_retry(self):
         queue=m.complete_queue(fixtures(),'yui')
         retry_seed=queue[0]['seed_id']
