@@ -1,0 +1,55 @@
+name: 4LEAF restoration status sync
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, deleted, labeled, unlabeled]
+  push:
+    branches: [main]
+    paths:
+      - apps/4leaf/rog/scripts/sync_restoration_issues.py
+      - apps/4leaf/rog/docs/RESTORATION_STATUS.json
+      - .github/workflows/4leaf-restoration-status-sync.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: 4leaf-restoration-status-sync
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    if: github.event_name != 'issues' || startsWith(github.event.issue.title, '[4LEAF]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate ledger rules
+        run: python -m unittest discover -s apps/4leaf/rog/scripts -p test_sync_restoration_issues.py -v
+      - name: Rebuild status snapshot from live GitHub Issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python apps/4leaf/rog/scripts/sync_restoration_issues.py
+      - name: Commit only meaningful changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/4leaf/rog/docs/RESTORATION_STATUS.json
+          if git diff --cached --quiet; then
+            echo "4LEAF status already current"
+            exit 0
+          fi
+          git commit -m "chore(4leaf): refresh issue-based status index [skip ci]"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 2
+          done
+          echo "Unable to publish refreshed 4LEAF status index"
+          exit 1
