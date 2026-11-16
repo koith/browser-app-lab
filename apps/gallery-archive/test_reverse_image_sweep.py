@@ -138,6 +138,31 @@ def main():
     assert len(recovered["candidate_pages"])==1,recovered
     assert recovered["candidate_pages"][0]["url"].endswith("mimmi-red-shirt.html"),recovered
     assert recovered["originals_stored"]==recovered["visible_gallery_added"]==0
+    # Actual reverse-image PagesIncluding may carry a completely numeric
+    # host page and generic image name. Do not lose this verifiable lead
+    # before the independently page-based edition checker sees it.
+    class EmptyPublicSearchHTML:
+        def get(self,url,params=None,**kw):
+            return FakeResponse('<html>Only generic Bing navigation</html>')
+    image_host='https://other-public-gallery.org/photo/476821'
+    exact_image='https://cdn.other-public-gallery.org/images/476821.jpg'
+    with patch('reverse_image_sweep.bing_visual_query',return_value={
+        'status':'visual_pages_1','links':[{
+            'url':image_host,'label':'Photo 476821',
+            'matched_image_url':exact_image,
+            'source_engine':'bing_visual_pages_including'}]}):
+        visual_only=search_one(seed,EmptyPublicSearchHTML())
+    assert visual_only['matched_urls_by_engine']['bing_visual']==1,visual_only
+    assert visual_only['candidate_pages'][0]['url']==image_host,visual_only
+    assert visual_only['candidate_pages'][0]['visual_host_page_only_unverified_edition']
+    assert visual_only['originals_stored']==visual_only['visible_gallery_added']==0
+    # The same numeric URL from generic search HTML is NOT verified visual
+    # evidence and must never bypass model/edition hints.
+    with patch('reverse_image_sweep.bing_visual_query',return_value={
+        'status':'http_403','links':[]}):
+        generic_only=search_one(seed,EmptyPublicSearchHTML())
+    assert generic_only['candidate_pages']==[],generic_only
+
     # Neither the Yandex nor Bing HTML landing page carries usable work
     # links: Lens must be tried, and a blocked Lens must not suppress TinEye.
     class NoHtmlMatches:
