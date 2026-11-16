@@ -117,6 +117,7 @@ jobs:
           cd apps/demand-research
           python -m py_compile profile_backfill_dispatch.py test_profile_backfill_dispatch.py github_temp_bundle.py test_github_temp_bundle.py test_backup_queue_sqlite.py target_account_archive.py target_account_bundle.py verified_bundle_reader.py target_account_enrichment.py target_account_viewer.py target_archive_api.py backup_queue.py backup_bridge_poller.py sealed_credentials.py test_sealed_credentials.py test_backup_queue.py test_target_account_archive.py test_target_account_bundle.py test_account_append_only.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py gateway.py
           node --check target_archive_client.js
+          node test_live_keyword_exclusion.js
           node --check account_archive_view.js
           node --check archive_tab.js
           node --check intersection-sw.js
