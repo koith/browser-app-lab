@@ -192,17 +192,17 @@ class StatusBoardTests(unittest.TestCase):
 
     def test_primary_completed_count_ignores_past_subtasks_and_subchecklists(self):
         text = (
-            "## P0 — current\\n"
-            "- [ ] **INT-01** original bytes not verified\\n"
-            "- [ ] **INT-02** capture latency pending\\n"
-            "## P1 — current\\n"
-            "- [x] **INT-05** actual browser proof\\n"
-            "## P2 — current\\n"
-            "- [x] **INT-10** original rank proof\\n"
-            "## 2026-11-03 legacy notes\\n"
-            "- [x] **INT-01 old subtask** not original restoration\\n"
-            "- [x] **INT-02 old subtask** not rate guarantee\\n"
-            "- [x] **INT-03** code-only patch\\n"
+            "## P0 — current\n"
+            "- [ ] **INT-01** original bytes not verified\n"
+            "- [ ] **INT-02** capture latency pending\n"
+            "## P1 — current\n"
+            "- [x] **INT-05** actual browser proof\n"
+            "## P2 — current\n"
+            "- [x] **INT-10** original rank proof\n"
+            "## 2026-11-03 legacy notes\n"
+            "- [x] **INT-01 old subtask** not original restoration\n"
+            "- [x] **INT-02 old subtask** not rate guarantee\n"
+            "- [x] **INT-03** code-only patch\n"
         )
         self.assertEqual(ops.top_level_task_counts(text), (2,4))
         self.assertEqual(ops.top_level_task_counts(
