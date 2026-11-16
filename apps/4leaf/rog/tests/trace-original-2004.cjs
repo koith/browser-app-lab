@@ -134,7 +134,7 @@ function absNear(actual,target,span,label){assert.ok(Number.isFinite(actual)&&Ma
   console.log('CHAT-ORIGINAL-794X528-RECTS '+JSON.stringify(chat));
   absNear(chat.frame.w,794,2,'original 2004 ChatRoom frame width');
   absNear(chat.frame.h,528,2,'original 2004 ChatRoom frame height');
-  absNear(chat.log.x,18,1,'chat log original x18');
+  absNear(chat.log.x,16,1,'chat frame origin x16, scrollbar x406 (verified 2004 source)');
   absNear(chat.log.y,0,1,'chat log original y0');
   absNear(chat.log.w,407,2,'chat original 407px message panel');
   absNear(chat.log.h,118,2,'chat original 118px message panel');
