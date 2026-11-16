@@ -10,7 +10,7 @@ cookies, bypass a challenge or claim a confirmed reverse-image match.
 """
 from __future__ import annotations
 import json
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus,parse_qsl,urlencode,urlsplit,urlunsplit
 
 import requests
 from reverse_image_discovery import untrack
@@ -46,6 +46,16 @@ def pages_including(payload):
                     continue
                 original=photo.get("hostPageUrl")
                 page=untrack(original) if isinstance(original,str) else None
+                if page is not None:
+                    # One host-page may occur several times with tracking
+                    # arguments. Preserve meaningful edition/photo query
+                    # selectors, remove only well-known tracking keys.
+                    parts=urlsplit(page)
+                    stable=[(key,value) for key,value in parse_qsl(
+                        parts.query,keep_blank_values=True)
+                        if not key.lower().startswith("utm_")
+                        and key.lower() not in {"fbclid","gclid","msclkid"}]
+                    page=urlunsplit(parts._replace(query=urlencode(stable)))
                 if page is None or page in seen:
                     continue
                 seen.add(page)
