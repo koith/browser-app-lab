@@ -129,7 +129,10 @@
  overflow:hidden!important;
  white-space:nowrap!important;
  text-overflow:ellipsis!important;
- font:800 16px/19px Gulim,'굴림',sans-serif!important;
+ /* 52px real IMG/eventmsgbox.png frame: 22px heading + 15px detail,
+  * 1px gap and 8px inset = 46px. Restore a genuinely readable live cue
+  * inside source geometry, never a floating modern overlay. */
+ font:800 19px/22px Gulim,'굴림',sans-serif!important;
  color:#172d67!important;
 }
 #app.app-classic-dice #game #dice-native-event .dice-native-event-detail{
@@ -140,7 +143,7 @@
  overflow:hidden!important;
  white-space:nowrap!important;
  text-overflow:ellipsis!important;
- font:700 11px/14px Gulim,'굴림',sans-serif!important;
+ font:700 12px/15px Gulim,'굴림',sans-serif!important;
  color:#274174!important;
 }
 @media(max-width:650px){
