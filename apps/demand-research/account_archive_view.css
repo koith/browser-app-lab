@@ -538,3 +538,40 @@ body{background:var(--paper);color:var(--ink)}
     height:43px;min-height:43px;
   }
 }
+
+
+/* Measured real Bluesky parity iteration 2 (live 2026-11-16):
+   Real tabs: y=325px mobile, y=332px desktop, x=235px desktop.
+   Last verified archive: y=367.7px mobile and desktop, x=236px.
+   Keep ALL profile content visible, reduce only extra non-native spacing;
+   native post rows must not overlap or clip the profile. */
+:root[data-platform="bluesky"] .archive-embedded .profile,
+:root[data-platform="bluesky"] .archive-embedded .archive-content{
+  border-left:0;border-right:0;
+}
+:root[data-platform="bluesky"] .archive-embedded .profile-content{
+  padding-bottom:5px;
+}
+:root[data-platform="bluesky"] .archive-embedded .profile-content .bio{
+  margin:3px 0 0;
+}
+:root[data-platform="bluesky"] .archive-embedded .profile-content .stats{
+  margin:0;
+}
+:root[data-platform="bluesky"] .archive-embedded .profile-content #profileExtras{
+  margin:0;
+}
+:root[data-platform="bluesky"] .archive-embedded .archive-content .tabs button{
+  box-sizing:border-box;height:47px;min-height:47px;padding:0;
+}
+@media(max-width:750px){
+  :root[data-platform="bluesky"] .archive-embedded .profile-content{
+    padding-bottom:0;
+  }
+  :root[data-platform="bluesky"] .archive-embedded .profile-content .bio{
+    margin:1px 0 0;
+  }
+  :root[data-platform="bluesky"] .archive-embedded .archive-content .tabs button{
+    height:43px;min-height:43px;padding:0;
+  }
+}
