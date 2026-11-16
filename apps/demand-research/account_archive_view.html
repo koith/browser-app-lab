@@ -67,8 +67,20 @@
   <nav class="tabs" role="tablist" aria-label="아카이브 항목">
    <button type="button" role="tab" data-section="posts" aria-selected="true" class="active">게시글</button>
    <button type="button" role="tab" data-section="replies" aria-selected="false">답글</button>
+   <button type="button" role="tab" data-section="activity" aria-selected="false" hidden>활동</button>
    <button type="button" role="tab" data-section="media" aria-selected="false">미디어</button>
+   <button type="button" role="tab" data-section="videos" aria-selected="false" hidden>동영상</button>
+   <button type="button" role="tab" data-section="featured" aria-selected="false" hidden>고정됨</button>
   </nav>
+  <div id="mastodonActivityControls" class="mastodon-activity-controls" hidden>
+    <label for="mastodonActivity">활동 보기</label>
+    <select id="mastodonActivity" aria-label="Mastodon 활동 필터">
+      <option value="activity_all">게시글·리블로그·답글</option>
+      <option value="post">게시글만</option>
+      <option value="activity_posts_boosts">게시글·리블로그</option>
+      <option value="activity_posts_replies">게시글·답글</option>
+    </select>
+  </div>
   <form id="feedSearch" class="feed-controls" autocomplete="off" aria-label="저장된 게시글 검색과 필터">
    <input id="feedQuery" maxlength="100" type="search" aria-label="보관된 모든 게시글 본문 검색" placeholder="모든 보관 글에서 검색">
    <select id="feedKind" aria-label="게시물 유형"><option value="">모든 글</option>
