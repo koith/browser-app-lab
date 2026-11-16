@@ -118,14 +118,28 @@ def execute(args):
         reports.append(row)
         print('FULL_COLLECTION_BATCH_RESULT',json.dumps(row,ensure_ascii=False),flush=True)
     timed_out=[x['batch'] for x in reports if x.get('collection_error')=='collector_timeout']
-    report={'model':args.model,'registered_works_visited':sum(map(len,batches)),
+    unresolved=[x for x in reports if x['collector_returncode']!=0
+                or x.get('publisher_returncode',0)!=0
+                or x.get('publication_error')]
+    incomplete_works=list(dict.fromkeys(aid for row in unresolved for aid in row['works']))
+    success_count=sum(len(x['works']) for x in reports if x not in unresolved)
+    # "Scheduled" is NOT the same as "collected": a timed-out group may
+    # never have reached some of its listed work IDs. Keep partial results
+    # and replay the verified bytes, but expose the incomplete works.
+    report={'model':args.model,
+            'registered_works_scheduled':sum(map(len,batches)),
+            'registered_works_visited':success_count,
+            'registered_works_in_successful_batches':success_count,
+            'registered_work_ids_in_incomplete_batches':incomplete_works,
+            'incomplete_batch_count':len(unresolved),
             'batches':reports,'new_local_verified_SHA':collected,
             'timed_out_batches':timed_out,
             'collection_complete_without_batch_timeouts':not timed_out,
+            'collection_all_batches_success':not unresolved,
             'new_remote_SHA_readback_verified':0,
             'new_public_Pages_verified':0,
             'scope':'public_authenticated-free_only',
-            'state':('LOCAL_STAGED_PARTIAL_TIMEOUT_NOT_FULLY_SEARCHED' if timed_out
+            'state':('LOCAL_STAGED_PARTIAL_INCOMPLETE_BATCHES' if unresolved
                      else 'LOCAL_PUBLICATION_STAGED_NOT_DEPLOYED')}
     (stage/'full-collection-summary.json').write_text(
        json.dumps(report,ensure_ascii=False,indent=2)+'\n')
