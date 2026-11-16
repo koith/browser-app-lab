@@ -1250,7 +1250,12 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     continue
                 candidate_count+=1
                 old=historic.get((aid,url))
-                if book.get('curated_images_only') and not old and url not in alt_photo_urls:
+                if (book.get('curated_images_only') and not old
+                        and url not in alt_photo_urls and url not in dynamic_scoped):
+                    # Existing owner work does not authorize arbitrary new
+                    # media. However, an independently exact-work-verified
+                    # reverse source with directly observed article images
+                    # *does* authorize those specific public image URLs.
                     unreviewed_count+=1;continue
                 if url in seen_urls:continue
                 seen_urls.add(url);variant=bool(old and old.get('public_full_variant'))
