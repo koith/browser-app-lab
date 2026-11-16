@@ -406,11 +406,54 @@ def review_source_backlog(db,state,model,results,session,limit=96):
     statistics={}
     accepted=merge_image_reverse_sites(
         db,pseudo,model,results,session,limit=limit,stats_out=statistics)
+    verified=list(state.get('source_verified_pages',[]))
+    keys={(x['album_id'],x['url']) for x in verified}
+    for item in accepted:
+        key=(item['album_id'],item['source'])
+        if key not in keys:
+            verified.append({'album_id':key[0],'url':key[1]})
+            keys.add(key)
+    if len(verified)>2000:
+        raise ValueError('VERIFIED_SOURCE_HISTORY_CAPACITY_NOT_SILENTLY_DROPPED')
     after={**state,'source_pending_pages':pending[len(chosen):],
+           'source_verified_pages':verified,
            'last_source_pages_reviewed':len(chosen)}
+    statistics['verified_page_sources_reusable_next_run']=len(verified)
     statistics['source_page_candidates_reviewed_this_run']=len(chosen)
     statistics['source_page_candidates_pending_next_run']=len(after['source_pending_pages'])
     return accepted,after,statistics
+
+
+def reuse_verified_source_history(db,model,results,history):
+    """Reuse verified article URLs across runs; physical collector rechecks.
+
+    Saving only the lead's review-completed status would lose a proven
+    same-edition source whenever byte download times out later that run.
+    This cache is a research lead, NOT already downloaded photos.
+    """
+    restored=0
+    for entry in history:
+        if not isinstance(entry,dict):
+            continue
+        aid=entry.get('album_id')
+        url=entry.get('url')
+        work=f'{model}:{aid}'
+        if work not in db['works'] or not isinstance(url,str) or not https_page(url):
+            continue
+        row=next((x for x in results if x['id']==aid),None)
+        if row is None:
+            row={'id':aid,'title':db['works'][work][0]['name'],
+                 'urls':[],'observations':[],'query_count':0}
+            results.append(row)
+        if url in row['urls']:
+            continue
+        row['urls'].append(url)
+        row['observations'].append({
+            'model':model,'album_id':aid,'source':url,
+            'proof':'unique_named_work_page_model_and_edition',
+            'name':row['title'],'durable_source_review_history':True})
+        restored+=1
+    return restored
 
 
 def main():
@@ -443,6 +486,9 @@ def main():
             limit=a.reverse_limit)
         report['image_reverse_resolution_stats']=reverse_stats
         report['image_reverse_sites_verified']=matches
+        report['verified_source_pages_reused']=reuse_verified_source_history(
+            db,a.model,report['search_results'],
+            next_source_state.get('source_verified_pages',[]))
     elif a.reverse and a.reverse.is_file():
         reverse_stats={}
         matches=merge_image_reverse_sites(db,json.loads(a.reverse.read_text(encoding="utf-8")),
