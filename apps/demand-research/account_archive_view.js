@@ -212,8 +212,14 @@ function renderExtraProfileFields(profile){
   if(profile.platform==="mastodon"){
     if(profile.bot===true)addText("계정 유형","자동화 계정");
     if(profile.locked===true)addText("팔로우 상태","승인 필요");
-    addText("헤더 설명",profile.header_description);
-    addText("프로필 사진 설명",profile.avatar_description);
+    // Source Mastodon displays alt text to assistive technology, not as
+    // extra visible profile rows that shift every subsequent screenshot.
+    const cover=$("cover"),avatar=$("avatar");
+    cover.setAttribute("role","img");
+    cover.setAttribute("aria-label",profile.header_description||
+      "보관된 공개 프로필 헤더 배경");
+    avatar.setAttribute("aria-label",profile.avatar_description||
+      "보관된 공개 프로필 사진");
   }
   const site=validLink(profile.website);
   if(site){
