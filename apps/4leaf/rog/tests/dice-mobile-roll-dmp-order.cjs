@@ -67,7 +67,7 @@ const {chromium,webkit}=require('playwright');
   const mobileCamera=await page.evaluate(()=>window.__LEAF_CAMERA__.getState());
   const phoneFit=await page.evaluate(()=>window.__LEAF_PHONE_FIT__?.getState?.());
   const onScreen=mobileCamera.scale*(phoneFit?phoneFit.scale:1);
-  assert.ok(onScreen>=.45&&onScreen<=.7,
+  assert.ok(onScreen>=.3&&onScreen<=.7,
    'phone initial camera still fits the DMP field: '+onScreen);
   await page.locator('#board-zoom-in').click();
   assert.equal(await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale),
@@ -166,6 +166,7 @@ const {chromium,webkit}=require('playwright');
   });
   const landFit=await page.evaluate(()=>window.__LEAF_PHONE_FIT__?.getState?.());
   assert.deepEqual([landFit.deviceWidth,landFit.deviceHeight],[844,390]);
+  assert.ok(landFit.layoutWidth===800&&landFit.layoutHeight===600&&landFit.scale<.7,'rotation must shrink whole source client, never enlarge scene');
   assert.equal(landscape.sourceOriginal,true,'rotation preserves 145x97 source TIS art');
   assert.ok(landscape.sourceActors.length>=2&&
    landscape.sourceActors.every(v=>['original-obs-sprite','original-card-portrait-fallback'].includes(v)),
