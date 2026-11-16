@@ -204,6 +204,46 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
                 'search_results':results},'mimmi',safe_registered_public_page)=={
                 'mimmi-teddy-bear':{url}}
 
+    def test_bounded_source_page_backlog_preserves_unreviewed_suffix(self):
+        from source_alias_search import review_source_backlog
+        second='https://public-album-archive.org/mimmi-pop-kitty-party'
+        def entry(url):
+            return {'album_id':'unclassified-owner-work',
+                    'link':{'url':url,'label':'DJAWA Mimmi Pop Kitty Party',
+                            'source_engine':'yandex_sites',
+                            'matched_image_url':'https://cdn.public-album-archive.org/pic.jpg'}}
+        state={'schema_version':1,'model':'mimmi',
+               'source_pending_pages':[entry(SOURCE),entry(second)]}
+        db={'works':{f'mimmi:{ALBUM}':[{'name':'Mimmi Pop Kitty Party'}]},
+            'model_names':{'mimmi':[{'name':'Mimmi'}]}}
+        class FakeSession:
+            def get(self,url,**kwargs):
+                self.last=url
+                doc=html().decode()
+                return type('Result',(),{'status_code':200,
+                        'headers':{'Content-Type':'text/html'},
+                        'content':doc.encode(),'text':doc})()
+        sess=FakeSession()
+        result=[]
+        matched,remaining,stats=review_source_backlog(
+            db,state,'mimmi',result,sess,limit=1)
+        self.assertEqual(len(matched),1,matched)
+        self.assertEqual(stats['source_page_candidates_reviewed_this_run'],1)
+        self.assertEqual(stats['source_page_candidates_pending_next_run'],1)
+        self.assertEqual(remaining['source_pending_pages'][0]['link']['url'],second)
+        self.assertEqual(remaining['last_source_pages_reviewed'],1)
+        matched2,done,stats2=review_source_backlog(
+            db,remaining,'mimmi',result,sess,limit=1)
+        self.assertEqual(len(matched2),1,matched2)
+        self.assertEqual(done['source_pending_pages'],[])
+        self.assertEqual(stats2['source_page_candidates_pending_next_run'],0)
+        self.assertEqual(len(result[0]['urls']),2)
+        # Research leaves must still independently pass exact-work/source
+        # proof before any image URL is allowed to enter storage.
+        self.assertEqual(eligible_source_pages({'schema_version':1,
+            'model':'mimmi','search_results':result},'mimmi',
+            safe_registered_public_page),{ALBUM:{SOURCE,second}})
+
     def test_no_unreviewed_result_is_automatically_scraped(self):
         doc=evidence()
         doc['search_results']=[]
