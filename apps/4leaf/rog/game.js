@@ -398,8 +398,22 @@ function syncNativeDiceEvent(message){
   output.dataset.source='IMG/eventmsgbox.png';
   area.append(output);
  }
- output.textContent=String(message||'');
- output.title=String(message||'');
+ // The visible frame is the actual 244x52 IMG/eventmsgbox.png source
+ // artwork. Put the current LIVE player turn in its real text field rather
+ // than painting an unrelated 166x93 modern bubble over historic DMP tiles.
+ // Turn ownership comes from the already-authoritative match and banner;
+ // history/message remains the exact gameplay event, never manufactured.
+ const banner=$('dice-turn-banner');
+ const headline=banner?.querySelector('.turn-cue-head')?.textContent||
+   ((match.active+1)+'P · '+(activePlayer()?.name||'현재 참가자')+' 차례');
+ const turn=document.createElement('strong');turn.className='dice-native-turn-heading';
+ turn.textContent=headline;
+ const detail=document.createElement('small');detail.className='dice-native-event-detail';
+ detail.textContent=String(message||'');
+ output.replaceChildren(turn,detail);
+ output.title=headline+' | '+String(message||'');
+ output.dataset.turnOwner=banner?.dataset.turnOwner||'local';
+ output.dataset.turnPlayer=String(match.active);
  output.dataset.eventText=String(message||'');
 }
 function toast(message){

@@ -10,6 +10,12 @@
  * remain normal DOM game entities, not static screenshot compositions.
  */
 #app.app-classic-dice #game:has(#battle-visual) #dice-native-event,
+/* The WEB-only 16px turn bubble was created after the original battle
+ * screenshot registration; it paints x97..263, y51..144 OVER the source
+ * BATTLE heading and left score. The historical original has no bubble.
+ * Keep its ARIA text and live turn state, but never paint over genuine
+ * winBattle original SPR while an actual duel is visible. */
+#app.app-classic-dice #game:has(#battle-visual) .dice-turn-banner,
 #app.app-classic-dice #game:has(#battle-visual) .game-controls,
 #app.app-classic-dice #game:has(#battle-visual) .control-center,
 #app.app-classic-dice #game:has(#battle-visual) .roll-controls,
