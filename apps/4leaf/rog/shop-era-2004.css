@@ -152,3 +152,104 @@
  border:2px ridge #a38bbf!important;
  color:#f2efff!important;background:#272654df!important;
 }
+
+/*
+ * SHOP-01 / surviving 2004 screenshot coordinate trace:
+ * apps/4leaf/assets/shop_ref.png is a 541x402 scaled 794px-wide client
+ * capture. Source client scaling is 541/794=0.68136. Its shop workspace
+ * starts at screenshot y≈44. Preserve the 2002 PAK's distinct native 3x3
+ * version when era=2002; 2004's four-by-two arrangement is different.
+ *
+ * Recorded screenshot landmarks (source image pixel -> 794x404 stage):
+ * tabs Normal (22,54) -> (32,15), Valuable (91,54) -> (134,15),
+ * Rare (159,54) -> (233,15); cards first (32,82)->(47,56),
+ * next columns x89/146/203 -> x131/214/298, second row y143->145.
+ * equipment list (275,66)->(403,32), currency (274,245)->(402,295),
+ * purchase (274,271)->(402,333), sale (344,271)->(505,333);
+ * card information panel (22,221)->(32,260).
+ * Tolerance on tiny compressed historical photo >=4 source px.
+ * This restores layout anchors only, not unavailable 2004 per-face art,
+ * source shop background layers or original 2004 EXE economic mechanics.
+ */
+#shop .shop-native-stage[data-era="2004"]{
+ /* Original shop_ref has no extra 2px HTML ridge around this source client. */
+ border:0!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-grid{
+ left:47px!important;top:56px!important;
+ width:325px!important;height:182px!important;
+ grid-template-columns:repeat(4,73px)!important;
+ grid-template-rows:repeat(2,91px)!important;
+ column-gap:11px!important;row-gap:0!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab{
+ top:14px!important;height:25px!important;
+ font:italic 700 13px/21px Georgia,serif!important;
+ border-radius:4px 4px 1px 1px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="normal"]{
+ left:32px!important;width:98px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="valuable"]{
+ left:134px!important;width:95px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="rare"]{
+ left:233px!important;width:96px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="all"]{
+ /* Not on the 2004 photo. Keep a small WEB catalog reset just above
+    the image region instead of replacing the authentic tier tabs. */
+ left:331px!important;top:14px!important;width:48px!important;
+ font:10px/21px Gulim,'굴림',sans-serif!important;
+ background:#332653a8!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-page-controls #shop-prev{
+ left:11px!important;top:164px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-page-controls #shop-next{
+ left:374px!important;top:164px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-page-controls #shop-page{
+ left:168px!important;top:242px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-equipped,
+#shop .shop-native-stage[data-era="2004"].owned-open .shop-equipped{
+ left:402px!important;top:32px!important;
+ width:193px!important;height:234px!important;
+ border:1px solid #a38ac0!important;border-radius:0!important;
+ display:flex!important;overflow:hidden!important;
+}
+#shop .shop-native-stage[data-era="2004"] #shop-owned-list{
+ overflow-y:auto!important;overflow-x:hidden!important;
+ scrollbar-width:thin;scrollbar-color:#a9aed7 #37315a;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-owned-toggle{
+ left:558px!important;top:12px!important;
+ width:36px!important;height:23px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-detail{
+ left:32px!important;top:260px!important;
+ width:342px!important;height:126px!important;
+ padding:8px!important;overflow:hidden!important;
+}
+#shop .shop-native-stage[data-era="2004"] #shop-selected{
+ width:321px!important;height:98px!important;max-height:98px!important;
+ font:11px/17px Gulim,'굴림',sans-serif!important;
+ overflow-y:auto!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-detail #shop-buy{
+ left:368px!important;top:71px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-detail #shop-sell{
+ left:471px!important;top:71px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-keeper .money{
+ left:402px!important;top:294px!important;
+ width:193px!important;height:31px!important;
+ box-sizing:border-box!important;padding:3px 6px!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-era-toggle{
+ /* Distinguish date switch as a WEB inspection control rather than
+    transcribing it as if the original screenshot contained one. */
+ right:12px!important;bottom:7px!important;
+}
