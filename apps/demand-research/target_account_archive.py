@@ -205,8 +205,13 @@ def resolve(platform, raw, api):
     value = profile_input(platform, raw)
     if platform == "bluesky":
         actor = value
-        profile = api.json("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?" +
-                           urlencode({"actor":actor}))
+        # Match the already deployed main capture fallback. A 400 from the
+        # CDN endpoint is not proof that a public DID has no accessible profile.
+        lookup=urlencode({"actor":actor})
+        try:
+            profile=api.json("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?"+lookup)
+        except SourceUnavailable:
+            profile=api.json("https://api.bsky.app/xrpc/app.bsky.actor.getProfile?"+lookup)
         did = profile.get("did") if isinstance(profile,dict) else None
         handle = profile.get("handle") if isinstance(profile,dict) else None
         if not isinstance(did,str) or not DID_RE.fullmatch(did) or not isinstance(handle,str):
