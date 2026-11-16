@@ -146,7 +146,7 @@ jobs:
           raise SystemExit(0 if report['seed_queries']==0
               and old.get('search_revision')==report['search_revision']
               and old.get('last_run_attempts')==0
-              and not old.get('source_pending_pages') else 1)
+              and old.get('last_source_pages_reviewed',0)==0 else 1)
           PY
           then
             echo "ALL_OWNER_PHOTO_REVERSE_CURSOR_UNCHANGED model=$MODEL"
@@ -191,13 +191,64 @@ jobs:
           # has already been durably committed and read back above.
           if ! timeout 420s python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
             --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
-            --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
+            --work-budget 8 --reverse-limit 96 --reverse-progress "$STAGE/reverse-next.json" \
             --out "$STAGE/source-evidence.json"; then
             # Optional source-name enrichment must NOT prevent the independent
             # registered public work collector or block the next SHA batch.
             echo "::warning::SOURCE_ALIAS_SEARCH_UNAVAILABLE model=$MODEL; registered sources still scanned"
             printf '{"schema_version":1,"model":"%s","targets":[],"search_results":[],"research_only_not_yet_saved":true,"source_alias_status":"unavailable"}\n' "$MODEL" > "$STAGE/source-evidence.json"
           fi
+      - name: Persist source-page review cursor so unvisited image leads survive across runs
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="gallery-reverse-progress-$MODEL"
+          key="apps/gallery-archive/verification/reverse-progress-$MODEL.json"
+          # Re-read authoritative remote state; never trust a prior PUT
+          # success or an uncommitted result from a cancelled search.
+          gh api "repos/$GITHUB_REPOSITORY/contents/$key?ref=$branch" \
+            --jq '.content' | tr -d '\n' | base64 -d > "$STAGE/source-cursor-before.json"
+          if python - <<'PY'
+          import json,os,pathlib
+          root=pathlib.Path(os.environ['STAGE'])
+          current=json.loads((root/'source-cursor-before.json').read_text())
+          proposed=json.loads((root/'reverse-next.json').read_text())
+          raise SystemExit(0 if current==proposed else 1)
+          PY
+          then
+            echo "GALLERY_SOURCE_BACKLOG_UNCHANGED model=$MODEL"
+            exit 0
+          fi
+          python - <<'PY'
+          import base64,json,os,pathlib,subprocess
+          model=os.environ['MODEL']
+          repo=os.environ['GITHUB_REPOSITORY']
+          directory=pathlib.Path(os.environ['STAGE'])
+          key=f'apps/gallery-archive/verification/reverse-progress-{model}.json'
+          branch=f'gallery-reverse-progress-{model}'
+          current=subprocess.check_output(
+              ['gh','api',f'repos/{repo}/contents/{key}?ref={branch}',
+               '--jq','.sha'],text=True).strip()
+          upload={'message':f'checkpoint(gallery): preserve remaining verified-source review queue for {model}',
+                  'branch':branch,'sha':current,
+                  'content':base64.b64encode(
+                      (directory/'reverse-next.json').read_bytes()).decode()}
+          (directory/'source-cursor-upload.json').write_text(json.dumps(upload))
+          PY
+          gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/$key" \
+            --input "$STAGE/source-cursor-upload.json" --jq '.commit.sha'
+          gh api "repos/$GITHUB_REPOSITORY/contents/$key?ref=$branch" \
+            --jq '.content' | tr -d '\n' | base64 -d > "$STAGE/source-cursor-readback.json"
+          python - <<'PY'
+          import json,os,pathlib
+          root=pathlib.Path(os.environ['STAGE'])
+          proposed=json.loads((root/'reverse-next.json').read_text())
+          persisted=json.loads((root/'source-cursor-readback.json').read_text())
+          assert persisted==proposed, 'GALLERY_SOURCE_BACKLOG_READBACK_MISMATCH'
+          print('GALLERY_SOURCE_BACKLOG_DURABLY_SAVED',
+                'pending',len(persisted.get('source_pending_pages',[])),
+                'reviewed',persisted.get('last_source_pages_reviewed',0),flush=True)
+          PY
       - name: Acquire every registered work, prioritizing actual missing cuts
         shell: bash
         run: |
