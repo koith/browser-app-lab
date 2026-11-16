@@ -55,7 +55,24 @@ const only=process.env.LEAF_VIEWS?process.env.LEAF_VIEWS.split(','):null;
     const s=await state(),key=JSON.stringify(s);
     if(key!==last){last=key;lastChange=Date.now();rounds.add(s.round)}
     if(s.finished)break;
-    assert.ok(Date.now()-lastChange<45000,name+' match stuck at '+key);
+    if(Date.now()-lastChange>=45000){
+     const diagnosis=await page.evaluate(()=>{
+      const els=[...document.querySelectorAll('button')].map(e=>{
+       const r=e.getBoundingClientRect(),st=getComputedStyle(e),t=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+       return {id:e.id,text:(e.textContent||'').trim().slice(0,65),
+        disabled:e.disabled,display:st.display,visibility:st.visibility,
+        inside:r.width>0&&r.height>0&&r.left>=0&&r.top>=0&&
+         r.right<=innerWidth&&r.bottom<=innerHeight,
+        hit:t===e||e.contains(t)};
+      }).filter(x=>/roll|turn|continue|exit|battle|ability|modal|result|confirm|주사위|확인|굴리기|진행/.test(x.id+' '+x.text));
+      const m=document.getElementById('modal');
+      return {viewport:[innerWidth,innerHeight],fit:window.__LEAF_PHONE_FIT__?.getState?.(),
+       modal:{hidden:m?.classList.contains('hidden'),text:(m?.textContent||'').slice(0,500)},
+       controls:els,match:window.__ROG_TEST__?.getMatch?.()};
+     });
+     console.error('REALUSE FULL GAME STALL DIAGNOSTIC',JSON.stringify({key,diagnosis}).slice(0,9000));
+     throw new Error(name+' match stuck at '+key);
+    }
     assert.ok(Date.now()-t0<200000,name+' match did not finish within 200 seconds');
     const target=await page.evaluate(()=>{
      const ok=e=>{

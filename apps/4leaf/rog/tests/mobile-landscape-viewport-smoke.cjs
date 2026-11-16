@@ -43,16 +43,16 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
      assert.equal(s.rotate,'none');
      return;
     }
-    assert.ok(s.fit&&s.fit.layoutWidth===800&&s.fit.layoutHeight===600,
-      name+' 800x600 original layout kept');
-    assert.equal(s.fit.method,'uniform-transform-fit');
-    assert.ok(s.fit.scale>0&&s.fit.scale<=1,
-      name+' scale must not zoom in');
+    assert.ok(s.fit&&s.fit.layoutWidth>=800&&s.fit.layoutHeight>=440&&s.fit.layoutHeight<=600,
+      name+' source-preserving per-scene layout kept');
+    assert.equal(s.fit.method,'per-scene-native-contain');
+    assert.ok(s.fit.scale>0&&s.fit.scale<=1.5,
+      name+' source image scales only to available height, never cropped');
     assert.ok(s.app.x>=-2&&s.app.right<=s.width+2&&
       s.app.y>=-2&&s.app.bottom<=s.height+2,
       name+' entire frame within actual device '+JSON.stringify(s));
-    assert.ok(Math.abs(s.app.width-800*s.fit.scale)<2&&
-      Math.abs(s.app.height-600*s.fit.scale)<2,
+    assert.ok(Math.abs(s.app.width-s.fit.layoutWidth*s.fit.scale)<2&&
+      Math.abs(s.app.height-s.fit.layoutHeight*s.fit.scale)<2,
       name+' uniform aspect ratio '+JSON.stringify(s));
     assert.equal(s.fit.landscape,mode==='landscape');
     if(mode==='portrait')assert.notEqual(s.rotate,'none');
@@ -66,6 +66,10 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
     assert.equal(await page.locator('html').getAttribute('data-leaf-chat-open'),'true');
     await page.locator('#leaf-phone-chat-toggle').click();
     assert.equal(await page.locator('html').getAttribute('data-leaf-chat-open'),'false');
+    // WebKit device emulation keeps its original orientation even after a
+    // viewport-size mutation; independent portrait/landscape contexts above
+    // test both real configurations. Do not claim live WebKit rotation tested.
+    if(engine!=='webkit'){
     // Rotate the SAME live page, then rotate back without reload.
     await page.setViewportSize({width:390,height:844});
     await page.waitForFunction(()=>document.documentElement.getAttribute('data-leaf-phone-fit')==='portrait');
@@ -74,8 +78,11 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
     await page.waitForFunction(()=>document.documentElement.getAttribute('data-leaf-phone-fit')==='landscape');
     const after=await get();
     verify(after,'landscape');
-    assert.ok(after.fit.scale<=Math.min((after.visualWidth-2)/800,(after.visualHeight-2)/600)+.0001,
+    assert.ok(after.fit.scale<=Math.min((after.visualWidth-3)/800,(after.visualHeight-3)/after.fit.layoutHeight)+.0001,
       name+' returning to landscape must never overfill its current visible viewport '+JSON.stringify({before:s.fit,after:after.fit}));
+    }else{
+     console.log('webkit orientation: separate phone contexts validated; live device rotation requires hardware QA');
+    }
    }
    const unrelatedErrors=errors.filter(e=>!(/fourleaf-central-chat-free\.onrender\.com\/api\/session/.test(e)&&/Fetch API cannot load/.test(e)));
    assert.deepEqual(unrelatedErrors,[],name+' viewport-induced JavaScript errors');

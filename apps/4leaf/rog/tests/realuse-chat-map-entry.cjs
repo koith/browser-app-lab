@@ -16,6 +16,13 @@ const VIEWS=[['desktop',{viewport:{width:1280,height:850}}],
    if(engine!=='webkit')delete opts.defaultBrowserType;
    const ctx=await browser.newContext({...opts,serviceWorkers:'block'});
    const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+   if(name==='iphone-portrait'){
+    await page.goto(base);
+    await page.locator('#leaf-phone-rotate').waitFor({state:'visible'});
+    assert.equal(await page.locator('html').getAttribute('data-leaf-phone-fit'),'portrait');
+    console.log(name,'orientation guidance shown; real-use click path is landscape-only');
+    await ctx.close();continue;
+   }
    await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL=''});
    await page.goto(base);
    await page.getByRole('button',{name:/북 하이아칸/}).first().click();
