@@ -93,6 +93,16 @@ function absNear(actual,target,span,label){assert.ok(Number.isFinite(actual)&&Ma
    T.resolveBattle(m.players[0],m.players[1]).catch(e=>console.error('source trace battle',e));
   });
   await page.waitForSelector('#battle-visual',{timeout:12000});
+  // Do not compare a transitional half-rendered duel to the historical
+  // settled BATTLE still: wait for source winBattle podium, score glyphs,
+  // and the engine's genuine dice to reach their visible state.
+  await page.waitForFunction(()=>{
+   const stage=document.querySelector('#battle-visual');
+   return stage?.dataset.nativeBattlePodium==='ready' &&
+    stage.querySelectorAll('.battle-total-digit').length>=2 &&
+    stage.querySelectorAll('.battle-visual-die').length>=2;
+  },null,{timeout:12000});
+  await page.waitForTimeout(400);
   const battleOverlays=await page.evaluate(()=>({
    battle:!!document.querySelector('#battle-visual'),
    eventVisibility:getComputedStyle(document.querySelector('#dice-native-event')).visibility,
