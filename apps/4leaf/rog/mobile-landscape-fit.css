@@ -7,6 +7,8 @@ html[data-leaf-phone-fit]{
  height:100%!important;
  overflow:hidden!important;
  background:#1b1941!important;
+ -webkit-text-size-adjust:100%!important;
+ text-size-adjust:100%!important;
 }
 html[data-leaf-phone-fit] body{
  margin:0!important;
@@ -31,6 +33,15 @@ html[data-leaf-phone-fit] #app{
  overflow:hidden!important;
  display:flex!important;
  flex-direction:column!important;
+}
+/* iOS Safari auto-zooms focused controls below 16 CSS pixels. Preserve
+ * the fitted whole screen instead of unexpectedly zooming into chat inputs. */
+@supports (-webkit-touch-callout: none){
+ html[data-leaf-phone-fit] #app input,
+ html[data-leaf-phone-fit] #app textarea,
+ html[data-leaf-phone-fit] #app select{
+  font-size:16px!important;
+ }
 }
 html[data-leaf-phone-fit="landscape"] #app>.titlebar,
 html[data-leaf-phone-fit="landscape"] #app>.statusbar{display:none!important}
