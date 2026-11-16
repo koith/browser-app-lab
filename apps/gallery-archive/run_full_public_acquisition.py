@@ -101,6 +101,8 @@ def execute(args):
              'new_sha_verified_originals':0,'total_bytes_added':0}
         if collection_error:
             row['collection_error']=collection_error
+        if collector_code==0 and not catalog.is_file():
+            row['collection_error']='missing_finalized_stage_catalog'
         if collector_code==0 and catalog.is_file():
             try:
                 proc=subprocess.run([sys.executable,str(ARCHIVE/'publish_new_public_photos_to_pages.py'),
@@ -171,8 +173,30 @@ def execute(args):
 def replay(model,stage,max_per_batch,bytes_per_batch):
     from publish_new_public_photos_to_pages import publish
     stage=Path(stage)
+    summary=stage/'full-collection-summary.json'
+    if not summary.is_file():
+        # Never trust partial/stale catalogs without a completed collection
+        # audit. Missing stage is a genuine no-op, not a successful publish.
+        if any(stage.glob('batch-*/metadata/catalog.json')):
+            raise ValueError('UNVERIFIED_COLLECTION_STAGE_AUDIT_MISSING')
+        print('FULL_COLLECTION_REBASED_MAIN_NEW_SHA',model,0,flush=True)
+        return 0
+    audit=json.loads(summary.read_text(encoding='utf-8'))
+    if audit.get('model')!=model or not isinstance(audit.get('batches'),list):
+        raise ValueError('COLLECTION_REPLAY_AUDIT_INVALID')
+    allowed=set()
+    for row in audit['batches']:
+        if (row.get('collector_returncode')==0
+                and row.get('publisher_returncode')==0
+                and not row.get('collection_error')
+                and not row.get('publication_error')):
+            allowed.add('batch-'+str(row['batch']).zfill(2))
+    # Only replay catalogs from successful, SHA-verified publication
+    # substeps. A timed-out collector can leave partial catalog files.
     count=0
     for folder in sorted(stage.glob('batch-*')):
+        if folder.name not in allowed:
+            continue
         if not (folder/'metadata/catalog.json').is_file():
             continue
         doc=publish(model,folder,root=ROOT,budget=bytes_per_batch,limit=max_per_batch)
