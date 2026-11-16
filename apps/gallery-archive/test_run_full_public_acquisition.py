@@ -162,10 +162,19 @@ class FullAcquisitionTests(unittest.TestCase):
             self.assertFalse(doc['collection_all_batches_success'])
             self.assertEqual(doc['incomplete_batch_count'],1)
             self.assertEqual(doc['registered_works_scheduled'],43)
+            recovered=doc['batches'][1]['recovery_scheduled_work_ids']
+            self.assertEqual(len(recovered),3)
+            self.assertEqual(doc['single_work_recovery_scheduled'],3)
+            self.assertEqual(doc['single_work_recovery_succeeded'],3)
             self.assertEqual(doc['registered_works_visited'],
-                             43-len(doc['batches'][1]['works']))
+                             43-len(doc['batches'][1]['works'])+3)
             self.assertEqual(doc['registered_work_ids_in_incomplete_batches'],
-                             doc['batches'][1]['works'])
+                             [x for x in doc['batches'][1]['works'] if x not in recovered])
+            self.assertEqual(len(doc['registered_work_ids_in_incomplete_batches']),4)
+            # Retrying the timed-out group must use its own bounded per-work
+            # timeout, never silently rerun all seven works for 420 seconds.
+            followups=[row for row in doc['batches'] if row['single_work_recovery']]
+            self.assertEqual([row['works'][0] for row in followups],recovered)
             self.assertGreater(len(attempts),2)
             self.assertEqual(doc['batches'][1]['collector_returncode'],124)
             self.assertEqual(doc['batches'][1]['collection_error'],'collector_timeout')
