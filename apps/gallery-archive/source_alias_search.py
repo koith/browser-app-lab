@@ -445,14 +445,16 @@ def reuse_verified_source_history(db,model,results,history):
             row={'id':aid,'title':db['works'][work][0]['name'],
                  'urls':[],'observations':[],'query_count':0}
             results.append(row)
-        if url in row['urls']:
-            continue
-        row['urls'].append(url)
-        row['observations'].append({
-            'model':model,'album_id':aid,'source':url,
-            'proof':'unique_named_work_page_model_and_edition',
-            'name':row['title'],'durable_source_review_history':True})
-        restored+=1
+        if url not in row['urls']:
+            row['urls'].append(url)
+        if not any(obs.get('source')==url
+                   and obs.get('proof')=='unique_named_work_page_model_and_edition'
+                   for obs in row['observations']):
+            row['observations'].append({
+                'model':model,'album_id':aid,'source':url,
+                'proof':'unique_named_work_page_model_and_edition',
+                'name':row['title'],'durable_source_review_history':True})
+            restored+=1
     return restored
 
 
