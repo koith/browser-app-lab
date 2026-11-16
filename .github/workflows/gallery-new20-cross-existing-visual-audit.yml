@@ -11,7 +11,9 @@ on:
       - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
       - '.github/workflows/gallery-new20-cross-existing-visual-audit.yml'
   workflow_run:
-    workflows: ['pages build and deployment']
+    workflows:
+      - 'pages build and deployment'
+      - 'Deploy static content to Pages'
     types: [completed]
 permissions:
   contents: read
