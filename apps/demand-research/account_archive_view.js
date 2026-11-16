@@ -287,6 +287,15 @@ function renderProfile(profile){
   $("biography").textContent=typeof profile.description==="string"&&profile.description.trim()
     ?profile.description:"수집된 프로필에 등록된 자기소개가 없습니다.";
   $("postCount").textContent=fmt(profile.posts_count);
+  if(profile.platform==="mastodon"){
+    const featured=document.querySelector('.tabs [data-section="featured"]');
+    const mediaTab=document.querySelector('.tabs [data-section="media"]');
+    if(featured)featured.hidden=profile.show_featured===false;
+    if(mediaTab)mediaTab.hidden=profile.show_media===false;
+    if((state.section==="media"&&profile.show_media===false)||
+       (state.section==="featured"&&profile.show_featured===false))
+      setTab("activity");
+  }
   $("followerCount").textContent=fmt(profile.followers_count);
   $("followingCount").textContent=fmt(profile.following_count);
   const fields=profile.fields;
@@ -637,6 +646,8 @@ async function nextPage(){
     const feedKindFilter=selected==="replies"?"reply":
       selected==="activity"?$("mastodonActivity").value:
       selected==="featured"?"featured":
+      selected==="media"&&state.profile?.platform==="mastodon"&&
+        state.profile.show_media_replies===false?"post":
       selected==="media"||selected==="videos"?"":feedKind.value||"post";
     const mediaFilter=selected==="media"?"has_media":
       selected==="videos"?"has_video":feedMediaStatus.value;
