@@ -7,7 +7,9 @@ on:
       - 'apps/yui-gallery/stored-albums.json'
       - 'apps/yui-gallery/stored-albums/public-yui-sns/**'
   workflow_run:
-    workflows: ["pages build and deployment"]
+    workflows:
+      - "Deploy static content to Pages"
+      - "pages build and deployment"
     types: [completed]
 permissions:
   contents: read
