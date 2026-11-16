@@ -69,7 +69,7 @@ class StatusBoardTests(unittest.TestCase):
             2026, 11, 4, tzinfo=timezone.utc
         ))
         self.assertIn("P0 / INT-01: FAILED", result)
-        self.assertIn("1/2건 완료 표시", result)
+        self.assertIn("핵심 과제:** 0/10건 검증 완료 표시", result)
         self.assertIn("21", result)
         self.assertIn("PENDING", result)
         self.assertIn("과거 미복구 0건", result)
@@ -180,6 +180,47 @@ class StatusBoardTests(unittest.TestCase):
             stage_action="NONE", reason="SECRET_LEAKED_FROM_UNTRUSTED_EVENT",
         ))
         self.assertEqual(saved[123]["reason"], "INT01_OPERATIONAL_PROOF_PENDING")
+
+
+    def test_only_first_primary_checklist_is_counted_not_history(self):
+        body = (
+            "## P0 — 실운영\n"
+            "- [ ] **INT-01** P0\n"
+            "- [ ] **INT-02** P0\n"
+            "- [ ] **INT-03** P0\n"
+            "- [ ] **INT-04** P0\n"
+            "## P1 — 서비스\n"
+            "- [ ] **INT-05** P1\n"
+            "- [ ] **INT-06** P1\n"
+            "- [ ] **INT-07** P1\n"
+            "- [ ] **INT-08** P1\n"
+            "## P2 — 검증\n"
+            "- [ ] **INT-09** P2\n"
+            "- [x] **INT-10** P2\n"
+            "## 2026-11-03 오래된 개발 완료 하위 기록\n"
+            "- [x] **INT-01** 과거 서브태스크 (상위 작업 미완료)\n"
+            "- [x] **INT-02** 과거 서브태스크\n"
+            "- [x] **INT-03** 과거 서브태스크\n"
+        )
+        states = ops.core_task_states(body)
+        self.assertEqual(len(states), 10)
+        self.assertEqual(sum(states.values()), 1)
+        self.assertFalse(states["INT-01"])
+        self.assertTrue(states["INT-10"])
+        report = ops.render(
+            REPO, {ops.CAPTURE: [], ops.REPLAY: [], ops.REPAIR: []},
+            {}, body, datetime(2026, 11, 16, tzinfo=timezone.utc))
+        self.assertIn("핵심 과제:** 1/10건 검증 완료 표시", report)
+        self.assertNotIn("9/12건", report)
+
+    def test_ledger_comment_fails_closed_if_over_cap(self):
+        gh = ops.GitHub(REPO, "fake-token")
+        with self.assertRaisesRegex(ValueError, "size cap"):
+            gh.upsert_comment("x" * (ops.MAX_STATUS_COMMENT_CHARS + 1))
+
+    def test_history_only_issue_fails_task_discovery(self):
+        old = "## 2026-11-03 히스토리\n- [x] **INT-01** 과거 완료\n"
+        self.assertEqual(ops.core_task_states(old), {})
 
     def test_non_user_input_workflow_urls_are_canonical(self):
         self.assertEqual(
