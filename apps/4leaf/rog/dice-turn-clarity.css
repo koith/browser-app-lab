@@ -105,3 +105,47 @@
   line-height:1.3!important;
  }
 }
+
+/* 2026-11-16 direct board.jpg source tracing:
+ * the 166x93 extra WEB turn bubble covered x97..263 / y51..144 of the
+ * native DMP board. It exists ONLY for assistive semantics now. The actual
+ * visible 1P/2P owner and event are drawn in the recovered
+ * IMG/eventmsgbox.png, without inventing another source-era window.
+ * Keep this accessible live region in DOM (opacity, not display:none). */
+#app.app-classic-dice #game .dice-turn-banner{
+ opacity:0!important;
+ pointer-events:none!important;
+}
+#app.app-classic-dice #game #dice-native-event{
+ flex-direction:column!important;
+ gap:1px!important;
+ padding:4px 11px!important;
+}
+#app.app-classic-dice #game #dice-native-event .dice-native-turn-heading{
+ box-sizing:border-box!important;
+ display:block!important;
+ width:100%!important;
+ max-width:100%!important;
+ overflow:hidden!important;
+ white-space:nowrap!important;
+ text-overflow:ellipsis!important;
+ font:800 16px/19px Gulim,'굴림',sans-serif!important;
+ color:#172d67!important;
+}
+#app.app-classic-dice #game #dice-native-event .dice-native-event-detail{
+ box-sizing:border-box!important;
+ display:block!important;
+ width:100%!important;
+ max-width:100%!important;
+ overflow:hidden!important;
+ white-space:nowrap!important;
+ text-overflow:ellipsis!important;
+ font:700 11px/14px Gulim,'굴림',sans-serif!important;
+ color:#274174!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #dice-native-event{
+  transform:translateX(-50%) scale(.9)!important;
+  transform-origin:top center!important;
+ }
+}
