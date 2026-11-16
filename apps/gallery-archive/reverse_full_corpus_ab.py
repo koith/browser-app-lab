@@ -29,44 +29,36 @@ SHA=re.compile('^[a-f0-9]{64}$')
 
 
 def all_album_seeds(root=ROOT):
+    """Include the entire public/owner SHA union, not three sample covers."""
+    from reverse_seed_priority import seeds as every_photo_seed
     root=Path(root)
     rows=[]
     model_totals={}
+    owner_album_keys=set()
     for model in ('yui','mimmi'):
-        base=root/'apps'/(model+'-gallery')
-        owner=json.loads((base/'owner-index.json').read_text(encoding='utf-8'))
-        pub=json.loads((base/'stored-albums.json').read_text(encoding='utf-8'))
-        by_id={a['id']:a for a in pub.get('albums',[])}
+        owner=json.loads((root/'apps'/f'{model}-gallery'/'owner-index.json')
+                         .read_text(encoding='utf-8'))
         albums=owner.get('albums',[])
         model_totals[model]=len(albums)
-        for a in albums:
-            aid=a['id']
-            originals=list({p['sha256']:p for p in a.get('images',[])
-                            if SHA.fullmatch(str(p.get('sha256','')))
-                            and isinstance(p.get('number'),int) and p['number']>0
-                            and p.get('bytes',0)>1024}.values())
-            static=list({p['sha256']:p for p in by_id.get(aid,{}).get('images',[])
-                         if SHA.fullmatch(str(p.get('sha256',''))) and
-                         str(p.get('url','')).startswith('stored-albums/') and
-                         '..' not in str(p.get('url','')).split('/')}.values())
-            refs=static or originals
-            indices=list(dict.fromkeys((0,len(refs)//2,len(refs)-1))) if refs else []
-            for i in indices:
-                p=refs[i];digest=p['sha256']
-                if static:
-                    url=BASE+'/'+model+'-gallery/'+quote(p['url'],safe='/')
-                    kind='already_committed_public_image'
-                else:
-                    url=(COVER+'/'+model+'/'+quote(aid,safe='')+'/'+str(p['number'])+
-                         '?v='+str(p.get('preview_sha256') or digest)[:24])
-                    kind='first_party_cover_of_owner_original'
-                rows.append({'model':model,'album_id':aid,'album_title':a.get('title',aid),
-                             'owner_sha256':digest,'owner_photo_count':len(originals),
-                             'seed_position':i,'public_image_url':url,'seed_kind':kind,
-                             'ai_derived_seed':bool(re.search(r'AI Enhanced|AI 보정|ai32',a.get('title',''),re.I))})
+        owner_album_keys.update((model,a['id']) for a in albums)
+    positions={}
+    for p in every_photo_seed(root/'apps', all_cuts=True):
+        key=(p['model'],p['album_id'])
+        i=positions.get(key,0)
+        positions[key]=i+1
+        rows.append({'model':p['model'],'album_id':p['album_id'],
+            'album_title':p['album_title'],'owner_sha256':p['photo_sha256'],
+            'owner_photo_count':p['owner_saved_count'],
+            'seed_position':i,'public_image_url':p['public_image_url'],
+            'seed_kind':p.get('seed_kind'),
+            'ai_derived_seed':bool(re.search(r'AI Enhanced|AI 보정|ai32',
+                                           p.get('album_title',''),re.I))})
     if len({(x['model'],x['album_id'],x['owner_sha256']) for x in rows})!=len(rows):
         raise ValueError('same_photo_seed_counted_twice')
-    return {'owner_albums_by_model':model_totals,'seeds':rows}
+    seeded={(x['model'],x['album_id']) for x in rows}
+    return {'owner_albums_by_model':model_totals,'seeds':rows,
+            'owner_albums_without_photo_seed':len(owner_album_keys-seeded),
+            'owner_album_ids':len(owner_album_keys)}
 
 
 def all_title_leads(root=ROOT):
@@ -89,8 +81,7 @@ def full_census(root=ROOT):
              'all_public_reverse_photo_seeds':len(albums['seeds']),
              'unique_albums_with_seeds':len({(x['model'],x['album_id']) for x in albums['seeds']}),
              'missing_owner_albums_without_photo_seed':
-                sum(albums['owner_albums_by_model'].values())-
-                len({(x['model'],x['album_id']) for x in albums['seeds']}),
+                albums['owner_albums_without_photo_seed'],
              'all_title_work_leads':len(leads)}
     return {'summary':summary,'seeds':albums['seeds'],'title_leads':leads}
 
@@ -174,7 +165,7 @@ def audit(root,model,shard,shards,out,delay=.5):
         'new_originals_stored':0,'gallery_visible_photos_added':0}
     report={'schema_version':1,'generated_at':datetime.now(timezone.utc).isoformat(),
         'full_census_summary':census['summary'],'summary':summary,'photo_seeds':results,
-        'title_leads':titles,'scope':'all owner cover positions + all title leads, no sampled albums',
+        'title_leads':titles,'scope':'full distinct owner+public SHA union and title leads, no sampled images',
         'warning':'Search hits are candidate pages, not decoded, stored or proven identity photos.'}
     p=Path(out);p.parent.mkdir(parents=True,exist_ok=True)
     p.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
