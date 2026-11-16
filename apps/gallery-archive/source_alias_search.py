@@ -14,6 +14,7 @@ from pathlib import Path
 from urllib.parse import urlsplit, urlencode
 import requests
 from bs4 import BeautifulSoup
+from public_work_photo_extractor import ordinary_public_https_image
 from source_name_ledger import LEDGER, queries, safe_url, key
 from visual_work_discovery import ENGINES, hits_from_html
 
@@ -106,7 +107,10 @@ def hydrate_all_registered_works(db, model, root=None):
 
 
 def https_page(url):
-    if not safe_url(url):return False
+    # Reverse search returns untrusted public page hints. Never request a
+    # private/local/cloud-metadata host; reuse the existing public-origin
+    # guard also used by image discovery and physical collection.
+    if not safe_url(url) or ordinary_public_https_image(url,url) is None:return False
     p=urlsplit(url)
     return (not any(s in p.path.lower() for s in EXCLUDE) and
             not re.search(r"\.(?:zip|rar|7z|pdf|exe|jpe?g|png|webp)(?:$|/)",p.path,re.I))
