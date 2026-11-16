@@ -460,8 +460,20 @@
    easing:'linear',fill:'forwards'});
   const turn=cube.animate(spin,{duration,
    easing:'cubic-bezier(.19,.61,.33,1)',fill:'forwards'});
-  try{await Promise.all([fall.finished,turn.finished]);}
-  finally{
+  // A browser may suspend Web Animations (background tab, hidden PWA,
+  // reduced-power WebKit) without settling Animation.finished. Presentation
+  // MUST NOT hold the real Dice turn forever: the game outcome is already
+  // fixed by its engine and final source face can always be drawn directly.
+  // Race the normal finish against a bounded wall-clock safeguard, without
+  // changing a single game roll/seed/result or claiming original MVE timing.
+  let watchdog=0;
+  try{
+   await Promise.race([
+    Promise.all([fall.finished,turn.finished]),
+    new Promise(resolve=>{watchdog=setTimeout(resolve,duration+650)})
+   ]);
+  }finally{
+   clearTimeout(watchdog);
    // Make the FINAL face permanent before removing animated layer.
    cube.style.transform=target;
    if(tumbleTimer)clearInterval(tumbleTimer);
