@@ -484,6 +484,12 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;
  gap:8px;min-height:35px;color:#dce5f9;font:10px Gulim,'굴림',sans-serif
 }
+/* Server admission errors are rendered in the map's existing hint line,
+   not silently appended to the hidden global chat history. */
+#rooms .social-map-toolbar>span[role="alert"]{
+ display:block;min-width:0;line-height:1.35;
+ color:#fff2b8;font-weight:bold;white-space:normal;overflow-wrap:anywhere;
+}
 #rooms .social-map-directions{display:flex;flex:none;gap:3px}
 #rooms .social-map-directions button{
  padding:3px 6px;min-width:26px;min-height:23px;cursor:pointer;
