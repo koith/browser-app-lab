@@ -415,3 +415,16 @@ body{background:var(--paper);color:var(--ink)}
   .post-bottom .post-action{font-size:10px}
   :root[data-platform="bluesky"] .profile-content{padding-top:50px}
 }
+
+/* Backup-only controls stay accessible but do not impersonate native SNS UI. */
+.profile-content .profile-audit{order:8;border-top:1px solid var(--line);
+ margin-top:9px;padding-top:5px}
+.profile-audit summary,.archive-tools summary{cursor:pointer;
+ font-size:11px;color:var(--sub);padding:7px 13px;font-weight:650}
+.profile-audit .evidence{margin:5px 0 0}
+.archive-tools{border-bottom:1px solid var(--line);background:var(--white)}
+.archive-tools[open] summary{border-bottom:1px solid var(--line)}
+.archive-tools .feed-controls[hidden]{display:none}
+.archive-tools .feed-controls{padding:10px 12px}
+:root[data-platform="mastodon"] .profile-audit,
+:root[data-platform="mastodon"] .archive-tools{border-color:#3e4254}
