@@ -84,8 +84,25 @@ def main():
         for offset in (0,1,5,17,47):
             selected=diversified_seed_window(complete,8,offset)
             assert len(selected)==8,(offset,len(selected))
-            assert len({(x['model'],x['album_id']) for x in selected})==4,selected
             assert len({(x['model'],x['album_id'],x['photo_sha256']) for x in selected})==8,selected
+        # With an offset incremented by 8 per scheduled run, every immutable
+        # photo must be reached before any photo is revisited.
+        key=lambda p:(p['model'],p['album_id'],p['photo_sha256'])
+        census={key(p) for p in complete}
+        visited=set()
+        for run in range((len(census)+7)//8):
+            batch=diversified_seed_window(complete,8,run*8)
+            assert not visited.intersection(map(key,batch)),(run,batch)
+            visited.update(map(key,batch))
+        assert visited==census,(len(visited),len(census))
+        assert len({(x['model'],x['album_id']) for x in diversified_seed_window(complete,8,0)})==4
+        # Regression: the old epoch=offset//album_count skipped half of a
+        # ten-photo single-album archive (offset 0,8,16,...).
+        single=[{'model':'mimmi','album_id':'only','photo_sha256':f'{i:064x}'}
+                for i in range(10)]
+        reached={key(p) for run in range(2)
+                 for p in diversified_seed_window(single,8,run*8)}
+        assert len(reached)==10,reached
         first=diversified_seed_window(complete,4,0)
         rotated=diversified_seed_window(complete,4,4)
         assert {x['photo_sha256'] for x in first}!={x['photo_sha256'] for x in rotated}
