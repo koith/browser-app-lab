@@ -1,135 +1,145 @@
 {
-  "schemaVersion": 1,
-  "purpose": "4LEAF 복원 개발의 초경량 대화 인수용 상태 스냅샷. 원본 개발원장을 대체하지 않으며, 새 일감 완료/변경 시 재생성 필요",
-  "generatedAt": "2026-11-16",
-  "authoritativeSource": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "sourceBlobSha": "ebf655b3444edd9f744c29fbd35817c300e1693d",
-  "sourceUpdatedAt": "2026-11-16",
+  "schemaVersion": 2,
+  "purpose": "4LEAF 복원 작업의 초경량 대화 인수. 과거 상세 이력은 별도 보존.",
+  "sourceOfTruth": "GitHub Issues [4LEAF][ID]",
+  "statusSnapshot": "apps/4leaf/rog/docs/RESTORATION_STATUS.json",
+  "process": "apps/4leaf/rog/docs/RESTORATION_LEDGER_MANAGEMENT.md",
+  "legacyEvidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "counts": {
     "total": 60,
     "done": 43,
     "in_progress": 16,
     "todo": 1,
+    "review_required": 0,
     "remaining": 17
   },
   "openTasks": [
     {
-      "id": "M02",
-      "status": "in_progress",
-      "priority": "P1",
-      "title": "켈티카·매직카덴 원작 복원"
-    },
-    {
-      "id": "M04",
-      "status": "in_progress",
+      "id": "ACT-05",
+      "issue": 1244,
       "priority": "P0",
-      "title": "주잔 DMP·TIS 보드 복원"
-    },
-    {
-      "id": "M05",
-      "status": "in_progress",
-      "priority": "P0",
-      "title": "주잔 창세기전 체스맨 원본 전신"
-    },
-    {
-      "id": "M06",
-      "status": "in_progress",
-      "priority": "P0",
-      "title": "주잔 배틀 원본 발판·시점"
-    },
-    {
-      "id": "M07",
-      "status": "in_progress",
-      "priority": "P0",
-      "title": "주사위 원본 모델·결과별 모션"
-    },
-    {
-      "id": "M09",
-      "status": "in_progress",
-      "priority": "P0",
-      "title": "동일 상태 원본 비교·배포 수용"
-    },
-    {
-      "id": "P0-PODIUM",
-      "status": "in_progress",
-      "priority": "P0",
-      "title": "원본 전투 발판·배치 완성"
-    },
-    {
-      "id": "P0-CHAT",
-      "status": "in_progress",
-      "priority": "P0",
-      "title": "상설 채팅방 원작 화면 정밀 복원"
-    },
-    {
-      "id": "P0-RELEASE",
-      "status": "in_progress",
-      "priority": "P0",
-      "title": "원작 복원 최종 화면·기능 수용 게이트"
-    },
-    {
-      "id": "SRC-01",
-      "status": "in_progress",
-      "priority": "P0",
-      "title": "리소스 출처·실제 용도 전수 정합"
+      "title": "체스맨 카드 초상화(CardData chm_N) 원본 근거 매핑",
+      "status": "in_progress"
     },
     {
       "id": "BRD-01",
-      "status": "in_progress",
+      "issue": 1238,
       "priority": "P0",
-      "title": "카메라 투영·발판 크기 원본 시점 맞춤"
+      "title": "카메라 투영·발판 크기 원본 시점 맞춤",
+      "status": "in_progress"
     },
     {
       "id": "BTL-04",
-      "status": "todo",
+      "issue": 1239,
       "priority": "P1",
-      "title": "전투 발판 원작 실제 공간감·시점 보강"
+      "title": "전투 발판 원작 실제 공간감·시점 보강",
+      "status": "todo"
     },
     {
       "id": "DIE-02",
-      "status": "in_progress",
+      "issue": 1240,
       "priority": "P0",
-      "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니"
+      "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
+      "status": "in_progress"
     },
     {
-      "id": "SHOP-02",
-      "status": "in_progress",
+      "id": "M02",
+      "issue": 1228,
       "priority": "P1",
-      "title": "구매·판매·GP·장착 카드 원본 룰 검증"
+      "title": "켈티카·매직카덴 원작 복원",
+      "status": "in_progress"
+    },
+    {
+      "id": "M04",
+      "issue": 1229,
+      "priority": "P0",
+      "title": "주잔 DMP·TIS 보드 복원",
+      "status": "in_progress"
+    },
+    {
+      "id": "M05",
+      "issue": 1230,
+      "priority": "P0",
+      "title": "주잔 창세기전 체스맨 원본 전신",
+      "status": "in_progress"
+    },
+    {
+      "id": "M06",
+      "issue": 1231,
+      "priority": "P0",
+      "title": "주잔 배틀 원본 발판·시점",
+      "status": "in_progress"
+    },
+    {
+      "id": "M07",
+      "issue": 1232,
+      "priority": "P0",
+      "title": "주사위 원본 모델·결과별 모션",
+      "status": "in_progress"
+    },
+    {
+      "id": "M09",
+      "issue": 1233,
+      "priority": "P0",
+      "title": "동일 상태 원본 비교·배포 수용",
+      "status": "in_progress"
+    },
+    {
+      "id": "P0-CHAT",
+      "issue": 1235,
+      "priority": "P0",
+      "title": "상설 채팅방 원작 화면 정밀 복원",
+      "status": "in_progress"
+    },
+    {
+      "id": "P0-PODIUM",
+      "issue": 1234,
+      "priority": "P0",
+      "title": "원본 전투 발판·배치 완성",
+      "status": "in_progress"
+    },
+    {
+      "id": "P0-RELEASE",
+      "issue": 1236,
+      "priority": "P0",
+      "title": "원작 복원 최종 화면·기능 수용 게이트",
+      "status": "in_progress"
     },
     {
       "id": "RULE-01",
-      "status": "in_progress",
+      "issue": 1242,
       "priority": "P0",
-      "title": "원작 특수칸·이벤트 데이터 검증"
+      "title": "원작 특수칸·이벤트 데이터 검증",
+      "status": "in_progress"
     },
     {
       "id": "RULE-02",
-      "status": "in_progress",
+      "issue": 1243,
       "priority": "P1",
-      "title": "전투·능력·아이템·라운드 원본 예외처리"
+      "title": "전투·능력·아이템·라운드 원본 예외처리",
+      "status": "in_progress"
     },
     {
-      "id": "ACT-05",
-      "status": "in_progress",
+      "id": "SHOP-02",
+      "issue": 1241,
+      "priority": "P1",
+      "title": "구매·판매·GP·장착 카드 원본 룰 검증",
+      "status": "in_progress"
+    },
+    {
+      "id": "SRC-01",
+      "issue": 1237,
       "priority": "P0",
-      "title": "체스맨 카드 초상화(CardData chm_N) 원본 근거 매핑"
+      "title": "리소스 출처·실제 용도 전수 정합",
+      "status": "in_progress"
     }
   ],
-  "highestPriority": "채팅 접속/사용자/지역/채널/방/실시간 대화. 주잔은 채팅 기반 콘텐츠",
-  "recentEventNumbers": [
-    482,
-    483,
-    484,
-    485,
-    486
-  ],
-  "sessionRules": [
-    "이번 파일은 빠른 맥락 파악에만 사용. 현재 상태 보고/완료 판정 전 GitHub 원장과 최신 main 확인",
-    "58만 자 개발원장, 도구 로그, 과거 채팅 전문을 대화 출력으로 펼치지 말 것",
-    "GitHub 파일을 읽는 도구 호출 결과는 실행 내부에서 JSON 파싱한 뒤 완료 수·미완료 ID·증거만 압축해서 출력",
-    "PR 생성/병합과 기존 원장 일감 완료를 혼동하지 말 것",
-    "원작 스크린샷 비교와 실제 브라우저 사용 검증 증거가 없는 일감은 done 처리하지 말 것",
-    "이 스냅샷은 ChatGPT 대화 길이 제한 자체를 바꾸지 못함"
+  "priority": "채팅 서버·지역·채널·방·실시간 대화를 최우선 복원. 주잔은 채팅 연계 콘텐츠.",
+  "rules": [
+    "대화나 도구 출력으로 구 원장 58만 자·장문 로그·이전 대화 전문을 재전개하지 않는다",
+    "작업 시작 시 상태 스냅샷만 열고, 사실 검증은 해당 GitHub Issue 및 최신 코드를 확인한다",
+    "후속 Issue가 닫혀도 원작 비교·브라우저 검증·배포 증거 없으면 신규 일감 완료로 계산하지 않는다",
+    "실제 신규 완료와 PR/코드 수정·기존 완료 이관은 별도 수치로 보고한다",
+    "필요한 과거 증거만 구 원장에서 제한적으로 조회한다"
   ]
 }
