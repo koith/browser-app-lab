@@ -152,9 +152,9 @@ def source_headings(html):
     # HTML Open Graph / Twitter metadata; get_text() on <meta> is empty.
     # Use those observed fields, then still require independently matching
     # model+edition and page-scoped photos before staging any file.
-    meta_titles=[x.get("content","") for x in soup.select(
+    meta_titles=[x.get("content") or "" for x in soup.select(
         'meta[property="og:title"],meta[name="twitter:title"]')[:4]]
-    meta_descriptions=[x.get("content","") for x in soup.select(
+    meta_descriptions=[x.get("content") or "" for x in soup.select(
         'meta[property="og:description"],meta[name="description"]')[:4]]
     heads=" ".join([title]+headlines+meta_titles)
     context=" ".join([soup.get_text(" ",strip=True),*meta_titles,
