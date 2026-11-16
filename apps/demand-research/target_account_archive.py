@@ -724,7 +724,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
     head_pages=0
     pending_repaired=0
     pending_names=sorted(n for n in archive.names("metadata/media-pending")
-                         if re.fullmatch(r"[a-f0-9]{40}\\.json",n))
+                         if re.fullmatch(r"[a-f0-9]{40}\.json",n))
     for name in pending_names[:8]:
         if clock()>=deadline:break
         pid=name[:-5]
@@ -847,7 +847,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                 break
         outstanding=0
         for name in archive.names("metadata/media-pending"):
-            if not re.fullmatch(r"[a-f0-9]{40}\\.json",name):continue
+            if not re.fullmatch(r"[a-f0-9]{40}\.json",name):continue
             pid=name[:-5]
             if (archive.read("metadata/entries/"+pid+".json",cap=1024,optional=True)
                 or archive.read("metadata/media-resolved/"+pid+".json",
