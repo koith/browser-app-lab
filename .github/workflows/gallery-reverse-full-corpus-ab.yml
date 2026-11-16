@@ -22,6 +22,7 @@ jobs:
           python -m py_compile apps/gallery-archive/reverse_full_corpus_ab.py apps/gallery-archive/reverse_full_aggregate.py
           python apps/gallery-archive/test_reverse_full_corpus_ab.py
   query-all-images-and-titles:
+    if: github.event_name != 'pull_request'
     needs: verify-all-seeds
     runs-on: ubuntu-24.04
     timeout-minutes: 48
@@ -53,7 +54,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 21
   must-account-for-all-owner-seeds:
-    if: always()
+    if: always() && github.event_name != 'pull_request'
     needs: [verify-all-seeds, query-all-images-and-titles]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
