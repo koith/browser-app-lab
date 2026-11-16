@@ -558,3 +558,35 @@ def test_public_bluesky_label_warns_without_excluding_published_source():
     restricted=blue_row("hidden12","Original hidden by moderation")
     restricted["value"]["labels"]={"values":[{"val":"!hide"}]}
     assert job.normalize_record(profile,restricted) is None
+
+
+def test_one_unavailable_media_does_not_hide_later_posts_and_repairs_append_only():
+    first=blue_row("unavailable01","First post with initially missing picture",
+                   assets=[("image/jpeg",PHOTO)])
+    second=blue_row("safe-post2","Second public text must remain archived")
+    class RecoveringAPI(BlueAPI):
+        unavailable=True
+        def media(self,url,mime):
+            if self.unavailable:
+                raise job.SourceUnavailable("synthetic original temporarily unavailable")
+            return mime,PHOTO
+    api=RecoveringAPI({None:([first,second],None)})
+    store=FakeCloud()
+    result=job.run_one("bluesky",DID,root=store,api=api,max_pages=1,clock=lambda:0)
+    archive=job.account_cloud(store,job.resolve("bluesky",DID,api))
+    pending_id=job.post_key("bluesky",first["uri"])
+    safe_id=job.post_key("bluesky",second["uri"])
+    assert result["status"]=="RESUME_NEEDED_MEDIA"
+    assert result["posts_verified"]==1
+    assert archive.read("metadata/media-pending/"+pending_id+".json",optional=True)
+    assert not archive.read("metadata/entries/"+pending_id+".json",optional=True)
+    safe_before=archive.read("posts/"+safe_id+"/post.json")
+    assert len(archive.load_catalog())==1
+    api.unavailable=False
+    again=job.run_one("bluesky",DID,root=store,api=api,max_pages=1,clock=lambda:0)
+    assert again["status"]=="COMPLETE_CURRENT_PUBLIC_CURSOR"
+    assert again["media_repaired"]==1
+    assert archive.read("metadata/media-resolved/"+pending_id+".json",optional=True)
+    assert archive.read("metadata/entries/"+pending_id+".json",optional=True)
+    assert archive.read("posts/"+safe_id+"/post.json")==safe_before
+    assert len(archive.load_catalog())==2
