@@ -136,6 +136,51 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
             self.assertEqual(output[0]['observations'][0]['proof'],
                              'unique_named_work_page_model_and_edition')
 
+    def test_unknown_reverse_seed_maps_to_exact_registered_owner_work(self):
+        from source_alias_search import hydrate_all_registered_works, merge_image_reverse_sites
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            base=root/'apps/mimmi-gallery'
+            base.mkdir(parents=True)
+            # Owner catalog is larger than the approved-source registry.
+            (base/'public-work-pages.json').write_text(json.dumps({
+                'albums':[{'id':'mimmi-white','title':'Mimmi — White',
+                    'source':'https://djawaphoto.com/portfolio/mimmi-white/'}]}))
+            (base/'owner-index.json').write_text(json.dumps({
+                'model':'mimmi','albums':[{'id':'mimmi-teddy-bear',
+                'title':'DJAWA Mimmi Teddy Bear',
+                'images':[{'number':1,'sha256':'a'*64,'bytes':50000}]}]}))
+            db={'works':{},'model_names':{'mimmi':[{'name':'Mimmi'}],
+                                         'yui':[{'name':'Yui'}]}}
+            count=hydrate_all_registered_works(db,'mimmi',root)
+            self.assertEqual(count,2)
+            self.assertIn('mimmi:mimmi-teddy-bear',db['works'])
+            url='https://new-public-gallery.org/mimmi-teddy-bear'
+            report={'research_only':True,'results':[{'model':'mimmi',
+                # This legacy/unclassified SHA photo is NOT the registered work.
+                'album_id':'legacy-unknown-source','candidate_pages':[
+                    {'url':url,'label':'DJAWA Mimmi Teddy Bear public photo'},
+                    {'url':'https://new-public-gallery.org/other-model',
+                     'label':'Unrelated other model'}]}]}
+            html_page='<title>DJAWA Mimmi Teddy Bear</title><h1>Mimmi Teddy Bear</h1><article>Mimmi new public images</article>'
+            class Session:
+                def get(self,requested,**kwargs):
+                    self_url=url
+                    if requested!=self_url:raise AssertionError(requested)
+                    return type('R',(),{'status_code':200,
+                        'headers':{'Content-Type':'text/html'},
+                        'content':html_page.encode(),'text':html_page})()
+            results=[]
+            matched=merge_image_reverse_sites(db,report,'mimmi',results,Session(),limit=10)
+            self.assertEqual(len(matched),1,matched)
+            self.assertEqual(matched[0]['album_id'],'mimmi-teddy-bear')
+            self.assertEqual(matched[0]['reverse_seed_album_id'],'legacy-unknown-source')
+            self.assertEqual(results[0]['observations'][0]['proof'],
+                             'unique_named_work_page_model_and_edition')
+            assert eligible_source_pages({'schema_version':1,'model':'mimmi',
+                'search_results':results},'mimmi',safe_registered_public_page)=={
+                'mimmi-teddy-bear':{url}}
+
     def test_no_unreviewed_result_is_automatically_scraped(self):
         doc=evidence()
         doc['search_results']=[]
