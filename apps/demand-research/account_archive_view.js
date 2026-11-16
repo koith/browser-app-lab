@@ -606,6 +606,7 @@ function setTab(section){
   state.viewVersion+=1;state.loading=false;
   state.section=section;state.offset=0;state.more=false;
   feedSearch.hidden=!journalSection(section);
+  $("mastodonActivityControls").hidden=section!=="activity";
   for(const btn of document.querySelectorAll("[data-section]")){
     const active=btn.dataset.section===section;
     if(btn.getAttribute("role")==="tab"){
@@ -633,10 +634,15 @@ async function nextPage(){
         requestVersion=state.viewVersion;
   try{
     const isJournal=journalSection(selected);
+    const feedKindFilter=selected==="replies"?"reply":
+      selected==="activity"?$("mastodonActivity").value:
+      selected==="featured"?"featured":
+      selected==="media"||selected==="videos"?"":feedKind.value||"post";
+    const mediaFilter=selected==="media"?"has_media":
+      selected==="videos"?"has_video":feedMediaStatus.value;
     const feedParams=new URLSearchParams({
       offset:String(offset),limit:"20",q:feedQuery.value.trim(),
-      kind:selected==="replies"?"reply":selected==="media"?"":feedKind.value,
-      media_status:selected==="media"?"has_media":feedMediaStatus.value});
+      kind:feedKindFilter,media_status:mediaFilter});
     const endpoint=isJournal
        ?base()+"/feed?"+feedParams.toString()
        :base()+"/graph/"+selected+"?offset="+offset+"&limit=50";
@@ -692,8 +698,9 @@ async function selectAccount(value){
   $("more").hidden=true;$("more").disabled=false;
   detailRequestSeq+=1;
   if(detail.open)detail.close();
-  state.account=value||"";state.profile=null;state.offset=0;state.section="posts";
+  state.account=value||"";state.profile=null;state.offset=0;
   setPlatformTheme(state.account);
+  state.section=state.account.startsWith("mastodon-")?"activity":"posts";
   if(value)setAccountUrl(value);
   if(!value){
     resetProfile();$("displayName").textContent="계정을 선택하세요";
@@ -706,7 +713,7 @@ async function selectAccount(value){
   // The remote profile snapshot can take tens of seconds to verify. Start
   // post loading NOW, independently. A stale profile response must never
   // overwrite a newly selected account.
-  setTab("posts");
+  setTab(state.section);
   try{
     const profile=await get(base()+"/profile");
     if(state.account!==value)return;
@@ -772,6 +779,9 @@ feedSearch.addEventListener("submit",event=>{event.preventDefault();resetFeedSea
 feedQuery.addEventListener("input",scheduleFeedSearch);
 feedKind.addEventListener("change",resetFeedSearch);
 feedMediaStatus.addEventListener("change",resetFeedSearch);
+$("mastodonActivity").addEventListener("change",()=>{
+  if(state.section==="activity")setTab("activity");
+});
 $("feedReset").addEventListener("click",()=>{
   feedQuery.value="";feedKind.value="";feedMediaStatus.value="";
   resetFeedSearch();
