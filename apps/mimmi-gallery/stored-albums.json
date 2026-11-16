@@ -11001,6 +11001,66 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 83,
+          "url": "stored-albums/djawa-in-the-summer-sunshine-part-1/c8a42f7d63c6cbf76813.webp",
+          "sha256": "c8a42f7d63c6cbf76813c97497a668e0a0931020cb25426d63112282cfb90ab2",
+          "bytes": 1008900,
+          "width": 1687,
+          "height": 2250,
+          "origin_page": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 84,
+          "url": "stored-albums/djawa-in-the-summer-sunshine-part-1/b83d9d2cdc5df89f1388.webp",
+          "sha256": "b83d9d2cdc5df89f138840649fd4544e18d90f7cbe3d3954f8f77a63e0e9a328",
+          "bytes": 1019558,
+          "width": 1693,
+          "height": 2250,
+          "origin_page": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 85,
+          "url": "stored-albums/djawa-in-the-summer-sunshine-part-1/2da9bd036d839baba02d.webp",
+          "sha256": "2da9bd036d839baba02dc816b8dc82bf26ebbb3dadabf613f80b043b22dc7f36",
+          "bytes": 1006264,
+          "width": 1693,
+          "height": 2250,
+          "origin_page": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 86,
+          "url": "stored-albums/djawa-in-the-summer-sunshine-part-1/cd073b487a235c040dbc.webp",
+          "sha256": "cd073b487a235c040dbc810aa4c726166c834e7d4f71c57831e58721a500a3a3",
+          "bytes": 106164,
+          "width": 1024,
+          "height": 1366,
+          "origin_page": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 87,
+          "url": "stored-albums/djawa-in-the-summer-sunshine-part-1/9fadbfcab3995902dec1.webp",
+          "sha256": "9fadbfcab3995902dec18a1a69c0e6d9065ee426aff56bd94c6ccbc8c884a709",
+          "bytes": 111566,
+          "width": 1024,
+          "height": 1366,
+          "origin_page": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -16384,6 +16444,102 @@
           "bytes": 302042,
           "width": 1300,
           "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 243,
+          "url": "stored-albums/djawa-nikke-elegg/781f6cef695d838fe904.jpg",
+          "sha256": "781f6cef695d838fe9042eb6f07e10723219c8e562faec7abb690a6ed57a01c8",
+          "bytes": 217927,
+          "width": 1066,
+          "height": 1600,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 244,
+          "url": "stored-albums/djawa-nikke-elegg/4abc43be1914416db052.jpg",
+          "sha256": "4abc43be1914416db0521be8c1f9e4daafe916b18e7f8a6e6bd3e7a92e4682b9",
+          "bytes": 188622,
+          "width": 1066,
+          "height": 1600,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 245,
+          "url": "stored-albums/djawa-nikke-elegg/5e8e850ad102f03e2f6e.jpg",
+          "sha256": "5e8e850ad102f03e2f6e19f7f7711ea580f93f40060314752b0a3790f9e9d630",
+          "bytes": 193692,
+          "width": 1066,
+          "height": 1600,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 246,
+          "url": "stored-albums/djawa-nikke-elegg/8e99eef194e9d40776e4.jpg",
+          "sha256": "8e99eef194e9d40776e479842919ae8f08e8124a5a7b833d7bd3f6f00dc00181",
+          "bytes": 171508,
+          "width": 1066,
+          "height": 1600,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 247,
+          "url": "stored-albums/djawa-nikke-elegg/8494063e96c6d001a63a.jpg",
+          "sha256": "8494063e96c6d001a63a4e877c4c60edd9ee59dd6f777766789fed451312ba1b",
+          "bytes": 201051,
+          "width": 1600,
+          "height": 1066,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 248,
+          "url": "stored-albums/djawa-nikke-elegg/74e3d4e4de31f99fa24a.jpg",
+          "sha256": "74e3d4e4de31f99fa24a8a43a5a022c21f1f1052d34196a7aebc811c753a95fb",
+          "bytes": 295669,
+          "width": 1600,
+          "height": 1066,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 249,
+          "url": "stored-albums/djawa-nikke-elegg/10a572ad5fe88ab5da74.jpg",
+          "sha256": "10a572ad5fe88ab5da74a11c7019dc122d1f2e93473f60cb1c1c8af439c81157",
+          "bytes": 196293,
+          "width": 1066,
+          "height": 1600,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 250,
+          "url": "stored-albums/djawa-nikke-elegg/9b2a38341286ab8d0d32.jpg",
+          "sha256": "9b2a38341286ab8d0d32f3c72ee158d3c842d097fa72ba3fefa2dd52b63c8b59",
+          "bytes": 195613,
+          "width": 1066,
+          "height": 1600,
           "origin_page": "https://djawaphoto.com/portfolio/nikke-elegg/",
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
@@ -27926,5 +28082,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2836
+  "physical_verified_image_count": 2849
 }
