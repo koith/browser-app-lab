@@ -1449,8 +1449,8 @@ const TERMS=["뒷계","섹트","섹블","일탈계"];
 const LIVE_HARD_EXCLUDED_PHRASES=Object.freeze(["야단라"]);
 function normalizedLivePostText(value){
   return String(value??"").normalize("NFKC").toLocaleLowerCase("ko-KR")
-    .replace(/[\\u200b-\\u200f\\u2060\\ufeff\\u00ad]/g,"")
-    .replace(/[\\p{Z}\\p{P}\\p{S}\\s]/gu,"");
+    .replace(/[\u200b-\u200f\u2060\ufeff\u00ad]/g,"")
+    .replace(/[\p{Z}\p{P}\p{S}\s]/gu,"");
 }
 function hasHardExcludedPhrase(value){
   const text=normalizedLivePostText(value);
