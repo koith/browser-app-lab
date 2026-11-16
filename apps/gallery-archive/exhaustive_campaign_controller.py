@@ -27,7 +27,17 @@ def decide(states, step, max_steps=64):
         unique=len(set(state['attempted_ids']))
         if unique!=len(state['attempted_ids']) or unique>total:
             raise ValueError('CORRUPT_CAMPAIGN_COVERAGE_'+model)
-        summary[model]={'total':total,'attempted':unique,'remaining':total-unique,
+        pending = state.get('retry_pending_ids', [])
+        unverified = state.get('unverified_after_retry_ids', [])
+        if (not isinstance(pending, list) or len(pending)!=len(set(pending))
+                or not isinstance(unverified, list) or len(unverified)!=len(set(unverified))
+                or set(pending)-set(state['attempted_ids']) or
+                set(pending)&set(unverified)):
+            raise ValueError('CORRUPT_REVERSE_RETRY_STATE_'+model)
+        summary[model]={'total':total,'attempted':unique,
+                        'remaining':total-unique+len(pending),
+                        'pending_retry':len(pending),
+                        'unverified_after_retry':len(unverified),
                         'last_run_attempts':state['last_run_attempts']}
     unfinished=any(v['remaining']>0 for v in summary.values())
     progressed=any(v['last_run_attempts']>0 for v in summary.values())
