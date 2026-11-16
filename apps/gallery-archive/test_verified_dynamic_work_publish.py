@@ -77,6 +77,37 @@ class NewPublishedWorkTests(unittest.TestCase):
             self.assertEqual(len(manifest2['albums']),1)
             self.assertEqual(len(manifest2['albums'][0]['images']),1)
 
+    def test_existing_owner_edition_absent_from_public_work_list_publishes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            evidence=self.proof()
+            evidence[0]['proof']='owner_catalog_work_with_reviewed_public_source'
+            base,stage,raw,digest=self.make_fixture(root,evidence)
+            owner_path=base/'owner-index.json'
+            owner=json.loads(owner_path.read_text())
+            owner['albums'].append({'id':NEW_ID,'title':'DJAWA Mimmi New Edition',
+                                   'images':[{'sha256':'b'*64,'number':1}]})
+            owner_path.write_text(json.dumps(owner))
+            result=publish(MODEL,stage,root=root)
+            self.assertEqual(result['new_sha_verified_originals'],1,result)
+            photo=json.loads((base/'stored-albums.json').read_text())['albums'][0]['images'][0]
+            self.assertEqual((base/photo['url']).read_bytes(),raw)
+            self.assertEqual(photo['sha256'],digest)
+
+    def test_existing_owner_claim_requires_matching_actual_owner_title(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            evidence=self.proof()
+            evidence[0]['proof']='owner_catalog_work_with_reviewed_public_source'
+            base,stage,_,_=self.make_fixture(root,evidence)
+            owner_path=base/'owner-index.json'
+            owner=json.loads(owner_path.read_text())
+            owner['albums'].append({'id':NEW_ID,'title':'Another Edition',
+                                   'images':[{'sha256':'b'*64,'number':1}]})
+            owner_path.write_text(json.dumps(owner))
+            with self.assertRaisesRegex(ValueError,'UNVERIFIED_NEW_WORK_PUBLICATION_SOURCE'):
+                publish(MODEL,stage,root=root)
+
     def test_unknown_work_without_independent_proof_is_not_published(self):
         with tempfile.TemporaryDirectory() as tmp:
             base,stage,_,_=self.make_fixture(Path(tmp),[])
