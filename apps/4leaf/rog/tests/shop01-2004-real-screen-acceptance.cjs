@@ -82,6 +82,29 @@ const approx=(got,want,name,tol=4)=>assert.ok(Math.abs(got-want)<=tol, name+' na
   assert.ok(landmark.ownedScroll>landmark.ownedBox,'the screenshot item window must scroll with more real items');
   assert.equal(landmark.rare,false,'2004 source screenshot has an actual Rare tab');
   assert.equal(landmark.gp,'1,000,000','native GP field is live currency, not screenshot');
+  // A button can have the correct CSS XY and even a programmatic click
+  // handler while an overflowing parent CLIPS all its real pixels. Verify
+  // the actual physical hit at the source-positioned BUY and SELL centers.
+  const visible=await page.evaluate(()=>{
+   const hit=id=>{
+    const el=document.getElementById(id),r=el.getBoundingClientRect();
+    const center=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+    return {target:center?.id,actual:id,visible:getComputedStyle(el).visibility,
+     rect:[r.x,r.y,r.width,r.height]};
+   };
+   return {buy:hit('shop-buy'),sell:hit('shop-sell'),
+    art:[...document.querySelectorAll('#shop-grid .shop-card .pixel-portrait')]
+     .filter(x=>x.dataset.cardArtEvidence==='verified-CHR-own-body-not-CardData-portrait')
+     .map(x=>getComputedStyle(x).transform),
+    infoOverflow:getComputedStyle(document.querySelector('#shop .shop-detail')).overflow};
+  });
+  assert.equal(visible.buy.target,'shop-buy','real BUY atlas must be physically visible at screenshot position');
+  assert.equal(visible.sell.target,'shop-sell','real SELL atlas must be physically visible at screenshot position');
+  assert.equal(visible.buy.visible,'visible');assert.equal(visible.sell.visible,'visible');
+  assert.equal(visible.infoOverflow,'visible','real buttons lie just outside the source Card Info rectangle');
+  assert.ok(visible.art.length>=7,'real CHR source preview images are displayed, not replaced by invented faces');
+  assert.ok(visible.art.every(transform=>transform.includes('-1')),
+   '2002 own-body OBS frame preview was inverted in CardShop; must display upright');
   await page.screenshot({path:'leaf-shop01-historical-2004-trace-'+engine.name()+'.png'});
   // Both native authentic era modes must remain individually interactive.
   await page.locator('#shop .group-tab[data-group="valuable"]').click();
