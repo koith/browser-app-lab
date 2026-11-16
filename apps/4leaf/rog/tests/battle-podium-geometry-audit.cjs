@@ -26,32 +26,33 @@ const VIEWS=[
 ];
 const FOOT_TOL_Y=10, FOOT_TOL_X=14; // CSS px; WEB tolerance (INFERRED)
 async function measureFoot(page,sel){
- // Screenshot the stage twice: fighter shown / fighter hidden, decode both
- // in the page with createImageBitmap and diff the pixels.
- const clip=await page.evaluate(()=>{const r=document.querySelector('#battle-visual').getBoundingClientRect();
-  return {x:Math.max(0,r.left),y:Math.max(0,r.top),width:Math.min(innerWidth,r.right)-Math.max(0,r.left),height:Math.min(innerHeight,r.bottom)-Math.max(0,r.top)}});
- const freeze=async on=>page.evaluate(on=>{for(const n of document.querySelectorAll('#battle-visual *'))
-  {n.style.animationPlayState=on?'paused':'';n.style.transitionDuration=on?'0s':''}},on);
- await freeze(true);
- const shown=await page.screenshot({clip,scale:'css'});
- await page.evaluate(sel=>{document.querySelector(sel).style.visibility='hidden'},sel);
- const hidden=await page.screenshot({clip,scale:'css'});
- await page.evaluate(sel=>{document.querySelector(sel).style.visibility=''},sel);
- await freeze(false);
- const res=await page.evaluate(async([a,b])=>{
-  const load=async s=>{const bl=await (await fetch('data:image/png;base64,'+s)).blob();const bm=await createImageBitmap(bl);
-   const c=new OffscreenCanvas(bm.width,bm.height),x=c.getContext('2d');x.drawImage(bm,0,0);return x.getImageData(0,0,bm.width,bm.height)};
-  const A=await load(a),B=await load(b);let maxY=-1,minY=1e9,count=0;const rows={};
-  for(let y=0;y<A.height;y++)for(let x=0;x<A.width;x++){const i=(y*A.width+x)*4;
-   const d=Math.abs(A.data[i]-B.data[i])+Math.abs(A.data[i+1]-B.data[i+1])+Math.abs(A.data[i+2]-B.data[i+2]);
-   if(d>60){count++;if(y>maxY)maxY=y;if(y<minY)minY=y;(rows[y]||(rows[y]=[])).push(x)}}
-  if(maxY<0)return null;
-  // foot = lowest rows (bottom 4px) of the fighter mask, ignoring its shadow
-  const xs=[];for(let y=maxY-3;y<=maxY;y++)if(rows[y])xs.push(...rows[y]);
-  xs.sort((p,q)=>p-q);
-  return {footY:maxY,headY:minY,footX:xs[xs.length>>1],pixels:count};
- },[shown.toString('base64'),hidden.toString('base64')]);
- return res&&{...res,footY:res.footY+clip.y,headY:res.headY+clip.y,footX:res.footX+clip.x};
+ // Lowest opaque pixel from the current original OBS frame, not screenshot
+ // subtraction which is affected by viewport scaling.
+ return page.evaluate(async sel=>{
+  const actor=document.querySelector(sel);if(!actor)return null;
+  const img=[...actor.querySelectorAll('img.leaf-chess-original-obs')].find(i=>!i.hidden&&i.naturalWidth>0);
+  if(!img)return null;
+  try{await img.decode()}catch{}
+  const w=img.naturalWidth,h=img.naturalHeight;
+  const c=new OffscreenCanvas(w,h),x=c.getContext('2d');x.drawImage(img,0,0);
+  const d=x.getImageData(0,0,w,h).data;
+  const transform=getComputedStyle(img).transform;
+  const m=new DOMMatrixReadOnly(transform==='none'?undefined:transform);
+  const flipY=m.d<0,flipX=m.a<0;
+  const rowOpaque=r=>{const xs=[];for(let i=0;i<w;i++)if(d[(r*w+i)*4+3]>40)xs.push(i);return xs};
+  let foot=-1,head=-1;
+  const order=[...Array(h).keys()];
+  for(const r of (flipY?order:order.slice().reverse())){if(rowOpaque(r).length>=2){foot=r;break}}
+  for(const r of (flipY?order.slice().reverse():order)){if(rowOpaque(r).length>=2){head=r;break}}
+  if(foot<0)return null;
+  const xs=[];for(let k=0;k<4;k++){const r=flipY?foot+k:foot-k;if(r>=0&&r<h)xs.push(...rowOpaque(r))}
+  xs.sort((p,q)=>p-q);const fx=xs[xs.length>>1];
+  const box=img.getBoundingClientRect();
+  const dispRow=r=>flipY?h-1-r:r,dispCol=i=>flipX?w-1-i:i;
+  return {footX:box.left+(dispCol(fx)+.5)/w*box.width,
+   footY:box.top+(dispRow(foot)+1)/h*box.height,
+   headY:box.top+dispRow(head)/h*box.height,pixels:xs.length};
+ },sel);
 }
 async function startBattle(page){
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL=''});
@@ -78,7 +79,7 @@ async function startBattle(page){
  const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
  const browser=await (engine==='webkit'?webkit:chromium).launch(engine==='webkit'?{}:{args:['--no-sandbox']});
  const out={generated:new Date().toISOString(),engine,
-  method:'screenshot diff (fighter shown vs hidden) for foot pixels; elementFromPoint for occlusion',
+  method:'lowest opaque pixel from live OBS image; elementFromPoint for occlusion',
   tolerance:{footY:FOOT_TOL_Y,footX:FOOT_TOL_X,status:'INFERRED WEB tolerance, not 2002 MVE geometry'},
   sourceDeckCentres:{attacker:[77,34],defender:[278,34],frame:'Dice/IMG.pak winBattle.spr frame 1 (355x113)'},
   views:[]};
