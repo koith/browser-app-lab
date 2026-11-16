@@ -234,42 +234,57 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
             "physical_originals_stored":0,"gallery_visible_added":0}
 
 def merge_image_reverse_sites(db, report, model, results, session, limit=8):
-    """Follow actual image-search source URLs and independently verify target work.
+    """Resolve source-page identities across the *registered work catalog*.
 
-    This is candidate provenance, not photo-byte acquisition. The real file
-    collector still decodes, deduplicates, stages, verifies and publishes.
+    The reverse seed may be an unclassified or differently named preview
+    album. Old code discarded the entire hit unless seed.album_id exactly
+    matched a registered work ID; that discarded real image-source leads.
+    Check same-model edition hints and independently verify the actual public
+    page's heading/context. Ambiguous or generic-person pages never enter the
+    trusted source scope.
     """
     accepted=[]
     if report.get("research_only") is not True or not isinstance(report.get("results"),list):
         return accepted
+    catalog=[work for work in db["works"] if work.startswith(model+":")]
     seen=set()
+    attempts=0
     for seed in report["results"]:
         if seed.get("model")!=model:continue
-        album=seed.get("album_id")
-        work=model+":"+str(album)
-        if work not in db["works"]:continue
-        row=next((r for r in results if r["id"]==album),None)
-        if row is None:
-            row={"id":album,"title":db["works"][work][0]["name"],
-                 "urls":[],"observations":[],"query_count":0}
-            results.append(row)
-        for link in seed.get("candidate_pages",[]):
-            if len(seen)>=limit:break
+        seed_id=seed.get("album_id")
+        for link in seed.get("candidate_pages",[])[:90]:
+            if attempts>=limit:break
             url=link.get("url") if isinstance(link,dict) else None
             if not isinstance(url,str) or url in seen or not https_page(url):continue
+            # Search-title evidence is a cheap prefilter, NOT source identity
+            # proof. A seed from an unrelated ID can still expose the exact
+            # registered edition under an alternate published name.
+            hint=str(link.get("label",""))+" "+url
+            possible=[work for work in catalog if exact_work_in_text(work,hint)]
+            if not possible:continue
             seen.add(url)
+            attempts+=1
             html,state=load_html(session,url)
             if html is None:continue
             heading,context=source_headings(html)
-            if not page_matches(work,heading,context):continue
+            confirmed=[work for work in possible if page_matches(work,heading,context)]
+            if len(confirmed)!=1:continue
+            work=confirmed[0]
+            album=work.split(":",1)[1]
+            row=next((r for r in results if r["id"]==album),None)
+            if row is None:
+                row={"id":album,"title":db["works"][work][0]["name"],
+                     "urls":[],"observations":[],"query_count":0}
+                results.append(row)
             if url not in row["urls"]:row["urls"].append(url)
             row["observations"].append({
                 "album_id":album,"model":model,"name":heading[:220],
-                "source":url,
+                "source":url,"reverse_seed_album_id":seed_id,
                 "proof":"unique_named_work_page_model_and_edition"})
             accepted.append({"model":model,"album_id":album,"source":url,
+                             "reverse_seed_album_id":seed_id,
                              "origin":"reverse_photo_source_page_identified"})
-        if len(seen)>=limit:break
+        if attempts>=limit:break
     return accepted
 
 
