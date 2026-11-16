@@ -76,6 +76,8 @@ on:
       - "apps/demand-research/test_target_archive_api.py"
       - "apps/demand-research/target_archive_client.js"
       - "apps/demand-research/account_watch.js"
+      - "apps/demand-research/intersection-sw.js"
+      - "apps/demand-research/test_live_keyword_exclusion.js"
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_watch_migration_browser.py"
       - "apps/demand-research/gateway.py"
