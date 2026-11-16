@@ -93,7 +93,7 @@ window.__LEAF_HISTORIC_MARKET__={
   otherPricesVerifiedOnSelectedDate:historicShopDate==='2003-01-05',
   serialRedemptionPriceIsSeparate:true})
 };
-const DEFAULT_PROFILE={name:'Guest',gp:3000,wins:0,owned:CHR_SOURCE.length>50?STARTERS.slice():['soldier','joan','rashid','narcia'],team:CHR_SOURCE.length>50?['c_0078','c_0096','c_0040']:['joan','soldier','narcia']};
+const DEFAULT_PROFILE={name:'Guest',gp:3000,wins:0,owned:CHR_SOURCE.length>50?STARTERS.slice():['soldier','joan','rashid','narcia'],team:CHR_SOURCE.length>50?['c_0078','c_0096','c_0040']:['joan','soldier','narcia'],serialRedeemed:[]};
 const ITEMS=[
 {id:'valkyrie',name:'발키리의 창',icon:'⚔',hint:'전투 시 상대 주사위 수의 절반만큼 주사위 추가',sourceId:'0008',battle:true},
 {id:'ring',name:'지혜의 반지',icon:'◉',hint:'해당 게임 종료까지 파티 능력 +1',sourceId:'0009'},
@@ -215,6 +215,13 @@ if(CHR_SOURCE.length>50){
  if(!profile.team.length)profile.team=DEFAULT_PROFILE.team.slice();
  if(!CARD_MAP[chosenCard])chosenCard=profile.owned[0];
 }
+// Card serial numbers were verified by the ORIGINAL server, not this static
+// browser. We cannot mint or validate redemption codes. Preserve provenance
+// ONLY when an imported/saved profile explicitly records a redeemed card.
+// Never infer serial ownership from card rarity, CHR ID or shop purchases.
+profile.serialRedeemed=Array.isArray(profile.serialRedeemed)
+ ?[...new Set(profile.serialRedeemed.map(id=>LEGACY_IDS[id]||id).filter(id=>
+   typeof id==='string'&&profile.owned.includes(id)&&Boolean(CARD_MAP[id])))]:[];
 // A syntactically valid JSON document can still be an unsafe match: a
 // finished game, a missing player, or a truncated schema. The previous
 // bootstrap silently rewrote ALL such records to the JSON literal null.
@@ -519,16 +526,26 @@ window.__LEAF_DICE_ROSTER__={
 // surviving client has NOT verified its resale GP rule. 50% is a clearly
 // labeled WEB economic fallback, never represented as source historical data.
 const inferredShopResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/2));
+// Original 4LEAF operation notice, 2003-09-18: serial-number REDEEMED
+// cards were resold to Magic Carden for exactly 1,000 GP, regardless of
+// market purchase price. This is NOT proof of a 1,000 GP resale for all
+// ordinary GP-purchased cards; those retain the explicitly inferred rule.
+// https://4leafmemorial.geld.kr/959
+const shopResaleQuote=card=>profile.serialRedeemed.includes(card?.id)
+ ?{gp:1000,source:'original-2003-serial-redemption-1000gp',
+   label:'원작 2003년 시리얼 등록 카드 재판매 1,000 GP'}
+ :{gp:inferredShopResaleGP(card),source:'inferred-web-price-not-original',
+   label:'임시 판매가 '+inferredShopResaleGP(card).toLocaleString()+' GP (일반 카드 원작 재판매 가격 규칙 미확인)'};
 // An inventory/GP change must not become visible until it is durable.
 // On localStorage quota/permission failure, restore exactly the previous
 // in-memory balances; a later page reload must not silently undo a purchase
 // or remove an item whose sale only appeared to complete.
 function commitShopTransaction(change){
- const previousGP=profile.gp,previousOwned=profile.owned.slice();
+ const previousGP=profile.gp,previousOwned=profile.owned.slice(),previousSerial=profile.serialRedeemed.slice();
  change();
  try{localStorage.setItem('rog_profile',JSON.stringify(profile))}
  catch(error){
-  profile.gp=previousGP;profile.owned=previousOwned;
+  profile.gp=previousGP;profile.owned=previousOwned;profile.serialRedeemed=previousSerial;
   console.warn('4LEAF shop transaction not persisted; old balances retained',
    error?.name||'storage-error');
   modal('매직카덴 저장 실패',
@@ -621,10 +638,11 @@ function drawShop(){
    const sell=$('shop-sell'),canSell=shopCanSell(c);
    sell.disabled=!canSell;
    sell.textContent='판매하기';
-   sell.dataset.resaleStatus='inferred-web-price-not-original';
-   sell.dataset.resaleGp=String(inferredShopResaleGP(c));
+   const resale=shopResaleQuote(c);
+   sell.dataset.resaleStatus=resale.source;
+   sell.dataset.resaleGp=String(resale.gp);
    sell.title=canSell?
-    c.name+' · 임시 판매가 '+inferredShopResaleGP(c).toLocaleString()+' GP (원작 판매 가격 규칙 미확인)':
+    c.name+' · '+resale.label:
     (profile.team.includes(c.id)?'출전 파티에 포함된 카드는 판매할 수 없습니다.':
     (!profile.owned.includes(c.id)?'먼저 해당 카드를 보유해야 합니다.':'마지막 카드나 진행 중 경기 참가 카드는 판매할 수 없습니다.'));
  }
@@ -2369,22 +2387,24 @@ function init(){installBoardControls();installNativeDiceMenu();
   modal('매직카덴','선택한 카드가 없거나, 출전·진행 중 경기·마지막 보유 카드이므로 판매할 수 없습니다.',[{label:'확인'}]);
   return;
  }
- const gp=inferredShopResaleGP(c),offerDate=historicShopDate;
- modal('매직카덴',c.name+' 카드를 판매하시겠습니까? 임시 판매가 '+
-  gp.toLocaleString()+' GP (원작 재판매 가격 규칙 미확인).',[{label:'판매',primary:true,run:()=>{
+ const quote=shopResaleQuote(c),gp=quote.gp,offerDate=historicShopDate;
+ modal('매직카덴',c.name+' 카드를 판매하시겠습니까? '+quote.label+'.',[{label:'판매',primary:true,run:()=>{
    // Protect against double confirmation, intervening game state and
    // resale of a currently equipped/still active match chessman.
    if(!shopCanSell(c))return;
-   if(offerDate!==historicShopDate||gp!==inferredShopResaleGP(c))
+   if(offerDate!==historicShopDate||gp!==shopResaleQuote(c).gp||
+      quote.source!==shopResaleQuote(c).source)
     return modal('매직카덴 시세 변경','판매가가 변경됐습니다. 다시 확인하세요.',
      [{label:'확인',primary:true}]);
    if(!commitShopTransaction(()=>{
     profile.owned=profile.owned.filter(id=>id!==c.id);
+    profile.serialRedeemed=profile.serialRedeemed.filter(id=>id!==c.id);
     profile.gp+=gp;
    }))return;
    if(chosenCard===c.id)chosenCard=profile.owned[0]||BASE_CARDS[0]?.id;
    profileUI();drawShop();drawTeam();
-   chat('매직카덴',c.name+' 카드 판매 · '+gp.toLocaleString()+' GP (임시 웹 판매 규칙).','system');
+   chat('매직카덴',c.name+' 카드 판매 · '+gp.toLocaleString()+' GP ('+
+    (quote.source==='original-2003-serial-redemption-1000gp'?'2003년 시리얼 카드 공식 규칙':'임시 웹 판매 규칙')+').','system');
    sfx(600);
   }},{label:'취소'}]);
 };$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if($('rog-real-user'))$('rog-real-user').textContent='♧ '+profile.name+' (내 기기)';if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);};const list=$('online-list');list.replaceChildren();const selfUser=document.createElement('div');selfUser.id='rog-real-user';selfUser.textContent='♧ '+profile.name+' (내 기기)';list.append(selfUser);setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI/로컬 대전 · 브라우저 간 직접 연결. 원작 중앙 서버는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
