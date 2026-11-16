@@ -382,11 +382,43 @@ def merge_image_reverse_sites(db, report, model, results, session, limit=8, stat
     return accepted
 
 
+def review_source_backlog(db,state,model,results,session,limit=96):
+    """Review bounded pending host pages and return the remaining checkpoint.
+
+    Every pending page is preserved in a durable Git checkpoint BEFORE this
+    network step; if the step times out nothing is removed. Failed/mismatched
+    pages are not treated as verified sources. A run reviews a fixed page
+    window and never silently drops the unvisited suffix.
+    """
+    if (state.get('schema_version')!=1 or state.get('model')!=model
+            or not isinstance(state.get('source_pending_pages'),list)
+            or not 1<=limit<=128):
+        raise ValueError('INVALID_REVERSE_SOURCE_BACKLOG_STATE')
+    pending=state['source_pending_pages']
+    chosen=pending[:limit]
+    for entry in chosen:
+        if (not isinstance(entry,dict) or not isinstance(entry.get('album_id'),str)
+                or not isinstance(entry.get('link'),dict)):
+            raise ValueError('INVALID_SOURCE_PAGE_BACKLOG_ENTRY')
+    pseudo={'research_only':True,'results':[{
+        'model':model,'album_id':x['album_id'],'candidate_pages':[x['link']]
+    } for x in chosen]}
+    statistics={}
+    accepted=merge_image_reverse_sites(
+        db,pseudo,model,results,session,limit=limit,stats_out=statistics)
+    after={**state,'source_pending_pages':pending[len(chosen):],
+           'last_source_pages_reviewed':len(chosen)}
+    statistics['source_page_candidates_reviewed_this_run']=len(chosen)
+    statistics['source_page_candidates_pending_next_run']=len(after['source_pending_pages'])
+    return accepted,after,statistics
+
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--model",choices=["mimmi","yui"],required=True)
     p.add_argument("--ledger",type=Path,default=LEDGER)
     p.add_argument("--reverse",type=Path)
+    p.add_argument("--reverse-progress",type=Path)
     p.add_argument("--reverse-limit",type=int,default=8)
     p.add_argument("--offset",type=int,default=0)
     p.add_argument("--per-work",type=int,default=3)
@@ -401,16 +433,34 @@ def main():
     report=crawl_names(db,a.model,a.offset,a.per_work,a.max_pages,
                        work_budget=a.work_budget)
     report['additional_registered_works_searched_by_catalog']=new_works
-    if a.reverse and a.reverse.is_file():
+    next_source_state=None
+    if a.reverse_progress:
+        if not a.reverse_progress.is_file():
+            raise ValueError('MISSING_REVERSE_SOURCE_PROGRESS')
+        state=json.loads(a.reverse_progress.read_text(encoding='utf-8'))
+        matches,next_source_state,reverse_stats=review_source_backlog(
+            db,state,a.model,report['search_results'],requests.Session(),
+            limit=a.reverse_limit)
+        report['image_reverse_resolution_stats']=reverse_stats
+        report['image_reverse_sites_verified']=matches
+    elif a.reverse and a.reverse.is_file():
         reverse_stats={}
         matches=merge_image_reverse_sites(db,json.loads(a.reverse.read_text(encoding="utf-8")),
                                          a.model,report["search_results"],requests.Session(),
                                          limit=a.reverse_limit,stats_out=reverse_stats)
         report["image_reverse_resolution_stats"]=reverse_stats
         report["image_reverse_sites_verified"]=matches
+    if a.reverse_progress or a.reverse:
         report["targets"]=[{"id":x["id"],"title":x["title"],"urls":x["urls"]}
                            for x in report["search_results"] if x["urls"]]
     a.out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    # Update the on-disk pending cursor only after the completed source
+    # research report is safely written. The outer workflow commits this
+    # changed cursor and verifies it with GitHub readback before collection.
+    if next_source_state is not None:
+        a.reverse_progress.write_text(json.dumps(
+            next_source_state,ensure_ascii=False,separators=(',',':'))+'\n',
+            encoding='utf-8')
     print("SAME_WORK_MULTILINGUAL_SOURCE_SEARCH",json.dumps({
         "model":a.model,"new_site_hosts":len(report["new_site_hosts"]),
         "target_source_pages":sum(len(x["urls"]) for x in report["targets"]),
