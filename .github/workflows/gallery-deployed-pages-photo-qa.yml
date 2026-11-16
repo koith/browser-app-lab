@@ -1,12 +1,10 @@
 name: Yui Mimmi Deployed GitHub Pages Real Photo Browser QA
 on:
   workflow_dispatch:
+  # Run the deployed-photo gate once for the active native Pages release.
+  # The exact gallery push-path fallback and manual dispatch remain enabled.
   workflow_run:
-    workflows:
-      # Current Pages publisher can be native rather than static.yml.
-      # A successful native deployment must run the same real-photo gate.
-      - "Deploy static content to Pages"
-      - "pages build and deployment"
+    workflows: ["pages build and deployment"]
     types: [completed]
   push:
     branches: [main]
