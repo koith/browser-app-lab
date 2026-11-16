@@ -16,6 +16,11 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
       - 'apps/gallery-archive/restore_known_owner_cache.py'
       - 'apps/gallery-archive/probe_private_owner_runtime.py'
+      # Only real gallery owner inventories should start a new rescue on push.
+      - 'apps/mimmi-gallery/owner-index.json'
+      - 'apps/yui-gallery/owner-index.json'
+      - 'apps/mimmi-gallery/stored-albums.json'
+      - 'apps/yui-gallery/stored-albums.json'
   schedule:
     # Keep existing recovery polling; do not trigger it after unrelated Pages builds.
     - cron: '7,17,27,37,47,57 * * * *'
@@ -43,12 +48,7 @@ jobs:
           python apps/gallery-archive/test_probe_private_owner_runtime.py
           python apps/gallery-archive/test_signed_sync_non_schedule_rehydration.py
   synchronize:
-    if: >-
-      github.event_name != 'pull_request' &&
-      (github.event_name != 'workflow_run' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository))
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
