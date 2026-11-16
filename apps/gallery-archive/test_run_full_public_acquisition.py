@@ -99,7 +99,14 @@ class FullAcquisitionTests(unittest.TestCase):
             doc=json.loads((stage/'full-collection-summary.json').read_text())
             self.assertEqual(doc['timed_out_batches'],[1])
             self.assertFalse(doc['collection_complete_without_batch_timeouts'])
-            self.assertEqual(doc['state'],'LOCAL_STAGED_PARTIAL_TIMEOUT_NOT_FULLY_SEARCHED')
+            self.assertEqual(doc['state'],'LOCAL_STAGED_PARTIAL_INCOMPLETE_BATCHES')
+            self.assertFalse(doc['collection_all_batches_success'])
+            self.assertEqual(doc['incomplete_batch_count'],1)
+            self.assertEqual(doc['registered_works_scheduled'],43)
+            self.assertEqual(doc['registered_works_visited'],
+                             43-len(doc['batches'][1]['works']))
+            self.assertEqual(doc['registered_work_ids_in_incomplete_batches'],
+                             doc['batches'][1]['works'])
             self.assertGreater(len(attempts),2)
             self.assertEqual(doc['batches'][1]['collector_returncode'],124)
             self.assertEqual(doc['batches'][1]['collection_error'],'collector_timeout')
