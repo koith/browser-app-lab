@@ -51,19 +51,13 @@
    <p id="biography" class="bio">저장된 프로필을 불러오면 이곳에 계정 소개가 표시됩니다.</p>
    <p id="profileFields" class="muted profile-fields"></p>
    <div id="profileExtras" class="profile-extras" hidden></div>
-   <details id="profileHistory" class="profile-history" hidden>
-    <summary>이 계정의 이전 프로필·헤더·자기소개 기록</summary>
-    <div id="profileHistoryList" class="profile-history-list" role="group" aria-label="저장된 프로필 이력"></div>
-   </details>
+
    <div class="stats">
     <button id="statPosts" type="button" data-section="posts"><strong id="postCount">—</strong><span>게시글</span></button>
     <button id="statFollowers" type="button" data-section="followers"><strong id="followerCount">—</strong><span>팔로워</span></button>
     <button id="statFollowing" type="button" data-section="following"><strong id="followingCount">—</strong><span>팔로잉</span></button>
    </div>
-   <details class="profile-audit">
-     <summary>백업 검증 정보</summary>
-     <p id="profileStatus" class="evidence">보관 여부 확인 전 · 미확인 자료는 표시하지 않습니다.</p>
-    </details>
+
   </div>
  </section>
  <section class="archive-content" aria-label="계정 보관 콘텐츠">
@@ -102,6 +96,19 @@
   </div>
   <button type="button" id="more" class="more" hidden>더 보기</button>
  </section>
+ <details class="archive-diagnostics" id="archiveVerificationPanel">
+   <summary>보관 상태 · 과거 프로필 기록</summary>
+   <div class="archive-diagnostics-inner">
+   <details id="profileHistory" class="profile-history" hidden>
+    <summary>이 계정의 이전 프로필·헤더·자기소개 기록</summary>
+    <div id="profileHistoryList" class="profile-history-list" role="group" aria-label="저장된 프로필 이력"></div>
+   </details>
+   <details class="profile-audit">
+     <summary>백업 검증 정보</summary>
+     <p id="profileStatus" class="evidence">보관 여부 확인 전 · 미확인 자료는 표시하지 않습니다.</p>
+    </details>
+   </div>
+ </details>
  <p class="footer-note">공개 API가 제공한 시점의 자료만 보관됩니다. 계정 전체 이력과 관계 목록의 완전성은 보장되지 않으며, 댓글의 외부 미디어 링크는 별도 검증 저장되지 않았을 수 있습니다.</p>
 </main>
 </div>
