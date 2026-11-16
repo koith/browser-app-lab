@@ -1442,6 +1442,30 @@ main{padding-top:10px}
 "use strict";
 const API="https://api.bsky.app/xrpc/app.bsky.feed.searchPosts";
 const TERMS=["뒷계","섹트","섹블","일탈계"];
+/* Hard exclusion requested for the LIVE aggregated feed only (not immutable
+   backups). Normalizing removes Unicode compatibility/zero-width and
+   separators so an identical prohibited phrase cannot re-enter through
+   another SNS, cached object, alt text, search lead or source widget. */
+const LIVE_HARD_EXCLUDED_PHRASES=Object.freeze(["야단라"]);
+function normalizedLivePostText(value){
+  return String(value??"").normalize("NFKC").toLocaleLowerCase("ko-KR")
+    .replace(/[\u200b-\u200f\u2060\ufeff\u00ad]/g,"")
+    .replace(/[\p{Z}\p{P}\p{S}\s]/gu,"");
+}
+function hasHardExcludedPhrase(value){
+  const text=normalizedLivePostText(value);
+  return LIVE_HARD_EXCLUDED_PHRASES.some(word=>text.includes(word));
+}
+function excludedFromLiveAggregate(post){
+  if(cloudMode||!post)return false;
+  const text=[post.text,post.author,post.title,post.description,
+    post.externalLink,post.quote?.text,post.quotedPost?.text,
+    post.embed?.external?.title,post.embed?.external?.description];
+  if(Array.isArray(post.media))
+    for(const item of post.media)text.push(item?.alt,item?.title,item?.description);
+  return text.some(hasHardExcludedPhrase);
+}
+
 const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS=4500;
 // The regular Posts tab shows fresh public SNS posts on BOTH hosts.
 // TeraBox-only records remain available in the Archive tab; "?source=archive"
@@ -1488,6 +1512,8 @@ function hideMedia(p){
 }
 function addPost(p,term){
   if(!p||!p.uri||typeof p.record?.text!=="string"||!p.record.text.includes(term))return false;
+  if(excludedFromLiveAggregate({text:p.record.text,author:p.author?.displayName,
+      media:getMedia(p),embed:p.embed}))return false;
   let uri=String(p.uri),old=ids.get(uri);
   if(old){old.terms.add(term);return false}
   // Prefer the official handle for bsky.app links. Previous code encoded a
@@ -1540,7 +1566,7 @@ function textFromHtml(html){
     return (doc.body.textContent||"").trim()}catch{return ""}
 }
 function addFederatedRow(row,term,start,end){
-  if(!row||!row.id||!row.text)return false;
+  if(!row||!row.id||!row.text||excludedFromLiveAggregate(row))return false;
   let stamp=Date.parse(row.posted||"");
   if(!Number.isFinite(stamp)||stamp<start||stamp>=end)return false;
   if(!row.text.includes(term))return false;
@@ -1562,6 +1588,8 @@ window.INTERSECTION_acceptPublicX=function(record){
   const id=String(record.id||""),txt=String(record.text||"");
   if(!/^[0-9]{10,25}$/.test(id)||!txt||txt.length>5000||record.protected===true)
     return {accepted:false,reason:"invalid"};
+  if(excludedFromLiveAggregate({text:txt,author:record.author,
+    media:record.media}))return {accepted:false,reason:"excluded-phrase"};
   const terms=TERMS.filter(term=>txt.includes(term));
   if(!terms.length)return {accepted:false,reason:"keyword"};
   let url,match;
@@ -2020,7 +2048,8 @@ function renderManualBlockManager(){
 
 function matchesText(p){return !needle||p.text.toLowerCase().includes(needle)}
 function filtered(){
-  return posts.filter(p=>matchesText(p)&&!suspectedAd(p)&&!isManualBlocked(p))
+  return posts.filter(p=>matchesText(p)&&!excludedFromLiveAggregate(p)&&
+      !suspectedAd(p)&&!isManualBlocked(p))
     .sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
 }
 /* The main feed contains dated, source-verified SNS originals only.
@@ -2030,7 +2059,8 @@ let lastDiscoveredSignature="";
 function drawDiscoveredLinks(){
   // A verified X post only supersedes its own X search lead. Threads and
   // Instagram can legitimately use the same opaque post ID string.
-  const rows=indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&!isManualBlocked(p)&&
+  const rows=indexedCandidates.filter(p=>matchesText(p)&&!excludedFromLiveAggregate(p)&&
+    !suspectedAd(p)&&!isManualBlocked(p)&&
     !(p.platform==="x"&&ids.has("x:"+p.postId)));
   const container=$("discoveryCandidates"),list=$("discoveryCandidateList");
   const signature=(cloudMode?"private:":"public:")+rows.map(p=>p.id).join("|");
@@ -2074,7 +2104,7 @@ window.INTERSECTION_receiveCandidates=function(raw){
     const label=String(candidate.title||"").trim().slice(0,220);
     const excerpt=String(candidate.description||"").trim().slice(0,450);
     const text=[label,excerpt].filter(Boolean).join("\n").slice(0,650);
-    if(!text)continue;
+    if(!text||excludedFromLiveAggregate({text}))continue;
     let profileUrl="",author=platform==="x"?"X":platform==="threads"?"Threads":"Instagram";
     if(platform==="x"){
       profileUrl="https://x.com/"+matched[1];author="@"+matched[1];
@@ -2397,7 +2427,8 @@ function closeDetail(){
 }
 function draw(){
   updateAdScores();
-  let matching=posts.filter(matchesText),suspected=matching.filter(suspectedAd).length;
+  let matching=posts.filter(p=>matchesText(p)&&!excludedFromLiveAggregate(p)),
+      suspected=matching.filter(suspectedAd).length;
   let manuallyHidden=matching.filter(p=>!suspectedAd(p)&&isManualBlocked(p)).length;
   let hidden=suspected;
   let rows=feedRows(),list=$("feed");
@@ -2467,7 +2498,8 @@ function draw(){
 
   updateServiceCounts();
   let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x+" T"+serviceCounts.threads+" I"+serviceCounts.instagram;
-  let candidates=cloudMode?0:indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&!isManualBlocked(p)).length;
+  let candidates=cloudMode?0:indexedCandidates.filter(p=>matchesText(p)&&
+    !excludedFromLiveAggregate(p)&&!suspectedAd(p)&&!isManualBlocked(p)).length;
   // Verified posts and unverified discovery leads are disjoint lists.
   // Never subtract search leads from real post counts (can become negative).
   $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고·자동 생성글 "+hidden.toLocaleString()+"건 제외":"")+(manuallyHidden?" · 직접 차단 "+manuallyHidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
@@ -2507,11 +2539,11 @@ window.INTERSECTION_publicVideoSnapshot=function(){
    personal information is persisted by the account UI. */
 window.INTERSECTION_publicAccountSnapshot=function(){
   return {fromMs,toMs,
-    verified:posts.filter(p=>p.platform!=="cloud"&&!p.restricted&&!suspectedAd(p)).map(p=>({
+    verified:filtered().filter(p=>p.platform!=="cloud"&&!p.restricted).map(p=>({
       platform:p.platform,profileUrl:p.profileUrl,author:p.author,
       posted:p.posted,url:p.url,text:String(p.text||"").slice(0,1800),id:p.id
     })),
-    candidates:indexedCandidates.map(p=>({
+    candidates:indexedCandidates.filter(p=>!excludedFromLiveAggregate(p)).map(p=>({
       platform:p.platform,profileUrl:p.profileUrl,author:p.author,id:p.id
     }))
   };
