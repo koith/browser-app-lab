@@ -164,9 +164,12 @@ def execute(args):
             summary.write('- Incomplete work IDs: '+(', '.join(incomplete_works) or 'none')+'\n')
             summary.write('- New SHA files staged (not yet Pages verified): '+str(collected)+'\n')
             summary.write('- Full collection completed: '+str(not unresolved).lower()+'\n\n')
-    if not any(x['collector_returncode']==0 for x in reports):
+    if success_count==0:
+        # Process returncode 0 alone is not a completed collection: it needs
+        # the finalized stage catalog AND successful SHA-staged publication.
         return 2
-    if any(x.get('publisher_returncode',0)!=0 for x in reports):
+    if any(x.get('publisher_returncode') not in (None,0)
+           or x.get('publication_error') for x in reports):
         return 3
     return 0
 
