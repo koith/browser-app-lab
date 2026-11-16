@@ -144,6 +144,23 @@ def execute(args):
     (stage/'full-collection-summary.json').write_text(
        json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print('FULL_COLLECTION_MODEL_RESULT',json.dumps(report,ensure_ascii=False),flush=True)
+    # GitHub Actions step success means the runner completed, NOT that every
+    # public edition was checked. Make timeouts/incomplete work IDs prominent
+    # in job logs and the actual human-visible step summary.
+    if incomplete_works:
+        print('::warning::GALLERY_COLLECTION_INCOMPLETE model='+args.model+
+              ' scheduled='+str(report['registered_works_scheduled'])+
+              ' successfully_batched='+str(success_count)+
+              ' unresolved='+','.join(incomplete_works),flush=True)
+    step_summary=os.environ.get('GITHUB_STEP_SUMMARY')
+    if step_summary:
+        with Path(step_summary).open('a',encoding='utf-8') as summary:
+            summary.write('### Actual '+args.model+' public image collection\n\n')
+            summary.write('- Registered works scheduled: '+str(report['registered_works_scheduled'])+'\n')
+            summary.write('- Works in successful batches: '+str(success_count)+'\n')
+            summary.write('- Incomplete work IDs: '+(', '.join(incomplete_works) or 'none')+'\n')
+            summary.write('- New SHA files staged (not yet Pages verified): '+str(collected)+'\n')
+            summary.write('- Full collection completed: '+str(not unresolved).lower()+'\n\n')
     if not any(x['collector_returncode']==0 for x in reports):
         return 2
     if any(x.get('publisher_returncode',0)!=0 for x in reports):
