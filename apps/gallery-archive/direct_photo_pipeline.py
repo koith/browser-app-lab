@@ -894,9 +894,14 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     r'[a-z0-9][a-z0-9-]{1,100}',aid):
                 reverse_counts['reverse_unverified_targets_rejected']+=1
                 continue
+            # A target row alone is only a candidate. Admit ONLY URLs also
+            # present in this exact model+edition's independently opened
+            # article observations. The previous code incremented
+            # reverse_source_pages_admitted even for unproven target URLs.
+            independently_verified=verified_discovered.get(aid,set())
             links=list(dict.fromkeys(
                 u for u in target.get('urls',[])
-                if safe_registered_public_page(u,model)))
+                if u in independently_verified and safe_registered_public_page(u,model)))
             if not links:
                 reverse_counts['reverse_unverified_targets_rejected']+=1
                 continue
