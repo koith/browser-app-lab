@@ -53,7 +53,7 @@ def physical_seeds(root: Path = ROOT) -> list[dict]:
     """
     from reverse_seed_priority import seeds as owner_photo_seeds
     try:
-        owned = owner_photo_seeds(root)
+        owned = owner_photo_seeds(root, all_cuts=True)
     except FileNotFoundError:
         # Offline/static-only fixtures and older repositories remain supported.
         owned = []
@@ -71,20 +71,21 @@ def physical_seeds(root: Path = ROOT) -> list[dict]:
             if not images or re.search(r"AI Enhanced|AI 보정", album.get("title", ""), re.I):
                 continue
             valid = []
+            seen_sha = set()
             for photo in images:
                 rel, digest = photo.get("url", ""), photo.get("sha256", "")
                 if (not isinstance(rel, str) or not rel.startswith("stored-albums/")
                     or any(bit in ("", ".", "..") for bit in rel.split("/"))
                     or not SHA.fullmatch(digest)
-                    or not re.search(r"\.(?:jpe?g|png|webp)$", rel, re.I)):
+                    or not re.search(r"\.(?:jpe?g|png|webp)$", rel, re.I)
+                    or digest in seen_sha):
                     continue
+                seen_sha.add(digest)
                 valid.append((rel, digest))
             if not valid:
                 continue
-            positions = list(dict.fromkeys((0, len(valid) // 2, len(valid) - 1)))
             photos = []
-            for position in positions:
-                rel, digest = valid[position]
+            for rel, digest in valid:
                 photos.append({
                     "model": model, "album_id": album["id"],
                     "album_title": album.get("title", ""),
@@ -96,11 +97,10 @@ def physical_seeds(root: Path = ROOT) -> list[dict]:
     albums.sort(key=lambda photos: (
         photos[0]["album_saved_public_count"],
         photos[0]["model"], photos[0]["album_id"]))
-    # Seek first distinct album, then the second and third frame.
-    # This avoids exhausting a run on three photos from one 7-photo album.
-    return [photo for index in range(3) for album in albums
-            for photo in album[index:index + 1]]
-
+    # Unlike the old first/mid/last sample, every SHA-distinct image enters
+    # the rotation; only the per-run request budget remains bounded.
+    return [photo for i in range(max(map(len, albums), default=0))
+            for album in albums for photo in album[i:i + 1]]
 
 def untrack(url: str) -> str | None:
     """Reject search UI, unsafe schemes, credentials and fake nested URLs."""
