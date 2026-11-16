@@ -234,11 +234,14 @@ def test_exact_original_blob_CID_hash_rejects_substitution_without_checkpoint():
             return mime,b"wrong CDN-transformed bytes"
     api=WrongMedia({None:([p],None)})
     cloud=FakeCloud()
-    with pytest.raises(job.SourceUnavailable,match="original media incomplete"):
-        job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
+    state=job.run_one("bluesky",DID,root=cloud,api=api,max_pages=1,clock=lambda:0)
     archive=job.account_cloud(cloud,job.resolve("bluesky",DID,api))
-    assert not archive.names("metadata/checkpoints")
+    assert state["status"]=="RESUME_NEEDED_MEDIA", (
+        "a SHA-mismatched original must not be presented as complete")
+    assert archive.names("metadata/checkpoints"), (
+        "missing media cannot block collection of later public pages")
     assert len(archive.names("metadata/source-records"))==1
+    assert len(archive.names("metadata/media-pending"))==1
     assert not archive.names("metadata/entries")
 
 
@@ -495,3 +498,72 @@ def test_bluesky_profile_public_cdn_400_uses_same_did_official_fallback():
     assert profile["identity"]==DID
     assert any(x.startswith("https://api.bsky.app/xrpc/app.bsky.actor.getProfile")
                for x in api.calls)
+
+def test_public_mastodon_cw_post_is_captured_not_silently_dropped():
+    profile={"platform":"mastodon","identity":"writer@mastodon.example",
+             "actor":"20200","pds":"https://mastodon.example",
+             "profile_url":"https://mastodon.example/@writer"}
+    raw={"id":"992","visibility":"public","sensitive":True,
+         "spoiler_text":"콘텐츠 경고","content":"<p>경고가 있는 공개 게시글</p>",
+         "url":"https://mastodon.example/@writer/992",
+         "account":{"id":"20200","acct":"writer"},
+         "created_at":"2026-11-03T00:00:00Z","media_attachments":[]}
+    record=job.normalize_record(profile,raw)
+    assert record is not None and record["kind"]=="post"
+    assert record["text"]=="경고가 있는 공개 게시글"
+    assert record["raw"]["spoiler_text"]=="콘텐츠 경고"
+    assert job.normalize_record(profile,{**raw,"visibility":"private"}) is None
+
+
+
+def test_public_mastodon_reblogs_are_preserved_as_owner_timeline_actions():
+    profile={"platform":"mastodon","identity":"writer@mastodon.example",
+             "actor":"20200","pds":"https://mastodon.example",
+             "profile_url":"https://mastodon.example/@writer"}
+    original={"id":"82","visibility":"public","content":"<p>공개된 다른 사용자 원문</p>",
+              "account":{"id":"20299","acct":"source"},
+              "media_attachments":[]}
+    outer={"id":"888","visibility":"public","sensitive":False,
+           "content":"","reblog":original,
+           "created_at":"2026-11-03T00:00:00Z",
+           "url":"https://mastodon.example/@writer/888",
+           "account":{"id":"20200","acct":"writer"}}
+    result=job.normalize_record(profile,outer)
+    assert result and result["kind"]=="reblog"
+    assert result["text"]=="공개된 다른 사용자 원문"
+    assert job.normalize_record(profile,{**outer,
+        "reblog":{**original,"visibility":"private"}}) is None
+
+
+
+def test_one_unavailable_media_does_not_hide_later_posts_and_repairs_append_only():
+    first=blue_row("unavailable01","First post with initially missing picture",
+                   assets=[("image/jpeg",PHOTO)])
+    second=blue_row("safe-post2","Second public text must remain archived")
+    class RecoveringAPI(BlueAPI):
+        unavailable=True
+        def media(self,url,mime):
+            if self.unavailable:
+                raise job.SourceUnavailable("synthetic original temporarily unavailable")
+            return mime,PHOTO
+    api=RecoveringAPI({None:([first,second],None)})
+    store=FakeCloud()
+    result=job.run_one("bluesky",DID,root=store,api=api,max_pages=1,clock=lambda:0)
+    archive=job.account_cloud(store,job.resolve("bluesky",DID,api))
+    pending_id=job.post_key("bluesky",first["uri"])
+    safe_id=job.post_key("bluesky",second["uri"])
+    assert result["status"]=="RESUME_NEEDED_MEDIA"
+    assert result["posts_verified"]==1
+    assert archive.read("metadata/media-pending/"+pending_id+".json",optional=True)
+    assert not archive.read("metadata/entries/"+pending_id+".json",optional=True)
+    safe_before=archive.read("posts/"+safe_id+"/post.json")
+    assert len(archive.load_catalog())==1
+    api.unavailable=False
+    again=job.run_one("bluesky",DID,root=store,api=api,max_pages=1,clock=lambda:0)
+    assert again["status"]=="COMPLETE_CURRENT_PUBLIC_CURSOR"
+    assert again["media_repaired"]==1
+    assert archive.read("metadata/media-resolved/"+pending_id+".json",optional=True)
+    assert archive.read("metadata/entries/"+pending_id+".json",optional=True)
+    assert archive.read("posts/"+safe_id+"/post.json")==safe_before
+    assert len(archive.load_catalog())==2
+
