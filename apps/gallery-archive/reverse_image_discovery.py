@@ -107,10 +107,12 @@ def untrack(url: str) -> str | None:
     for _ in range(2):
         try:
             p = urlsplit(url)
-        except ValueError:
-            return None
-        if (p.scheme != "https" or not p.hostname or p.username or p.password
-                or p.port not in (None, 443)):
+            # Accessing .port can itself raise ValueError, even if URL parsing
+            # succeeded (e.g. https://host.invalid:broken/path).
+            if (p.scheme != "https" or not p.hostname or p.username or p.password
+                    or p.port not in (None, 443)):
+                return None
+        except (ValueError, TypeError):
             return None
         if p.hostname in SEARCH_DOMAINS:
             if p.path in ("/url", "/search"):
