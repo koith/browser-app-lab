@@ -59,7 +59,7 @@ const {chromium}=require('playwright');
     text:title.textContent,detail:detail.textContent};
   });
   assert.ok(sourceTurn,'the real recovered source frame must be present');
-  assert.match(sourceTurn.image,/original\\/IMG\\/eventmsgbox\\.png/);
+  assert.ok(sourceTurn.image.includes('original/IMG/eventmsgbox.png'),'source frame must be real archive art');
   assert.deepEqual(sourceTurn.size,[244,52],'never enlarge or cover source event art');
   assert.ok(sourceTurn.opacity>.9&&sourceTurn.visibility==='visible','live source text must actually be visible');
   assert.ok(sourceTurn.titlePx>=18&&sourceTurn.detailPx>=12,'read the source panel, not the hidden WEB cue');
@@ -131,7 +131,7 @@ const {chromium}=require('playwright');
    'phone must actually display source event art, not a hidden WEB cue');
   assert.ok(phoneSource.visualHeading>=16,
    'source in-frame turn text must be physically readable on phone '+JSON.stringify(phoneSource));
-    assert.ok(mobile.visible,'phone turn cue must remain visible inside the game viewport '+JSON.stringify(mobile));
+  assert.ok(mobile.visible,'phone turn cue must remain visible inside the game viewport '+JSON.stringify(mobile));
   assert.ok(mobile.fontSize>=15,'phone title must not shrink to the old unreadable 10px');
   assert.equal(mobile.overlap,false,'do not obscure native event message on a 390px phone '+JSON.stringify(mobile));
   assert.equal(mobile.slot,mobile.activeSlot,'phone cue must track the live actual player even if AI advanced');
