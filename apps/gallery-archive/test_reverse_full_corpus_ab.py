@@ -15,7 +15,9 @@ def test():
         for model in ('yui','mimmi')}
     assert s['owner_albums_by_model']==expected_owner,s
     assert s['missing_owner_albums_without_photo_seed']==0,s
-    assert s['all_title_work_leads']==30,s
+    expected_title_count=len(json.loads(
+        (ROOT/'apps/gallery-archive/visual-work-leads.json').read_text())['works'])
+    assert s['all_title_work_leads']==expected_title_count,s
     expected_rows=full_photo_inventory(ROOT/'apps',all_cuts=True)
     expected_keys={(x['model'],x['album_id'],x['photo_sha256']) for x in expected_rows}
     actual_keys={(x['model'],x['album_id'],x['owner_sha256']) for x in c['seeds']}
@@ -29,7 +31,7 @@ def test():
         titles=[x for model in ('yui','mimmi') for shard in range(shards)
                     for x in c['title_leads'] if x['model']==model and partition(x,shards)==shard]
         assert len(grouped)==len(c['seeds']),shards
-        assert len(titles)==30,shards
+        assert len(titles)==expected_title_count,shards
         assert len({(x['model'],x['album_id'],x['owner_sha256']) for x in grouped})==len(grouped)
     import reverse_full_corpus_ab as m
     funcs=[m.multi_search,m.lens_query,m.tineye_query,m.yandex_site_search]
