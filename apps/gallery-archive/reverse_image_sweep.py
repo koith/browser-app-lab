@@ -14,7 +14,8 @@ from urllib.parse import urlsplit,urljoin
 import requests
 from reverse_seed_priority import seeds
 from reverse_sites_parser import sites_from_html
-from reverse_image_discovery import untrack, leads_from_html, identity_supported
+from reverse_image_discovery import (untrack, leads_from_html, identity_supported,
+                                     lens_query, tineye_query)
 
 RESEARCH_UA="PersonalPublicPhotoSourceResearch/1.0"
 SEARCH_URL="https://yandex.com/images/search"
@@ -110,6 +111,19 @@ def search_one(seed,client=None):
         b_links=leads_from_html(b_html) if b_html else []
         stages["bing"]=b_status if b_status!="ok" else "leads_"+str(len(b_links))
         accept(b_links,"bing")
+    # The HTML landing page above is not the complete Bing Visual Search
+    # knowledge API. When it yields no model-supported pages, try the
+    # independently implemented public Lens and TinEye URL-result flows.
+    # Each is at most one ordinary request; never bypass access challenges.
+    if not approved:
+        for engine,query in (("lens_public",lens_query),("tineye_public",tineye_query)):
+            try:
+                outcome=query(client,url)
+                stages[engine]=str(outcome.get('status','unknown'))
+                accept(outcome.get('links',[]) or [],engine)
+            except (requests.RequestException,ValueError,TypeError) as exc:
+                stages[engine]='error_'+type(exc).__name__
+                per_engine[engine]=0
     return {**seed,"search_status":stages,"candidate_pages":approved[:90],
             "matched_urls_by_engine":per_engine,
             "off_model_rejected":rejected,
