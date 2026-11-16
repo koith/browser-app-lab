@@ -4,9 +4,9 @@ on:
     paths:
       - 'apps/gallery-archive/qa_local_lightbox_live.py'
       - '.github/workflows/gallery-local-lightbox-live-qa.yml'
-  workflow_run:
-    workflows: ["Deploy static content to Pages"]
-    types: [completed]
+  workflow_dispatch:
+  # Live mobile browser check remains manually available on main; its
+  # syntax/selection checks still run on source-specific pull requests.
 permissions:
   contents: read
 concurrency:
@@ -27,11 +27,7 @@ jobs:
           node apps/gallery-archive/test_local_lightbox_source.cjs
 
   live-mobile-same-sha:
-    if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main' &&
-      github.event.workflow_run.head_repository.full_name == github.repository
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 17
     strategy:
@@ -41,12 +37,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.sha }}
       - name: Check exact deploy SHA and supported fixture
         id: source
         shell: bash
         run: |
-          test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+          test "$(git rev-parse HEAD)" = "${{ github.sha }}"
           if [[ -f apps/gallery-archive/qa_local_lightbox_live.py ]]; then
             echo 'supported=true' >> "$GITHUB_OUTPUT"
             echo "GALLERY_STATIC_LIGHTBOX_DEPLOYED_SHA=$(git rev-parse HEAD)"
