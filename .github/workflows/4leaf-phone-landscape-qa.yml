@@ -49,6 +49,10 @@ jobs:
           done
           cat /tmp/4leaf-http.log
           exit 1
+      - name: Phone frame, portrait prompt and chat overlay
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+        run: node apps/4leaf/rog/tests/mobile-landscape-viewport-smoke.cjs
       - name: Real click-through room map and chat
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
