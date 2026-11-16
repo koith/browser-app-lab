@@ -983,6 +983,14 @@
   body.textContent='이 채팅방은 현재 '+allowedCapacity(room.capacity)+'명으로 가득 찼습니다. 다른 방을 선택해 주세요.';
   popup('채팅방 정원 초과',body);
  }
+ // Directory errors previously appeared only in the hidden global chat log.
+ // Reuse the existing native-map instruction strip so a failed real click
+ // is visible without inventing a new historical modal or map sprite.
+ function roomEntryFailure(message){
+  const hint=$('social-map-viewport')?.closest('.social-directory')?.querySelector('.social-map-toolbar>span');
+  if(hint){hint.textContent=message;hint.setAttribute('role','alert')}
+  systemLine(message);
+ }
  let roomJoinIntent=0,roomJoinQueue=Promise.resolve();
  function joinRoom(id){
   const room=roomById(id);if(!room)return;
@@ -1014,9 +1022,12 @@
       if(state.view==='directory'&&central.joinedId)
        await central.leave().catch(err=>console.warn('ChatTown rollback:',err.message));
       if(/full|정원/i.test(e.message))roomFullNotice(room);
-      else if(room.preset&&centralOutage(e)){
+      else if(!room.passwordProof&&centralOutage(e)){
+       // A custom public room already listed by the real server is just as
+       // locally joinable as a canonical room during a temporary 502/503.
+       // NEVER bypass the server's password check for a locked room.
        if(enterRoom(room,true))systemLine('서버 장애로 오프라인 방에 입장했습니다. 중앙 서버의 다른 기기와 연결되지 않습니다.');
-      }else systemLine('채팅방 입장 실패: '+e.message);
+      }else roomEntryFailure('채팅방 입장 실패: '+e.message);
      }
     };
     const pending=roomJoinQueue.then(attempt,attempt);
@@ -1028,11 +1039,17 @@
    return;
   }
   if(room.passwordProof){
+   if(!localRoom){
+    // A server-locked room has no local password salt/proof. Do not solicit
+    // a password for an offline check that can never legitimately succeed.
+    roomEntryFailure('서버 연결이 필요합니다. 비공개 채팅방은 오프라인에서 비밀번호를 확인할 수 없습니다.');
+    return;
+   }
    askText('비공개 채팅방','방 비밀번호',true,async value=>{
     try{
      if(await deriveRoomProof(value,room.passwordSalt)===room.passwordProof)enterRoom(room,true);
-     else systemLine('비밀번호가 일치하지 않습니다.');
-    }catch{systemLine('비밀번호 검증을 진행할 수 없습니다.')}
+     else roomEntryFailure('비밀번호가 일치하지 않습니다.');
+    }catch{roomEntryFailure('비밀번호 검증을 진행할 수 없습니다.')}
    });return;
   }
   if(enterRoom(room,true))systemLine('오프라인 채팅방입니다. 이 브라우저의 다른 탭 또는 직접 연결 사용자끼리만 채팅합니다. 서버 복구 후 방에 재입장하면 온라인으로 연결됩니다.');
@@ -1442,6 +1459,7 @@
  function showCreateRoom(){
   const body=document.createElement('form');body.className='social-modal-form';
   body.innerHTML='<label>방 제목<input name="name" placeholder="방 이름" maxlength="26" required></label><label>배경<select name="background"><option value="2">서재</option><option value="3">클로버 응접실</option><option value="5">벽난로가 있는 방</option><option value="4">햇빛이 드는 방</option><option value="0">숲속 광장</option><option value="1">숲속 오솔길</option></select></label><label>정원<select name="capacity"><option value="12">12명</option><option value="8">8명</option><option value="4">4명</option><option value="2">2명 전용</option></select></label><label>비밀번호 (선택)<input name="password" type="password" maxlength="24" placeholder="비우면 공개방"></label><button type="submit">방 만들기</button>';
+  body.querySelector('[name="name"]')?.addEventListener('input',event=>event.currentTarget.setCustomValidity(''));
   body.onsubmit=async e=>{
    e.preventDefault();const form=new FormData(body);
    const name=safe(form.get('name'),26);
@@ -1458,7 +1476,12 @@
      await central.join(room.id,password);
      closePopup();enterRoom(room);presence();return;
     }catch(error){
-     if(!centralOutage(error)){systemLine('채팅방 개설 실패: '+error.message);return}
+     if(!centralOutage(error)){
+      const failure='채팅방 개설 실패: '+error.message;
+      const nameField=body.querySelector('[name="name"]');
+      nameField.setCustomValidity(failure);nameField.reportValidity();
+      systemLine(failure);return;
+     }
      systemLine('중앙 서버에 방을 만들지 못했습니다: '+error.message+' · 대신 오프라인 방을 개설합니다.');
     }
    }
