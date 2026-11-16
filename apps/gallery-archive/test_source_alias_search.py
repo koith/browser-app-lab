@@ -19,6 +19,12 @@ def main():
     assert not https_page("http://example.org/yui")
     assert not https_page("https://example.org/login")
     assert not https_page("https://example.org/archive.zip")
+    assert not https_page("https://127.0.0.1/album/yui")
+    assert not https_page("https://10.2.3.4/album/yui")
+    assert not https_page("https://169.254.169.254/latest/meta-data")
+    assert not https_page("https://metadata.google.internal/secret")
+    assert not https_page("https://pub.example.internal/gallery")
+    assert not https_page("https://example.org:8080/gallery")
     assert https_page("https://example.org/album/mimmi?preview=1")
     title,context=source_headings("<html><title>Mimmi Pop Kitty Party</title><h1>DJAWA × Mimmi</h1><p>full public preview</p></html>")
     assert "Pop Kitty Party" in title and "Mimmi" in context
