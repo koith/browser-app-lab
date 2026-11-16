@@ -240,7 +240,7 @@ class StatusBoardTests(unittest.TestCase):
         assert len(old_doc) > 12_000
         assert "2026-11-16 정리 전 원문" in old_issue
         assert "INT-11" in current and "INT-13" in current
-        assert "이슈 원문" in current
+        assert "기존 Issue #607 본문 원문" in current
         old_original = old_issue.split("\n---\n\n", 1)[1]
         states = ops.core_task_states(old_original)
         self.assertEqual(len(states), 10)
