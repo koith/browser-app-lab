@@ -221,9 +221,9 @@ class FullReverseCoverageTests(unittest.TestCase):
         def with_sources(seed):
             num=int(seed['photo_sha256'],16)
             return {**seed,'search_status':{'bing_visual':'visual_pages_1'},
-                    'candidate_pages':[{'url':f'https://photo-source.org/work/{num}',
+                    'candidate_pages':[{'url':f'https://photo-source.org/work/{seed["album_id"]}/{num}',
                         'label':'Mimmi same photo','matched_image_url':
-                            f'https://cdn.photo-source.org/{num}.jpg',
+                            f'https://cdn.photo-source.org/{seed["album_id"]}/{num}.jpg',
                         'source_engine':'bing_visual_pages_including'}],
                     'off_model_rejected':0,'originals_stored':0,
                     'visible_gallery_added':0}
