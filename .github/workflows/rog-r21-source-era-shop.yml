@@ -7,6 +7,7 @@ on:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/r21-source-era-shop.cjs'
+      - 'apps/4leaf/rog/tests/shop01-2004-real-screen-acceptance.cjs'
       - 'apps/4leaf/rog/tests/shop-original-serial-resale.cjs'
       - '.github/workflows/rog-r21-source-era-shop.yml'
   push:
@@ -16,6 +17,7 @@ on:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/r21-source-era-shop.cjs'
+      - 'apps/4leaf/rog/tests/shop01-2004-real-screen-acceptance.cjs'
       - 'apps/4leaf/rog/tests/shop-original-serial-resale.cjs'
   workflow_dispatch:
 permissions:
@@ -45,6 +47,8 @@ jobs:
           done
           exit 1
       - run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r21-source-era-shop.cjs
+      - name: SHOP-01 2004 original 541x402 screenshot-traced native tab/card/inventory/card-info/GP/real-purchase acceptance
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/shop01-2004-real-screen-acceptance.cjs
       - name: Verify original 2003 serial-origin card sold for 1,000 GP, saved, repurchased with ordinary provenance
         run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/shop-original-serial-resale.cjs
       - uses: actions/upload-artifact@v4
@@ -55,4 +59,5 @@ jobs:
           retention-days: 10
           path: |
             leaf-r21-*.png
+            leaf-shop01-historical-2004-trace-*.png
             leaf-archival-serial-resale-real-shop-*.png
