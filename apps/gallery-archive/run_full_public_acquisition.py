@@ -18,6 +18,9 @@ ROOT=Path(__file__).resolve().parents[2]
 ARCHIVE=ROOT/'apps/gallery-archive'
 MAX_REGISTERED_PAGES_PER_WORK=5
 MAX_CHROMIUM_WEAK_PAGES_PER_BATCH=2
+MAX_RECOVERY_SINGLE_WORKS_PER_RUN=6
+MAX_RECOVERY_PER_TIMEOUT_GROUP=3
+RECOVERY_SINGLE_WORK_TIMEOUT=120
 PRIORITY={
  'mimmi':(
   'djawa-pop-kitty-party','djawa-nikke-yuni',
@@ -101,7 +104,12 @@ def execute(args):
     source_evidence=Path(args.source_evidence).resolve() if args.source_evidence else None
     reports=[]
     collected=0
-    for index,ids in enumerate(batches):
+    # A seven-work timeout must not permanently strand the other six works.
+    # Bounded, one-level single-work followups run only for timed-out groups.
+    # The run-number rotates which works get the recovery budget.
+    work_queue=list(batches)
+    recovery_scheduled=0
+    for index,ids in enumerate(work_queue):
         target=stage/('batch-'+str(index).zfill(2))
         catalog=target/'metadata/catalog.json'
         command=[sys.executable,str(ARCHIVE/'direct_photo_pipeline.py'),
@@ -122,7 +130,9 @@ def execute(args):
             command.extend(['--album-id',aid])
         print('FULL_COLLECTION_BATCH_START',args.model,index,'work_count',len(ids),flush=True)
         try:
-            result=subprocess.run(command,cwd=ROOT,timeout=args.batch_timeout,check=False)
+            timeout=(min(args.batch_timeout,RECOVERY_SINGLE_WORK_TIMEOUT)
+                     if index>=len(batches) else args.batch_timeout)
+            result=subprocess.run(command,cwd=ROOT,timeout=timeout,check=False)
             collector_code=result.returncode
             collection_error=None
         except subprocess.TimeoutExpired:
@@ -131,7 +141,17 @@ def execute(args):
             collector_code=124
             collection_error='collector_timeout'
         row={'batch':index,'works':ids,'collector_returncode':collector_code,
+             'single_work_recovery':index>=len(batches),
              'new_sha_verified_originals':0,'total_bytes_added':0}
+        if collection_error=='collector_timeout' and len(ids)>1:
+            available=MAX_RECOVERY_SINGLE_WORKS_PER_RUN-recovery_scheduled
+            count=min(available,MAX_RECOVERY_PER_TIMEOUT_GROUP,len(ids))
+            if count:
+                offset=max(args.run_number-1,0)%len(ids)
+                chosen=[ids[(offset+i)%len(ids)] for i in range(count)]
+                work_queue.extend([[aid] for aid in chosen])
+                recovery_scheduled+=count
+                row['recovery_scheduled_work_ids']=chosen
         if collection_error:
             row['collection_error']=collection_error
         if collector_code==0 and not catalog.is_file():
@@ -157,25 +177,32 @@ def execute(args):
                 or x.get('publisher_returncode')!=0
                 or x.get('collection_error')
                 or x.get('publication_error')]
-    incomplete_works=list(dict.fromkeys(aid for row in unresolved for aid in row['works']))
-    success_count=sum(len(x['works']) for x in reports if x not in unresolved)
+    # A failed multi-work batch may have partially recovered via successful
+    # individually audited followups. Count unique work IDs, never attempts.
+    scheduled=list(dict.fromkeys(aid for group in batches for aid in group))
+    successes={aid for row in reports if row not in unresolved for aid in row['works']}
+    incomplete_works=[aid for aid in scheduled if aid not in successes]
+    success_count=len(successes)
     # "Scheduled" is NOT the same as "collected": a timed-out group may
     # never have reached some of its listed work IDs. Keep partial results
     # and replay the verified bytes, but expose the incomplete works.
     report={'model':args.model,
-            'registered_works_scheduled':sum(map(len,batches)),
+            'registered_works_scheduled':len(scheduled),
             'registered_works_visited':success_count,
             'registered_works_in_successful_batches':success_count,
             'registered_work_ids_in_incomplete_batches':incomplete_works,
             'incomplete_batch_count':len(unresolved),
+            'single_work_recovery_scheduled':recovery_scheduled,
+            'single_work_recovery_succeeded':sum(
+                1 for x in reports if x.get('single_work_recovery') and x not in unresolved),
             'batches':reports,'new_local_verified_SHA':collected,
             'timed_out_batches':timed_out,
             'collection_complete_without_batch_timeouts':not timed_out,
-            'collection_all_batches_success':not unresolved,
+            'collection_all_batches_success':not incomplete_works,
             'new_remote_SHA_readback_verified':0,
             'new_public_Pages_verified':0,
             'scope':'public_authenticated-free_only',
-            'state':('LOCAL_STAGED_PARTIAL_INCOMPLETE_BATCHES' if unresolved
+            'state':('LOCAL_STAGED_PARTIAL_INCOMPLETE_BATCHES' if incomplete_works
                      else 'LOCAL_PUBLICATION_STAGED_NOT_DEPLOYED')}
     (stage/'full-collection-summary.json').write_text(
        json.dumps(report,ensure_ascii=False,indent=2)+'\n')
@@ -196,7 +223,7 @@ def execute(args):
             summary.write('- Works in successful batches: '+str(success_count)+'\n')
             summary.write('- Incomplete work IDs: '+(', '.join(incomplete_works) or 'none')+'\n')
             summary.write('- New SHA files staged (not yet Pages verified): '+str(collected)+'\n')
-            summary.write('- Full collection completed: '+str(not unresolved).lower()+'\n\n')
+            summary.write('- Full collection completed: '+str(not incomplete_works).lower()+'\n\n')
     if success_count==0:
         # Process returncode 0 alone is not a completed collection: it needs
         # the finalized stage catalog AND successful SHA-staged publication.
