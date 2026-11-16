@@ -37,8 +37,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: apps/gallery-archive
-          sparse-checkout-cone-mode: true
+          # The contract test reads this YAML as well as its Python fixtures.
+          sparse-checkout: |
+            apps/gallery-archive
+            .github/workflows/gallery-terabox-render-session-sync.yml
+          sparse-checkout-cone-mode: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
