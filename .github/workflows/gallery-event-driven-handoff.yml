@@ -3,22 +3,9 @@ name: Gallery Event-Driven Verified Handoff
 # Event-based: no timer, periodic polling, infinite retry or new ChatGPT chat.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/gallery-event-driven-handoff.yml
-      - .github/scripts/gallery_event_handoff.cjs
-      - .github/scripts/test_gallery_event_handoff.cjs
-  issues:
-    types: [edited]
-  workflow_run:
-    workflows:
-      - Gallery — First Image Latency and Full SHA Coverage
-      - Gallery Quality Branding and Fast Entry Regression QA
-      - Yui Mimmi Deployed GitHub Pages Real Photo Browser QA
-      - Gallery Real Image Pixel Quality Audit
-      - Deploy static content to Pages
-    types: [completed]
+  # Finite gallery tasks G-01..G-11 are already 10/10 complete.
+  # Historical Pages/QA/issue events would launch this workflow only to
+  # print a no-op. Keep explicit manual handoff and PR regression tests.
   pull_request:
     paths:
       - .github/workflows/gallery-event-driven-handoff.yml
