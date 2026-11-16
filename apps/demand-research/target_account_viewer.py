@@ -150,7 +150,8 @@ def public_profile_fields(doc):
         "followers_count","following_count","posts_count","fields",
         "created_at","indexed_at","captured_at","complete_media",
         "profile_url","pronouns","website","pinned_post","locked","bot",
-        "header_description","avatar_description")}
+        "header_description","avatar_description",
+        "show_media","show_media_replies","show_featured")}
 
 
 def sanitize_safe_link(value):
