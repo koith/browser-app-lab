@@ -20,7 +20,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, FileResponse, Response
 from demand_archive import CloudArchive, sha256
 import github_temp_bundle
-from target_account_archive import REGISTRY_RE, archive_key, account_cloud
+from target_account_archive import REGISTRY_RE, archive_key, account_cloud, text_only
 from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
 from verified_bundle_reader import (
     VerifiedBundle, BundleAccountCloud, MergedBundleAccountCloud, available_bundles, latest_account_bundle, BundleInvalid,
@@ -309,6 +309,36 @@ def profile_view(archive,account,entry,*,snapshot=""):
                 sanitize_safe_link(entry.get("profile_url")),"history":[]}
     name,doc=selected
     view=public_profile_fields(doc)
+    # Preserve the source provider's actual paragraph layout and verified
+    # custom-field cards even for older saved snapshots whose generic
+    # plain-text summary had concatenated separate <p> blocks.
+    if doc.get("platform")=="mastodon":
+        raw_profile=doc.get("raw") or {}
+        if isinstance(raw_profile,dict):
+            note=raw_profile.get("note")
+            if isinstance(note,str):
+                view["description"]=text_only(note)
+            source_fields=raw_profile.get("fields",doc.get("fields",[]))
+        else:
+            source_fields=doc.get("fields",[])
+        safe_fields=[]
+        if isinstance(source_fields,list):
+            for field in source_fields[:40]:
+                if not isinstance(field,dict):continue
+                name=str(field.get("name") or "")[:250]
+                value=field.get("value") or ""
+                parser=_PublicHtmlParts()
+                if isinstance(value,str):
+                    try:parser.feed(value[:12000])
+                    except (ValueError,TypeError):pass
+                pieces=[{"text":str(part.get("text") or "")[:1200],
+                         "href":sanitize_safe_link(part.get("href"))}
+                        for part in parser.parts[:50] if isinstance(part,dict)]
+                if name or pieces:
+                    safe_fields.append({"name":name,"parts":pieces,
+                        "verified_at":field.get("verified_at")
+                            if isinstance(field.get("verified_at"),str) else None})
+        view["fields_rendered"]=safe_fields
     view["available"]=True
     view["profile_url"]=sanitize_safe_link(entry.get("profile_url"))
     view["snapshot_id"]=name
@@ -381,11 +411,11 @@ class _PublicHtmlParts(HTMLParser):
             props=dict(attrs)
             self.link=sanitize_safe_link(props.get("href",""))
         elif tag in ("br","p"):
-            self.parts.append({"text":"\\n","href":""})
+            self.parts.append({"text":"\n","href":""})
     def handle_endtag(self,tag):
         if tag=="a":self.link=""
         elif tag in ("p","div"):
-            self.parts.append({"text":"\\n","href":""})
+            self.parts.append({"text":"\n","href":""})
     def handle_data(self,data):
         if data:self.parts.append({"text":data[:12000],"href":self.link})
 
@@ -452,7 +482,8 @@ def _source_ui(archive,post):
     """
     out={"rich_text":[],"content_warning":"","sensitive":False,
          "alt_text":[],"external_card":None,"quoted_post":None,
-         "poll":None,"reblog":None,"engagement":None,"pinned":False}
+         "poll":None,"reblog":None,"engagement":None,"pinned":False,
+         "source_labels":[]}
     pid=post.get("id","")
     if not HEX40.fullmatch(str(pid)):
         return out
@@ -477,6 +508,10 @@ def _source_ui(archive,post):
         out["rich_text"]=_bsky_facet_parts(record,text)
         labels=record.get("labels") or {}
         values=labels.get("values",[]) if isinstance(labels,dict) else []
+        if isinstance(values,list):
+            out["source_labels"]=[
+                str(v.get("val"))[:80] for v in values[:100]
+                if isinstance(v,dict) and isinstance(v.get("val"),str)]
         if isinstance(values,list) and any(
                 isinstance(x,dict) and x.get("val") in
                 ("porn","sexual","nudity","graphic-media") for x in values):
@@ -508,7 +543,7 @@ def _source_ui(archive,post):
                 ":"+str(published)!=str(post.get("original_id",""))[-len(str(published))-1:]):
             return out
         embedded=source.get("reblog")
-        display=embedded if isinstance(embedded,dict) and embedded.get("visibility")=="public" else source
+        display=embedded if isinstance(embedded,dict) and embedded.get("visibility") in ("public","unlisted") else source
         if embedded and display is embedded:
             owner=display.get("account") or {}
             if isinstance(owner,dict):

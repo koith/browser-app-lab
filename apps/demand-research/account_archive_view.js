@@ -212,8 +212,14 @@ function renderExtraProfileFields(profile){
   if(profile.platform==="mastodon"){
     if(profile.bot===true)addText("계정 유형","자동화 계정");
     if(profile.locked===true)addText("팔로우 상태","승인 필요");
-    addText("헤더 설명",profile.header_description);
-    addText("프로필 사진 설명",profile.avatar_description);
+    // Source Mastodon displays alt text to assistive technology, not as
+    // extra visible profile rows that shift every subsequent screenshot.
+    const cover=$("cover"),avatar=$("avatar");
+    cover.setAttribute("role","img");
+    cover.setAttribute("aria-label",profile.header_description||
+      "보관된 공개 프로필 헤더 배경");
+    avatar.setAttribute("aria-label",profile.avatar_description||
+      "보관된 공개 프로필 사진");
   }
   const site=validLink(profile.website);
   if(site){
@@ -298,9 +304,34 @@ function renderProfile(profile){
   }
   $("followerCount").textContent=fmt(profile.followers_count);
   $("followingCount").textContent=fmt(profile.following_count);
-  const fields=profile.fields;
-  $("profileFields").textContent=Array.isArray(fields)?
-    fields.slice(0,12).map(f=>(f.name||"")+": "+(f.value||"").replace(/<[^>]*>/g,"")).join("\n"):"";
+  // Do not flatten Mastodon 4.6 profile fields into an artificial
+  // colon-separated paragraph. Render every archived public field in
+  // source order and preserve only independently sanitized HTTPS links.
+  const fields=Array.isArray(profile.fields_rendered)?
+    profile.fields_rendered:(Array.isArray(profile.fields)?profile.fields:[]);
+  const fieldsHost=$("profileFields");
+  fieldsHost.replaceChildren();
+  for(const field of fields){
+    if(!field||typeof field!=="object")continue;
+    const row=node("dl","profile-field");
+    row.append(node("dt","profile-field-name",field.name||""));
+    const value=node("dd","profile-field-value");
+    if(Array.isArray(field.parts)){
+      for(const part of field.parts){
+        if(!part||typeof part.text!=="string")continue;
+        const safe=validLink(part.href||"");
+        if(safe)value.append(anchor(safe,part.text,"profile-field-link"));
+        else value.append(document.createTextNode(part.text));
+      }
+    }else if(typeof field.value==="string"){
+      value.textContent=field.value.replace(/<[^>]*>/g," ");
+    }
+    row.append(value);
+    if(typeof field.verified_at==="string"&&field.verified_at)
+      row.append(node("span","profile-field-verified","✓ 확인된 링크"));
+    fieldsHost.append(row);
+  }
+  fieldsHost.hidden=!fieldsHost.childElementCount;
   renderExtraProfileFields(profile);
   renderProfileHistory(profile);
   const external=validLink(profile.profile_url),a=$("sourceProfile");

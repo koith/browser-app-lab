@@ -617,3 +617,56 @@ def test_source_links_never_accept_javascript_or_internal_network():
     html.feed('<a href="javascript:alert(1)">악성</a><a href="https://public.example">공개</a>')
     assert html.parts[0]["text"]=="악성" and not html.parts[0]["href"]
     assert html.parts[1]["href"]=="https://public.example"
+
+
+def test_all_mastodon_source_profile_fields_and_paragraphs_render_as_safe_cards():
+    """The archived raw provider snapshot, not a flattened summary, owns bio."""
+    name="snap-"+"1"*20+"-"+"a"*16+".json"
+    identity="mastodon.example:20200"
+    doc={"platform":"mastodon","identity":identity,
+         "handle":"writer@mastodon.example","display_name":"Public QA",
+         "description":"Previously flattened biography",
+         "captured_at":"2026-11-16T00:00:00Z",
+         "raw":{"note":"<p>first line</p><p>second line</p>",
+                "fields":[{"name":"Pronouns","value":"she/her",
+                           "verified_at":None},
+                          {"name":"Website",
+                           "value":'<a href="https://example.org">example.org</a>',
+                           "verified_at":"2026-11-16T00:00:00Z"},
+                          {"name":"Unsafe marker",
+                           "value":'<a href="javascript:alert(1)">No script</a>',
+                           "verified_at":None}]},
+         "assets":{"avatar":{"status":"not_set"},"banner":{"status":"not_set"}}}
+    class PublicSnapshot:
+        def names(self,prefix):
+            return [name] if prefix=="profile/snapshots" else []
+        def read(self,path,*,cap,optional=False):
+            return canonical_json(doc) if path=="profile/snapshots/"+name else None
+    result=viewer.profile_view(PublicSnapshot(),
+       "mastodon-"+"a"*40,
+       {"platform":"mastodon","identity":identity,
+        "profile_url":"https://mastodon.example/@writer"})
+    assert result["description"]=="first line\nsecond line"
+    assert len(result["fields_rendered"])==3
+    assert result["fields_rendered"][1]["parts"][0]=={
+        "text":"example.org","href":"https://example.org"}
+    assert result["fields_rendered"][1]["verified_at"]
+    assert result["fields_rendered"][2]["parts"][0]["href"]==""
+    assert not any("<a" in str(row) for row in result["fields_rendered"])
+
+
+def test_every_public_source_label_is_retained_in_viewer_audit():
+    post={"id":PID,"platform":"bluesky",
+          "original_id":"at://"+DID+"/app.bsky.feed.post/test100",
+          "text":"Public source returned by PDS"}
+    raw={"uri":post["original_id"],
+         "value":{"text":post["text"],
+                  "labels":{"values":[{"val":"!hide"},
+                                      {"val":"!takedown"},
+                                      {"val":"user-defined"}]}}}
+    class PublicSource:
+        def read(self,path,*,cap,optional=False):
+            return canonical_json(raw) if path.endswith(PID+".json") else None
+    result=viewer._source_ui(PublicSource(),post)
+    assert result["source_labels"]==["!hide","!takedown","user-defined"]
+    assert result["rich_text"][0]["text"]=="Public source returned by PDS"

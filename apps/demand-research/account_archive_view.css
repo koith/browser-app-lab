@@ -428,3 +428,51 @@ body{background:var(--paper);color:var(--ink)}
 .archive-tools .feed-controls{padding:10px 12px}
 :root[data-platform="mastodon"] .profile-audit,
 :root[data-platform="mastodon"] .archive-tools{border-color:#3e4254}
+
+
+/* 2026 Mastodon publicly archived profile fields: semantic two-column cards.
+   All original public fields appear; none is lost to a 12-field truncation. */
+.profile-content #profileFields[hidden]{display:none!important}
+.profile-content #profileFields{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;margin:11px 0 6px;min-width:0;order:4;
+}
+.profile-field{display:flex;flex-direction:column;min-width:0;
+  margin:0;padding:9px 10px;border:1px solid var(--line);
+  border-radius:9px;background:var(--white);overflow-wrap:anywhere}
+.profile-field-name{font-size:11px;font-weight:660;color:var(--sub);
+  margin:0 0 3px;line-height:1.4}
+.profile-field-value{font-size:12px;font-weight:650;color:var(--ink);
+  line-height:1.5;margin:0;min-width:0;white-space:pre-wrap}
+.profile-field-link{color:var(--accent);text-decoration:none}
+.profile-field-verified{display:block;font-size:10px;
+  color:var(--accent);margin-top:3px;font-weight:680}
+:root[data-platform="mastodon"] .profile-field{
+  background:var(--white);border-color:var(--line)}
+@media(max-width:380px){
+  .profile-content #profileFields{grid-template-columns:1fr 1fr;gap:6px}
+  .profile-field{padding:8px}
+}
+@media(prefers-color-scheme:light){
+  :root[data-platform="mastodon"]{
+    --ink:#171926;--sub:#676b79;--line:#e4e4ef;--paper:#f5f5fb;
+    --white:#fff;--accent:#6364ff;--accent2:#f1f0ff;
+    color-scheme:light
+  }
+  :root[data-platform="mastodon"] .sns-provider-top,
+  :root[data-platform="mastodon"] .archive-content,
+  :root[data-platform="mastodon"] .post{background:#fff;border-color:#e9e9f0}
+  :root[data-platform="mastodon"] .sns-provider-ident strong,
+  :root[data-platform="mastodon"] .profile-head h2,
+  :root[data-platform="mastodon"] .stats strong,
+  :root[data-platform="mastodon"] .bio{color:#1e2130}
+  :root[data-platform="mastodon"] .stats{border-color:#e4e4ef}
+  :root[data-platform="mastodon"] .post-metric,
+  :root[data-platform="mastodon"] .stats span{color:#676b79}
+  :root[data-platform="mastodon"] .post-quote,
+  :root[data-platform="mastodon"] .post-poll,
+  :root[data-platform="mastodon"] .post-external-card{
+    background:#fff;border-color:#e4e4ef}
+  :root[data-platform="mastodon"] .cover:not(.has-image){
+    background-color:#e8e8f1}
+}

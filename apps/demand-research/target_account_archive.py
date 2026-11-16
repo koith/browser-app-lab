@@ -142,19 +142,40 @@ class Transport:
 
 
 class TextOnly(HTMLParser):
+    """Preserve public paragraph/list line breaks from sanitized SNS HTML.
+
+    The previous parser concatenated '</p><p>' and <br> boundaries,
+    irreversibly changing the visible text of Mastodon bios and posts.
+    Never execute or inject the HTML in the archive viewer.
+    """
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.data = []
-    def handle_data(self, value):
-        self.data.append(value)
+        self.data=[]
+        self.suppressed=0
+    def separator(self):
+        if self.data and self.data[-1]!="\n":
+            self.data.append("\n")
+    def handle_starttag(self,tag,attrs):
+        if tag in ("script","style"):
+            self.suppressed+=1
+        elif not self.suppressed and tag in ("br","p","li","blockquote","div"):
+            self.separator()
+    def handle_endtag(self,tag):
+        if tag in ("script","style"):
+            self.suppressed=max(0,self.suppressed-1)
+        elif not self.suppressed and tag in ("p","li","blockquote","div"):
+            self.separator()
+    def handle_data(self,value):
+        if not self.suppressed:
+            self.data.append(value)
 
 
 def text_only(markup):
-    if not isinstance(markup, str):
+    if not isinstance(markup,str):
         return ""
-    parser = TextOnly()
+    parser=TextOnly()
     parser.feed(markup[:60000])
-    return "".join(parser.data)[:30000]
+    return "".join(parser.data).strip()[:30000]
 
 
 def profile_input(platform, raw):
