@@ -1,67 +1,124 @@
-/* 4LEAF phone fit v2.
- * Never mutate the viewport meta tag on rotation: changing layout widths
- * makes iOS Safari re-evaluate its zoom and can enlarge/crop a live scene.
- * Instead keep the real device viewport and uniformly fit the 800x600 client.
+/* 4LEAF mobile landscape scene-fit v3.
+ * Source images have different dimensions: Genesis Region/Map/Room 794x404,
+ * World 796x528, battle 800x600. Do NOT fit all of them into the 800x600
+ * game canvas or force every <section> to a horizontal flex row.
+ * The outer web chrome fills the physical viewport while original source
+ * image assets remain undistorted, clickable and centred at their own ratio.
  */
 (function(){
  'use strict';
- var DESIGN_W=800,DESIGN_H=600;
- var applied=null,scheduled=false;
- var root=document.documentElement;
+ var root=document.documentElement,applied=null,scheduled=false;
  var coarse=window.matchMedia?window.matchMedia('(pointer:coarse)'):null;
  var orientation=window.matchMedia?window.matchMedia('(orientation: landscape)'):null;
+ var observed=false,observer=null;
  function isPhone(){
-  var screenShort=Math.min(
-   Number(window.screen&&screen.width)||Infinity,
-   Number(window.screen&&screen.height)||Infinity);
-  return Boolean(coarse&&coarse.matches&&screenShort<=600);
+  var s=window.screen;
+  var short=Math.min(Number(s&&s.width)||Infinity,Number(s&&s.height)||Infinity);
+  return !!(coarse&&coarse.matches&&short<=600);
+ }
+ function shown(id){
+  var e=document.getElementById(id);
+  return !!(e&&!e.classList.contains('hidden'));
+ }
+ function sceneDesign(){
+  if(shown('game'))return {kind:'battle',height:600,wide:false};
+  if(shown('dice-channels')||shown('lobby'))
+   return {kind:'genesis-404',height:440,wide:true};
+  if(shown('rooms')){
+   var el=document.getElementById('rooms');
+   if(el.classList.contains('native-town-scene')||
+      el.classList.contains('native-directory-scene')||
+      el.classList.contains('native-knight-town'))
+    return {kind:'chat-town-404',height:480,wide:true};
+   return {kind:'chat-room-528',height:600,wide:true};
+  }
+  if(shown('sky'))return {kind:'world-528',height:564,wide:true};
+  return {kind:'standard',height:600,wide:true};
  }
  function focusedEditor(){
-  var e=document.activeElement;
-  return e&&(/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName)||e.isContentEditable);
+  var el=document.activeElement;
+  return !!(el&&(/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)||el.isContentEditable));
  }
  function measure(){
-  // visualViewport gives the available area as Safari's toolbars expand/collapse.
-  // It does NOT require changing meta width to a synthetic 1300px layout.
   var vv=window.visualViewport;
-  var w=vv&&vv.width>0?vv.width:window.innerWidth;
-  var h=vv&&vv.height>0?vv.height:window.innerHeight;
-  if(!isPhone()||!Number.isFinite(w)||!Number.isFinite(h)||w<=0||h<=0){
+  var w=vv&&vv.width>0?vv.width:innerWidth;
+  var h=vv&&vv.height>0?vv.height:innerHeight;
+  if(!isPhone()||w<1||h<1){
    applied=null;
    root.removeAttribute('data-leaf-phone-fit');
+   root.removeAttribute('data-leaf-phone-scene');
    root.removeAttribute('data-leaf-chat-open');
-   root.style.removeProperty('--leaf-fit-scale');
+   for(var n of ['--leaf-fit-scale','--leaf-layout-width','--leaf-layout-height','--leaf-left','--leaf-top'])root.style.removeProperty(n);
    return;
   }
-  var landscape=orientation?orientation.matches:window.innerWidth>window.innerHeight;
-  // Do not shrink an already fitted game to a postage stamp while typing.
-  // The OS keyboard moves the visual viewport; keep the previous stable scale.
-  var keyboard=Boolean(focusedEditor()&&applied&&applied.landscape===landscape&&
-   h<applied.deviceHeight*0.78);
-  if(keyboard)h=applied.deviceHeight;
-  // 2px visual margin avoids fractional rounding pushing an edge off-screen.
-  var scale=Math.min(1,Math.max(0.1,Math.min((w-2)/DESIGN_W,(h-2)/DESIGN_H)));
-  scale=Number(scale.toFixed(5));
-  var next={
-   landscape:landscape,layoutWidth:DESIGN_W,layoutHeight:DESIGN_H,
-   deviceWidth:Number(w.toFixed(2)),deviceHeight:Number(h.toFixed(2)),
-   scale:scale,method:'uniform-transform-fit'
-  };
-  applied=next;
+  var landscape=orientation?orientation.matches:innerWidth>innerHeight;
+  // Keyboard and Safari toolbar changes do not authorize zooming or cropping.
+  var isKeyboard=focusedEditor()&&applied&&applied.landscape===landscape&&
+   h<applied.deviceHeight*.78;
+  if(isKeyboard)h=applied.deviceHeight;
+  var scene=sceneDesign();
+  var targetH=landscape?scene.height:600;
+  var scale=Math.min((w-4)/800,(h-4)/targetH);
+  scale=Math.min(1.5,Math.max(.1,scale));
+  scale=Number(scale.toFixed(6));
+  // Fill wide phones with original MainFrame chrome, but keep the unmodified
+  // source scene (794px art) centred. Never stretch/crop its native image.
+  var virtualW=(landscape&&scene.wide)?
+   Math.max(800,Math.floor((w-4)/scale)):800;
   root.style.setProperty('--leaf-fit-scale',String(scale));
+  root.style.setProperty('--leaf-layout-width',virtualW+'px');
+  root.style.setProperty('--leaf-layout-height',targetH+'px');
+  root.style.setProperty('--leaf-left','calc(50% - '+(virtualW/2)+'px)');
+  root.style.setProperty('--leaf-top','calc(50% - '+(targetH/2)+'px)');
   root.setAttribute('data-leaf-phone-fit',landscape?'landscape':'portrait');
+  root.setAttribute('data-leaf-phone-scene',scene.kind);
   if(!landscape)root.removeAttribute('data-leaf-chat-open');
+  applied={landscape:landscape,kind:scene.kind,layoutWidth:virtualW,
+   layoutHeight:targetH,sourceWidth:800,sourceHeight:scene.height,
+   deviceWidth:+w.toFixed(2),deviceHeight:+h.toFixed(2),scale:scale,
+   method:'per-scene-native-contain'};
  }
  function schedule(){
   if(scheduled)return;
   scheduled=true;
   requestAnimationFrame(function(){scheduled=false;measure()});
  }
- // First pass is safe during <head>, before #app and CSS are attached.
+ function start(){
+  if(observed)return;
+  observed=true;
+  var app=document.getElementById('app');
+  var targets=['sky','dice-channels','lobby','rooms','game','shop'];
+  if('MutationObserver' in window){
+   observer=new MutationObserver(schedule);
+   if(app)observer.observe(app,{attributes:true,attributeFilter:['class']});
+   targets.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)observer.observe(el,{attributes:true,attributeFilter:['class']});
+   });
+  }
+  var chat=document.getElementById('leaf-phone-chat-toggle');
+  if(!chat){
+   chat=document.createElement('button');
+   chat.type='button';chat.id='leaf-phone-chat-toggle';
+   chat.textContent='채팅';chat.setAttribute('aria-pressed','false');
+   chat.onclick=function(){
+    var open=root.getAttribute('data-leaf-chat-open')!=='true';
+    root.setAttribute('data-leaf-chat-open',String(open));
+    chat.setAttribute('aria-pressed',String(open));
+    chat.textContent=open?'채팅 닫기':'채팅';
+   };
+   var rotate=document.createElement('div');
+   rotate.id='leaf-phone-rotate';rotate.setAttribute('role','status');
+   rotate.textContent='↻ 휴대폰을 가로로 돌려 주세요';
+   document.body.append(chat,rotate);
+  }
+  schedule();
+ }
  measure();
  window.addEventListener('resize',schedule,{passive:true});
  window.addEventListener('orientationchange',schedule,{passive:true});
  window.addEventListener('pageshow',schedule,{passive:true});
+ window.addEventListener('leaf-route-change',schedule);
  document.addEventListener('focusin',schedule);
  document.addEventListener('focusout',schedule);
  if(window.screen&&screen.orientation&&screen.orientation.addEventListener)
@@ -70,22 +127,8 @@
   visualViewport.addEventListener('resize',schedule,{passive:true});
   visualViewport.addEventListener('scroll',schedule,{passive:true});
  }
- document.addEventListener('DOMContentLoaded',function(){
-  var chat=document.createElement('button');
-  chat.type='button';chat.id='leaf-phone-chat-toggle';
-  chat.textContent='채팅';chat.setAttribute('aria-pressed','false');
-  chat.addEventListener('click',function(){
-   var open=root.getAttribute('data-leaf-chat-open')!=='true';
-   root.setAttribute('data-leaf-chat-open',String(open));
-   chat.setAttribute('aria-pressed',String(open));
-   chat.textContent=open?'채팅 닫기':'채팅';
-  });
-  var rotate=document.createElement('div');
-  rotate.id='leaf-phone-rotate';rotate.setAttribute('role','status');
-  rotate.textContent='↻ 휴대폰을 가로로 돌려 주세요';
-  document.body.append(chat,rotate);
-  schedule();
- });
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+ else start();
  window.__LEAF_PHONE_FIT__={
   getState:function(){return applied?Object.assign({},applied):null},
   refresh:measure
