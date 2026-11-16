@@ -8,6 +8,10 @@ on:
       - 'apps/gallery-archive/test_pages_deployment_identity.py'
       - '.github/workflows/static.yml'
       - '.github/workflows/gallery-pages-single-publisher.yml'
+      - '.github/workflows/gallery-*.yml'
+      - '.github/workflows/mimmi-*.yml'
+      - '.github/workflows/yui-*.yml'
+      - 'apps/gallery-archive/audit_gallery_workflows.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,6 +24,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Enforce full 145-gallery-workflow budget without reading long ledger
+        run: |
+          python apps/gallery-archive/audit_gallery_workflows.py --self-test
+          python apps/gallery-archive/audit_gallery_workflows.py --strict
       - name: Strict source identity and publisher selection contracts
         run: python apps/gallery-archive/test_pages_deployment_identity.py
       - name: Read the actual existing Pages mode with the job token
