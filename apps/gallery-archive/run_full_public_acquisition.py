@@ -121,7 +121,8 @@ def execute(args):
         print('FULL_COLLECTION_BATCH_RESULT',json.dumps(row,ensure_ascii=False),flush=True)
     timed_out=[x['batch'] for x in reports if x.get('collection_error')=='collector_timeout']
     unresolved=[x for x in reports if x['collector_returncode']!=0
-                or x.get('publisher_returncode',0)!=0
+                or x.get('publisher_returncode')!=0
+                or x.get('collection_error')
                 or x.get('publication_error')]
     incomplete_works=list(dict.fromkeys(aid for row in unresolved for aid in row['works']))
     success_count=sum(len(x['works']) for x in reports if x not in unresolved)
