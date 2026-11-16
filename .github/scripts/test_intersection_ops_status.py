@@ -222,6 +222,32 @@ class StatusBoardTests(unittest.TestCase):
         old = "## 2026-11-03 히스토리\n- [x] **INT-01** 과거 완료\n"
         self.assertEqual(ops.core_task_states(old), {})
 
+    def test_current_backlog_stays_bounded_and_old_evidence_survives(self):
+        from pathlib import Path
+        root = Path(__file__).resolve().parents[2]
+        current = (root / "apps/demand-research/OPERATIONS_BACKLOG.md").read_text(
+            encoding="utf-8")
+        old_issue = (root /
+            "apps/demand-research/docs/history/"
+            "ISSUE_607_2026-11-16_PRE_COMPACTION.md").read_text(
+                encoding="utf-8")
+        old_doc = (root /
+            "apps/demand-research/docs/history/"
+            "OPERATIONS_BACKLOG_2026-11-16_PRE_COMPACTION.md").read_text(
+                encoding="utf-8")
+        assert len(current) <= 5_000
+        assert len(old_issue) > 23_000
+        assert len(old_doc) > 12_000
+        assert "2026-11-16 정리 전 원문" in old_issue
+        assert "INT-11" in current and "INT-13" in current
+        assert "이슈 원문" in current
+        old_original = old_issue.split("\n---\n\n", 1)[1]
+        states = ops.core_task_states(old_original)
+        self.assertEqual(len(states), 10)
+        self.assertEqual(sum(states.values()), 1)
+        self.assertFalse(states["INT-01"])
+        self.assertTrue(states["INT-10"])
+
     def test_non_user_input_workflow_urls_are_canonical(self):
         self.assertEqual(
             ops.run_url(run(42), REPO),
