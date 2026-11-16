@@ -84,6 +84,12 @@ const only=process.env.LEAF_VIEWS?process.env.LEAF_VIEWS.split(','):null;
       return t===e||e.contains(t);
      };
      const pt=e=>{const r=e.getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]};
+     const battleConfirm=document.querySelector('#board-area>.leaf-native-battle-actions #modal-buttons button');
+     if(battleConfirm&&!ok(battleConfirm)){
+      const r=battleConfirm.getBoundingClientRect();
+      const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+      throw new Error('native battle result control is obscured by '+(hit?.id||hit?.className||hit?.tagName));
+     }
      const modal=[...document.querySelectorAll('#modal-buttons button,.leaf-native-battle-actions button')].filter(ok);
      const confirm=modal.find(b=>/결과 확인/.test(b.textContent))
       ||modal.find(b=>/확인/.test(b.textContent))||modal[0];
