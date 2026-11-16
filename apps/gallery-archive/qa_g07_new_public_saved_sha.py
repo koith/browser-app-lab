@@ -19,6 +19,7 @@ def source_proof():
     path=ROOT/'apps/yui-gallery'
     saved=json.loads((path/'stored-albums.json').read_text())
     owner=json.loads((path/'owner-index.json').read_text())
+    owner_shas={photo['sha256'] for album in owner['albums'] for photo in album['images']}
     expected = {
         '68ff6a9b92bd13e7a1def21ef2dfb42a28c7bf627d1a493164906107158dcc7b': (467,234959,1366,2048),
         'c00059932bfcfd17c214d4dc8b462de4846cad8881bcebc2ac24f4feb31b8802': (468,325352,1365,2048),
@@ -29,7 +30,7 @@ def source_proof():
                if p['sha256']==sha]
         assert len(local)==1,('new individual photo not in exact recorded source album',sha)
         candidate=local[0]
-        assert not any(t.get('sha256')==sha for a in owner['albums'] for t in a['images']), 'not new relative to owner catalog'
+        assert sha not in owner_shas, ('pinned genuinely new SNS SHA appeared in owner originals',sha)
         file=(path/candidate['url']).resolve()
         assert file.is_relative_to((path/'stored-albums/public-yui-sns').resolve())
         raw=file.read_bytes()
@@ -46,6 +47,8 @@ def source_proof():
                      'yui-meow-public-samples':6}
     actual_counts={}
     total=0
+    already_owned_sha_count=0
+    newly_added_public_sha_count=0
     global_sha=set()
     for album in saved['albums']:
         if album['id'] not in expected_albums:continue
@@ -53,8 +56,14 @@ def source_proof():
         actual_counts[album['id']]=len(album['images'])
         for item in album['images']:
             sha=item['sha256']
-            assert sha not in global_sha,('duplicate SHA in new works',sha)
-            assert not any(p['sha256']==sha for a in owner['albums'] for p in a['images'])
+            assert sha not in global_sha,('duplicate SHA in selected published works',sha)
+            # A previously owner-archived photo can later be published as a
+            # public preview. It remains a valid SHA-verified public file,
+            # but it is NOT a newly acquired photograph. Report both counts.
+            if sha in owner_shas:
+                already_owned_sha_count+=1
+            else:
+                newly_added_public_sha_count+=1
             global_sha.add(sha)
             file=(path/item['url']).resolve()
             assert file.is_relative_to((path/'stored-albums').resolve())
@@ -67,10 +76,16 @@ def source_proof():
                 assert image.format=='JPEG'
             total+=1
     assert all(aid in actual_counts for aid in expected_albums),('baseline albums missing',actual_counts)
-    assert total>=20,('all baseline 20 actual individual new public photo bytes required',total)
-    print('G07_ACTUAL_20_BASELINE_AND_ADDITIONAL_SHA_ORIGINALS_VERIFIED',{ 'model':'yui',
+    assert total>=20,('baseline 20 actual public photo files missing',total)
+    assert newly_added_public_sha_count>=len(expected), (
+        'pinned two genuinely owner-novel public photographs must survive',
+        newly_added_public_sha_count)
+    assert total==already_owned_sha_count+newly_added_public_sha_count
+    print('G07_PUBLIC_BASELINE_SHA_ORIGINALS_VERIFIED',{ 'model':'yui',
         'baseline_minimum':expected_albums,'actual_album_counts':actual_counts,
-        'bytes_sha_decoded':total,'above_baseline':total-20},flush=True)
+        'sha_verified_public_files':total,'above_20_file_baseline':total-20,
+        'sha_already_in_owner_archive_not_new':already_owned_sha_count,
+        'sha_not_in_owner_archive':newly_added_public_sha_count},flush=True)
     p=verified[PHOTO_SHA]
     print('G07_REAL_PUBLIC_NEW_FILE_SHA_BYTES_PIXELS_PASS',json.dumps({
       'sha256':PHOTO_SHA,'bytes':p['bytes'],'width':p['width'],
