@@ -9,8 +9,11 @@ def test():
     assert s['owner_albums_by_model']=={'yui':32,'mimmi':80},s
     assert s['missing_owner_albums_without_photo_seed']==0,s
     assert s['all_title_work_leads']==30,s
-    assert s['unique_albums_with_seeds']==112,s
-    assert s['all_public_reverse_photo_seeds']>=112,s
+    assert s['unique_albums_with_seeds']>=112,s
+    # Every SHA-distinct owned and public photo, including static-only works,
+    # must be queued: the old first/middle/last sampling was roughly 300.
+    assert s['all_public_reverse_photo_seeds']>=6000,s
+    assert s['all_public_reverse_photo_seeds']>s['unique_albums_with_seeds']*3,s
     for shards in (1,5,8,16):
         grouped=[x for model in ('yui','mimmi') for shard in range(shards)
                     for x in c['seeds'] if x['model']==model and partition(x,shards)==shard]
