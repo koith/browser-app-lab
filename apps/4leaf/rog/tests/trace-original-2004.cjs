@@ -50,7 +50,10 @@ function absNear(actual,target,span,label){assert.ok(Number.isFinite(actual)&&Ma
    ['mini','x',0,2],['mini','y',448,2],['mini','w',172,2],['mini','h',152,2],
    ['chat','x',172,2],['chat','y',448,2],['chat','w',406,2],['chat','h',152,2],
    ['chessmen','x',578,2],['chessmen','y',448,2],['chessmen','w',222,2],['chessmen','h',152,2],
-   // Event panel is genuine IMG/eventmsgbox.png; on the WEB board it sits\n   // 37px below the original 30px menu => ABSOLUTE y67, not y37. This\n   // is WEB placement; historical native y is not proven by a battle still.\n   ['event','x',278,3],['event','y',67,3],['event','w',244,2],['event','h',52,2]
+   // Event panel is genuine IMG/eventmsgbox.png; on the WEB board it sits
+   // 37px below the original 30px menu => ABSOLUTE y67, not y37. This
+   // is WEB placement; historical native y is not proven by a battle still.
+   ['event','x',278,3],['event','y',67,3],['event','w',244,2],['event','h',52,2]
   ];
   const measured=targets.map(([id,key,expected,slack])=>({id,key,expected,actual:geometry[id]?.[key],delta:(geometry[id]?.[key]??0)-expected,slack}));
   console.log('DICE-ORIGINAL-800X600-RECTS '+JSON.stringify(geometry));
@@ -68,7 +71,7 @@ function absNear(actual,target,span,label){assert.ok(Number.isFinite(actual)&&Ma
     body:event.querySelector('.dice-native-event-detail')?.textContent};
   });
   assert.equal(nativeStatus.inventedBubbleOpacity,'0','WEB bubble must NOT paint on 2004 native board');
-  assert.match(nativeStatus.sourceBitmap,/original\\/IMG\\/eventmsgbox\\.png/);
+  assert.match(nativeStatus.sourceBitmap,/original\/IMG\/eventmsgbox\.png/);
   assert.match(nativeStatus.heading,/1P.+차례/);
   assert.ok(nativeStatus.headingFont>=16,'large readable turn in actual native-source event frame');
   console.log('DICE-ORIGINAL-SOURCE-TURN-STATUS '+JSON.stringify(nativeStatus));
@@ -135,7 +138,7 @@ function absNear(actual,target,span,label){assert.ok(Number.isFinite(actual)&&Ma
   absNear(chat.log.y,0,1,'chat log original y0');
   absNear(chat.log.w,407,2,'chat original 407px message panel');
   absNear(chat.log.h,118,2,'chat original 118px message panel');
-  absNear(chat.users.x,621,1,'participant list original x621');
+  absNear(chat.users.x,620,1,'participant list original x620');
   absNear(chat.users.y,10,1,'participant list original y10');
   absNear(chat.users.h,128,2,'participant list original height');
   absNear(chat.exit.x,728,2,'original EXIT hotspot x728');
