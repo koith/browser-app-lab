@@ -1391,13 +1391,28 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         authorized=sorted(
             set(verified_discovered.get(aid,set())) &
             set(source_book.get('verified_discovered_pages',[])))
+        if authorized:
+            proof='unique_named_work_page_model_and_edition'
+        elif aid in old_albums:
+            # Another large class of misses: the owner's edition already has
+            # archived SHA originals but was omitted from the small static
+            # public-work-pages list. The existing reviewed public source is
+            # still valid collection evidence for that SAME owner edition.
+            # Never promote merely researched/unreviewed generic pages.
+            authorized=[u for u in dict.fromkeys(
+                [source_book['source']]+source_book.get('source_pages',[]))
+                if reviewed_direct_source(u,model)]
+            proof='owner_catalog_work_with_reviewed_public_source'
+        else:
+            continue
         if not authorized:
             continue
         approved_new_works.append({
             'id':aid,
-            'title':source_book.get('title') or album.get('title') or aid,
+            'title':old_albums[aid]['title'] if aid in old_albums
+                    else source_book.get('title') or album.get('title') or aid,
             'source':authorized[0],
-            'proof':'unique_named_work_page_model_and_edition',
+            'proof':proof,
             'verified_same_work_pages':authorized[:12]})
     catalog={'schema_version':1,'model':model,
              'storage':'owner-private-terabox-sha-verified-bytes',
