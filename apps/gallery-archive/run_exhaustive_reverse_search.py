@@ -103,6 +103,42 @@ def complete_queue(inventory, model):
     return queue
 
 
+MAX_PENDING_SOURCE_PAGES=120000
+
+def append_source_pages(previous, scanned, model):
+    """Durably retain every unique URL until actual source-page review.
+
+    The old collector verified at most 96 pages from up to 256 searched SHA
+    photographs, then threw away all unreviewed leads while advancing the SHA
+    checkpoint. Retain the bounded, deduplicated backlog between runs.
+    """
+    pending=list(previous)
+    seen={p['link']['url'] for p in pending}
+    for row in scanned:
+        if row.get('model')!=model:
+            raise ValueError('MIXED_REVERSE_SOURCE_MODEL')
+        for link in row.get('candidate_pages',[]):
+            if not isinstance(link,dict):
+                continue
+            url=link.get('url')
+            if not isinstance(url,str) or not url.startswith('https://') or len(url)>2200:
+                continue
+            if url in seen:continue
+            # Store only fields relevant to independent edition verification.
+            keep={k:v for k,v in link.items()
+                  if k in ('url','label','matched_image_url','matched_width',
+                            'matched_height','source_engine',
+                            'visual_host_page_only_unverified_edition')
+                  and (v is None or isinstance(v,(str,int,float,bool)))}
+            if len(str(keep))>3500:
+                continue
+            pending.append({'album_id':str(row['album_id'])[:150],'link':keep})
+            seen.add(url)
+            if len(pending)>MAX_PENDING_SOURCE_PAGES:
+                raise ValueError('SOURCE_BACKLOG_CAPACITY_EXCEEDED_NOT_DISCARDED')
+    return pending
+
+
 def read_progress(path, model, ids, required_revision=1):
     path = Path(path)
     data = json.loads(path.read_text(encoding='utf-8')) if path.exists() else {}
@@ -153,6 +189,25 @@ def read_progress(path, model, ids, required_revision=1):
         raise ValueError('REVERSE_RETRY_AND_UNVERIFIED_OVERLAP')
     if set(data['retry_pending_ids']) - set(data['attempted_ids']):
         raise ValueError('REVERSE_PENDING_RETRY_NOT_ATTEMPTED')
+    sources=data.get('source_pending_pages',[])
+    if not isinstance(sources,list) or len(sources)>MAX_PENDING_SOURCE_PAGES:
+        raise ValueError('INVALID_SOURCE_PAGE_BACKLOG')
+    urls=set()
+    for entry in sources:
+        if (not isinstance(entry,dict)
+                or not isinstance(entry.get('album_id'),str)
+                or not isinstance(entry.get('link'),dict)
+                or not isinstance(entry['link'].get('url'),str)
+                or not entry['link']['url'].startswith('https://')
+                or len(entry['link']['url'])>2200
+                or entry['link']['url'] in urls):
+            raise ValueError('CORRUPT_SOURCE_PAGE_BACKLOG')
+        urls.add(entry['link']['url'])
+    last_reviewed=data.get('last_source_pages_reviewed',0)
+    if type(last_reviewed) is not int or last_reviewed<0:
+        raise ValueError('CORRUPT_SOURCE_REVIEW_CURSOR')
+    data['source_pending_pages']=sources
+    data['last_source_pages_reviewed']=last_reviewed
     data['search_revision'] = required_revision
     return data
 
@@ -243,6 +298,9 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
                                                  if p['seed_id'] in unverified],
                   'last_cycle_size': len(queue),
                   'last_run_attempts': len(scanned),
+                  'last_source_pages_reviewed': 0,
+                  'source_pending_pages': append_source_pages(
+                      state.get('source_pending_pages',[]),scanned,model),
                   'updated_at': datetime.now(timezone.utc).isoformat()})
     sources = len({c['url'] for r in scanned for c in r.get('candidate_pages', [])})
     # A readable HTML page is not the same as an actual reverse-image match.
@@ -288,6 +346,7 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
                            'remaining_this_cycle': len(queue)-len(state['attempted_ids']),
                            'pending_unreadable_retry': len(pending),
                            'unverified_after_retry': len(unverified),
+                           'pending_source_page_reviews': len(state['source_pending_pages']),
                            'blocked_or_unreadable_this_run': len(scanned)-readable,
                            'scan_budget': budget},
               'results': scanned}
