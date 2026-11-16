@@ -168,11 +168,15 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
             count=hydrate_all_registered_works(db,'mimmi',root)
             self.assertEqual(count,2)
             self.assertIn('mimmi:mimmi-teddy-bear',db['works'])
-            url='https://new-public-gallery.org/mimmi-teddy-bear'
+            # Genuine Yandex CBIR identified the host page + source image
+            # but the result card only has a numeric URL and generic title.
+            url='https://new-public-gallery.org/collection/184994'
             report={'research_only':True,'results':[{'model':'mimmi',
                 # This legacy/unclassified SHA photo is NOT the registered work.
                 'album_id':'legacy-unknown-source','candidate_pages':[
-                    {'url':url,'label':'DJAWA Mimmi Teddy Bear public photo'},
+                    {'url':url,'label':'Shared image from public collection',
+                     'source_engine':'yandex_sites',
+                     'matched_image_url':'https://cdn.public-gallery.org/photobook-01.jpg'},
                     {'url':'https://new-public-gallery.org/other-model',
                      'label':'Unrelated other model'}]}]}
             html_page='<title>DJAWA Mimmi Teddy Bear</title><h1>Mimmi Teddy Bear</h1><article>Mimmi new public images</article>'
@@ -189,6 +193,7 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
                                               limit=10,stats_out=statistics)
             self.assertEqual(len(matched),1,matched)
             self.assertEqual(statistics['cross_album_seed_recovered'],1,statistics)
+            self.assertEqual(statistics['structured_visual_host_page_without_edition_hint'],1,statistics)
             self.assertEqual(statistics['no_exact_edition_hint'],1,statistics)
             self.assertEqual(statistics['accepted_verified_same_work_pages'],1,statistics)
             self.assertEqual(matched[0]['album_id'],'mimmi-teddy-bear')
