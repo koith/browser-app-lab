@@ -18,18 +18,22 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
  page.on('pageerror',e=>errs.push(String(e)));
  await page.route('https://chat-flaky.test/**',async route=>{
   const req=route.request(),path=new URL(req.url()).pathname;
-  if(path==='/api/session')return route.fulfill({status:201,contentType:'application/json',
+  const cors={'access-control-allow-origin':'*',
+   'access-control-allow-methods':'GET,POST,OPTIONS',
+   'access-control-allow-headers':'authorization,content-type,accept'};
+  if(req.method()==='OPTIONS')return route.fulfill({status:204,headers:cors,body:''});
+  if(path==='/api/session')return route.fulfill({status:201,contentType:'application/json',headers:cors,
    body:JSON.stringify({token:'a'.repeat(64),id:'server-test-user',room:null})});
   if(path==='/api/rooms'&&req.method()==='GET')
-   return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({rooms:[custom]})});
+   return route.fulfill({status:200,contentType:'application/json',headers:cors,body:JSON.stringify({rooms:[custom]})});
   if(path==='/api/snapshot')
-   return route.fulfill({status:200,contentType:'application/json',
+   return route.fulfill({status:200,contentType:'application/json',headers:cors,
     body:JSON.stringify({roomId:null,nextSequence:0,messages:[],peers:[]})});
   if(path==='/api/rooms'&&req.method()==='POST')
-   return route.fulfill({status:429,contentType:'application/json',body:JSON.stringify({error:'Room limit reached'})});
+   return route.fulfill({status:429,contentType:'application/json',headers:cors,body:JSON.stringify({error:'Room limit reached'})});
   if(path==='/api/rooms/'+custom.id+'/join')
-   return route.fulfill({status:503,contentType:'text/html',body:'<h1>Temporarily Unavailable</h1>'});
-  return route.fulfill({status:200,contentType:'application/json',body:'{}'});
+   return route.fulfill({status:503,contentType:'text/html',headers:cors,body:'<h1>Temporarily Unavailable</h1>'});
+  return route.fulfill({status:200,contentType:'application/json',headers:cors,body:'{}'});
  });
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='https://chat-flaky.test'});
  try{
