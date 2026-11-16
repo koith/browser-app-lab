@@ -484,7 +484,37 @@ function drawTeam(){
  const label=document.createElement('div');label.className='fine';
  label.textContent='첫 3명: 실제 공격·방어·지력 팀 / 4번째: 출전 대기 체스맨';
  root.append(label);
+ // The authentic 794x404 Room/roomback.png has a large CHESSMAN INFO table
+ // and four selected-party rows. Keep that source bitmap populated by the
+ // very same live game profile, not a second unsynchronised mock inventory.
+ window.dispatchEvent(new Event('leaf-dice-roster-change'));
 }
+// Source Room table adapter: no synthetic chessmen, no independent roster
+// state. All writes take the EXACT existing 4LEAF profile/save path.
+window.__LEAF_DICE_ROSTER__={
+ getState:()=>({
+  owned:ownedCards().map(id=>CARD_MAP[id]).filter(Boolean).map(c=>({
+   id:c.id,name:c.name,point:c.point,move:c.move,atk:c.atk,
+   def:c.def,int:c.int,ability:c.ability,element:c.element||'None'
+  })),
+  team:profile.team.slice(0,4),
+  pointLimit:Number($('point-limit')?.value||12),
+  totalPoints:teamStats(profile.team).point
+ }),
+ equip:(slot,id)=>{
+  if(!Number.isInteger(slot)||slot<0||slot>3||typeof id!=='string')return false;
+  if(!profile.owned.includes(id)||!CARD_MAP[id])return false;
+  if(profile.team.some((current,i)=>i!==slot&&current===id))return false;
+  profile.team[slot]=id;
+  persist();drawTeam();
+  return true;
+ },
+ chooseSlot:slot=>{
+  const buttons=$('team-select')?.querySelectorAll('.team-slot');
+  if(!Number.isInteger(slot)||slot<0||slot>=4||!buttons?.[slot])return false;
+  buttons[slot].click();return true;
+ }
+};
 // Archived CardShop sprite atlas includes actual 판매하기 button art, but
 // surviving client has NOT verified its resale GP rule. 50% is a clearly
 // labeled WEB economic fallback, never represented as source historical data.
