@@ -18,7 +18,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ github.token }}
     steps:
-      - name: Sync all verified account picker records under the existing restricted OIDC identity
+      - name: Queue verified public account metadata and incomplete original backfill using existing restricted OIDC identity
         run: |
           python - <<'PY'
           import json,os
@@ -26,7 +26,7 @@ jobs:
           token=os.environ["GITHUB_TOKEN"]
           url=("https://api.github.com/repos/koith/browser-app-lab"
                "/actions/workflows/intersection-target-account-bundle.yml/dispatches")
-          payload={"ref":"main","inputs":{"profile_index_only":"true"}}
+          payload={"ref":"main","inputs":{"profile_backfill_all":"true"}}
           req=Request(url,method="POST",data=json.dumps(payload).encode(),
               headers={"Authorization":"Bearer "+token,
                   "Accept":"application/vnd.github+json",
@@ -35,8 +35,8 @@ jobs:
                   "User-Agent":"intersection-reviewed-public-profile-repair"})
           with urlopen(req,timeout=25) as response:
               assert response.status==204, "profile inventory dispatch not accepted"
-          print("ARCHIVE_INDEX_TRUSTED_REFRESH_DISPATCH_ACCEPTED",flush=True)
+          print("PUBLIC_PROFILE_BACKFILL_TRUSTED_DISPATCH_ACCEPTED",flush=True)
           PY
       - name: Confirm status boundary
         run: |
-          echo 'The whitelisted main-branch archive workflow will independently verify existing encrypted public-account releases and publish their signed owner-only index; this run DOES NOT launch duplicate captures or claim the source ZIPs were permanently migrated.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The whitelisted main-branch archive workflow will independently verify existing encrypted releases and queue per-account capture of public posts, profiles, and still-missing media slots. Accepted dispatch is NOT proof of completed original backup.' >> "$GITHUB_STEP_SUMMARY"
