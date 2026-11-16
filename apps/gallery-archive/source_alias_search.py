@@ -237,7 +237,13 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
     # This second pass is bounded and rotates through ALL observed model names.
     cross_site=[]
     cross_budget=16
-    for site in sorted(hosts)[:2]:
+    # The former sorted(hosts)[:2] permanently ignored every other
+    # discovered source domain. Rotate the two-site budget by run number
+    # so that all new sites receive a same-work cross-model check eventually.
+    domains=sorted(hosts)
+    start=(offset//max(1,per_work))%len(domains) if domains else 0
+    rotated=[domains[(start+i)%len(domains)] for i in range(min(2,len(domains)))]
+    for site in rotated:
         for other_model,names in db["model_names"].items():
             for identity in names:
                 if cross_budget<=0:break
@@ -277,6 +283,8 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
                 for r in results if r["urls"]],
             "search_results":results,"new_site_hosts":sorted(hosts),
             "cross_model_verified_site_pages":cross_site,
+            "cross_site_domains_total":len(domains),
+            "cross_site_domains_scanned":rotated,
             "cross_site_model_alias_queries":16-cross_budget,
             "engine_status":dict(status),"research_only_not_yet_saved":True,
             "physical_originals_stored":0,"gallery_visible_added":0}
