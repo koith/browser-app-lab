@@ -45,6 +45,19 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
             ordinary_public_https_image)
         self.assertEqual(allowed,{ASSET})
 
+    def test_article_og_title_must_be_checked_by_downstream_edition_gate(self):
+        # When the search bridge accepts a page using real on-page OG title
+        # metadata, the collector must recognize that SAME edition as well.
+        good=(b'<html><head><meta property="og:title" '
+              b'content="DJAWA Mimmi Pop Kitty Party"></head><body>'
+              b'<article><img src="https://public-gallery.org/picture.jpg">'
+              b'</article></body></html>')
+        bad=good.replace(b'Pop Kitty Party',b'Nikke Alice')
+        self.assertTrue(_work_token_matched_in_heading(
+            good,'Pop Kitty Party',ALBUM,MODEL))
+        self.assertFalse(_work_token_matched_in_heading(
+            bad,'Pop Kitty Party',ALBUM,MODEL))
+
     def test_unverified_alias_or_other_model_rejected(self):
         document=evidence()
         document['search_results'][0]['observations'][0]['proof']='search_snippet_only'
