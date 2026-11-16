@@ -63,8 +63,9 @@ class StatusBoardTests(unittest.TestCase):
             7: {"fetched": 4, "saved_verified": 4,
                 "storage_failures": 0, "encrypted_only_originals": 0},
         }
-        body = ("- [ ] **INT-01 테라박스 저장 장애**\n"
-                "- [x] **INT-02 예약 확인**\n")
+        body = ("## P0 — current\n"
+                "- [ ] **INT-01** 테라박스 저장 장애\n"
+                "- [x] **INT-02** 예약 확인\n")
         result = ops.render(REPO, groups, summary, body, datetime(
             2026, 11, 4, tzinfo=timezone.utc
         ))
