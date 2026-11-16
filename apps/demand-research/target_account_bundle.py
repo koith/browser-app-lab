@@ -348,7 +348,7 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
             "source_state":manifest["capture_state"],
             "source_partial":(interrupted is not None or
                 result is None or result.get("status")!="COMPLETE_CURRENT_PUBLIC_CURSOR"),
-            "unresolved_media_records":(result or {}).get("media_pending",0),
+            "unresolved_media_records":(result or {}).get("media_pending_total",0),
             "profile_snapshot_verified":(result or {}).get("profile",{}).get(
                 "profile_verified") is True,
             "profile_assets_unavailable":(result or {}).get("profile",{}).get(
