@@ -16,7 +16,7 @@ vm.runInContext(snippet+
 const {hasHardExcludedPhrase,excludedFromLiveAggregate}=context.filterUnderTest;
 for(const value of [
  "야단라", "속보 야단라 게시글", "#야단라", "야 단 라",
- "야-단-라", "야\\u200b단라", "야\\u2060단라", "야.단/라",
+ "야-단-라", "야"+String.fromCharCode(0x200b)+"단라", "야"+String.fromCharCode(0x2060)+"단라", "야.단/라",
  "＃야단라", "ＹＡ? 야단라"
 ])assert(hasHardExcludedPhrase(value),JSON.stringify(value));
 for(const value of ["뒷계", "여단라", "야단사", "아이디어 공유", "단라 야기"])
