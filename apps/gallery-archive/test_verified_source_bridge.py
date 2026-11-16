@@ -171,8 +171,13 @@ class VerifiedDiscoveryBridgeTests(unittest.TestCase):
                         'headers':{'Content-Type':'text/html'},
                         'content':html_page.encode(),'text':html_page})()
             results=[]
-            matched=merge_image_reverse_sites(db,report,'mimmi',results,Session(),limit=10)
+            statistics={}
+            matched=merge_image_reverse_sites(db,report,'mimmi',results,Session(),
+                                              limit=10,stats_out=statistics)
             self.assertEqual(len(matched),1,matched)
+            self.assertEqual(statistics['cross_album_seed_recovered'],1,statistics)
+            self.assertEqual(statistics['no_exact_edition_hint'],1,statistics)
+            self.assertEqual(statistics['accepted_verified_same_work_pages'],1,statistics)
             self.assertEqual(matched[0]['album_id'],'mimmi-teddy-bear')
             self.assertEqual(matched[0]['reverse_seed_album_id'],'legacy-unknown-source')
             self.assertEqual(results[0]['observations'][0]['proof'],
