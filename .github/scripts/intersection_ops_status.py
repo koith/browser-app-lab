@@ -20,7 +20,7 @@ MARKER = "<!-- intersection-evidence-status-v1 -->"
 # Update one known bot-owned status comment, not all 71 historical comments.
 STATUS_COMMENT_ID = 6619616433
 MAX_STATUS_CHARS = 5000
-MAX_PRIMARY_LEDGER_CHARS = 6000
+MAX_PRIMARY_LEDGER_CHARS = 5000
 
 PREFIX = "https://api.github.com"
 CAPTURE = "demand-fast-capture.yml"
@@ -167,7 +167,7 @@ def render(repo, run_groups, summaries, issue_body, now):
     lines = [
         MARKER,
         "## 교집합 자동 운영 진행판",
-        f"마지막 점검: {now.strftime('%Y-%m-%d %H:%M UTC')} · GitHub Actions 자체 실행 · ChatGPT 새 대화 생성 없음",
+        f"마지막 상태 변경: {now.strftime('%Y-%m-%d %H:%M UTC')} · GitHub Actions 자체 실행 · ChatGPT 새 대화 생성 없음",
         "",
         f"**P0 / INT-01: {core}**",
         f"**메인 이슈 체크:** {checked_count}/{tracked_count or '미확인'}건 완료 표시 · "
@@ -242,6 +242,16 @@ def render(repo, run_groups, summaries, issue_body, now):
     if len(board)>MAX_STATUS_CHARS:
         raise ValueError("status board exceeds 5000-character cap")
     return board
+
+
+def status_without_refresh_time(body):
+    """Compare substantive status only; frequent runs must not churn timestamps."""
+    if not isinstance(body, str):
+        return ""
+    return "\n".join(
+        line for line in body.splitlines()
+        if not line.startswith("마지막 상태 변경: ")
+    )
 
 
 class GitHub:
@@ -346,46 +356,29 @@ class GitHub:
         return None
 
     def upsert_comment(self, body):
-        if len(body)>MAX_STATUS_CHARS:
+        """Update a verified fixed bot comment; never scan old history or append."""
+        if len(body) > MAX_STATUS_CHARS:
             raise ValueError("refuse oversized status board")
-        existing=None
-        try:
-            candidate=self.request(
-                f"/repos/{self.repo}/issues/comments/{STATUS_COMMENT_ID}")
-            author=candidate.get("user") or {}
-            if (MARKER in candidate.get("body","") and
-                    (author.get("type")=="Bot" or
-                     author.get("login")=="github-actions[bot]")):
-                existing=candidate
-        except (HTTPError,URLError,ValueError,TypeError):
-            pass
-        # Historical fallback only when direct pinned comment lookup fails.
-        if existing is None:
-            for page in range(1,5):
-                comments=self.request(
-                    f"/repos/{self.repo}/issues/{ISSUE_NUMBER}/comments"
-                    f"?per_page=100&page={page}")
-                if not isinstance(comments,list):
-                    break
-                for item in comments:
-                    author=item.get("user") or {}
-                    login=author.get("login","")
-                    if (MARKER in item.get("body","") and
-                            (author.get("type")=="Bot" or
-                             login=="github-actions[bot]")):
-                        existing=item
-                        break
-                if existing or len(comments)<100:
-                    break
-        if existing:
-            if existing.get("body")==body:
-                return "unchanged"
-            self.request(f"/repos/{self.repo}/issues/comments/{existing['id']}",
-                         method="PATCH",data={"body":body})
-            return "updated"
-        self.request(f"/repos/{self.repo}/issues/{ISSUE_NUMBER}/comments",
-                     method="POST",data={"body":body})
-        return "created"
+        candidate = self.request(
+            f"/repos/{self.repo}/issues/comments/{STATUS_COMMENT_ID}"
+        )
+        author = candidate.get("user") or {}
+        previous = candidate.get("body")
+        if (candidate.get("id") != STATUS_COMMENT_ID
+                or not isinstance(previous, str)
+                or not previous.startswith(MARKER + "\n")
+                or not (author.get("type") == "Bot"
+                        or author.get("login") == "github-actions[bot]")):
+            raise ValueError("pinned bot comment invalid; refusing history scan or creation")
+        # Treat just the report clock as a no-op. A new run ID, status, count
+        # or other evidence still refreshes the board and the timestamp.
+        if status_without_refresh_time(previous) == status_without_refresh_time(body):
+            return "unchanged"
+        self.request(
+            f"/repos/{self.repo}/issues/comments/{STATUS_COMMENT_ID}",
+            method="PATCH", data={"body": body},
+        )
+        return "updated"
 
 
 def apply_current_stage_output(groups, summaries, *, run_id, task, stage_action, reason):
@@ -426,7 +419,9 @@ def main():
         runs = gh.workflow_runs(filename, limit=5)
         groups[filename] = runs
         if marker:
-            for run in runs[:3]:
+            # The board displays only the newest controller decision.
+            # Do not fetch/log-scan two unused historical controller runs.
+            for run in runs[:1 if filename == CONTROLLER else 3]:
                 data = gh.metrics_for_run(run, marker, job)
                 if data is not None:
                     summaries[run["id"]] = data

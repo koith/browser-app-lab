@@ -10,11 +10,15 @@ on:
       - ".github/scripts/intersection_ops_status.py"
       - ".github/scripts/test_intersection_ops_status.py"
       - ".github/workflows/intersection-ops-status.yml"
+      - "apps/demand-research/LEDGER_POLICY.md"
+      - "apps/demand-research/OPERATIONS_BACKLOG.md"
   pull_request:
     paths:
       - ".github/scripts/intersection_ops_status.py"
       - ".github/scripts/test_intersection_ops_status.py"
       - ".github/workflows/intersection-ops-status.yml"
+      - "apps/demand-research/LEDGER_POLICY.md"
+      - "apps/demand-research/OPERATIONS_BACKLOG.md"
 
 permissions:
   contents: read
