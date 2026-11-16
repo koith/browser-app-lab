@@ -238,6 +238,49 @@ class StatusBoardTests(unittest.TestCase):
         self.assertEqual(len(calls),2)
         self.assertEqual(calls[-1][1],"PATCH")
 
+    def test_unchanged_evidence_does_not_rewrite_comment_for_clock_only(self):
+        gh = ops.GitHub(REPO, "test-token-not-real")
+        old = (ops.MARKER + "\n"
+               "마지막 상태 변경: 2026-11-16 16:11 UTC · GitHub Actions 자체 실행 · ChatGPT 새 대화 생성 없음\n"
+               "결과: INT-01 실패\n")
+        new = old.replace("2026-11-16 16:11", "2026-11-17 01:30")
+        fake = {"id": ops.STATUS_COMMENT_ID, "body": old,
+                "user": {"login": "github-actions[bot]", "type": "Bot"}}
+        with patch.object(gh, "request", return_value=fake) as request:
+            self.assertEqual(gh.upsert_comment(new), "unchanged")
+        request.assert_called_once()
+        self.assertEqual(request.call_args.args[0],
+                         f"/repos/{REPO}/issues/comments/{ops.STATUS_COMMENT_ID}")
+
+    def test_missing_pinned_comment_never_fetches_history_or_posts(self):
+        gh = ops.GitHub(REPO, "test-token-not-real")
+        with patch.object(gh, "request", side_effect=URLError("gone")) as request:
+            with self.assertRaises(URLError):
+                gh.upsert_comment(ops.MARKER + "\nnew status\n")
+        request.assert_called_once()
+        self.assertNotIn("/issues/607/comments", str(request.call_args))
+
+    def test_wrong_author_or_marker_fail_closed_without_post(self):
+        gh = ops.GitHub(REPO, "test-token-not-real")
+        invalid = [
+            {"id": ops.STATUS_COMMENT_ID, "body": ops.MARKER + "\nstatus",
+             "user": {"type": "User", "login": "human"}},
+            {"id": ops.STATUS_COMMENT_ID, "body": "Untrusted prefix " + ops.MARKER,
+             "user": {"type": "Bot", "login": "github-actions[bot]"}},
+        ]
+        for item in invalid:
+            with self.subTest(item=item):
+                with patch.object(gh, "request", return_value=item) as request:
+                    with self.assertRaisesRegex(ValueError, "refusing history scan"):
+                        gh.upsert_comment(ops.MARKER + "\nnew status\n")
+                request.assert_called_once()
+
+    def test_controller_aggregate_log_reads_are_bounded(self):
+        source = Path(__file__).with_name("intersection_ops_status.py").read_text()
+        self.assertIn("runs[:1 if filename == CONTROLLER else 3]", source)
+        self.assertNotIn("issues/{ISSUE_NUMBER}/comments", source)
+        self.assertNotIn('method="POST",data={"body":body}', source)
+
     def test_oversized_status_board_rejected_before_comment_write(self):
         gh=ops.GitHub(REPO,"test-token-not-real")
         with patch.object(gh,"request") as request:
