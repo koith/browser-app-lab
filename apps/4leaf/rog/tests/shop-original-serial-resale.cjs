@@ -12,7 +12,16 @@ const browserType=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
  const page=await browser.newPage({viewport:{width:1280,height:850},serviceWorkers:'block'});
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
-  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL=''});
+  await page.addInitScript(()=>{
+   window.LEAF_CENTRAL_API_URL='';
+   const real=Storage.prototype.setItem;
+   Storage.prototype.setItem=function(key,value){
+    if(this===localStorage&&key==='rog_profile'&&
+       sessionStorage.getItem('__leaf_serial_quota_test')==='1')
+     throw new DOMException('Source-card save quota', 'QuotaExceededError');
+    return real.call(this,key,value);
+   };
+  });
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.ORIGINAL_LEAF_CHESSMEN);
   // A previously verified/imported original-profile record, NOT fabricated
@@ -35,7 +44,23 @@ const browserType=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   assert.equal(original.source,'original-2003-serial-redemption-1000gp');
   assert.match(original.title,/2003년 시리얼 등록 카드/);
   const before=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')));
+  const rawBefore=await page.evaluate(()=>localStorage.getItem('rog_profile'));
   const button=page.locator('#shop-sell');
+  // A failed persistent write must roll back GP, card and SERIAL origin, not
+  // just the purchase cost, so an authentic one-time resale can be retried.
+  await page.evaluate(()=>sessionStorage.setItem('__leaf_serial_quota_test','1'));
+  await button.click();
+  assert.match(await page.locator('#modal-content').textContent(),/시리얼 등록 카드 재판매 1,000 GP/);
+  await page.locator('#modal-buttons button').filter({hasText:'판매'}).click();
+  assert.match(await page.locator('#modal-title').textContent(),/저장 실패/);
+  assert.equal(await page.evaluate(()=>localStorage.getItem('rog_profile')),rawBefore);
+  const quoteAfterFailure=await page.locator('#shop-sell').evaluate(el=>({
+   gp:Number(el.dataset.resaleGp),source:el.dataset.resaleStatus
+  }));
+  assert.equal(quoteAfterFailure.gp,1000);
+  assert.equal(quoteAfterFailure.source,'original-2003-serial-redemption-1000gp');
+  await page.locator('#modal-buttons button').filter({hasText:'확인'}).click();
+  await page.evaluate(()=>sessionStorage.removeItem('__leaf_serial_quota_test'));
   await button.click();
   assert.match(await page.locator('#modal-content').textContent(),/시리얼 등록 카드 재판매 1,000 GP/);
   await page.locator('#modal-buttons button').filter({hasText:'판매'}).click();
