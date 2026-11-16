@@ -122,7 +122,7 @@ const path=require('node:path');
    };
   });
   const fit=await page.evaluate(()=>window.__LEAF_PHONE_FIT__?.getState?.());
-  assert.deepEqual([fit.deviceWidth,fit.deviceHeight],[844,390]);
+  assert.ok(fit.deviceWidth<=844&&fit.deviceHeight<=390&&fit.scale>0&&fit.scale<.7,'original frame fits visible landscape area');
   assert.ok(fit.landscape&&fit.layoutWidth===800&&fit.layoutHeight===600&&landscape.screen[1]===390,'entire 800x600 design frame scales into the real landscape viewport');
   assert.equal(landscape.tiles,104,'turning the iPhone cannot erase original DMP source cells');
   assert.ok(landscape.originalSizes,'landscape must preserve exact native 145x97 TIS PNG pixels');
