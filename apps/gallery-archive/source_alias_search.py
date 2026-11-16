@@ -458,9 +458,13 @@ def main():
     # research report is safely written. The outer workflow commits this
     # changed cursor and verifies it with GitHub readback before collection.
     if next_source_state is not None:
-        a.reverse_progress.write_text(json.dumps(
+        # A timeout or cancellation must never truncate the only locally
+        # staged checkpoint. Replace the file atomically after full encoding.
+        pending_temp=a.reverse_progress.with_suffix('.reviewed-tmp')
+        pending_temp.write_text(json.dumps(
             next_source_state,ensure_ascii=False,separators=(',',':'))+'\n',
             encoding='utf-8')
+        pending_temp.replace(a.reverse_progress)
     print("SAME_WORK_MULTILINGUAL_SOURCE_SEARCH",json.dumps({
         "model":a.model,"new_site_hosts":len(report["new_site_hosts"]),
         "target_source_pages":sum(len(x["urls"]) for x in report["targets"]),
