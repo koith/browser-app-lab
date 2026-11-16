@@ -127,6 +127,47 @@ jobs:
             --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
             --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
             --out "$STAGE/source-evidence.json"
+      - name: Persist search attempts immediately, even if later photo collection times out
+        shell: bash
+        run: |
+          set -euo pipefail
+          # A model with a complete first pass generates zero new work;
+          # do not create a no-op commit every scheduled collection run.
+          if [[ "$(python -c 'import json,sys; print(json.load(open(sys.argv[1]))["seed_queries"])' "$STAGE/reverse-evidence.json")" == "0" ]]; then
+            echo "ALL_OWNER_PHOTO_REVERSE_CURSOR_UNCHANGED model=$MODEL"
+            exit 0
+          fi
+          python - <<'PY'
+          import base64,json,os,pathlib,subprocess
+          model=os.environ['MODEL']
+          repo=os.environ['GITHUB_REPOSITORY']
+          directory=pathlib.Path(os.environ['STAGE'])
+          path=f'apps/gallery-archive/verification/reverse-progress-{model}.json'
+          branch=f'gallery-reverse-progress-{model}'
+          old=subprocess.run(['gh','api',f'repos/{repo}/contents/{path}?ref={branch}',
+                             '--jq','.sha'],capture_output=True,text=True)
+          data={'message':f'checkpoint(gallery): resume all-owner reverse search for {model}',
+                'branch':branch,
+                'content':base64.b64encode((directory/'reverse-next.json').read_bytes()).decode()}
+          if old.returncode==0 and old.stdout.strip():
+              data['sha']=old.stdout.strip()
+          (directory/'checkpoint-upload.json').write_text(json.dumps(data))
+          PY
+          gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/apps/gallery-archive/verification/reverse-progress-$MODEL.json" \
+            --input "$STAGE/checkpoint-upload.json" \
+            --jq '.commit.sha' > "$STAGE/checkpoint-commit-sha.txt"
+          # A successful API write is not proof of durable progress until
+          # the exact per-model branch state can be retrieved and compared.
+          gh api "repos/$GITHUB_REPOSITORY/contents/apps/gallery-archive/verification/reverse-progress-$MODEL.json?ref=gallery-reverse-progress-$MODEL" \
+            --jq '.content' | base64 -d > "$STAGE/reverse-readback.json"
+          python - <<'PY'
+          import json,os,pathlib
+          root=pathlib.Path(os.environ['STAGE'])
+          expected=json.loads((root/'reverse-next.json').read_text())
+          observed=json.loads((root/'reverse-readback.json').read_text())
+          assert observed==expected, 'REVERSE_CHECKPOINT_READBACK_MISMATCH'
+          PY
+          echo "ALL_OWNER_PHOTO_REVERSE_CURSOR_PERSISTED_AND_READBACK model=$MODEL SHA=$(cat "$STAGE/checkpoint-commit-sha.txt")"
       - name: Acquire every registered work, prioritizing actual missing cuts
         shell: bash
         run: |
@@ -136,7 +177,7 @@ jobs:
             --stage "$STAGE/photos" \
             --source-evidence "$STAGE/source-evidence.json" \
             --batch-size 7 --max-per-batch 48 --bytes-per-batch 36000000 \
-            --batch-timeout 1200 --alternate-priority
+            --batch-timeout 420 --alternate-priority
       - name: Replay exact staged SHA bytes onto latest main, then commit actual new photos
         shell: bash
         run: |
@@ -177,30 +218,6 @@ jobs:
             --title "Gallery: newly verified $MODEL public image originals" \
             --body "SHA-verified new public-photo files, requiring Pages browser acceptance."
           echo "MODEL=$MODEL NEW_BYTES_STAGED_PR=yes" >> "$GITHUB_STEP_SUMMARY"
-      - name: Checkpoint image-search cursor only after actual photo collection and safe commit
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import base64,json,os,pathlib,subprocess
-          model=os.environ['MODEL']
-          repo=os.environ['GITHUB_REPOSITORY']
-          directory=pathlib.Path(os.environ['STAGE'])
-          path=f'apps/gallery-archive/verification/reverse-progress-{model}.json'
-          branch=f'gallery-reverse-progress-{model}'
-          old=subprocess.run(['gh','api',f'repos/{repo}/contents/{path}?ref={branch}',
-                             '--jq','.sha'],capture_output=True,text=True)
-          data={'message':f'checkpoint(gallery): resume all-owner reverse search for {model}',
-                'branch':branch,
-                'content':base64.b64encode((directory/'reverse-next.json').read_bytes()).decode()}
-          if old.returncode==0 and old.stdout.strip():
-              data['sha']=old.stdout.strip()
-          (directory/'checkpoint-upload.json').write_text(json.dumps(data))
-          PY
-          gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/apps/gallery-archive/verification/reverse-progress-$MODEL.json" \
-            --input "$STAGE/checkpoint-upload.json" \
-            --jq '.commit.sha' > "$STAGE/checkpoint-commit-sha.txt"
-          echo "ALL_OWNER_PHOTO_REVERSE_CURSOR_PERSISTED model=$MODEL SHA=$(cat "$STAGE/checkpoint-commit-sha.txt")"
       - name: Preserve audit metadata, never bundle originals as CI artifacts
         if: always()
         uses: actions/upload-artifact@v4
