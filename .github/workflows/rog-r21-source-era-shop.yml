@@ -7,6 +7,7 @@ on:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/r21-source-era-shop.cjs'
+      - 'apps/4leaf/rog/tests/shop-original-serial-resale.cjs'
       - '.github/workflows/rog-r21-source-era-shop.yml'
   push:
     branches: [main]
@@ -15,6 +16,7 @@ on:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/r21-source-era-shop.cjs'
+      - 'apps/4leaf/rog/tests/shop-original-serial-resale.cjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -43,10 +45,14 @@ jobs:
           done
           exit 1
       - run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/r21-source-era-shop.cjs
+      - name: Verify original 2003 serial-origin card sold for 1,000 GP, saved, repurchased with ordinary provenance
+        run: FOURLEAF_BROWSER=${{ matrix.browser }} node apps/4leaf/rog/tests/shop-original-serial-resale.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: 4leaf-r21-original-shop-${{ matrix.browser }}
           if-no-files-found: ignore
           retention-days: 10
-          path: leaf-r21-*.png
+          path: |
+            leaf-r21-*.png
+            leaf-archival-serial-resale-real-shop-*.png
