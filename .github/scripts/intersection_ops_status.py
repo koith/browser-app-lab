@@ -96,6 +96,31 @@ def run_url(run, repo):
             if isinstance(number, int) and number > 0 else "")
 
 
+CORE_TASK_IDS = tuple(f"INT-{i:02d}" for i in range(1, 11))
+MAX_ISSUE_BODY_CHARS = 6_000
+MAX_STATUS_COMMENT_CHARS = 4_000
+
+
+def core_task_states(issue_body):
+    """Read only first P0/P1/P2 primary checklist, not dated subtask history."""
+    found = {}
+    in_core = False
+    for line in (issue_body or "").splitlines()[:150]:
+        if line.startswith("## P0"):
+            in_core = True
+        elif in_core and line.startswith("## ") and not line.startswith(
+                ("## P0", "## P1", "## P2")):
+            break
+        if not in_core:
+            continue
+        match = re.match(
+            r"^- \[([ x])\] \*\*(INT-(?:0[1-9]|10))\*\*(?:\s|$)", line
+        )
+        if match and match.group(2) not in found:
+            found[match.group(2)] = match.group(1) == "x"
+    return found
+
+
 def render(repo, run_groups, summaries, issue_body, now):
     """Render one durable status comment without claiming unproven completion."""
     latest_capture = next(iter(run_groups.get(CAPTURE, [])), None)
@@ -128,12 +153,9 @@ def render(repo, run_groups, summaries, issue_body, now):
         core = "UNVERIFIED — 최근 3회 수집은 정상이나 전체 복구·무결성 미검증"
     else:
         core = "UNVERIFIED — 연속 정상 수집 및 기존 원본 전수 검증 미충족"
-    titles = re.findall(
-        r"(?m)^- \[([ x])\] \*\*(INT-[0-9]{2})(?:\s+|[^*])*\*\*",
-        issue_body,
-    )
-    checked = {key for state, key in titles if state == "x"}
-    tracked = {key for _, key in titles}
+    states = core_task_states(issue_body)
+    checked = {task for task, complete in states.items() if complete}
+    missing = len(CORE_TASK_IDS) - len(states)
     extra = "INT-11, INT-12는 상세 OPERATIONS_BACKLOG.md에서 별도 관리. "
     lines = [
         MARKER,
@@ -141,8 +163,9 @@ def render(repo, run_groups, summaries, issue_body, now):
         f"마지막 점검: {now.strftime('%Y-%m-%d %H:%M UTC')} · GitHub Actions 자체 실행 · ChatGPT 새 대화 생성 없음",
         "",
         f"**P0 / INT-01: {core}**",
-        f"**메인 이슈 체크:** {len(checked)}/{len(tracked) or '미확인'}건 완료 표시 · "
-        "체크박스는 실제 복구 검증 없이는 자동 변경하지 않음",
+        f"**핵심 과제:** {len(checked)}/{len(CORE_TASK_IDS)}건 검증 완료 표시"
+        + (f" · 누락 {missing}건(집계 불완전)" if missing else "")
+        + " · 운영 검증 없이 자동 체크하지 않음",
         "",
         "### 최근 실제 수집 (최대 3회)",
         "| 실행 | 상태 | 발견 | 테라박스 검증 | 저장 실패 | 암호화 임시 보관 |",
@@ -209,7 +232,10 @@ def render(repo, run_groups, summaries, issue_body, now):
         "",
         extra + "비공개 원문·계정·자격증명·실파일명은 이 보고에 기록하지 않음.",
     ])
-    return "\n".join(lines) + "\n"
+    board = "\n".join(lines) + "\n"
+    if len(board) > MAX_STATUS_COMMENT_CHARS:
+        raise ValueError("Operations dashboard exceeds bounded comment size")
+    return board
 
 
 class GitHub:
@@ -314,6 +340,8 @@ class GitHub:
         return None
 
     def upsert_comment(self, body):
+        if len(body) > MAX_STATUS_COMMENT_CHARS:
+            raise ValueError("Operations status comment exceeds hard size cap")
         existing = None
         for page in range(1, 5):
             comments = self.request(
@@ -373,6 +401,11 @@ def main():
         os.getenv("GH_TOKEN", ""),
     )
     issue = gh.request(f"/repos/{gh.repo}/issues/{ISSUE_NUMBER}")
+    body = issue.get("body") or ""
+    if len(body) > MAX_ISSUE_BODY_CHARS:
+        raise ValueError("Core development issue body exceeds concise ledger cap")
+    if len(core_task_states(body)) != len(CORE_TASK_IDS):
+        raise ValueError("Core development issue checklist incomplete")
     groups = {}
     summaries = {}
     for filename, marker, job in (
