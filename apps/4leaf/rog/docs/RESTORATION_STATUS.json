@@ -1,0 +1,555 @@
+{
+  "schemaVersion": 2,
+  "sourceOfTruth": "GitHub Issues with [4LEAF][ID] title",
+  "legacyEvidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+  "counts": {
+    "total": 60,
+    "done": 43,
+    "in_progress": 16,
+    "todo": 1,
+    "review_required": 0,
+    "remaining": 17
+  },
+  "tasks": [
+    {
+      "id": "ACT-01",
+      "issue": 1258,
+      "title": "원본 OBS 미복원 34종 해독",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1258"
+    },
+    {
+      "id": "ACT-02",
+      "issue": 1259,
+      "title": "OBS 행 X좌표·원점 인코딩 완전 해독",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1259"
+    },
+    {
+      "id": "ACT-03",
+      "issue": 1260,
+      "title": "캐릭터별 대기·이동·공격·피격·승리·방향 원본 프레임표",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1260"
+    },
+    {
+      "id": "ACT-04",
+      "issue": 1261,
+      "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1261"
+    },
+    {
+      "id": "ACT-05",
+      "issue": 1244,
+      "title": "체스맨 카드 초상화(CardData chm_N) 원본 근거 매핑",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1244"
+    },
+    {
+      "id": "BRD-01",
+      "issue": 1238,
+      "title": "카메라 투영·발판 크기 원본 시점 맞춤",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1238"
+    },
+    {
+      "id": "BRD-02",
+      "issue": 1254,
+      "title": "실제 TIS 알파·윗면·하단 림 상태 복원",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1254"
+    },
+    {
+      "id": "BRD-03",
+      "issue": 1255,
+      "title": "26맵 타일 간 깊이·캐릭터 가림 재현",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1255"
+    },
+    {
+      "id": "BRD-04",
+      "issue": 1256,
+      "title": "DMP/DMO/MVE 26개 원본 지도 정확도 검증",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1256"
+    },
+    {
+      "id": "BRD-05",
+      "issue": 1257,
+      "title": "실제 맵 범위·미니맵 이동 정확성",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1257"
+    },
+    {
+      "id": "BTL-01",
+      "issue": 1262,
+      "title": "원본 winBattle.spr 2프레임 배포본 적용",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1262"
+    },
+    {
+      "id": "BTL-02",
+      "issue": 1263,
+      "title": "전투 800×600 제목·좌우 점수·체스맨·주사위 정밀 배치",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1263"
+    },
+    {
+      "id": "BTL-03",
+      "issue": 1264,
+      "title": "원본 winResult/winAbility/winJail UI 실제 연결",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1264"
+    },
+    {
+      "id": "BTL-04",
+      "issue": 1239,
+      "title": "전투 발판 원작 실제 공간감·시점 보강",
+      "priority": "P1",
+      "status": "todo",
+      "acceptance": "not-started",
+      "url": "https://github.com/koith/browser-app-lab/issues/1239"
+    },
+    {
+      "id": "CHT-01",
+      "issue": 1268,
+      "title": "2004 동일 방 배경·레이아웃 매칭",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1268"
+    },
+    {
+      "id": "CHT-02",
+      "issue": 1269,
+      "title": "상단 검정 채팅 로그·입력창 원본 픽셀 정합",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1269"
+    },
+    {
+      "id": "CHT-03",
+      "issue": 1270,
+      "title": "실접속 참가자 목록·닉네임·좌석 표시",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1270"
+    },
+    {
+      "id": "CHT-04",
+      "issue": 1271,
+      "title": "아바타 즉시 이동·원본 슬롯·표정·동작",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1271"
+    },
+    {
+      "id": "CHT-05",
+      "issue": 1272,
+      "title": "방 가구 전경·캐릭터 뒤가림·원본 링 버튼",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1272"
+    },
+    {
+      "id": "CHT-06",
+      "issue": 1273,
+      "title": "남·북 하이아칸/주잔 채널 선택 혼동 방지",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1273"
+    },
+    {
+      "id": "CHT-07",
+      "issue": 1285,
+      "title": "상설 채팅방 자기 아바타·원본 도구모음 클릭 가림 회귀",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1285"
+    },
+    {
+      "id": "DIE-01",
+      "issue": 1265,
+      "title": "원본 D4/D6 본체 그래픽·메시 출처 발굴",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1265"
+    },
+    {
+      "id": "DIE-02",
+      "issue": 1240,
+      "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1240"
+    },
+    {
+      "id": "DIE-03",
+      "issue": 1266,
+      "title": "원본 ROLL 버튼·주사위 낙하 UI 역할 분리",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1266"
+    },
+    {
+      "id": "DIE-04",
+      "issue": 1267,
+      "title": "전투 주사위 개수·눈·점수·결과 정렬",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1267"
+    },
+    {
+      "id": "EVID-01",
+      "issue": 1279,
+      "title": "같은 상태 원작-웹 A/B 800×600·794×528 재현",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1279"
+    },
+    {
+      "id": "EVID-02",
+      "issue": 1280,
+      "title": "원본 픽셀·앵커 위치 정량 오차 보고",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1280"
+    },
+    {
+      "id": "FL-MAP-01",
+      "issue": 1286,
+      "title": "기존 FL-01~FL-16 원문과 GitHub 57건 개발원장 정합",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1286"
+    },
+    {
+      "id": "GOV-LEDGER",
+      "issue": 1252,
+      "title": "대화 소실 대응 영구 개발원장 운영",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1252"
+    },
+    {
+      "id": "M00",
+      "issue": 1245,
+      "title": "원본 클라이언트·근거 자료 수집",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1245"
+    },
+    {
+      "id": "M01",
+      "issue": 1246,
+      "title": "월드맵·메인프레임 복원",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1246"
+    },
+    {
+      "id": "M02",
+      "issue": 1228,
+      "title": "켈티카·매직카덴 원작 복원",
+      "priority": "P1",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1228"
+    },
+    {
+      "id": "M03",
+      "issue": 1247,
+      "title": "북·남 하이아칸 상설 채팅 복원",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1247"
+    },
+    {
+      "id": "M04",
+      "issue": 1229,
+      "title": "주잔 DMP·TIS 보드 복원",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1229"
+    },
+    {
+      "id": "M05",
+      "issue": 1230,
+      "title": "주잔 창세기전 체스맨 원본 전신",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1230"
+    },
+    {
+      "id": "M06",
+      "issue": 1231,
+      "title": "주잔 배틀 원본 발판·시점",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1231"
+    },
+    {
+      "id": "M07",
+      "issue": 1232,
+      "title": "주사위 원본 모델·결과별 모션",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1232"
+    },
+    {
+      "id": "M08",
+      "issue": 1248,
+      "title": "주잔 원작 룰·오프라인·온라인",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1248"
+    },
+    {
+      "id": "M09",
+      "issue": 1233,
+      "title": "동일 상태 원본 비교·배포 수용",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1233"
+    },
+    {
+      "id": "P0-ACTOR",
+      "issue": 1250,
+      "title": "채팅 아바타 대신 실제 창세기전 체스맨과 행동",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1250"
+    },
+    {
+      "id": "P0-BOARD",
+      "issue": 1249,
+      "title": "타일 상하·겹침·입체감 사용자 재현 결함",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1249"
+    },
+    {
+      "id": "P0-CHAT",
+      "issue": 1235,
+      "title": "상설 채팅방 원작 화면 정밀 복원",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1235"
+    },
+    {
+      "id": "P0-DICE",
+      "issue": 1251,
+      "title": "원작 주사위 눈별 낙하/튕김/정지 연출",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1251"
+    },
+    {
+      "id": "P0-PODIUM",
+      "issue": 1234,
+      "title": "원본 전투 발판·배치 완성",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1234"
+    },
+    {
+      "id": "P0-RELEASE",
+      "issue": 1236,
+      "title": "원작 복원 최종 화면·기능 수용 게이트",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1236"
+    },
+    {
+      "id": "QA-01",
+      "issue": 1281,
+      "title": "원본 발판 새 자산 브랜치 스모크 실패 복구",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1281"
+    },
+    {
+      "id": "QA-02",
+      "issue": 1282,
+      "title": "완성본 동일 SHA 전체 CI·배포 추적",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1282"
+    },
+    {
+      "id": "QA-03",
+      "issue": 1283,
+      "title": "아이폰 Safari 세로·가로 4LEAF HUD 오버랩 재검증",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1283"
+    },
+    {
+      "id": "QA-04",
+      "issue": 1284,
+      "title": "원본 근거·완료 판정·개발원장 지속 관리",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1284"
+    },
+    {
+      "id": "RULE-01",
+      "issue": 1242,
+      "title": "원작 특수칸·이벤트 데이터 검증",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1242"
+    },
+    {
+      "id": "RULE-02",
+      "issue": 1243,
+      "title": "전투·능력·아이템·라운드 원본 예외처리",
+      "priority": "P1",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1243"
+    },
+    {
+      "id": "RULE-03",
+      "issue": 1278,
+      "title": "실제 멀티플레이 경기 권한·동기화 실환경 검증",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1278"
+    },
+    {
+      "id": "SHOP-01",
+      "issue": 1277,
+      "title": "원작 Normal/Valuable/Rare 상점 탭·목록 복원",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1277"
+    },
+    {
+      "id": "SHOP-02",
+      "issue": 1241,
+      "title": "구매·판매·GP·장착 카드 원본 룰 검증",
+      "priority": "P1",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1241"
+    },
+    {
+      "id": "SRC-01",
+      "issue": 1237,
+      "title": "리소스 출처·실제 용도 전수 정합",
+      "priority": "P0",
+      "status": "in_progress",
+      "acceptance": "open",
+      "url": "https://github.com/koith/browser-app-lab/issues/1237"
+    },
+    {
+      "id": "SRC-02",
+      "issue": 1253,
+      "title": "2004 원작 조작 영상·상태 기준 확보",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1253"
+    },
+    {
+      "id": "SRC-04",
+      "issue": 1287,
+      "title": "OBS 투명도 규칙 정정(팔레트 0번 ≠ 투명) 및 재추출",
+      "priority": "P0",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1287"
+    },
+    {
+      "id": "WORLD-01",
+      "issue": 1274,
+      "title": "원본 MainFrame 전체 제목줄·아이콘·배치 정합",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1274"
+    },
+    {
+      "id": "WORLD-02",
+      "issue": 1275,
+      "title": "켈티카 원작 파노라마·지점 클릭 경계",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1275"
+    },
+    {
+      "id": "WORLD-03",
+      "issue": 1276,
+      "title": "월드맵 6지역·각 목적지 경로 복원 검증",
+      "priority": "P1",
+      "status": "done",
+      "acceptance": "legacy-import",
+      "url": "https://github.com/koith/browser-app-lab/issues/1276"
+    }
+  ]
+}
