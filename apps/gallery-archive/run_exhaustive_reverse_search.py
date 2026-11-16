@@ -219,7 +219,10 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
     # Generic search HTML may say leads_0; that is not a visual match, but
     # it is a readable search response. Hard failures get ONE deferred retry.
     def readable_result(row):
-        return any(str(v).startswith('leads_')
+        # A genuine Bing PagesIncluding response is readable even if Yandex
+        # and generic Bing HTML are denied. Generic HTML navigation is never
+        # treated as structured visual-search evidence.
+        return any(str(v).startswith(('leads_','visual_pages_'))
                    for v in row.get('search_status', {}).values())
     readable = sum(readable_result(r) for r in scanned)
     old_pending = set(state.get('retry_pending_ids', []))
@@ -245,6 +248,11 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
     # A readable HTML page is not the same as an actual reverse-image match.
     # In particular, leads_0 can be the generic search UI without any photo.
     matched_frames = sum(bool(r.get('candidate_pages')) for r in scanned)
+    named_frames = sum(any(not p.get('visual_host_page_only_unverified_edition')
+                           for p in r.get('candidate_pages',[])) for r in scanned)
+    structured_unlabeled_frames = sum(any(
+        p.get('visual_host_page_only_unverified_edition')
+        for p in r.get('candidate_pages',[])) for r in scanned)
     engine_outcomes = {}
     for row in scanned:
         for engine, outcome in row.get('search_status', {}).items():
@@ -262,11 +270,13 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
               'source_pages_accepted': sources,
               # These are name-supported source-page hints, NOT proof that
               # the exact referenced image visually matched any source image.
-              'model_matched_photo_frames': matched_frames,
-              'photo_frames_with_zero_model_matches': len(scanned)-matched_frames,
-              'name_supported_source_frames_unverified_visual': matched_frames,
+              'model_matched_photo_frames': named_frames,
+              'photo_frames_with_zero_model_matches': len(scanned)-named_frames,
+              'name_supported_source_frames_unverified_visual': named_frames,
+              'structured_visual_host_page_frames_unverified_edition': structured_unlabeled_frames,
+              'photo_frames_with_any_source_leads': matched_frames,
               'verified_same_photo_matches': 0,
-              'readable_html_without_name_supported_source': max(0, readable-matched_frames),
+              'readable_html_without_name_supported_source': max(0, readable-named_frames),
               'search_engine_outcomes': engine_outcomes,
               'off_model_rejected': sum(r['off_model_rejected'] for r in scanned),
               'physical_photos_new': 0, 'gallery_photos_new': 0,
@@ -290,8 +300,9 @@ def run(model, progress_path, out_path, next_path, budget, seconds, workers, sto
         {**report['coverage'], 'model': model,
          'searched_this_run': len(scanned),
          'search_pages_accepted': sources,
-         'frames_with_model_matched_sources': matched_frames,
-         'frames_without_model_matched_sources': len(scanned)-matched_frames,
+         'frames_with_model_matched_sources': named_frames,
+         'frames_without_model_matched_sources': len(scanned)-named_frames,
+         'unlabeled_structured_image_host_frames': structured_unlabeled_frames,
          'engine_outcomes': engine_outcomes,
          'readable_html_not_verified_visual_match': readable,
          'photo_files_downloaded': 0}, ensure_ascii=False), flush=True)
