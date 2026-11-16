@@ -1,6 +1,6 @@
 /* Source 2004 ChatRoom screen registration.
  * Real captured room is 794x528 (apps/4leaf/assets/chat_ref.jpg), with
- * messenger at x18 y0, participant list at x621 y10 and EXIT at x728 y503.
+ * messenger at x16 y0, participant list at x620 y10 and EXIT at x728 y503.
  * Previous WEB shell put 54px title + two navigation bars + 56px invented
  * chat header above it, scaled scene to 896x596 and hid the real framing.
  *
@@ -190,7 +190,7 @@
  /* Historical screenshots show 1:1 407x118 chat and 158x128 participant
     window. Existing source-native ChatRoom atlas CSS applies inside them. */
  #rooms.classic-chat-room .messenger[data-native-overlay="true"]{
-  left:18px!important;top:0!important;
+  left:16px!important;top:0!important;
   transform:none!important;
  }
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"]{

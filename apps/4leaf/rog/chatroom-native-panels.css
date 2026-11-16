@@ -16,7 +16,7 @@
   box-sizing:border-box;
   position:absolute!important;
   z-index:25!important;
-  top:0!important;left:18px!important;right:auto!important;bottom:auto!important;
+  top:0!important;left:16px!important;right:auto!important;bottom:auto!important;
   width:407px!important;max-width:none!important;
   height:118px!important;min-height:118px!important;
   margin:0!important;padding:0!important;
@@ -149,7 +149,7 @@
 @media(min-width:651px){
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"][data-native-frame="userlist.png-9slice"]{
   display:block!important;
-  top:10px!important;left:621px!important;right:auto!important;
+  top:10px!important;left:620px!important;right:auto!important;
   width:163px!important;height:128px!important;max-height:128px!important;
   border:0!important;border-radius:0!important;box-shadow:none!important;
   background:var(--leaf-userlist-frame) no-repeat 0 0/163px 128px!important;
@@ -250,6 +250,6 @@
   mask-position:right top,left top;mask-repeat:no-repeat;
  }
  #rooms.classic-chat-room #social-peer-panel.social-user-panel[data-native-overlay="true"]{
-  top:10px!important;left:621px!important;right:auto!important;width:163px!important;
+  top:10px!important;left:620px!important;right:auto!important;width:163px!important;
  }
 }
