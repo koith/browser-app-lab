@@ -43,6 +43,27 @@ const {chromium}=require('playwright');
   assert.ok(cue.left>=cue.railRight,'WEB label must sit next to, not over, source portrait');
   assert.equal(cue.eventOverlap,false,'native IMG/eventmsgbox art must remain unobstructed');
   assert.match(cue.role,/내 차례/);
+  // The source-side floating WEB cue is intentionally opacity:0. It MUST
+  // NOT be used as proof of a readable in-game turn notification. Measure
+  // the actual IMG/eventmsgbox.png-backed LIVE panel and its text instead.
+  const sourceTurn=await page.evaluate(()=>{
+   const panel=document.getElementById('dice-native-event');
+   const title=panel?.querySelector('.dice-native-turn-heading');
+   const detail=panel?.querySelector('.dice-native-event-detail');
+   if(!panel||!title||!detail)return null;
+   const p=getComputedStyle(panel),t=getComputedStyle(title),d=getComputedStyle(detail);
+   const r=panel.getBoundingClientRect();
+   return {image:p.backgroundImage,opacity:Number(p.opacity),visibility:p.visibility,
+    size:[r.width,r.height],titlePx:parseFloat(t.fontSize),titleLine:parseFloat(t.lineHeight),
+    detailPx:parseFloat(d.fontSize),detailLine:parseFloat(d.lineHeight),
+    text:title.textContent,detail:detail.textContent};
+  });
+  assert.ok(sourceTurn,'the real recovered source frame must be present');
+  assert.match(sourceTurn.image,/original\\/IMG\\/eventmsgbox\\.png/);
+  assert.deepEqual(sourceTurn.size,[244,52],'never enlarge or cover source event art');
+  assert.ok(sourceTurn.opacity>.9&&sourceTurn.visibility==='visible','live source text must actually be visible');
+  assert.ok(sourceTurn.titlePx>=18&&sourceTurn.detailPx>=12,'read the source panel, not the hidden WEB cue');
+  assert.ok(sourceTurn.titleLine+sourceTurn.detailLine+9<=52,'text remains within original 52px art');
   const before=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch(),c=window.__LEAF_CAMERA__;
    c.panBy(100000,100000);
@@ -99,7 +120,18 @@ const {chromium}=require('playwright');
     activeSlot:String(window.__ROG_TEST__.getMatch().active+1),rect:[a.x,a.y,a.width,a.height],
     event:b?[b.x,b.y,b.width,b.height]:null};
   });
-  assert.ok(mobile.visible,'phone turn cue must remain visible inside the game viewport '+JSON.stringify(mobile));
+  const phoneSource=await page.locator('#dice-native-event').evaluate(panel=>{
+   const r=panel.getBoundingClientRect();
+   const title=panel.querySelector('.dice-native-turn-heading');
+   return {visible:getComputedStyle(panel).opacity==='1',image:getComputedStyle(panel).backgroundImage,
+    visualHeading:parseFloat(getComputedStyle(title).fontSize)*r.width/244,
+    width:r.width,height:r.height};
+  });
+  assert.ok(phoneSource.visible&&phoneSource.image.includes('eventmsgbox.png'),
+   'phone must actually display source event art, not a hidden WEB cue');
+  assert.ok(phoneSource.visualHeading>=16,
+   'source in-frame turn text must be physically readable on phone '+JSON.stringify(phoneSource));
+    assert.ok(mobile.visible,'phone turn cue must remain visible inside the game viewport '+JSON.stringify(mobile));
   assert.ok(mobile.fontSize>=15,'phone title must not shrink to the old unreadable 10px');
   assert.equal(mobile.overlap,false,'do not obscure native event message on a 390px phone '+JSON.stringify(mobile));
   assert.equal(mobile.slot,mobile.activeSlot,'phone cue must track the live actual player even if AI advanced');
