@@ -84,7 +84,9 @@ const path=require('node:path');
    visible:getComputedStyle(node).display,
    parent:node.parentElement.id,
    realEventNodes:document.querySelectorAll('#dice-native-event').length,
-   event:node.textContent,title:node.title
+   event:node.dataset.eventText,rendered:node.textContent,
+   heading:node.querySelector('.dice-native-turn-heading')?.textContent||'',
+   title:node.title
   }));
   assert.equal(move.source,'IMG/eventmsgbox.png','actual played move displayed in original source event');
   assert.equal(move.parent,'board-area','original event source appears in the visible playable board, not hidden web item footer');
@@ -94,7 +96,10 @@ const path=require('node:path');
   assert.ok(move.paint.includes('/original/IMG/eventmsgbox.png'));
   assert.ok(Math.abs(move.frame[0]-244)<1&&Math.abs(move.frame[1]-52)<1,
    'true 244x52 original event rectangle in non-mobile client: '+JSON.stringify(move));
-  assert.equal(move.event,move.title,'ellipsized two-line paint keeps complete actual gameplay event accessible');
+  assert.ok(move.event.length>0&&move.rendered.includes(move.event)&&move.title.includes(move.event),
+   'the real gameplay event must remain readable in original IMG frame and full tooltip');
+  assert.ok(move.heading.includes('P')&&move.rendered.includes(move.heading),
+   'turn owner is an added label and must not be mistaken for actual recorded move');
   assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().history)).includes(move.event),
    'event box is sourced from real persistent match history, never made-up status');
   await page.screenshot({path:'leaf-original-genesis-live-eventbox.png'});
