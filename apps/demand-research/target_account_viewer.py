@@ -451,7 +451,7 @@ def _source_ui(archive,post):
     """
     out={"rich_text":[],"content_warning":"","sensitive":False,
          "alt_text":[],"external_card":None,"quoted_post":None,
-         "poll":None,"reblog":None,"engagement":None}
+         "poll":None,"reblog":None,"engagement":None,"pinned":False}
     pid=post.get("id","")
     if not HEX40.fullmatch(str(pid)):
         return out
@@ -520,6 +520,7 @@ def _source_ui(archive,post):
                 out["rich_text"]=parser.parts[:300]
             except (TypeError,ValueError):
                 pass
+        out["pinned"]=bool(source.get("pinned"))
         warning=display.get("spoiler_text") or source.get("spoiler_text") or ""
         out["content_warning"]=str(warning)[:1000]
         out["sensitive"]=bool(source.get("sensitive") or display.get("sensitive") or warning)
@@ -570,8 +571,17 @@ def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
             continue
         category=("revision" if post.get("revision_of") else
                   "reply" if post.get("kind")=="reply" else "post")
-        if kind and category!=kind:
-            continue
+        if kind:
+            if kind=="activity_posts_boosts" and category not in ("post","reblog"):
+                continue
+            elif kind=="activity_posts_replies" and category not in ("post","reply"):
+                continue
+            elif kind=="activity_all" and category not in ("post","reply","reblog"):
+                continue
+            elif kind=="featured":
+                if not _source_ui(archive,post).get("pinned"):continue
+            elif kind not in ("activity_posts_boosts","activity_posts_replies","activity_all","featured") and category!=kind:
+                continue
         expected=post.get("media_expected",0)
         saved=post.get("media_saved",0)
         if not isinstance(expected,int) or expected<0:expected=0
@@ -579,11 +589,13 @@ def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
         complete=post.get("archive_complete") is True and saved>=expected
         # Native SNS media tab includes only entries with a real archived
         # source media slot, never text-only posts or fabricated thumbnails.
-        if media_status=="has_media":
+        if media_status in ("has_media","has_video"):
             raw_slots=post.get("media",[])
             if not isinstance(raw_slots,list) or not any(
                     isinstance(item,dict) and
                     archived_media_slot(str(post["id"]),item) is not None
+                    and (media_status=="has_media" or
+                         str(item.get("mime","")).startswith("video/"))
                     for item in raw_slots[:16]):
                 continue
         elif media_status and media_status!=("complete" if complete else "partial"):
@@ -609,8 +621,9 @@ def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
                 "verified_sha256":bool(verified)})
         media.sort(key=lambda value:value["index"])
         matching.append({
-            **_source_ui(archive,post),
-            "id":pid,"posted_at":post.get("posted_at"),"text":text,
+            "id":pid,"original_id":post.get("original_id"),
+            "platform":post.get("platform"),
+            "posted_at":post.get("posted_at"),"text":text,
             "source_url":sanitize_safe_link(post.get("source_url")),
             "profile_url":sanitize_safe_link(post.get("profile_url")),
             "kind":post.get("kind","post"),
@@ -619,8 +632,13 @@ def feed_data(archive,account,offset,limit,q="",kind="",media_status=""):
             "reply_to":post.get("reply_to",""),
             "media":media,"media_expected":expected,
             "media_saved":saved,"archive_complete":complete})
+    page=matching[offset:offset+limit]
+    # Parse rich text, source warnings and embeds ONLY for the requested
+    # page, not for a 900-post whole-account search on every tab change.
+    for post in page:
+        post.update(_source_ui(archive,post))
     return {"total":len(matching),"offset":offset,"limit":limit,
-            "posts":matching[offset:offset+limit],"more":offset+limit<len(matching)}
+            "posts":page,"more":offset+limit<len(matching)}
 
 
 def graph_data(archive,kind,offset,limit):
@@ -931,9 +949,11 @@ def create_router(auth):
                    kind:str=Query(""),
                    media_status:str=Query("")):
         auth(request)
-        if kind not in ("","post","reply","revision"):
+        if kind not in ("","post","reply","reblog","revision",
+                         "activity_posts_boosts","activity_posts_replies",
+                         "activity_all","featured"):
             raise HTTPException(400,"Invalid archived post type")
-        if media_status not in ("","complete","partial","has_media"):
+        if media_status not in ("","complete","partial","has_media","has_video"):
             raise HTTPException(400,"Invalid media verification filter")
         _,_,archive=open_account(account)
         try:
