@@ -144,8 +144,9 @@ jobs:
           report=json.load(open(sys.argv[1]))
           old=json.load(open(sys.argv[2]))
           raise SystemExit(0 if report['seed_queries']==0
-              and old.get('search_revision')==3
-              and old.get('last_run_attempts')==0 else 1)
+              and old.get('search_revision')==report['search_revision']
+              and old.get('last_run_attempts')==0
+              and not old.get('source_pending_pages') else 1)
           PY
           then
             echo "ALL_OWNER_PHOTO_REVERSE_CURSOR_UNCHANGED model=$MODEL"
