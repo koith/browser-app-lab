@@ -56,7 +56,8 @@ def main():
     normal=RedirectClient('/images/search?q=public')
     assert query_page(normal,'https://www.bing.com/images/search',{})[0]=='ok'
     assert normal.calls==2
-    for location in ['https://other.example/result','/captcha/verify','/login']:
+    for location in ['https://other.example/result','/captcha/verify','/login',
+                     'https://www.bing.com:badport/images/search']:
         boundary=RedirectClient(location)
         assert query_page(boundary,'https://www.bing.com/images/search',{})[0]=='redirect_access_boundary_not_followed'
         assert boundary.calls==1
