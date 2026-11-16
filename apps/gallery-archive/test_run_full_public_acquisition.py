@@ -37,6 +37,8 @@ class FullAcquisitionTests(unittest.TestCase):
                            'source':'https://official-photo.example.com/yui'}]}))
             article='https://public-photos-archive.org/artgravia-777-yui'
             verified={'schema_version':1,'model':'yui',
+                      'targets':[{'id':'artgravia-777-yui','title':'ArtGravia 777 Yui',
+                                  'urls':[article]}],
                       'search_results':[{'id':'artgravia-777-yui',
                       'urls':[article],
                       'observations':[{
@@ -50,6 +52,15 @@ class FullAcquisitionTests(unittest.TestCase):
             self.assertEqual(set(observed),
                              {'public-yui-sns','artgravia-777-yui'})
             self.assertEqual(len(observed),2)
+            # Discovery observed an edition but forgot to include the
+            # target row consumed by the physical collector. Do not fake
+            # a successful collection attempt for a nonexistent work.
+            remembered_targets=verified.pop('targets')
+            evidence.write_text(json.dumps(verified))
+            no_target=[aid for group in work_batches('yui',1,root,7,
+                               source_evidence=evidence) for aid in group]
+            self.assertEqual(no_target,['public-yui-sns'])
+            verified['targets']=remembered_targets
             # A snippet-only lead is NOT evidence sufficient to schedule an
             # unregistered work or fetch its photos.
             verified['search_results'][0]['observations'][0]['proof']='search_snippet_only'
