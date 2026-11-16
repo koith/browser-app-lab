@@ -88,10 +88,20 @@ def execute(args):
         for aid in ids:
             command.extend(['--album-id',aid])
         print('FULL_COLLECTION_BATCH_START',args.model,index,'work_count',len(ids),flush=True)
-        result=subprocess.run(command,cwd=ROOT,timeout=args.batch_timeout,check=False)
-        row={'batch':index,'works':ids,'collector_returncode':result.returncode,
+        try:
+            result=subprocess.run(command,cwd=ROOT,timeout=args.batch_timeout,check=False)
+            collector_code=result.returncode
+            collection_error=None
+        except subprocess.TimeoutExpired:
+            # One slow public origin must not discard the other works' verified
+            # files or prevent bounded attempts against the remaining albums.
+            collector_code=124
+            collection_error='collector_timeout'
+        row={'batch':index,'works':ids,'collector_returncode':collector_code,
              'new_sha_verified_originals':0,'total_bytes_added':0}
-        if result.returncode==0 and catalog.is_file():
+        if collection_error:
+            row['collection_error']=collection_error
+        if collector_code==0 and catalog.is_file():
             try:
                 proc=subprocess.run([sys.executable,str(ARCHIVE/'publish_new_public_photos_to_pages.py'),
                     '--model',args.model,'--stage',str(target),
@@ -107,12 +117,16 @@ def execute(args):
                 row['publication_error']=type(error).__name__
         reports.append(row)
         print('FULL_COLLECTION_BATCH_RESULT',json.dumps(row,ensure_ascii=False),flush=True)
+    timed_out=[x['batch'] for x in reports if x.get('collection_error')=='collector_timeout']
     report={'model':args.model,'registered_works_visited':sum(map(len,batches)),
             'batches':reports,'new_local_verified_SHA':collected,
+            'timed_out_batches':timed_out,
+            'collection_complete_without_batch_timeouts':not timed_out,
             'new_remote_SHA_readback_verified':0,
             'new_public_Pages_verified':0,
             'scope':'public_authenticated-free_only',
-            'state':'LOCAL_PUBLICATION_STAGED_NOT_DEPLOYED'}
+            'state':('LOCAL_STAGED_PARTIAL_TIMEOUT_NOT_FULLY_SEARCHED' if timed_out
+                     else 'LOCAL_PUBLICATION_STAGED_NOT_DEPLOYED')}
     (stage/'full-collection-summary.json').write_text(
        json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print('FULL_COLLECTION_MODEL_RESULT',json.dumps(report,ensure_ascii=False),flush=True)
