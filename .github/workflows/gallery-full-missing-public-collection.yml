@@ -27,6 +27,10 @@ on:
       - 'apps/gallery-archive/test_run_full_public_acquisition.py'
       - 'apps/gallery-archive/run_exhaustive_reverse_search.py'
       - 'apps/gallery-archive/test_exhaustive_reverse_search.py'
+      - 'apps/gallery-archive/reverse_image_sweep.py'
+      - 'apps/gallery-archive/test_reverse_image_sweep.py'
+      - 'apps/gallery-archive/bing_visual_knowledge.py'
+      - 'apps/gallery-archive/test_bing_visual_knowledge.py'
       - 'apps/gallery-archive/exhaustive_campaign_controller.py'
       - 'apps/gallery-archive/test_exhaustive_campaign_controller.py'
       - 'apps/gallery-archive/source_alias_search.py'
@@ -56,6 +60,7 @@ jobs:
           python apps/gallery-archive/test_run_full_public_acquisition.py
           python apps/gallery-archive/test_source_alias_search.py
           python apps/gallery-archive/test_reverse_image_sweep.py
+          python apps/gallery-archive/test_bing_visual_knowledge.py
           python apps/gallery-archive/test_exhaustive_reverse_search.py
           python apps/gallery-archive/test_exhaustive_campaign_controller.py
           python apps/gallery-archive/test_gallery_full_workflow_order.py
