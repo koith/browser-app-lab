@@ -17,6 +17,9 @@ from urllib.request import Request, urlopen
 
 ISSUE_NUMBER = 607
 MARKER = "<!-- intersection-evidence-status-v1 -->"
+# Update one known bot-owned status comment, not all 71 historical comments.
+STATUS_COMMENT_ID = 6619616433
+MAX_STATUS_CHARS = 5000
 PREFIX = "https://api.github.com"
 CAPTURE = "demand-fast-capture.yml"
 REPLAY = "demand-replay-encrypted.yml"
@@ -96,6 +99,25 @@ def run_url(run, repo):
             if isinstance(number, int) and number > 0 else "")
 
 
+def top_level_task_counts(issue_body):
+    """Only P0/P1/P2 parent checklist items count toward finished work."""
+    active=False
+    seen={}
+    for line in issue_body.splitlines():
+        if line.startswith("## "):
+            active=bool(re.match(r"^## P[012]\\b",line))
+            continue
+        if not active:
+            continue
+        match=re.match(r"^- \\[([ x])\\] \\*\\*(INT-[0-9]{2})\\*\\*",line)
+        if match:
+            state,key=match.groups()
+            if key in seen:
+                return 0,0  # duplicate parent task: fail closed
+            seen[key]=(state=="x")
+    return sum(seen.values()),len(seen)
+
+
 def render(repo, run_groups, summaries, issue_body, now):
     """Render one durable status comment without claiming unproven completion."""
     latest_capture = next(iter(run_groups.get(CAPTURE, [])), None)
@@ -128,12 +150,7 @@ def render(repo, run_groups, summaries, issue_body, now):
         core = "UNVERIFIED — 최근 3회 수집은 정상이나 전체 복구·무결성 미검증"
     else:
         core = "UNVERIFIED — 연속 정상 수집 및 기존 원본 전수 검증 미충족"
-    titles = re.findall(
-        r"(?m)^- \[([ x])\] \*\*(INT-[0-9]{2})(?:\s+|[^*])*\*\*",
-        issue_body,
-    )
-    checked = {key for state, key in titles if state == "x"}
-    tracked = {key for _, key in titles}
+    checked_count,tracked_count=top_level_task_counts(issue_body)
     extra = "INT-11, INT-12는 상세 OPERATIONS_BACKLOG.md에서 별도 관리. "
     lines = [
         MARKER,
@@ -141,7 +158,7 @@ def render(repo, run_groups, summaries, issue_body, now):
         f"마지막 점검: {now.strftime('%Y-%m-%d %H:%M UTC')} · GitHub Actions 자체 실행 · ChatGPT 새 대화 생성 없음",
         "",
         f"**P0 / INT-01: {core}**",
-        f"**메인 이슈 체크:** {len(checked)}/{len(tracked) or '미확인'}건 완료 표시 · "
+        f"**메인 이슈 체크:** {checked_count}/{tracked_count or '미확인'}건 완료 표시 · "
         "체크박스는 실제 복구 검증 없이는 자동 변경하지 않음",
         "",
         "### 최근 실제 수집 (최대 3회)",
@@ -209,7 +226,10 @@ def render(repo, run_groups, summaries, issue_body, now):
         "",
         extra + "비공개 원문·계정·자격증명·실파일명은 이 보고에 기록하지 않음.",
     ])
-    return "\n".join(lines) + "\n"
+    board="\n".join(lines) + "\n"
+    if len(board)>MAX_STATUS_CHARS:
+        raise ValueError("status board exceeds 5000-character cap")
+    return board
 
 
 class GitHub:
@@ -314,36 +334,45 @@ class GitHub:
         return None
 
     def upsert_comment(self, body):
-        existing = None
-        for page in range(1, 5):
-            comments = self.request(
-                f"/repos/{self.repo}/issues/{ISSUE_NUMBER}/comments"
-                f"?per_page=100&page={page}"
-            )
-            if not isinstance(comments, list):
-                break
-            for item in comments:
-                author = item.get("user") or {}
-                login = author.get("login", "")
-                if (MARKER in item.get("body", "")
-                        and (author.get("type") == "Bot"
-                             or login == "github-actions[bot]")):
-                    existing = item
+        if len(body)>MAX_STATUS_CHARS:
+            raise ValueError("refuse oversized status board")
+        existing=None
+        try:
+            candidate=self.request(
+                f"/repos/{self.repo}/issues/comments/{STATUS_COMMENT_ID}")
+            author=candidate.get("user") or {}
+            if (MARKER in candidate.get("body","") and
+                    (author.get("type")=="Bot" or
+                     author.get("login")=="github-actions[bot]")):
+                existing=candidate
+        except (HTTPError,URLError,ValueError,TypeError):
+            pass
+        # Historical fallback only when direct pinned comment lookup fails.
+        if existing is None:
+            for page in range(1,5):
+                comments=self.request(
+                    f"/repos/{self.repo}/issues/{ISSUE_NUMBER}/comments"
+                    f"?per_page=100&page={page}")
+                if not isinstance(comments,list):
                     break
-            if existing or len(comments) < 100:
-                break
+                for item in comments:
+                    author=item.get("user") or {}
+                    login=author.get("login","")
+                    if (MARKER in item.get("body","") and
+                            (author.get("type")=="Bot" or
+                             login=="github-actions[bot]")):
+                        existing=item
+                        break
+                if existing or len(comments)<100:
+                    break
         if existing:
-            if existing.get("body") == body:
+            if existing.get("body")==body:
                 return "unchanged"
-            self.request(
-                f"/repos/{self.repo}/issues/comments/{existing['id']}",
-                method="PATCH", data={"body": body}
-            )
+            self.request(f"/repos/{self.repo}/issues/comments/{existing['id']}",
+                         method="PATCH",data={"body":body})
             return "updated"
-        self.request(
-            f"/repos/{self.repo}/issues/{ISSUE_NUMBER}/comments",
-            method="POST", data={"body": body}
-        )
+        self.request(f"/repos/{self.repo}/issues/{ISSUE_NUMBER}/comments",
+                     method="POST",data={"body":body})
         return "created"
 
 
