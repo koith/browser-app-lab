@@ -113,6 +113,66 @@ def diff_pixels(source_bytes,archive_bytes):
             "pixels":n}
 
 
+def measure_source_geometry(page,profile):
+    """Keep public source pixels private; log only dimensionless UI geometry."""
+    return page.evaluate("""(identity) => {
+      const dims=el=>{
+        const r=el.getBoundingClientRect();
+        return {x:Math.round(r.x),y:Math.round(r.y),
+                w:Math.round(r.width),h:Math.round(r.height)};
+      };
+      const visible=el=>{
+        const r=el.getBoundingClientRect();
+        return r.width>0 && r.height>0 && r.bottom>0 &&
+               r.top<window.innerHeight;
+      };
+      const host=identity.handle.replace(/^@/, "").toLowerCase();
+      const name=identity.name.toLowerCase();
+      const textNodes=[...document.querySelectorAll('span,div,h1,h2,h3')].slice(0,18000)
+        .filter(el=>el.children.length===0 && visible(el));
+      const byText=(needle)=>textNodes
+        .filter(el=>(el.textContent||'').trim().toLowerCase()===needle)
+        .slice(0,8).map(dims);
+      const imageRects=[...document.querySelectorAll('img')].slice(0,1000)
+        .filter(el=>visible(el)).map(el=>({...dims(el)}));
+      const candidates=[...document.querySelectorAll('*')].slice(0,12000)
+        .filter(el=> {
+          const r=el.getBoundingClientRect();
+          return r.width>=250 && r.height>=65 && r.height<=250 &&
+                 r.top>=0 && r.top<500;
+        })
+        .filter(el=>getComputedStyle(el).backgroundImage!=='none')
+        .slice(0,8).map(dims);
+      const tabs=[...document.querySelectorAll('[role=tab]')].slice(0,12)
+        .filter(visible).map(dims);
+      return {handle:byText(host).slice(0,3),
+              name:byText(name).slice(0,3),
+              profileImages:imageRects.filter(r=>r.w>=50&&r.h>=50&&
+                 r.w<=180&&r.h<=180&&r.y<500).slice(0,6),
+              wideImages:imageRects.filter(r=>r.w>=250&&r.h>=65&&
+                 r.h<=300&&r.y<500).slice(0,6),
+              coverBackgrounds:candidates,
+              tabs:tabs.slice(0,8)};
+    }""",{"handle":str(profile.get("handle") or ""),
+            "name":str(profile.get("display_name") or "")})
+
+
+def per_band_errors(source_bytes,archive_bytes):
+    source=Image.open(io.BytesIO(source_bytes)).convert("RGB")
+    archived=Image.open(io.BytesIO(archive_bytes)).convert("RGB")
+    rows=[]
+    for top in range(0,min(source.height,archived.height),100):
+        bottom=min(source.height,archived.height,top+100)
+        lhs=io.BytesIO();rhs=io.BytesIO()
+        source.crop((0,top,source.width,bottom)).save(lhs,format="PNG")
+        archived.crop((0,top,archived.width,bottom)).save(rhs,format="PNG")
+        mismatch=diff_pixels(lhs.getvalue(),rhs.getvalue())
+        rows.append({"top":top,"bottom":bottom,
+                     "exact_percent":mismatch["equal_pixel_percent"],
+                     "rgb_mae":mismatch["rgb_mae"]})
+    return rows
+
+
 def compare_one(browser,provider,key,source_url,profile,width,height):
     context=browser.new_context(
         viewport={"width":width,"height":height},device_scale_factor=1,
@@ -127,6 +187,7 @@ def compare_one(browser,provider,key,source_url,profile,width,height):
         # An error splash or login page is not a valid pixel reference.
         if not handle or handle not in visible:
             return {"status":"SOURCE_NOT_COMPARABLE"}
+        source_boxes=measure_source_geometry(source,profile)
         archived=context.new_page()
         candidate_url=BASE+"/account-archive?embedded=1&account="+key
         candidate_bytes=capture(archived,candidate_url,selector="#displayName")
@@ -141,6 +202,8 @@ def compare_one(browser,provider,key,source_url,profile,width,height):
         if handle not in body:
             return {"status":"ARCHIVED_SOURCE_IDENTITY_NOT_MATCHED"}
         metrics=diff_pixels(reference_bytes,candidate_bytes)
+        metrics["source_geometry"]=source_boxes
+        metrics["vertical_error_bands"]=per_band_errors(reference_bytes,candidate_bytes)
         metrics["status"]="PIXEL_IDENTICAL" if metrics["exactly_identical"] else "PIXEL_DIFFERENT"
         # Expected source geometry varies by actual provider version.
         # Record only the archive-side measured bounding boxes, no text.
