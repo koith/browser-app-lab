@@ -65,7 +65,7 @@ const browserType=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   assert.equal(ordinary.source,'inferred-web-price-not-original',
    'ordinary bought cards have no officially attested resale ratio');
   assert.equal(ordinary.gp,Math.floor(price/2),'preserve existing WEB-only resale behavior');
-  assert.match(ordinary.title,/일반 카드 원작 판매가 미확인/);
+  assert.match(ordinary.title,/일반 카드 원작 재판매 가격 규칙 미확인/);
   await page.screenshot({path:'leaf-archival-serial-resale-real-shop-'+browserType.name()+'.png'});
   assert.deepEqual(errors,[]);
   console.log('4LEAF_OFFICIAL_2003_SERIAL_CARD_RESALE_PASS',JSON.stringify({
