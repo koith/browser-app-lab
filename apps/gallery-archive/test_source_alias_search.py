@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Local match/identity regression for public site search. No external requests."""
-from source_alias_search import page_matches,exact_work_in_text,https_page,source_headings,rotated_work_scope
+from source_alias_search import (page_matches,exact_work_in_text,https_page,
+                                 source_headings,rotated_work_scope,crawl_names)
 from source_name_ledger import LEDGER
+from unittest.mock import patch
 import json
 
 def main():
@@ -44,6 +46,34 @@ def main():
         pass
     else:
         raise AssertionError('invalid negative source rotation must fail')
+    # A source snippet mentions two work names, but the actual article
+    # proves ONLY the second. Prior global visited_urls discarded its URL
+    # after the first failed edition check, losing a real image source.
+    source="https://public-image-archives.org/mimmi-multiple-editions"
+    work_db={'works':{
+        'mimmi:djawa-pop-kitty-party':[{'name':'Mimmi Pop Kitty Party'}],
+        'mimmi:djawa-nikke-yuni':[{'name':'Mimmi Nikke Yuni'}]},
+        'model_names':{'mimmi':[{'name':'Mimmi'}]}}
+    def source_or_search(_session,url,timeout=12):
+        if url==source:
+            return ('<html><title>DJAWA Mimmi Nikke Yuni</title>'
+                    '<h1>Mimmi Nikke Yuni</h1><article>Mimmi official Yuni photos</article>'
+                    '</html>','ok')
+        return '<html><title>image search</title></html>','ok'
+    def shared_result(html,engine):
+        if 'image search' in html:
+            return [{'url':source,
+                     'title':'Mimmi Pop Kitty Party and Mimmi Nikke Yuni',
+                     'snippet':'DJAWA cosplay official works'}]
+        return []
+    with patch('source_alias_search.load_html',side_effect=source_or_search),patch(
+            'source_alias_search.hits_from_html',side_effect=shared_result):
+        result=crawl_names(work_db,'mimmi',per_work=1,max_pages=2,
+                           session=object(),delay=0,work_budget=2)
+    by_id={v['id']:v['urls'] for v in result['search_results']}
+    assert by_id['djawa-pop-kitty-party']==[],result
+    assert by_id['djawa-nikke-yuni']==[source],result
+
     print("PUBLIC_SOURCE_ALIAS_MATCH_AND_IDENTITY_GATES_PASS")
 
 if __name__=="__main__":main()
