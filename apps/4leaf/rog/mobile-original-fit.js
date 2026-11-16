@@ -51,7 +51,10 @@
    for(var n of ['--leaf-fit-scale','--leaf-layout-width','--leaf-layout-height','--leaf-left','--leaf-top'])root.style.removeProperty(n);
    return;
   }
-  var landscape=orientation?orientation.matches:innerWidth>innerHeight;
+  // WebKit may retain a stale orientation media-query during live rotation.
+  // Available viewport dimensions are authoritative, except while the
+  // keyboard is shrinking a focused editor's visual viewport.
+  var landscape=(focusedEditor()&&applied)?applied.landscape:(w>h);
   // Keyboard and Safari toolbar changes do not authorize zooming or cropping.
   var isKeyboard=focusedEditor()&&applied&&applied.landscape===landscape&&
    h<applied.deviceHeight*.78;
