@@ -1,4 +1,4 @@
-name: 4LEAF public Pages mobile version verification
+name: 4LEAF public Pages version and source-file verification
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
       - "apps/4leaf/rog/sw.js"
       - "apps/4leaf/rog/mobile-original-fit.js"
       - "apps/4leaf/rog/mobile-landscape-fit.css"
+      - "apps/4leaf/rog/shop-era-2004.js"
+      - "apps/4leaf/rog/shop-era-2004.css"
+      - "apps/4leaf/rog/street-world.js"
   workflow_dispatch:
 
 permissions:
@@ -36,9 +39,15 @@ jobs:
                  curl -fsSL --max-time 12 "$base/mobile-original-fit.js?verify=$GITHUB_SHA-$attempt" -o /tmp/public-mobile.js &&
                  curl -fsSL --max-time 12 "$base/mobile-landscape-fit.css?verify=$GITHUB_SHA-$attempt" -o /tmp/public-mobile.css &&
                  cmp -s apps/4leaf/rog/mobile-original-fit.js /tmp/public-mobile.js &&
-                 cmp -s apps/4leaf/rog/mobile-landscape-fit.css /tmp/public-mobile.css; then
+                 cmp -s apps/4leaf/rog/mobile-landscape-fit.css /tmp/public-mobile.css &&
+                 curl -fsSL --max-time 12 "$base/shop-era-2004.js?verify=$GITHUB_SHA-$attempt" -o /tmp/public-shop-era.js &&
+                 curl -fsSL --max-time 12 "$base/shop-era-2004.css?verify=$GITHUB_SHA-$attempt" -o /tmp/public-shop-era.css &&
+                 curl -fsSL --max-time 12 "$base/street-world.js?verify=$GITHUB_SHA-$attempt" -o /tmp/public-street.js &&
+                 cmp -s apps/4leaf/rog/shop-era-2004.js /tmp/public-shop-era.js &&
+                 cmp -s apps/4leaf/rog/shop-era-2004.css /tmp/public-shop-era.css &&
+                 cmp -s apps/4leaf/rog/street-world.js /tmp/public-street.js; then
                 ok=1
-                echo "Public Pages verified: $public_ver / $public_cache and byte-matching mobile JS/CSS"
+                echo "Public Pages verified: $public_ver / $public_cache and byte-matching mobile and M02 historical source JS/CSS"
                 break
               fi
             else
