@@ -29660,6 +29660,18 @@
           "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
           "source_url": "",
           "quality": "sha_verified_existing_owner_exact_static_fallback_no_new_cut_claim"
+        },
+        {
+          "number": 16,
+          "url": "stored-albums/djawa-rudy2-codename-wolfgirl/a565a1afa22c09fa665b.jpg",
+          "sha256": "a565a1afa22c09fa665be41c6526fdf4af15e1e8f99c4706d2ed533550f290a0",
+          "bytes": 40364,
+          "width": 600,
+          "height": 400,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -29696,5 +29708,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 2984
+  "physical_verified_image_count": 2985
 }
