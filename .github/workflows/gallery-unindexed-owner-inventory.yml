@@ -1,5 +1,9 @@
-name: Gallery Owner Archive Unindexed Files - Manual Read Only
+name: Gallery Owner Archive One-Shot Census - Read Only
 on:
+  push:
+    branches: [run/gallery-owner-census-one-shot-20261117]
+    paths:
+      - '.github/workflows/gallery-unindexed-owner-inventory.yml'
   workflow_dispatch:
     inputs:
       model:
@@ -11,15 +15,21 @@ on:
           - yui
 permissions:
   contents: read
+  issues: write
 concurrency:
   group: gallery-unindexed-owner-inventory-${{ inputs.model }}
   cancel-in-progress: false
 jobs:
   read-only-census:
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi, yui]
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
-      MODEL: ${{ inputs.model }}
+      MODEL: ${{ matrix.model }}
+      GH_TOKEN: ${{ github.token }}
       YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
       MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
@@ -61,5 +71,26 @@ jobs:
           "$RUNNER_TEMP/bin/rclone" cat "$remote/metadata/catalog.json" --timeout 75s --retries 2 > "$RUNNER_TEMP/owner-catalog.json" 2> "$RUNNER_TEMP/catalog-stderr"
           # lsjson reports paths and sizes, not image bytes; restrict logs to aggregate counts.
           timeout 660 "$RUNNER_TEMP/bin/rclone" lsjson "$remote" -R --files-only --timeout 75s --retries 2 > "$RUNNER_TEMP/owner-lsjson.json" 2> "$RUNNER_TEMP/lsjson-stderr"
-          python apps/gallery-archive/inventory_unindexed_owner_files.py --model "$MODEL" --listing "$RUNNER_TEMP/owner-lsjson.json" --catalog "$RUNNER_TEMP/owner-catalog.json"
+          python apps/gallery-archive/inventory_unindexed_owner_files.py --model "$MODEL" --listing "$RUNNER_TEMP/owner-lsjson.json" --catalog "$RUNNER_TEMP/owner-catalog.json" | tee "$RUNNER_TEMP/owner-census-result.log"
           echo 'Read-only owner archive file census complete; no files downloaded, uploaded or deleted.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish only aggregate counts for the two-model one-shot investigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,os,pathlib
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'owner-census-result.log'
+          rows=[x for x in p.read_text().splitlines() if x.startswith('OWNER_ARCHIVE_UNINDEXED_INVENTORY ')]
+          if len(rows)!=1: raise SystemExit('Missing verified census report')
+          data=json.loads(rows[0].split(' ',1)[1])
+          if data.get('model')!=os.environ['MODEL'] or data.get('read_only') is not True: raise SystemExit('Invalid model census')
+          body=('One-time verified read-only TeraBox census '+data['model']+': '
+                'unindexed original image candidates='+str(data['unindexed_original_image_candidates'])+
+                ', other image candidates='+str(data['unindexed_other_image_candidates'])+
+                ', archive candidates='+str(data['unindexed_archive_candidates'])+
+                ', catalog referenced files missing='+str(data['catalog_referenced_files_missing'])+
+                ', catalog photo records='+str(data['catalog_photo_records'])+
+                '. No media bytes downloaded; only aggregate counts exposed.')
+          (pathlib.Path(os.environ['RUNNER_TEMP'])/'owner-census-issue-comment.txt').write_text(''.join(body))
+          PY
+          gh api --method POST "repos/$GITHUB_REPOSITORY/issues/605/comments" -f body="$(cat "$RUNNER_TEMP/owner-census-issue-comment.txt")" --silent
