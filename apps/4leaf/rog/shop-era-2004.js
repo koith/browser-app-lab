@@ -26,7 +26,7 @@
  }
  // Inspection controls belong to the WEB frame, NEVER atop original
  // CardShop bitmap or the 2004 screenshot's item stock.
- const outsideScene=document.querySelector('#shop>.scene-banner');
+ const outsideScene=document.querySelector('#app>.toolbar');
  (outsideScene||stage).append(toolbar);
  // The recovered 2002 UI does not contain a time-machine control.
  // Keep this WEB-only provenance switch visually separate from source art.
