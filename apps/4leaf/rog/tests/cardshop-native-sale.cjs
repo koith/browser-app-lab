@@ -34,6 +34,9 @@ const path=require('node:path');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_SHOP_NATIVE__);
   await page.locator('[data-route="shop"]').first().click();
   await page.waitForSelector('#shop:not(.hidden)');
+  // This regression tests the distinct 2002 native PAK 3×3 client.
+  // M02's screenshot-faithful 2004 4×2 UI has its own source E2E test.
+  await page.evaluate(()=>window.__LEAF_SHOP_ERA__.setEra('2002'));
   assert.equal(await page.locator('#shop-grid .shop-card').count(),9,
    'source CardShop/cardshopback.png has 3 columns by 3 rows, do not mistakenly replace with different-version 4x2 screenshot');
   const oldOwned=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')).owned);
@@ -83,7 +86,7 @@ const path=require('node:path');
   }));
   assert.ok(afterBuy.p.owned.includes(cardId),'real chessman added to saved inventory');
   assert.equal(afterBuy.enabled,true,'newly purchased un-equipped card may be sold');
-  assert.equal(afterBuy.known,'inferred-web-price-not-original',
+  assert.equal(afterBuy.known,'inferred-early-web-50pct-not-original',
    'never misrepresent 50% resale as confirmed original rule');
   assert.equal(afterBuy.pos,'0px -481px','genuine 판매하기 original first-frame atlas');
   assert.equal(afterBuy.clickTarget,'shop-sell',
