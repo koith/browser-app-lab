@@ -1,0 +1,50 @@
+name: 4LEAF M02 original shop acceptance
+on:
+  pull_request:
+    paths:
+      - "apps/4leaf/rog/tests/m02-real-scene-snapshot.cjs"
+      - "apps/4leaf/rog/shop-era-2004.css"
+      - "apps/4leaf/rog/shop-era-2004.js"
+      - "apps/4leaf/rog/street-world.js"
+      - ".github/workflows/4leaf-m02-original-shop-acceptance.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  m02-original-realuse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install browsers
+        working-directory: apps/4leaf/rog
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps ${{ matrix.engine }}
+      - name: Start frontend
+        run: |
+          python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/server.log 2>&1 &
+          for try in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:8765/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/server.log; exit 1
+      - name: Real user Keltica to Magic Carden, source 2004 shop
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          LEAF_VISUAL_LOG_B64: "1"
+        run: node apps/4leaf/rog/tests/m02-real-scene-snapshot.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m02-original-scene-${{ matrix.engine }}
+          path: apps/4leaf/rog/tests/.visual-captures/*.jpg
+          retention-days: 14
+          if-no-files-found: warn

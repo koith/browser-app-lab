@@ -256,3 +256,71 @@
     transcribing it as if the original screenshot contained one. */
  right:12px!important;bottom:7px!important;
 }
+
+
+/* M02 final source-layout acceptance against assets/shop_ref.png.
+ * Do not paint WEB provenance into the 794x404 ORIGINAL CardShop canvas.
+ * Put optional 2002/2004 comparison controls in the MainFrame chrome only. */
+#app>.toolbar{position:relative}
+#app>.toolbar .shop-era-toggle{
+ display:none;position:absolute;left:203px;top:4px;right:auto;bottom:auto;
+ z-index:30;box-sizing:border-box;height:27px;max-height:27px;
+ align-items:center;gap:3px;margin:0;padding:2px 5px;
+ color:#f8f0db;background:#1b2857df;border:1px solid #7d91c7;
+ border-radius:2px;box-shadow:inset 0 1px #b8c9e52b;
+ font:10px Gulim,'굴림',sans-serif;
+}
+#app:has(#shop:not(.hidden))>.toolbar .shop-era-toggle{display:flex}
+#app>.toolbar .shop-era-toggle button{
+ display:inline-flex!important;align-items:center;justify-content:center;
+ min-width:36px!important;width:36px!important;height:21px!important;
+ padding:1px!important;margin:0!important;
+ border:1px solid #8796c7!important;border-radius:1px!important;
+ background:#3b5180!important;box-shadow:none!important;
+ color:#f6f3e5!important;text-shadow:none!important;
+ font:10px/18px Gulim,'굴림',sans-serif!important;
+}
+#app>.toolbar .shop-era-toggle button[aria-pressed="true"]{
+ background:#f0dca8!important;color:#30335c!important;border-color:#bd9d67!important;
+}
+#app>.toolbar .shop-market-date-label{
+ display:inline-flex;align-items:center;gap:2px;padding:0 0 0 5px;
+ white-space:nowrap;font:10px Gulim,'굴림',sans-serif;color:#edf2ff;
+}
+#app>.toolbar #shop-market-date{
+ height:21px!important;min-width:70px!important;width:74px!important;
+ font:10px Gulim,'굴림',sans-serif;background:#d8dff2;color:#262b4c;
+ border:1px solid #8295bc;
+}
+/* Still available to accessibility trees (live status); never over the art. */
+#app>.toolbar #shop-era-provenance{
+ position:absolute!important;left:-10000px!important;top:auto!important;
+ width:1px!important;height:1px!important;overflow:hidden!important;
+ clip-path:inset(50%)!important;border:0!important;padding:0!important;
+}
+/* The 2004 archival capture contains an integral raised Card Info title.
+ * The functional live card data remains inside the same original panel. */
+#shop .shop-native-stage[data-era="2004"] .shop-detail::before{
+ content:"Card Info";
+ position:absolute;left:93px;top:-6px;width:138px;height:25px;
+ box-sizing:border-box;padding:1px 6px;z-index:12;pointer-events:none;
+ border:2px ridge #bda6d7;border-radius:8px 8px 3px 3px;
+ background:linear-gradient(#7665a5,#342855 58%,#3e315f);
+ box-shadow:inset 1px 1px #d8bff4,0 2px 4px #160f39;
+ color:#f9f0ff;text-shadow:1px 2px #18122b;
+ text-align:center;font:italic bold 19px/18px Georgia,serif;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-detail::after{
+ content:"";position:absolute;left:94px;top:-1px;width:136px;height:15px;
+ box-sizing:border-box;pointer-events:none;z-index:13;
+ border-left:4px double #bdafcf;border-right:4px double #bdafcf;
+}
+
+/* The 2004 screenshot has 3 source tabs, not a fourth WEB reset tab. */
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="all"]{
+ display:none!important;pointer-events:none!important;
+}
+#app>.toolbar .shop-era-toggle .shop-era-show-all{
+ min-width:29px!important;width:29px!important;
+ color:#eff6ff!important;background:#405783!important;
+}

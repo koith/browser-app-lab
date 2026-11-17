@@ -24,7 +24,19 @@
   b.setAttribute('aria-label',era+'년 매직카덴 화면 선택');
   toolbar.append(b);
  }
- stage.append(toolbar);
+ // Original CardShop source canvas must contain ONLY authentic era art and
+ // functional shop controls. This WEB-era inspection switch belongs in the
+ // independent MainFrame toolbar, not over the 2004 screenshot geometry.
+ const mainFrameToolbar=document.querySelector('#app > .toolbar');
+ (mainFrameToolbar||stage).append(toolbar);
+ // Screenshot 2004 contains exactly Normal / Valuable / Rare. A synthetic
+ // '전체' tab would change the original screenshot; keep it exclusively as
+ // an optional WEB catalog reset button on the external MainFrame toolbar.
+ const reset=document.createElement('button');
+ reset.type='button';reset.className='shop-era-show-all';
+ reset.textContent='전체';reset.title='전체 카드 보기 (웹앱 편의 기능)';
+ reset.addEventListener('click',()=>tabs.querySelector('[data-group="all"]')?.click());
+ toolbar.append(reset);
  // The recovered 2002 UI does not contain a time-machine control.
  // Keep this WEB-only provenance switch visually separate from source art.
  const marketLabel=document.createElement('label');
@@ -45,7 +57,7 @@
  const provenance=document.createElement('div');
  provenance.id='shop-era-provenance';
  provenance.setAttribute('role','status');
- stage.append(provenance);
+ (mainFrameToolbar||stage).append(provenance);
  const renderProvenance=()=>{
   const market=window.__LEAF_HISTORIC_MARKET__?.getState();
   const note=market?.date==='2003-01-15'
@@ -54,19 +66,23 @@
   provenance.textContent=(era==='2004'
    ?'2004 캡처 기반 4×2 / RARE 명단 미확보(역사상 발매 0종) · 구성 비교용'
    :'2002 PAK 원본 3×3 / 원본 배경·버튼')+note;
+  toolbar.title=provenance.textContent;
  };
  window.addEventListener('leaf-shop-market-change',()=>{
   const source=window.__LEAF_HISTORIC_MARKET__?.getState();
   if(source&&marketSelect.value!==source.date)marketSelect.value=source.date;
   renderProvenance();
  });
- let era='2002';
- try{era=localStorage.getItem('4leaf-original-shop-era')==='2004'?'2004':'2002'}catch{}
+ // The currently accepted M02 archival reference is 2004's 4x2 shop.
+ // New visits open that historical layout; explicit legacy 2002 choice is
+ // preserved as a user preference without altering any source PAK assets.
+ let era='2004';
+ try{if(localStorage.getItem('4leaf-original-shop-era')==='2002')era='2002'}catch{}
  const apply=(selected,persist)=>{
   if(!['2002','2004'].includes(selected))return false;
   era=selected;
   stage.dataset.era=era;
-  for(const b of toolbar.querySelectorAll('button')){
+  for(const b of toolbar.querySelectorAll('button[data-era]')){
    b.setAttribute('aria-pressed',String(b.dataset.era===era));
   }
   rare.disabled=era!=='2004';
@@ -79,7 +95,7 @@
   window.dispatchEvent(new CustomEvent('leaf-shop-era-change',{detail:{era,sourceRarity:'unverified'}}));
   return true;
  };
- for(const b of toolbar.querySelectorAll('button'))b.addEventListener('click',()=>apply(b.dataset.era,true));
+ for(const b of toolbar.querySelectorAll('button[data-era]'))b.addEventListener('click',()=>apply(b.dataset.era,true));
  window.__LEAF_SHOP_ERA__={setEra:s=>apply(s,true),getState:()=>({
   era,pageSize:era==='2004'?8:9,
   originalAsset:era==='2004'?'archived-2004-shop_ref.png-reference/independent-DOM':'2002-CardShop/cardshopback.png',
