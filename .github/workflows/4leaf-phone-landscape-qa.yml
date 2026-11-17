@@ -68,6 +68,14 @@ jobs:
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
         run: node apps/4leaf/rog/tests/visual-landscape-audit.cjs
+      - name: Archive actual 932x320 visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-landscape-visual-${{ matrix.engine }}
+          path: apps/4leaf/rog/tests/.visual-captures/*.jpg
+          if-no-files-found: warn
+          retention-days: 30
       - name: One complete match on phone landscape
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
