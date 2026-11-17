@@ -2122,18 +2122,29 @@
       "id": "M02",
       "priority": "P1",
       "title": "켈티카·매직카덴 원작 복원",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M02",
-      "current": "MainStreet와 CardShop 리소스를 게임에 연결",
+      "current": "M02 소스 범위: 실제 켈티카 MainStreet 원본 1938×404 거리/건물 픽셀 클릭 → 매직카덴. 2004년 상점 캡처 4×2/3등급 탭/착용목록/Card Info/GP/구매/판매 10개 소스 좌표 Chromium+WebKit 최대 오차 2px. WEB 전용 연도/시세 탭은 MainFrame으로 분리, 2002년 원본 3×3 PAK 장면 명시적으로 유지. CardData 개별 얼굴 매핑 ACT-05, 경제 규칙 SHOP-02, 채팅 창 P0-CHAT 등 별도 미완료는 본 M02 UI 수용에 포함하지 않음.",
       "acceptance": [
         "상점/구매/문 UI를 2004년 캡처와 동일 상태에서 비교·검증"
       ],
       "evidence": [
-        "apps/4leaf/rog/shop-native.js"
+        "apps/4leaf/rog/shop-native.js",
+        "apps/4leaf/assets/shop_ref.png",
+        "apps/4leaf/rog/street-world.js",
+        "apps/4leaf/rog/docs/evidence/M02-2004-shop-acceptance.md",
+        "https://github.com/koith/browser-app-lab/pull/1311",
+        "https://github.com/koith/browser-app-lab/actions/runs/44067060931",
+        "https://github.com/koith/browser-app-lab/actions/runs/44044382651"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-2004-ARCHIVAL-SCREENSHOT-10-ANCHORS-2PX/MAINSTREET-REAL-DOOR/CHROMIUM-WEBKIT; ACT-05/SHOP-02/P0-CHAT-SEPARATE",
+      "lastReviewed": "2026-11-17",
+      "verifiedAcceptance": {
+        "sourceComparison": "apps/4leaf/assets/shop_ref.png archived 2004 original 541x402, equivalent 794x404 shop scene. Normal/Valuable/Rare, first/fifth card, owned list, GP, Card Info, buy/sell 10 target coordinates matched in two actual browser engines with max source-coordinate deviation 2px (limit 4px). Original 2002 3x3 PAK remains independent.",
+        "implementation": "PR #1311 merged main 9e33b3cf1f9fd705a96f36062adf4e04f4398c37 (beta.95/PWA v182); original MainStreet/card.png hit-test entrance; DOM-based 2004 real card slot/control UI; 2002 explicit selection and 2004 default; historical label and WEB-only controls outside original source canvas. Missing face identity is tracked in ACT-05, economy rules in SHOP-02, room chat fidelity in P0-CHAT.",
+        "runtimeTest": "Actions #44067060931 Chromium+WebKit both SUCCESS: actual user route street → original building → CardShop, era 2002/2004 switch, 4x2 cards, 10 source landmarks max 2px; preexisting CardShop real buy-sale save/reload test #44044382651 both SUCCESS.",
+        "deployment": "PENDING: separate public Pages byte-for-byte beta.95/M02 source-asset verification run #44069414461 must SUCCESS before this candidate record is merged. Do not treat this branch-only row as an accepted main completion."
+      }
     },
     {
       "id": "M03",
