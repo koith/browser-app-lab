@@ -86,7 +86,7 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
    assert.ok(actual&&Math.abs(actual[0]-xy[0])<13&&Math.abs(actual[1]-xy[1])<13,
     '2004 screenshot landmark '+key+': '+JSON.stringify({source:actual,reference:xy}));
   }
-  const dir='apps/4leaf/rog/tests/.m02-screenshots';
+  const dir='apps/4leaf/rog/tests/m02-screenshots';
   fs.mkdirSync(dir,{recursive:true});
   const shot=await page.screenshot({path:dir+'/'+engine+'-magic-carden-2004.jpg',type:'jpeg',quality:75});
   if(process.env.M02_IMAGE_LOG==='1')console.log('M02_SCREEN_B64='+shot.toString('base64'));
