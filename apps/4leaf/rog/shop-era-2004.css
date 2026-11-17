@@ -302,7 +302,7 @@
  * The functional live card data remains inside the same original panel. */
 #shop .shop-native-stage[data-era="2004"] .shop-detail::before{
  content:"Card Info";
- position:absolute;left:93px;top:-16px;width:138px;height:25px;
+ position:absolute;left:93px;top:-6px;width:138px;height:25px;
  box-sizing:border-box;padding:1px 6px;z-index:12;pointer-events:none;
  border:2px ridge #bda6d7;border-radius:8px 8px 3px 3px;
  background:linear-gradient(#7665a5,#342855 58%,#3e315f);
@@ -311,7 +311,7 @@
  text-align:center;font:italic bold 19px/18px Georgia,serif;
 }
 #shop .shop-native-stage[data-era="2004"] .shop-detail::after{
- content:"";position:absolute;left:94px;top:-11px;width:136px;height:15px;
+ content:"";position:absolute;left:94px;top:-1px;width:136px;height:15px;
  box-sizing:border-box;pointer-events:none;z-index:13;
  border-left:4px double #bdafcf;border-right:4px double #bdafcf;
 }
