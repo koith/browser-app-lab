@@ -58,6 +58,8 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
   await page.waitForFunction(()=>window.__LEAF_DICE_ROSTER__?.getState());
   assert.equal((await get()).roster.team[3],testId,'source roster survives actual page reload');
   await page.locator('[data-route="lobby"]').first().click();
+  await page.locator('#lobby-create').click();
+  await page.locator('#dice-room-config:not(.hidden)').waitFor();
   await page.locator('#team-select .team-slot').nth(3).click();
   await page.locator('#modal select').selectOption('');
   await page.evaluate(()=>{window.__denyProfileWrites=true});
