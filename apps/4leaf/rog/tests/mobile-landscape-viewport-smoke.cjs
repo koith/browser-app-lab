@@ -30,7 +30,7 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
      visualWidth:vv?.width||innerWidth,visualHeight:vv?.height||innerHeight,
      viewportMeta:document.querySelector('meta[name="viewport"]').content,
      app:{x:a.x,y:a.y,width:a.width,height:a.height,right:a.right,bottom:a.bottom},
-     chat:getComputedStyle(document.getElementById('leaf-phone-chat-toggle')).display,
+     chatDetached:!!document.getElementById('leaf-phone-chat-toggle'),
      rotate:getComputedStyle(document.getElementById('leaf-phone-rotate')).display
     };
    });
@@ -39,7 +39,7 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
     assert.match(s.viewportMeta,/width=device-width/,name+' no synthetic meta zoom');
     if(!mode){
      assert.equal(s.fit,null,'desktop unaffected');
-     assert.equal(s.chat,'none');
+     assert.equal(s.chatDetached,false,'do not add invented global chat control');
      assert.equal(s.rotate,'none');
      return;
     }
@@ -61,11 +61,7 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
    const s=await get();
    verify(s,expected);
    if(expected==='landscape'){
-    assert.notEqual(s.chat,'none','chat overlay toggle visible');
-    await page.locator('#leaf-phone-chat-toggle').click();
-    assert.equal(await page.locator('html').getAttribute('data-leaf-chat-open'),'true');
-    await page.locator('#leaf-phone-chat-toggle').click();
-    assert.equal(await page.locator('html').getAttribute('data-leaf-chat-open'),'false');
+    assert.equal(s.chatDetached,false,'original MainFrame toolbar must not be hidden by an invented global chat toggle');
     // WebKit device emulation keeps its original orientation even after a
     // viewport-size mutation; independent portrait/landscape contexts above
     // test both real configurations. Do not claim live WebKit rotation tested.
