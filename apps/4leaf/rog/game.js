@@ -624,6 +624,24 @@ function selectShopCard(id){
  if(index>=0)shopPage=Math.floor(index/shopPageSize());
  drawShop();
 }
+// The 2004 client has a structured Card Info panel, not a developer
+// sentence overflowing into the trade buttons. All values remain bound to
+// the currently selected real CardData card, with no hardcoded fixtures.
+function draw2004CardInfo(c){
+ const out=$('shop-selected');
+ const create=(className,value)=>{
+  const node=document.createElement('div');node.className=className;node.textContent=value;return node;
+ };
+ out.replaceChildren(
+  create('source-cardinfo-heading','Card Info'),
+  create('source-cardinfo-name',c.name+'  ·  '+c.ability),
+  create('source-cardinfo-detail',
+   '이동 '+c.move+'   공격 '+c.atk+'   방어 '+c.def+'   지력 '+c.int+
+   '   POINT '+c.point+'   '+c.element),
+  create('source-cardinfo-price',c.price.toLocaleString()+' GP'),
+  create('source-cardinfo-evidence',shopPriceEvidenceText(c))
+ );
+}
 function drawShop(){
  const root=$('shop-grid'),cards=shopFiltered(),pageSize=shopPageSize(),pages=Math.max(1,Math.ceil(cards.length/pageSize));
  shopPage=Math.max(0,Math.min(pages-1,shopPage));
@@ -678,7 +696,8 @@ function drawShop(){
    $('shop-sell').dataset.resaleStatus='unknown-source';
  }
  if(c){
-   $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+shopPriceEvidenceText(c);
+   if(window.__LEAF_SHOP_ERA__?.getState?.().era==='2004')draw2004CardInfo(c);
+   else $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP · '+shopPriceEvidenceText(c);
    $('shop-buy').disabled=profile.owned.includes(c.id)||profile.gp<c.price;
    $('shop-buy').textContent=profile.owned.includes(c.id)?'보유중':(profile.gp<c.price?'GP 부족':'구입하기');
    const sell=$('shop-sell'),canSell=shopCanSell(c);
