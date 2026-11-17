@@ -47,6 +47,7 @@ jobs:
       - name: Source 2004 shop flow and screenshot comparison
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
+          M02_IMAGE_LOG: "1"
         run: node apps/4leaf/rog/tests/m02-original-shop-2004-realuse.cjs
       - name: Preserve visual evidence
         if: always()
