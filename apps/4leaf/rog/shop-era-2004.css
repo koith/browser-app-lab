@@ -330,3 +330,33 @@
 #shop .shop-native-stage[data-era="2004"] #shop-selected .source-cardinfo-evidence{
  position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden
 }
+
+
+/* Stage-native section banners are hidden by the original MainFrame
+ * skin. Put WEB-only restoration controls in the visible outer toolbar. */
+#app>.toolbar{position:relative!important}
+#app>.toolbar #shop-era-toggle{
+ position:absolute!important;
+ top:3px!important;left:290px!important;right:auto!important;bottom:auto!important;
+ display:flex!important;align-items:center!important;gap:3px!important;
+ width:auto!important;height:24px!important;
+ z-index:200!important;padding:1px 4px!important;
+ background:#25335fe8;border:1px solid #9aa8d1!important;
+ pointer-events:auto!important;
+}
+#app>.toolbar #shop-era-toggle button{
+ display:inline-block!important;
+ min-width:38px!important;height:20px!important;
+ padding:0 5px!important;font:700 10px/18px Gulim,'굴림',sans-serif!important;
+}
+#app>.toolbar #shop-era-toggle .shop-market-date-label{
+ display:inline-flex!important;gap:3px;height:20px;
+ font:9px/20px Gulim,'굴림',sans-serif!important;
+}
+#app>.toolbar #shop-era-toggle #shop-market-date{
+ height:19px!important;font-size:9px!important
+}
+#app>.toolbar #shop-era-provenance{display:none!important}
+#app:not(:has(#shop:not(.hidden)))>.toolbar #shop-era-toggle{
+ display:none!important;
+}
