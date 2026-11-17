@@ -572,7 +572,7 @@ function commitShopTransaction(change){
  // rather than accidentally minting or erasing currency. Original 2003
  // resale prices remain separately provenance-labelled by shopResaleQuote.
  const hasValidGPShape=typeof previousGP==='number'||
-  (typeof previousGP==='string'&&/^\\d+$/.test(previousGP.trim()));
+  (typeof previousGP==='string'&&/^\d+$/.test(previousGP.trim()));
  const normalizedGP=hasValidGPShape?Number(previousGP):NaN;
  if(!Number.isSafeInteger(normalizedGP)||normalizedGP<0){
   modal('매직카덴 GP 확인 필요',
