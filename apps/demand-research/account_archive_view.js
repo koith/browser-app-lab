@@ -153,8 +153,14 @@ function resetProfile(){
   $("handle").textContent="";$("biography").textContent="";
   $("postCount").textContent="—";$("followerCount").textContent="—";
   $("followingCount").textContent="—";$("profileFields").textContent="";
-  $("cover").style.backgroundImage="";$("cover").classList.remove("has-image");
-  $("avatar").style.backgroundImage="";$("avatar").textContent="?";
+  // Release any prior account's image before displaying another account.
+  for(const kind of ["avatar","banner"]){
+    const image=$(kind==="banner"?"coverImage":"avatarImage");
+    image.onload=null;image.onerror=null;image.hidden=true;image.removeAttribute("src");
+  }
+  $("cover").classList.remove("has-image");
+  $("avatar").classList.remove("has-image");
+  $("avatarFallback").hidden=false;$("avatarFallback").textContent="?";
   $("profileStatus").textContent="보관된 원본의 프로필 정보를 확인하는 중입니다.";
   $("sourceProfile").hidden=true;
   $("profileExtras").hidden=true;
@@ -267,6 +273,44 @@ function renderProfileHistory(profile){
   }
 }
 
+function validArchivedProfileImage(path,kind){
+  // The deployed snapshot API uses ?snapshot=<verified archive snapshot id>.
+  // Accept only this account's archive image, never an external URL or
+  // another account's media. Versioned links are essential for history.
+  if(typeof path!=="string"||path.length>420||!ACCOUNT_KEY.test(state.account))return "";
+  const prefix="/api/account-archives/"+state.account+"/profile-asset/"+kind;
+  if(path===prefix)return path;
+  const suffix=path.slice(prefix.length);
+  return /^\?snapshot=snap-[0-9]{20}-[a-f0-9]{16}\.json$/.test(suffix)?path:"";
+}
+function applyArchivedProfileImage(kind,path){
+  // Actual <img> decoding avoids silently hiding 404/502 behind CSS.
+  const frame=$(kind==="banner"?"cover":"avatar");
+  const image=$(kind==="banner"?"coverImage":"avatarImage");
+  const fallback=$("avatarFallback");
+  const account=state.account;
+  const valid=validArchivedProfileImage(path,kind);
+  image.onload=null;image.onerror=null;
+  image.hidden=true;image.removeAttribute("src");
+  frame.classList.remove("has-image");
+  if(kind==="avatar")fallback.hidden=false;
+  if(!valid)return;
+  image.onload=()=>{
+    if(state.account!==account||image.getAttribute("src")!==valid)return;
+    if(!image.naturalWidth||!image.naturalHeight){image.onerror();return;}
+    image.hidden=false;frame.classList.add("has-image");
+    if(kind==="avatar")fallback.hidden=true;
+  };
+  image.onerror=()=>{
+    if(state.account!==account||image.getAttribute("src")!==valid)return;
+    image.hidden=true;frame.classList.remove("has-image");
+    if(kind==="avatar")fallback.hidden=false;
+    const msg=kind==="banner"?"헤더 이미지 파일을 읽지 못했습니다.":"프로필 사진 파일을 읽지 못했습니다.";
+    const status=$("profileStatus");
+    if(!status.textContent.includes(msg))status.textContent+=" · "+msg;
+  };
+  image.src=valid;
+}
 function renderProfile(profile){
   if(!profile.available){
     $("displayName").textContent="아직 프로필 보관본 없음";
@@ -339,14 +383,9 @@ function renderProfile(profile){
   if(external)a.href=external;
   const avatar=profile.assets&&profile.assets.avatar;
   const banner=profile.assets&&profile.assets.banner;
-  if(avatar){
-    $("avatar").style.backgroundImage='url("'+avatar+'")';
-    $("avatar").textContent="";
-  }else $("avatar").textContent=($("displayName").textContent||"?").charAt(0).toUpperCase();
-  if(banner){
-    $("cover").style.backgroundImage='url("'+banner+'")';
-    $("cover").classList.add("has-image");
-  }
+  $("avatarFallback").textContent=($("displayName").textContent||"?").charAt(0).toUpperCase();
+  applyArchivedProfileImage("avatar",avatar);
+  applyArchivedProfileImage("banner",banner);
   function assetEvidence(kind,present){
     const meta=profile.asset_status?.[kind]||{};
     const label=kind==="avatar"?"프로필 사진":"헤더 이미지";
