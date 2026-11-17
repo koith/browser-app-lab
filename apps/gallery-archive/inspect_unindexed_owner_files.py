@@ -80,7 +80,8 @@ def summarize(model, listing, catalog, saved, remote, budget):
                 if target.stat().st_size != declared_size:
                     failures["storage_size_changed"] += 1
                     continue
-                raw_hash = hashlib.file_digest(target.open("rb"), "sha256").hexdigest()
+                with target.open("rb") as source:
+                    raw_hash = hashlib.file_digest(source, "sha256").hexdigest()
                 with Image.open(target) as image:
                     if image.format not in ("JPEG", "PNG", "WEBP", "TIFF"):
                         raise ValueError("UNSUPPORTED_DECODE_FORMAT")
