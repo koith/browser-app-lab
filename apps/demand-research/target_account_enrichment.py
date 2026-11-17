@@ -105,7 +105,14 @@ def public_profile_images(profile,meta,api,archive):
         cid=ref.get("$link") if isinstance(ref,dict) else None
         mime=blob.get("mimeType") if isinstance(blob,dict) else None
         if not url and not cid:
-            images[name]={"status":"not_set"}
+            if profile["platform"]=="bluesky" and record is None:
+                # A failed public PDS record read cannot prove absence.
+                # Previously saved banners remain in immutable history.
+                images[name]={"status":"unavailable",
+                              "reason":"public_profile_record_unavailable"}
+                missing.append(name)
+            else:
+                images[name]={"status":"not_set"}
             continue
         data=None
         source=None
