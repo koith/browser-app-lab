@@ -51,13 +51,16 @@ def run(listing,catalog,saved):
           and type(r.get("Size")) is int and 200<=r["Size"]<=10_000_000)]
     env=os.environ.copy()
     existing=[]
+    existing_unavailable=0
     rows=[]
     with tempfile.TemporaryDirectory(prefix="visual-owner-check-") as td:
         tmp=Path(td)/"image"
         for p in owner["images"]:
             tmp.unlink(missing_ok=True)
             ok,method=read_existing(REMOTE,p["key"],tmp,env)
-            if not ok: raise RuntimeError("EXISTING_OWNER_ALBUM_READ_FAILED_"+method)
+            if not ok:
+                existing_unavailable += 1
+                continue
             with tmp.open("rb") as f: sha=hashlib.file_digest(f,"sha256").hexdigest()
             if sha!=p["sha256"] or tmp.stat().st_size!=p["bytes"]:
                 raise ValueError("EXISTING_OWNER_SHA_MISMATCH")
@@ -77,6 +80,10 @@ def run(listing,catalog,saved):
                 continue
             try:
                 sig=signature(tmp)
+                if not existing:
+                    rows.append({"row":n,"comparison_unavailable":True,
+                                 "pixels":[sig["width"],sig["height"]]})
+                    continue
                 nearest=min([closeness(sig,old) for old in existing],
                             key=lambda v:(v[0],v[1]))
                 nearest_hash=min([closeness(sig,old) for old in existing],
@@ -92,6 +99,8 @@ def run(listing,catalog,saved):
             except (OSError,ValueError):
                 rows.append({"row":n,"decode_error":True})
     return {"model":"yui","album":WORK,"existing_verified":len(existing),
+            "existing_unavailable":existing_unavailable,
+            "comparison_complete":existing_unavailable == 0,
             "unindexed_candidates":len(extra),"results":rows,
             "new_gallery_photos":0,"readonly":True}
 
