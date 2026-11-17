@@ -182,8 +182,10 @@ def verify(engine, *, label, width, height):
                 const b=document.getElementById('coverImage').getBoundingClientRect();
                 return {cw:c.width,ch:c.height,bw:b.width,bh:b.height};
             }""")
-            assert abs(geometry["cw"]/3-geometry["ch"])<1.5, (
-                "deployed source banner aspect ratio does not match 3:1")
+            expected_height=(150 if provider=="bluesky" else
+                             (160 if geometry["cw"]>=500 else 120))
+            assert abs(geometry["ch"]-expected_height)<1.5, (
+                "deployed banner viewport height does not match source UI")
             assert abs(geometry["bw"]-geometry["cw"])<1 and abs(
                 geometry["bh"]-geometry["ch"])<1, (
                 "deployed header bytes are cropped by a mismatched HTML frame")
