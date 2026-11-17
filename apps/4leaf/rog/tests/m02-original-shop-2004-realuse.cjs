@@ -88,7 +88,8 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
   }
   const dir='apps/4leaf/rog/tests/.m02-screenshots';
   fs.mkdirSync(dir,{recursive:true});
-  await page.screenshot({path:dir+'/'+engine+'-magic-carden-2004.jpg',type:'jpeg',quality:88});
+  const shot=await page.screenshot({path:dir+'/'+engine+'-magic-carden-2004.jpg',type:'jpeg',quality:75});
+  if(process.env.M02_IMAGE_LOG==='1')console.log('M02_SCREEN_B64='+shot.toString('base64'));
   // Verify original header controls switch to the distinct recovered 2002 PAK.
   await page.locator('#shop-era-toggle button[data-era="2002"]').click();
   assert.equal(await page.locator('#shop-grid .shop-card').count(),9);
