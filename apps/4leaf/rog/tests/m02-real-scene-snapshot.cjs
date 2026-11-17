@@ -31,6 +31,11 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
   await capture('city');
   await page.locator('.street-location[data-street="magic"]').click();
   await page.locator('#shop-native-stage').waitFor({state:'visible'});
+  assert.equal(await page.evaluate(()=>window.__LEAF_SHOP_ERA__.getState().era),'2004',
+   'new M02 visitor lands on the archival 2004 4x2 scene');
+  await page.locator('#shop-era-toggle button[data-era="2002"]').click();
+  assert.equal(await page.evaluate(()=>window.__LEAF_SHOP_ERA__.getState().era),'2002',
+   'explicit 2002 3x3 source atlas remains available');
   await capture('shop-2002');
   await page.locator('#shop-era-toggle button[data-era="2004"]').click();
   await page.locator('#shop-grid .shop-card').first().click();
