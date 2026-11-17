@@ -135,6 +135,82 @@ def fake_private_archive(monkeypatch):
     monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
 
 
+def test_public_pds_profile_banner_is_archived_as_exact_original():
+    import target_account_enrichment as enrich
+    banner=b"\\x89PNG\\r\\n\\x1a\\nsynthetic-cid-banner"
+    class PublicBannerAPI(BlueAPI):
+        def json(self,url,body=None):
+            if "com.atproto.repo.getRecord" in url:
+                return {"value":{"banner":{"$type":"blob","mimeType":"image/png",
+                                           "ref":{"$link":cid(banner)},
+                                           "size":len(banner)}}}
+            return super().json(url,body)
+    api=PublicBannerAPI({None:([],None)})
+    api.blobs[cid(banner)]=("image/png",banner)
+    cloud=FakeCloud()
+    profile=job.resolve("bluesky",DID,api)
+    archive=job.account_cloud(cloud,profile)
+    stats=enrich.archive_profile(profile,api,archive)
+    assert stats["profile_assets_verified"]>=1
+    snapshots=archive.names("profile/snapshots")
+    assert snapshots
+    saved=json.loads(archive.read("profile/snapshots/"+snapshots[-1]))
+    item=saved["assets"]["banner"]
+    assert item["status"]=="sha256_verified"
+    assert item["source_tier"]=="original_pds_blob"
+    assert item["original_cid"]==cid(banner)
+    assert archive.read_verified(item["key"],item["sha256"],cap=len(banner)+1)==banner
+
+
+def test_missing_public_record_is_unavailable_not_false_no_banner():
+    import target_account_enrichment as enrich
+    class RecordDenied(BlueAPI):
+        def json(self,url,body=None):
+            if "com.atproto.repo.getRecord" in url:
+                raise job.SourceUnavailable("public record temporarily unavailable")
+            return super().json(url,body)
+    api=RecordDenied({None:([],None)})
+    cloud=FakeCloud()
+    profile=job.resolve("bluesky",DID,api)
+    archive=job.account_cloud(cloud,profile)
+    stats=enrich.archive_profile(profile,api,archive)
+    saved=json.loads(archive.read("profile/snapshots/"+
+                                  archive.names("profile/snapshots")[-1]))
+    assert saved["assets"]["banner"]["status"]=="unavailable"
+    assert saved["assets"]["banner"]["reason"]=="public_profile_record_unavailable"
+    assert not saved["complete_media"]
+    assert stats["profile_assets_unavailable"]>=1
+
+
+def test_public_cdn_banner_is_saved_with_truthful_provenance_if_pds_denied():
+    import target_account_enrichment as enrich
+    banner=b"\\x89PNG\\r\\n\\x1a\\nsynthetic-public-cdn-banner"
+    class CDNOnly(BlueAPI):
+        def json(self,url,body=None):
+            if "com.atproto.repo.getRecord" in url:
+                raise job.SourceUnavailable("PDS denied")
+            if "app.bsky.actor.getProfile" in url:
+                raw=super().json(url,body)
+                raw["banner"]="https://cdn.bsky.app/img/qa-banner"
+                return raw
+            return super().json(url,body)
+        def media(self,url,mime):
+            if url=="https://cdn.bsky.app/img/qa-banner":
+                return "image/png",banner
+            return super().media(url,mime)
+    api=CDNOnly({None:([],None)})
+    cloud=FakeCloud()
+    profile=job.resolve("bluesky",DID,api)
+    archive=job.account_cloud(cloud,profile)
+    enrich.archive_profile(profile,api,archive)
+    saved=json.loads(archive.read("profile/snapshots/"+
+                                  archive.names("profile/snapshots")[-1]))
+    item=saved["assets"]["banner"]
+    assert item["status"]=="sha256_verified"
+    assert item["source_tier"]=="public_bluesky_cdn_rendition"
+    assert archive.read_verified(item["key"],item["sha256"],cap=len(banner)+1)==banner
+
+
 def test_bluesky_username_and_handle_are_canonical_without_profile_url():
     assert job.profile_input("bluesky", "sample") == "sample.bsky.social"
     assert job.profile_input("bluesky", "@Sample") == "sample.bsky.social"
