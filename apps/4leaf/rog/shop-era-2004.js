@@ -65,8 +65,11 @@
   if(source&&marketSelect.value!==source.date)marketSelect.value=source.date;
   renderProvenance();
  });
- let era='2002';
- try{era=localStorage.getItem('4leaf-original-shop-era')==='2004'?'2004':'2002'}catch{}
+ // The currently accepted M02 archival reference is 2004's 4x2 shop.
+ // New visits open that historical layout; explicit legacy 2002 choice is
+ // preserved as a user preference without altering any source PAK assets.
+ let era='2004';
+ try{if(localStorage.getItem('4leaf-original-shop-era')==='2002')era='2002'}catch{}
  const apply=(selected,persist)=>{
   if(!['2002','2004'].includes(selected))return false;
   era=selected;
