@@ -33,6 +33,9 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
   await street.waitFor();
   await street.click();
   await page.locator('#shop:not(.hidden)').waitFor({timeout:10000});
+  assert.equal(await page.locator('#shop-grid .shop-card').count(),9,
+   'original 2002 PAK shop must remain the default');
+  await page.locator('#shop-era-toggle button[data-era="2004"]').click();
   const before=await page.evaluate(()=>{
    const stage=document.getElementById('shop-native-stage');
    const rect=stage.getBoundingClientRect(),scale=rect.width/794;
