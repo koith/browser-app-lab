@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "sourceOfTruth": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+  "warning": "Derived index only. Never treat this file as an independent task ledger.",
+  "sourceUpdatedAt": "2026-11-16",
+  "counts": {
+    "total": 60,
+    "done": 43,
+    "in_progress": 16,
+    "todo": 1,
+    "blocked": 0,
+    "active": 17
+  },
+  "historicalEventsNotDuplicated": 486,
+  "active": [
+    {
+      "id": "M02",
+      "priority": "P1",
+      "title": "켈티카·매직카덴 원작 복원",
+      "status": "in_progress",
+      "acceptance": [
+        "상점/구매/문 UI를 2004년 캡처와 동일 상태에서 비교·검증"
+      ],
+      "currentTail": "MainStreet와 CardShop 리소스를 게임에 연결",
+      "evidence": [
+        "apps/4leaf/rog/shop-native.js"
+      ],
+      "lastReviewed": "2026-10-18"
+    },
+    {
+      "id": "M04",
+      "priority": "P0",
+      "title": "주잔 DMP·TIS 보드 복원",
+      "status": "in_progress",
+      "acceptance": [
+        "전체 경로 모든 육각 플랫폼의 방향·윗면 노출·비정상 겹침·깊이를 board.jpg와 동일 상태에서 정량 비교"
+      ],
+      "currentTail": "26맵·32타일·145x97 소스, 웹 투영/상하 보정 적용됐지만 전체 겹침·높이·카메라 미복원; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.",
+      "evidence": [
+        "apps/4leaf/rog/dice-native-minipanel-spr.css",
+        "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs"
+      ],
+      "lastReviewed": "2026-10-19"
+    },
+    {
+      "id": "M05",
+      "priority": "P0",
+      "title": "주잔 창세기전 체스맨 원본 전신",
+      "status": "in_progress",
+      "acceptance": [
+        "98종 실물 전신과 대기·이동·공격·피격·승리/방향별 프레임을 근거대로 구현해 CSS 대체물 제거"
+      ],
+      "currentTail": "…ginal OBS/OBS2/OBS3 bodies (78 earlier + 19 recovered with 662 SHA-256 original PNGs). 0156 original source still absent. Verified all 19 load on Chromium game board; slots 0–12 source keys/ticks connected. Original hurt/victory and 13–16 roles/tick milliseconds still UNVERIFIED.",
+      "evidence": [
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
+      ],
+      "lastReviewed": "2026-11-02"
+    },
+    {
+      "id": "M06",
+      "priority": "P0",
+      "title": "주잔 배틀 원본 발판·시점",
+      "status": "in_progress",
+      "acceptance": [
+        "원본 메시 또는 검증된 동등한 3D 발판 구조·접지·투영·전투 이동을 구현, 사진 비교 QA 통과"
+      ],
+      "currentTail": "스크린샷을 근거로 4지지대 CSS 근사만 존재; 2026-10-18: Source IMG.pak winBattle.spr genuine 2D two-platform stage and BATTLE header integrated; not a genuine 2004 MVE 3D physical platform; original POV and actual OBS action/synchronization pending.",
+      "evidence": [
+        "apps/4leaf/rog/dice-native-battle-podium.css",
+        "https://github.com/koith/browser-app-lab/pull/117"
+      ],
+      "lastReviewed": "2026-10-18"
+    },
+    {
+      "id": "M07",
+      "priority": "P0",
+      "title": "주사위 원본 모델·결과별 모션",
+      "status": "in_progress",
+      "acceptance": [
+        "D4/D6 결과별 하늘 낙하/튕김/정지 원본 시퀀스를 리소스 근거로 구현하고 실제 결과와 일치"
+      ],
+      "currentTail": "… D6 1171.obs and D4 1223.obs extra 63 PNG frames deployed. Source slot20 tumble -> slot12 impact -> confirmed engine final pips. Pixel/frame keys VERIFIED by source hashes and Chromium/WebKit. Fall/impact role, original timing, effect event 2125, slot13/3D native mesh unverified.",
+      "evidence": [
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
+      ],
+      "lastReviewed": "2026-11-02"
+    },
+    {
+      "id": "M09",
+      "priority": "P0",
+      "title": "동일 상태 원본 비교·배포 수용",
+      "status": "in_progress",
+      "acceptance": [
+        "실물 2004년 캡처 동일 상태 800x600 정량 비교와 모바일/WebKit·Pages·온라인 회귀 통과"
+      ],
+      "currentTail": "…QA 존재, 전체 원작 외형과 iOS 검증 미통과 2026-11-09: #920 original WorldMap→first real dice turn in four real browser journeys including PWA return PASS; #932 bounded cold-load recovery and public ChatRoom/WebRTC Pages QA PASS. Historical EXE pose, D4/D6 3D and physical iOS remain UNVERIFIED.",
+      "evidence": [
+        "apps/4leaf/rog/tests/dice-original-visual-qa.cjs"
+      ],
+      "lastReviewed": "2026-11-09"
+    },
+    {
+      "id": "P0-PODIUM",
+      "priority": "P0",
+      "title": "원본 전투 발판·배치 완성",
+      "status": "in_progress",
+      "acceptance": [
+        "원본 배틀 캡처와 실측 일치하는 3D 플랫폼, 원본 체스맨 높이/가림·회전/공격 시점 검증"
+      ],
+      "currentTail": "웹 CSS 사진 근사 발판; 2026-10-18: True winBattle.spr 355x113 dual metallic 2D podium now live (2ea43db0); historic 3D MVE platform mesh, collision/support depth, exact fighter foot placement and camera 2004 equivalence remain unverified.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/117",
+        "apps/4leaf/rog/dice-native-battle-source-spr.css"
+      ],
+      "lastReviewed": "2026-10-18"
+    },
+    {
+      "id": "P0-CHAT",
+      "priority": "P0",
+      "title": "상설 채팅방 원작 화면 정밀 복원",
+      "status": "in_progress",
+      "acceptance": [
+        "원본 794×528/2004 화면의 입력·가구·좌석·상설 목록을 실제 참가자 그대로 재현"
+      ],
+      "currentTail": "…locked server room cannot bypass password; native owner create server failure appears on original live input field; map entry errors surface in existing map hint. New real Chromium regression and CI submitted; original 2004 screenshot/published Pages equivalence still UNVERIFIED.",
+      "evidence": [
+        "apps/4leaf/rog/tests/chat-ready-then-503-public-room.cjs",
+        "apps/4leaf/rog/world-social.css"
+      ],
+      "lastReviewed": "2026-11-02"
+    },
+    {
+      "id": "P0-RELEASE",
+      "priority": "P0",
+      "title": "원작 복원 최종 화면·기능 수용 게이트",
+      "status": "in_progress",
+      "acceptance": [
+        "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
+      ],
+      "currentTail": "…배포 게이트 추가, 원작 모든 장면 동일성은 여전히 미완료. 2026-11-09: #932 one-time automatic bootstrap retry vs permanent-failure manual retry verified via real mobile Chromium fault injection; original dynamic game and ChatRoom/WebRTC postmerge Pages CI PASS. Full historical/physical iOS gate pending.",
+      "evidence": [
+        "apps/4leaf/rog/original/OBS/embedded/dice-selected.js",
+        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
+      ],
+      "lastReviewed": "2026-11-09"
+    },
+    {
+      "id": "SRC-01",
+      "priority": "P0",
+      "title": "리소스 출처·실제 용도 전수 정합",
+      "status": "in_progress",
+      "acceptance": [
+        "모든 게임·채팅 UI 자산에 원본 PAK 멤버, SHA/프레임 및 화면 용도를 연결하고 잘못 분류된 ROLL/모델 자산 0건"
+      ],
+      "currentTail": "…/중복 PAK과 2004 실제 화면 대응표가 불완전함 | 구현 목표: OBS/OBS2/OBS3/IMG/CHR/DMP/TIS/DMO 및 EXE 문자열을 출처·해시·역할·실사용 DOM 파일별로 매핑하고 확인되지 않은 것은 추정으로 표기; 복원된 2002 Dice/IMG.pak GUI 원본 12개 SPR 100 PNG 전수 SHA256·IHDR 원본 크기·불투명 픽셀 유효성 검사 추가, 2D GUI와 미복원 3D MVE 구분. 최초 출처 파일 100종 이상 수집/EXE 역할 전수 정합은 여전히 미완료.",
+      "evidence": [
+        "apps/4leaf/rog/original/OBS/embedded/dice-selected.js",
+        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
+      ],
+      "lastReviewed": "2026-11-02"
+    },
+    {
+      "id": "BRD-01",
+      "priority": "P0",
+      "title": "카메라 투영·발판 크기 원본 시점 맞춤",
+      "status": "in_progress",
+      "acceptance": [
+        "동일 상태 캡처에서 최소 10개 기준 타일 중심·사이즈·상하 방향·배경 지형 오차를 기록하고 역전/비정상 중첩 0건"
+      ],
+      "currentTail": "…소실점/배경 시야를 추적해 실제 카메라 수치 결정; 2026-10-20 board.jpg 및 battle.jpg 원본 800x600 실제 열람 비교: 두 자료는 VS/두 금속 발판/주사위가 있는 전투 씬임. 일반 26 DMP 맵과 동일 시점·주사위/맵 상태가 아니므로 가짜 1:1 원작 카메라 값 산출 불가. WEB 진짜 TIS 145x97/150x100 non-overlap/32 소스 픽셀 검사 보존, 추가 원본 일반 게임 영상/클라이언트 MVE camera 찾는 중. 소스 3D 투영 완료 아님.",
+      "evidence": [
+        "apps/4leaf/assets/battle.jpg",
+        "apps/4leaf/rog/docs/OBS_640_STRIDE_SOURCE_RESTORATION_2026-10-20.md"
+      ],
+      "lastReviewed": "2026-10-20"
+    },
+    {
+      "id": "BTL-04",
+      "priority": "P1",
+      "title": "전투 발판 원작 실제 공간감·시점 보강",
+      "status": "todo",
+      "acceptance": [
+        "원본 2004 전투 카메라·캐릭터 그늘·높이/앞뒤 가림 검증; 2D PNG만으로 3D 메시 완성 판정 금지"
+      ],
+      "currentTail": "…VE mesh, camera and frame-accurate physics still UNVERIFIED.; 2026-10-23 PR177 merged main a6c44c3: native source pixel deck responsive actor foot/center alignment, Chromium QA 39813521946 SUCCESS, WebKit pending, public Pages still beta10 (NOT deployed). Original MVE 3D unknown.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/177",
+        "https://github.com/koith/browser-app-lab/actions/runs/39813521946"
+      ],
+      "lastReviewed": "2026-10-23"
+    },
+    {
+      "id": "DIE-02",
+      "priority": "P0",
+      "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
+      "status": "in_progress",
+      "acceptance": [
+        "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
+      ],
+      "currentTail": "…65/PWA v152 PUBLIC VERIFIED: 2026-11-05 original 1171/1223 extra block 63 own-palette frames active: slot20 tumble, slot12 bounce/impact, engine verified D6/D4 rest face; archive source record keys/ticks and PNG SHA authenticated. Roles and original EXE physics/time not verified.",
+      "evidence": [
+        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
+      ],
+      "lastReviewed": "2026-11-02"
+    },
+    {
+      "id": "SHOP-02",
+      "priority": "P1",
+      "title": "구매·판매·GP·장착 카드 원본 룰 검증",
+      "status": "in_progress",
+      "acceptance": [
+        "선택·구매·판매·장착·잔액·무능력 상태 원본 규칙 예제를 실시간 게임·상점 화면에서 통과"
+      ],
+      "currentTail": "…튼은 있지만 원작 가격표·판매 시 GP·카드 종류 세부 규칙과 화면 조건 미입증 | 구현 목표: 원본 CardData 수치/GP 문구·등급 Normal Valuable Rare 및 실제 보유·구매/판매 UX 대응; 원본 CardShop/cardshopbutton.png의 판매하기 원본 4상태 y=481 sprite를 실제 보유/GP 거래에 연결, 장착·현재 경기·마지막 카드 삭제 방지. 원작 재판매 금액 테이블 미확보이므로 50%은 웹 추정치임을 모달·DOM에 명시. 원작 경제 규칙 비교 미완료.",
+      "evidence": [
+        "apps/4leaf/rog/cardshop-native-controls.css",
+        "apps/4leaf/rog/tests/cardshop-native-sale.cjs"
+      ],
+      "lastReviewed": "2026-10-19"
+    },
+    {
+      "id": "RULE-01",
+      "priority": "P0",
+      "title": "원작 특수칸·이벤트 데이터 검증",
+      "status": "in_progress",
+      "acceptance": [
+        "동일 seed·좌표 입력에 대해 모든 특수칸 이동/부활/보상 결과가 원본 근거 표와 일치"
+      ],
+      "currentTail": "…금지를 제거하고 arena PvP도 Non에 한정, 별도 원본 [Non] DMP는 미확보로 진위 분리. 경기 테스트 진행 중.; PR #142 Chromium verified user-PvP on normal archival 한반도 DMP, and strict [Non]Stadium in-memory variant suppressed arena PvP without inventing a source file; original later Non map sprites not yet recovered.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/actions/runs/39211031348",
+        "https://github.com/koith/browser-app-lab/pull/142"
+      ],
+      "lastReviewed": "2026-10-19"
+    },
+    {
+      "id": "RULE-02",
+      "priority": "P1",
+      "title": "전투·능력·아이템·라운드 원본 예외처리",
+      "status": "in_progress",
+      "acceptance": [
+        "샘플 전투 수치·아이템·무승부·중복 효과·탈출/종료 원본 기대값 fixture 전부 통과"
+      ],
+      "currentTail": "…3 code: duplicate GOAL/finish event no longer credits repeated GP/wins, stale winner identity rejected, canonical 워프게이트 reward source spelling restored; real browser Chromium/WebKit acceptance pending PR #1113, other original 2004 battle/item exception semantics still unverified.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/1113",
+        "apps/4leaf/rog/tests/r23-goal-idempotence.cjs"
+      ],
+      "lastReviewed": "2026-11-14"
+    },
+    {
+      "id": "ACT-05",
+      "priority": "P0",
+      "title": "체스맨 카드 초상화(CardData chm_N) 원본 근거 매핑",
+      "status": "in_progress",
+      "acceptance": [
+        "CHR 레코드 등 원본 자료에서 카드ID→chm_N 매핑을 확인하고 근거 없는 매핑 0건."
+      ],
+      "currentTail": "(sourceId%59)+1 공식 제거(main 150fa9a에서 얼굴 35개가 카드 78장에 중복). 0040/0088·0087/0137 중복 제거. 미근거 카드는 IMG/avatarback. 남은 7건은 ef3df072 가상 로스터 유래 미근거.",
+      "evidence": [
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+      ],
+      "lastReviewed": "2026-11-02"
+    }
+  ]
+}
