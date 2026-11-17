@@ -54,6 +54,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: original-2004-shop-${{ matrix.engine }}
-          path: apps/4leaf/rog/tests/.m02-screenshots/*.jpg
+          path: apps/4leaf/rog/tests/m02-screenshots/*.jpg
           if-no-files-found: warn
           retention-days: 30
