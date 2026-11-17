@@ -315,3 +315,12 @@
  box-sizing:border-box;pointer-events:none;z-index:13;
  border-left:4px double #bdafcf;border-right:4px double #bdafcf;
 }
+
+/* The 2004 screenshot has 3 source tabs, not a fourth WEB reset tab. */
+#shop .shop-native-stage[data-era="2004"] .shop-stock .tabline .group-tab[data-group="all"]{
+ display:none!important;pointer-events:none!important;
+}
+#app>.toolbar .shop-era-toggle .shop-era-show-all{
+ min-width:29px!important;width:29px!important;
+ color:#eff6ff!important;background:#405783!important;
+}
