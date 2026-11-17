@@ -787,7 +787,7 @@ main{padding-top:10px}
 /* Post detail is a real inset modal: a single fixed action row, scrollable body,
    visible surrounding context and an explicit background dim. */
 #detail{width:min(780px,calc(100vw - 52px));max-width:calc(100vw - 52px);
-  max-height:min(80dvh,740px);border:2px solid #101432;border-top:4px solid #f5d312;
+  height:min(80dvh,740px);max-height:min(80dvh,740px);border:2px solid #101432;border-top:4px solid #f5d312;
   border-radius:13px;box-shadow:0 20px 70px #070c26aa,0 0 0 3px #ffdc093d;
   background:#fff9ed;overflow:hidden}
 #detail[open]{display:flex;flex-direction:column}
@@ -825,7 +825,7 @@ main{padding-top:10px}
 #detail .dialog-backup-status[data-state="failed"]{border-color:#bd4330;background:#fff0e9;color:#953726}
 #detail .dialog-backup-status[data-state="verified"]{border-color:#157b58;background:#eaf8f1;color:#176146}
 @media(max-width:720px){
- #detail{width:calc(100vw - 28px);max-width:calc(100vw - 28px);max-height:82dvh}
+ #detail{width:calc(100vw - 28px);max-width:calc(100vw - 28px);height:82dvh;max-height:82dvh}
  #detail .dialog-head{gap:5px;padding:8px 9px;min-height:54px}
  #detail .dialog-head b{font-size:12px;gap:0}
  #detail .dialog-kicker{display:none}
@@ -2762,9 +2762,15 @@ $("detailBlockAccount").addEventListener("click",()=>{
   const blocked=isManualBlocked(p);
   function apply(){
     const ok=setManualBlocked(p,!blocked);
+    if(ok&&!blocked){
+      // Confirmed block removes the post immediately, not just the feed card.
+      closeDetail();
+      $("manualBlockStatus").textContent="차단했습니다. 자동 보관 데이터 삭제를 확인하는 중입니다.";
+      void purgeBlockedAutoArchive(p);
+      return;
+    }
     $("detailBlockStatus").textContent=ok?
-      (blocked?"차단을 해제했습니다.":"차단했습니다. 최신 게시물 검색에서 제외됩니다."):
-      "브라우저에 차단 목록을 저장하지 못했습니다.";
+      "차단을 해제했습니다.":"브라우저에 차단 목록을 저장하지 못했습니다.";
   }
   if(blocked)apply();
   else confirmPostAccountAction("block",p,apply);
