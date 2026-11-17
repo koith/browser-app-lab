@@ -507,7 +507,6 @@ function commitRosterSelection(slot,id){
  if(id&&next.some((existing,index)=>index!==slot&&existing===id))return false;
  next[slot]=id;
  if(slot===3&&!id)next.splice(3,1);
- const previous=profile.team;
  try{
   localStorage.setItem('rog_profile',JSON.stringify({...profile,team:next}));
  }catch(error){
@@ -572,7 +571,9 @@ function commitShopTransaction(change){
  // Normalize only inside an actual durable transaction; reject unsafe GP
  // rather than accidentally minting or erasing currency. Original 2003
  // resale prices remain separately provenance-labelled by shopResaleQuote.
- const normalizedGP=Number(previousGP);
+ const hasValidGPShape=typeof previousGP==='number'||
+  (typeof previousGP==='string'&&/^\\d+$/.test(previousGP.trim()));
+ const normalizedGP=hasValidGPShape?Number(previousGP):NaN;
  if(!Number.isSafeInteger(normalizedGP)||normalizedGP<0){
   modal('매직카덴 GP 확인 필요',
    '저장된 GP 값이 올바르지 않아 거래를 중단했습니다. 보유 카드와 기존 GP 데이터는 변경하지 않았습니다.',
