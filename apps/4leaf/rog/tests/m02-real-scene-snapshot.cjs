@@ -44,6 +44,47 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
   assert.equal(source.era.era,'2004');
   assert.equal(source.era.pageSize,8);
   assert.equal(source.visibleCards,8);
+  const acceptance=await page.evaluate(()=>{
+   const stage=document.querySelector('#shop-native-stage').getBoundingClientRect();
+   const scale=stage.width/794;
+   const pos=selector=>{
+    const e=document.querySelector(selector);
+    if(!e)return null;
+    const r=e.getBoundingClientRect();
+    return {x:(r.left-stage.left)/scale,y:(r.top-stage.top)/scale,
+     width:r.width/scale,height:r.height/scale,rect:r};
+   };
+   const targets={
+    normal:[32,15,'.group-tab[data-group="normal"]'],
+    valuable:[134,15,'.group-tab[data-group="valuable"]'],
+    rare:[233,15,'.group-tab[data-group="rare"]'],
+    firstCard:[47,56,'#shop-grid .shop-card:first-child'],
+    fifthCard:[47,145,'#shop-grid .shop-card:nth-child(5)'],
+    owned:[402,32,'.shop-equipped'],
+    gp:[402,294,'.shop-keeper .money'],
+    cardInfo:[32,260,'.shop-detail'],
+    buy:[402,333,'#shop-buy'],sell:[505,333,'#shop-sell']
+   };
+   const results={};let maxDelta=0;
+   for(const [key,[x,y,selector]] of Object.entries(targets)){
+    const actual=pos(selector);
+    const delta=actual?Math.max(Math.abs(actual.x-x),Math.abs(actual.y-y)):999;
+    maxDelta=Math.max(maxDelta,delta);
+    results[key]={expected:[x,y],actual:actual?[+actual.x.toFixed(2),+actual.y.toFixed(2)]:null,delta:+delta.toFixed(2)};
+   }
+   const header=document.querySelector('#app>.toolbar .shop-era-toggle');
+   const stageElement=document.querySelector('#shop-native-stage');
+   const art=stageElement.querySelector('.shop-detail');
+   return {maxDelta:+maxDelta.toFixed(2),results,
+    comparisonOutsideSource:!!header&&!stageElement.contains(header),
+    cardInfoLabel:getComputedStyle(art,'::before').content,
+    sourceArtWidth:794,sourceArtHeight:404
+   };
+  });
+  assert.ok(acceptance.maxDelta<=4,'2004 archived screenshot original pixels, 4px tolerance: '+JSON.stringify(acceptance));
+  assert.equal(acceptance.comparisonOutsideSource,true,'WEB year/date tools must never overlay original 2004 canvas');
+  assert.match(acceptance.cardInfoLabel,/Card Info/,'original Card Info label restored');
+  console.log('M02_ARCHIVAL_2004_GEOMETRY_PASS '+engine+' '+JSON.stringify(acceptance));
   console.log('M02 SNAPSHOT PASS '+engine+' '+JSON.stringify(source));
   await ctx.close();
  }finally{await browser.close()}
