@@ -284,19 +284,8 @@ body{background:var(--paper);color:var(--ink)}
 :root[data-platform="mastodon"] .archive-embedded .profile-content {
   padding-top:32px
 }
-@container (max-width:499px){
-  :root[data-platform="mastodon"] .cover,
-  :root[data-platform="mastodon"] .archive-embedded .cover { height:120px; }
-}
-/* A container is the .profile itself; :root is outside the container query.
-   Scope by descendant-only selectors so mobile embedded width is respected. */
-@container (max-width:499px){
-  .cover[data-provider="mastodon"] {height:120px}
-}
 @media (max-width:650px){
   .cover,.archive-embedded .cover{height:150px;aspect-ratio:auto}
-  :root[data-platform="mastodon"] .cover,
-  :root[data-platform="mastodon"] .archive-embedded .cover{height:120px}
   .avatar{left:10px;top:-46px;width:94px;height:94px;border-width:2px}
   :root[data-platform="mastodon"] .avatar {
     left:14px;top:-64px;width:80px;height:80px;border-width:1px
@@ -305,5 +294,14 @@ body{background:var(--paper);color:var(--ink)}
   :root[data-platform="mastodon"] .profile-content,
   :root[data-platform="mastodon"] .archive-embedded .profile-content {
     padding-top:32px
+  }
+}
+
+/* Media query alone is not sufficient: an embedded viewer can be 400px wide
+   inside a wider desktop window. Mastodon uses its *profile container* width. */
+@container (max-width:499px){
+  :root[data-platform="mastodon"] .cover,
+  :root[data-platform="mastodon"] .archive-embedded .cover {
+    height:120px
   }
 }
