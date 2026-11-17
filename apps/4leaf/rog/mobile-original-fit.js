@@ -47,7 +47,6 @@
    applied=null;
    root.removeAttribute('data-leaf-phone-fit');
    root.removeAttribute('data-leaf-phone-scene');
-   root.removeAttribute('data-leaf-chat-open');
    for(var n of ['--leaf-fit-scale','--leaf-layout-width','--leaf-layout-height','--leaf-left','--leaf-top'])root.style.removeProperty(n);
    return;
   }
@@ -75,7 +74,6 @@
   root.style.setProperty('--leaf-top','calc(50% - '+(targetH/2)+'px)');
   root.setAttribute('data-leaf-phone-fit',landscape?'landscape':'portrait');
   root.setAttribute('data-leaf-phone-scene',scene.kind);
-  if(!landscape)root.removeAttribute('data-leaf-chat-open');
   applied={landscape:landscape,kind:scene.kind,layoutWidth:virtualW,
    layoutHeight:targetH,sourceWidth:800,sourceHeight:scene.height,
    deviceWidth:+w.toFixed(2),deviceHeight:+h.toFixed(2),scale:scale,
@@ -99,21 +97,15 @@
     if(el)observer.observe(el,{attributes:true,attributeFilter:['class']});
    });
   }
-  var chat=document.getElementById('leaf-phone-chat-toggle');
-  if(!chat){
-   chat=document.createElement('button');
-   chat.type='button';chat.id='leaf-phone-chat-toggle';
-   chat.textContent='채팅';chat.setAttribute('aria-pressed','false');
-   chat.onclick=function(){
-    var open=root.getAttribute('data-leaf-chat-open')!=='true';
-    root.setAttribute('data-leaf-chat-open',String(open));
-    chat.setAttribute('aria-pressed',String(open));
-    chat.textContent=open?'채팅 닫기':'채팅';
-   };
+  // Do not invent a global floating chat button. Original room chat is
+  // integrated inside the 794x528 ChatRoom scene and is already usable on
+  // mobile. The detached blue button previously covered the original
+  // MainFrame icons and Genesis 'back' control on every landscape screen.
+  if(!document.getElementById('leaf-phone-rotate')){
    var rotate=document.createElement('div');
    rotate.id='leaf-phone-rotate';rotate.setAttribute('role','status');
    rotate.textContent='↻ 휴대폰을 가로로 돌려 주세요';
-   document.body.append(chat,rotate);
+   document.body.append(rotate);
   }
   schedule();
  }

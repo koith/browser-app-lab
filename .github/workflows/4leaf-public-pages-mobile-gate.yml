@@ -1,0 +1,52 @@
+name: 4LEAF public Pages mobile version verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/4leaf/rog/app-version.json"
+      - "apps/4leaf/rog/sw.js"
+      - "apps/4leaf/rog/mobile-original-fit.js"
+      - "apps/4leaf/rog/mobile-landscape-fit.css"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-deployment:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm deployed Pages version and mobile assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_ver="$(python3 -c 'import json;print(json.load(open("apps/4leaf/rog/app-version.json"))["version"])')"
+          expected_cache="$(python3 -c 'import json;print(json.load(open("apps/4leaf/rog/app-version.json"))["pwaCache"])')"
+          base="https://koith.github.io/browser-app-lab/apps/4leaf/rog"
+          ok=0
+          for attempt in $(seq 1 30); do
+            if curl -fsSL --max-time 12 "$base/app-version.json?verify=$GITHUB_SHA-$attempt" -o /tmp/public-version.json; then
+              public_ver="$(python3 -c 'import json;print(json.load(open("/tmp/public-version.json")).get("version","unknown"))' || true)"
+              public_cache="$(python3 -c 'import json;print(json.load(open("/tmp/public-version.json")).get("pwaCache","unknown"))' || true)"
+              echo "attempt=$attempt expected=$expected_ver/$expected_cache public=$public_ver/$public_cache"
+              if [[ "$public_ver" == "$expected_ver" && "$public_cache" == "$expected_cache" ]] &&
+                 curl -fsSL --max-time 12 "$base/mobile-original-fit.js?verify=$GITHUB_SHA-$attempt" -o /tmp/public-mobile.js &&
+                 curl -fsSL --max-time 12 "$base/mobile-landscape-fit.css?verify=$GITHUB_SHA-$attempt" -o /tmp/public-mobile.css &&
+                 cmp -s apps/4leaf/rog/mobile-original-fit.js /tmp/public-mobile.js &&
+                 cmp -s apps/4leaf/rog/mobile-landscape-fit.css /tmp/public-mobile.css; then
+                ok=1
+                echo "Public Pages verified: $public_ver / $public_cache and byte-matching mobile JS/CSS"
+                break
+              fi
+            else
+              echo "Public Pages not yet reachable on attempt $attempt"
+            fi
+            sleep 10
+          done
+          if [[ "$ok" -ne 1 ]]; then
+            echo "::error::GitHub main and public Pages are not in sync; do not claim public deployment completed."
+            exit 1
+          fi
