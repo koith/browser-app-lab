@@ -1,0 +1,50 @@
+name: 4LEAF real roster durability QA
+
+on:
+  pull_request:
+    paths:
+      - "apps/4leaf/rog/game.js"
+      - "apps/4leaf/rog/tests/roster-storage-atomic.cjs"
+      - ".github/workflows/4leaf-roster-atomic-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-roster:
+    name: "genuine Room roster (${{ matrix.engine }})"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Source syntax and public asset sanity
+        run: |
+          node --check apps/4leaf/rog/game.js
+          node --check apps/4leaf/rog/tests/roster-storage-atomic.cjs
+          test -s apps/4leaf/rog/original/chessmen.json
+      - name: Install real browser
+        working-directory: apps/4leaf/rog
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps ${{ matrix.engine }}
+      - name: Start original live frontend
+        run: |
+          python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-server.log 2>&1 &
+          for try in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:8765/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/leaf-server.log
+          exit 1
+      - name: Real original chessman Room equip / save-denial / reload
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+        run: node apps/4leaf/rog/tests/roster-storage-atomic.cjs
