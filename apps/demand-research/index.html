@@ -1423,7 +1423,7 @@ main{padding-top:10px}
   <div class="manual-block-head"><h2 id="manualBlockTitle">차단 계정 관리</h2>
    <button id="manualBlockClose" type="button" aria-label="차단 계정 관리 닫기">×</button></div>
   <div class="manual-block-body">
-   <p>직접 차단한 계정은 이 브라우저의 최신 게시물 검색에서 제외됩니다. 자동 광고 필터와 별도로 작동하며, 백업된 원본은 삭제하지 않습니다. 다른 기기·브라우저와 자동 동기화되지는 않습니다.</p>
+   <p>직접 차단한 계정은 최신 검색에서 제외하고, 해당 계정의 실시간 자동 저장 원본 삭제를 요청합니다. 삭제는 서버에서 재조회 검증된 경우에만 완료됩니다. 별도로 지정해 백업한 계정 보관함은 삭제하지 않습니다.</p>
    <ul id="manualBlockList" aria-label="직접 차단한 SNS 계정"></ul>
    <p id="manualBlockStatus" role="status" aria-live="polite"></p>
   </div>
@@ -1930,7 +1930,7 @@ function suspectedAd(post){
 
 
 /* A manually maintained personal exclusion list, not an automated ad verdict.
-   Scope is this browser origin and the PUBLIC feed; archives are untouched. */
+   Confirmed blocks request authenticated erasure of AUTO-captured posts only. */
 const MANUAL_BLOCK_STORAGE_KEY="intersection.manual-blocked-accounts.v1";
 const MANUAL_BLOCK_LIMIT=1000;
 function manualAccountKey(platform,profileUrl){
@@ -2011,6 +2011,77 @@ function setManualBlocked(p,blocked){
   refreshManualBlockViews();
   return true;
 }
+
+const AUTO_PURGE_PENDING_KEY="intersection.pending-auto-purges.v1";
+function blockedAutoPurgePayload(p){
+  return {platform:String(p.platform||"").toLowerCase(),
+    profile_url:String(p.profileUrl||p.profile_url||""),
+    author_did:String(p.authorDid||p.author_did||"").toLowerCase()};
+}
+function pendingAutoPurges(){
+  try{
+    const a=JSON.parse(localStorage.getItem(AUTO_PURGE_PENDING_KEY)||"[]");
+    return Array.isArray(a)?a.filter(x=>x&&typeof x.profile_url==="string"
+      &&manualAccountKey(x.platform,x.profile_url)).slice(0,1000):[];
+  }catch{return []}
+}
+function savePendingAutoPurges(rows){
+  try{localStorage.setItem(AUTO_PURGE_PENDING_KEY,JSON.stringify(rows));return true}
+  catch{return false}
+}
+function queueAutoPurge(row){
+  const pending=pendingAutoPurges(),id=manualAccountKey(row.platform,row.profile_url);
+  if(!id||cloudMode)return false;
+  if(!pending.some(x=>manualAccountKey(x.platform,x.profile_url)===id))
+    pending.push(row);
+  return savePendingAutoPurges(pending);
+}
+function clearAutoPurge(row){
+  const id=manualAccountKey(row.platform,row.profile_url);
+  return savePendingAutoPurges(pendingAutoPurges().filter(x=>
+    manualAccountKey(x.platform,x.profile_url)!==id));
+}
+async function syncAutoArchiveBlock(row,action){
+  if(cloudMode)return false;
+  const endpoint=action==="unblock"?"/api/auto-archive/unblock-account":
+    "/api/auto-archive/purge-account";
+  try{
+    const response=await fetch(endpoint,{method:"POST",credentials:"same-origin",
+      cache:"no-store",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(row)});
+    const data=await response.json().catch(()=>null);
+    if(response.ok&&data?.state===(action==="unblock"?"unblocked":"purged")){
+      clearAutoPurge(row);
+      $("manualBlockStatus").textContent=action==="unblock"?
+        "차단 해제 완료 · 삭제됐던 원본은 복원하지 않습니다.":
+        "차단 완료 · 기존 실시간 자동 보관 원본 삭제 검증 완료";
+      return true;
+    }
+    const code=response.status===401?"관리자 인증 필요":response.status===403?
+      "삭제 권한 확인 필요":"저장소 확인 대기";
+    $("manualBlockStatus").textContent="차단은 적용됐지만 자동 보관 원본 삭제는 아직 미완료 ("+code+").";
+  }catch{
+    $("manualBlockStatus").textContent="차단은 적용됐지만 자동 보관 원본 삭제 확인은 대기 중입니다.";
+  }
+  return false;
+}
+async function purgeBlockedAutoArchive(p){
+  const row=blockedAutoPurgePayload(p);
+  if(!queueAutoPurge(row)){
+    $("manualBlockStatus").textContent="차단은 적용됐지만 자동 보관 삭제 요청을 기기에 보존하지 못했습니다.";
+    return;
+  }
+  await syncAutoArchiveBlock(row,"purge");
+}
+async function retryPendingAutoPurges(){
+  if(cloudMode)return;
+  for(const row of pendingAutoPurges().slice(0,4)){
+    const matched=[...manualBlockedAccounts.values()].some(x=>
+      manualAccountKey(x.platform,x.profileUrl)===manualAccountKey(row.platform,row.profile_url));
+    if(!matched){clearAutoPurge(row);continue;}
+    await syncAutoArchiveBlock(row,"purge");
+  }
+}
 function refreshManualBlockViews(){
   $("manualBlockCount").textContent=String(manualBlockedAccounts.size);
   if($("manualBlockDialog").open)renderManualBlockManager();
@@ -2038,6 +2109,8 @@ function renderManualBlockManager(){
     release.setAttribute("aria-label",String(row.author||row.profileUrl)+" 차단 해제");
     release.addEventListener("click",()=>{
       const ok=setManualBlocked(row,false);
+      if(ok){clearAutoPurge(blockedAutoPurgePayload(row));
+        void syncAutoArchiveBlock(blockedAutoPurgePayload(row),"unblock");}
       $("manualBlockStatus").textContent=ok?"차단을 해제했습니다. 게시글 검색에 즉시 반영됩니다.":
         "차단 해제 저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.";
     });
@@ -2768,6 +2841,10 @@ $("detailBlockAccount").addEventListener("click",()=>{
       $("manualBlockStatus").textContent="차단했습니다. 자동 보관 데이터 삭제를 확인하는 중입니다.";
       void purgeBlockedAutoArchive(p);
       return;
+    }
+    if(ok&&blocked){
+      clearAutoPurge(blockedAutoPurgePayload(p));
+      void syncAutoArchiveBlock(blockedAutoPurgePayload(p),"unblock");
     }
     $("detailBlockStatus").textContent=ok?
       "차단을 해제했습니다.":"브라우저에 차단 목록을 저장하지 못했습니다.";
