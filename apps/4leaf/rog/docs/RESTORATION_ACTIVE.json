@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "sourceOfTruth": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "warning": "Derived index only. Never treat this file as an independent task ledger.",
-  "sourceUpdatedAt": "2026-11-16",
+  "sourceUpdatedAt": "2026-11-17",
   "counts": {
     "total": 60,
     "done": 43,
@@ -214,12 +214,12 @@
       "acceptance": [
         "선택·구매·판매·장착·잔액·무능력 상태 원본 규칙 예제를 실시간 게임·상점 화면에서 통과"
       ],
-      "currentTail": "…튼은 있지만 원작 가격표·판매 시 GP·카드 종류 세부 규칙과 화면 조건 미입증 | 구현 목표: 원본 CardData 수치/GP 문구·등급 Normal Valuable Rare 및 실제 보유·구매/판매 UX 대응; 원본 CardShop/cardshopbutton.png의 판매하기 원본 4상태 y=481 sprite를 실제 보유/GP 거래에 연결, 장착·현재 경기·마지막 카드 삭제 방지. 원작 재판매 금액 테이블 미확보이므로 50%은 웹 추정치임을 모달·DOM에 명시. 원작 경제 규칙 비교 미완료.",
+      "currentTail": "…ton.png의 판매하기 원본 4상태 y=481 sprite를 실제 보유/GP 거래에 연결, 장착·현재 경기·마지막 카드 삭제 방지. 원작 재판매 금액 테이블 미확보이므로 50%은 웹 추정치임을 모달·DOM에 명시. 원작 경제 규칙 비교 미완료. | 2026-11-17 #1306/beta.94: 문자형 구 GP의 구매/판매 문자열 이어붙임 오류 방지, 비숫자·무한대·안전 정수 초과 GP 거래 거부 및 보유 카드 보존 Chromium/WebKit 통과. 원본 일반 카드 판매가 규칙은 여전히 미확인.",
       "evidence": [
-        "apps/4leaf/rog/cardshop-native-controls.css",
-        "apps/4leaf/rog/tests/cardshop-native-sale.cjs"
+        "https://github.com/koith/browser-app-lab/pull/1306",
+        "https://github.com/koith/browser-app-lab/actions/runs/44044382651"
       ],
-      "lastReviewed": "2026-10-19"
+      "lastReviewed": "2026-11-17"
     },
     {
       "id": "RULE-01",
@@ -244,12 +244,12 @@
       "acceptance": [
         "샘플 전투 수치·아이템·무승부·중복 효과·탈출/종료 원본 기대값 fixture 전부 통과"
       ],
-      "currentTail": "…3 code: duplicate GOAL/finish event no longer credits repeated GP/wins, stale winner identity rejected, canonical 워프게이트 reward source spelling restored; real browser Chromium/WebKit acceptance pending PR #1113, other original 2004 battle/item exception semantics still unverified.",
+      "currentTail": "… real browser Chromium/WebKit acceptance pending PR #1113, other original 2004 battle/item exception semantics still unverified. | 2026-11-17 #1306/beta.94: 원본 Room CHESSMAN INFO 4칸 실클릭·저장 실패 후 기존 파티 보존·중복 장착 방지·새로고침 유지 Chromium/WebKit 통과. 웹 저장 안전성 보강이며 2004 원작 모든 전투/아이템 예외는 미입증.",
       "evidence": [
-        "https://github.com/koith/browser-app-lab/pull/1113",
-        "apps/4leaf/rog/tests/r23-goal-idempotence.cjs"
+        "https://github.com/koith/browser-app-lab/pull/1306",
+        "https://github.com/koith/browser-app-lab/actions/runs/44044382651"
       ],
-      "lastReviewed": "2026-11-14"
+      "lastReviewed": "2026-11-17"
     },
     {
       "id": "ACT-05",
