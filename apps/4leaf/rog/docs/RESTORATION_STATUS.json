@@ -4,11 +4,11 @@
   "legacyEvidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "counts": {
     "total": 60,
-    "done": 43,
-    "in_progress": 16,
+    "done": 44,
+    "in_progress": 15,
     "todo": 1,
     "review_required": 0,
-    "remaining": 17
+    "remaining": 16
   },
   "tasks": [
     {
@@ -295,8 +295,8 @@
       "issue": 1228,
       "title": "켈티카·매직카덴 원작 복원",
       "priority": "P1",
-      "status": "in_progress",
-      "acceptance": "open",
+      "status": "done",
+      "acceptance": "accepted-with-evidence",
       "url": "https://github.com/koith/browser-app-lab/issues/1228"
     },
     {
