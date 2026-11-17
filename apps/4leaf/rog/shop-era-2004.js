@@ -24,7 +24,10 @@
   b.setAttribute('aria-label',era+'년 매직카덴 화면 선택');
   toolbar.append(b);
  }
- stage.append(toolbar);
+ // Inspection controls belong to the WEB frame, NEVER atop original
+ // CardShop bitmap or the 2004 screenshot's item stock.
+ const outsideScene=document.querySelector('#shop>.scene-banner');
+ (outsideScene||stage).append(toolbar);
  // The recovered 2002 UI does not contain a time-machine control.
  // Keep this WEB-only provenance switch visually separate from source art.
  const marketLabel=document.createElement('label');
@@ -45,7 +48,7 @@
  const provenance=document.createElement('div');
  provenance.id='shop-era-provenance';
  provenance.setAttribute('role','status');
- stage.append(provenance);
+ (outsideScene||stage).append(provenance);
  const renderProvenance=()=>{
   const market=window.__LEAF_HISTORIC_MARKET__?.getState();
   const note=market?.date==='2003-01-15'
@@ -60,8 +63,10 @@
   if(source&&marketSelect.value!==source.date)marketSelect.value=source.date;
   renderProvenance();
  });
- let era='2002';
- try{era=localStorage.getItem('4leaf-original-shop-era')==='2004'?'2004':'2002'}catch{}
+ // M02's surviving 2004 CardShop screenshot is the selected visual target.
+ // Preserve 2002 PAK as a separate selectable source-era in the header.
+ let era='2004';
+ try{era=localStorage.getItem('4leaf-original-shop-era')==='2002'?'2002':'2004'}catch{}
  const apply=(selected,persist)=>{
   if(!['2002','2004'].includes(selected))return false;
   era=selected;
@@ -70,6 +75,8 @@
    b.setAttribute('aria-pressed',String(b.dataset.era===era));
   }
   rare.disabled=era!=='2004';
+  if(era==='2004'&&tabs.querySelector('.group-tab.selected')?.dataset.group==='all')
+   tabs.querySelector('[data-group="normal"]')?.click();
   if(era==='2002'&&rare.classList.contains('selected')){
    tabs.querySelector('[data-group="all"]')?.click();
   }
