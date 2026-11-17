@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/intersection-profile-backfill-all.yml"
+      # A profile/header capture fix should re-check already verified
+      # accounts without overwriting immutable saved art or posts.
+      - "apps/demand-research/target_account_enrichment.py"
 permissions:
   contents: read
   actions: write

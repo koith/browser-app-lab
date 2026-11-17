@@ -175,6 +175,22 @@ function syncVisiblePostIdentity(){
     }
   }
 }
+function profileArtLabel(profile,kind,available){
+  const detail=profile?.asset_details?.[kind]||{};
+  const label=kind==="banner"?"헤더":"프로필 사진";
+  if(!available){
+    if(detail.state==="not_set")return label+" 미설정(현재 공개 기록)";
+    return label+" 미보관(공개 원본 접근/저장 검증 필요)";
+  }
+  const tier=detail.source_tier==="original_pds_blob"?"원본 PDS":
+             detail.source_tier==="public_bluesky_cdn_rendition"?"공개 CDN 변환본":
+             detail.source_tier==="mastodon_public_profile_image"?"공개 SNS 이미지":
+             "기존 검증 이미지";
+  if(detail.state==="archived_prior_snapshot"){
+    return label+" 이전 백업본 보존("+tier+" · 현재 이미지 확인 불가)";
+  }
+  return label+" 보관("+tier+" · SHA-256 검증)";
+}
 function renderProfile(profile){
   if(!profile.available){
     $("displayName").textContent="아직 프로필 보관본 없음";
@@ -215,8 +231,8 @@ function renderProfile(profile){
     $("cover").style.backgroundImage='url("'+banner+'")';
     $("cover").classList.add("has-image");
   }
-  const assets=[avatar?"프로필 원본 SHA 검증됨":"프로필 사진 미보관",
-                banner?"헤더 원본 SHA 검증됨":"헤더 사진 미보관"];
+  const assets=[profileArtLabel(profile,"avatar",Boolean(avatar)),
+                profileArtLabel(profile,"banner",Boolean(banner))];
   $("profileStatus").textContent="PROFILE SNAPSHOT · "+date(profile.captured_at)+
      " · "+assets.join(" · ")+" · 관계 목록/게시글 완전성 별도 확인 필요";
   syncVisiblePostIdentity();

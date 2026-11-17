@@ -256,6 +256,81 @@ def latest_snapshot(archive,folder,pattern,cap=300_000):
 
 
 
+def retained_profile_asset(archive, current, kind):
+    """Find the latest immutable, SHA-addressed profile image across snapshots.
+
+    A provider's transient header failure or later removal must not erase an
+    earlier verified image. The caller marks historical art explicitly; this
+    never claims an old banner is the account's current live banner.
+    """
+    if kind not in ("avatar", "banner"):
+        raise ValueError("unsupported profile asset")
+    if not isinstance(current, dict):
+        return None, False
+
+    def valid(doc):
+        if not isinstance(doc, dict):
+            return None
+        assets=doc.get("assets")
+        item=assets.get(kind) if isinstance(assets, dict) else None
+        if not isinstance(item, dict) or item.get("status")!="sha256_verified":
+            return None
+        key=item.get("key")
+        digest=item.get("sha256")
+        length=item.get("bytes")
+        mime=item.get("mime")
+        extensions={"image/jpeg":".jpg", "image/png":".png",
+                    "image/webp":".webp", "image/avif":".avif",
+                    "image/gif":".gif"}
+        if (not isinstance(digest,str)
+                or not re.fullmatch(r"[a-f0-9]{64}",digest)
+                or mime not in extensions
+                or key!="profile/assets/"+digest+extensions[mime]
+                or not isinstance(length,int) or not 0<length<=24_000_000):
+            return None
+        return item
+
+    selected=valid(current)
+    if selected is not None:
+        return selected, False
+    names=sorted(name for name in archive.names("profile/snapshots")
+                 if PROFILE_FILE_RE.fullmatch(name))
+    for name in reversed(names):
+        raw=archive.read("profile/snapshots/"+name,cap=300_000,optional=True)
+        if raw is None:
+            continue
+        try:
+            old=json.loads(raw)
+        except (ValueError,TypeError):
+            continue
+        if (not isinstance(old,dict)
+                or old.get("identity")!=current.get("identity")
+                or old.get("platform")!=current.get("platform")):
+            continue
+        selected=valid(old)
+        if selected is not None:
+            return {**selected,"captured_at":old.get("captured_at")}, True
+    return None, False
+
+
+def profile_asset_details(current, asset, historical, kind):
+    """Expose evidence tier without leaking original source URLs."""
+    if asset is None:
+        entries=current.get("assets") if isinstance(current.get("assets"),dict) else {}
+        status=entries.get(kind) if isinstance(entries.get(kind),dict) else {}
+        state=status.get("status")
+        return {"state":state if state in ("not_set","unavailable") else "unavailable",
+                "source_tier":None,"captured_at":None}
+    tier=asset.get("source_tier")
+    if tier not in ("original_pds_blob","public_bluesky_cdn_rendition",
+                    "mastodon_public_profile_image"):
+        tier="unspecified_verified_image"
+    return {"state":"archived_prior_snapshot" if historical else "verified_current_snapshot",
+            "source_tier":tier,
+            "captured_at":asset.get("captured_at") if historical
+                          else current.get("captured_at")}
+
+
 def archived_media_slot(pid,item):
     """Recover the original 0-based attachment position from its immutable key.
 
@@ -615,12 +690,15 @@ def create_router(auth):
             view["available"]=True
             view["profile_url"]=sanitize_safe_link(entry.get("profile_url"))
             view["assets"]={}
+            view["asset_details"]={}
             for name in ("avatar","banner"):
-                asset=doc.get("assets",{}).get(name,{})
-                if asset.get("status")=="sha256_verified":
-                    view["assets"][name]="/api/account-archives/"+account+"/profile-asset/"+name
-                else:
-                    view["assets"][name]=None
+                selected,historical=retained_profile_asset(archive,doc,name)
+                view["assets"][name]=(
+                    "/api/account-archives/"+account+"/profile-asset/"+name
+                    if selected else None
+                )
+                view["asset_details"][name]=profile_asset_details(
+                    doc,selected,historical,name)
             return JSONResponse(view,headers=CACHE_HEADERS)
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Archived public profile unavailable") from None
@@ -714,9 +792,8 @@ def create_router(auth):
         doc=latest_snapshot(archive,"profile/snapshots",PROFILE_FILE_RE)
         if not doc:
             raise HTTPException(404,"Profile snapshot unavailable")
-        asset=doc.get("assets",{}).get(kind,{})
-        if (asset.get("status")!="sha256_verified"
-                or not str(asset.get("key","")).startswith("profile/assets/")):
+        asset,_historical=retained_profile_asset(archive,doc,kind)
+        if asset is None:
             raise HTTPException(404,"Profile image not archived")
         return get_verified_media(archive,
                                   {**asset,"remote_verified":True},request)

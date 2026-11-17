@@ -131,6 +131,58 @@ def test_private_account_profile_bio_header_and_original_photo(populated):
     assert client.get(p["assets"]["banner"]).content==BANNER
 
 
+def test_previous_verified_banner_survives_later_unavailable_snapshot(populated):
+    client,_root,archive,name=populated
+    # Newest public profile is readable but the CDN/PDS temporarily denied
+    # header access. The previously SHA-verified saved banner must not vanish.
+    enrich.save_snapshot(archive,"profile/snapshots",{
+        "platform":"bluesky","identity":DID,
+        "handle":"qa-user.bsky.social","display_name":"Updated QA",
+        "description":"Newer bio survives untouched",
+        "captured_at":"2026-11-17T03:00:00Z",
+        "complete_media":False,
+        "assets":{"avatar":{"status":"unavailable"},
+                  "banner":{"status":"unavailable"}}})
+    response=client.get("/api/account-archives/"+name+"/profile")
+    assert response.status_code==200
+    body=response.json()
+    assert body["display_name"]=="Updated QA"
+    assert body["description"]=="Newer bio survives untouched"
+    assert body["asset_details"]["banner"]["state"]=="archived_prior_snapshot"
+    assert body["asset_details"]["avatar"]["state"]=="archived_prior_snapshot"
+    assert body["assets"]["banner"].endswith("/banner")
+    assert client.get(body["assets"]["banner"]).content==BANNER
+    assert client.get(body["assets"]["avatar"]).content==PHOTO
+
+
+def test_removed_live_banner_retains_historical_proof_without_claiming_current(populated):
+    client,_root,archive,name=populated
+    enrich.save_snapshot(archive,"profile/snapshots",{
+        "platform":"bluesky","identity":DID,
+        "handle":"qa-user.bsky.social","display_name":"Public QA",
+        "captured_at":"2026-11-17T03:30:00Z",
+        "complete_media":True,
+        "assets":{"avatar":{"status":"not_set"},
+                  "banner":{"status":"not_set"}}})
+    body=client.get("/api/account-archives/"+name+"/profile").json()
+    assert body["asset_details"]["banner"]["state"]=="archived_prior_snapshot"
+    assert body["assets"]["banner"].endswith("/banner")
+    assert client.get(body["assets"]["banner"]).content==BANNER
+    source=client.get("/account-archive/account_archive_view.js").text
+    assert "이전 백업본 보존" in source
+    assert "공개 CDN 변환본" in source
+
+
+def test_unknown_banner_does_not_invent_image_without_saved_bytes(populated):
+    client,_root,archive,name=populated
+    # Remove every profile snapshot by directing the helper to only a
+    # different-account record; never substitute another person's image.
+    result=viewer.retained_profile_asset(archive,{
+        "platform":"bluesky","identity":"did:plc:"+"z"*24,
+        "assets":{"banner":{"status":"unavailable"}}},"banner")
+    assert result==(None,False)
+
+
 def test_source_verified_feed_exact_original_range_and_comment_thread(populated):
     client,root,archive,name=populated
     feed=client.get("/api/account-archives/"+name+"/feed?limit=20")

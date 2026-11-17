@@ -145,6 +145,34 @@ def verify(engine, *, label, width, height):
             "archived actor handle not rendered on social card")
         assert page.locator("#displayName").inner_text().strip(), "profile display missing"
         assert "미확인" not in page.locator("#displayName").inner_text(), "profile not loaded"
+        # When the private archive advertises a stored banner, its SAME
+        # SHA-verified image endpoint must actually deliver image bytes.
+        # A blank banner is never treated as a pass or fabricated from posts.
+        base=SITE.rsplit("/",1)[0]
+        profile_response=page.request.get(
+            base+"/api/account-archives/"+quote(key,safe="")+"/profile",
+            timeout=120000,
+        )
+        assert profile_response.status==200, "live saved profile read unavailable"
+        snapshot=profile_response.json()
+        banner=snapshot.get("assets",{}).get("banner")
+        if banner:
+            assert banner.startswith("/api/account-archives/"), (
+                "archived banner not bound to exact account")
+            banner_response=page.request.get(base+banner,timeout=120000)
+            assert banner_response.status==200, (
+                "advertised SHA-verified banner bytes were not readable")
+            assert banner_response.headers.get("content-type","").startswith(
+                "image/"), "archived banner MIME is not an image"
+            assert banner_response.body(), "archived banner empty"
+            origin=snapshot.get("asset_details",{}).get("banner",{}).get("state")
+            assert origin in ("verified_current_snapshot",
+                              "archived_prior_snapshot"), (
+                "saved banner missing provenance")
+            print("LIVE_ARCHIVED_BANNER_READBACK_PASS",flush=True)
+        else:
+            print("LIVE_ARCHIVED_BANNER_UNVERIFIED_NOT_FABRICATED",flush=True)
+
         assert page.locator("#results article.post").first.get_by_role(
             "link", name="SNS 원문"
         ).count() == 1, "public original attribution missing"
