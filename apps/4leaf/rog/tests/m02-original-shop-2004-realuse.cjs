@@ -147,5 +147,41 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
    'no shop runtime errors: '+errors.join(';'));
   console.log('M02 SOURCE SHOP 2004 E2E PASS '+engine,JSON.stringify({id,geometry:before.geometry,from:'Keltica original door',to:'Keltica after buy/sell'}));
   await context.close();
+  // An original UI that only works on desktop is still incomplete for this
+  // mobile-web restoration. Use the actual iPhone landscape context and
+  // navigate through the same source building instead of modifying DOM.
+  const phoneOpts={...devices['iPhone 13 landscape']};
+  if(engine!=='webkit')delete phoneOpts.defaultBrowserType;
+  const phoneCtx=await browser.newContext({...phoneOpts,serviceWorkers:'block'});
+  const phone=await phoneCtx.newPage();
+  await phone.addInitScript(()=>window.LEAF_CENTRAL_API_URL='');
+  await phone.goto(base);
+  await phone.locator('button[data-route="city"]').first().click();
+  await phone.locator('#city:not(.hidden)').waitFor();
+  await phone.locator('.street-location[data-street="magic"]').click();
+  await phone.locator('#shop:not(.hidden)').waitFor();
+  await phone.locator('#shop-era-toggle button[data-era="2004"]').click();
+  const result=await phone.evaluate(()=>{
+   const frame=document.getElementById('shop-native-stage').getBoundingClientRect();
+   const box=sel=>{
+    const e=document.querySelector(sel),r=e?.getBoundingClientRect();
+    return r?{left:r.left,top:r.top,right:r.right,bottom:r.bottom,
+      visible:!!(r.width&&r.height&&r.right>0&&r.bottom>0&&r.left<innerWidth&&r.top<innerHeight)}:null;
+   };
+   return {phoneFit:window.__LEAF_PHONE_FIT__?.getState?.(),
+     frame:{x:frame.x,y:frame.y,width:frame.width,height:frame.height},
+     buttons:['#shop-buy','#shop-sell','#shop .group-tab[data-group="normal"]',
+      '#shop .group-tab[data-group="valuable"]','#shop .group-tab[data-group="rare"]',
+      '#shop-era-toggle button[data-era="2004"]'].map(sel=>[sel,box(sel)])
+   };
+  });
+  assert.equal(result.phoneFit?.landscape,true,'iPhone landscape source-shop must stay landscape');
+  assert.ok(result.frame.width>250&&result.frame.height>150,'phone shows actual CardShop bitmap');
+  for(const [selector,box] of result.buttons){
+   assert.ok(box?.visible,'iPhone landscape CardShop button cannot be clipped: '+selector+' '+JSON.stringify(result));
+  }
+  await phone.screenshot({path:dir+'/'+engine+'-iphone-landscape-2004.jpg',type:'jpeg',quality:75});
+  console.log('M02 PHONE ORIGINAL SHOP PASS '+engine,JSON.stringify(result));
+  await phoneCtx.close();
  }finally{await browser.close()}
 })().catch(e=>{console.error('M02 SOURCE SHOP 2004 E2E FAILED',e.stack||e);process.exit(1)});
