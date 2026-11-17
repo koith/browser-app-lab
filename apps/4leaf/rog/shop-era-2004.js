@@ -63,10 +63,11 @@
   if(source&&marketSelect.value!==source.date)marketSelect.value=source.date;
   renderProvenance();
  });
- // M02's surviving 2004 CardShop screenshot is the selected visual target.
- // Preserve 2002 PAK as a separate selectable source-era in the header.
- let era='2004';
- try{era=localStorage.getItem('4leaf-original-shop-era')==='2002'?'2002':'2004'}catch{}
+ // The 2002 PAK is the only fully extracted CardShop art, so retain
+ // it as the default rather than silently replacing the client with a
+ // partially reconstructed 2004 screenshot. 2004 is an explicit mode.
+ let era='2002';
+ try{era=localStorage.getItem('4leaf-original-shop-era')==='2004'?'2004':'2002'}catch{}
  const apply=(selected,persist)=>{
   if(!['2002','2004'].includes(selected))return false;
   era=selected;
