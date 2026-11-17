@@ -10,6 +10,7 @@ on:
       - "apps/4leaf/rog/sw.js"
       - "apps/4leaf/rog/tests/realuse-*.cjs"
       - ".github/workflows/4leaf-phone-landscape-qa.yml"
+      - "apps/4leaf/rog/tests/visual-landscape-audit.cjs"
   workflow_dispatch:
 
 permissions:
@@ -36,6 +37,7 @@ jobs:
           node --check apps/4leaf/rog/tests/realuse-dice-full-game.cjs
           node --check apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
           node --check apps/4leaf/rog/tests/mobile-landscape-native-scenes.cjs
+          node --check apps/4leaf/rog/tests/visual-landscape-audit.cjs
       - name: Install Playwright
         working-directory: apps/4leaf/rog
         run: |
@@ -62,6 +64,10 @@ jobs:
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
         run: node apps/4leaf/rog/tests/realuse-chat-map-entry.cjs
+      - name: Capture 932x320 world, lobby, channels and chat town pixel evidence
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+        run: node apps/4leaf/rog/tests/visual-landscape-audit.cjs
       - name: One complete match on phone landscape
         env:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
