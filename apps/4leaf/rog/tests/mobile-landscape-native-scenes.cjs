@@ -48,7 +48,21 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
    assert.ok(m.app.w>=m.width*.94,'MainFrame fills available landscape width');
    whole(m.app,{x:0,y:0,r:m.width,b:m.height},'outer MainFrame');
   };
+  const isTopmost=selector=>page.evaluate(selector=>{
+    const e=document.querySelector(selector);
+    if(!e)return {missing:selector};
+    const r=e.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+    const target=document.elementFromPoint(x,y);
+    return {ok:r.width>8&&r.height>8&&x>=0&&x<innerWidth&&y>=0&&y<innerHeight&&
+      (target===e||e.contains(target)),selector,target:target?.id||target?.className||target?.tagName,
+      box:[r.left,r.top,r.width,r.height]};
+   },selector);
+  const assertTopmost=async (selector,kind)=>{
+   const value=await isTopmost(selector);
+   assert.equal(value.ok,true,kind+' original control must be touchable: '+JSON.stringify(value));
+  };
   await viewIs('world-528');
+  await assertTopmost('#help','world toolbar');
   const world=await measure();
   frame(world,'world-528');
   await page.locator('button[data-route="lobby"]').first().click();
@@ -64,6 +78,7 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
   await viewIs('genesis-404');
   const region=await measure();
   frame(region,'genesis-404');
+  await assertTopmost('#dice-channel-back','channel back control');
   assert.equal(region.region.flexDirection,'column','TOWN SELECT must not become side-by-side flex ROW');
   assert.ok(region.regionView.h>=region.app.h*.8,'TOWN SELECT art fills content height');
   whole(region.regionArt,region.regionView,'original TOWN SELECT');
