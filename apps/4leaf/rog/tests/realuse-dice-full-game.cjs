@@ -18,7 +18,15 @@ const only=process.env.LEAF_VIEWS?process.env.LEAF_VIEWS.split(','):null;
    if(engine!=='webkit')delete opts.defaultBrowserType;
    const ctx=await browser.newContext({...opts,serviceWorkers:'block'});
    const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
-   await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL=''});
+   await page.addInitScript(()=>{
+    window.LEAF_CENTRAL_API_URL='';
+    // Test-only reproducible native dice sequence. Does not change game code.
+    let seed=0x4e1ea;
+    Math.random=()=>{
+     seed=(Math.imul(seed,1664525)+1013904223)>>>0;
+     return seed/4294967296;
+    };
+   });
    await page.goto(base);
    const hit=sel=>page.evaluate(sel=>{
     const e=document.querySelector(sel);if(!e||e.hidden)return false;
@@ -35,7 +43,13 @@ const only=process.env.LEAF_VIEWS?process.env.LEAF_VIEWS.split(','):null;
    assert.ok(await hit('#lobby-create'),name+' CREATE is visible');
    await page.locator('#lobby-create').click();
    await page.locator('#map-select').waitFor({state:'attached'});
-   await page.locator('#map-select').selectOption({index:2});
+   // Real source DMP 0200 is the shortest recovered original map:
+   // 34 tiles, title "No Item". Avoid random 37-tile warp loops triggering
+   // 200-second false alarms, while still playing the whole real match.
+   const originalMap=page.locator('#map-select option[data-original-map-id="0200"]');
+   assert.equal(await originalMap.getAttribute('value'),'No Item',
+    'short recovered No Item DMP source must be installed');
+   await page.locator('#map-select').selectOption('No Item');
    await page.locator('#point-limit').selectOption({label:'8 POINT'}).catch(()=>{});
    await page.waitForTimeout(400);
    let how='original READY';
