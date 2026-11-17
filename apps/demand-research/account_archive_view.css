@@ -227,53 +227,83 @@ body{background:var(--paper);color:var(--ink)}
 .archive-embedded .sns-provider-top{margin-top:0;border-radius:0}
 @media(max-width:650px){.sns-provider-top{padding:8px 12px}}
 
-/* SOURCE_NAIVE_PROFILE_GEOMETRY_V1
-   Profile images are real replaced elements, not CSS background textures.
-   Keep the avatar image mathematically inside its circular border. The
-   reference social banners use a 3:1 source canvas (e.g. 1500x500 on
-   Mastodon). Fixed 174px/112px boxes were cropping source headers
-   differently at every viewport width. */
-.cover,.archive-embedded .cover{
-  position:relative;display:block;width:100%;height:auto;
-  aspect-ratio:3/1;min-height:0;padding:0;overflow:hidden;
-  background:#e5eef7;background-image:none;background-position:center
+/* SOURCE_NATIVE_PROFILE_GEOMETRY_V2
+   VERIFIED against the respective UI source files:
+   Bluesky social-app src/screens/Profile/Header/{layout.ts,Shell.tsx}
+      visible banner 150px; avatar frame 94px at (left:10px, bannerTop+104px)
+      ring 2px; saved image is 90x90 inside the ring.
+   Mastodon mastodon app/javascript/mastodon/components/account_header/
+      styles.module.scss + index.tsx
+      banner 120px / 160px at container >= 500px, avatar size 80px
+      margin-top:-64px, content padding-left:16px, frame border 1px.
+   Source image upload ratios and *visible viewport crops* are different:
+   a 3:1 uploaded banner is NOT necessarily shown as a 3:1 box.
+   No artificial image crop outside the provider's real image window. */
+.profile { container-type:inline-size; }
+.cover,.archive-embedded .cover {
+  position:relative;display:block;width:100%;min-height:0;
+  height:150px;aspect-ratio:auto;padding:0;overflow:hidden;
+  background:#e5eef7;background-image:none
 }
-:root[data-platform="mastodon"] .cover{
-  background:#353849
-}
-.cover-image{
+.cover.has-image{background-image:none}
+.cover-image {
   position:absolute;inset:0;display:block;width:100%;height:100%;
-  object-fit:cover;object-position:50% 50%;border:0;margin:0;padding:0
+  object-fit:cover;object-position:50% 50%;
+  padding:0;margin:0;border:0;border-radius:0
 }
-.cover-image[hidden],.avatar-image[hidden],.avatar-fallback[hidden]{
+.cover-image[hidden],.avatar-image[hidden],#avatarFallback[hidden] {
   display:none!important
 }
 .avatar{
-  position:absolute;left:18px;top:-48px;z-index:1;
-  box-sizing:border-box;display:flex;align-items:center;justify-content:center;
-  width:96px;height:96px;padding:0;border:4px solid var(--white);
+  box-sizing:border-box;position:absolute;left:10px;top:-46px;z-index:1;
+  width:94px;height:94px;padding:0;margin:0;border:2px solid var(--white);
   border-radius:50%;overflow:hidden;background:var(--accent2);
   background-image:none;background-size:auto;background-position:center;
+  display:flex;align-items:center;justify-content:center;
   line-height:1;isolation:isolate
 }
-.avatar-image{
-  display:block;position:relative;flex:0 0 100%;
-  width:100%;height:100%;min-width:0;min-height:0;
+.avatar-image {
+  position:relative;display:block;flex:0 0 100%;
+  box-sizing:border-box;width:100%;height:100%;min-width:0;min-height:0;
   max-width:100%;max-height:100%;margin:0;padding:0;border:0;
   border-radius:50%;object-fit:cover;object-position:50% 50%
 }
-.avatar-fallback{display:grid;place-items:center;width:100%;height:100%}
-.profile-content,.archive-embedded .profile-content{padding-top:55px}
-:root[data-platform="mastodon"] .avatar{
-  width:100px;height:100px;top:-50px;
-  border-color:var(--white)
+#avatarFallback{width:100%;height:100%;display:grid;place-items:center}
+.profile-content,.archive-embedded .profile-content {
+  padding-top:55px
 }
-:root[data-platform="mastodon"] .profile-content{padding-top:57px}
-@media(max-width:650px){
-  .cover,.archive-embedded .cover{height:auto;aspect-ratio:3/1}
-  .avatar,:root[data-platform="mastodon"] .avatar{
-    left:13px;top:-44px;width:88px;height:88px;border-width:4px
+:root[data-platform="mastodon"] .cover,
+:root[data-platform="mastodon"] .archive-embedded .cover {
+  height:160px;background:#353849;
+}
+:root[data-platform="mastodon"] .avatar{
+  left:14px;top:-64px;width:80px;height:80px;
+  border-width:1px;border-color:var(--line)
+}
+:root[data-platform="mastodon"] .profile-content,
+:root[data-platform="mastodon"] .archive-embedded .profile-content {
+  padding-top:32px
+}
+@container (max-width:499px){
+  :root[data-platform="mastodon"] .cover,
+  :root[data-platform="mastodon"] .archive-embedded .cover { height:120px; }
+}
+/* A container is the .profile itself; :root is outside the container query.
+   Scope by descendant-only selectors so mobile embedded width is respected. */
+@container (max-width:499px){
+  .cover[data-provider="mastodon"] {height:120px}
+}
+@media (max-width:650px){
+  .cover,.archive-embedded .cover{height:150px;aspect-ratio:auto}
+  :root[data-platform="mastodon"] .cover,
+  :root[data-platform="mastodon"] .archive-embedded .cover{height:120px}
+  .avatar{left:10px;top:-46px;width:94px;height:94px;border-width:2px}
+  :root[data-platform="mastodon"] .avatar {
+    left:14px;top:-64px;width:80px;height:80px;border-width:1px
   }
-  .profile-content,.archive-embedded .profile-content,
-  :root[data-platform="mastodon"] .profile-content{padding-top:51px}
+  .profile-content,.archive-embedded .profile-content{padding-top:55px}
+  :root[data-platform="mastodon"] .profile-content,
+  :root[data-platform="mastodon"] .archive-embedded .profile-content {
+    padding-top:32px
+  }
 }
