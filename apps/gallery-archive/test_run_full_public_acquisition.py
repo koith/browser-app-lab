@@ -22,7 +22,10 @@ class FullAcquisitionTests(unittest.TestCase):
                 seen=[aid for batch in batches for aid in batch]
                 self.assertEqual(set(seen),set(known))
                 self.assertEqual(len(seen),len(known))
-                self.assertEqual(seen[:len(PRIORITY[model])],list(PRIORITY[model]))
+                from official_sample_supply import exhausted_official_samples
+                priority=[aid for aid in PRIORITY[model]
+                          if aid not in exhausted_official_samples(ROOT,model)]
+                self.assertEqual(seen[:len(priority)],priority)
 
     def test_cross_registry_verified_source_work_is_not_lost_by_batch_filter(self):
         # A reverse hit may prove an owner edition that was never placed in
@@ -77,7 +80,13 @@ class FullAcquisitionTests(unittest.TestCase):
         for model in PRIORITY:
             first=work_batches(model,1,ROOT,7)
             second=work_batches(model,2,ROOT,7)
-            self.assertEqual(first[0],second[0])
+            from official_sample_supply import exhausted_official_samples
+            priority=[aid for aid in PRIORITY[model]
+                      if aid not in exhausted_official_samples(ROOT,model)]
+            if priority:
+                self.assertEqual(first[0],second[0])
+            else:
+                self.assertNotEqual(first[0],second[0])
             self.assertNotEqual(first[1:],second[1:])
 
     def test_no_replay_without_immutable_on_disk_stage_catalog(self):

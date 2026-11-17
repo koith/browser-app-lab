@@ -26,6 +26,11 @@ on:
       - '.github/workflows/gallery-full-missing-public-collection.yml'
       - 'apps/gallery-archive/run_full_public_acquisition.py'
       - 'apps/gallery-archive/test_run_full_public_acquisition.py'
+      - 'apps/gallery-archive/official_sample_supply.py'
+      - 'apps/gallery-archive/test_official_sample_supply.py'
+      - 'apps/gallery-archive/inventory_unindexed_owner_files.py'
+      - 'apps/gallery-archive/test_inventory_unindexed_owner_files.py'
+      - '.github/workflows/gallery-unindexed-owner-inventory.yml'
       - 'apps/gallery-archive/run_exhaustive_reverse_search.py'
       - 'apps/gallery-archive/test_exhaustive_reverse_search.py'
       - 'apps/gallery-archive/reverse_image_sweep.py'
@@ -61,6 +66,8 @@ jobs:
         run: |
           python -m py_compile apps/gallery-archive/run_full_public_acquisition.py
           python apps/gallery-archive/test_run_full_public_acquisition.py
+          python apps/gallery-archive/test_official_sample_supply.py
+          python apps/gallery-archive/test_inventory_unindexed_owner_files.py
           python apps/gallery-archive/test_source_alias_search.py
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/gallery-archive/test_bing_visual_knowledge.py

@@ -79,7 +79,12 @@ def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=Non
             # work that the collector cannot create from a proven target URL.
             if source_urls & target_urls.get(aid,set()) and aid not in all_ids:
                 all_ids.append(aid)
-    priority=[aid for aid in PRIORITY[model] if aid in all_ids]
+    # Official recorded DJAWA sample URLs already represented by saved SHA
+    # do not deserve the repeated first batch. Keep them in the normal round-
+    # robin scan so new public variants are still discoverable.
+    from official_sample_supply import exhausted_official_samples
+    exhausted=exhausted_official_samples(base,model)
+    priority=[aid for aid in PRIORITY[model] if aid in all_ids and aid not in exhausted]
     rest=[aid for aid in all_ids if aid not in priority]
     if rest:
         offset=((max(run_number,1)-1)*batch_size)%len(rest)
