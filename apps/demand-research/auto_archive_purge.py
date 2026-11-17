@@ -104,8 +104,13 @@ def _remove_physical(cloud,key):
     for target in paths:
         cloud.command(["deletefile",cloud.remote+"/"+target,"--retries","2"],
                       timeout=45,allow_missing=True)
+        # Read at most one byte: a leftover 1GB video must never be loaded
+        # into the small Render process merely to verify its removal.
         for domain in (None,"https://nephobox.com"):
-            data=cloud._read_physical(target,cap=1,optional=True,domain=domain)
+            args=["cat",cloud.remote+"/"+target,"--count","1","--retries","2"]
+            if domain:
+                args.extend(["--terabox-domain",domain])
+            data=cloud.command(args,timeout=45,allow_missing=True)
             if data is not None:
                 raise RuntimeError("private archive erasure readback not empty")
 
@@ -128,7 +133,10 @@ def erase_post(cloud,post):
         keys.append(media)
     # Extra first-sighting records and image-part slots are also account data.
     keys.extend(["posts/"+pid+"/capture.json","metadata/early-"+pid+".json"])
-    for i in range(1,17):
+    expected=post.get("media_expected",len(post.get("media",[])))
+    if type(expected) is not int or not 0<=expected<=16:
+        raise ValueError("invalid expected original media count")
+    for i in range(1,max(expected,len(post.get("media",[])))+1):
         keys.append("metadata/media-parts/"+pid+"/"+str(i).zfill(4)+".json")
     for key in dict.fromkeys(keys):
         _remove_physical(cloud,key)
