@@ -29,6 +29,14 @@
  // independent MainFrame toolbar, not over the 2004 screenshot geometry.
  const mainFrameToolbar=document.querySelector('#app > .toolbar');
  (mainFrameToolbar||stage).append(toolbar);
+ // Screenshot 2004 contains exactly Normal / Valuable / Rare. A synthetic
+ // '전체' tab would change the original screenshot; keep it exclusively as
+ // an optional WEB catalog reset button on the external MainFrame toolbar.
+ const reset=document.createElement('button');
+ reset.type='button';reset.className='shop-era-show-all';
+ reset.textContent='전체';reset.title='전체 카드 보기 (웹앱 편의 기능)';
+ reset.addEventListener('click',()=>tabs.querySelector('[data-group="all"]')?.click());
+ toolbar.append(reset);
  // The recovered 2002 UI does not contain a time-machine control.
  // Keep this WEB-only provenance switch visually separate from source art.
  const marketLabel=document.createElement('label');
@@ -74,7 +82,7 @@
   if(!['2002','2004'].includes(selected))return false;
   era=selected;
   stage.dataset.era=era;
-  for(const b of toolbar.querySelectorAll('button')){
+  for(const b of toolbar.querySelectorAll('button[data-era]')){
    b.setAttribute('aria-pressed',String(b.dataset.era===era));
   }
   rare.disabled=era!=='2004';
@@ -87,7 +95,7 @@
   window.dispatchEvent(new CustomEvent('leaf-shop-era-change',{detail:{era,sourceRarity:'unverified'}}));
   return true;
  };
- for(const b of toolbar.querySelectorAll('button'))b.addEventListener('click',()=>apply(b.dataset.era,true));
+ for(const b of toolbar.querySelectorAll('button[data-era]'))b.addEventListener('click',()=>apply(b.dataset.era,true));
  window.__LEAF_SHOP_ERA__={setEra:s=>apply(s,true),getState:()=>({
   era,pageSize:era==='2004'?8:9,
   originalAsset:era==='2004'?'archived-2004-shop_ref.png-reference/independent-DOM':'2002-CardShop/cardshopback.png',
