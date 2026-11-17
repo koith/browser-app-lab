@@ -110,9 +110,36 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
   const bought=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')));
   assert.ok(bought.gp<gpBefore,'real purchase deducts GP');
   assert.ok(bought.owned.includes(id),'real purchase persists source chessman');
+  const sourcePrice=Number((await page.locator('.source-cardinfo-price').textContent()).replace(/[^0-9]/g,''));
+  const resale=Number(await page.locator('#shop-sell').getAttribute('data-resale-gp'));
+  const status=await page.locator('#shop-sell').getAttribute('data-resale-status');
+  assert.equal(resale,Math.floor(sourcePrice/4),
+   '2004 archived non-serial resale uses historically recorded 25% rate');
+  assert.equal(status,'historical-retrospective-25pct-not-exe-verified',
+   'secondary evidence is never falsely labelled verified original EXE');
   await page.locator('#shop-sell').click();
   await page.locator('#modal-buttons button').filter({hasText:'판매'}).click();
   await page.waitForFunction(id=>!JSON.parse(localStorage.getItem('rog_profile')).owned.includes(id),id);
+  const sold=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')));
+  assert.equal(sold.gp,bought.gp+resale,
+   'normal 2004 CardShop resale adds the exact selected historic quote');
+  // Original official 2003-09 operation notice: only a REDEEMED serial card
+  // is exchanged for 1,000GP. Exercise that separate provenance path using
+  // an isolated profile fixture, not a fabricated public user inventory.
+  await page.evaluate(id=>{
+   const p=JSON.parse(localStorage.getItem('rog_profile'));
+   p.owned.push(id);p.serialRedeemed.push(id);
+   localStorage.setItem('rog_profile',JSON.stringify(p));
+  },id);
+  await page.reload();
+  await page.locator('button[data-route="shop"]').first().click();
+  await page.locator('#shop-era-toggle button[data-era="2004"]').click();
+  await page.locator('#shop .group-tab[data-group="normal"]').click();
+  const serialCard=page.locator('#shop-grid .shop-card[data-card-id="'+id+'"]');
+  if(await serialCard.count())await serialCard.click();
+  else await page.locator('#shop-owned-list .shop-owned-entry[data-card-id="'+id+'"]').click();
+  assert.equal(Number(await page.locator('#shop-sell').getAttribute('data-resale-gp')),1000,
+   'only actually serial-redeemed cards earn the verified 1000GP source sale');
   await page.locator('button[data-route="city"]').first().click();
   await page.locator('#city:not(.hidden)').waitFor();
   await street.waitFor({state:'visible'});
