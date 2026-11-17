@@ -226,3 +226,54 @@ body{background:var(--paper);color:var(--ink)}
 :root[data-platform="mastodon"] .post{border-bottom:1px solid #393d4a}
 .archive-embedded .sns-provider-top{margin-top:0;border-radius:0}
 @media(max-width:650px){.sns-provider-top{padding:8px 12px}}
+
+/* SOURCE_NAIVE_PROFILE_GEOMETRY_V1
+   Profile images are real replaced elements, not CSS background textures.
+   Keep the avatar image mathematically inside its circular border. The
+   reference social banners use a 3:1 source canvas (e.g. 1500x500 on
+   Mastodon). Fixed 174px/112px boxes were cropping source headers
+   differently at every viewport width. */
+.cover,.archive-embedded .cover{
+  position:relative;display:block;width:100%;height:auto;
+  aspect-ratio:3/1;min-height:0;padding:0;overflow:hidden;
+  background:#e5eef7;background-image:none;background-position:center
+}
+:root[data-platform="mastodon"] .cover{
+  background:#353849
+}
+.cover-image{
+  position:absolute;inset:0;display:block;width:100%;height:100%;
+  object-fit:cover;object-position:50% 50%;border:0;margin:0;padding:0
+}
+.cover-image[hidden],.avatar-image[hidden],.avatar-fallback[hidden]{
+  display:none!important
+}
+.avatar{
+  position:absolute;left:18px;top:-48px;z-index:1;
+  box-sizing:border-box;display:flex;align-items:center;justify-content:center;
+  width:96px;height:96px;padding:0;border:4px solid var(--white);
+  border-radius:50%;overflow:hidden;background:var(--accent2);
+  background-image:none;background-size:auto;background-position:center;
+  line-height:1;isolation:isolate
+}
+.avatar-image{
+  display:block;position:relative;flex:0 0 100%;
+  width:100%;height:100%;min-width:0;min-height:0;
+  max-width:100%;max-height:100%;margin:0;padding:0;border:0;
+  border-radius:50%;object-fit:cover;object-position:50% 50%
+}
+.avatar-fallback{display:grid;place-items:center;width:100%;height:100%}
+.profile-content,.archive-embedded .profile-content{padding-top:55px}
+:root[data-platform="mastodon"] .avatar{
+  width:100px;height:100px;top:-50px;
+  border-color:var(--white)
+}
+:root[data-platform="mastodon"] .profile-content{padding-top:57px}
+@media(max-width:650px){
+  .cover,.archive-embedded .cover{height:auto;aspect-ratio:3/1}
+  .avatar,:root[data-platform="mastodon"] .avatar{
+    left:13px;top:-44px;width:88px;height:88px;border-width:4px
+  }
+  .profile-content,.archive-embedded .profile-content,
+  :root[data-platform="mastodon"] .profile-content{padding-top:51px}
+}
