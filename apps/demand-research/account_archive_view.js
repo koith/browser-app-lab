@@ -183,10 +183,10 @@ function syncVisiblePostIdentity(){
   }
 }
 function profileArtLabel(profile,kind,available){
-  const detail=profile?.asset_details?.[kind]||{};
+  const detail=profile?.asset_details?.[kind]||profile?.asset_status?.[kind]||{};
   const label=kind==="banner"?"헤더":"프로필 사진";
   if(!available){
-    if(detail.state==="not_set")return label+" 미설정(현재 공개 기록)";
+    if((detail.state||detail.status)==="not_set")return label+" 미설정(현재 공개 기록)";
     return label+" 미보관(공개 원본 접근/저장 검증 필요)";
   }
   const tier=detail.source_tier==="original_pds_blob"?"원본 PDS":
