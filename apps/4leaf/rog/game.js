@@ -477,9 +477,7 @@ function drawTeam(){
     div.append(select);
     modal('체스맨 원정대',div,[{label:'선택',primary:true,run:()=>{
       const chosen=select.value;
-      profile.team[slot]=chosen;
-      if(slot===3&&!chosen)profile.team.splice(3,1);
-      persist();drawTeam();
+      commitRosterSelection(slot,chosen);
     }},{label:'취소'}]);
   };
   root.append(b);
@@ -495,6 +493,35 @@ function drawTeam(){
  // and four selected-party rows. Keep that source bitmap populated by the
  // very same live game profile, not a second unsynchronised mock inventory.
  window.dispatchEvent(new Event('leaf-dice-roster-change'));
+}
+// Roster changes are transactions, not speculative UI edits. A quota-
+// denied profile write used to leave the NEW party visible until reload and
+// could then restore an old lineup silently. Validate and save a candidate
+// snapshot BEFORE mutating the real party. The original EXE storage format
+// is unverified; this is a WEB save-integrity guard, not an original rule.
+function commitRosterSelection(slot,id){
+ if(!Number.isInteger(slot)||slot<0||slot>3||typeof id!=='string')return false;
+ if(slot===0&&!id)return false;
+ if(id&&(!CARD_MAP[id]||!profile.owned.includes(id)))return false;
+ const next=profile.team.slice(0,4);
+ if(id&&next.some((existing,index)=>index!==slot&&existing===id))return false;
+ next[slot]=id;
+ if(slot===3&&!id)next.splice(3,1);
+ const previous=profile.team;
+ try{
+  localStorage.setItem('rog_profile',JSON.stringify({...profile,team:next}));
+ }catch(error){
+  // No existing party or saved game is modified on quota denial.
+  console.warn('4LEAF roster selection not persisted; original party retained',
+   error?.name||'storage-error');
+  modal('체스맨 원정대 저장 실패',
+   '장착 변경 사항을 저장하지 못했습니다. 기존 출전 파티를 유지합니다. 저장 공간을 확인한 뒤 다시 시도하세요.',
+   [{label:'확인',primary:true}]);
+  return false;
+ }
+ profile.team=next;
+ drawTeam();
+ return true;
 }
 // Source Room table adapter: no synthetic chessmen, no independent roster
 // state. All writes take the EXACT existing 4LEAF profile/save path.
@@ -512,9 +539,7 @@ window.__LEAF_DICE_ROSTER__={
   if(!Number.isInteger(slot)||slot<0||slot>3||typeof id!=='string')return false;
   if(!profile.owned.includes(id)||!CARD_MAP[id])return false;
   if(profile.team.some((current,i)=>i!==slot&&current===id))return false;
-  profile.team[slot]=id;
-  persist();drawTeam();
-  return true;
+  return commitRosterSelection(slot,id);
  },
  chooseSlot:slot=>{
   const buttons=$('team-select')?.querySelectorAll('.team-slot');
