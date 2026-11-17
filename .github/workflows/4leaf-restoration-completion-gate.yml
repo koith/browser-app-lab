@@ -1,0 +1,23 @@
+name: 4LEAF restoration completion gate
+on:
+  pull_request:
+    paths:
+      - "apps/4leaf/rog/docs/RESTORATION_LEDGER.json"
+      - "apps/4leaf/rog/docs/RESTORATION_ACTIVE.json"
+      - "apps/4leaf/rog/docs/DELIVERY_FOCUS.json"
+      - "apps/4leaf/rog/docs/DELIVERY_CLOSURES.json"
+      - "apps/4leaf/rog/docs/check_restoration_delivery.py"
+      - ".github/workflows/4leaf-restoration-completion-gate.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prevent-inflated-completion:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check one-WIP selection, all 16 remaining tasks, and closure evidence
+        run: python3 apps/4leaf/rog/docs/check_restoration_delivery.py
+      - name: Check compact active snapshot remains derived, not an independent ledger
+        run: python3 apps/4leaf/rog/docs/build_restoration_active.py --check

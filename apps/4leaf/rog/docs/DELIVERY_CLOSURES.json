@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "description": "Only NEW task closures after the 2026-11-18 baseline. Historical completions remain in RESTORATION_LEDGER.json. A closure is not accepted until real original+renewal reference, implementation, actual browser flows and public deployment evidence are linked.",
+  "newClosures": {}
+}
