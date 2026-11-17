@@ -14,6 +14,7 @@ ACCOUNT="bluesky-"+"a"*40
 POST="b"*40
 POST2="f"*40
 POST4="d"*40
+ASSET_SNAPSHOT="snap-20261117000000000000-0123456789abcdef.json"
 
 
 def response_fixture(path,query=""):
@@ -25,7 +26,8 @@ def response_fixture(path,query=""):
                 "handle":"qa.bsky.social","display_name":"Synthetic QA",
                 "description":"Synthetic biography for browser verification",
                 "followers_count":13,"following_count":4,"posts_count":29,
-                "assets":{"avatar":None,"banner":None},
+                "assets":{"avatar":"/api/account-archives/"+ACCOUNT+"/profile-asset/avatar?snapshot="+ASSET_SNAPSHOT,
+                          "banner":"/api/account-archives/"+ACCOUNT+"/profile-asset/banner?snapshot="+ASSET_SNAPSHOT},
                 "captured_at":"2026-11-04T00:00:00Z",
                 "profile_url":"https://bsky.app/profile/qa.bsky.social"}
     if "/feed" in path:
@@ -121,7 +123,7 @@ def run(browser_type,name,width,height):
                     if retry_requests["count"]==1:
                         route.fulfill(status=503,content_type="application/json",body='{"error":"test transient"}')
                         return
-                if "/media/" in path:
+                if "/media/" in path or "/profile-asset/" in path:
                     route.fulfill(status=200,content_type="image/png",
                         body=bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b49444154789c636000020000050001a5f645400000000049454e44ae426082"))
                 else:
@@ -153,6 +155,25 @@ def run(browser_type,name,width,height):
         assert page.locator("#cover").evaluate(
             "(el) => getComputedStyle(el).backgroundImage")=="none", (
             "source-less cover must NOT show an invented green gradient")
+        page.locator("#coverImage").wait_for(state="visible",timeout=10000)
+        page.locator("#avatarImage").wait_for(state="visible",timeout=10000)
+        assert page.locator("#coverImage").evaluate("(el)=>el.naturalWidth")>0
+        assert page.locator("#avatarImage").evaluate("(el)=>el.naturalWidth")>0
+        assert "snapshot="+ASSET_SNAPSHOT in page.locator("#coverImage").get_attribute("src")
+        assert page.locator("#cover").evaluate("(el)=>el.classList.contains('has-image')")
+        assert page.locator("#avatar").evaluate("(el)=>el.classList.contains('has-image')")
+        box=page.locator("#avatar").evaluate("""(el)=>{
+          const frame=el.getBoundingClientRect(), image=el.querySelector("img").getBoundingClientRect(),
+            style=getComputedStyle(el);
+          return {frameW:frame.width,frameH:frame.height,imageW:image.width,imageH:image.height,
+            leftDelta:image.left-frame.left,topDelta:image.top-frame.top,
+            border:parseFloat(style.borderLeftWidth),
+            objectFit:getComputedStyle(el.querySelector("img")).objectFit}
+        }""")
+        assert abs(box["frameW"]-94)<1 and abs(box["frameH"]-94)<1,box
+        assert abs(box["border"]-2)<.5 and box["objectFit"]=="cover",box
+        assert abs(box["imageW"]-90)<1 and abs(box["imageH"]-90)<1,box
+        assert abs(box["leftDelta"]-2)<1 and abs(box["topDelta"]-2)<1,box
         page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for(timeout=10000)
         assert page.locator(".post-media img").count()==1
         # A transient 503 on page 2 must leave page 1 visible, and retry from offset=2.
