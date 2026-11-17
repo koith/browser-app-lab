@@ -170,10 +170,22 @@ def run(browser_type,name,width,height):
                       center:getComputedStyle(document.getElementById('avatarImage')).objectPosition};
             }""")
             c,h,r,a=metrics["cover"],metrics["header"],metrics["ring"],metrics["portrait"]
-            assert abs(c["height"]-c["width"]/3)<1.5,(provider,"source banner 3:1",metrics)
+            # Authoritative source viewport heights differ from the
+            # 3:1 crop of the underlying uploaded image.
+            expected_height=(150 if provider=="bluesky" else
+                             (160 if c["width"]>=500 else 120))
+            expected_ring=94 if provider=="bluesky" else 80
+            expected_border=2 if provider=="bluesky" else 1
+            expected_top=-46 if provider=="bluesky" else -64
+            expected_left=10 if provider=="bluesky" else 14
+            assert abs(c["height"]-expected_height)<1.5,(
+                provider,"native banner viewport height",metrics)
             assert abs(h["width"]-c["width"])<1 and abs(h["height"]-c["height"])<1
-            assert abs(r["y"]+r["height"]/2-(c["y"]+c["height"]))<1.5, (
-                provider,"circle not half-overlapping the banner",metrics)
+            assert abs(r["y"]-(c["y"]+c["height"]+expected_top))<1.5, (
+                provider,"native frame top overlap",metrics)
+            assert abs(r["x"]-(c["x"]+expected_left))<2, (
+                provider,"native frame left offset",metrics)
+            assert abs(r["width"]-expected_ring)<1 and abs(r["height"]-expected_ring)<1
             assert abs(a["x"]-(r["x"]+metrics["border"]))<1.1, (
                 provider,"avatar inset x does not equal the ring width",metrics)
             assert abs(a["y"]-(r["y"]+metrics["border"]))<1.1,(
@@ -181,7 +193,7 @@ def run(browser_type,name,width,height):
             assert abs(a["width"]-(r["width"]-metrics["border"]*2))<1.1
             assert abs(a["height"]-(r["height"]-metrics["border"]*2))<1.1
             assert metrics["fit"]=="cover" and metrics["center"]=="50% 50%"
-            assert metrics["border"]==4 and metrics["radius"]=="50%"
+            assert metrics["border"]==expected_border and metrics["radius"]=="50%"
         page.evaluate("() => document.documentElement.dataset.platform='bluesky'")
 
         assert page.get_by_text("Synthetic biography for browser verification").count()==1
