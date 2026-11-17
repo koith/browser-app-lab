@@ -546,20 +546,23 @@ window.__LEAF_DICE_ROSTER__={
   buttons[slot].click();return true;
  }
 };
-// Archived CardShop sprite atlas includes actual 판매하기 button art, but
-// surviving client has NOT verified its resale GP rule. 50% is a clearly
-// labeled WEB economic fallback, never represented as source historical data.
-const inferredShopResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/2));
-// Original 4LEAF operation notice, 2003-09-18: serial-number REDEEMED
-// cards were resold to Magic Carden for exactly 1,000 GP, regardless of
-// market purchase price. This is NOT proof of a 1,000 GP resale for all
-// ordinary GP-purchased cards; those retain the explicitly inferred rule.
+// Archived original 2003 notice explicitly fixes resale of a card received
+// from a serial redemption at 1,000 GP (primary source).
 // https://4leafmemorial.geld.kr/959
+// A historical account of the client also records the LATER shop's resale
+// rate being reduced to 25% for ordinary items. This is a retrospective,
+// NOT the recovered 2004 EXE price function: preserve provenance on-screen.
+// https://tcatmon.com/wiki/주사위의_잔영
+const originalLateResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/4));
+const inferredEarlyResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/2));
 const shopResaleQuote=card=>profile.serialRedeemed.includes(card?.id)
  ?{gp:1000,source:'original-2003-serial-redemption-1000gp',
-   label:'원작 2003년 시리얼 등록 카드 재판매 1,000 GP'}
- :{gp:inferredShopResaleGP(card),source:'inferred-web-price-not-original',
-   label:'임시 판매가 '+inferredShopResaleGP(card).toLocaleString()+' GP (일반 카드 원작 재판매 가격 규칙 미확인)'};
+   label:'원작 공지: 시리얼 등록 카드 재판매 1,000 GP'}
+ :window.__LEAF_SHOP_ERA__?.getState?.().era==='2004'
+  ?{gp:originalLateResaleGP(card),source:'historical-retrospective-25pct-not-exe-verified',
+    label:'2004 재판매가 '+originalLateResaleGP(card).toLocaleString()+' GP (후대 기록 25%, EXE 미검증)'}
+  :{gp:inferredEarlyResaleGP(card),source:'inferred-early-web-50pct-not-original',
+    label:'2002 초기 웹 재판매가 '+inferredEarlyResaleGP(card).toLocaleString()+' GP (원본 규칙 미확인)'};
 // An inventory/GP change must not become visible until it is durable.
 // On localStorage quota/permission failure, restore exactly the previous
 // in-memory balances; a later page reload must not silently undo a purchase
