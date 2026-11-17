@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   publicly-deployed-original-shop:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
