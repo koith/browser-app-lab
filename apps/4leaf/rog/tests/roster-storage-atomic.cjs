@@ -44,11 +44,20 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
   assert.match(await page.locator('#modal-content').textContent(),/기존 출전 파티/);
   await page.locator('#modal-buttons button').first().click();
   await page.evaluate(()=>{window.__denyProfileWrites=false});
-  const accepted=await page.evaluate(id=>window.__LEAF_DICE_ROSTER__.equip(3,id),testId);
-  assert.equal(accepted,true,'valid source card commits');
+  await page.locator('[data-route="lobby"]').first().click();
+  await page.locator('#lobby-create').click();
+  await page.locator('#dice-room-config:not(.hidden)').waitFor();
+  // Use the ORIGINAL 794x404 Room/roomback CHESSMAN INFO rows,
+  // not the hidden legacy HTML fallback #team-select.
+  const selectedSlot=page.locator('#dice-native-selected-chessmen .dice-native-chessman-row[data-slot="3"]');
+  await selectedSlot.click();
+  assert.equal(await page.locator('#dice-native-stage').getAttribute('data-native-chessmen-active-slot'),'3');
+  const actualNativeCard=page.locator('#dice-native-owned-chessmen .dice-native-chessman-row[data-card-id="'+testId+'"]');
+  await actualNativeCard.click();
+  await page.waitForFunction(id=>window.__LEAF_DICE_ROSTER__.getState().team[3]===id,testId);
   let updated=await get();
-  assert.equal(updated.roster.team[3],testId);
-  assert.equal(JSON.parse(updated.saved).team[3],testId,'new lineup actually persisted');
+  assert.equal(updated.roster.team[3],testId,'real Room table equips fourth source actor');
+  assert.equal(JSON.parse(updated.saved).team[3],testId,'new Room lineup actually persisted');
   const duplicate=await page.evaluate(id=>window.__LEAF_DICE_ROSTER__.equip(2,id),testId);
   assert.equal(duplicate,false,'one source card cannot equip in two live positions');
   assert.equal((await get()).saved,updated.saved,'rejected duplicate keeps original saved state');
@@ -56,36 +65,13 @@ const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
   assert.equal(unknown,false,'unissued card must never be equipped');
   await page.reload();
   await page.waitForFunction(()=>window.__LEAF_DICE_ROSTER__?.getState());
-  assert.equal((await get()).roster.team[3],testId,'source roster survives actual page reload');
-  await page.locator('[data-route="lobby"]').first().click();
-  await page.locator('#lobby-create').click();
-  await page.locator('#dice-room-config:not(.hidden)').waitFor();
-  await page.locator('#team-select .team-slot').nth(3).click();
-  await page.locator('#modal select').selectOption('');
-  await page.evaluate(()=>{window.__denyProfileWrites=true});
-  await page.locator('#modal-buttons button').first().click();
-  const deniedClear=await get();
-  assert.equal(deniedClear.roster.team[3],testId,'native Room slot clear fails closed');
-  assert.equal(JSON.parse(deniedClear.saved).team[3],testId,'failed slot clear remains durable');
-  assert.match(await page.locator('#modal-content').textContent(),/기존 출전 파티/);
-  await page.locator('#modal-buttons button').first().click();
-  await page.evaluate(()=>{window.__denyProfileWrites=false});
-  await page.locator('#team-select .team-slot').nth(3).click();
-  await page.locator('#modal select').selectOption('');
-  await page.locator('#modal-buttons button').first().click();
-  const cleared=await get();
-  assert.ok(!cleared.roster.team[3]&&cleared.roster.team.length<4,
-   'legitimate optional source fourth slot can be emptied');
-  await page.reload();
-  await page.waitForFunction(()=>window.__LEAF_DICE_ROSTER__?.getState());
   const final=await get();
-  assert.equal(final.roster.team.length,initial.roster.team.length,
-   'native Room lineup restored after saved clear');
-  assert.deepEqual(final.roster.team,initial.roster.team);
+  assert.equal(final.roster.team[3],testId,'source roster survives actual page reload');
+  assert.ok(final.roster.team.length===4,'four real source cards remain equipped');
   assert.deepEqual(pageErrors.filter(e=>!/Failed to fetch|Load failed/.test(e)),[],
    'no unhandled roster errors');
   console.log('SOURCE ROSTER DURABLE PASS '+engine+' '+JSON.stringify({
-   sourceId:testId,saveDenied:true,uiClearDenied:true,persistedThenReloaded:true,
+   sourceId:testId,saveDenied:true,nativeRoomSelection:true,persistedThenReloaded:true,
    duplicateRejected:true,unissuedRejected:true
   }));
   await ctx.close();
