@@ -70,4 +70,31 @@ jobs:
           # lsjson reports paths and sizes, not image bytes; restrict logs to aggregate counts.
           timeout 660 "$RUNNER_TEMP/bin/rclone" lsjson "$remote" -R --files-only --timeout 75s --retries 2 > "$RUNNER_TEMP/owner-lsjson.json" 2> "$RUNNER_TEMP/lsjson-stderr"
           python apps/gallery-archive/inventory_unindexed_owner_files.py --model "$MODEL" --listing "$RUNNER_TEMP/owner-lsjson.json" --catalog "$RUNNER_TEMP/owner-catalog.json" | tee "$RUNNER_TEMP/owner-census-result.log"
+          # Classify the unindexed originals by ALREADY PUBLIC catalog album IDs.
+          # Do not print owner paths, filenames, hashes or contents.
+          python - <<'PY'
+          import collections,json,os,pathlib
+          t=pathlib.Path(os.environ['RUNNER_TEMP'])
+          doc=json.loads((t/'owner-catalog.json').read_text())
+          listing=json.loads((t/'owner-lsjson.json').read_text())
+          known={a['id'] for a in doc['albums']}
+          registered={p['key'] for a in doc['albums'] for p in a['images'] if isinstance(p.get('key'),str)}
+          counts=collections.Counter()
+          sizes=collections.Counter()
+          unknown=0
+          for p in listing:
+            key=p.get('Path','')
+            if not key.startswith('originals/') or key in registered: continue
+            if not key.casefold().endswith(('.jpg','.jpeg','.png','.webp','.avif','.heic','.tif','.tiff')): continue
+            segments=key.split('/')
+            aid=segments[1] if len(segments)>=3 else ''
+            if aid in known: counts[aid]+=1
+            else: unknown+=1
+            size=p.get('Size',0)
+            sizes['at_least_2mb' if size>=2000000 else '500kb_to_2mb' if size>=500000 else 'below_500kb']+=1
+          report={'model':os.environ['MODEL'],'known_album_candidates':sum(counts.values()),
+                  'unknown_album_candidates':unknown,'album_counts':counts.most_common(25),
+                  'size_buckets':dict(sizes)}
+          print('OWNER_UNINDEXED_ORIGINALS_BREAKDOWN',json.dumps(report,sort_keys=True))
+          PY
           echo 'Read-only owner archive file census complete; no files downloaded, uploaded or deleted.' >> "$GITHUB_STEP_SUMMARY"
