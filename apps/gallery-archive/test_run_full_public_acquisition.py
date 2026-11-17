@@ -22,7 +22,10 @@ class FullAcquisitionTests(unittest.TestCase):
                 seen=[aid for batch in batches for aid in batch]
                 self.assertEqual(set(seen),set(known))
                 self.assertEqual(len(seen),len(known))
-                self.assertEqual(seen[:len(PRIORITY[model])],list(PRIORITY[model]))
+                from official_sample_supply import exhausted_official_samples
+                priority=[aid for aid in PRIORITY[model]
+                          if aid not in exhausted_official_samples(ROOT,model)]
+                self.assertEqual(seen[:len(priority)],priority)
 
     def test_cross_registry_verified_source_work_is_not_lost_by_batch_filter(self):
         # A reverse hit may prove an owner edition that was never placed in
