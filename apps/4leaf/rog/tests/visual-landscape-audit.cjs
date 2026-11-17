@@ -4,6 +4,7 @@
    a reviewer can inspect actual screenshots and not trust geometry only.
    No runtime code or live project state is modified by this test. */
 const {chromium,webkit,devices}=require('playwright');
+const fs=require('node:fs');
 const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
 const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
 (async()=>{
@@ -34,8 +35,13 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
     return o;
    });
    const jpeg=await page.screenshot({type:'jpeg',quality:55,animations:'disabled'});
+   const dir='apps/4leaf/rog/tests/.visual-captures';
+   fs.mkdirSync(dir,{recursive:true});
+   fs.writeFileSync(dir+'/'+engine+'-'+name.toLowerCase()+'.jpg',jpeg);
    console.log('4LEAF_META_'+name+'='+JSON.stringify(meta));
-   console.log('4LEAF_JPEG_'+name+'='+jpeg.toString('base64'));
+   // Opt-in only: large base64 screenshots make GitHub and AI logs unwieldy.
+   if(process.env.LEAF_VISUAL_LOG_B64==='1')
+     console.log('4LEAF_JPEG_'+name+'='+jpeg.toString('base64'));
   };
   await page.goto(base);
   await page.waitForFunction(()=>window.__LEAF_PHONE_FIT__?.getState?.()?.kind==='world-528');
