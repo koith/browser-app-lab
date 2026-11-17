@@ -567,10 +567,30 @@ const shopResaleQuote=card=>profile.serialRedeemed.includes(card?.id)
 // or remove an item whose sale only appeared to complete.
 function commitShopTransaction(change){
  const previousGP=profile.gp,previousOwned=profile.owned.slice(),previousSerial=profile.serialRedeemed.slice();
- change();
- try{localStorage.setItem('rog_profile',JSON.stringify(profile))}
- catch(error){
+ // A valid imported old profile may store GP as a decimal string. The old
+ // sale path used += directly and converted "3000"+1000 into "30001000".
+ // Normalize only inside an actual durable transaction; reject unsafe GP
+ // rather than accidentally minting or erasing currency. Original 2003
+ // resale prices remain separately provenance-labelled by shopResaleQuote.
+ const normalizedGP=Number(previousGP);
+ if(!Number.isSafeInteger(normalizedGP)||normalizedGP<0){
+  modal('매직카덴 GP 확인 필요',
+   '저장된 GP 값이 올바르지 않아 거래를 중단했습니다. 보유 카드와 기존 GP 데이터는 변경하지 않았습니다.',
+   [{label:'확인',primary:true}]);
+  return false;
+ }
+ const rollback=()=>{
   profile.gp=previousGP;profile.owned=previousOwned;profile.serialRedeemed=previousSerial;
+ };
+ try{
+  profile.gp=normalizedGP;
+  change();
+  if(!Number.isSafeInteger(profile.gp)||profile.gp<0||
+     !Array.isArray(profile.owned)||!Array.isArray(profile.serialRedeemed))
+   throw new RangeError('Unsafe CardShop GP or roster transaction');
+  localStorage.setItem('rog_profile',JSON.stringify(profile));
+ }catch(error){
+  rollback();
   console.warn('4LEAF shop transaction not persisted; old balances retained',
    error?.name||'storage-error');
   modal('매직카덴 저장 실패',
