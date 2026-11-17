@@ -1,0 +1,143 @@
+name: Gallery Recover Existing Unindexed DJAWA Bytes into Static Album
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-recover-unindexed-djawa-existing-photos.yml'
+      - 'apps/gallery-archive/recover_unindexed_djawa_owner_photos.py'
+      - 'apps/gallery-archive/test_recover_unindexed_djawa_owner_photos.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-recover-unindexed-djawa-existing-photos.yml'
+permissions:
+  contents: write
+  actions: write
+  pages: write
+concurrency:
+  group: gallery-existing-djawa-photo-publish-${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
+  cancel-in-progress: false
+jobs:
+  existing-owner-real-photo-backfill:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      GH_TOKEN: ${{ github.token }}
+      STAGE: /tmp/gallery-owner-existing-backfill
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          sparse-checkout: |
+            apps/gallery-archive
+            apps/mimmi-gallery/cloud/gateway/cookie_format.py
+            apps/mimmi-gallery/owner-index.json
+            apps/mimmi-gallery/stored-albums.json
+            apps/mimmi-gallery/public-work-pages.json
+            apps/mimmi-gallery/stored-albums/djawa-retrospection
+            apps/mimmi-gallery/stored-albums/djawa-christmas-special-2021-mimmi
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify recovery regression tests and existing image-publisher import
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet 'Pillow==11.3.0'
+          python -m py_compile apps/gallery-archive/recover_unindexed_djawa_owner_photos.py apps/gallery-archive/publish_new_public_photos_to_pages.py
+          python apps/gallery-archive/test_recover_unindexed_djawa_owner_photos.py
+      - name: Install existing pinned owner TeraBox read client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Acquire previously unindexed exact owner originals and publish only distinct cuts to local Pages checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          export RCLONE_CONFIG_ARCHIVE_COOKIE="$MIMMI_COOKIE"
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          mkdir -p "$STAGE"
+          cp apps/mimmi-gallery/stored-albums.json "$STAGE/static-before.json"
+          rclone cat 'archive:MimmiArchive/metadata/catalog.json' --timeout 75s --retries 2 > "$STAGE/owner-catalog.json" 2> "$STAGE/private-errors"
+          timeout 660 rclone lsjson 'archive:MimmiArchive' -R --files-only --timeout 75s --retries 2 > "$STAGE/owner-lsjson.json" 2> "$STAGE/private-list-errors"
+          python apps/gallery-archive/recover_unindexed_djawa_owner_photos.py \
+            --root . --stage "$STAGE/staged" \
+            --catalog "$STAGE/owner-catalog.json" \
+            --listing "$STAGE/owner-lsjson.json" --limit 18
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py \
+            --model mimmi --stage "$STAGE/staged" --limit 18 --budget 14000000
+          python - <<'PY'
+          import hashlib,json,os,pathlib
+          root=pathlib.Path('apps/mimmi-gallery')
+          original=json.loads((pathlib.Path(os.environ['STAGE'])/'static-before.json').read_text())
+          current=json.loads((root/'stored-albums.json').read_text())
+          before={a['id']:a for a in original['albums']}
+          after={a['id']:a for a in current['albums']}
+          allowed={'djawa-retrospection','djawa-christmas-special-2021-mimmi'}
+          assert set(before)<=set(after),'Prior album removed'
+          added=0
+          for aid,a in after.items():
+            old=before.get(aid)
+            if old is None: assert aid in allowed
+            elif aid not in allowed: assert old==a, 'Unrelated album changed'
+            old_rows=(old or {}).get('images',[])
+            new_rows=a.get('images',[])
+            assert new_rows[:len(old_rows)]==old_rows,'Prior photo altered or removed'
+            for row in new_rows[len(old_rows):]:
+              assert aid in allowed and row['url'].startswith('stored-albums/'+aid+'/')
+              f=(root/row['url']).resolve()
+              assert f.is_relative_to(root.resolve()) and f.is_file()
+              raw=f.read_bytes()
+              assert len(raw)==row['bytes'] and hashlib.sha256(raw).hexdigest()==row['sha256']
+              added+=1
+          print('GALLERY_BACKFILL_IMMUTABLE_PREVIOUS_AND_NEW_PHOTO_BYTES_VERIFIED',added)
+          (pathlib.Path(os.environ['STAGE'])/'added.txt').write_text(str(added))
+          PY
+      - name: Commit verified, distinct photo bytes and index to main, then request Pages rebuild
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          new="$(cat "$STAGE/added.txt")"
+          if [[ "$new" == 0 ]]; then
+            echo 'VERIFIED_EXISTING_DJAWA_NEW_GALLERY_PHOTOS=0' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mimmi-gallery/stored-albums.json \
+            apps/mimmi-gallery/stored-albums/djawa-retrospection/ \
+            apps/mimmi-gallery/stored-albums/djawa-christmas-special-2021-mimmi/
+          git diff --cached --quiet && { echo 'No validated gallery change to commit'; exit 1; }
+          git commit -m "feat(gallery): backfill $new existing-owner DJAWA originals with SHA evidence"
+          for try in 1 2 3; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo 'Backfill publication requires conflict review; original photos remain unchanged' >&2
+              exit 1
+            fi
+            if git push origin HEAD:refs/heads/main; then
+              echo "GALLERY_BACKFILL_SHA_VERIFIED_PHOTOS_COMMITTED=$new" >> "$GITHUB_STEP_SUMMARY"
+              echo "GALLERY_BACKFILL_MAIN_COMMIT $(git rev-parse HEAD) count=$new"
+              gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --silent || true
+              gh workflow run gallery-deployed-pages-photo-qa.yml --ref main || true
+              exit 0
+            fi
+            sleep 3
+          done
+          git push origin "HEAD:refs/heads/auto/gallery-owner-photo-recovery-$GITHUB_RUN_ID"
+          gh pr create --base main --head "auto/gallery-owner-photo-recovery-$GITHUB_RUN_ID" \
+            --title 'Gallery: verified existing owner image additions' \
+            --body 'Immutable SHA verified owner image bytes; full browser acceptance still required.'
+          echo 'Backfill main push unavailable; recovered actual photos preserved in review PR' >&2
+          exit 1
