@@ -172,6 +172,25 @@ def verify(engine, *, label, width, height):
             print("LIVE_ARCHIVED_BANNER_READBACK_PASS",flush=True)
         else:
             print("LIVE_ARCHIVED_BANNER_UNVERIFIED_NOT_FABRICATED",flush=True)
+        if banner:
+            page.wait_for_function("""() => {
+                const img=document.getElementById('coverImage');
+                return !!img && !img.hidden && img.complete && img.naturalWidth>0;
+            }""",timeout=90000)
+            geometry=page.evaluate("""() => {
+                const c=document.getElementById('cover').getBoundingClientRect();
+                const b=document.getElementById('coverImage').getBoundingClientRect();
+                return {cw:c.width,ch:c.height,bw:b.width,bh:b.height};
+            }""")
+            assert abs(geometry["cw"]/3-geometry["ch"])<1.5, (
+                "deployed source banner aspect ratio does not match 3:1")
+            assert abs(geometry["bw"]-geometry["cw"])<1 and abs(
+                geometry["bh"]-geometry["ch"])<1, (
+                "deployed header bytes are cropped by a mismatched HTML frame")
+            print("LIVE_NATIVE_ARCHIVE_BANNER_RENDER_PASS",flush=True)
+        else:
+            assert page.locator("#coverImage").is_hidden(), (
+                "missing banner must not display another account's pixels")
 
         assert page.locator("#results article.post").first.get_by_role(
             "link", name="SNS 원문"

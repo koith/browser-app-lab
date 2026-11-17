@@ -78,7 +78,7 @@ def verify(browser_type,label):
             page.locator("#results article.post").first.wait_for(timeout=20000)
             expected_provider="bluesky" if embedded else "mastodon"
             assert page.locator("html").get_attribute("data-platform")==expected_provider
-            assert page.locator("#snsProviderTitle").inner_text()=="프로필"
+            assert page.locator("#snsProviderTitle").inner_text()==("Bluesky" if expected_provider=="bluesky" else "Mastodon")
             assert page.locator("#snsProviderSubtitle").count()==0
             assert page.locator(".sns-archive-pill").count()==0
             assert page.locator("#results .post-byline strong").count()==1
@@ -120,7 +120,7 @@ def verify(browser_type,label):
                     "() => document.querySelector('#displayName')?.textContent==='코코'",
                     timeout=15000)
                 assert page.locator("html").get_attribute("data-platform")=="bluesky"
-                assert page.locator("#snsProviderTitle").inner_text()=="프로필"
+                assert page.locator("#snsProviderTitle").inner_text()=="Bluesky"
                 assert page.locator("#snsProviderSymbol").inner_text()=="🦋"
                 page.wait_for_function(
                     "() => document.querySelector('#results .post-byline strong')?.textContent==='코코'"

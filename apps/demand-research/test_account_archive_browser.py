@@ -24,7 +24,10 @@ def response_fixture(path,query=""):
                 "handle":"qa.bsky.social","display_name":"Synthetic QA",
                 "description":"Synthetic biography for browser verification",
                 "followers_count":13,"following_count":4,"posts_count":29,
-                "assets":{"avatar":None,"banner":None},
+                "assets":{"avatar":"/api/account-archives/"+ACCOUNT+"/profile-asset/avatar",
+                          "banner":"/api/account-archives/"+ACCOUNT+"/profile-asset/banner"},
+                "asset_details":{"avatar":{"state":"verified_current_snapshot"},
+                                 "banner":{"state":"verified_current_snapshot"}},
                 "captured_at":"2026-11-04T00:00:00Z",
                 "profile_url":"https://bsky.app/profile/qa.bsky.social"}
     if "/feed" in path:
@@ -119,7 +122,7 @@ def run(browser_type,name,width,height):
                     if retry_requests["count"]==1:
                         route.fulfill(status=503,content_type="application/json",body='{"error":"test transient"}')
                         return
-                if "/media/" in path:
+                if "/media/" in path or "/profile-asset/" in path:
                     route.fulfill(status=200,content_type="image/png",
                         body=bytes.fromhex("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000b49444154789c636000020000050001a5f645400000000049454e44ae426082"))
                 else:
@@ -145,6 +148,42 @@ def run(browser_type,name,width,height):
         response=page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
         assert response and response.status==200
         page.get_by_role("heading",name="Synthetic QA").wait_for(timeout=12000)
+        page.wait_for_function("""() =>
+          document.querySelector('#coverImage')?.naturalWidth > 0 &&
+          document.querySelector('#avatarImage')?.naturalWidth > 0
+        """,timeout=10000)
+        for provider in ("bluesky","mastodon"):
+            page.evaluate("(p) => document.documentElement.dataset.platform=p",provider)
+            metrics=page.evaluate("""() => {
+              const b=(id)=>document.getElementById(id).getBoundingClientRect();
+              const cover=b('cover'),header=b('coverImage'),ring=b('avatar'),
+                    portrait=b('avatarImage');
+              const css=getComputedStyle(document.getElementById('avatar'));
+              return {cover:{x:cover.x,y:cover.y,width:cover.width,height:cover.height},
+                      header:{x:header.x,y:header.y,width:header.width,height:header.height},
+                      ring:{x:ring.x,y:ring.y,width:ring.width,height:ring.height},
+                      portrait:{x:portrait.x,y:portrait.y,
+                                width:portrait.width,height:portrait.height},
+                      border:parseFloat(css.borderLeftWidth),
+                      radius:css.borderTopLeftRadius,
+                      fit:getComputedStyle(document.getElementById('avatarImage')).objectFit,
+                      center:getComputedStyle(document.getElementById('avatarImage')).objectPosition};
+            }""")
+            c,h,r,a=metrics["cover"],metrics["header"],metrics["ring"],metrics["portrait"]
+            assert abs(c["height"]-c["width"]/3)<1.5,(provider,"source banner 3:1",metrics)
+            assert abs(h["width"]-c["width"])<1 and abs(h["height"]-c["height"])<1
+            assert abs(r["y"]+r["height"]/2-(c["y"]+c["height"]))<1.5, (
+                provider,"circle not half-overlapping the banner",metrics)
+            assert abs(a["x"]-(r["x"]+metrics["border"]))<1.1, (
+                provider,"avatar inset x does not equal the ring width",metrics)
+            assert abs(a["y"]-(r["y"]+metrics["border"]))<1.1,(
+                provider,"avatar inset y does not equal the ring width",metrics)
+            assert abs(a["width"]-(r["width"]-metrics["border"]*2))<1.1
+            assert abs(a["height"]-(r["height"]-metrics["border"]*2))<1.1
+            assert metrics["fit"]=="cover" and metrics["center"]=="50% 50%"
+            assert metrics["border"]==4 and metrics["radius"]=="50%"
+        page.evaluate("() => document.documentElement.dataset.platform='bluesky'")
+
         assert page.get_by_text("Synthetic biography for browser verification").count()==1
         assert page.locator("#followerCount").inner_text()=="13"
         page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for(timeout=10000)
