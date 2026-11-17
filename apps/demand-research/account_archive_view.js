@@ -79,7 +79,7 @@ function setPlatformTheme(accountKey){
   const provider=String(accountKey||"").startsWith("mastodon-")?"mastodon":"bluesky";
   document.documentElement.dataset.platform=provider;
   $("snsProviderSymbol").textContent=provider==="mastodon"?"M":"🦋";
-  $("snsProviderTitle").textContent="프로필";
+  $("snsProviderTitle").textContent=provider==="mastodon"?"Mastodon":"Bluesky";
   $("detailTitle").textContent=provider==="mastodon"?"보관된 게시물 · 대화":"게시글 · 대화";
 }
 function accountLabel(item){
@@ -145,8 +145,15 @@ function resetProfile(){
   $("handle").textContent="";$("biography").textContent="";
   $("postCount").textContent="—";$("followerCount").textContent="—";
   $("followingCount").textContent="—";$("profileFields").textContent="";
-  $("cover").style.backgroundImage="";$("cover").classList.remove("has-image");
-  $("avatar").style.backgroundImage="";$("avatar").textContent="?";
+  for(const kind of ("avatar","banner")){
+    const image=$(kind==="banner"?"coverImage":"avatarImage");
+    image.onload=null;image.onerror=null;image.hidden=true;
+    image.removeAttribute("src");
+  }
+  $("cover").classList.remove("has-image");
+  $("avatar").classList.remove("has-image");
+  $("avatarFallback").hidden=false;
+  $("avatarFallback").textContent="?";
   $("profileStatus").textContent="프로필 보관본 확인 중";
   $("sourceProfile").hidden=true;
 }
@@ -191,6 +198,42 @@ function profileArtLabel(profile,kind,available){
   }
   return label+" 보관("+tier+" · SHA-256 검증)";
 }
+function validArchivedProfileImage(path,kind){
+  if(typeof path!=="string"||path.length>300)return "";
+  const account=state.account;
+  if(!ACCOUNT_KEY.test(account))return "";
+  const expected="/api/account-archives/"+account+"/profile-asset/"+kind;
+  return path===expected?path:"";
+}
+function applyArchivedProfileImage(kind,path){
+  // Real <img> load/error events expose a missing SHA-backed response.
+  // CSS background-image silently hid HTTP 404/502 and geometry mistakes.
+  const frame=$(kind==="banner"?"cover":"avatar");
+  const image=$(kind==="banner"?"coverImage":"avatarImage");
+  const fallback=$("avatarFallback");
+  const account=state.account;
+  const valid=validArchivedProfileImage(path,kind);
+  image.onload=null;image.onerror=null;
+  image.hidden=true;image.removeAttribute("src");
+  frame.classList.remove("has-image");
+  if(kind==="avatar")fallback.hidden=false;
+  if(!valid)return;
+  image.onload=()=>{
+    if(state.account!==account||image.getAttribute("src")!==valid)return;
+    if(!image.naturalWidth||!image.naturalHeight){image.onerror();return;}
+    image.hidden=false;frame.classList.add("has-image");
+    if(kind==="avatar")fallback.hidden=true;
+  };
+  image.onerror=()=>{
+    if(state.account!==account||image.getAttribute("src")!==valid)return;
+    image.hidden=true;frame.classList.remove("has-image");
+    if(kind==="avatar")fallback.hidden=false;
+    const msg=kind==="banner"?"헤더 이미지 파일을 실제로 읽지 못했습니다.":"프로필 이미지 파일을 실제로 읽지 못했습니다.";
+    const notice=$("profileStatus");
+    if(!notice.textContent.includes(msg))notice.textContent+=" · "+msg;
+  };
+  image.src=valid;
+}
 function renderProfile(profile){
   if(!profile.available){
     $("displayName").textContent="아직 프로필 보관본 없음";
@@ -223,14 +266,9 @@ function renderProfile(profile){
   if(external)a.href=external;
   const avatar=profile.assets&&profile.assets.avatar;
   const banner=profile.assets&&profile.assets.banner;
-  if(avatar){
-    $("avatar").style.backgroundImage='url("'+avatar+'")';
-    $("avatar").textContent="";
-  }else $("avatar").textContent=($("displayName").textContent||"?").charAt(0).toUpperCase();
-  if(banner){
-    $("cover").style.backgroundImage='url("'+banner+'")';
-    $("cover").classList.add("has-image");
-  }
+  $("avatarFallback").textContent=($("displayName").textContent||"?").charAt(0).toUpperCase();
+  applyArchivedProfileImage("avatar",avatar);
+  applyArchivedProfileImage("banner",banner);
   const assets=[profileArtLabel(profile,"avatar",Boolean(avatar)),
                 profileArtLabel(profile,"banner",Boolean(banner))];
   $("profileStatus").textContent="PROFILE SNAPSHOT · "+date(profile.captured_at)+
