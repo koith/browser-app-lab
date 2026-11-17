@@ -5,28 +5,14 @@
   "sourceUpdatedAt": "2026-11-17",
   "counts": {
     "total": 60,
-    "done": 43,
-    "in_progress": 16,
+    "done": 44,
+    "in_progress": 15,
     "todo": 1,
     "blocked": 0,
-    "active": 17
+    "active": 16
   },
   "historicalEventsNotDuplicated": 486,
   "active": [
-    {
-      "id": "M02",
-      "priority": "P1",
-      "title": "켈티카·매직카덴 원작 복원",
-      "status": "in_progress",
-      "acceptance": [
-        "상점/구매/문 UI를 2004년 캡처와 동일 상태에서 비교·검증"
-      ],
-      "currentTail": "MainStreet와 CardShop 리소스를 게임에 연결",
-      "evidence": [
-        "apps/4leaf/rog/shop-native.js"
-      ],
-      "lastReviewed": "2026-10-18"
-    },
     {
       "id": "M04",
       "priority": "P0",
