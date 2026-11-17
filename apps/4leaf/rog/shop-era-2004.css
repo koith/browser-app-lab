@@ -256,3 +256,77 @@
     transcribing it as if the original screenshot contained one. */
  right:12px!important;bottom:7px!important;
 }
+
+
+/* M02 2004 surviving pixel reference: original CardShop has a source
+ * 794×404 bitmap; retain it below the reconstructed 2004 stock panel.
+ * The two-era/time inspection controls are WEB chrome, outside this art.
+ * Historical 2004 per-face card textures remain a distinct resource gap.
+ */
+#shop>.scene-banner{position:relative}
+#shop>.scene-banner .shop-era-toggle{
+ position:absolute;top:1px;right:6px;bottom:auto;z-index:45;
+ height:25px;padding:1px 2px;gap:2px;
+ box-shadow:none!important;
+}
+#shop>.scene-banner .shop-era-toggle button{
+ height:20px!important;min-width:38px!important;
+ font:700 10px Gulim,'굴림',sans-serif!important;
+}
+#shop>.scene-banner .shop-market-date-label{
+ height:20px!important;font-size:9px!important
+}
+#shop>.scene-banner #shop-market-date{
+ height:19px!important;font-size:9px!important
+}
+#shop>.scene-banner #shop-era-provenance{
+ display:none!important;position:static!important
+}
+#shop .shop-native-stage[data-era="2004"]{
+ background:#26204b url('./original/CardShop/cardshopback.png') 0 0/794px 404px no-repeat!important;
+}
+#shop .shop-native-stage[data-era="2004"]::before{
+ /* Purple card stock occupies the LEFT 2004 screenshot; the game's own
+  * original room art is not replaced by a fabricated flat wallpaper. */
+ left:16px!important;top:12px!important;
+ width:575px!important;height:372px!important;
+ border:2px ridge #776295!important;border-radius:17px 17px 4px 4px!important;
+ background:
+  radial-gradient(ellipse at 56% 36%,#4d367ccf,#281c55f5 60%,#1b1647fd 96%)!important;
+ box-shadow:inset 0 0 0 4px #251b4a77,inset 0 0 22px #0b0629a6!important;
+ pointer-events:none!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-equipped>h4{
+ font-size:0!important;
+}
+#shop .shop-native-stage[data-era="2004"] .shop-equipped>h4::after{
+ content:'착용목록';font:700 12px/20px Gulim,'굴림',sans-serif;
+ color:#efe8ff;text-shadow:1px 1px #1c103e;
+}
+#shop .shop-native-stage[data-era="2004"] #shop-selected{
+ position:relative!important;
+ display:flex!important;flex-direction:column!important;
+ justify-content:flex-start!important;gap:3px!important;
+ white-space:normal!important;overflow:hidden!important;
+ font:11px/14px Gulim,'굴림',sans-serif!important;
+ text-shadow:1px 1px #161043!important;
+}
+#shop .shop-native-stage[data-era="2004"] #shop-selected .source-cardinfo-heading{
+ margin:0 0 4px!important;line-height:17px;
+ color:#f5dced;font:italic 700 16px Georgia,serif;
+ text-align:center;text-shadow:1px 1px #271342;
+ border-bottom:1px solid #aa8ac6;
+}
+#shop .shop-native-stage[data-era="2004"] #shop-selected .source-cardinfo-name{
+ font:700 12px Gulim,'굴림',sans-serif!important;
+ color:#f2eafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+#shop .shop-native-stage[data-era="2004"] #shop-selected .source-cardinfo-detail{
+ color:#d5d9fc;line-height:17px!important;word-break:keep-all
+}
+#shop .shop-native-stage[data-era="2004"] #shop-selected .source-cardinfo-price{
+ text-align:right;color:#f3e49b;font:700 12px Gulim,'굴림',sans-serif;
+}
+#shop .shop-native-stage[data-era="2004"] #shop-selected .source-cardinfo-evidence{
+ position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden
+}
