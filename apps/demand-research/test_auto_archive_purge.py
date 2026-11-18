@@ -154,3 +154,22 @@ def test_block_identity_hash_is_exact_and_unchanged():
     assert key.startswith("metadata/blocked-auto-v1-")
     assert key.endswith(".json")
     assert key!=marker_key(identity("bluesky",P_A))
+
+
+def test_encrypted_outage_buffer_from_blocked_source_cannot_republish(tmp_path, monkeypatch):
+    from recovery_spool import RecoverySpool
+    from test_demand_archive import FakeCloud
+    monkeypatch.setenv("DEMAND_ARCHIVE_RECOVERY_KEY","test-key-safe-long-enough-for-verified-encrypted-spool")
+    pid="c"*40
+    first={"id":pid,"platform":"bluesky","source_url":P_A+"/post/test",
+           "profile_url":P_A,"text":"synthetic", "posted_at":"2026-11-17T00:00:00Z",
+           "observed_at":1794873600,"media_links":[]}
+    spool=RecoverySpool(tmp_path)
+    sealed=spool.save(pid,first)
+    cloud=FakeCloud()
+    target=identity("bluesky",P_A)
+    from auto_archive_purge import block
+    block(cloud,target)
+    assert spool.restore(sealed,cloud)=="blocked_source_discarded"
+    assert not sealed.exists(), "encrypted source must not be replayed after block"
+    assert not any(key.startswith("posts/") for key in cloud.objects)
