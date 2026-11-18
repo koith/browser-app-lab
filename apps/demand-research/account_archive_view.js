@@ -821,9 +821,9 @@ async function selectAccount(value){
   }catch{
     if(state.account===value){
       // Retain the independently signed picker name/handle on a transient error.
-      const signed=state.accounts.find(item=>item.key===value);
-      if(!signed?.display_name&&!signed?.handle)
-        $("displayName").textContent="보관본 원본 재조회 필요";
+      // Embedded iframe receives a signed account preview from the parent,
+      // but state.accounts may be empty. Never overwrite that visible name
+      // merely because the private source ZIP had a transient 502.
       $("profileStatus").textContent="원본 프로필 읽기 지연 · 이미지 원본 재확인 필요. 계정을 다시 선택하면 재시도합니다.";
     }
   }
