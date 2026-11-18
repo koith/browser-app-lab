@@ -126,3 +126,19 @@ body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] lab
 body>.social-modal .social-native-owner-form:not([data-native-owner-ready="true"]) .social-owner-source-backdrop{
  display:none;
 }
+
+/* V2 authority error is OUTSIDE the historical 309x126 room-master bitmap.
+ * Preserve native form fields/OK/CANCEL anchors, and place failure feedback
+ * beneath both original sprite buttons, not over the original room artwork. */
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"]
+ #social-create-error:not([hidden]){
+ position:absolute!important;z-index:10!important;
+ left:7px!important;top:205px!important;
+ box-sizing:border-box!important;width:295px!important;
+ min-height:25px!important;margin:0!important;padding:5px 7px!important;
+ background:#242642!important;color:#fff1d0!important;
+ border:1px solid #d3a6a0!important;border-radius:2px!important;
+ white-space:normal!important;overflow-wrap:anywhere!important;
+ font:11px/1.4 Gulim,'굴림',sans-serif!important;
+ box-shadow:0 2px 6px #10142b88!important;
+}
