@@ -190,7 +190,9 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                         'previous_sha256':former['sha256'],
                         'new_sha256':digest,
                         'previous_bytes':len(previous_raw),
-                        'new_bytes':len(raw),'relation':evidence['relation']})
+                        'new_bytes':len(raw),'new_width':photo['width'],
+                        'new_height':photo['height'],
+                        'relation':evidence['relation']})
                     used+=len(raw)
                 else:
                     same_frame_skipped.append(row)
@@ -231,6 +233,27 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
         if rec['images']:
             byid[aid]=rec
     if added or quality_replacements:
+        # A configured album cover is SHA pinned. If it depicts the exact
+        # same upgraded cut, rebind it to the improved immutable file in the
+        # same transaction; never leave the public gallery with a stale cover.
+        cover_path=base/'album-covers.json'
+        if quality_replacements and cover_path.is_file():
+            covers=json.loads(cover_path.read_text(encoding='utf-8'))
+            changed=False
+            for upgrade in quality_replacements:
+                cover=(covers.get('covers') or {}).get(upgrade['album'])
+                if (isinstance(cover,dict)
+                        and cover.get('sha256')==upgrade['previous_sha256']
+                        and cover.get('number')==upgrade['number']):
+                    cover['sha256']=upgrade['new_sha256']
+                    cover['width']=upgrade['new_width']
+                    cover['height']=upgrade['new_height']
+                    cover['quality_upgrade_previous_sha256']=upgrade['previous_sha256']
+                    changed=True
+            if changed:
+                cover_path.write_text(
+                    json.dumps(covers,ensure_ascii=False,indent=2)+'\n',
+                    encoding='utf-8')
         old['albums']=list(byid.values())
         # The manifest count must reflect real immutable photo rows, not the
         # stale cached number before newly acquired individual files.
