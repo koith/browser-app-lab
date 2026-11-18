@@ -61,6 +61,10 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   await page.waitForFunction(()=>document.querySelector('#social-modal form')?.dataset.serverCreatedRoom===
    'acknowledged-server-room-777'&&!document.querySelector('#social-modal button[type="submit"]')?.disabled,
    null,{timeout:15000});
+  assert.equal(await page.locator('#social-modal form').getAttribute('data-lifecycle'),'v2-room-domain',
+   'real CREATE form must use isolated V2 room transaction module');
+  assert.equal(await page.locator('#social-create-error').isVisible(),true,
+   'JOIN failure remains visible in the source owner dialog');
   assert.equal(createPosts,1,'double submit must not create a duplicate online room');
   assert.equal(joinPosts,1,'initial JOIN should be attempted once');
   assert.equal(await page.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'directory',
