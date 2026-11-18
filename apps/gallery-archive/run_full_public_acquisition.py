@@ -22,6 +22,7 @@ MAX_RECOVERY_SINGLE_WORKS_PER_RUN=14
 MAX_RECOVERY_PER_TIMEOUT_GROUP=7
 RECOVERY_SINGLE_WORK_TIMEOUT=180
 SLOW_PUBLIC_SOURCE_TIMEOUT=180
+MAX_URGENT_INCOMPLETE_PER_RUN=6
 PRIORITY={
  'mimmi':(
   'djawa-pop-kitty-party','djawa-nikke-yuni',
@@ -34,6 +35,29 @@ PRIORITY={
   'yui-summer-public-samples',
  ),
 }
+
+
+def unresolved_first(model, run_number, base, rest):
+    """Resume previous incomplete editions first, preserving the full corpus."""
+    path=Path(base)/'apps/gallery-archive/verification'/f'incomplete-{model}.json'
+    if not path.is_file():
+        return [],rest
+    try:
+        item=json.loads(path.read_text(encoding='utf-8'))
+    except (OSError,ValueError):
+        return [],rest
+    if (not isinstance(item,dict) or item.get('schema_version')!=1
+            or item.get('model')!=model
+            or not isinstance(item.get('unresolved_work_ids'),list)):
+        return [],rest
+    outstanding=list(dict.fromkeys(aid for aid in item['unresolved_work_ids']
+                                    if isinstance(aid,str) and aid in rest))
+    if not outstanding:
+        return [],rest
+    start=((max(1,run_number)-1)*MAX_URGENT_INCOMPLETE_PER_RUN)%len(outstanding)
+    rotated=outstanding[start:]+outstanding[:start]
+    urgent=rotated[:MAX_URGENT_INCOMPLETE_PER_RUN]
+    return urgent,[aid for aid in rest if aid not in urgent]
 
 
 def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=None):
@@ -124,13 +148,12 @@ def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=Non
     if rest:
         offset=((max(run_number,1)-1)*batch_size)%len(rest)
         rest=rest[offset:]+rest[:offset]
-    # Keep priority works in a separate, longer-pagination batch.
-    # V2PH public multi-page sites historically exhaust whole seven-work
-    # batches. Isolate them: a slow source must never hide other editions.
-    # A dedicated single-work timeout keeps the full inventory scheduled.
+    # Up to six previously incomplete editions get single-work early retries.
+    # Every other source remains scheduled, not permanently skipped.
+    urgent,rest=unresolved_first(model,run_number,base,rest)
     slow=[aid for aid in rest if aid.startswith('v2ph-actor-')]
     normal=[aid for aid in rest if not aid.startswith('v2ph-actor-')]
-    return ([priority] if priority else []) + [
+    return ([priority] if priority else []) + [[aid] for aid in urgent] + [
         normal[i:i+batch_size] for i in range(0,len(normal),batch_size)
     ] + [[aid] for aid in slow]
 
@@ -322,6 +345,34 @@ def execute(args):
     return 0
 
 
+def record_failure_checkpoint(model,stage,root=ROOT):
+    """Write only unresolved work IDs, never an append-only audit/history."""
+    if model not in PRIORITY:
+        raise ValueError('UNSUPPORTED_CHECKPOINT_MODEL')
+    summary=Path(stage)/'full-collection-summary.json'
+    if not summary.is_file():
+        raise ValueError('COLLECTION_CHECKPOINT_SUMMARY_MISSING')
+    report=json.loads(summary.read_text(encoding='utf-8'))
+    pending=report.get('registered_work_ids_in_incomplete_batches')
+    if (report.get('model')!=model or not isinstance(pending,list)
+            or not isinstance(report.get('registered_works_scheduled'),int)):
+        raise ValueError('COLLECTION_CHECKPOINT_INVALID')
+    import re
+    unique=list(dict.fromkeys(pending))
+    if (len(unique)>300 or any(not isinstance(aid,str)
+            or not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid)
+            for aid in unique)):
+        raise ValueError('COLLECTION_CHECKPOINT_INVALID_WORK_IDS')
+    dest=Path(root)/'apps/gallery-archive/verification'/f'incomplete-{model}.json'
+    dest.parent.mkdir(parents=True,exist_ok=True)
+    data={'schema_version':1,'model':model,'unresolved_work_ids':sorted(unique)}
+    out=json.dumps(data,ensure_ascii=False,indent=2)+'\n'
+    if not dest.exists() or dest.read_text(encoding='utf-8')!=out:
+        dest.write_text(out,encoding='utf-8')
+    print('GALLERY_DURABLE_INCOMPLETE_CHECKPOINT',model,len(unique),flush=True)
+    return len(unique)
+
+
 def replay(model,stage,max_per_batch,bytes_per_batch):
     from publish_new_public_photos_to_pages import publish
     stage=Path(stage)
@@ -377,11 +428,15 @@ def main():
     p.add_argument('--alternate-priority',action='store_true')
     p.add_argument('--plan-only',action='store_true')
     p.add_argument('--replay-only',action='store_true')
+    p.add_argument('--checkpoint-only',action='store_true')
     a=p.parse_args()
     if (not 1<=a.batch_size<=20 or not 1<=a.max_per_batch<=90 or
             not 1000000<=a.bytes_per_batch<=80000000 or
             not 60<=a.batch_timeout<=2000 or a.run_number<0):
         raise SystemExit('INVALID_SAFE_COLLECTION_BOUNDS')
+    if a.checkpoint_only:
+        record_failure_checkpoint(a.model,a.stage)
+        return
     if a.replay_only:
         replay(a.model,a.stage,a.max_per_batch,a.bytes_per_batch)
         return
