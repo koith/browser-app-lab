@@ -883,7 +883,7 @@
    b.dataset.room=r.id;b.dataset.permanent=String(!!r.preset);
    b.title=r.name+(r.preset?' · 복원 서버 상설방':'')+' · 입장';
    b.setAttribute('aria-label',r.name+' 채팅방 입장');
-   const position=realRoomPosition(i,rooms.length);
+   const position=realRoomPosition(i,rooms.length,r);
    b.style.left=position.x+'px';b.style.top=position.y+'px';
    const number=document.createElement('span');number.className='social-room-number';
    number.textContent=String(i+1).padStart(2,'0');
@@ -910,12 +910,32 @@
    cells.push({col,row,distance:Math.abs(col-4.5)+2.2*Math.abs(row-9.5)});
   return cells.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.col-b.col);
  })();
- function realRoomPosition(index,total){
-  // WEB-only coordinates: non-overlapping room cards. No 2002 native
-  // ROOM position table has been recovered; avoid claiming exact fidelity.
-  const count=Math.min(liveRoomCells.length,Math.max(1,Number(total)||index+1));
-  const block=liveRoomCells.slice(0,count).sort((a,b)=>a.row-b.row||a.col-b.col);
-  const cell=block[index%block.length];
+ // The old slice(0,total).sort() re-positioned EVERY room whenever
+ // a room was created or closed. Keep the 8 existing public markers at their
+ // current coordinates; allocate later user rooms to stable unused cells for
+ // this browser session. Room-estate coordinates are still WEB approximations.
+ const originalPublicCells=liveRoomCells.slice(0,8).sort((a,b)=>
+  a.row-b.row||a.col-b.col);
+ const stableRoomCells=originalPublicCells.concat(liveRoomCells.filter(cell=>
+  !originalPublicCells.includes(cell)));
+ const roomSlotAssignments=new Map();
+ function realRoomPosition(index,total,room){
+  const scope=room?room.region+':'+room.district:'';
+  let slots=roomSlotAssignments.get(scope);
+  if(!slots){slots=new Map();roomSlotAssignments.set(scope,slots)}
+  let slot=room&&slots.get(room.id);
+  if(slot===undefined){
+   const preset=room&&/^leaf-public-(north|south)-([0-7])-([0-7])$/.exec(room.id);
+   if(preset&&preset[1]===room.region)slot=Number(preset[3]);
+   else{
+    const used=new Set(slots.values());
+    slot=8;
+    while(slot<stableRoomCells.length&&used.has(slot))slot++;
+    if(slot>=stableRoomCells.length)slot=stableRoomCells.length-1;
+   }
+   if(room)slots.set(room.id,slot);
+  }
+  const cell=stableRoomCells[(slot===undefined?index:slot)%stableRoomCells.length];
   return {x:70+cell.col*130,y:70+cell.row*100};
  }
  function setupRoomMap(){
@@ -930,11 +950,14 @@
   const saved=state.roomMapOffsets[key];
   // Default map viewport must face the EXISTING room markers. Centering
   // the much larger blank estate stranded buttons off-screen on phones.
-  const shown=Math.max(1,plane.querySelectorAll('.social-map-rooms>button').length);
+  const buttons=plane.querySelectorAll('.social-map-rooms>button');
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-  for(let i=0;i<shown;i++){const pos=realRoomPosition(i,shown);
-   minX=Math.min(minX,pos.x);maxX=Math.max(maxX,pos.x+118);
-   minY=Math.min(minY,pos.y);maxY=Math.max(maxY,pos.y+84)}
+  for(const button of buttons){
+   const px=Number.parseFloat(button.style.left)||0,py=Number.parseFloat(button.style.top)||0;
+   minX=Math.min(minX,px);maxX=Math.max(maxX,px+118);
+   minY=Math.min(minY,py);maxY=Math.max(maxY,py+84);
+  }
+  if(!buttons.length){minX=0;maxX=118;minY=0;maxY=84}
   let x=saved?.x??viewport.clientWidth/2-(minX+maxX)/2;
   let y=saved?.y??viewport.clientHeight/2-(minY+maxY)/2;
   const clamp=(v,max)=>Math.max(Math.min(0,v),Math.min(0,max));
