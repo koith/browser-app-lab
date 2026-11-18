@@ -54,6 +54,25 @@ def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=Non
     all_ids=[a['id'] for a in works]
     if len(all_ids)!=len(set(all_ids)):
         raise ValueError('DUPLICATE_PUBLIC_WORK_IDS')
+    # The small public-work-pages manifest is NOT the full owner inventory.
+    # The collector itself merges the exhaustive registered corpus. Schedule
+    # that same corpus here or the scheduler silently discards owner works
+    # discovered by the extractor before it even executes them.
+    registry=Path(base)/'apps/gallery-archive/global_source_registry.json'
+    if registry.is_file():
+        from collector_full_census import census
+        from direct_photo_pipeline import safe_registered_public_page
+        inventory=census(base)
+        for row in inventory['targets']:
+            if (row.get('kind')!='work' or row.get('model')!=model
+                    or not isinstance(row.get('id'),str)):
+                continue
+            if (any(safe_registered_public_page(url,model)
+                    for url in row.get('urls',[]))
+                    and row['id'] not in all_ids):
+                all_ids.append(row['id'])
+    # Every scheduled ID must correspond to an observed, registered edition;
+    # unknown search snippets are added only via the proven source bridge.
     # A name-search result alone must never register an album. Require the
     # exact edition page proof that the physical collector checks again.
     if source_evidence is not None and Path(source_evidence).is_file():
