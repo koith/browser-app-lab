@@ -1,6 +1,7 @@
 name: 4LEAF centralized multi-device ChatTown authority
 on:
   push:
+    branches: [main]
     paths:
       - 'apps/4leaf/rog/server/**'
       - 'apps/4leaf/rog/central-client.js'

@@ -1,6 +1,7 @@
 name: 4LEAF world map and real social chat integration
 on:
   push:
+    branches: [main]
     paths:
       - 'apps/4leaf/rog/world-map.js'
       - 'apps/4leaf/rog/world-map-source-moon.css'

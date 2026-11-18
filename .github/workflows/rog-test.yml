@@ -6,6 +6,7 @@ on:
       - 'apps/4leaf/rog/**'
       - '.github/workflows/rog-test.yml'
   push:
+    branches: [main]
     paths:
       - 'apps/4leaf/rog/**'
       - '.github/workflows/rog-test.yml'

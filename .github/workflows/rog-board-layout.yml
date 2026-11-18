@@ -1,6 +1,7 @@
 name: 4LEAF original dice board layout QA
 on:
   push:
+    branches: [main]
     paths:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/cardshop-native-controls.css'

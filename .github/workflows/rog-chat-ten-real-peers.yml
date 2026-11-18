@@ -1,6 +1,7 @@
 name: 4LEAF original ChatRoom ten genuine connected participants
 on:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/rog-chat-ten-real-peers.yml'
       - 'apps/4leaf/rog/tests/chatroom-ten-real-peers.cjs'
