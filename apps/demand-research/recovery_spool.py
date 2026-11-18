@@ -182,6 +182,13 @@ class RecoverySpool:
         pid=first["id"]
         if path.name!=_filename(pid,self.secret):
             raise ValueError("encrypted artifact filename identity mismatch")
+        # A cloud outage can leave earlier account posts in encrypted spool.
+        # Re-check durable exclusions BEFORE restoring either first sighting
+        # or the original media. Fail closed on an unreadable block inventory.
+        from auto_archive_purge import read_blocks, matches
+        if any(matches(first,account) for account in read_blocks(cloud)):
+            self.discard(pid)
+            return "blocked_source_discarded"
         original=canonical_json(first)
         current=cloud.save_first_observation(pid,original,prefer_flat=True)
         if current!=original:
