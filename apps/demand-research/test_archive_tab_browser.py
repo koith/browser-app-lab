@@ -15,6 +15,7 @@ HTML="""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="archive_tab.js" defer></script></head><body>
 <button id="viewArchives">백업 보관함</button>
+<a id="openAutoArchiveShortcut" href="?tab=archives&amp;mode=auto">자동 수집 저장본 보기</a>
 <section id="archivesView">
  <div role="tablist">
   <button id="archiveModeAuto" role="tab" aria-selected="false">자동 저장 게시글</button>
@@ -45,6 +46,7 @@ HTML="""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 
 
 def exercise(browser_type,label):
+    assert 'id="openAutoArchiveShortcut"' in (ROOT/"index.html").read_text("utf-8")
     browser=browser_type.launch(headless=True)
     try:
         for private in (False,True):
@@ -216,6 +218,11 @@ def exercise(browser_type,label):
                 assert page.locator("#archiveQuickSelect option").count()==1
                 assert "마루" in page.locator("#archiveQuickSelect option").inner_text()
                 page.locator("#archiveQuickSearch").fill("")
+                # Shortcut from posts switches to automatic saved originals in-place.
+                page.locator("#openAutoArchiveShortcut").click()
+                assert page.locator("#archiveModeAuto").get_attribute("aria-selected")=="true"
+                assert page.locator("#archiveHubFrame").get_attribute("src")=="/auto-archive"
+                assert "mode=auto" in page.url
             else:
                 assert page.locator("#archiveHubFrameBox").is_hidden()
                 assert page.locator("#archiveHubFrame").get_attribute("src") is None
@@ -241,6 +248,9 @@ def exercise(browser_type,label):
                 page.locator("#archiveModeAccounts").click()
                 assert page.locator("#archiveHubFrame").get_attribute("src") is None
                 assert "mode=accounts" in link.get_attribute("href")
+                page.locator("#openAutoArchiveShortcut").click()
+                assert "mode=auto" in link.get_attribute("href")
+                assert "session" not in requests
             assert not errors,errors
             print("ARCHIVE_TAB_BROWSER_PASS",label,
                   "private_gateway" if private else "public_unlinked_then_login",

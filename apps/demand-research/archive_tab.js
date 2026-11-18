@@ -428,6 +428,10 @@ if(queueOpen&&queueDialog){
 window.INTERSECTION_openArchive=(account,mode)=>
   changeMode(mode==="auto"?"auto":"accounts",account||"");
 auto.addEventListener("click",()=>changeMode("auto"));
+$("openAutoArchiveShortcut")?.addEventListener("click",event=>{
+  event.preventDefault();
+  changeMode("auto");
+});
 accounts.addEventListener("click",()=>changeMode("accounts"));
 quick?.addEventListener("change",()=>{
   if(ACCOUNT.test(quick.value))changeMode("accounts",quick.value);
