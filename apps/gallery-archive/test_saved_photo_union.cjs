@@ -169,4 +169,29 @@ for(const model of ['mimmi','yui']){
  console.log('YUI_ALIAS_DEDUPE_PROTECTS_DISTINCT_STORAGE_AND_OWNER_PASS');
 }
 
+{
+ const originalSHA='a'.repeat(64),betterSHA='b'.repeat(64),otherSHA='c'.repeat(64);
+ const improved={number:5,sha256:betterSHA,bytes:230000,width:1200,height:1800,
+  url:'stored-albums/example-work/improved.jpg',
+  quality:'verified_same_frame_optical_upgrade',
+  previous_versions:[{sha256:originalSHA,url:'stored-albums/example-work/old.jpg'}]};
+ const existing={number:5,sha256:originalSHA,bytes:120000,width:1200,height:1800,
+  url:'owner:example-work:5',ownerAlbum:'example-work'};
+ const unrelated={number:1,sha256:otherSHA,bytes:190000,width:1200,height:1800,
+  url:'owner:example-work:1',ownerAlbum:'example-work'};
+ const grouped=join([[{id:'example-work',images:[improved]}],
+                     [{id:'example-work',images:[existing,unrelated]}]]);
+ assert.equal(grouped[0].images.length,3,'raw archival union must preserve originals');
+ const visible=sandbox.window.SavedGalleryPhotoUnion.hideVerifiedSupersededPhotos(grouped);
+ assert.equal(visible[0].images.length,2,'display only improved cut and unrelated frame');
+ assert.ok(visible[0].images.some(x=>x.sha256===betterSHA));
+ assert.ok(visible[0].images.some(x=>x.sha256===otherSHA));
+ assert.ok(!visible[0].images.some(x=>x.sha256===originalSHA));
+ assert.equal(grouped[0].images.length,3,'archival union remains unmodified');
+ assert.deepEqual(
+  sandbox.window.SavedGalleryPhotoUnion.hideVerifiedSupersededPhotos(visible),visible,
+  'verified replacement display must be idempotent');
+ console.log('GALLERY_VERIFIED_OPTICAL_UPGRADE_VISIBLE_ONCE_ORIGINAL_PRESERVED');
+}
+
 console.log('GALLERY_NUMBER_COLLISION_EXACT_SHA_STORAGE_ROUTING_PASS');
