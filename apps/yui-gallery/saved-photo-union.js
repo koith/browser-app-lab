@@ -137,5 +137,29 @@ window.SavedGalleryPhotoUnion=(()=>{
   }
   return albums.filter(a=>a.images.length);
  }
- return Object.freeze({join,dedupeAliasedPhysicalCopies});
+ // A successfully SHA-verified upgrade keeps the previous source file and
+ // immutable version ledger, but should not display the superseded *same
+ // photographic frame* twice when an owner/vault copy is also indexed.
+ // Only an explicit publisher-side strict same-frame transaction can hide
+ // that prior presentation. Never infer duplicate identity from filenames.
+ function hideVerifiedSupersededPhotos(albums){
+  if(!Array.isArray(albums))throw new TypeError('Expected saved album records');
+  return albums.map(album=>{
+   const superseded=new Set();
+   for(const p of album.images||[]){
+    if(p.quality!=='verified_same_frame_optical_upgrade'||
+       typeof p.url!=='string'||
+       !p.url.startsWith('stored-albums/'+album.id+'/')||
+       !Array.isArray(p.previous_versions))continue;
+    for(const old of p.previous_versions){
+     if(old&&/^[a-f0-9]{64}$/.test(old.sha256||'')&&
+        typeof old.url==='string'&&
+        old.url.startsWith('stored-albums/'+album.id+'/')&&
+        old.sha256!==p.sha256)superseded.add(old.sha256);
+    }
+   }
+   return {...album,images:(album.images||[]).filter(p=>!superseded.has(p.sha256))};
+  });
+ }
+ return Object.freeze({join,dedupeAliasedPhysicalCopies,hideVerifiedSupersededPhotos});
 })();
