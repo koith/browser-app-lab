@@ -76,12 +76,15 @@ const {chromium,webkit}=require('playwright');
   await page.locator('#board-zoom-reset').click();
   assert.equal(await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale),mobileCamera.scale,
    'phone reset restores the initial camera');
-  const roll=page.locator('#roll-btn');
+  // Touch the actual original SPR-backed visible ROLL, never the legacy
+  // engine button underneath the 2004 presentation.
+  await page.waitForFunction(()=>document.getElementById('dice-source-roll')?.dataset.nativeRollSource==='ready',null,{timeout:15000});
+  const roll=page.locator('#dice-source-roll');
   const point=async()=>{
    assert.equal(await roll.isVisible(),true,'roll button remains visible in game');
    assert.equal(await roll.isEnabled(),true,'current manual human may roll');
    const b=await roll.boundingBox();
-   assert.ok(b&&b.width>=40&&b.height>=28,'physical touch target is usable');
+   assert.ok(b&&b.width>=44&&b.height>=44,'actual source ROLL touch target must be >=44px each dimension');
    const vp=await page.evaluate(()=>[innerWidth,innerHeight]);
    assert.ok(b.x>=0&&b.y>=0&&b.x+b.width<=vp[0]&&b.y+b.height<=vp[1],
     'roll button is not clipped outside the physical phone viewport');

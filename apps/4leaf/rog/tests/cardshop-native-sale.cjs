@@ -34,6 +34,9 @@ const path=require('node:path');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_SHOP_NATIVE__);
   await page.locator('[data-route="shop"]').first().click();
   await page.waitForSelector('#shop:not(.hidden)');
+  // Exercise 2002 original atlas, not the separate 2004 4x2 reference.
+  await page.locator('#shop-era-toggle [data-era="2002"]').click();
+  assert.equal(await page.locator('#shop-native-stage').getAttribute('data-era'),'2002');
   assert.equal(await page.locator('#shop-grid .shop-card').count(),9,
    'source CardShop/cardshopback.png has 3 columns by 3 rows, do not mistakenly replace with different-version 4x2 screenshot');
   const oldOwned=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')).owned);

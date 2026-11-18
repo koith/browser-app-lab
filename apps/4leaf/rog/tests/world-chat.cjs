@@ -219,6 +219,8 @@ const path=require('path');
  // CardShop/cardshopback.png is a 794x404 native screen. Uniform scaling
  // must leave the original card backs visible beneath accessible controls.
  await host.waitForFunction(()=>Number(document.querySelector('#shop-native-stage')?.dataset.scale)>0,null,{timeout:9000});
+ // Verify genuine 2002 CardShop PAK atlas; current default is separate 2004 4x2 layout.
+ await host.locator('#shop-era-toggle [data-era="2002"]').click();
  const nativeShop=await host.evaluate(()=>{
   const viewport=document.querySelector('#shop .shop-scene'),stage=document.getElementById('shop-native-stage');
   const a=viewport.getBoundingClientRect(),b=stage.getBoundingClientRect();

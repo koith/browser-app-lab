@@ -14,7 +14,7 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
 const fs=require('node:fs');
 (async()=>{
  const browser=await engine.launch({headless:true,args:engine===chromium?['--no-sandbox']:[]});
- const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1280,height:900},
+ const context=await browser.newContext({viewport:mobile?{width:844,height:390}:{width:1280,height:900},
   hasTouch:mobile,isMobile:mobile,serviceWorkers:'block'});
  const page=await context.newPage();const errors=[];let rolls=0,modalChoices=0,cycleSteps=[];
  page.on('pageerror',e=>errors.push(e.stack||String(e)));

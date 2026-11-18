@@ -51,7 +51,9 @@ async function run(){
  await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
  await page.locator('[data-route="shop"]').first().click();
  await page.waitForSelector('#shop:not(.hidden)');
- assert.equal(await page.locator('#shop-grid .shop-card').count(),9,'nine original Magic Carden slots');
+ const activeShopEra=await page.evaluate(()=>window.__LEAF_SHOP_ERA__?.getState?.().era||'2002');
+ assert.equal(await page.locator('#shop-grid .shop-card').count(),activeShopEra==='2004'?8:9,
+  'source-aware 2004 4x2 / 2002 3x3 Magic Carden slots');
  assert.ok((await page.locator('#shop-page').textContent()).includes('/'),'paginated original chessman roster');
  await page.locator('#shop-next').click();
  assert.ok((await page.locator('#shop-page').textContent()).startsWith('2'),'next chessman page navigates');
