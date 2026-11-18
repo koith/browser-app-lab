@@ -944,7 +944,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 [book['source']]+book.get('source_pages',[])))
             proved=verified_discovered.get(book['id'],set())
             approved_pages=[u for u in proposed
-                            if reviewed_direct_source(u,model) or u in proved]
+                            if reviewed_direct_source(u,model) or u in proved
+                            or (book.get('census_existing_owner')
+                                and safe_registered_public_page(u,model))]
             book['verified_discovered_pages']=[u for u in approved_pages if u in proved]
             if not approved_pages:
                 continue
@@ -1166,7 +1168,15 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         errors.append({'page':page,'reason':'research_work_identity_unverified'})
                         continue
                 dynamic_scoped=set()
-                if reviewed_source_only and page in book.get('verified_discovered_pages',[]):
+                owner_edition_proven=(
+                    book.get('census_existing_owner') is True
+                    and PUBLIC_STRONG_MODEL[model].search(
+                        _source_page_heading(response.content))
+                    and _work_token_matched_in_heading(
+                        response.content,book.get('title'),aid,model))
+                if reviewed_source_only and (
+                        page in book.get('verified_discovered_pages',[])
+                        or owner_edition_proven):
                     from public_work_photo_extractor import ordinary_public_https_image
                     dynamic_scoped=article_scoped_images(
                         response.content,page,model,aid,book.get('title'),
