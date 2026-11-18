@@ -103,6 +103,35 @@ class VerifiedUpgradeTransaction(unittest.TestCase):
                 self.assertEqual(cover['quality_upgrade_previous_sha256'],old_record['sha256'])
                 self.assertEqual(cover['position'],[50,40])
 
+    def test_actual_mimmi_rei_10_restored_original_has_more_pixels_and_immutable_history(self):
+        """Regression: original SHA bytes and decoded dimensions, not PR status."""
+        root=Path(__file__).resolve().parents[2]
+        gallery=root/'apps/mimmi-gallery'
+        manifest=json.loads((gallery/'stored-albums.json').read_text())
+        album=next(a for a in manifest['albums']
+                   if a['id']=='djawa-rei-beyond-the-heart')
+        row=next(p for p in album['images'] if p['number']==10)
+        expected='e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1'
+        prior='bde9db82907cf455f5b2fc85cb69d81b75afeda155bfe0f951f9df4ddde233fd'
+        self.assertEqual(row['sha256'],expected)
+        self.assertEqual((row['width'],row['height']), (1800,1200))
+        self.assertEqual(row['bytes'],555454)
+        raw=(gallery/row['url']).read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest(),expected)
+        self.assertEqual(len(raw),row['bytes'])
+        with Image.open(gallery/row['url']) as img:
+            img.load()
+            self.assertEqual(img.size,(1800,1200))
+        history=next(p for p in row['previous_versions']
+                     if p['sha256']==prior)
+        old_raw=(gallery/history['url']).read_bytes()
+        self.assertEqual(hashlib.sha256(old_raw).hexdigest(),prior)
+        self.assertEqual((history['width'],history['height']), (1600,1066))
+        self.assertEqual(row['source_url'],
+                         'https://djawaphoto.com/wp-content/uploads/2024/12/sample_02-4.jpg')
+        self.assertEqual(row['quality_upgrade_evidence']['method'],
+                         'direct_original_sha256_sof_and_dqt_verified')
+
     def test_uncertain_improvement_cannot_overwrite_existing_photo(self):
         with tempfile.TemporaryDirectory() as tmp:
             root,base,stage,old,new,old_record,match=fixture(tmp,'yui')
