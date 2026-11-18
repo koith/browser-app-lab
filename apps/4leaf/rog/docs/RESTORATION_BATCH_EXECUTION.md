@@ -2,7 +2,10 @@
 
 This document governs how the assistant and Claude divide independent
 development, avoid one-ticket-at-a-time conversations and close actual
-restoration tasks. For **new work**, the authoritative completion source is GitHub Issues\n`[4LEAF][ID]`, projected into `RESTORATION_STATUS.json`.\n`RESTORATION_LEDGER.json` is an immutable historical evidence archive.\nThis older protocol does not independently mark any item done.
+restoration tasks. For **new work**, the authoritative completion source is GitHub Issues
+`[4LEAF][ID]`, projected into `RESTORATION_STATUS.json`.
+`RESTORATION_LEDGER.json` is an immutable historical evidence archive.
+This older protocol does not independently mark any item done.
 
 ## User goal and immutable priority
 
