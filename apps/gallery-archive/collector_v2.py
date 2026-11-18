@@ -26,6 +26,9 @@ from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 from PIL import Image
 import requests
+from photo_visual_dedupe import WorkVisualIndex
+from perceptual_duplicate_audit import scan_image, candidate_relation
+from photo_quality_evidence import preferred_pair
 
 ROOT = Path(__file__).resolve().parents[2]
 USER_AGENT = "GalleryCollectorV2/0.1 (public pages only; respectful crawling)"
@@ -313,6 +316,10 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
     stage = Path(stage)
     stage.mkdir(parents=True, exist_ok=True)
     works, known = load_inventory(root, model)
+    base = Path(root) / "apps" / (model + "-gallery")
+    saved = json.loads((base / "stored-albums.json").read_text(encoding="utf-8"))
+    by_id = {a["id"]: a for a in saved.get("albums", [])}
+    visual_indexes = {}
     queue = QueueDB(stage / "queue.sqlite", state_file, now=now)
     selected = queue.eligible(works, max_works)
     client = http or PublicHTTP()
@@ -327,8 +334,14 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
         if time.monotonic() >= cutoff or len(session_sha) >= max_photos:
             break
         details = {"id": work["id"], "pages": 0, "media_candidates": 0,
-                   "files_staged": 0, "known_sha": 0, "errors": {}}
+                   "files_staged": 0, "known_sha": 0, "same_frame_filtered": 0,
+                   "errors": {}}
         photos = []
+        stage_visual = []
+        if work["id"] not in visual_indexes:
+            visual_indexes[work["id"]] = WorkVisualIndex(
+                base, by_id.get(work["id"], {"id": work["id"], "images": []}))
+        previous_visual = visual_indexes[work["id"]]
         pages_without_failure = 0
         for page in work["urls"][:max_pages_per_work]:
             if time.monotonic() >= cutoff or len(session_sha) >= max_photos:
@@ -361,8 +374,33 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
                 if meta["sha256"] in known or meta["sha256"] in session_sha:
                     details["known_sha"] += 1
                     continue
-                # The renderer/publisher independently detects visual re-encodes
-                # and upgrades. A distinct SHA here is NOT a new gallery photo.
+                # Drop proven same-frame recompressions BEFORE consuming the
+                # finite staging budget. The independent publisher repeats
+                # the same gate as defense-in-depth.
+                existing_match = previous_visual.classify(raw)
+                if existing_match and not existing_match["needs_replacement_transaction"]:
+                    details["same_frame_filtered"] += 1
+                    continue
+                try:
+                    scanned = scan_image(raw)
+                    same_staged = next((
+                        (old_raw, old_meta) for old_raw, old_meta in stage_visual
+                        if (lambda relation, distance, diff:
+                            relation == "perceptually_similar_review" and
+                            distance is not None and distance <= 3 and
+                            diff is not None and diff <= 2.0
+                        )(*candidate_relation(old_meta, scanned))), None)
+                except (OSError, ValueError):
+                    scanned, same_staged = None, None
+                if same_staged:
+                    old_raw, old_meta = same_staged
+                    higher, evidence = preferred_pair(
+                        old_raw, raw, old_meta["sha256"])
+                    if not (higher and evidence.get("same_photo_verified")):
+                        details["same_frame_filtered"] += 1
+                        continue
+                # A distinct SHA here is STILL not a new gallery photo:
+                # publisher independently validates real visual novelty.
                 rel = ("originals/" + work["id"] + "/" +
                        meta["sha256"][:20] + "." + meta["ext"])
                 dest = stage / rel
@@ -374,6 +412,8 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
                     temp.write_bytes(raw)
                     os.replace(temp, dest)
                 session_sha.add(meta["sha256"])
+                if scanned is not None:
+                    stage_visual.append((raw, scanned))
                 photos.append({"key": rel, "sha256": meta["sha256"],
                                "bytes": meta["bytes"], "width": meta["width"],
                                "height": meta["height"], "number": len(photos) + 1,

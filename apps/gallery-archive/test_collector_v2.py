@@ -123,6 +123,31 @@ class CollectorV2Test(unittest.TestCase):
         db = QueueDB(":memory:", self.root / "blocked.json", now=300010.0)
         self.assertEqual(db.eligible(load_inventory(self.root, "mimmi")[0], 4), [])
 
+    def test_same_frame_recompression_does_not_use_staging_budget(self):
+        from photo_visual_dedupe import WorkVisualIndex
+        original = self.first_bytes
+        image = Image.open(BytesIO(original))
+        other = BytesIO()
+        image.save(other, "JPEG", quality=80)
+        reencoded = other.getvalue()
+        digest = hashlib.sha256(original).hexdigest()
+        folder = self.base / "stored-albums" / self.work
+        folder.mkdir(parents=True)
+        (folder / "original.jpg").write_bytes(original)
+        (self.base / "stored-albums.json").write_text(json.dumps({
+            "albums": [{"id": self.work, "images": [{
+                "sha256": digest, "number": 1,
+                "url": "stored-albums/" + self.work + "/original.jpg"}]}]}))
+        self.assertNotEqual(digest, hashlib.sha256(reencoded).hexdigest())
+        http = FakeHTTP({self.page: self.html, self.one: reencoded,
+                         self.two: self.second_bytes})
+        result = collect(self.root, "mimmi", self.root / "reencode-stage",
+                         self.root / "reencode-checkpoint.json",
+                         max_photos=2, http=http, now=400000.0)
+        self.assertEqual(result["new_physical_sha_staged"], 1)
+        self.assertEqual(result["works"][0]["same_frame_filtered"], 1)
+        self.assertEqual(result["works"][0]["files_staged"], 1)
+
     def test_bad_photo_does_not_become_sha(self):
         with self.assertRaises(DownloadFailure):
             inspect_photo(b"<html>not a photo</html>")
