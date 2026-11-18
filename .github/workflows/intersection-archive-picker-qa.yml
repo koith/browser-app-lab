@@ -81,7 +81,6 @@ concurrency:
   # commits from other apps must not erase an ongoing private-live acceptance.
   group: intersection-archive-picker-${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-  queue: max
 
 jobs:
   archive-picker:
