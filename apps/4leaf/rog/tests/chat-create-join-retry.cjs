@@ -28,7 +28,7 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   if(pathname==='/api/rooms'&&req.method()==='GET')
    return respond(200,{rooms:createPosts?[room]:[]});
   if(pathname==='/api/snapshot')
-   return respond(200,{roomId:null,nextSequence:0,messages:[],peers:[]});
+   return respond(200,{roomId:joinPosts>=2?room.id:null,nextSequence:0,messages:[],peers:[]});
   if(pathname==='/api/rooms'&&req.method()==='POST'){
    createPosts++;
    await new Promise(resolve=>setTimeout(resolve,250));
