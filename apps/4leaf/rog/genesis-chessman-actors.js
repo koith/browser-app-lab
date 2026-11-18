@@ -447,7 +447,13 @@
        if(attempt<=3){
          const member=pawn.dataset.chessmanId;
          pawn.dataset.actorSourceLoad='retrying-original-OBS';
-         img.hidden=true;
+         // When a valid decoded *same-actor* previous source frame has
+         // been retained as this image's CSS background, hiding the IMG
+         // element also hides that real native frame. WebKit can retry one
+         // slow frame on an otherwise valid local source file; keep the
+         // previous source pixels visible until the new PNG finishes.
+         // No guessed body, other CHR member or CSS-drawn stand-in is used.
+         img.hidden=!Boolean(img.dataset.obsHeldSource);
          setTimeout(()=>{
            if(!pawn.isConnected||!img.isConnected||
              pawn.dataset.chessmanId!==member||pawn.dataset.obsUnavailable==='true')return;
