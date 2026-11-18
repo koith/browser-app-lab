@@ -8,6 +8,8 @@ on:
     paths:
       - apps/4leaf/rog/scripts/sync_restoration_issues.py
       - apps/4leaf/rog/docs/RESTORATION_STATUS.json
+      - apps/4leaf/rog/docs/CHAT_HANDOFF_BRIEF.json
+      - apps/4leaf/rog/docs/DELIVERY_FOCUS.json
       - .github/workflows/4leaf-restoration-status-sync.yml
   workflow_dispatch:
 
@@ -41,7 +43,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/4leaf/rog/docs/RESTORATION_STATUS.json
+          git add apps/4leaf/rog/docs/RESTORATION_STATUS.json apps/4leaf/rog/docs/CHAT_HANDOFF_BRIEF.json
           if git diff --cached --quiet; then
             echo "4LEAF status already current"
             exit 0
