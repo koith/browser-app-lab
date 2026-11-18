@@ -98,6 +98,9 @@ def verify(browser_type,label):
                 page.wait_for_function(
                     "() => document.querySelector('#displayName')?.textContent==='코코'",
                     timeout=15000)
+                # Profile identity and feed loading are independent requests.
+                # The header may update before the new account's post list.
+                page.locator("#results article.post").first.wait_for(timeout=15000)
                 assert page.locator("#results article.post").count()==1
                 assert "account="+KEY_A in page.url
                 # One list load across changing accounts; all responses re-use the choice cache.
