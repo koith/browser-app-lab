@@ -6,6 +6,7 @@ on:
       - 'apps/4leaf/rog/social-chat.js'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/chat-map-first-real-user.cjs'
+      - 'apps/4leaf/rog/tests/chat-stable-room-map-anchors.cjs'
       - 'apps/4leaf/rog/tests/dice-real-complete-match.cjs'
       - '.github/workflows/rog-chat-map-dice-full-cycle.yml'
   push:
@@ -54,6 +55,11 @@ jobs:
           FOURLEAF_MOBILE: ${{ matrix.mobile }}
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/chat-map-first-real-user.cjs
+      - name: Verify live CREATE never shifts existing room positions
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chat-stable-room-map-anchors.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
