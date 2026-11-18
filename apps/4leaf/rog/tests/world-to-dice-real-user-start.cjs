@@ -13,7 +13,9 @@ const warmPwa=process.env.FOURLEAF_SW_ENABLED==='1';
 (async()=>{
  const browser=await engine.launch({headless:true,args:engine===chromium?['--no-sandbox']:[]});
  const page=await browser.newPage({
-  viewport:phone?{width:390,height:844}:{width:1280,height:900},
+  // Original 4LEAF player interface is landscape-only. Real user taps
+  // run at phone landscape; a separate portrait rotation-guide test remains.
+  viewport:phone?{width:844,height:390}:{width:1280,height:900},
   isMobile:phone,hasTouch:phone,serviceWorkers:warmPwa?'allow':'block'});
  const errors=[],requests=[],steps=[];
  page.on('pageerror',e=>errors.push(e.stack||String(e)));
