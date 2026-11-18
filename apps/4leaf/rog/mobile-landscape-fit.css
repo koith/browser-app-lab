@@ -203,3 +203,11 @@ html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #board-area>.l
 html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #dice-source-roll{
  height:70px!important;
 }
+
+/* Mobile landscape: the existing real messenger lives in #main when <=650px.
+ * Reveal it only inside an entered ChatRoom. On map/town/world the global
+ * messenger stays hidden to preserve the source MainFrame art. */
+html[data-leaf-phone-fit="landscape"] #app:not(.app-classic-dice)
+ #main:has(#rooms.classic-chat-room:not(.hidden))>.messenger{
+ display:flex!important;
+}

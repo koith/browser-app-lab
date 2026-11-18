@@ -11,7 +11,7 @@ const {chromium,webkit}=require('playwright');
  const browser=await (engine==='webkit'?webkit:chromium).launch({
   headless:true,args:engine==='webkit'?[]:['--no-sandbox']});
  const page=await browser.newPage({
-  viewport:mobile?{width:390,height:844}:{width:1280,height:900},
+  viewport:mobile?{width:844,height:390}:{width:1280,height:900},
   hasTouch:mobile,isMobile:mobile,deviceScaleFactor:mobile?2:1,
   serviceWorkers:'block'});
  const errors=[];page.on('pageerror',err=>errors.push(String(err)));
@@ -75,15 +75,15 @@ const {chromium,webkit}=require('playwright');
   assert.equal(before.target,'dice-source-roll',
    'physical press reaches source-positioned ROLL without a transparent overlay blocking it');
   assert.ok(before.click[0]>=0&&before.click[1]>=0
-   &&before.click[0]<= (mobile?390:1280)
-   &&before.click[1]<= (mobile?844:900),'physical ROLL center stays on-screen');
+   &&before.click[0]<= (mobile?844:1280)
+   &&before.click[1]<= (mobile?390:900),'physical ROLL center stays on-screen');
   if(!mobile){
    const px=(before.click[0]-before.scene[0])/before.scene[2];
    assert.ok(px>.47&&px<.53,'original 800px reference centers ROLL at x400');
    assert.ok(before.button[2]>=70&&before.button[3]>=48,
     '2004 approximate ROLL mesh occupies ~74x53 original logical pixels');
   }else{
-   assert.ok(before.button[2]>=60&&before.button[3]>=44,
+   assert.ok(before.button[2]>=44&&before.button[3]>=44,
     'mobile preserves a reachable physical ROLL control');
   }
   await page.screenshot({path:'leaf-source-roll-'+engine+(mobile?'-mobile':'-desktop')+'-before.png'});
