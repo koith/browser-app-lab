@@ -1461,26 +1461,45 @@
   body.innerHTML='<label>방 제목<input name="name" placeholder="방 이름" maxlength="26" required></label><label>배경<select name="background"><option value="2">서재</option><option value="3">클로버 응접실</option><option value="5">벽난로가 있는 방</option><option value="4">햇빛이 드는 방</option><option value="0">숲속 광장</option><option value="1">숲속 오솔길</option></select></label><label>정원<select name="capacity"><option value="12">12명</option><option value="8">8명</option><option value="4">4명</option><option value="2">2명 전용</option></select></label><label>비밀번호 (선택)<input name="password" type="password" maxlength="24" placeholder="비우면 공개방"></label><button type="submit">방 만들기</button>';
   const nameField=body.querySelector('[name="name"]');
   const createButton=body.querySelector('button[type="submit"]');
-  nameField?.addEventListener('input',event=>event.currentTarget.setCustomValidity(''));
-  // Once CREATE receives a server ACK, retry only JOIN. Never create a
-  // second server room or silently substitute a local room for a real one.
-  let submitting=false,createdRoom=null,createdPassword='';
+  // V2 session authority. Browser screen supplies only the room DTO
+  // and UI callbacks; acknowledged server membership is owned by domain code.
+  const creation=window.__LEAF_ROOM_DOMAIN__.makeCreationSession({
+   create:details=>central.create(details),
+   join:(id,password)=>central.join(id,password),
+   leave:()=>central.leave(),
+   connect:()=>central.connect(nick()),
+   isReady:()=>central.ready,
+   isActive:()=>body.isConnected,
+   normalize:centralRoom,
+   onCreated:room=>{
+    centralRooms.set(room.id,room);centralCounts.set(room.id,0);
+    body.dataset.serverCreatedRoom=room.id;
+    createButton.textContent='생성된 방에 다시 입장';
+   },
+   enter:room=>enterRoom(room)
+  });
+  body.dataset.lifecycle='v2-room-domain';
+  const createError=document.createElement('p');
+  createError.id='social-create-error';createError.setAttribute('role','alert');
+  createError.style.cssText='color:#fff0cf;font:12px/1.45 Gulim,sans-serif;';
+  createError.hidden=true;body.append(createError);
+  nameField?.setAttribute('aria-describedby',createError.id);
+  nameField?.addEventListener('input',event=>{
+   event.currentTarget.setCustomValidity('');
+   createError.hidden=true;createError.textContent='';
+  });
+  let submitting=false;
   function showCreateFailure(message){
-   if(nameField){
-    nameField.setCustomValidity(message);
-    nameField.reportValidity();
-    // Leaving customValidity set blocks submit, defeating the retry button.
-    nameField.setCustomValidity('');
-   }
+   createError.textContent=message;createError.hidden=false;
    systemLine(message);
   }
   body.onsubmit=async e=>{
-   e.preventDefault();
-   if(submitting)return; // double-click/Enter cannot POST two CREATEs
+   e.preventDefault();if(submitting)return;
+   createError.hidden=true;createError.textContent='';
    const form=new FormData(body);
-   const name=createdRoom?createdRoom.name:safe(form.get('name'),26);
+   const name=creation.room?creation.room.name:safe(form.get('name'),26);
    if(!name)return;
-   const password=createdRoom?createdPassword:safe(form.get('password'),24);
+   const password=creation.draft?creation.draft.password:safe(form.get('password'),24);
    if(password&&password.length<6){
     const field=body.querySelector('[name="password"]');
     field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');
@@ -1488,30 +1507,21 @@
    }
    submitting=true;createButton.disabled=true;
    try{
-    if(createdRoom||(central.enabled&&central.ready)){
+    if(creation.room||(central.enabled&&central.ready)){
      try{
-      if(!createdRoom){
-       const result=await central.create({name,region:state.region,district:state.district,
-        capacity:allowedCapacity(form.get('capacity')),background:allowedBackground(form.get('background')),password});
-       createdRoom={...centralRoom(result.room),ownerId:tabId,owner:nick()};
-       createdPassword=password;
-       centralRooms.set(createdRoom.id,createdRoom);centralCounts.set(createdRoom.id,0);
-       body.dataset.serverCreatedRoom=createdRoom.id;
-       createButton.textContent='생성된 방에 다시 입장';
-      }
-      if(!central.ready)await central.connect(nick());
-      await central.join(createdRoom.id,createdPassword);
-      if(!enterRoom(createdRoom))throw Error('서버 입장 확인 실패');
+      await creation.submit({name,region:state.region,district:state.district,
+       capacity:allowedCapacity(form.get('capacity')),
+       background:allowedBackground(form.get('background')),password});
       closePopup();presence();return;
      }catch(error){
-      if(createdRoom){
+      if(!body.isConnected)return;
+      if(creation.room){
        showCreateFailure('온라인 방은 만들어졌지만 입장에 실패했습니다: '+error.message+
         ' · 다시 누르면 기존 방에 재입장합니다.');
        return;
       }
       if(!centralOutage(error)){
-       showCreateFailure('채팅방 개설 실패: '+error.message);
-       return;
+       showCreateFailure('채팅방 개설 실패: '+error.message);return;
       }
       systemLine('중앙 서버에 방을 만들지 못했습니다: '+error.message+
        ' · 대신 오프라인 방을 개설합니다.');

@@ -1,9 +1,12 @@
 name: 4LEAF centralized multi-device ChatTown authority
 on:
   push:
+    branches: [main]
     paths:
       - 'apps/4leaf/rog/server/**'
       - 'apps/4leaf/rog/central-client.js'
+      - 'apps/4leaf/rog/chat-room-domain.js'
+      - 'apps/4leaf/rog/tests/chat-room-domain.test.cjs'
       - 'apps/4leaf/rog/social-chat.js'
       - 'apps/4leaf/rog/world-social.css'
       - 'apps/4leaf/rog/chatroom-native-exit.js'
@@ -42,6 +45,9 @@ jobs:
           node --check apps/4leaf/rog/server/archive-validation.cjs
           node --check apps/4leaf/rog/central-client.js
           node --check apps/4leaf/rog/social-chat.js
+          node --check apps/4leaf/rog/chat-room-domain.js
+      - name: Verify V2 room creation transaction independently of browser and server
+        run: node --test apps/4leaf/rog/tests/chat-room-domain.test.cjs
       - name: Verify authenticated server occupancy, chat and permissions
         run: node --test apps/4leaf/rog/server/central.test.cjs
       - name: Exercise real authority session expiry and room isolation

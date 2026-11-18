@@ -61,6 +61,19 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   await page.waitForFunction(()=>document.querySelector('#social-modal form')?.dataset.serverCreatedRoom===
    'acknowledged-server-room-777'&&!document.querySelector('#social-modal button[type="submit"]')?.disabled,
    null,{timeout:15000});
+  assert.equal(await page.locator('#social-modal form').getAttribute('data-lifecycle'),'v2-room-domain',
+   'real CREATE form must use isolated V2 room transaction module');
+  assert.equal(await page.locator('#social-create-error').isVisible(),true,
+   'JOIN failure remains visible in the source owner dialog');
+  const alertBounds=await page.locator('#social-create-error').boundingBox();
+  const submitBounds=await page.locator('#social-modal button[type="submit"]').boundingBox();
+  const sourceOwner=await page.locator('#social-modal form').getAttribute('data-native-owner-ready');
+  assert.ok(alertBounds?.width>150&&alertBounds?.height>=12,
+   'server error must have a visibly readable area, not only an ARIA flag');
+  if(sourceOwner==='true')assert.ok(alertBounds.y>=submitBounds.y+submitBounds.height-1,
+   'server errors may not obscure the original source owner-submit sprite');
+  assert.ok(alertBounds.y+alertBounds.height<=850,
+   'server errors stay inside the actual desktop browser viewport');
   assert.equal(createPosts,1,'double submit must not create a duplicate online room');
   assert.equal(joinPosts,1,'initial JOIN should be attempted once');
   assert.equal(await page.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'directory',
