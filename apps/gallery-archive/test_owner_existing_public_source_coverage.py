@@ -8,7 +8,7 @@ from io import BytesIO
 from pathlib import Path
 from unittest.mock import patch
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from direct_photo_pipeline import collect, merge_owner_census_sources
 
@@ -20,11 +20,18 @@ WORK='summer-edition-yui'
 
 def jpg(rgb):
     out=BytesIO()
-    # Real photo validation correctly rejects flat-color placeholder JPEGs.
-    # The regression fixture must have actual pixel contrast and detail.
-    textured=Image.effect_noise((1280,1920),60).convert('RGB')
-    Image.blend(textured,Image.new('RGB',(1280,1920),rgb),0.25).save(
-        out,'JPEG',quality=93)
+    # Simulate coherent *spatial* photographic detail. White noise alone
+    # vanishes when reduced to the 32px flat-placeholder detection scale.
+    image=Image.new('RGB',(1280,1920),rgb)
+    draw=ImageDraw.Draw(image)
+    for y in range(0,1920,100):
+        if y//100%2==0:
+            draw.rectangle((0,y,1280,y+45),
+                           fill=tuple(min(255,z+65) for z in rgb))
+    for x in range(0,1280,160):
+        draw.rectangle((x,0,x+15,1920),
+                       fill=tuple(min(255,z+90) for z in rgb))
+    image.save(out,'JPEG',quality=93)
     return out.getvalue()
 
 
