@@ -33419,15 +33419,39 @@
         },
         {
           "number": 44,
-          "url": "stored-albums/v2ph-actor-z4xoo5nz/a97fed0f3b3be12b680f.jpg",
-          "sha256": "a97fed0f3b3be12b680ff872b844771094dcf5cedf056bc4168adf103164cfb4",
-          "bytes": 28368,
-          "width": 500,
-          "height": 333,
+          "url": "stored-albums/v2ph-actor-z4xoo5nz/1e05a6d8387c2377d459.jpg",
+          "sha256": "1e05a6d8387c2377d4592e49deef7904f477f84960a361b711744f5d74b762a9",
+          "bytes": 225801,
+          "width": 1368,
+          "height": 912,
           "origin_page": "https://everia.club/2023/07/18/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-mash-mimmi-no-02/?utm_medium=organic&utm_source=yandexsmartcamera",
           "source_url": "",
-          "quality": "direct_public_original_bytes_not_publisher_master_verified",
-          "numbering_provenance": "archive_append_order_not_publisher_number"
+          "quality": "verified_same_frame_optical_upgrade",
+          "numbering_provenance": "archive_append_order_not_publisher_number",
+          "previous_versions": [
+            {
+              "sha256": "a97fed0f3b3be12b680ff872b844771094dcf5cedf056bc4168adf103164cfb4",
+              "url": "stored-albums/v2ph-actor-z4xoo5nz/a97fed0f3b3be12b680f.jpg",
+              "bytes": 28368,
+              "width": 500,
+              "height": 333,
+              "quality": "direct_public_original_bytes_not_publisher_master_verified",
+              "watermark_status": "unknown"
+            }
+          ],
+          "quality_upgrade_evidence": {
+            "method": "paired-decoded-pixel-v1",
+            "confidence": "measured",
+            "candidate_sha256": "1e05a6d8387c2377d4592e49deef7904f477f84960a361b711744f5d74b762a9",
+            "same_photo_verified": true,
+            "compared_to_sha256": "a97fed0f3b3be12b680ff872b844771094dcf5cedf056bc4168adf103164cfb4",
+            "relation": "higher",
+            "previous_detail": 0.0192036,
+            "candidate_detail": 0.0231301,
+            "comparison": "same_display_scale_center_detail_noise_suppressed_v1",
+            "limitations": "heuristic sharpness only; inspect fine textures, compression, oversharpening and watermarks before trusting replacement"
+          },
+          "quality_upgrade_source_url": ""
         },
         {
           "number": 45,
@@ -33476,9 +33500,93 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 89,
+          "url": "stored-albums/v2ph-actor-z4xoo5nz/9a4e44b1be152f886532.jpg",
+          "sha256": "9a4e44b1be152f886532676ce71b3a6f52a3c5fa339c1c2f0afbefbb2d11ce99",
+          "bytes": 186227,
+          "width": 1368,
+          "height": 912,
+          "origin_page": "https://everia.club/2023/07/18/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-mash-mimmi-no-02/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 90,
+          "url": "stored-albums/v2ph-actor-z4xoo5nz/ab0463afa0d27d6ae275.jpg",
+          "sha256": "ab0463afa0d27d6ae275ad7151f153921be9366bdf48f39db45cf16ea178ad76",
+          "bytes": 198233,
+          "width": 912,
+          "height": 1368,
+          "origin_page": "https://everia.club/2023/07/18/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-mash-mimmi-no-02/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 22,
+          "url": "stored-albums/v2ph-actor-z4xoo5nz/baafb83205595d8bfc3f.jpg",
+          "sha256": "baafb83205595d8bfc3f42599a4fd437b98e06ea1ad3742da69bdb1aaf36f83b",
+          "bytes": 237001,
+          "width": 1368,
+          "height": 912,
+          "origin_page": "https://everia.club/2023/07/18/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-mash-mimmi-no-02/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 91,
+          "url": "stored-albums/v2ph-actor-z4xoo5nz/d50e30bca5348237a6f4.jpg",
+          "sha256": "d50e30bca5348237a6f4e30b6d9b8ef72c6ca1b5beb151b62d392cb3a2fe7335",
+          "bytes": 115346,
+          "width": 1368,
+          "height": 912,
+          "origin_page": "https://everia.club/2023/07/18/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-mash-mimmi-no-02/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 92,
+          "url": "stored-albums/v2ph-actor-z4xoo5nz/49d7510d41a3d492cb20.jpg",
+          "sha256": "49d7510d41a3d492cb2066a0548625294854afccacd9282373a48d905aeb39fd",
+          "bytes": 176258,
+          "width": 912,
+          "height": 1368,
+          "origin_page": "https://everia.club/2023/07/18/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-mash-mimmi-no-02/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 93,
+          "url": "stored-albums/v2ph-actor-z4xoo5nz/0ee909189a18ef2985d3.jpg",
+          "sha256": "0ee909189a18ef2985d31ecd34ee6d34ff9fe4079d09d879134fee6468a1fdc4",
+          "bytes": 142404,
+          "width": 912,
+          "height": 1368,
+          "origin_page": "https://everia.club/2023/07/18/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-mash-mimmi-no-02/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 94,
+          "url": "stored-albums/v2ph-actor-z4xoo5nz/f7ba53e637a51597d8ba.jpg",
+          "sha256": "f7ba53e637a51597d8ba54f8ab71c3a7d1dd65b6fc7b0fe6e457b1fe5d40fd4b",
+          "bytes": 138469,
+          "width": 912,
+          "height": 1368,
+          "origin_page": "https://everia.club/2023/07/18/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-mash-mimmi-no-02/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     }
   ],
-  "physical_verified_image_count": 3296
+  "physical_verified_image_count": 3303
 }
