@@ -26,6 +26,13 @@ const fs=require('node:fs');
     name:p.name,bot:p.bot,pos:p.position,items:p.items?.length,jail:p.jail})),
    lastRoll:m.lastRoll?.length||0,route:document.querySelector('.scene:not(.hidden)')?.id,
    result:!!document.getElementById('leaf-original-match-result'),
+   // A genuine bot roll may return to START after the actual original
+   // DMP DOA, warp or negative-step effects. The final square is not
+   // a proof of whether AI completed its own dice turn.
+   botRolled:m.history?.some(entry=>{
+     const msg=typeof entry==='string'?entry:JSON.stringify(entry);
+     return msg.includes(m.players.find(p=>p.bot)?.name+' 이동 주사위 ');
+   })||false,
    blocked:!document.getElementById('modal')?.classList.contains('hidden')}:null;
  });
  const press=el=>mobile?el.tap():el.click();
@@ -99,8 +106,8 @@ const fs=require('node:fs');
    assert.ok(s.round>=initialRounds+1||s.finished,
     'after a real human roll, the computer must roll automatically and return turn to human');
    assert.ok(rolls>=1,'one actual original dice button was clicked');
-   assert.ok(s.players[1].pos>0||s.finished,
-    'computer must move its own pawn without a second human click');
+   assert.ok(s.botRolled||s.finished,
+    'computer must roll its own real dice (original DMP effects may legitimately reset its position)');
    assert.deepEqual(errors,[]);
    console.log('DICE_REAL_HUMAN_AI_COMPLETE_ROUND_PASS',JSON.stringify({
     engine:engine.name(),mobile,rolls,s,elapsed:Date.now()-start}));

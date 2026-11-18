@@ -71,7 +71,11 @@ const {chromium,webkit}=require('playwright');
   for(const [id,action,expected] of [['bomb','자폭',true],['flipper','오리발',false]]){
    await page.evaluate(id=>{
     const T=window.__ROG_TEST__,m=T.getMatch();
-    m.players[0].team=['c_0091'];m.players[1].team=['c_0127'];
+    // Original flipper cancels ONLY a losing combat. The old fixture
+    // assumed the item appeared even when the real attacker had won.
+    if(id==='flipper')Math.random=()=>0.4;
+    m.players[0].team=[id==='flipper'?'c_0096':'c_0091'];
+    m.players[1].team=['c_0127'];
     m.players[0].position=14;m.players[1].position=14;
     m.players[0].items=[id];m.players[0].usedItem=false;
     m.players[0].effects.destroy=0;m.players[1].effects.block=0;
