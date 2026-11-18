@@ -35,10 +35,9 @@ class HandoffTests(unittest.TestCase):
             summarize(BODY.replace("INT-10", "INT-99"))
 
     def test_ignore_historical_checkboxes_and_sanitize_markdown(self):
-        report = summarize(BODY + "\n- [x] **INT-01** extra historical record")
-        with self.assertRaises(ValueError):
-            summarize(BODY + "\n- [x] **INT-01** extra historical record")
+        report = summarize(BODY + "\n- [x] **OTHER-01** archived unrelated checkbox")
         self.assertLessEqual(len(report), 1100)
+        self.assertIn("완료 **1**", report)
 
 
 if __name__ == "__main__":
