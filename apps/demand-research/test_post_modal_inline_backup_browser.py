@@ -97,6 +97,7 @@ const suspectedAd=()=>false,hideMedia=()=>false;
 function draw(){window.__visibleFeed=filtered().map(p=>p.id)}
 
 const appendMedia=()=>{};
+function closeDetail(){document.querySelector("#detail").close()}
 window.__trackedPosts=[];
 window.INTERSECTION_watchPublicAccount=selection=>{
   window.__trackedPosts.push(selection);
@@ -439,18 +440,17 @@ def exercise(browser_type,name,width):
             assert page.evaluate("window.__visibleFeed")==[
                 "a-1","a-2","a-did","b-1","c-1"],"Must not hide before confirmation"
             confirm.get_by_role("button",name="취소").click()
+            assert modal.get_attribute("open") is not None,"Cancelled block must retain detail"
             assert page.evaluate("window.__visibleFeed")==[
                 "a-1","a-2","a-did","b-1","c-1"],"Cancel must not mutate feed"
             modal.locator("#detailBlockAccount").click()
             confirm.get_by_role("button",name="확인").click()
             assert page.evaluate("window.__visibleFeed")==["b-1","c-1"],("same author and DID must all disappear",host)
-            assert page.evaluate("posts.length")==5,"Blocking must NEVER delete originals"
+            assert page.evaluate("posts.length")==5,"Local source feed remains immutable; remote archive deletion is separately unverified"
             assert page.evaluate("JSON.parse(localStorage.getItem(MANUAL_BLOCK_STORAGE_KEY)).length")==1
-            assert modal.get_attribute("open") is not None,"Blocking should not navigate/close detail"
-            assert modal.get_by_role("button",name="이 계정 차단 해제").is_visible()
-            # Closing/reopening this modal keeps the exclusion list and
-            # dedicated manager exposes a one-click reversible unblock.
-            page.evaluate("document.querySelector('#detail').close()")
+            assert modal.get_attribute("open") is None,"Confirmed block must close its post dialog"
+            # The dedicated manager stays available after the post dialog closes.
+            # Physical deletion from remote TeraBox is NOT verified by this UI test.
             page.locator("#manualBlockOpen").click()
             assert page.locator("#manualBlockDialog").is_visible()
             assert page.locator("#manualBlockList li").count()==1
@@ -465,6 +465,7 @@ def exercise(browser_type,name,width):
             modal.locator("#detailBlockAccount").click()
             confirm.get_by_role("button",name="확인").click()
             assert page.evaluate("window.__visibleFeed")==["b-1","c-1"]
+            assert modal.get_attribute("open") is None,"Repeated block must also close dialog"
             page.reload(wait_until="domcontentloaded")
             page.wait_for_function("typeof window.setupManualBlockFeed==='function'")
             assert page.evaluate("window.setupManualBlockFeed()")==["b-1","c-1"]

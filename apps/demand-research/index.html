@@ -2760,6 +2760,10 @@ $("detailBlockAccount").addEventListener("click",()=>{
     $("detailBlockStatus").textContent=ok?
       (blocked?"차단을 해제했습니다.":"차단했습니다. 최신 게시물 검색에서 제외됩니다."):
       "브라우저에 차단 목록을 저장하지 못했습니다.";
+    // A confirmed block removes this author's posts from the live feed;
+    // keeping their old detail dialog visible contradicts that action.
+    // Never close the dialog on a failed local-storage write or an unblock.
+    if(ok&&!blocked)closeDetail();
   }
   if(blocked)apply();
   else confirmPostAccountAction("block",p,apply);
