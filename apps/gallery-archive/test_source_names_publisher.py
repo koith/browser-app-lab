@@ -50,7 +50,8 @@ def main():
         result=evaluate(root,spec)
         assert result["repo_sha_verified_photos"]==1
         assert result["checks"]["official_quantity_verified_with_real_unique_files"]
-        assert not result["complete"] and not result["checks"]["official_package_size_verified"]
+        assert not result["complete"] and result["checks"]["official_package_size_if_declared_verified"]
+        assert result["package_size_evidence_status"]=="NOT_DECLARED_BY_PUBLISHER"
         photo.write_bytes(b"tampered")
         assert evaluate(root,spec)["repo_sha_verified_photos"]==0
     print("CUMULATIVE_SITE_ALIAS_AND_PUBLISHER_COMPLETION_TEST_PASS")

@@ -81,6 +81,18 @@ def main():
     assert by_id['djawa-pop-kitty-party']==[],result
     assert by_id['djawa-nikke-yuni']==[source],result
 
+    # A misleading or shortened search CARD cannot suppress a true
+    # edition when the fetched article itself names model and full work.
+    def short_card(_html,_engine):
+        return [{'url':source,'title':'New gallery pictures','snippet':'photos'}]
+    with patch('source_alias_search.load_html',side_effect=source_or_search),patch(
+            'source_alias_search.hits_from_html',side_effect=short_card):
+        result=crawl_names(work_db,'mimmi',per_work=1,max_pages=2,
+                           session=object(),delay=0,work_budget=2)
+    by_id={v['id']:v['urls'] for v in result['search_results']}
+    assert by_id['djawa-nikke-yuni']==[source],result
+    assert by_id['djawa-pop-kitty-party']==[],result
+
     # A newly observed source host must not be stuck permanently behind
     # the same alphabetically first two domains on every scheduled run.
     domains=[f'gallery-{i}.public-photo.example.org' for i in range(5)]

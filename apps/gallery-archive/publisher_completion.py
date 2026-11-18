@@ -33,11 +33,19 @@ def evaluate(root,spec,qa=None):
     count=spec.get("declared_photo_count")
     w,h=spec.get("declared_width"),spec.get("declared_height")
     pkg=spec.get("declared_package_bytes")
+    # Publisher metadata sometimes omits archive size entirely. Do not
+    # fabricate a size, and do not make an unpublished criterion impossible.
+    # The other independent count/resolution/watermark/browser gates still
+    # MUST all pass for a genuine full-edition COMPLETE_VERIFIED.
+    package_size_declared=type(pkg) is int and pkg>0
     qa=qa or {}
     checks={
         "official_quantity_verified_with_real_unique_files":type(count)==int and count>0 and len(physically_verified)>=count,
         "official_resolution_verified_for_every_file":bool(physically_verified) and bool(w and h) and all({x.get("width"),x.get("height")}=={w,h} for x in physically_verified.values()),
-        "official_package_size_verified":type(pkg)==int and pkg>0 and qa.get("verified_official_package_bytes")==pkg and qa.get("full_package_sha_readback_verified") is True,
+        "official_package_size_if_declared_verified":(
+            not package_size_declared or (
+                qa.get("verified_official_package_bytes")==pkg
+                and qa.get("full_package_sha_readback_verified") is True)),
         "no_watermark_verified_for_every_file":bool(physically_verified) and all(x.get("watermark_status") in NO_WATERMARK for x in physically_verified.values()),
         "distinct_full_edition_cuts_verified":qa.get("distinct_full_edition_cuts_verified") is True,
         "all_cuts_browser_open_verified":qa.get("all_cuts_browser_open_verified") is True
@@ -45,7 +53,12 @@ def evaluate(root,spec,qa=None):
     complete=all(checks.values())
     return {"model":spec["model"],"album_id":name,"official_source":spec["publisher_page"],
             "declared_count":count,"declared_resolution":[w,h],
-            "declared_package_bytes":pkg,"registered_unique_sha":len(all_sha),
+            "declared_package_bytes":pkg,
+        "package_size_evidence_status":("VERIFIED" if package_size_declared and
+            checks["official_package_size_if_declared_verified"] else
+            "MISSING_VERIFICATION" if package_size_declared else
+            "NOT_DECLARED_BY_PUBLISHER"),
+        "registered_unique_sha":len(all_sha),
             "repo_sha_verified_photos":len(physically_verified),
             "registered_count_gap":max(0,(count or 0)-len(all_sha)),
             "checks":checks,"complete":complete,

@@ -10,7 +10,7 @@ on:
   schedule:
     - cron: '27 0,8,16 * * *'
   # This file's main push trigger starts one bounded new first pass when
-  # a repaired search revision is deployed. Revision 3 permits newly found
+  # a repaired search revision is deployed. Revision 4 permits previously rejected
   # safe public domains previously dropped by the hardcoded source allowlist;
   # every SHA is re-examined once, then checkpointed across later runs.
   push:
@@ -45,6 +45,8 @@ on:
       - 'apps/gallery-archive/test_verified_dynamic_work_publish.py'
       - 'apps/gallery-archive/verified_source_bridge.py'
       - 'apps/gallery-archive/test_verified_source_bridge.py'
+      - 'apps/gallery-archive/publisher_completion.py'
+      - 'apps/gallery-archive/test_publisher_completion_undeclared.py'
 permissions:
   contents: write
   pull-requests: write
@@ -67,6 +69,7 @@ jobs:
           python -m py_compile apps/gallery-archive/run_full_public_acquisition.py
           python apps/gallery-archive/test_run_full_public_acquisition.py
           python apps/gallery-archive/test_official_sample_supply.py
+          python apps/gallery-archive/test_publisher_completion_undeclared.py
           python apps/gallery-archive/test_inventory_unindexed_owner_files.py
           python apps/gallery-archive/test_source_alias_search.py
           python apps/gallery-archive/test_reverse_image_sweep.py
@@ -141,7 +144,7 @@ jobs:
             --progress-out "$STAGE/reverse-next.json" \
             --out "$STAGE/reverse-evidence.json" \
             --budget 256 --max-seconds 3300 --workers 3 --stop-after-full \
-            --search-revision 3
+            --search-revision 4
       - name: Persist reverse-search progress before ANY downstream network research
         shell: bash
         run: |
@@ -155,7 +158,7 @@ jobs:
           report=json.load(open(sys.argv[1]))
           old=json.load(open(sys.argv[2]))
           raise SystemExit(0 if report['seed_queries']==0
-              and old.get('search_revision')==3
+              and old.get('search_revision')==4
               and old.get('last_run_attempts')==0 else 1)
           PY
           then
@@ -199,9 +202,9 @@ jobs:
           set -euo pipefail
           # This may be slow or inaccessible. The full per-SHA reverse cursor
           # has already been durably committed and read back above.
-          if ! timeout 420s python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
-            --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 32 \
-            --work-budget 8 --reverse-limit 96 --reverse "$STAGE/reverse-evidence.json" \
+          if ! timeout 540s python apps/gallery-archive/source_alias_search.py --model "$MODEL" \
+            --offset "$((RUN_NUMBER * 3))" --per-work 3 --max-pages 96 \
+            --work-budget 16 --reverse-limit 128 --reverse "$STAGE/reverse-evidence.json" \
             --out "$STAGE/source-evidence.json"; then
             # Optional source-name enrichment must NOT prevent the independent
             # registered public work collector or block the next SHA batch.
@@ -212,12 +215,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          status=0
           python apps/gallery-archive/run_full_public_acquisition.py \
             --model "$MODEL" --run-number "$RUN_NUMBER" \
             --stage "$STAGE/photos" \
             --source-evidence "$STAGE/source-evidence.json" \
             --batch-size 7 --max-per-batch 48 --bytes-per-batch 36000000 \
-            --batch-timeout 420 --alternate-priority
+            --batch-timeout 420 --alternate-priority || status=$?
+          # Code 4 means incomplete work, not a genuine collector success.
+          # Preserve and publish *only* finalized SHA-pinned files first,
+          # then fail the job at the final truthful status gate.
+          echo "$status" > "$STAGE/collection-exit-code"
+          if [ "$status" -ne 0 ] && [ "$status" -ne 4 ]; then exit "$status"; fi
       - name: Replay exact staged SHA bytes onto latest main, then commit actual new photos
         shell: bash
         run: |
@@ -272,11 +281,31 @@ jobs:
             /tmp/gallery-public-full/photos/batch-*/metadata/pages-publication.json
           retention-days: 7
           if-no-files-found: warn
+      - name: Fail partial edition sweeps after preserving real files and evidence
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os,pathlib,sys
+          p=pathlib.Path(os.environ['STAGE'])/'photos/full-collection-summary.json'
+          if not p.is_file():
+              print('::error::FULL_COLLECTION_AUDIT_ABSENT')
+              sys.exit(1)
+          audit=json.loads(p.read_text())
+          missing=audit.get('registered_work_ids_in_incomplete_batches',[])
+          if missing or audit.get('collection_all_batches_success') is not True:
+              print('::error::GALLERY_PARTIAL_EDITION_SWEEP model='+os.environ['MODEL']+
+                    ' incomplete_works='+','.join(missing))
+              sys.exit(1)
+          print('GALLERY_ALL_REGISTERED_EDITION_BATCHES_FINISHED model='+os.environ['MODEL'])
+          PY
   continue_until_exhausted:
     needs: [offline, collect]
-    # Don't spawn more runs on a failed collection, invalid checkpoint,
-    # manual pull request or unrelated branch. The previous original stays safe.
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && needs.collect.result == 'success'
+    # An edition timeout can fail the truthful CI status gate while the
+    # per-photo reverse checkpoint was durably committed. Continue that
+    # bounded corpus search, but only if the controller sees actual progress.
+    # Stop on invalid checkpoint, skipped collection, PR or unrelated ref.
+    if: always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && needs.offline.result == 'success' && (needs.collect.result == 'success' || needs.collect.result == 'failure')
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     env:

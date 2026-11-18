@@ -16,11 +16,12 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[2]
 ARCHIVE=ROOT/'apps/gallery-archive'
-MAX_REGISTERED_PAGES_PER_WORK=5
-MAX_CHROMIUM_WEAK_PAGES_PER_BATCH=2
+MAX_REGISTERED_PAGES_PER_WORK=60  # Per-run safety bound, NOT a lifetime or edition-page ceiling
+MAX_CHROMIUM_WEAK_PAGES_PER_BATCH=4
 MAX_RECOVERY_SINGLE_WORKS_PER_RUN=6
 MAX_RECOVERY_PER_TIMEOUT_GROUP=3
 RECOVERY_SINGLE_WORK_TIMEOUT=120
+SLOW_PUBLIC_SOURCE_TIMEOUT=75
 PRIORITY={
  'mimmi':(
   'djawa-pop-kitty-party','djawa-nikke-yuni',
@@ -53,6 +54,25 @@ def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=Non
     all_ids=[a['id'] for a in works]
     if len(all_ids)!=len(set(all_ids)):
         raise ValueError('DUPLICATE_PUBLIC_WORK_IDS')
+    # The small public-work-pages manifest is NOT the full owner inventory.
+    # The collector itself merges the exhaustive registered corpus. Schedule
+    # that same corpus here or the scheduler silently discards owner works
+    # discovered by the extractor before it even executes them.
+    registry=Path(base)/'apps/gallery-archive/global_source_registry.json'
+    if registry.is_file():
+        from collector_full_census import census
+        from direct_photo_pipeline import safe_registered_public_page
+        inventory=census(base)
+        for row in inventory['targets']:
+            if (row.get('kind')!='work' or row.get('model')!=model
+                    or not isinstance(row.get('id'),str)):
+                continue
+            if (any(safe_registered_public_page(url,model)
+                    for url in row.get('urls',[]))
+                    and row['id'] not in all_ids):
+                all_ids.append(row['id'])
+    # Every scheduled ID must correspond to an observed, registered edition;
+    # unknown search snippets are added only via the proven source bridge.
     # A name-search result alone must never register an album. Require the
     # exact edition page proof that the physical collector checks again.
     if source_evidence is not None and Path(source_evidence).is_file():
@@ -90,9 +110,14 @@ def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=Non
         offset=((max(run_number,1)-1)*batch_size)%len(rest)
         rest=rest[offset:]+rest[:offset]
     # Keep priority works in a separate, longer-pagination batch.
+    # V2PH public multi-page sites historically exhaust whole seven-work
+    # batches. Isolate them: a slow source must never hide other editions.
+    # A dedicated single-work timeout keeps the full inventory scheduled.
+    slow=[aid for aid in rest if aid.startswith('v2ph-actor-')]
+    normal=[aid for aid in rest if not aid.startswith('v2ph-actor-')]
     return ([priority] if priority else []) + [
-        rest[i:i+batch_size] for i in range(0,len(rest),batch_size)
-    ]
+        normal[i:i+batch_size] for i in range(0,len(normal),batch_size)
+    ] + [[aid] for aid in slow]
 
 
 def execute(args):
@@ -136,7 +161,10 @@ def execute(args):
         print('FULL_COLLECTION_BATCH_START',args.model,index,'work_count',len(ids),flush=True)
         try:
             timeout=(min(args.batch_timeout,RECOVERY_SINGLE_WORK_TIMEOUT)
-                     if index>=len(batches) else args.batch_timeout)
+                     if index>=len(batches) else
+                     min(args.batch_timeout,SLOW_PUBLIC_SOURCE_TIMEOUT)
+                     if len(ids)==1 and ids[0].startswith('v2ph-actor-')
+                     else args.batch_timeout)
             result=subprocess.run(command,cwd=ROOT,timeout=timeout,check=False)
             collector_code=result.returncode
             collection_error=None
@@ -236,6 +264,10 @@ def execute(args):
     if any(x.get('publisher_returncode') not in (None,0)
            or x.get('publication_error') for x in reports):
         return 3
+    # Exit 4 means incomplete, NOT success. The Actions wrapper must still
+    # publish independently finalized files before surfacing this failure.
+    if incomplete_works:
+        return 4
     return 0
 
 

@@ -224,7 +224,10 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
                     # work, not across the entire model catalog.
                     if (work,url) in visited_urls or not https_page(url):continue
                     # URL candidates cannot pass merely on a search title; open source.
-                    if not exact_work_in_text(work,result.get("title","")+" "+result.get("snippet","")):continue
+                    # Search engines frequently use translated, shortened or
+                    # generic card titles. Inspect a bounded *actual article*
+                    # before dismissing the lead; never use snippets as identity
+                    # proof and never import a neighboring model's images.
                     if checked_this_work>=per_album_pages:break
                     visited_urls.add((work,url))
                     checked_this_work+=1
@@ -266,7 +269,8 @@ def crawl_names(db,model,offset=0,per_work=3,max_pages=12,session=None,delay=.5,
                     target=hit["url"]
                     if not https_page(target) or urlsplit(target).hostname!=site:continue
                     for work in [x for x in db["works"] if x.startswith(other_model+":")]:
-                        if not exact_work_in_text(work,hit.get("title","")+" "+hit.get("snippet","")):continue
+                        # Same principle for cross-site sources: a translated
+                        # search card cannot veto exact edition proof on-page.
                         body,source_status=load_html(session,target)
                         status["site_source_"+source_status]+=1
                         if body is None:continue
@@ -394,7 +398,7 @@ def main():
     p.add_argument("--work-budget",type=int,default=16)
     p.add_argument("--out",type=Path,required=True)
     a=p.parse_args()
-    if not 0<=a.offset or not 1<=a.per_work<=6 or not 1<=a.max_pages<=32 or not 1<=a.reverse_limit<=128 or not 1<=a.work_budget<=80:
+    if not 0<=a.offset or not 1<=a.per_work<=6 or not 1<=a.max_pages<=96 or not 1<=a.reverse_limit<=128 or not 1<=a.work_budget<=80:
         raise ValueError("bounded_research_budget_required")
     db=json.loads(a.ledger.read_text(encoding="utf-8"))
     new_works=hydrate_all_registered_works(db,a.model)
