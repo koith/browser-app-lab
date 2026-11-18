@@ -14,7 +14,10 @@
  let originalMessengerParent=null;
  let originalRosterParent=null;
  let messenger=null,roster=null;
- const mobile=()=>window.matchMedia('(max-width:650px)').matches;
+ // Portrait needs the larger external composer. Landscape keeps the real
+ // 794x528 source-room chat form and 150x38 userlist AT THEIR original anchors,
+ // avoiding a bottom overlay that intercepts the actual ChatRoom EXIT button.
+ const mobile=()=>window.matchMedia('(max-width:650px) and (orientation:portrait)').matches;
  const active=()=>Boolean($('rooms')?.classList.contains('classic-chat-room')&&
   !$('rooms')?.classList.contains('hidden'));
  function remember(){

@@ -2,7 +2,7 @@
    apps/4leaf/assets/chat_ref.jpg and chat.jpg. Actual 794x528 room artwork
    fills the stage; conversation+entry floats at upper left, participant list
    at upper right. These are existing, still interactive DOM components. */
-@media(min-width:651px){
+@media(min-width:651px), (max-width:650px) and (orientation:landscape){
  #rooms.classic-chat-room .social-layout{
   position:relative;
  }
@@ -115,7 +115,7 @@
 /* On phone/tablet layouts, keep the established large readable chat form
    BELOW the room and the participant list as a button-triggered side panel.
    Neither is shrunk to illegible 794x528-scaled interactive controls. */
-@media(max-width:650px){
+@media(max-width:650px) and (orientation:portrait){
  #rooms.classic-chat-room .messenger[data-native-overlay="true"],
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"]{
   position:static!important;
@@ -146,7 +146,7 @@
    x758 (thumb top y35, updown block y110..127). Coordinates below are
    relative to the panel origin (620,10). Without a composed frame (file://,
    decode error) the earlier CSS look above remains as the fallback. */
-@media(min-width:651px){
+@media(min-width:651px), (max-width:650px) and (orientation:landscape){
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"][data-native-frame="userlist.png-9slice"]{
   display:block!important;
   top:10px!important;left:620px!important;right:auto!important;
@@ -239,7 +239,7 @@
  top:-66px!important;
  transform:translate(calc(-50% + var(--leaf-tag-dx,0px)),calc(-100% + var(--leaf-tag-dy,0px)))!important;
 }
-@media(min-width:651px){
+@media(min-width:651px), (max-width:650px) and (orientation:landscape){
  #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list{
   padding-top:5px!important;
   -webkit-mask-image:linear-gradient(#000,#000),linear-gradient(#000 0 85px,transparent 85px);
