@@ -263,11 +263,12 @@ def test_replay_streams_artifacts_and_reports_unprocessed_backlog(monkeypatch):
     calls=[]
     monkeypatch.setattr(replay,"_gh",
                         lambda args,**kwargs:calls.append(args) or b"")
-    # Extra safe remote-pack probes may consult the clock without changing
-    # the intended deadline. The synthetic clock must not exhaust.
-    from itertools import chain, repeat
-    ticks=iter(chain([0,300,600,900],repeat(900)))
-    monkeypatch.setattr(replay.time,"monotonic",lambda:next(ticks))
+    # Patch only this module's clock, not the global time module used by
+    # CloudArchive's instrumentation. A global monkeypatch consumed the
+    # four synthetic ticks during preflight and hid the replay candidates.
+    from types import SimpleNamespace
+    ticks=iter([0,300,600,900])
+    monkeypatch.setattr(replay,"time",SimpleNamespace(monotonic=lambda:next(ticks)))
     result=replay.replay(cloud=FakeCloud())
     assert len(calls)==2  # Third archived source remains queued, not lost.
     assert result["deferred_artifacts"]==1
