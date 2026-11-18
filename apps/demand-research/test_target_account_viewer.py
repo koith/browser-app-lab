@@ -269,6 +269,46 @@ def test_verified_bundle_choice_uses_archived_nickname_not_url(populated,monkeyp
     assert response.json()["accounts"][0]["handle"]=="qa-user.bsky.social"
 
 
+@pytest.mark.parametrize("profile_on_terabox",[True,False])
+def test_verified_profile_survives_selection_of_larger_other_zip(
+        populated,monkeypatch,profile_on_terabox):
+    """A posts-rich ZIP must not erase the SHA-verified nickname in another ZIP."""
+    from types import SimpleNamespace
+    client,_,_,name=populated
+    prefix="account-archives/bluesky/"+archive_key(PROFILE)+"/"
+    snapshot={"platform":"bluesky","identity":DID,
+              "handle":"qa-user.bsky.social","display_name":"Public QA"}
+    key=prefix+"profile/snapshots/snap-"+"0"*20+"-"+"a"*16+".json"
+
+    def bundle(*,stored_profile,post_count):
+        return SimpleNamespace(
+            account=name,accounts={name:PROFILE},prefix=prefix,
+            items={key:canonical_json(snapshot)} if stored_profile else {},
+            post_count=post_count,object_count=post_count*2,
+            source_state="sha256_verified")
+    temporary=bundle(stored_profile=not profile_on_terabox,
+                     post_count=9 if profile_on_terabox else 2)
+    remote=bundle(stored_profile=profile_on_terabox,
+                  post_count=2 if profile_on_terabox else 9)
+    monkeypatch.setattr("github_temp_bundle.enabled",lambda:True)
+    monkeypatch.setattr("github_temp_bundle.latest_bundles",
+                        lambda:iter([temporary]))
+    monkeypatch.setattr(viewer,"_verified_account_bundles",
+                        lambda root:iter([remote]))
+    response=client.get("/api/account-archives")
+    assert response.status_code==200
+    rows=response.json()["accounts"]
+    assert len(rows)==1
+    row=rows[0]
+    assert row["posts_verified_in_bundle"]==9
+    assert row["display_name"]=="Public QA"
+    assert row["handle"]=="qa-user.bsky.social"
+    assert row["profile_snapshot_verified"] is True
+    assert row["backup_kind"]==(
+        "github_temp_sha_verified" if profile_on_terabox
+        else "terabox_zip_sha_verified")
+
+
 def test_unmatched_snapshot_never_injects_another_account_name(populated):
     _client,root,archive,name=populated
     class WrongIdentity:
