@@ -16747,6 +16747,18 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 123,
+          "url": "stored-albums/v2ph-actor-a8n7me7a/ee1ca027d1a49fb69edd.jpg",
+          "sha256": "ee1ca027d1a49fb69edd5ee2783a9e03577d685641ba9dc3499d8df0dda5a89c",
+          "bytes": 281811,
+          "width": 1280,
+          "height": 853,
+          "origin_page": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/4/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -32892,5 +32904,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3247
+  "physical_verified_image_count": 3248
 }
