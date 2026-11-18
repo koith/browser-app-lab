@@ -20,7 +20,11 @@ WORK='summer-edition-yui'
 
 def jpg(rgb):
     out=BytesIO()
-    Image.new('RGB',(1280,1920),rgb).save(out,'JPEG',quality=93)
+    # Real photo validation correctly rejects flat-color placeholder JPEGs.
+    # The regression fixture must have actual pixel contrast and detail.
+    textured=Image.effect_noise((1280,1920),60).convert('RGB')
+    Image.blend(textured,Image.new('RGB',(1280,1920),rgb),0.25).save(
+        out,'JPEG',quality=93)
     return out.getvalue()
 
 
