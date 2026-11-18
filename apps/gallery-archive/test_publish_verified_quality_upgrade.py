@@ -40,6 +40,10 @@ def fixture(tmp, model):
         'schema_version':1,'model':model,'albums':[]}))
     (base/'stored-albums.json').write_text(json.dumps({
         'albums':[{'id':aid,'title':'Public edition','images':[record]}]}))
+    (base/'album-covers.json').write_text(json.dumps({
+        'schema_version':2,'covers':{aid:{
+            'sha256':old_sha,'number':5,'width':540,'height':810,
+            'position':[50,40],'fit':'cover'}}}))
     (base/'public-work-pages.json').write_text(json.dumps({'albums':[{
         'id':aid,'title':'Public edition',
         'source':f'https://public-images.example.org/{model}/work'}]}))
@@ -94,6 +98,10 @@ class VerifiedUpgradeTransaction(unittest.TestCase):
                 self.assertEqual(row['previous_versions'][0]['url'],
                                  old_record['url'])
                 self.assertEqual(row['quality_upgrade_evidence']['relation'],'higher')
+                cover=json.loads((base/'album-covers.json').read_text())['covers']['public-edition']
+                self.assertEqual(cover['sha256'],row['sha256'])
+                self.assertEqual(cover['quality_upgrade_previous_sha256'],old_record['sha256'])
+                self.assertEqual(cover['position'],[50,40])
 
     def test_uncertain_improvement_cannot_overwrite_existing_photo(self):
         with tempfile.TemporaryDirectory() as tmp:
