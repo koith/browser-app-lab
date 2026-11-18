@@ -15,6 +15,8 @@ LEGACY_TODO = re.compile(r"원장 상태[^\n]{0,30}todo")
 LEGACY_DONE = re.compile(r"(?:이관 원장 상태|기존 상태)[^\n]{0,30}done")
 ACCEPTED_MARKER = "<!-- 4LEAF-ACCEPTED-WITH-EVIDENCE -->"
 OUTPUT = Path("apps/4leaf/rog/docs/RESTORATION_STATUS.json")
+HANDOFF = Path("apps/4leaf/rog/docs/CHAT_HANDOFF_BRIEF.json")
+FOCUS = Path("apps/4leaf/rog/docs/DELIVERY_FOCUS.json")
 
 
 def classify(issue):
@@ -74,6 +76,36 @@ def convert(items, previous=None):
     }
 
 
+def make_handoff(status, focus):
+    """Minimal, deterministic fresh-chat state; never include legacy events."""
+    current = [task for task in status["tasks"] if task["status"] != "done"]
+    selected = focus.get("activeFocus")
+    if selected not in {task["id"] for task in current}:
+        raise ValueError("activeFocus missing from the actual open GitHub Issues")
+    if len(current) != status["counts"]["remaining"]:
+        raise ValueError("handoff counts mismatch with the Issues snapshot")
+    return {
+        "schemaVersion": 3,
+        "purpose": "Small, generated 4LEAF conversation handoff; NOT a second ledger",
+        "sourceOfTruth": "GitHub Issues [4LEAF][ID]",
+        "statusSnapshot": str(OUTPUT),
+        "legacyEvidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+        "activeFocus": selected,
+        "counts": status["counts"],
+        "openTasks": [{
+            "id": task["id"], "issue": task["issue"],
+            "priority": task["priority"], "title": task["title"],
+            "status": task["status"], "url": task["url"]
+        } for task in current],
+        "rules": [
+            "Read only this handoff and the focused Issue at session start",
+            "Do not load the 628KB legacy JSON, historical chat, or long CI logs",
+            "A merged PR is not a newly completed restoration task",
+            "Check main, real browsers, original evidence and public Pages before closure"
+        ]
+    }
+
+
 def github_issues(repo, token):
     if not token:
         raise ValueError("GITHUB_TOKEN is required; refusing unauthenticated partial sync")
@@ -113,15 +145,22 @@ def main():
     p.add_argument("--output", type=Path, default=OUTPUT)
     p.add_argument("--input-json", type=Path,
                    help="Offline fixture for tests; not used by production workflow")
+    p.add_argument("--handoff-output", type=Path, default=HANDOFF)
+    p.add_argument("--focus-input", type=Path, default=FOCUS)
     args = p.parse_args()
     items = (json.loads(args.input_json.read_text(encoding="utf-8"))
              if args.input_json else github_issues(args.repo, os.environ.get("GITHUB_TOKEN")))
     previous = json.loads(args.output.read_text(encoding="utf-8")) if args.output.exists() else None
     out = convert(items, previous)
+    focus = json.loads(args.focus_input.read_text(encoding="utf-8"))
+    handoff = json.dumps(make_handoff(out, focus), ensure_ascii=False, indent=2) + "\n"
     payload = json.dumps(out, ensure_ascii=False, indent=2) + "\n"
     if previous is None or args.output.read_text(encoding="utf-8") != payload:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(payload, encoding="utf-8")
+    args.handoff_output.parent.mkdir(parents=True, exist_ok=True)
+    if not args.handoff_output.exists() or args.handoff_output.read_text(encoding="utf-8") != handoff:
+        args.handoff_output.write_text(handoff, encoding="utf-8")
     print("4LEAF status: " + json.dumps(out["counts"], ensure_ascii=False))
 
 
