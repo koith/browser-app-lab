@@ -196,3 +196,10 @@ html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #board-area>.l
  position:relative!important;
  pointer-events:auto!important;
 }
+
+/* Landscape source-ROLL: transparent hitbox grows, 51px source SPR visual
+ * remains bottom-anchored and unchanged. 74x70 logical at 0.64x =>
+ * >=44 CSS-pixel physical touch target on iPhone landscape. */
+html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #dice-source-roll{
+ height:70px!important;
+}

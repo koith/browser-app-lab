@@ -883,7 +883,7 @@
    b.dataset.room=r.id;b.dataset.permanent=String(!!r.preset);
    b.title=r.name+(r.preset?' · 복원 서버 상설방':'')+' · 입장';
    b.setAttribute('aria-label',r.name+' 채팅방 입장');
-   const position=realRoomPosition(i,rooms.length);
+   const position=realRoomPosition(i,rooms.length,r);
    b.style.left=position.x+'px';b.style.top=position.y+'px';
    const number=document.createElement('span');number.className='social-room-number';
    number.textContent=String(i+1).padStart(2,'0');
@@ -910,12 +910,56 @@
    cells.push({col,row,distance:Math.abs(col-4.5)+2.2*Math.abs(row-9.5)});
   return cells.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.col-b.col);
  })();
- function realRoomPosition(index,total){
-  // WEB-only coordinates: non-overlapping room cards. No 2002 native
-  // ROOM position table has been recovered; avoid claiming exact fidelity.
-  const count=Math.min(liveRoomCells.length,Math.max(1,Number(total)||index+1));
-  const block=liveRoomCells.slice(0,count).sort((a,b)=>a.row-b.row||a.col-b.col);
-  const cell=block[index%block.length];
+ const originalPublicCells=liveRoomCells.slice(0,8).sort((a,b)=>
+  a.row-b.row||a.col-b.col);
+ const stableRoomCells=originalPublicCells.concat(liveRoomCells.filter(cell=>
+  !originalPublicCells.includes(cell)));
+ // Remember WEB-only marker allocations through reloads. The old
+ // index-based renderer moved a user's room whenever newer rooms appeared.
+ // Only custom rooms need storage; the eight canonical slots are fixed.
+ const ROOM_SLOT_STORAGE='leaf_room_map_slots_v1';
+ const roomSlotAssignments=(()=>{
+  const maps=new Map();
+  try{
+   const saved=JSON.parse(localStorage.getItem(ROOM_SLOT_STORAGE)||'{}');
+   for(const [scope,entries] of Object.entries(saved)){
+    if(!entries||typeof entries!=='object'||Array.isArray(entries))continue;
+    const slots=new Map(),used=new Set();
+    for(const [id,n] of Object.entries(entries)){
+     if(id.length>100||!Number.isInteger(n)||n<8||n>=200||used.has(n))continue;
+     slots.set(id,n);used.add(n);
+    }
+    maps.set(scope,slots);
+   }
+  }catch{}
+  return maps;
+ })();
+ function saveRoomMapSlots(){
+  const data=Object.create(null);
+  for(const [scope,slots] of roomSlotAssignments)
+   data[scope]=Object.fromEntries([...slots].filter(([,n])=>n>=8));
+  try{localStorage.setItem(ROOM_SLOT_STORAGE,JSON.stringify(data))}catch{}
+ }
+ function realRoomPosition(index,total,room){
+  const scope=room?room.region+':'+room.district:'';
+  let slots=roomSlotAssignments.get(scope);
+  if(!slots){slots=new Map();roomSlotAssignments.set(scope,slots)}
+  let slot=room&&slots.get(room.id);
+  if(slot===undefined){
+   const preset=room&&/^leaf-public-(north|south)-([0-7])-([0-7])$/.exec(room.id);
+   if(preset&&preset[1]===room.region)slot=Number(preset[3]);
+   else{
+    const used=new Set(slots.values());
+    slot=8;
+    while(slot<stableRoomCells.length&&used.has(slot))slot++;
+    if(slot>=stableRoomCells.length)slot=stableRoomCells.length-1;
+   }
+   if(room){
+    slots.set(room.id,slot);
+    if(!preset)saveRoomMapSlots();
+   }
+  }
+  const cell=stableRoomCells[(slot===undefined?index:slot)%stableRoomCells.length];
   return {x:70+cell.col*130,y:70+cell.row*100};
  }
  function setupRoomMap(){
@@ -930,11 +974,14 @@
   const saved=state.roomMapOffsets[key];
   // Default map viewport must face the EXISTING room markers. Centering
   // the much larger blank estate stranded buttons off-screen on phones.
-  const shown=Math.max(1,plane.querySelectorAll('.social-map-rooms>button').length);
+  const buttons=plane.querySelectorAll('.social-map-rooms>button');
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-  for(let i=0;i<shown;i++){const pos=realRoomPosition(i,shown);
-   minX=Math.min(minX,pos.x);maxX=Math.max(maxX,pos.x+118);
-   minY=Math.min(minY,pos.y);maxY=Math.max(maxY,pos.y+84)}
+  for(const button of buttons){
+   const px=Number.parseFloat(button.style.left)||0,py=Number.parseFloat(button.style.top)||0;
+   minX=Math.min(minX,px);maxX=Math.max(maxX,px+118);
+   minY=Math.min(minY,py);maxY=Math.max(maxY,py+84);
+  }
+  if(!buttons.length){minX=0;maxX=118;minY=0;maxY=84}
   let x=saved?.x??viewport.clientWidth/2-(minX+maxX)/2;
   let y=saved?.y??viewport.clientHeight/2-(minY+maxY)/2;
   const clamp=(v,max)=>Math.max(Math.min(0,v),Math.min(0,max));
@@ -1461,7 +1508,16 @@
   body.innerHTML='<label>방 제목<input name="name" placeholder="방 이름" maxlength="26" required></label><label>배경<select name="background"><option value="2">서재</option><option value="3">클로버 응접실</option><option value="5">벽난로가 있는 방</option><option value="4">햇빛이 드는 방</option><option value="0">숲속 광장</option><option value="1">숲속 오솔길</option></select></label><label>정원<select name="capacity"><option value="12">12명</option><option value="8">8명</option><option value="4">4명</option><option value="2">2명 전용</option></select></label><label>비밀번호 (선택)<input name="password" type="password" maxlength="24" placeholder="비우면 공개방"></label><button type="submit">방 만들기</button>';
   const nameField=body.querySelector('[name="name"]');
   const createButton=body.querySelector('button[type="submit"]');
-  nameField?.addEventListener('input',event=>event.currentTarget.setCustomValidity(''));
+  const createError=document.createElement('p');
+  createError.id='social-create-error';createError.className='social-create-error';
+  createError.setAttribute('role','alert');createError.hidden=true;
+  createError.style.cssText='color:#fff0cf;font:12px/1.45 Gulim,sans-serif;white-space:normal;';
+  body.append(createError);
+  nameField?.setAttribute('aria-describedby',createError.id);
+  nameField?.addEventListener('input',event=>{
+   event.currentTarget.setCustomValidity('');
+   createError.hidden=true;createError.textContent='';
+  });
   // Once CREATE receives a server ACK, retry only JOIN. Never create a
   // second server room or silently substitute a local room for a real one.
   let submitting=false,createdRoom=null,createdPassword='';
@@ -1469,14 +1525,16 @@
    if(nameField){
     nameField.setCustomValidity(message);
     nameField.reportValidity();
-    // Leaving customValidity set blocks submit, defeating the retry button.
+    // Keep retry submission valid while leaving the error visible on screen.
     nameField.setCustomValidity('');
    }
+   createError.textContent=message;createError.hidden=false;
    systemLine(message);
   }
   body.onsubmit=async e=>{
    e.preventDefault();
    if(submitting)return; // double-click/Enter cannot POST two CREATEs
+   createError.hidden=true;createError.textContent='';
    const form=new FormData(body);
    const name=createdRoom?createdRoom.name:safe(form.get('name'),26);
    if(!name)return;

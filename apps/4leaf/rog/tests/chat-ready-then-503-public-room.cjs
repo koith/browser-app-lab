@@ -58,9 +58,13 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   const name=page.locator('#social-modal [name="name"]');
   await name.fill('서버 실패 안내 검증');
   await page.locator('#social-modal button[type="submit"]').click();
-  await page.waitForFunction(()=>document.querySelector('#social-modal [name="name"]')?.validity.customError);
-  assert.match(await name.evaluate(el=>el.validationMessage),/개설 실패/);
+  const error=page.locator('#social-create-error');
+  await error.waitFor({state:'visible',timeout:15000});
+  assert.match(await error.textContent(),/개설 실패/);
+  assert.equal(await name.evaluate(el=>el.validity.customError),false,
+   'error stays visible but cannot disable retry');
   await name.fill('다시 입력하면 수정 가능');
+  assert.equal(await error.isVisible(),false,'editing clears the stale error');
   assert.equal(await name.evaluate(el=>el.validity.customError),false,
    'editing the native owner field must permit retry after a failed server create');
   assert.deepEqual(errs,[]);

@@ -11,7 +11,7 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
 (async()=>{
  const browser=await engine.launch({headless:true,args:engine===chromium?['--no-sandbox']:[]});
  const context=await browser.newContext({
-  viewport:phone?{width:390,height:844}:{width:1280,height:850},
+  viewport:phone?{width:640,height:360}:{width:1280,height:850},
   isMobile:phone,hasTouch:phone,serviceWorkers:'block'});
  const page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
@@ -65,6 +65,8 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
   assert.equal(joined.roomId,'leaf-public-north-0-0');
   assert.ok(joined.bg.includes('/ChatRoom/room'), 'room must use archived ROOM interior, not room list');
   assert.equal(joined.localActors,1,'real own avatar visible in the room');
+  if(phone)assert.equal(await page.locator('#message').isVisible(),true,
+   'real mobile landscape ChatRoom composer must remain usable');
   await page.locator('#message').fill('지도에서 직접 입장한 실제 채팅');
   await page.locator('#chat-form button[type="submit"]').click();
   assert.ok((await page.locator('#chat-log').textContent()).includes('지도에서 직접 입장한 실제 채팅'));

@@ -180,11 +180,15 @@ const assert=require('node:assert/strict');
   assert.ok(await page.locator('#lobby-players .lobby-seat').count()===8,'native PLAYER panel displays eight distinct seats');
   assert.equal(await page.locator('#dice-team-picker').getAttribute('aria-expanded'),'false');
   await page.locator('#dice-team-picker').click();
-  assert.ok(await page.locator('#dice-room-config .team-select').isVisible(),
-   'native SELECT hotspot opens real interactive chessman controls');
+  const realRows=page.locator('#dice-native-owned-chessmen .dice-native-chessman-row');
+  assert.ok(await realRows.first().isVisible(),
+   'native SELECT opens real interactive source chessman rows instead of old hidden HTML overlay');
+  assert.ok(await page.locator('#dice-native-selected-chessmen .dice-native-chessman-row').first().isVisible(),
+   'original four real party source slots remain interactive');
+  assert.equal(await page.locator('#dice-team-picker').getAttribute('aria-expanded'),'true');
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#dice-team-picker').getAttribute('aria-expanded'),'false',
-   'chessman panel closes without concealing recovered client art');
+   'Escape dismisses native SELECT focus without concealing original table');
   await page.screenshot({path:'leaf-dice-native-ready-room.png'});
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#start-game').click();

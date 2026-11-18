@@ -9,7 +9,7 @@ const mobile=process.env.FOURLEAF_MOBILE==='1';
 const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
 (async()=>{
  const browser=await engine.launch({headless:true,args:engine===chromium?['--no-sandbox']:[]});
- const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1280,height:900},
+ const context=await browser.newContext({viewport:mobile?{width:640,height:360}:{width:1280,height:900},
   isMobile:mobile,hasTouch:mobile,serviceWorkers:'block'});
  const page=await context.newPage();const errors=[];
  page.on('pageerror',e=>errors.push(e.stack||String(e)));
