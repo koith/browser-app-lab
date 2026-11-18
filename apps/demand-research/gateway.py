@@ -1056,13 +1056,17 @@ async def _automatic_exclusions():
         return _auto_exclusions["rows"]
     try:
         rows=await asyncio.wait_for(
-            asyncio.to_thread(read_blocks,CloudArchive(REMOTE)),timeout=35)
+            asyncio.to_thread(read_blocks,CloudArchive(REMOTE)),timeout=6)
         _auto_exclusions.update(at=time.monotonic(),rows=rows)
         return rows
     except (TimeoutError,RuntimeError,TypeError,ValueError,AttributeError):
-        # A denied TeraBox read must not erase legitimate nonblocked posts.
-        # Reuse last known verified exclusions, never invent a blank success.
-        return _auto_exclusions["rows"] or []
+        # Unavailable TeraBox must never stall EVERY live feed request for
+        # 35 seconds. Cache a read failure for 90 seconds and retain the last
+        # verified block list. This is not evidence that deletion succeeded.
+        previous=_auto_exclusions["rows"]
+        fallback=previous if previous is not None else []
+        _auto_exclusions.update(at=time.monotonic(),rows=fallback)
+        return fallback
 
 def _owner_auto_archive_mutation(request:Request):
     check_auth(request)  # even DEMAND_PUBLIC_ARCHIVE_MODE cannot bypass POST
