@@ -48,6 +48,16 @@ def replacement_reason(candidate,current):
     if not isinstance(candidate,dict) or not isinstance(current,dict):return None
     if candidate.get('ai_enhanced') and not current.get('ai_enhanced'):return None
     if candidate.get('sha256')==current.get('sha256'):return None
+    # A cleaner sharpness score cannot justify losing actual source pixels.
+    # Compare portrait/landscape sides independently of EXIF orientation.
+    dims=[]
+    for item in (candidate,current):
+        w,h=item.get('width'),item.get('height')
+        if type(w) is not int or type(h) is not int or min(w,h)<1:
+            dims=[];break
+        dims.append(sorted((w,h)))
+    if len(dims)==2 and (dims[0][0]<dims[1][0] or dims[0][1]<dims[1][1]):
+        return None
     forward=optical_pair(candidate,current)
     reverse=optical_pair(current,candidate)
     if forward=='lower' or reverse=='higher':return None

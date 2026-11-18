@@ -46,6 +46,11 @@ def paired_optical_relation(old_file,new_file,old_rotation=0,new_rotation=0):
     """
     old=optical_detail(old_file,old_rotation)
     new=optical_detail(new_file,new_rotation)
+    # Compare decoded, rotated dimensions before a same-scale sharpness
+    # heuristic; otherwise an apparently sharper web thumbnail can win.
+    if (min(new['width'],new['height'])<min(old['width'],old['height'])
+            or max(new['width'],new['height'])<max(old['width'],old['height'])):
+        return 'lower'
     if (new['detail_index']>old['detail_index']*1.28
             and new['high_frequency']>old['high_frequency']+0.45):
         return 'higher'
