@@ -1851,7 +1851,255 @@
           "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
+    },
+    {
+      "id": "djawa-privaty-public-samples",
+      "title": "DJAWA × Yui — Nikke Privaty: Sharp Lesson (public samples)",
+      "source": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/djawa-privaty-public-samples/a685ca9797c949ccc07e.jpg",
+          "sha256": "a685ca9797c949ccc07efab70aca2aa068ed01993c2c476aa96d86e881dfa313",
+          "bytes": 174121,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_cv1-1-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/djawa-privaty-public-samples/19de498572f4bcc79720.jpg",
+          "sha256": "19de498572f4bcc7972067227a5b29978df044b0fcaaeca77c4df67b7d6f2118",
+          "bytes": 177106,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_cv2-1-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/djawa-privaty-public-samples/99c6a74caa1025fb6e08.jpg",
+          "sha256": "99c6a74caa1025fb6e080a9669b0d5c209868744c92d496d103bece5b416e0e1",
+          "bytes": 173799,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_01-4-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/djawa-privaty-public-samples/d011ea6821a5000f9519.jpg",
+          "sha256": "d011ea6821a5000f95197ff6acf7b7dfbac1646dc55b8b6c9b0fc921a41d8500",
+          "bytes": 150414,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_02-4-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 5,
+          "url": "stored-albums/djawa-privaty-public-samples/441191f5172b4b9ddbc0.jpg",
+          "sha256": "441191f5172b4b9ddbc0db253cf8085df9b17bc4d3c134695146c153a96e4035",
+          "bytes": 127413,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_03-4-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 6,
+          "url": "stored-albums/djawa-privaty-public-samples/cddee9cf98b6420a1733.jpg",
+          "sha256": "cddee9cf98b6420a1733fa963e1571ef89fd83fa876988987474e30a543c7536",
+          "bytes": 108214,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_04-4-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 7,
+          "url": "stored-albums/djawa-privaty-public-samples/15d71377195d3942bbf7.jpg",
+          "sha256": "15d71377195d3942bbf707bdc4cc2d15c1cd471b7852833ad6bd6b129353ccab",
+          "bytes": 188424,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_05-4-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 8,
+          "url": "stored-albums/djawa-privaty-public-samples/2593220d2098dc075ec8.jpg",
+          "sha256": "2593220d2098dc075ec89a64ff5117884896b74edf3349060eb37834145653c5",
+          "bytes": 597823,
+          "width": 1800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_06-4.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 9,
+          "url": "stored-albums/djawa-privaty-public-samples/407e4e0339ae4234f2c3.jpg",
+          "sha256": "407e4e0339ae4234f2c30ad63697985fbb44ba239ebc02694a3902d8d6bc016b",
+          "bytes": 650478,
+          "width": 1800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_07-4.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 10,
+          "url": "stored-albums/djawa-privaty-public-samples/3fa43ec39ba230cf4622.jpg",
+          "sha256": "3fa43ec39ba230cf4622c2662ab7a42323bdaf6478610c8fff454b47ba19c337",
+          "bytes": 624251,
+          "width": 1800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_08-3.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 11,
+          "url": "stored-albums/djawa-privaty-public-samples/808b8ec4c6616e9ca642.jpg",
+          "sha256": "808b8ec4c6616e9ca642607733a4ad40f08c6f1a850c57fa5808878ba47947a5",
+          "bytes": 170324,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_09-2-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 12,
+          "url": "stored-albums/djawa-privaty-public-samples/13ed972b67873e3289ca.jpg",
+          "sha256": "13ed972b67873e3289caf6800ba4893cf9b81c6800a1f85b6c93cc0f2d442972",
+          "bytes": 158232,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_10-3-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 13,
+          "url": "stored-albums/djawa-privaty-public-samples/690c202c09245a1e3d89.jpg",
+          "sha256": "690c202c09245a1e3d89eb67b7cdea5b1e5e70b248f5612feafab6101e4f11b4",
+          "bytes": 169822,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_11-3-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 14,
+          "url": "stored-albums/djawa-privaty-public-samples/fc4347d9f9441d265195.jpg",
+          "sha256": "fc4347d9f9441d26519563b0291691561829e440fcb907ed847d4ba769800c54",
+          "bytes": 801565,
+          "width": 1800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_12-2.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 15,
+          "url": "stored-albums/djawa-privaty-public-samples/31b5668d9866ab71e112.jpg",
+          "sha256": "31b5668d9866ab71e1125c33e85783acd98c77b157fd4a9579fe7eec9ef3fda3",
+          "bytes": 695627,
+          "width": 1800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_13-1.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 16,
+          "url": "stored-albums/djawa-privaty-public-samples/bc1bdc5b26f4f17f3fdb.jpg",
+          "sha256": "bc1bdc5b26f4f17f3fdbe16b41908beb29295c8f79ecc3bf3e0f092fcadaefa4",
+          "bytes": 112763,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_14-2-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 17,
+          "url": "stored-albums/djawa-privaty-public-samples/781afaf2f2331abef0a6.jpg",
+          "sha256": "781afaf2f2331abef0a63aa177767b2739a5994442e3998225190fc0df95253e",
+          "bytes": 129870,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_15-1-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 18,
+          "url": "stored-albums/djawa-privaty-public-samples/6b0331d1d5c200f64a6f.jpg",
+          "sha256": "6b0331d1d5c200f64a6fb218de8f961fc0d68908af18c8aeef03bc734b329165",
+          "bytes": 154721,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_16-2-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 19,
+          "url": "stored-albums/djawa-privaty-public-samples/3162c475b738ed275ed3.jpg",
+          "sha256": "3162c475b738ed275ed31070a87a2f6a38ed2d6f35a90639961ce2dc14c77ea7",
+          "bytes": 142625,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_17-1-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 20,
+          "url": "stored-albums/djawa-privaty-public-samples/8993614b73604606393b.jpg",
+          "sha256": "8993614b73604606393b06dfac515316d8b9d69a4b427f19021faa6616ec1e33",
+          "bytes": 171459,
+          "width": 1000,
+          "height": 1500,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_18-2-1000x1500.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
     }
   ],
-  "physical_verified_image_count": 146
+  "physical_verified_image_count": 166
 }
