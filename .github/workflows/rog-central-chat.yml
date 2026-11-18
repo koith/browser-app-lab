@@ -16,8 +16,17 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'apps/4leaf/rog/**'
-      - '.github/workflows/rog-*.yml'
+      - 'apps/4leaf/rog/server/**'
+      - 'apps/4leaf/rog/central-client.js'
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/world-social.css'
+      - 'apps/4leaf/rog/chatroom-native-exit.js'
+      - 'apps/4leaf/rog/chatroom-native-exit.css'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/central-browser.cjs'
+      - 'apps/4leaf/rog/tests/chat-create-join-retry.cjs'
+      - 'apps/4leaf/rog/tests/central-client-recovery.cjs'
+      - '.github/workflows/rog-central-chat.yml'
   workflow_dispatch:
 # Cancel stale checks when a developer pushes another commit to the same PR.
 # Production/main checks remain pinned to their unique SHA and are NEVER cancelled.

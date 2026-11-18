@@ -11,7 +11,7 @@ const pageUrl=process.env.FOURLEAF_TEST_URL||
  'file://'+path.resolve(__dirname,'../index.html');
 async function exercise(browser,mobile){
  const context=await browser.newContext({
-  viewport:mobile?{width:390,height:844}:{width:1280,height:900},
+  viewport:mobile?{width:844,height:390}:{width:1280,height:900},
   isMobile:mobile,hasTouch:mobile,serviceWorkers:'block'
  });
  try{

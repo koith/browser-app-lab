@@ -11,7 +11,7 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
 (async()=>{
  const browser=await engine.launch({headless:true,args:engine===chromium?['--no-sandbox']:[]});
  const context=await browser.newContext({
-  viewport:phone?{width:390,height:844}:{width:1280,height:850},
+  viewport:phone?{width:640,height:360}:{width:1280,height:850},
   isMobile:phone,hasTouch:phone,serviceWorkers:'block'});
  const page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
