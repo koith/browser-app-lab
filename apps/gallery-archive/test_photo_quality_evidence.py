@@ -70,6 +70,16 @@ class OpticalEvidence(unittest.TestCase):
         winner,_=preferred_pair(self.sharp,self.blurred,'0'*64)
         self.assertFalse(winner)
 
+    def test_smaller_sharper_copy_cannot_displace_saved_original(self):
+        previous_sha=hashlib.sha256(self.blurred).hexdigest()
+        evidence=inspect_pair(self.blurred,self.small,previous_sha)
+        self.assertTrue(evidence['same_photo_verified'],evidence)
+        self.assertEqual(evidence['reason'],'decoded_resolution_regression')
+        self.assertEqual(evidence['previous_dimensions'],[900,1350])
+        self.assertEqual(evidence['candidate_dimensions'],[250,375])
+        winner,_=preferred_pair(self.blurred,self.small,previous_sha)
+        self.assertFalse(winner,'A smaller file must not replace the stored original')
+
     def test_unrelated_photo_rejected(self):
         replacement=encoded(Image.new('RGB',(900,1350),'#eecc00'),quality=95)
         result=inspect_pair(self.sharp,replacement,self.oldsha)
