@@ -918,7 +918,32 @@
   a.row-b.row||a.col-b.col);
  const stableRoomCells=originalPublicCells.concat(liveRoomCells.filter(cell=>
   !originalPublicCells.includes(cell)));
- const roomSlotAssignments=new Map();
+ // Remember WEB-only marker allocations through reloads. The old
+ // index-based renderer moved a user's room whenever newer rooms appeared.
+ // Only custom rooms need storage; the eight canonical slots are fixed.
+ const ROOM_SLOT_STORAGE='leaf_room_map_slots_v1';
+ const roomSlotAssignments=(()=>{
+  const maps=new Map();
+  try{
+   const saved=JSON.parse(localStorage.getItem(ROOM_SLOT_STORAGE)||'{}');
+   for(const [scope,entries] of Object.entries(saved)){
+    if(!entries||typeof entries!=='object'||Array.isArray(entries))continue;
+    const slots=new Map(),used=new Set();
+    for(const [id,n] of Object.entries(entries)){
+     if(id.length>100||!Number.isInteger(n)||n<8||n>=200||used.has(n))continue;
+     slots.set(id,n);used.add(n);
+    }
+    maps.set(scope,slots);
+   }
+  }catch{}
+  return maps;
+ })();
+ function saveRoomMapSlots(){
+  const data=Object.create(null);
+  for(const [scope,slots] of roomSlotAssignments)
+   data[scope]=Object.fromEntries([...slots].filter(([,n])=>n>=8));
+  try{localStorage.setItem(ROOM_SLOT_STORAGE,JSON.stringify(data))}catch{}
+ }
  function realRoomPosition(index,total,room){
   const scope=room?room.region+':'+room.district:'';
   let slots=roomSlotAssignments.get(scope);
@@ -933,7 +958,10 @@
     while(slot<stableRoomCells.length&&used.has(slot))slot++;
     if(slot>=stableRoomCells.length)slot=stableRoomCells.length-1;
    }
-   if(room)slots.set(room.id,slot);
+   if(room){
+    slots.set(room.id,slot);
+    if(!preset)saveRoomMapSlots();
+   }
   }
   const cell=stableRoomCells[(slot===undefined?index:slot)%stableRoomCells.length];
   return {x:70+cell.col*130,y:70+cell.row*100};
