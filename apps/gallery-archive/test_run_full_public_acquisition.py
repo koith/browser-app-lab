@@ -158,13 +158,19 @@ class FullAcquisitionTests(unittest.TestCase):
                 stage=stage,source_evidence=None,batch_size=7,
                 max_per_batch=48,bytes_per_batch=36000000,
                 batch_timeout=60,alternate_priority=False,plan_only=False)
+            # Checkpoint priorities can add one-work urgent batches before
+            # normal groups. Exercise an actual multi-work group so a timeout
+            # proves sibling recovery, rather than a harmless single-work retry.
+            groups=work_batches('mimmi',1,ROOT,7)
+            target_batch=next(i for i,group in enumerate(groups)
+                              if i>0 and len(group)>1)
             attempts=[]
             collector_calls=[]
             def fake_run(command,**kwargs):
                 attempts.append(command)
                 if command[1].endswith('direct_photo_pipeline.py'):
                     collector_calls.append(command)
-                    if len(collector_calls)==2:
+                    if len(collector_calls)==target_batch+1:
                         raise subprocess.TimeoutExpired(command, kwargs['timeout'])
                     root=Path(command[command.index('--out')+1])/'metadata'
                     root.mkdir(parents=True,exist_ok=True)
@@ -178,15 +184,15 @@ class FullAcquisitionTests(unittest.TestCase):
                        side_effect=fake_run):
                 self.assertEqual(execute(args),0)
             doc=json.loads((stage/'full-collection-summary.json').read_text())
-            self.assertEqual(doc['timed_out_batches'],[1])
+            self.assertEqual(doc['timed_out_batches'],[target_batch])
             self.assertFalse(doc['collection_complete_without_batch_timeouts'])
             self.assertEqual(doc['state'],'LOCAL_PUBLICATION_STAGED_NOT_DEPLOYED')
             self.assertTrue(doc['collection_all_batches_success'])
             self.assertEqual(doc['incomplete_batch_count'],1)
             census_total=sum(map(len,work_batches('mimmi',1,ROOT,7)))
             self.assertEqual(doc['registered_works_scheduled'],census_total)
-            recovered=doc['batches'][1]['recovery_scheduled_work_ids']
-            self.assertEqual(len(recovered),len(doc['batches'][1]['works']))
+            recovered=doc['batches'][target_batch]['recovery_scheduled_work_ids']
+            self.assertEqual(len(recovered),len(doc['batches'][target_batch]['works']))
             self.assertEqual(doc['single_work_recovery_scheduled'],len(recovered))
             self.assertEqual(doc['single_work_recovery_succeeded'],len(recovered))
             self.assertEqual(doc['registered_works_visited'],census_total)
@@ -196,8 +202,8 @@ class FullAcquisitionTests(unittest.TestCase):
             followups=[row for row in doc['batches'] if row['single_work_recovery']]
             self.assertEqual([row['works'][0] for row in followups],recovered)
             self.assertGreater(len(attempts),2)
-            self.assertEqual(doc['batches'][1]['collector_returncode'],124)
-            self.assertEqual(doc['batches'][1]['collection_error'],'collector_timeout')
+            self.assertEqual(doc['batches'][target_batch]['collector_returncode'],124)
+            self.assertEqual(doc['batches'][target_batch]['collection_error'],'collector_timeout')
 
     def test_fatal_batch_exit_recovers_other_valid_works(self):
         # Rudy²'s malformed duplicate ID previously made seven unrelated
@@ -208,13 +214,18 @@ class FullAcquisitionTests(unittest.TestCase):
                 source_evidence=None,batch_size=7,max_per_batch=48,
                 bytes_per_batch=36000000,batch_timeout=60,
                 alternate_priority=False,plan_only=False)
+            # Test a genuine group, not whichever urgent single-work retry
+            # appears second after a durable incomplete-work checkpoint.
+            groups=work_batches('mimmi',1,ROOT,7)
+            target_batch=next(i for i,group in enumerate(groups)
+                              if i>0 and len(group)>1)
             calls=[]
             def fake_run(command,**kwargs):
                 if command[1].endswith('direct_photo_pipeline.py'):
                     names=[command[i+1] for i,arg in enumerate(command[:-1])
                            if arg=='--album-id']
                     calls.append(names)
-                    if len(calls)==2:
+                    if len(calls)==target_batch+1:
                         return SimpleNamespace(returncode=1)
                     dest=Path(command[command.index('--out')+1])/'metadata'
                     dest.mkdir(parents=True,exist_ok=True)
@@ -231,9 +242,9 @@ class FullAcquisitionTests(unittest.TestCase):
             self.assertEqual(result['registered_work_ids_in_incomplete_batches'],[])
             self.assertEqual(result['registered_works_scheduled'],
                              result['registered_works_visited'])
-            self.assertEqual(result['batches'][1]['collector_returncode'],1)
-            self.assertEqual(len(result['batches'][1]['recovery_scheduled_work_ids']),
-                             len(result['batches'][1]['works']))
+            self.assertEqual(result['batches'][target_batch]['collector_returncode'],1)
+            self.assertEqual(len(result['batches'][target_batch]['recovery_scheduled_work_ids']),
+                             len(result['batches'][target_batch]['works']))
 
     def test_filtered_works_are_incomplete_even_if_batch_returncode_is_zero(self):
         # Previously 47 works were counted as visited even though the
