@@ -1350,6 +1350,18 @@
           "width": 1368,
           "height": 912,
           "number": 63
+        },
+        {
+          "number": 78,
+          "url": "stored-albums/v2ph-actor-a5e78m5a/36d19f3336ef3362d2bd.jpg",
+          "sha256": "36d19f3336ef3362d2bdaf192bd03d7ca3fdb122288fb95e16a0d56b24c6e150",
+          "bytes": 243806,
+          "width": 1200,
+          "height": 1800,
+          "origin_page": "https://everia.club/2023/07/14/mimmi-%EB%B0%88%EB%AF%B8-creamsoda-neko-mimmi/?utm_medium=organic&utm_source=yandexsmartcamera",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -32724,5 +32736,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3233
+  "physical_verified_image_count": 3234
 }
