@@ -35,10 +35,11 @@ jobs:
         run: python -m pip install -r apps/demand-research/requirements-ci.txt
       - name: Compile every Python module and execute all offline contract test files
         shell: bash
+        working-directory: apps/demand-research
         run: |
           set -euo pipefail
-          python -m compileall -q apps/demand-research
-          mapfile -t cases < <(find apps/demand-research -maxdepth 1 \
+          python -m compileall -q .
+          mapfile -t cases < <(find . -maxdepth 1 \
             -name 'test_*.py' ! -name 'test_live_*' ! -name '*browser.py' \
             | sort)
           echo "INTERSECTION_OFFLINE_CONTRACT_FILE_COUNT=${#cases[@]}"
