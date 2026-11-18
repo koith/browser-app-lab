@@ -70,7 +70,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                             'source':src,
                             'proof':entry['proof']}
     added=[];used=0
-    visual_indexes={};same_frame_skipped=[];quality_replacement_deferred=[]
+    visual_indexes={};same_frame_skipped=[];quality_replacement_deferred=[];quality_replacements=[]
     for album in stage_doc.get('albums',[]):
         aid=album.get('id')
         if (not isinstance(aid,str) or
@@ -96,7 +96,7 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
             raw=stage_file.read_bytes()
             if len(raw)!=photo.get('bytes') or hashlib.sha256(raw).hexdigest()!=digest:
                 raise ValueError('staged original physical SHA mismatch')
-            if len(raw)>64_000_000 or used+len(raw)>budget or len(added)>=limit:
+            if len(raw)>64_000_000 or used+len(raw)>budget or len(added)+len(quality_replacements)>=limit:
                 continue
             ext=stage_file.suffix.lower()
             if ext not in ALLOWED_EXT:continue
@@ -118,7 +118,82 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
             if match:
                 row={'album':aid,'sha256':digest,**match}
                 if match['needs_replacement_transaction']:
-                    quality_replacement_deferred.append(row)
+                    # Immutable verified upgrade transaction: only a *local*
+                    # current same-work file can be replaced in the public
+                    # index. The old bytes remain untouched on disk and their
+                    # exact path/hash are retained in the version history.
+                    former=next((p for p in rec['images']
+                        if p.get('sha256')==match['existing_sha256']
+                        and p.get('number')==match['existing_number']),None)
+                    if former is None:
+                        quality_replacement_deferred.append({
+                            **row,'reason':'old_photo_not_in_current_public_index'})
+                        continue
+                    former_path=(base/str(former.get('url',''))).resolve()
+                    if (not former_path.is_relative_to(base.resolve())
+                            or not str(former.get('url','')).startswith('stored-albums/'+aid+'/')
+                            or not former_path.is_file()):
+                        quality_replacement_deferred.append({
+                            **row,'reason':'old_photo_bytes_unavailable'})
+                        continue
+                    previous_raw=former_path.read_bytes()
+                    if hashlib.sha256(previous_raw).hexdigest()!=former['sha256']:
+                        raise ValueError('quality_upgrade_original_sha_readback_failed')
+                    from photo_quality_evidence import preferred_pair
+                    better,evidence=preferred_pair(
+                        previous_raw,raw,former['sha256'],
+                        former.get('watermark_status','unknown'),
+                        photo.get('watermark_status','unknown'))
+                    # Same-frame and REAL visual-quality improvement are
+                    # mandatory. Do not silently swap compressed renditions,
+                    # uncertain matches or unverified watermark claims.
+                    if not (better and evidence.get('same_photo_verified')
+                            and evidence.get('relation')=='higher'):
+                        quality_replacement_deferred.append({
+                            **row,'reason':'verified_visual_upgrade_not_proven'})
+                        continue
+                    rel=f'stored-albums/{aid}/{digest[:20]}{ext}'
+                    dest=base/rel
+                    if dest.exists() and dest.read_bytes()!=raw:
+                        raise ValueError('immutable Pages upgrade collision')
+                    dest.parent.mkdir(parents=True,exist_ok=True)
+                    if not dest.exists():
+                        dest.write_bytes(raw)
+                    # The existing gallery number and album identity remain
+                    # stable. Preserve all historical versions and source
+                    # provenance; never delete the original photo.
+                    prior_history=list(former.get('previous_versions') or [])
+                    prior_history.append({
+                        'sha256':former['sha256'],'url':former['url'],
+                        'bytes':former.get('bytes'),
+                        'width':former.get('width'),'height':former.get('height'),
+                        'quality':former.get('quality'),
+                        'watermark_status':former.get('watermark_status','unknown')})
+                    improved={**former,'sha256':digest,'url':rel,
+                              'bytes':len(raw),'width':photo['width'],
+                              'height':photo['height'],
+                              'quality':'verified_same_frame_optical_upgrade',
+                              'previous_versions':prior_history,
+                              'quality_upgrade_evidence':evidence,
+                              'quality_upgrade_source_url':photo.get('source_url','')}
+                    if photo.get('watermark_status') in (
+                            'verified_none','verified_absent','verified_no_watermark'):
+                        improved['watermark_status']=photo['watermark_status']
+                    for i,existing in enumerate(rec['images']):
+                        if existing is former:
+                            rec['images'][i]=improved
+                            break
+                    visual.remember(improved,raw)
+                    existing_sha.add(digest)
+                    quality_replacements.append({
+                        'album':aid,'number':former['number'],
+                        'previous_sha256':former['sha256'],
+                        'new_sha256':digest,
+                        'previous_bytes':len(previous_raw),
+                        'new_bytes':len(raw),'new_width':photo['width'],
+                        'new_height':photo['height'],
+                        'relation':evidence['relation']})
+                    used+=len(raw)
                 else:
                     same_frame_skipped.append(row)
                 continue
@@ -157,7 +232,28 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
             used+=len(raw)
         if rec['images']:
             byid[aid]=rec
-    if added:
+    if added or quality_replacements:
+        # A configured album cover is SHA pinned. If it depicts the exact
+        # same upgraded cut, rebind it to the improved immutable file in the
+        # same transaction; never leave the public gallery with a stale cover.
+        cover_path=base/'album-covers.json'
+        if quality_replacements and cover_path.is_file():
+            covers=json.loads(cover_path.read_text(encoding='utf-8'))
+            changed=False
+            for upgrade in quality_replacements:
+                cover=(covers.get('covers') or {}).get(upgrade['album'])
+                if (isinstance(cover,dict)
+                        and cover.get('sha256')==upgrade['previous_sha256']
+                        and cover.get('number')==upgrade['number']):
+                    cover['sha256']=upgrade['new_sha256']
+                    cover['width']=upgrade['new_width']
+                    cover['height']=upgrade['new_height']
+                    cover['quality_upgrade_previous_sha256']=upgrade['previous_sha256']
+                    changed=True
+            if changed:
+                cover_path.write_text(
+                    json.dumps(covers,ensure_ascii=False,indent=2)+'\n',
+                    encoding='utf-8')
         old['albums']=list(byid.values())
         # The manifest count must reflect real immutable photo rows, not the
         # stale cached number before newly acquired individual files.
@@ -166,6 +262,8 @@ def publish(model, stage, root=ROOT, budget=14_000_000, limit=18):
                 len(album.get('images',[])) for album in old['albums'])
         old_path.write_text(json.dumps(old,ensure_ascii=False,indent=2)+'\n')
     result={'model':model,'new_sha_verified_originals':len(added),
+       'higher_visual_quality_replacements':len(quality_replacements),
+       'actual_quality_upgrade_evidence':quality_replacements[:25],
        'new_verified_source_work_ids':sorted({aid for aid,sha,n in added
                                              if aid in approved_new}),
        'total_bytes_added':used,'sha_samples':[{'album':a,'sha256':s,'bytes':n} for a,s,n in added],

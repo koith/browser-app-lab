@@ -903,7 +903,8 @@ Promise.all([
   // Never collapse two SHA-distinct saved originals solely because two
   // independent storage indexes reused the same publisher-facing number.
   // Save the physical storage number separately from the gallery number.
-  const merged=SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored]);
+  const merged=SavedGalleryPhotoUnion.hideVerifiedSupersededPhotos(
+    SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored]));
   const joined=MimmiAlbumGrouping.combine(merged,albumAliases,albumAliasEvidence);
   stored=joined.albums;
   rebuildLocalPreviewIndex();

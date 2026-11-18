@@ -26,6 +26,10 @@ on:
       - '.github/workflows/gallery-full-missing-public-collection.yml'
       - 'apps/gallery-archive/run_full_public_acquisition.py'
       - 'apps/gallery-archive/test_run_full_public_acquisition.py'
+      - 'apps/gallery-archive/test_publish_verified_quality_upgrade.py'
+      - 'apps/gallery-archive/test_saved_photo_union.cjs'
+      - 'apps/mimmi-gallery/saved-photo-union.js'
+      - 'apps/yui-gallery/saved-photo-union.js'
       - 'apps/gallery-archive/official_sample_supply.py'
       - 'apps/gallery-archive/test_official_sample_supply.py'
       - 'apps/gallery-archive/inventory_unindexed_owner_files.py'
@@ -69,6 +73,8 @@ jobs:
         run: |
           python -m py_compile apps/gallery-archive/run_full_public_acquisition.py
           python apps/gallery-archive/test_run_full_public_acquisition.py
+          python apps/gallery-archive/test_publish_verified_quality_upgrade.py
+          node apps/gallery-archive/test_saved_photo_union.cjs
           python apps/gallery-archive/test_official_sample_supply.py
           python apps/gallery-archive/test_publisher_completion_undeclared.py
           python apps/gallery-archive/test_inventory_unindexed_owner_files.py
@@ -240,15 +246,26 @@ jobs:
           python apps/gallery-archive/run_full_public_acquisition.py \
             --model "$MODEL" --run-number "$RUN_NUMBER" \
             --stage "$STAGE/photos" --replay-only
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          result=Path(os.environ['STAGE'])/'photos/full-replay-summary.json'
+          if result.is_file():
+              x=json.loads(result.read_text())
+              with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
+                  out.write('- '+x['model']+' new real photos: '+str(x['new_sha_verified_originals'])+
+                            ', verified higher-quality replacements: '+
+                            str(x['higher_visual_quality_replacements'])+'\\n')
+          PY
           node apps/gallery-archive/test_saved_photo_union.cjs
           node apps/gallery-archive/test_curated_cover_manifest.cjs
-          git add "apps/$MODEL-gallery/stored-albums.json" "apps/$MODEL-gallery/stored-albums/"
+          git add "apps/$MODEL-gallery/stored-albums.json" "apps/$MODEL-gallery/stored-albums/" "apps/$MODEL-gallery/album-covers.json"
           if git diff --cached --quiet; then
-            echo "MODEL=$MODEL NEW_VERIFIED_SHA=0 no_unowned_decoded_public_originals" >> "$GITHUB_STEP_SUMMARY"
+            echo "MODEL=$MODEL NEW_VERIFIED_SHA=0 VERIFIED_QUALITY_UPGRADES=0 no_verified_file_changes" >> "$GITHUB_STEP_SUMMARY"
             echo "FULL_COLLECTION_NO_NEW_BYTES model=$MODEL"
             exit 0
           fi
-          git commit -m "feat(gallery): save SHA-verified new $MODEL public photo originals"
+          git commit -m "feat(gallery): publish verified $MODEL new photos and optical quality upgrades"
           for i in 1 2 3; do
             git fetch origin main
             if ! git rebase origin/main; then

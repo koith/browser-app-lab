@@ -22,6 +22,8 @@ class FullAcquisitionTests(unittest.TestCase):
                 seen=[aid for batch in batches for aid in batch]
                 self.assertTrue(set(known).issubset(set(seen)))
                 self.assertEqual(len(seen),len(set(seen)))
+                self.assertNotIn('djawa-rudy%c2%b2-codename-wolfgirl',seen)
+                self.assertTrue(all('%' not in aid for aid in seen))
                 # Full registered-owner census can contain public-source
                 # albums omitted from the smaller public-work-pages manifest.
                 from official_sample_supply import exhausted_official_samples
@@ -174,24 +176,21 @@ class FullAcquisitionTests(unittest.TestCase):
                 return SimpleNamespace(returncode=0)
             with patch('run_full_public_acquisition.subprocess.run',
                        side_effect=fake_run):
-                self.assertEqual(execute(args),4)
+                self.assertEqual(execute(args),0)
             doc=json.loads((stage/'full-collection-summary.json').read_text())
             self.assertEqual(doc['timed_out_batches'],[1])
             self.assertFalse(doc['collection_complete_without_batch_timeouts'])
-            self.assertEqual(doc['state'],'LOCAL_STAGED_PARTIAL_INCOMPLETE_BATCHES')
-            self.assertFalse(doc['collection_all_batches_success'])
+            self.assertEqual(doc['state'],'LOCAL_PUBLICATION_STAGED_NOT_DEPLOYED')
+            self.assertTrue(doc['collection_all_batches_success'])
             self.assertEqual(doc['incomplete_batch_count'],1)
             census_total=sum(map(len,work_batches('mimmi',1,ROOT,7)))
             self.assertEqual(doc['registered_works_scheduled'],census_total)
             recovered=doc['batches'][1]['recovery_scheduled_work_ids']
-            self.assertEqual(len(recovered),3)
-            self.assertEqual(doc['single_work_recovery_scheduled'],3)
-            self.assertEqual(doc['single_work_recovery_succeeded'],3)
-            self.assertEqual(doc['registered_works_visited'],
-                             census_total-len(doc['batches'][1]['works'])+3)
-            self.assertEqual(doc['registered_work_ids_in_incomplete_batches'],
-                             [x for x in doc['batches'][1]['works'] if x not in recovered])
-            self.assertEqual(len(doc['registered_work_ids_in_incomplete_batches']),4)
+            self.assertEqual(len(recovered),len(doc['batches'][1]['works']))
+            self.assertEqual(doc['single_work_recovery_scheduled'],len(recovered))
+            self.assertEqual(doc['single_work_recovery_succeeded'],len(recovered))
+            self.assertEqual(doc['registered_works_visited'],census_total)
+            self.assertEqual(doc['registered_work_ids_in_incomplete_batches'],[])
             # Retrying the timed-out group must use its own bounded per-work
             # timeout, never silently rerun all seven works for 420 seconds.
             followups=[row for row in doc['batches'] if row['single_work_recovery']]
@@ -199,6 +198,42 @@ class FullAcquisitionTests(unittest.TestCase):
             self.assertGreater(len(attempts),2)
             self.assertEqual(doc['batches'][1]['collector_returncode'],124)
             self.assertEqual(doc['batches'][1]['collection_error'],'collector_timeout')
+
+    def test_fatal_batch_exit_recovers_other_valid_works(self):
+        # Rudy²'s malformed duplicate ID previously made seven unrelated
+        # Mimmi albums fail together with no attempts against their sources.
+        with tempfile.TemporaryDirectory() as temporary:
+            stage=Path(temporary)/'stage'
+            args=SimpleNamespace(model='mimmi',run_number=1,stage=stage,
+                source_evidence=None,batch_size=7,max_per_batch=48,
+                bytes_per_batch=36000000,batch_timeout=60,
+                alternate_priority=False,plan_only=False)
+            calls=[]
+            def fake_run(command,**kwargs):
+                if command[1].endswith('direct_photo_pipeline.py'):
+                    names=[command[i+1] for i,arg in enumerate(command[:-1])
+                           if arg=='--album-id']
+                    calls.append(names)
+                    if len(calls)==2:
+                        return SimpleNamespace(returncode=1)
+                    dest=Path(command[command.index('--out')+1])/'metadata'
+                    dest.mkdir(parents=True,exist_ok=True)
+                    (dest/'catalog.json').write_text('{"albums":[]}')
+                else:
+                    dest=Path(command[command.index('--stage')+1])/'metadata'
+                    (dest/'pages-publication.json').write_text(json.dumps({
+                        'new_sha_verified_originals':0,'total_bytes_added':0}))
+                return SimpleNamespace(returncode=0)
+            with patch('run_full_public_acquisition.subprocess.run',
+                       side_effect=fake_run):
+                self.assertEqual(execute(args),0)
+            result=json.loads((stage/'full-collection-summary.json').read_text())
+            self.assertEqual(result['registered_work_ids_in_incomplete_batches'],[])
+            self.assertEqual(result['registered_works_scheduled'],
+                             result['registered_works_visited'])
+            self.assertEqual(result['batches'][1]['collector_returncode'],1)
+            self.assertEqual(len(result['batches'][1]['recovery_scheduled_work_ids']),
+                             len(result['batches'][1]['works']))
 
     def test_filtered_works_are_incomplete_even_if_batch_returncode_is_zero(self):
         # Previously 47 works were counted as visited even though the
