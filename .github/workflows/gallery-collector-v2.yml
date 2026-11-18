@@ -1,0 +1,128 @@
+name: Gallery Collector V2 - Real Photo Pilot
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/collector_v2.py'
+      - 'apps/gallery-archive/test_collector_v2.py'
+      - 'apps/gallery-archive/COLLECTOR-V2.md'
+      - '.github/workflows/gallery-collector-v2.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/collector_v2.py'
+      - 'apps/gallery-archive/test_collector_v2.py'
+      - '.github/workflows/gallery-collector-v2.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: gallery-collector-v2-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --quiet 'Pillow==11.3.0' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
+      - name: Test source boundaries, SQLite queue, real photo SHA and retry
+        run: |
+          python -m py_compile apps/gallery-archive/collector_v2.py
+          python apps/gallery-archive/test_collector_v2.py
+          python apps/gallery-archive/collector_v2.py --model mimmi --stage "$RUNNER_TEMP/v2-test" --max-works 5 --plan-only
+          python apps/gallery-archive/collector_v2.py --model yui --stage "$RUNNER_TEMP/v2-test" --max-works 5 --plan-only
+  real-photo-pilot:
+    needs: offline
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        model: [mimmi, yui]
+    env:
+      MODEL: ${{ matrix.model }}
+      STAGE: /tmp/gallery-collector-v2
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: python -m pip install --quiet 'Pillow==11.3.0' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
+      - name: Acquire real images from exact registered public source pages
+        run: |
+          python apps/gallery-archive/collector_v2.py --model "$MODEL" \
+            --stage "$STAGE" \
+            --state "apps/gallery-archive/verification/collector-v2-$MODEL.json" \
+            --max-works 5 --max-photos 20 --max-pages-per-work 3 --deadline-seconds 600
+      - name: Prove images through independent visual-dedupe and immutable publisher
+        run: |
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py \
+            --model "$MODEL" --stage "$STAGE" --limit 20 --budget 20000000
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          m=os.environ['MODEL']; s=Path(os.environ['STAGE'])/'metadata'
+          discovery=json.loads((s/'collector-v2-report.json').read_text())
+          published=json.loads((s/'pages-publication.json').read_text())
+          summary=(f"## Collector V2 {m}\n"
+                   f"- Distinct SHA staged, not yet gallery success: {discovery['new_physical_sha_staged']}\n"
+                   f"- New physical photos added to Pages files: {published['new_sha_verified_originals']}\n"
+                   f"- Verified visual upgrades: {published['higher_visual_quality_replacements']}\n"
+                   f"- Deployed real browser opening: pending separate QA\n"
+                   f"- Per-work outcomes: {json.dumps(discovery['works'],ensure_ascii=False)}\n")
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write(summary)
+          print(summary,flush=True)
+          PY
+      - name: Persist checkpoint and any gallery originals in one main commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "apps/gallery-archive/verification/collector-v2-$MODEL.json" \
+                  "apps/$MODEL-gallery/stored-albums.json" \
+                  "apps/$MODEL-gallery/stored-albums/" \
+                  "apps/$MODEL-gallery/album-covers.json"
+          if git diff --cached --quiet; then
+            echo "COLLECTOR_V2_NO_CHANGED_FILES model=$MODEL"
+            exit 0
+          fi
+          git commit -m "feat(gallery): persist v2 $MODEL queue and verified originals"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::V2_REBASE_CONFLICT_KEEP_EXISTING_MAIN"
+              exit 1
+            fi
+            if git push origin HEAD:refs/heads/main; then
+              echo "COLLECTOR_V2_MAIN_PERSISTED model=$MODEL sha=$(git rev-parse HEAD)"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::V2_PUSH_EXHAUSTED_NOT_PERSISTED"
+          exit 1
+      - name: Preserve only compact audit, not downloaded photos as CI artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery-collector-v2-${{ matrix.model }}-audit
+          path: |
+            /tmp/gallery-collector-v2/metadata/collector-v2-report.json
+            /tmp/gallery-collector-v2/metadata/pages-publication.json
+          retention-days: 7
+          if-no-files-found: ignore
