@@ -27252,14 +27252,14 @@
           "number": 9
         },
         {
-          "url": "stored-albums/djawa-rei-beyond-the-heart/bde9db82907cf455f5b2.jpg",
+          "url": "stored-albums/djawa-rei-beyond-the-heart/e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1.jpg",
           "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_02-4.jpg",
-          "sha256": "bde9db82907cf455f5b2fc85cb69d81b75afeda155bfe0f951f9df4ddde233fd",
-          "bytes": 265312,
-          "width": 1600,
-          "height": 1066,
+          "sha256": "e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1",
+          "bytes": 555454,
+          "width": 1800,
+          "height": 1200,
           "number": 10,
-          "quality": "verified_same_frame_optical_upgrade",
+          "quality": "same_official_photo_restored_higher_resolution_jpeg_fidelity",
           "previous_versions": [
             {
               "sha256": "bde9db82907cf455f5b2fc85cb69d81b75afeda155bfe0f951f9df4ddde233fd",
@@ -27269,30 +27269,28 @@
               "height": 1066,
               "quality": "verified_same_frame_optical_upgrade",
               "watermark_status": "unknown"
-            },
-            {
-              "sha256": "e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1",
-              "url": "stored-albums/djawa-rei-beyond-the-heart/e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1.jpg",
-              "bytes": 555454,
-              "width": 1800,
-              "height": 1200,
-              "quality": "same_official_photo_restored_higher_resolution_jpeg_fidelity",
-              "watermark_status": "unknown"
             }
           ],
           "quality_upgrade_evidence": {
-            "method": "paired-decoded-pixel-v1",
-            "confidence": "measured",
-            "candidate_sha256": "bde9db82907cf455f5b2fc85cb69d81b75afeda155bfe0f951f9df4ddde233fd",
+            "method": "direct_original_sha256_sof_and_dqt_verified",
             "same_photo_verified": true,
-            "compared_to_sha256": "e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1",
             "relation": "higher",
-            "previous_detail": 0.0279837,
-            "candidate_detail": 0.0339569,
-            "comparison": "same_display_scale_center_detail_noise_suppressed_v1",
-            "limitations": "heuristic sharpness only; inspect fine textures, compression, oversharpening and watermarks before trusting replacement"
+            "candidate_sha256": "e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1",
+            "compared_to_sha256": "bde9db82907cf455f5b2fc85cb69d81b75afeda155bfe0f951f9df4ddde233fd",
+            "verified_resolution_gain": "1600x1066 to 1800x1200",
+            "previous_jpeg_quantization_sums": [
+              537,
+              530
+            ],
+            "candidate_jpeg_quantization_sums": [
+              303,
+              466
+            ],
+            "candidate_bytes": 555454,
+            "previous_bytes": 265312,
+            "limitations": "Resolution and JPEG encoding fidelity verified; previous 1600 sharpness-heuristic variant preserved, no claim of publisher master or complete photobook"
           },
-          "quality_upgrade_source_url": ""
+          "quality_upgrade_source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_02-4.jpg"
         },
         {
           "url": "stored-albums/djawa-rei-beyond-the-heart/f87bab2d3c8b5367472112e003b69bc02cc02e35abd817d0c1e4436614939291.jpg",

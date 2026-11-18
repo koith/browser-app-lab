@@ -5,6 +5,12 @@ on:
       - 'apps/gallery-archive/photo_quality_evidence.py'
       - 'apps/gallery-archive/direct_photo_pipeline.py'
       - 'apps/gallery-archive/test_photo_quality_evidence.py'
+      - 'apps/gallery-archive/test_publish_verified_quality_upgrade.py'
+      - 'apps/yui-gallery/photo_quality_policy.py'
+      - 'apps/yui-gallery/merge_higher_resolution.py'
+      - 'apps/yui-gallery/test_photo_quality_policy.py'
+      - 'apps/yui-gallery/stored-albums.json'
+      - 'apps/mimmi-gallery/stored-albums.json'
       - 'apps/yui-gallery/owner-media.js'
       - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/yui-gallery/image-quality.js'
@@ -17,6 +23,12 @@ on:
       - 'apps/gallery-archive/photo_quality_evidence.py'
       - 'apps/gallery-archive/direct_photo_pipeline.py'
       - 'apps/gallery-archive/test_photo_quality_evidence.py'
+      - 'apps/gallery-archive/test_publish_verified_quality_upgrade.py'
+      - 'apps/yui-gallery/photo_quality_policy.py'
+      - 'apps/yui-gallery/merge_higher_resolution.py'
+      - 'apps/yui-gallery/test_photo_quality_policy.py'
+      - 'apps/yui-gallery/stored-albums.json'
+      - 'apps/mimmi-gallery/stored-albums.json'
       - 'apps/yui-gallery/owner-media.js'
       - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/yui-gallery/image-quality.js'
@@ -42,6 +54,8 @@ jobs:
       - name: Inspect real JPEG pixels and test order of preferences
         run: |
           python apps/gallery-archive/test_photo_quality_evidence.py
+          python apps/gallery-archive/test_publish_verified_quality_upgrade.py
+          python apps/yui-gallery/test_photo_quality_policy.py
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py apps/gallery-archive/photo_quality_evidence.py apps/mimmi-gallery/cloud/gateway/catalog_view.py
           node apps/gallery-archive/test_gallery_visual_quality.cjs
           node apps/gallery-archive/test_quality_same_photo.cjs

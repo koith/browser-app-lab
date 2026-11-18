@@ -21,6 +21,8 @@ on:
       # on the newly approved sites; waiting for the next cron wastes recall.
       - 'apps/gallery-archive/direct_photo_pipeline.py'
       - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
+      - 'apps/gallery-archive/photo_quality_evidence.py'
+      - 'apps/yui-gallery/photo_quality_policy.py'
   pull_request:
     paths:
       - '.github/workflows/gallery-full-missing-public-collection.yml'
@@ -47,6 +49,8 @@ on:
       - 'apps/gallery-archive/source_alias_search.py'
       - 'apps/gallery-archive/direct_photo_pipeline.py'
       - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
+      - 'apps/gallery-archive/photo_quality_evidence.py'
+      - 'apps/yui-gallery/photo_quality_policy.py'
       - 'apps/gallery-archive/test_verified_dynamic_work_publish.py'
       - 'apps/gallery-archive/test_owner_existing_public_source_coverage.py'
       - 'apps/gallery-archive/verified_source_bridge.py'
@@ -76,6 +80,8 @@ jobs:
           python apps/gallery-archive/test_run_full_public_acquisition.py
           python apps/gallery-archive/test_durable_incomplete_resume.py
           python apps/gallery-archive/test_publish_verified_quality_upgrade.py
+          python apps/gallery-archive/test_photo_quality_evidence.py
+          python apps/yui-gallery/test_photo_quality_policy.py
           node apps/gallery-archive/test_saved_photo_union.cjs
           python apps/gallery-archive/test_official_sample_supply.py
           python apps/gallery-archive/test_publisher_completion_undeclared.py

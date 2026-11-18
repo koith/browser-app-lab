@@ -52,6 +52,16 @@ def inspect_pair(previous_raw,candidate_raw,previous_sha):
     if drift>5.0:
         return {'method':'paired-decoded-pixel-v1','confidence':'unverified',
                 'relation':'uncertain','same_photo_verified':False}
+    # A same-frame sharpness heuristic must not remove decoded source pixels.
+    # The model's archive requirement is monotonic: lower-resolution editions
+    # remain historical alternatives, never the displayed original.
+    if (min(b.size)<min(a.size) or max(b.size)<max(a.size)):
+        return {'method':'paired-decoded-pixel-v1','confidence':'measured',
+                'candidate_sha256':real_candidate_sha,
+                'same_photo_verified':True,'compared_to_sha256':previous_sha,
+                'relation':'uncertain','reason':'decoded_resolution_regression',
+                'previous_dimensions':list(a.size),
+                'candidate_dimensions':list(b.size)}
     before,after=_detail(a),_detail(b)
     if max(before,after)<0.001:
         relation='uncertain'

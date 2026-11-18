@@ -3,7 +3,7 @@ import hashlib,json,tempfile
 from pathlib import Path
 from PIL import Image,ImageDraw
 from photo_quality_policy import replacement_reason,watermark_status
-from merge_higher_resolution import merge
+from merge_higher_resolution import merge, paired_optical_relation
 from build_additional_source_manifest import build
 
 with tempfile.TemporaryDirectory() as temp:
@@ -37,6 +37,10 @@ with tempfile.TemporaryDirectory() as temp:
  blocked={**proven,'ai_enhanced':True}
  assert replacement_reason(blocked,cp) is None,'AI enlargement cannot displace original'
  assert replacement_reason(lp,mp) is None
+ lower_claim={**lp,'visual_quality':{**paired,'candidate_sha256':lp['sha256'],
+         'compared_to_sha256':mp['sha256'],'relation':'higher'}}
+ assert replacement_reason(lower_claim,mp) is None,'Lower pixels cannot win even when marked optically higher'
+ assert paired_optical_relation(marked/'photo.png',lower/'photo.png')=='lower', 'Decoded pixel floor'
  assert replacement_reason(mp,cp) is None
  unknown={**mp,'site_watermark_review':{'status':'absent'}}
  assert watermark_status(unknown)=='unknown' and replacement_reason(unknown,mp) is None
