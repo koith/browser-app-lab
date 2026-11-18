@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 from html.parser import HTMLParser
 from urllib.parse import quote, urlsplit
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query, Request, Depends
 from fastapi.responses import JSONResponse, FileResponse, Response
 from demand_archive import CloudArchive, sha256
 import github_temp_bundle
@@ -806,6 +806,25 @@ def bundled_account_picker_row(bundle,account,*,temporary):
             "temporary":bool(temporary),**identity}
 
 
+# VERIFIED 2026-11-18 Render event: 512 MiB OOM-killed the worker when
+# many distinct archive ZIP chains were read simultaneously. Per-account
+# cache locks protect loading, but a finished load stays referenced until
+# each HTTP response finishes. Bound the entire expensive request lifetime.
+# Saturation returns a *truthful* retryable 503, not false missing originals.
+_ARCHIVE_READ_SLOT=threading.BoundedSemaphore(value=1)
+_ARCHIVE_READ_WAIT_SECONDS=5.0
+
+def archive_read_capacity():
+    if not _ARCHIVE_READ_SLOT.acquire(timeout=_ARCHIVE_READ_WAIT_SECONDS):
+        raise HTTPException(status_code=503,
+            detail="Archive capacity busy; retry preserved originals",
+            headers={"Retry-After":"3","Cache-Control":"private, no-store"})
+    try:
+        yield
+    finally:
+        _ARCHIVE_READ_SLOT.release()
+
+
 def create_router(auth):
     # CloudArchive uses blocking rclone subprocesses. FastAPI dispatches these
     # sync GET handlers to its worker pool, keeping health, receipts and queue
@@ -931,7 +950,7 @@ def create_router(auth):
         except (RuntimeError,TypeError,ValueError,KeyError):
             raise HTTPException(502,"Private account index unavailable") from None
 
-    @router.get("/api/account-archives/{account}/backup-status")
+    @router.get("/api/account-archives/{account}/backup-status",dependencies=[Depends(archive_read_capacity)])
     def backup_status(request:Request,account:str):
         auth(request)
         _,_,archive=open_account(account)
@@ -969,7 +988,7 @@ def create_router(auth):
             "full_historical_coverage_guaranteed":False,
         },headers=CACHE_HEADERS)
 
-    @router.get("/api/account-archives/{account}/profile")
+    @router.get("/api/account-archives/{account}/profile",dependencies=[Depends(archive_read_capacity)])
     def profile(request:Request,account:str,
                 snapshot:str=Query("",max_length=80)):
         auth(request)
@@ -980,7 +999,7 @@ def create_router(auth):
         except (RuntimeError,ValueError,TypeError,KeyError):
             raise HTTPException(502,"Archived public profile unavailable") from None
 
-    @router.get("/api/account-archives/{account}/feed")
+    @router.get("/api/account-archives/{account}/feed",dependencies=[Depends(archive_read_capacity)])
     def feed(request:Request,account:str,
                    offset:int=Query(0,ge=0,le=200000),
                    limit:int=Query(20,ge=1,le=50),
@@ -1002,7 +1021,7 @@ def create_router(auth):
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Account history read unavailable") from None
 
-    @router.get("/api/account-archives/{account}/graph/{kind}")
+    @router.get("/api/account-archives/{account}/graph/{kind}",dependencies=[Depends(archive_read_capacity)])
     def graph(request:Request,account:str,kind:str,
                     offset:int=Query(0,ge=0,le=200000),
                     limit:int=Query(50,ge=1,le=100)):
@@ -1016,7 +1035,7 @@ def create_router(auth):
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Public graph archive unavailable") from None
 
-    @router.get("/api/account-archives/{account}/threads/{pid}")
+    @router.get("/api/account-archives/{account}/threads/{pid}",dependencies=[Depends(archive_read_capacity)])
     def thread(request:Request,account:str,pid:str):
         auth(request)
         if not HEX40.fullmatch(pid):
@@ -1043,7 +1062,7 @@ def create_router(auth):
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Public reply archive unavailable") from None
 
-    @router.get("/api/account-archives/{account}/media/{pid}/{index}")
+    @router.get("/api/account-archives/{account}/media/{pid}/{index}",dependencies=[Depends(archive_read_capacity)])
     def post_media(request:Request,account:str,pid:str,index:int):
         auth(request)
         if not HEX40.fullmatch(pid) or index<0 or index>=16:
@@ -1062,7 +1081,7 @@ def create_router(auth):
         except (RuntimeError,ValueError,TypeError):
             raise HTTPException(502,"Original media read unavailable") from None
 
-    @router.get("/api/account-archives/{account}/profile-asset/{kind}")
+    @router.get("/api/account-archives/{account}/profile-asset/{kind}",dependencies=[Depends(archive_read_capacity)])
     def profile_asset(request:Request,account:str,kind:str,
                       snapshot:str=Query("",max_length=80)):
         auth(request)
