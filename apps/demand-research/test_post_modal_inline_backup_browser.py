@@ -31,7 +31,9 @@ TILE_START=INDEX.index("function tile(p){")
 TILE_END=INDEX.index("function appendMedia(",TILE_START)
 TILE_CODE=INDEX[TILE_START:TILE_END]
 DETAIL_START=INDEX.index("function confirmPostAccountAction(")
-DETAIL_END=INDEX.index("function closeDetail(){",DETAIL_START)
+DETAIL_END=INDEX.index("function draw(){",DETAIL_START)
+# Include the REAL production closeDetail implementation in the synthetic
+# browser fixture; omitting it caused a false negative for confirmed blocking.
 POST_DETAIL=INDEX[DETAIL_START:DETAIL_END]
 HARD_BLOCK_START=INDEX.index("const LIVE_HARD_EXCLUDED_PHRASES=")
 HARD_BLOCK_END=INDEX.index("const DAY=",HARD_BLOCK_START)
