@@ -149,6 +149,7 @@ def execute(args):
     source_evidence=Path(args.source_evidence).resolve() if args.source_evidence else None
     reports=[]
     collected=0
+    quality_upgrades=0
     # A seven-work timeout must not permanently strand the other six works.
     # Bounded, one-level single-work followups run only for timed-out groups.
     # The run-number rotates which works get the recovery budget.
@@ -238,6 +239,9 @@ def execute(args):
                     row['new_sha_verified_originals']=publication['new_sha_verified_originals']
                     row['total_bytes_added']=publication['total_bytes_added']
                     collected+=row['new_sha_verified_originals']
+                    row['higher_visual_quality_replacements']=int(
+                        publication.get('higher_visual_quality_replacements',0))
+                    quality_upgrades+=row['higher_visual_quality_replacements']
             except (ValueError,OSError,subprocess.TimeoutExpired) as error:
                 row['publication_error']=type(error).__name__
         reports.append(row)
@@ -274,6 +278,7 @@ def execute(args):
             'single_work_recovery_succeeded':sum(
                 1 for x in reports if x.get('single_work_recovery') and x not in unresolved),
             'batches':reports,'new_local_verified_SHA':collected,
+            'verified_optical_quality_replacements_staged':quality_upgrades,
             'timed_out_batches':timed_out,
             'collection_complete_without_batch_timeouts':not timed_out,
             'collection_all_batches_success':not incomplete_works,
@@ -301,6 +306,7 @@ def execute(args):
             summary.write('- Works in successful batches: '+str(success_count)+'\n')
             summary.write('- Incomplete work IDs: '+(', '.join(incomplete_works) or 'none')+'\n')
             summary.write('- New SHA files staged (not yet Pages verified): '+str(collected)+'\n')
+            summary.write('- Same-frame verified optical replacements staged: '+str(quality_upgrades)+'\n')
             summary.write('- Full collection completed: '+str(not incomplete_works).lower()+'\n\n')
     if success_count==0:
         # Process returncode 0 alone is not a completed collection: it needs
@@ -340,6 +346,7 @@ def replay(model,stage,max_per_batch,bytes_per_batch):
     # Only replay catalogs from successful, SHA-verified publication
     # substeps. A timed-out collector can leave partial catalog files.
     count=0
+    upgrades=0
     for folder in sorted(stage.glob('batch-*')):
         if folder.name not in allowed:
             continue
@@ -347,7 +354,13 @@ def replay(model,stage,max_per_batch,bytes_per_batch):
             continue
         doc=publish(model,folder,root=ROOT,budget=bytes_per_batch,limit=max_per_batch)
         count+=doc['new_sha_verified_originals']
-    print('FULL_COLLECTION_REBASED_MAIN_NEW_SHA',model,count,flush=True)
+        upgrades+=int(doc.get('higher_visual_quality_replacements',0))
+    (stage/'full-replay-summary.json').write_text(json.dumps({
+        'model':model,'new_sha_verified_originals':count,
+        'higher_visual_quality_replacements':upgrades,
+        'real_files_merged_to_working_checkout':count+upgrades},indent=2)+'\n')
+    print('FULL_COLLECTION_REBASED_MAIN_NEW_SHA',model,count,
+          'VERIFIED_QUALITY_UPGRADES',upgrades,flush=True)
     return count
 
 
