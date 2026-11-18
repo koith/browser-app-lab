@@ -233,6 +233,13 @@ def exercise(browser_type,name,width):
                     route.fulfill(status=200,content_type="application/json",
                         body=json.dumps({"accepted":True,"state":"QUEUED_NOT_VERIFIED",
                                          "run_id":123456+len(posts),"receipt":"synthetic-job-receipt-"+str(len(posts))}))
+                elif path in ("/api/auto-archive/purge-account",
+                              "/api/auto-archive/unblock-account"):
+                    action="unblocked" if "unblock" in path else "purged"
+                    route.fulfill(status=200 if host==PRIVATE else 202,
+                        content_type="application/json",
+                        body=json.dumps({"state":action if host==PRIVATE else "pending",
+                                         "deleted_posts":0 if host==PRIVATE else None}))
                 elif path.startswith("/api/target-archive/jobs/"):
                     route.fulfill(status=200,content_type="application/json",
                                   body='{"state":"QUEUED","queued_seconds":1}')
@@ -356,6 +363,10 @@ def exercise(browser_type,name,width):
               modalTop:document.querySelector('#detail').getBoundingClientRect().top
             })""")
             assert scrolled["scroll"]>100,("dialog body did not scroll",scrolled)
+            fixed_height=page.locator("#detail").evaluate(
+                "(d)=>d.getBoundingClientRect().height")
+            assert abs(fixed_height-frame["modalHeight"])<2, (
+                "post popup must remain fixed height for long content",fixed_height,frame)
             # When a short centered dialog grows taller, the browser recenters
             # the modal itself. Header fixation is measured relative to the
             # dialog border, not the changing absolute viewport coordinate.
@@ -446,8 +457,17 @@ def exercise(browser_type,name,width):
             assert page.evaluate("window.__visibleFeed")==["b-1","c-1"],("same author and DID must all disappear",host)
             assert page.evaluate("posts.length")==5,"Blocking must NEVER delete originals"
             assert page.evaluate("JSON.parse(localStorage.getItem(MANUAL_BLOCK_STORAGE_KEY)).length")==1
-            assert modal.get_attribute("open") is not None,"Blocking should not navigate/close detail"
-            assert modal.get_by_role("button",name="이 계정 차단 해제").is_visible()
+            assert modal.get_attribute("open") is None, (
+                "confirmed block must close the original post popup")
+            if host==PRIVATE:
+                page.wait_for_function(
+                    "document.querySelector('#manualBlockStatus')?.textContent?.includes('삭제 검증 완료')",
+                    timeout=10000)
+            else:
+                page.wait_for_function(
+                    "document.querySelector('#manualBlockStatus')?.textContent?.includes('미완료')",
+                    timeout=10000)
+            assert page.evaluate("pendingAutoPurges().length")==(0 if host==PRIVATE else 1)
             # Closing/reopening this modal keeps the exclusion list and
             # dedicated manager exposes a one-click reversible unblock.
             page.evaluate("document.querySelector('#detail').close()")

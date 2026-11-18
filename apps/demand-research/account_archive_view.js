@@ -146,6 +146,25 @@ async function get(path){
   if(!response.ok)throw Error("보관본 조회 실패 (HTTP "+response.status+")");
   return response.json();
 }
+async function loadVerifiedProfileWithRetry(account){
+  // The signed ZIP mirror can briefly return 502/503 while its verified
+  // source is restored. A failed request is never evidence of a missing backup.
+  const delays=[0,1600,3900,7700,15000];
+  for(let attempt=0;attempt<delays.length;attempt++){
+    if(state.account!==account)return null;
+    if(delays[attempt]){
+      await new Promise(resolve=>window.setTimeout(resolve,delays[attempt]));
+      if(state.account!==account)return null;
+    }
+    try{return await get(base()+"/profile");}
+    catch(error){
+      if(!/(?:HTTP (?:502|503|504)|failed to fetch|networkerror)/i.test(
+         String(error?.message||""))||attempt===delays.length-1)throw error;
+      $("profileStatus").textContent="원본 프로필 검증 서버 일시 지연 · 자동 복구 "+(attempt+1)+"/4";
+    }
+  }
+  return null;
+}
 function showMessage(message){results.replaceChildren(node("p","placeholder",message));}
 function setStatus(message){status.textContent=message;}
 function resetProfile(){
@@ -751,10 +770,10 @@ async function nextPage(){
       // read. A bounded retry is better than requiring an operator click;
       // it NEVER treats unverified/failed responses as saved originals.
       const transient=/(?:HTTP (?:502|503|504)|failed to fetch|networkerror)/i.test(message);
-      if(offset===0&&journalSection(selected)&&transient&&state.firstPageRetries<2){
+      if(offset===0&&journalSection(selected)&&transient&&state.firstPageRetries<4){
         const attempt=++state.firstPageRetries;
-        const delay=attempt===1?1300:3300;
-        setStatus("검증된 보관본 읽기 지연 · 자동 재시도 "+attempt+"/2");
+        const delay=[1300,3300,7200,13500][attempt-1];
+        setStatus("검증된 보관본 읽기 지연 · 자동 복구 "+attempt+"/4");
         state.retryTimer=window.setTimeout(()=>{
           state.retryTimer=null;
           if(state.account===selectedAccount&&state.section===selected&&
@@ -796,13 +815,16 @@ async function selectAccount(value){
   // overwrite a newly selected account.
   setTab(state.section);
   try{
-    const profile=await get(base()+"/profile");
-    if(state.account!==value)return;
+    const profile=await loadVerifiedProfileWithRetry(value);
+    if(state.account!==value||profile===null)return;
     renderProfile(profile);
   }catch{
     if(state.account===value){
-      $("displayName").textContent="프로필 저장 상태 미확인";
-      $("profileStatus").textContent="프로필 원격 읽기 실패 · 보관 완료로 간주하지 않음";
+      // Retain the independently signed picker name/handle on a transient error.
+      // Embedded iframe receives a signed account preview from the parent,
+      // but state.accounts may be empty. Never overwrite that visible name
+      // merely because the private source ZIP had a transient 502.
+      $("profileStatus").textContent="원본 프로필 읽기 지연 · 이미지 원본 재확인 필요. 계정을 다시 선택하면 재시도합니다.";
     }
   }
 }

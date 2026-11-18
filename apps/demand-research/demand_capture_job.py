@@ -19,6 +19,7 @@ from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, urlopen, build_opener, HTTPRedirectHandler
 
 from demand_archive import CloudArchive, MIMES, canonical_json, post_key, public_url, sha256
+from auto_archive_purge import read_blocks as read_auto_blocks, matches as matches_auto_block
 from account_index_sources import fetch_public as bluesky_public_search
 
 TERMS = ("뒷계", "섹트", "섹블", "일탈계")
@@ -403,6 +404,18 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         # The archive is unreachable, not necessarily the public SNS source.
         # Continue only with authenticated, short-lived encrypted originals.
         cloud_available=False
+    # A blocked source must NEVER return through the encrypted fallback spool.
+    # If the authoritative exclusion list is unreadable, fail closed rather
+    # than capturing excluded people again under a different storage path.
+    excluded_accounts=[]
+    if cloud_available:
+        try:
+            excluded_accounts=read_auto_blocks(cloud)
+        except (RuntimeError,ValueError,TypeError,AttributeError):
+            raise RuntimeError("Blocked source exclusion verification unavailable") from None
+    # When private cloud is DOWN the existing fast-mode branch may still spool
+    # encrypted, uncommitted observations. It MUST check the block list again
+    # before recovery/publishing to durable automatic archives.
     now = int(clock())
     run_id = run_id or os.getenv("GITHUB_RUN_ID", "")
     if not re.fullmatch(r"[0-9]{6,30}", str(run_id)):
@@ -530,6 +543,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     failures += 1
                     break
                 fetched += 1
+                if any(matches_auto_block(row,account) for account in excluded_accounts):
+                    # Exclude before first-observation, media or encrypted spool.
+                    continue
                 pid = post_key(row["platform"], row["original_id"])
                 if pid in known_ids or pid in known or pid in seen_this_scan:
                     duplicates += 1

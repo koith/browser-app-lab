@@ -12,6 +12,7 @@ import account_index
 import account_index_sources
 import account_groups
 from demand_archive import CloudArchive, QueueStorageDenied
+from auto_archive_purge import identity as auto_block_identity, purge_account, unblock_account, read_blocks, matches as matches_auto_block
 
 from target_archive_api import create_router as create_target_archive_router, dispatch_enabled
 
@@ -1044,6 +1045,86 @@ async def verify_one_account_archive(request:Request):
         data={"state":"READBACK_TIMED_OUT","posts":None,"objects":None}
     return JSONResponse(data,headers={"Cache-Control":"private, no-store"})
 
+
+# The public read-only archive route is intentionally open in public mode.
+# Erasure requests MUST NOT inherit that exception: only the signed owner
+# session may delete automatic originals. Never delete selected-account ZIPs.
+_auto_exclusions={"at":0.0,"rows":None}
+async def _automatic_exclusions():
+    now=time.monotonic()
+    if _auto_exclusions["rows"] is not None and now-_auto_exclusions["at"]<90:
+        return _auto_exclusions["rows"]
+    try:
+        rows=await asyncio.wait_for(
+            asyncio.to_thread(read_blocks,CloudArchive(REMOTE)),timeout=6)
+        _auto_exclusions.update(at=time.monotonic(),rows=rows)
+        return rows
+    except (TimeoutError,RuntimeError,TypeError,ValueError,AttributeError):
+        # Unavailable TeraBox must never stall EVERY live feed request for
+        # 35 seconds. Cache a read failure for 90 seconds and retain the last
+        # verified block list. This is not evidence that deletion succeeded.
+        previous=_auto_exclusions["rows"]
+        fallback=previous if previous is not None else []
+        _auto_exclusions.update(at=time.monotonic(),rows=fallback)
+        return fallback
+
+def _owner_auto_archive_mutation(request:Request):
+    check_auth(request)  # even DEMAND_PUBLIC_ARCHIVE_MODE cannot bypass POST
+    origin=request.headers.get("origin","")
+    own=str(request.base_url).rstrip("/")
+    if origin!=own or request.headers.get("sec-fetch-site","same-origin") not in (
+            "same-origin","none"):
+        raise HTTPException(403,"Same-origin owner confirmation required")
+
+async def _requested_auto_account(request:Request):
+    if "application/json" not in request.headers.get("content-type",""):
+        raise HTTPException(415,"JSON body required")
+    raw=await request.body()
+    if len(raw)>1200:
+        raise HTTPException(413,"Account exclusion payload too large")
+    try:
+        body=json.loads(raw)
+        if not isinstance(body,dict):
+            raise ValueError()
+        return auto_block_identity(body.get("platform"),body.get("profile_url"),
+                                   body.get("author_did",""))
+    except (ValueError,TypeError,KeyError,UnicodeError):
+        raise HTTPException(400,"Invalid source account identifier") from None
+
+@app.post("/api/auto-archive/purge-account",include_in_schema=False)
+async def purge_auto_archive_account(request:Request):
+    _owner_auto_archive_mutation(request)
+    account=await _requested_auto_account(request)
+    try:
+        result=await asyncio.wait_for(
+            asyncio.to_thread(purge_account,CloudArchive(REMOTE),account),
+            timeout=105)
+        _auto_exclusions.update(at=0.0,rows=None)
+        _cache.update(at=0.0,posts=None)
+        return JSONResponse(result,headers={"Cache-Control":"private, no-store"})
+    except (TimeoutError,RuntimeError,ValueError,TypeError):
+        # Unknown provider state and partial erasures must NEVER report done.
+        _auto_exclusions.update(at=0.0,rows=None)
+        return JSONResponse({"state":"pending","deleted_posts":None,
+                             "reason":"remote_erasure_unverified"},
+                            status_code=202,
+                            headers={"Cache-Control":"private, no-store"})
+
+@app.post("/api/auto-archive/unblock-account",include_in_schema=False)
+async def unblock_auto_archive_account(request:Request):
+    _owner_auto_archive_mutation(request)
+    account=await _requested_auto_account(request)
+    try:
+        result=await asyncio.wait_for(
+            asyncio.to_thread(unblock_account,CloudArchive(REMOTE),account),
+            timeout=90)
+        _auto_exclusions.update(at=0.0,rows=None)
+        return JSONResponse(result,headers={"Cache-Control":"private, no-store"})
+    except (TimeoutError,RuntimeError,ValueError,TypeError):
+        return JSONResponse({"state":"pending","reason":"remote_unblock_unverified"},
+                            status_code=202,
+                            headers={"Cache-Control":"private, no-store"})
+
 @app.get("/api/posts")
 async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=60),q:str=Query("",max_length=100),
                      platform:str=Query("",max_length=32),media_status:str=Query("",max_length=16)):
@@ -1053,6 +1134,8 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
     if media_status not in ("","complete","partial"):
         raise HTTPException(400,"Invalid attachment status filter")
     posts=await get_catalog()
+    exclusions=await _automatic_exclusions()
+    if exclusions: posts=[p for p in posts if not any(matches_auto_block(p,block) for block in exclusions)]
     if q: posts=[p for p in posts if q.casefold() in p["text"].casefold()]
     if platform: posts=[p for p in posts if p.get("platform")==platform]
     if media_status:
