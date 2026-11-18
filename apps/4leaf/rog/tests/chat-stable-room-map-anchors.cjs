@@ -46,6 +46,14 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   assert.ok(afterB[b]);
   assert.equal(new Set(Object.values(afterB).map(v=>v.join(','))).size,10,
    'all ten room map hit targets must have unique positions');
+  // Reload can reorder the local room catalogue (newest first). Its marker
+  // coordinates must remain fixed because the assignments are persisted.
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>window.__LEAF_SOCIAL__&&window.__ROG_TEST__);
+  await page.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms')});
+  await page.locator('.social-district-hotspot').nth(3).click();
+  const afterReload=await snapshot();
+  assert.deepEqual(afterReload,afterB,'reload must not reshuffle user-created rooms');
   await page.locator('.social-directory-row[data-room="leaf-public-north-3-0"]').click();
   await page.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='room',null,{timeout:15000});
   await page.locator('#message').fill('기존 방 좌표 유지 후 실제 입장 확인');
