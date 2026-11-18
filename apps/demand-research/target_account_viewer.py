@@ -578,14 +578,29 @@ def create_router(auth):
                         present=index.get(account)
                         # Exact account identity and independently checked
                         # whole ZIP SHA already gate both archive backends.
-                        if (present is not None and bundle.post_count<=
-                                present["posts_verified_in_bundle"]):
-                            continue
                         row=bundled_account_picker_row(bundle,account,
                                                       temporary=False)
+                        # Completeness and profile fidelity are independent:
+                        # the ZIP with more posts may lack a profile snapshot
+                        # that was SHA-verified in the other ZIP. Keep the
+                        # verified nickname/handle even when the larger ZIP
+                        # is selected for post and original-media counts.
+                        if (present is not None and bundle.post_count<=
+                                present["posts_verified_in_bundle"]):
+                            if (row["profile_snapshot_verified"] and
+                                    not present["profile_snapshot_verified"]):
+                                for field in ("display_name","handle",
+                                              "profile_snapshot_verified"):
+                                    present[field]=row[field]
+                            continue
                         if present is None:
                             data.append(row)
                         else:
+                            if (present["profile_snapshot_verified"] and
+                                    not row["profile_snapshot_verified"]):
+                                for field in ("display_name","handle",
+                                              "profile_snapshot_verified"):
+                                    row[field]=present[field]
                             present.update(row)
                         index[account]=present if present is not None else row
             except (RuntimeError,ValueError,TypeError,KeyError,BundleInvalid):
