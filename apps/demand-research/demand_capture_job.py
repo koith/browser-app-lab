@@ -407,12 +407,15 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     # A blocked source must NEVER return through the encrypted fallback spool.
     # If the authoritative exclusion list is unreadable, fail closed rather
     # than capturing excluded people again under a different storage path.
-    if not cloud_available:
-        raise RuntimeError("Blocked source exclusion verification unavailable")
-    try:
-        excluded_accounts=read_auto_blocks(cloud)
-    except (RuntimeError,ValueError,TypeError,AttributeError):
-        raise RuntimeError("Blocked source exclusion verification unavailable") from None
+    excluded_accounts=[]
+    if cloud_available:
+        try:
+            excluded_accounts=read_auto_blocks(cloud)
+        except (RuntimeError,ValueError,TypeError,AttributeError):
+            raise RuntimeError("Blocked source exclusion verification unavailable") from None
+    # When private cloud is DOWN the existing fast-mode branch may still spool
+    # encrypted, uncommitted observations. It MUST check the block list again
+    # before recovery/publishing to durable automatic archives.
     now = int(clock())
     run_id = run_id or os.getenv("GITHUB_RUN_ID", "")
     if not re.fullmatch(r"[0-9]{6,30}", str(run_id)):
