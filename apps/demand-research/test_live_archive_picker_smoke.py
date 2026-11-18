@@ -29,7 +29,7 @@ def inspect_browser(engine,label,width,height):
                    for item in stored),"stored accounts lack verified nickname/id"
         # Main webapp must load account choices before the user clicks
         # a separate "load" button or opens an external GitHub workflow.
-        root=page.goto(BASE+"/?tab=archives",
+        root=page.goto(BASE+"/?tab=archives&mode=accounts",
                        wait_until="domcontentloaded",timeout=180000)
         assert root and root.status==200,"main live webapp unavailable"
         quick=page.locator("#archiveQuickSelect")
@@ -43,7 +43,7 @@ def inspect_browser(engine,label,width,height):
         assert all("https://" not in s and "(@" in s and ")" in s
                    for s in all_labels),"raw URLs or missing nickname(@handle)"
         assert page.locator("#archiveModeAccounts").get_attribute(
-            "aria-selected")=="true","account archive is not the default mode"
+            "aria-selected")=="true","explicit account archive mode did not activate"
         frame=page.locator("#archiveHubFrame")
         page.wait_for_function(
             "() => document.querySelector('#archiveHubFrame')"

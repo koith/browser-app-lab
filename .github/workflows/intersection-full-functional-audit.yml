@@ -1,0 +1,159 @@
+name: INTERSECTION — Comprehensive Functional Regression Audit
+
+# One explicit audit sweep; do not multiply scheduled scans or overwrite
+# immutable private archives. Existing secret-bearing production QA remains
+# in its dedicated scoped workflows.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/intersection-full-functional-audit.yml"
+  pull_request:
+    paths:
+      - ".github/workflows/intersection-full-functional-audit.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intersection-comprehensive-audit-${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
+  cancel-in-progress: false
+
+jobs:
+  python-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned public offline test dependencies
+        run: python -m pip install -r apps/demand-research/requirements-ci.txt
+      - name: Compile every Python module and execute all offline contract test files
+        shell: bash
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          python -m compileall -q .
+          mapfile -t cases < <(find . -maxdepth 1 \
+            -name 'test_*.py' ! -name 'test_live_*' ! -name '*browser.py' \
+            | sort)
+          echo "INTERSECTION_OFFLINE_CONTRACT_FILE_COUNT=${#cases[@]}"
+          test "${#cases[@]}" -ge 30
+          python -m pytest -q "${cases[@]}"
+
+  javascript-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax-check all client scripts and run filter/feed regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          find apps/demand-research -maxdepth 1 -type f \
+            \( -name '*.js' -o -name '*.cjs' \) -print0 \
+            | xargs -0 -r -n1 node --check
+          node apps/demand-research/test_live_keyword_exclusion.js
+          node apps/demand-research/test_live_feed_recovery.cjs
+
+  synthetic-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [archive, navigation]
+        include:
+          - suite: archive
+            files: >-
+              test_account_archive_browser.py
+              test_account_archive_picker_browser.py
+              test_archive_tab_browser.py
+              test_auto_archive_view_browser.py
+              test_target_archive_button_browser.py
+              test_post_modal_inline_backup_browser.py
+          - suite: navigation
+            files: >-
+              test_account_index_search_browser.py
+              test_account_watch_browser.py
+              test_core_navigation_fallback_browser.py
+              test_free_discovery_browser.py
+              test_private_social_browser.py
+              test_tab_reload_browser.py
+              test_watch_migration_browser.py
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned test runner and mobile browser engine
+        run: |
+          python -m pip install -r apps/demand-research/requirements-ci.txt
+          python -m playwright install --with-deps chromium webkit
+      - name: Run every offline desktop/mobile functional browser script in suite
+        shell: bash
+        working-directory: apps/demand-research
+        env:
+          AUDIT_FILES: ${{ matrix.files }}
+        run: |
+          set -euo pipefail
+          count=0
+          for test_file in $AUDIT_FILES; do
+            test -f "$test_file"
+            echo "INTERSECTION_BROWSER_TEST_START=$test_file"
+            timeout 150s python "$test_file"
+            count=$((count+1))
+          done
+          echo "INTERSECTION_SYNTHETIC_BROWSER_FILES_PASS=$count"
+
+  deployed-public-pages:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install real desktop and mobile WebKit engines
+        run: |
+          python -m pip install -r apps/demand-research/requirements-ci.txt
+          python -m playwright install --with-deps chromium webkit
+      - name: Read-only compare actual deployed GitHub Pages bytes and UI
+        run: |
+          cd apps/demand-research
+          timeout 240s python test_deployed_pages_browser.py
+
+  public-source-fallback:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install public-source test runner
+        run: |
+          python -m pip install -r apps/demand-research/requirements-ci.txt
+          python -m playwright install --with-deps chromium webkit
+      - name: Read-only official SNS source and browser fallback checks
+        run: |
+          cd apps/demand-research
+          timeout 240s python test_bsky_search_fallback_live_browser.py
