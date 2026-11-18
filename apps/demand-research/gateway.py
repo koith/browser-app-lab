@@ -1059,7 +1059,7 @@ async def _automatic_exclusions():
             asyncio.to_thread(read_blocks,CloudArchive(REMOTE)),timeout=35)
         _auto_exclusions.update(at=time.monotonic(),rows=rows)
         return rows
-    except (TimeoutError,RuntimeError,TypeError,ValueError):
+    except (TimeoutError,RuntimeError,TypeError,ValueError,AttributeError):
         # A denied TeraBox read must not erase legitimate nonblocked posts.
         # Reuse last known verified exclusions, never invent a blank success.
         return _auto_exclusions["rows"] or []
