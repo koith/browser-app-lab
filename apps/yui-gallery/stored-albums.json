@@ -729,18 +729,6 @@
           "quality": "direct_public_original_bytes_not_publisher_master_verified"
         },
         {
-          "number": 7,
-          "url": "stored-albums/yui-meow-public-samples/376cff9307d7b3e9007f.webp",
-          "sha256": "376cff9307d7b3e9007fee7c3ea5d36d4cbb48b5986965d89d9ab46734b7b972",
-          "bytes": 139738,
-          "width": 1824,
-          "height": 1368,
-          "origin_page": "https://showartx.net/yui-meow/",
-          "source_url": "https://showartx.net/wp-content/uploads/2026/03/Yui_Meow_bn.webp",
-          "quality": "direct_public_original_bytes_not_publisher_master_verified",
-          "numbering_provenance": "archive_append_order_not_publisher_number"
-        },
-        {
           "number": 8,
           "url": "stored-albums/yui-meow-public-samples/4c650c88173d336588ff.webp",
           "sha256": "4c650c88173d336588ffbdadb7ab6872ce014a7688496e061d9e467b42ba7698",
@@ -1865,5 +1853,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 147
+  "physical_verified_image_count": 146
 }

@@ -71,6 +71,9 @@ class CollectorV2Test(unittest.TestCase):
         urls = page_candidates(self.html, self.page)
         self.assertEqual(urls, [self.one, self.two])
         self.assertNotIn("https://bad.example.org/a.jpg", urls)
+        banner = (f'<main><article><img src="https://example.org/Yui_Meow_bn.webp">'
+                  f'<img src="{self.one}"></article></main>').encode()
+        self.assertEqual(page_candidates(banner, self.page), [self.one])
 
     def test_inventory_and_gap(self):
         works, existing = load_inventory(self.root, "mimmi")

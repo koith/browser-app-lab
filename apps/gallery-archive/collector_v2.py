@@ -270,6 +270,11 @@ def page_candidates(raw, origin, max_candidates=160):
         if not isinstance(url, str):
             return
         url = urljoin(origin, unescape(url.strip()))
+        filename = urlsplit(url).path.rsplit("/", 1)[-1].lower()
+        # Promotional graphics are not frames of the publisher's edition.
+        # Keep the source bytes discoverable; exclude them from photo counts.
+        if re.search(r"(?:^|[_-])(bn|banner|flyer|logo|cover)(?:[_.-]|$)", filename):
+            return
         if usable_image_url(url) and url not in seen:
             seen.add(url)
             result.append(url)
