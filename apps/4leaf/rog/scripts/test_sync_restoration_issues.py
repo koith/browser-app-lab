@@ -64,5 +64,25 @@ class LedgerSyncTest(unittest.TestCase):
         self.assertEqual(result["counts"]["total"], 1)
 
 
+    def test_handoff_derived_from_same_issue_snapshot(self):
+        snapshot = sync.convert([
+            issue(10, "P0-CHAT"), issue(11, "M02", "closed", "- 기존 상태: done"),
+            issue(12, "M04", "open", "**원장 상태:** todo")
+        ])
+        handoff = sync.make_handoff(snapshot, {"activeFocus": "P0-CHAT"})
+        self.assertEqual(handoff["counts"], snapshot["counts"])
+        self.assertEqual(handoff["activeFocus"], "P0-CHAT")
+        self.assertEqual({row["id"] for row in handoff["openTasks"]}, {"M04", "P0-CHAT"})
+        self.assertEqual(len(handoff["openTasks"]), snapshot["counts"]["remaining"])
+        self.assertNotIn("events", handoff)
+        self.assertNotIn("currentTail", str(handoff))
+
+    def test_handoff_rejects_stale_completed_focus(self):
+        snapshot = sync.convert([issue(13, "P0-CHAT", "closed", "- 기존 상태: done"),
+                                 issue(14, "M04")])
+        with self.assertRaisesRegex(ValueError, "activeFocus"):
+            sync.make_handoff(snapshot, {"activeFocus": "P0-CHAT"})
+
+
 if __name__ == "__main__":
     unittest.main()
