@@ -1459,40 +1459,77 @@
  function showCreateRoom(){
   const body=document.createElement('form');body.className='social-modal-form';
   body.innerHTML='<label>방 제목<input name="name" placeholder="방 이름" maxlength="26" required></label><label>배경<select name="background"><option value="2">서재</option><option value="3">클로버 응접실</option><option value="5">벽난로가 있는 방</option><option value="4">햇빛이 드는 방</option><option value="0">숲속 광장</option><option value="1">숲속 오솔길</option></select></label><label>정원<select name="capacity"><option value="12">12명</option><option value="8">8명</option><option value="4">4명</option><option value="2">2명 전용</option></select></label><label>비밀번호 (선택)<input name="password" type="password" maxlength="24" placeholder="비우면 공개방"></label><button type="submit">방 만들기</button>';
-  body.querySelector('[name="name"]')?.addEventListener('input',event=>event.currentTarget.setCustomValidity(''));
-  body.onsubmit=async e=>{
-   e.preventDefault();const form=new FormData(body);
-   const name=safe(form.get('name'),26);
-   if(!name)return;
-   const password=safe(form.get('password'),24),salt=password?uuid():'';
-   if(password&&password.length<6){const field=body.querySelector('[name="password"]');field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');field.reportValidity();return}
-   const proof=password?await deriveRoomProof(password,salt):'';
-   if(central.enabled&&central.ready){
-    try{
-     const created=await central.create({name,region:state.region,district:state.district,
-      capacity:allowedCapacity(form.get('capacity')),background:allowedBackground(form.get('background')),password});
-     const room={...centralRoom(created.room),ownerId:tabId,owner:nick()};
-     centralRooms.set(room.id,room);centralCounts.set(room.id,0);
-     await central.join(room.id,password);
-     closePopup();enterRoom(room);presence();return;
-    }catch(error){
-     if(!centralOutage(error)){
-      const failure='채팅방 개설 실패: '+error.message;
-      const nameField=body.querySelector('[name="name"]');
-      nameField.setCustomValidity(failure);nameField.reportValidity();
-      systemLine(failure);return;
-     }
-     systemLine('중앙 서버에 방을 만들지 못했습니다: '+error.message+' · 대신 오프라인 방을 개설합니다.');
-    }
+  const nameField=body.querySelector('[name="name"]');
+  const createButton=body.querySelector('button[type="submit"]');
+  nameField?.addEventListener('input',event=>event.currentTarget.setCustomValidity(''));
+  // Once CREATE receives a server ACK, retry only JOIN. Never create a
+  // second server room or silently substitute a local room for a real one.
+  let submitting=false,createdRoom=null,createdPassword='';
+  function showCreateFailure(message){
+   if(nameField){
+    nameField.setCustomValidity(message);
+    nameField.reportValidity();
+    // Leaving customValidity set blocks submit, defeating the retry button.
+    nameField.setCustomValidity('');
    }
-   const room={id:'leaf-local-'+uuid(),name,region:state.region,district:state.district,owner:nick(),
-    ownerId:tabId,passwordProof:proof,passwordSalt:salt,background:allowedBackground(form.get('background')),capacity:allowedCapacity(form.get('capacity')),created:now()};
-   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});sendRTC({kind:'roomCreated',room});
-   closePopup();if(enterRoom(room,true))systemLine('오프라인 채팅방 개설 완료 · 중앙 서버의 다른 기기에서는 보이지 않습니다.');
+   systemLine(message);
+  }
+  body.onsubmit=async e=>{
+   e.preventDefault();
+   if(submitting)return; // double-click/Enter cannot POST two CREATEs
+   const form=new FormData(body);
+   const name=createdRoom?createdRoom.name:safe(form.get('name'),26);
+   if(!name)return;
+   const password=createdRoom?createdPassword:safe(form.get('password'),24);
+   if(password&&password.length<6){
+    const field=body.querySelector('[name="password"]');
+    field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');
+    field.reportValidity();return;
+   }
+   submitting=true;createButton.disabled=true;
+   try{
+    if(createdRoom||(central.enabled&&central.ready)){
+     try{
+      if(!createdRoom){
+       const result=await central.create({name,region:state.region,district:state.district,
+        capacity:allowedCapacity(form.get('capacity')),background:allowedBackground(form.get('background')),password});
+       createdRoom={...centralRoom(result.room),ownerId:tabId,owner:nick()};
+       createdPassword=password;
+       centralRooms.set(createdRoom.id,createdRoom);centralCounts.set(createdRoom.id,0);
+       body.dataset.serverCreatedRoom=createdRoom.id;
+       createButton.textContent='생성된 방에 다시 입장';
+      }
+      if(!central.ready)await central.connect(nick());
+      await central.join(createdRoom.id,createdPassword);
+      if(!enterRoom(createdRoom))throw Error('서버 입장 확인 실패');
+      closePopup();presence();return;
+     }catch(error){
+      if(createdRoom){
+       showCreateFailure('온라인 방은 만들어졌지만 입장에 실패했습니다: '+error.message+
+        ' · 다시 누르면 기존 방에 재입장합니다.');
+       return;
+      }
+      if(!centralOutage(error)){
+       showCreateFailure('채팅방 개설 실패: '+error.message);
+       return;
+      }
+      systemLine('중앙 서버에 방을 만들지 못했습니다: '+error.message+
+       ' · 대신 오프라인 방을 개설합니다.');
+     }
+    }
+    const salt=password?uuid():'';
+    const proof=password?await deriveRoomProof(password,salt):'';
+    const room={id:'leaf-local-'+uuid(),name,region:state.region,district:state.district,owner:nick(),
+     ownerId:tabId,passwordProof:proof,passwordSalt:salt,background:allowedBackground(form.get('background')),
+     capacity:allowedCapacity(form.get('capacity')),created:now()};
+    state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});sendRTC({kind:'roomCreated',room});
+    closePopup();if(enterRoom(room,true))systemLine('오프라인 채팅방 개설 완료 · 중앙 서버의 다른 기기에서는 보이지 않습니다.');
+   }finally{
+    submitting=false;
+    if(body.isConnected)createButton.disabled=false;
+   }
   };
   popup('새로운 4LEAF 채팅방 개설',body);
-  // Use recovered ChatRoom/ownerdialog.png as a separate original 2002 UI
-  // component, with exactly the same working form and server authority.
   window.__LEAF_NATIVE_OWNER_DIALOG__?.enhance(body);
  }
  async function closeRoom(roomId){
