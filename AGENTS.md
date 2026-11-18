@@ -9,3 +9,7 @@ For Yui/Mimmi gallery tasks (both model folders, shared `apps/gallery-archive/`,
 - Completion requires real saved file/SHA and quality evidence, publication, and actual gallery display. A PR, candidate URL, or passing CI alone is not a photo.
 
 For unrelated apps: do not load gallery-specific materials.
+
+For INTERSECTION / 교집합 / demand-research tasks:
+- Read `apps/demand-research/AGENTS.md` first; it gives a bounded-context handoff, QA gate, and the single current issue reference.
+- Do not preload unrelated repository or conversation histories.
