@@ -19,7 +19,7 @@ stages={
 assert stages['reverse'] < stages['checkpoint'] < stages['sources'] < stages['collect'], stages
 assert 'ALL_OWNER_PHOTO_REVERSE_CURSOR_PERSISTED_AND_READBACK' in workflow
 assert 'SOURCE_ALIAS_SEARCH_UNAVAILABLE' in workflow
-assert 'timeout 420s python apps/gallery-archive/source_alias_search.py' in workflow
+assert 'timeout 540s python apps/gallery-archive/source_alias_search.py' in workflow
 assert 'source_alias_status' in workflow
 assert 'continue_until_exhausted:' in workflow
 print('GALLERY_REVERSE_PROGRESS_DURABLE_BEFORE_OPTIONAL_ALIAS_AND_COLLECTION_PASS',stages)
