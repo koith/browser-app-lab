@@ -8,7 +8,9 @@ const {chromium}=require('playwright');
 const path=require('node:path');
 async function check(browser,mobile){
  const page=await browser.newPage({
-  viewport:mobile?{width:390,height:844}:{width:1280,height:900},
+  // Gameplay is phone-landscape-only; portrait intentionally displays the rotate overlay.
+  // The old portrait test never reached original minipanel tabs at all.
+  viewport:mobile?{width:844,height:390}:{width:1280,height:900},
   deviceScaleFactor:mobile?2:1,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block'
  });
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
