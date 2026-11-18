@@ -1,17 +1,17 @@
 {
-  "schemaVersion": 2,
-  "purpose": "4LEAF 복원 작업의 초경량 대화 인수. 과거 상세 이력은 별도 보존.",
+  "schemaVersion": 3,
+  "purpose": "Small, generated 4LEAF conversation handoff; NOT a second ledger",
   "sourceOfTruth": "GitHub Issues [4LEAF][ID]",
   "statusSnapshot": "apps/4leaf/rog/docs/RESTORATION_STATUS.json",
-  "process": "apps/4leaf/rog/docs/RESTORATION_LEDGER_MANAGEMENT.md",
   "legacyEvidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+  "activeFocus": "P0-CHAT",
   "counts": {
     "total": 60,
-    "done": 43,
-    "in_progress": 16,
+    "done": 44,
+    "in_progress": 15,
     "todo": 1,
     "review_required": 0,
-    "remaining": 17
+    "remaining": 16
   },
   "openTasks": [
     {
@@ -19,127 +19,134 @@
       "issue": 1244,
       "priority": "P0",
       "title": "체스맨 카드 초상화(CardData chm_N) 원본 근거 매핑",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1244"
     },
     {
       "id": "BRD-01",
       "issue": 1238,
       "priority": "P0",
       "title": "카메라 투영·발판 크기 원본 시점 맞춤",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1238"
     },
     {
       "id": "BTL-04",
       "issue": 1239,
       "priority": "P1",
       "title": "전투 발판 원작 실제 공간감·시점 보강",
-      "status": "todo"
+      "status": "todo",
+      "url": "https://github.com/koith/browser-app-lab/issues/1239"
     },
     {
       "id": "DIE-02",
       "issue": 1240,
       "priority": "P0",
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
-      "status": "in_progress"
-    },
-    {
-      "id": "M02",
-      "issue": 1228,
-      "priority": "P1",
-      "title": "켈티카·매직카덴 원작 복원",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1240"
     },
     {
       "id": "M04",
       "issue": 1229,
       "priority": "P0",
       "title": "주잔 DMP·TIS 보드 복원",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1229"
     },
     {
       "id": "M05",
       "issue": 1230,
       "priority": "P0",
       "title": "주잔 창세기전 체스맨 원본 전신",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1230"
     },
     {
       "id": "M06",
       "issue": 1231,
       "priority": "P0",
       "title": "주잔 배틀 원본 발판·시점",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1231"
     },
     {
       "id": "M07",
       "issue": 1232,
       "priority": "P0",
       "title": "주사위 원본 모델·결과별 모션",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1232"
     },
     {
       "id": "M09",
       "issue": 1233,
       "priority": "P0",
       "title": "동일 상태 원본 비교·배포 수용",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1233"
     },
     {
       "id": "P0-CHAT",
       "issue": 1235,
       "priority": "P0",
       "title": "상설 채팅방 원작 화면 정밀 복원",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1235"
     },
     {
       "id": "P0-PODIUM",
       "issue": 1234,
       "priority": "P0",
       "title": "원본 전투 발판·배치 완성",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1234"
     },
     {
       "id": "P0-RELEASE",
       "issue": 1236,
       "priority": "P0",
       "title": "원작 복원 최종 화면·기능 수용 게이트",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1236"
     },
     {
       "id": "RULE-01",
       "issue": 1242,
       "priority": "P0",
       "title": "원작 특수칸·이벤트 데이터 검증",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1242"
     },
     {
       "id": "RULE-02",
       "issue": 1243,
       "priority": "P1",
       "title": "전투·능력·아이템·라운드 원본 예외처리",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1243"
     },
     {
       "id": "SHOP-02",
       "issue": 1241,
       "priority": "P1",
       "title": "구매·판매·GP·장착 카드 원본 룰 검증",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1241"
     },
     {
       "id": "SRC-01",
       "issue": 1237,
       "priority": "P0",
       "title": "리소스 출처·실제 용도 전수 정합",
-      "status": "in_progress"
+      "status": "in_progress",
+      "url": "https://github.com/koith/browser-app-lab/issues/1237"
     }
   ],
-  "priority": "채팅 서버·지역·채널·방·실시간 대화를 최우선 복원. 주잔은 채팅 연계 콘텐츠.",
   "rules": [
-    "대화나 도구 출력으로 구 원장 58만 자·장문 로그·이전 대화 전문을 재전개하지 않는다",
-    "작업 시작 시 상태 스냅샷만 열고, 사실 검증은 해당 GitHub Issue 및 최신 코드를 확인한다",
-    "후속 Issue가 닫혀도 원작 비교·브라우저 검증·배포 증거 없으면 신규 일감 완료로 계산하지 않는다",
-    "실제 신규 완료와 PR/코드 수정·기존 완료 이관은 별도 수치로 보고한다",
-    "필요한 과거 증거만 구 원장에서 제한적으로 조회한다"
+    "Read only this handoff and the focused Issue at session start",
+    "Do not load the 628KB legacy JSON, historical chat, or long CI logs",
+    "A merged PR is not a newly completed restoration task",
+    "Check main, real browsers, original evidence and public Pages before closure"
   ]
 }

@@ -5,7 +5,7 @@
 - **일감의 기준:** [GitHub Issues 검색](https://github.com/koith/browser-app-lab/issues?q=is%3Aissue+%5B4LEAF%5D) — 제목의 `[4LEAF][ID]`를 고유 식별자로 사용
 - **경량 상태:** [RESTORATION_STATUS.json](./RESTORATION_STATUS.json) — 60건의 ID/우선순위/상태/Issue 링크만 유지. 자동 생성이며 **직접 편집 금지**
 - **과거 근거 보관:** [RESTORATION_LEDGER.json](./RESTORATION_LEDGER.json) — 기존 101건 요청·486건 이벤트·상세 검증 증거를 보존한 **레거시 기록물**. 일반 작업 중 전체 파일 조회·이력 추가 금지
-- **새 대화 인수:** [CHAT_HANDOFF_BRIEF.json](./CHAT_HANDOFF_BRIEF.json) — 최소 정보로 작업 재개. 완료 수는 GitHub Issue 및 경량 상태에서 새로 확인
+- **새 대화 인수:** [CHAT_HANDOFF_BRIEF.json](./CHAT_HANDOFF_BRIEF.json) — Issues 상태와 동시 자동 생성되는 초경량 파일. 수치가 어긋나면 GitHub Issue 실시간 상태가 우선. 전체 원장·과거 채팅 전문은 불러오지 않음
 
 원본 60건을 GitHub Issue로 전부 이관: **43건 기존 완료(닫힘), 16건 진행, 1건 시작 전**. 이는 기록 이관이며 새 기능 완료 실적이 아니다.
 
@@ -31,7 +31,7 @@
 
 ## 동기화와 실패 방지
 
-- 생성기: `../scripts/sync_restoration_issues.py` (Python 표준 라이브러리만 사용)
+- 생성기: `../scripts/sync_restoration_issues.py` (STATUS와 HANDOFF를 한 번에 생성) (Python 표준 라이브러리만 사용)
 - 회귀 테스트: `python -m unittest discover -s apps/4leaf/rog/scripts -p test_sync_restoration_issues.py -v`
 - Actions: `.github/workflows/4leaf-restoration-status-sync.yml` — Issue 변경과 워크플로 수동 실행 시 재생성. 주기적 빈 자동 실행 없음
 - 보호: GitHub 검색 결과가 비어 있거나 불완전하면 파일을 덮어쓰지 않음. 기존 ID 누락·중복이 있으면 실패하도록 설정

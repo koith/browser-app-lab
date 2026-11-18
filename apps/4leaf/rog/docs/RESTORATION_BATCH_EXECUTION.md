@@ -2,8 +2,10 @@
 
 This document governs how the assistant and Claude divide independent
 development, avoid one-ticket-at-a-time conversations and close actual
-restoration tasks. The sole authoritative completion source remains
-RESTORATION_LEDGER.json; this policy does not mark any item done.
+restoration tasks. For **new work**, the authoritative completion source is GitHub Issues
+`[4LEAF][ID]`, projected into `RESTORATION_STATUS.json`.
+`RESTORATION_LEDGER.json` is an immutable historical evidence archive.
+This older protocol does not independently mark any item done.
 
 ## User goal and immutable priority
 
@@ -94,7 +96,7 @@ Report once per meaningful batch, not after each minor commit. Always show:
 * Blockers requiring cost/security/credentials/irreversible approval
 * Next batch automatically selected by dependency/priority
 
-The initial 60 ledger tasks (13 done / 47 not done at time of writing)
+The initial 60 ledger tasks (historical 13 done / 47 not done at the time of the old protocol; use live Issues for current counts)
 contain overlapping umbrellas; count is backlog accounting, not a
 scientific measure of actual restoration fidelity. Do not fabricate
 completion percentages or a delivery date without measured throughput.
