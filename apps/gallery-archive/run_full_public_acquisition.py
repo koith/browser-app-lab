@@ -18,10 +18,10 @@ ROOT=Path(__file__).resolve().parents[2]
 ARCHIVE=ROOT/'apps/gallery-archive'
 MAX_REGISTERED_PAGES_PER_WORK=60  # Per-run safety bound, NOT a lifetime or edition-page ceiling
 MAX_CHROMIUM_WEAK_PAGES_PER_BATCH=4
-MAX_RECOVERY_SINGLE_WORKS_PER_RUN=6
-MAX_RECOVERY_PER_TIMEOUT_GROUP=3
-RECOVERY_SINGLE_WORK_TIMEOUT=120
-SLOW_PUBLIC_SOURCE_TIMEOUT=75
+MAX_RECOVERY_SINGLE_WORKS_PER_RUN=14
+MAX_RECOVERY_PER_TIMEOUT_GROUP=7
+RECOVERY_SINGLE_WORK_TIMEOUT=180
+SLOW_PUBLIC_SOURCE_TIMEOUT=180
 PRIORITY={
  'mimmi':(
   'djawa-pop-kitty-party','djawa-nikke-yuni',
@@ -54,6 +54,19 @@ def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=Non
     all_ids=[a['id'] for a in works]
     if len(all_ids)!=len(set(all_ids)):
         raise ValueError('DUPLICATE_PUBLIC_WORK_IDS')
+    # One legacy Rudy² source is indexed under a URL-escaped ID, which the
+    # image collector correctly rejects as an invalid album slug. Map only
+    # this known, exact alias to the existing canonical same-work ID; never
+    # allow a malformed ID to abort the other six registered works.
+    import re
+    known_aliases={'mimmi':{
+        'djawa-rudy%c2%b2-codename-wolfgirl':'djawa-rudy2-codename-wolfgirl'}}
+    def canonical_id(value):
+        if not isinstance(value,str):
+            return None
+        normalized=known_aliases.get(model,{}).get(value,value)
+        return normalized if re.fullmatch(
+            r'[a-z0-9][a-z0-9-]{1,100}',normalized) else None
     # The small public-work-pages manifest is NOT the full owner inventory.
     # The collector itself merges the exhaustive registered corpus. Schedule
     # that same corpus here or the scheduler silently discards owner works
@@ -64,13 +77,15 @@ def work_batches(model, run_number, base=ROOT, batch_size=7, source_evidence=Non
         from direct_photo_pipeline import safe_registered_public_page
         inventory=census(base)
         for row in inventory['targets']:
-            if (row.get('kind')!='work' or row.get('model')!=model
-                    or not isinstance(row.get('id'),str)):
+            if row.get('kind')!='work' or row.get('model')!=model:
+                continue
+            canon=canonical_id(row.get('id'))
+            if not canon:
                 continue
             if (any(safe_registered_public_page(url,model)
                     for url in row.get('urls',[]))
-                    and row['id'] not in all_ids):
-                all_ids.append(row['id'])
+                    and canon not in all_ids):
+                all_ids.append(canon)
     # Every scheduled ID must correspond to an observed, registered edition;
     # unknown search snippets are added only via the proven source bridge.
     # A name-search result alone must never register an album. Require the
@@ -176,7 +191,10 @@ def execute(args):
         row={'batch':index,'works':ids,'collector_returncode':collector_code,
              'single_work_recovery':index>=len(batches),
              'new_sha_verified_originals':0,'total_bytes_added':0}
-        if collection_error=='collector_timeout' and len(ids)>1:
+        # Nonzero exit may come from ONE invalid page/album and must not
+        # strand all the valid works sharing its batch. Recover individually
+        # from both timeout and process errors, with finite per-run limits.
+        if (collector_code!=0 or collection_error) and len(ids)>1:
             available=MAX_RECOVERY_SINGLE_WORKS_PER_RUN-recovery_scheduled
             count=min(available,MAX_RECOVERY_PER_TIMEOUT_GROUP,len(ids))
             if count:
