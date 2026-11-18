@@ -1,10 +1,11 @@
 # Monorepo agent routing
 
-This repository contains unrelated apps. Do not preload other apps' histories, large manifests, or CI logs.
+This repository contains unrelated apps. Do not preload unrelated histories, large manifests, or CI logs.
 
-- For work in `apps/yui-gallery/`: read `apps/yui-gallery/AGENTS.md`.
-- For work in `apps/mimmi-gallery/`: read `apps/mimmi-gallery/AGENTS.md`.
-- For either gallery: also read `docs/gallery-archive/DEVELOPMENT-RUNBOOK.md` before planning or editing. Use only the current body of https://github.com/koith/browser-app-lab/issues/605 for active work; fetch older history or excerpts only when needed for a specific failure.
-- Treat actual stored unique photos, replacement quality, verified deployment, and viewer checks as outcomes. A PR or successful CI alone is not a new photo.
+For Yui/Mimmi gallery tasks (both model folders, shared `apps/gallery-archive/`, and gallery-related workflows):
+- Read `docs/gallery-archive/DEVELOPMENT-RUNBOOK.md` and `apps/gallery-archive/AGENTS.md`.
+- For Yui, also read `apps/yui-gallery/AGENTS.md`; for Mimmi, read `apps/mimmi-gallery/AGENTS.md`.
+- Consult only the current body of https://github.com/koith/browser-app-lab/issues/605 for the active queue. Read historical excerpts only for specific investigations.
+- Completion requires real saved file/SHA and quality evidence, publication, and actual gallery display. A PR, candidate URL, or passing CI alone is not a photo.
 
-For all other apps: do not load or apply gallery-specific guidance.
+For unrelated apps: do not load gallery-specific materials.

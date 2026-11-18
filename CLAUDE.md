@@ -1,5 +1,5 @@
 # Monorepo guidance
 
-For tasks touching `apps/yui-gallery/` or `apps/mimmi-gallery/`, first read that folder's `AGENTS.md` and `docs/gallery-archive/DEVELOPMENT-RUNBOOK.md` from repository root. Use only the current body of issue #605 by default; never preload its historical comments, large manifests, or CI logs.
+When a task involves Yui/Mimmi galleries, including shared `apps/gallery-archive/` and gallery workflows, first read `apps/gallery-archive/AGENTS.md`, the relevant model folder's `AGENTS.md`, and `docs/gallery-archive/DEVELOPMENT-RUNBOOK.md`. Use only the current issue #605 body by default; do not preload past comments or entire manifests.
 
-For all other apps: do not load gallery-specific material.
+Other apps: do not load gallery-specific material.
