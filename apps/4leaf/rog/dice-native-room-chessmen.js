@@ -113,6 +113,14 @@
   if(!owned.contains(document.activeElement))
    picker?.setAttribute('aria-expanded','false');
  });
+ // Escape returns keyboard focus to the source SELECT sprite without
+ // hiding the original chessman table or opening a web-only modal.
+ owned.addEventListener('keydown',event=>{
+  if(event.key!=='Escape')return;
+  event.preventDefault();event.stopPropagation();
+  picker?.setAttribute('aria-expanded','false');
+  picker?.focus();
+ });
  window.addEventListener('leaf-dice-roster-change',render);
  window.addEventListener('leaf-route-change',event=>{
   if(event.detail?.route==='lobby')render();
