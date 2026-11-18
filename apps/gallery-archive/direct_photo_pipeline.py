@@ -402,6 +402,12 @@ def merge_owner_census_sources(books, owner, rows, model, safe_source=None):
             stats['unowned_registered_works_with_source']+=1
         if aid in books:
             book=books[aid]
+            # This work has already been authenticated by its durable owner
+            # manifest and independently registered public sources. Previously
+            # only newly added books received this flag, so the final
+            # reviewed-source filter silently discarded most older albums.
+            if owner_work:
+                book['census_existing_owner']=True
             before=set([book['source']]+book.get('source_pages',[]))
             book['source_pages']=list(dict.fromkeys(
                 list(book.get('source_pages',[]))+verified))
@@ -915,17 +921,24 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 continue
             if aid in books:
                 book=books[aid]
+                already_registered=set([book['source']]+book.get('source_pages',[]))
                 book['source_pages']=list(dict.fromkeys(
                     book.get('source_pages',[])+links))
             else:
+                already_registered=set()
                 held=old_albums.get(aid,{})
                 book={'id':aid,'title':held.get('title') or target.get('title') or aid,
                       'source':links[0],'source_pages':links[1:],
                       'curated_images_only':bool(held),
                       'census_new_work':not bool(held)}
                 books[aid]=book
+            # Reverse search discovery cannot make an already-reviewed owner
+            # source *less* trusted. Re-check only genuinely new candidate
+            # URLs. Preserve hard model+edition identity gates for those new
+            # leads, never a mere search snippet.
+            fresh_leads=[u for u in links if u not in already_registered]
             book['reverse_unverified_pages']=list(dict.fromkeys(
-                book.get('reverse_unverified_pages',[])+links))
+                book.get('reverse_unverified_pages',[])+fresh_leads))
             reverse_counts['reverse_works_with_source']+=1
             reverse_counts['reverse_source_pages_admitted']+=len(links)
     source_scope.update(reverse_counts)

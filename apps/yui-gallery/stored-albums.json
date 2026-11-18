@@ -1699,7 +1699,75 @@
           "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
+    },
+    {
+      "id": "yui-chinokun-illustar-2026-public",
+      "title": "심유이 — 2026 일러스타페스 · 사진가 치노쿤 공개 사진",
+      "source": "https://x.com/chinokun_photo/status/2116593328175333409",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 6,
+          "url": "stored-albums/yui-chinokun-illustar-2026-public/7026125431d6a4f82617.webp",
+          "sha256": "7026125431d6a4f82617bee2f67022c0148b52302fb54b570c82f1c893d00c14",
+          "bytes": 35100,
+          "width": 454,
+          "height": 680,
+          "origin_page": "https://x.com/chinokun_photo/status/2116593328175333409",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 7,
+          "url": "stored-albums/yui-chinokun-illustar-2026-public/085cd4eba7bdfa8c5647.webp",
+          "sha256": "085cd4eba7bdfa8c5647df9a12d8d2d63f7c9a4c18c964134720b6dd98d2031e",
+          "bytes": 25180,
+          "width": 383,
+          "height": 680,
+          "origin_page": "https://x.com/chinokun_photo/status/2116593328175333409",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 8,
+          "url": "stored-albums/yui-chinokun-illustar-2026-public/d989df32d4da531800a8.webp",
+          "sha256": "d989df32d4da531800a8266a1b1e15427cc60323b4a44fbf3f8eecd066e44c55",
+          "bytes": 39852,
+          "width": 510,
+          "height": 680,
+          "origin_page": "https://x.com/chinokun_photo/status/2116593328175333409",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 9,
+          "url": "stored-albums/yui-chinokun-illustar-2026-public/00914a5463410afc311c.webp",
+          "sha256": "00914a5463410afc311c738e3a308c9dc12f923cc47adbb9e02397a121f57e59",
+          "bytes": 32556,
+          "width": 454,
+          "height": 680,
+          "origin_page": "https://x.com/chinokun_photo/status/2116593328175333409",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 10,
+          "url": "stored-albums/yui-chinokun-illustar-2026-public/66b48132abfb7c8e3d72.jpg",
+          "sha256": "66b48132abfb7c8e3d72dd44bdb0a0eb3be5ebfac20e254a589d3d5c1e461197",
+          "bytes": 28124,
+          "width": 400,
+          "height": 400,
+          "origin_page": "https://x.com/chinokun_photo/status/2116593328175333409",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
     }
   ],
-  "physical_verified_image_count": 134
+  "physical_verified_image_count": 139
 }

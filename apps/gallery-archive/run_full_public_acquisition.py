@@ -190,6 +190,25 @@ def execute(args):
         if collector_code==0 and not catalog.is_file():
             row['collection_error']='missing_finalized_stage_catalog'
         if collector_code==0 and catalog.is_file():
+            # A finalized catalogue does not mean every requested edition was
+            # actually scanned. The collector can filter out works while
+            # returning 0. Keep any valid staged files publishable, but do
+            # not count filtered works as completed.
+            audit_path=target/'metadata/collection-audit.json'
+            if audit_path.is_file():
+                try:
+                    detail=json.loads(audit_path.read_text(encoding='utf-8'))
+                    verified_ids={v.get('id') for v in detail.get('results',[])
+                                  if isinstance(v,dict)}
+                    row['unvisited_registered_work_ids']=[
+                        aid for aid in ids if aid not in verified_ids]
+                    row['work_ids_with_media_candidates']=[
+                        v['id'] for v in detail.get('results',[])
+                        if isinstance(v,dict) and v.get('id') in ids
+                        and int(v.get('published_image_candidates') or 0)>0]
+                except (OSError,ValueError,TypeError) as exc:
+                    row['unvisited_registered_work_ids']=list(ids)
+                    row['coverage_error']='invalid_collector_audit_'+type(exc).__name__
             try:
                 proc=subprocess.run([sys.executable,str(ARCHIVE/'publish_new_public_photos_to_pages.py'),
                     '--model',args.model,'--stage',str(target),
@@ -213,7 +232,9 @@ def execute(args):
     # A failed multi-work batch may have partially recovered via successful
     # individually audited followups. Count unique work IDs, never attempts.
     scheduled=list(dict.fromkeys(aid for group in batches for aid in group))
-    successes={aid for row in reports if row not in unresolved for aid in row['works']}
+    successes={aid for row in reports if row not in unresolved
+               for aid in row['works']
+               if aid not in row.get('unvisited_registered_work_ids',[])}
     incomplete_works=[aid for aid in scheduled if aid not in successes]
     success_count=len(successes)
     # "Scheduled" is NOT the same as "collected": a timed-out group may
@@ -224,6 +245,12 @@ def execute(args):
             'registered_works_visited':success_count,
             'registered_works_in_successful_batches':success_count,
             'registered_work_ids_in_incomplete_batches':incomplete_works,
+            'works_with_real_image_candidates':len(set(
+                aid for row in reports
+                for aid in row.get('work_ids_with_media_candidates',[]))),
+            'source_filtered_or_unvisited_work_ids':sorted(set(
+                aid for row in reports
+                for aid in row.get('unvisited_registered_work_ids',[]))),
             'incomplete_batch_count':len(unresolved),
             'single_work_recovery_scheduled':recovery_scheduled,
             'single_work_recovery_succeeded':sum(

@@ -200,6 +200,42 @@ class FullAcquisitionTests(unittest.TestCase):
             self.assertEqual(doc['batches'][1]['collector_returncode'],124)
             self.assertEqual(doc['batches'][1]['collection_error'],'collector_timeout')
 
+    def test_filtered_works_are_incomplete_even_if_batch_returncode_is_zero(self):
+        # Previously 47 works were counted as visited even though the
+        # reviewed-source gate admitted only 22. The photos from any good
+        # sub-work must remain publishable despite this truthful failure.
+        with tempfile.TemporaryDirectory() as tmp:
+            stage=Path(tmp)
+            args=SimpleNamespace(model='yui',run_number=1,
+                stage=stage,source_evidence=None,batch_size=7,
+                max_per_batch=48,bytes_per_batch=36000000,
+                batch_timeout=60,alternate_priority=False,plan_only=False)
+            def fake_run(command,**kwargs):
+                if command[1].endswith('direct_photo_pipeline.py'):
+                    batch=Path(command[command.index('--out')+1])/'metadata'
+                    batch.mkdir(parents=True,exist_ok=True)
+                    (batch/'catalog.json').write_text('{"albums":[]}')
+                    chosen=[command[i+1] for i,v in enumerate(command[:-1])
+                            if v=='--album-id']
+                    (batch/'collection-audit.json').write_text(json.dumps({
+                        'model':'yui','results':[
+                            {'id':chosen[0],'published_image_candidates':3}]
+                    }))
+                else:
+                    batch=Path(command[command.index('--stage')+1])/'metadata'
+                    (batch/'pages-publication.json').write_text(json.dumps({
+                        'new_sha_verified_originals':0,'total_bytes_added':0}))
+                return SimpleNamespace(returncode=0)
+            with patch('run_full_public_acquisition.subprocess.run',
+                       side_effect=fake_run):
+                self.assertEqual(execute(args),4)
+            summary=json.loads((stage/'full-collection-summary.json').read_text())
+            self.assertFalse(summary['collection_all_batches_success'])
+            self.assertGreater(len(summary['source_filtered_or_unvisited_work_ids']),0)
+            self.assertGreater(summary['works_with_real_image_candidates'],0)
+            self.assertLess(summary['registered_works_visited'],
+                            summary['registered_works_scheduled'])
+
     def test_success_exit_without_finalized_catalog_is_not_photo_acquisition(self):
         with tempfile.TemporaryDirectory() as temporary:
             stage=Path(temporary)
