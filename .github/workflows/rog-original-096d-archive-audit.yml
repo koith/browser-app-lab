@@ -62,6 +62,57 @@ jobs:
             echo "ARCHIVE_LIST_FAIL: split archive type/password/damage must be inspected."
             tail -60 "$GITHUB_WORKSPACE/leaf-096d-archive-list.txt" || true
           fi
+      - name: Inspect complete original InstallShield client payload without executing binaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/leaf096d
+          if ! [ -f 4Leaf096d.part7.rar ]; then
+            echo 'Original seven-part archive unavailable; stop at availability metadata.'
+            exit 0
+          fi
+          mkdir -p original-installer
+          7z x -y -ooriginal-installer 4Leaf096d.part1.rar >/tmp/leaf096d/7zip-extract.log
+          echo 'Seven-volume RAR extracted; actual 2003 InstallShield data CAB:'
+          ls -lh original-installer/data1.cab
+          file original-installer/data1.cab
+          if ! command -v unshield >/dev/null; then
+            sudo apt-get -qq update
+            sudo apt-get -qq install -y unshield
+          fi
+          if ! unshield l original-installer/data1.cab > "$GITHUB_WORKSPACE/leaf-096d-cab-inventory.txt" 2>&1; then
+            echo 'InstallShield CAB not parseable with unshield. Exact diagnostic:'
+            tail -70 "$GITHUB_WORKSPACE/leaf-096d-cab-inventory.txt"
+            exit 0
+          fi
+          echo 'INSTALLSHIELD_SOURCE_INVENTORY_PASS'
+          echo 'Targeted asset names in original client (source listing):'
+          grep -Ei '(ChatTown|ChatRoom|Map|Room|Dice|\\.pak|\\.mve|\\.obs|\\.chr|\\.dmp|\\.dll|\\.exe)'             "$GITHUB_WORKSPACE/leaf-096d-cab-inventory.txt" | head -130 || true
+          mkdir -p source-client
+          if ! unshield -d source-client x original-installer/data1.cab > /tmp/leaf096d/unshield-extract.log 2>&1; then
+            echo 'InstallShield file extraction incomplete; leave originals untouched.'
+            tail -80 /tmp/leaf096d/unshield-extract.log
+            exit 0
+          fi
+          echo 'INSTALLSHIELD_ORIGINAL_CLIENT_EXTRACT_PASS'
+          find source-client -type f -print0 | sort -z |
+            xargs -0 -r sha256sum > "$GITHUB_WORKSPACE/leaf-096d-file-sha256.txt"
+          find source-client -type f -printf '%p\t%s bytes\n' |
+            sort > "$GITHUB_WORKSPACE/leaf-096d-file-sizes.tsv"
+          echo "File count: $(find source-client -type f | wc -l)"
+          echo 'Potential original .PAK/.EXE/.DLL or 3D file types:'
+          grep -Ei '\\.(pak|exe|dll|dmp|mve|obs|chr|tis|spr|mesh|bin)[[:space:]]'             "$GITHUB_WORKSPACE/leaf-096d-file-sizes.tsv" | head -100 || true
+      - name: Upload original client resource inventory only (no binaries)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fourleaf-096d-original-resource-census
+          path: |
+            leaf-096d-cab-inventory.txt
+            leaf-096d-file-sha256.txt
+            leaf-096d-file-sizes.tsv
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Upload public file inventory only, not copyrighted binaries
         if: always()
         uses: actions/upload-artifact@v4
