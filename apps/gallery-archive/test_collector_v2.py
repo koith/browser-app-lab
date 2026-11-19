@@ -46,11 +46,11 @@ class CollectorV2Test(unittest.TestCase):
         for name in ("owner-index.json", "stored-albums.json"):
             (self.base / name).write_text(json.dumps(
                 {"albums": [{"id": self.work, "images": []}]}))
-        im = Image.effect_noise((800, 600), 100).convert("RGB")
+        im = Image.effect_noise((1200, 900), 100).convert("RGB")
         buf = BytesIO()
         im.save(buf, "JPEG", quality=91)
         self.first_bytes = buf.getvalue()
-        second = Image.effect_noise((800, 600), 150).convert("RGB")
+        second = Image.effect_noise((1200, 900), 150).convert("RGB")
         buf = BytesIO()
         second.save(buf, "JPEG", quality=91)
         self.second_bytes = buf.getvalue()
@@ -98,7 +98,7 @@ class CollectorV2Test(unittest.TestCase):
             raw = (stage / item["key"]).read_bytes()
             self.assertEqual(hashlib.sha256(raw).hexdigest(), item["sha256"])
             self.assertEqual(len(raw), item["bytes"])
-            self.assertEqual((item["width"], item["height"]), (800, 600))
+            self.assertEqual((item["width"], item["height"]), (1200, 900))
         self.assertTrue(state.is_file())
         repeat = collect(self.root, "mimmi", self.root / "next", state,
                          max_works=2, max_photos=4, http=http, now=100010.0)
@@ -244,6 +244,37 @@ class CollectorV2Test(unittest.TestCase):
                          state, http=fake, now=100000.0 + 86401)
         self.assertEqual(first["new_physical_sha_staged"], 1)
         self.assertEqual(second["new_physical_sha_staged"], 1)
+
+    def test_small_site_card_rejected_before_staging(self):
+        small = Image.new("RGB", (600, 800), (30, 50, 80))
+        buffer = BytesIO()
+        small.save(buffer, "JPEG", quality=90)
+        with self.assertRaises(DownloadFailure) as ctx:
+            inspect_photo(buffer.getvalue())
+        self.assertEqual(ctx.exception.code, "invalid_photo_dimensions")
+        poster = ("https://images.example.org/"
+                  "DJAWA-Photo-Mimmi-Realise-Loveliness-PixiBB.jpg")
+        self.assertEqual(page_candidates(
+            (f'<main><article><h1>Pop Kitty Party</h1>'
+             f'<img src="{poster}"><img src="{self.one}"></article></main>').encode(),
+            self.page), [self.one])
+
+    def test_missing_count_ranks_ahead_of_complete_public_source(self):
+        complete = "v2ph-actor-z7exoo5z"
+        (self.base / "public-work-pages.json").write_text(json.dumps({"albums": [
+            {"id": complete, "title": "White", "source":
+                "https://example.org/photos/mimmi-white/", "priority": 0,
+             "advertised_photos": 1},
+            {"id": "djawa-blossom-reverie", "title": "Blossom Reverie",
+             "source": "https://example.org/photos/blossom/", "priority": 99,
+             "advertised_photos": 123}]}))
+        (self.base / "owner-index.json").write_text(json.dumps({"albums": [
+            {"id": complete, "images": [{"sha256": hashlib.sha256(
+                self.first_bytes).hexdigest()}]}]}))
+        works, _ = load_inventory(self.root, "mimmi")
+        self.assertEqual(works[0]["id"], "djawa-blossom-reverie")
+        self.assertEqual(works[0]["gap"], 123)
+        self.assertEqual(works[1]["gap"], 0)
 
     def test_bad_photo_does_not_become_sha(self):
         with self.assertRaises(DownloadFailure):

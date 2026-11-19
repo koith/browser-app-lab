@@ -126,7 +126,12 @@ def load_inventory(root, model):
                       "gap": max(0, expected - len(counts[aid])) if expected else None,
                       "missing_lower_bound_by_sha": max(0, expected - len(counts[aid]))
                           if expected else None})
-    works.sort(key=lambda a: (a["priority"], -(a["gap"] or 0), a["id"]))
+    # Missing published cuts first, then unknown totals, finally albums whose
+    # recorded SHA count already reaches their source-claimed public count.
+    works.sort(key=lambda a: (
+        0 if a["gap"] is not None and a["gap"] > 0 else
+        1 if a["gap"] is None else 2,
+        a["priority"], -(a["gap"] or 0), a["id"]))
     return works, known
 
 
@@ -291,7 +296,7 @@ def page_candidates(raw, origin, max_candidates=160):
         filename = urlsplit(url).path.rsplit("/", 1)[-1].lower()
         # Promotional graphics are not frames of the publisher's edition.
         # Keep the source bytes discoverable; exclude them from photo counts.
-        if re.search(r"(?:^|[_-])(bn|banner|flyer|logo|cover)(?:[_.-]|$)", filename):
+        if re.search(r"(?:^|[_-])(bn|banner|flyer|logo|cover|poster|pixibb)(?:[_.-]|$)", filename):
             return
         if usable_image_url(url) and url not in seen:
             seen.add(url)
@@ -324,7 +329,9 @@ def inspect_photo(raw):
             w, h = img.size
     except (OSError, ValueError, Image.DecompressionBombError) as exc:
         raise DownloadFailure("invalid_decoded_photo") from exc
-    if fmt not in ("JPEG", "PNG", "WEBP") or min(w, h) < 300 or w * h > 100000000:
+    # Reject third-party 512px cards and 600x800 site posters, not real
+    # publisher-quality source photos. Never count small cards as new cuts.
+    if fmt not in ("JPEG", "PNG", "WEBP") or min(w, h) < 900 or w * h > 100000000:
         raise DownloadFailure("invalid_photo_dimensions")
     return {"sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw),
             "width": w, "height": h,
