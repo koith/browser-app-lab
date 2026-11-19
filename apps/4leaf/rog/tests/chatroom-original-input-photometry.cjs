@@ -114,7 +114,11 @@ const {chromium}=require('playwright');
   const continued=await page.evaluate(()=>{
    const transcript=document.getElementById('chat-log');
    const scroll=window.__LEAF_NATIVE_SCROLLBAR__.getState();
-   const bubble=document.querySelector('#social-avatar-layer .social-avatar.self .social-speech');
+   // The room screen paints balloons in one speech layer above every avatar
+   // (chatroom-screen.js), keyed by the speaker's peer id.
+   const selfPeer=document.querySelector('#social-avatar-layer .social-avatar.self')?.dataset.peer;
+   const bubble=[...document.querySelectorAll('#social-avatar-layer .leaf-speech-layer>.social-speech')]
+    .find(b=>b.dataset.peer===selfPeer);
    return {
     messages:[...transcript.querySelectorAll('.social-chat-message')].length,
     last:transcript.lastElementChild?.textContent,

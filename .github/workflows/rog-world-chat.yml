@@ -55,8 +55,9 @@ on:
       - 'apps/4leaf/rog/world-social.css'
       - 'apps/4leaf/rog/chatroom-native-exit.js'
       - 'apps/4leaf/rog/chatroom-native-2004-frame.css'
-      - 'apps/4leaf/rog/chatroom-native-talkbox.js'
-      - 'apps/4leaf/rog/chatroom-native-talkbox.css'
+      - 'apps/4leaf/rog/chatroom-screen.js'
+      - 'apps/4leaf/rog/chatroom-screen.css'
+      - 'apps/4leaf/rog/tests/p0-chat-two-browser-flow.cjs'
       - 'apps/4leaf/rog/chatroom-native-ringbtn.css'
       - 'apps/4leaf/rog/registry-native-avatar-dialog.js'
       - 'apps/4leaf/rog/registry-native-avatar-dialog.css'
@@ -163,6 +164,11 @@ jobs:
             cat /tmp/4leaf-http.log
             exit 1
           fi
+      - name: P0 CHAT real two independent Chromium browsers - CREATE, join, message, exit and rejoin
+        env:
+          FOURLEAF_BROWSER: chromium
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/p0-chat-two-browser-flow.cjs
       # Run the real game resume/AI consent regression before 40+ slower browser scenarios.
       # A previous failing run waited 107s between first E2E and this guard.
       - name: Verify saved AI turns pause on reload and remain manually rollable
@@ -295,6 +301,11 @@ jobs:
             sleep 1
           done
           test "$ready" = "1" || { cat /tmp/leaf-webkit-http.log; exit 1; }
+      - name: P0 CHAT real two independent WebKit browsers - desktop and phone landscape
+        env:
+          FOURLEAF_BROWSER: webkit
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/p0-chat-two-browser-flow.cjs
       - name: Tap REAL roll button twice on WebKit mobile and verify 145x97 / 70x47 source DMP
         env:
           FOURLEAF_BROWSER: webkit

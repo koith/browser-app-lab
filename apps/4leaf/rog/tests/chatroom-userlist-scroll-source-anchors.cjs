@@ -10,7 +10,10 @@ const assert=require('node:assert/strict');
 const {chromium,webkit}=require('playwright');
 const ANCHOR={
  panel:[620,10,163,128],header:[627,15,129,16],menu:[760,16,15,14],
- list:[628,35,143,93],
+ // The 628..771 list area of the source is names (628..758) plus the
+ // 13px scroll column (758..771); the column is a DOM control so WebKit/iOS
+ // webviews draw it too (they ignore ::-webkit-scrollbar art).
+ list:[628,35,130,93],rosterColumn:[758,35,13,94],rosterUp:[758,111,13,9],rosterDown:[758,120,13,9],
  logUp:[406,78,13,9],logDown:[406,87,13,9],logTrack:[406,19,13,56],logColumn:[406,0,16,97]
 };
 (async()=>{
@@ -47,12 +50,13 @@ const ANCHOR={
     const list=document.getElementById('social-peer-list');
     return {bg:getComputedStyle(document.getElementById('social-image-frame')).backgroundImage,
      panel:box('#social-peer-panel'),header:box('#social-original-userlist'),
-     menu:box('.leaf-native-userlist-menu'),list:box('#social-peer-list'),
+     menu:box('.leaf-native-userlist-menu'),list:box('#social-peer-list'),rosterColumn:box('#leaf-roster-scroll'),
+     rosterUp:box('#leaf-roster-scroll-up'),rosterDown:box('#leaf-roster-scroll-down'),
      logUp:box('#social-native-scroll-up'),logDown:box('#social-native-scroll-down'),
      logTrack:box('#social-native-scroll-track'),logColumn:box('#social-native-chat-scroll'),
      hits:{menu:hit('.leaf-native-userlist-menu'),row:hit('#social-peer-list .social-user-row'),
       up:hit('#social-native-scroll-up'),down:hit('#social-native-scroll-down'),
-      track:hit('#social-native-scroll-track'),input:hit('#message')},
+      track:hit('#social-native-scroll-track'),input:hit('#message'),rosterUp:hit('#leaf-roster-scroll-up'),rosterDown:hit('#leaf-roster-scroll-down')},
      rows:[...list.querySelectorAll('.social-user-row')].map(r=>r.textContent),
      rowFont:getComputedStyle(list.querySelector('.social-user-row')).fontSize,
      listScrollbar:list.offsetWidth-list.clientWidth,
@@ -73,7 +77,7 @@ const ANCHOR={
    assert.deepEqual(m.headerCanvas,[150,38],'the decoded 150x38 source canvas is kept and cropped');
    assert.equal(m.arrowOpacity,'1','source arrows are never dimmed (atlas has no disabled cell)');
    assert.ok(m.frameUrl>100,'panel painted from the composed source 9-slice');
-   if(engine==='chromium')assert.equal(m.listScrollbar,13,'live 13px source-art scrollbar column in the list');
+   assert.equal(m.listScrollbar,0,'one scroll column only: the native list scrollbar is suppressed in every engine');
    report.push({room:bg,ok:true});
   }
   // Composed panel pixels == source atlas pixels (corners and inner corners).
