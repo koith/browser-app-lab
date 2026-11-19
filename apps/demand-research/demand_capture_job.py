@@ -620,9 +620,12 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         lookback_minutes=min(MAX_CATCHUP_MINUTES,max(WINDOW_MINUTES,requested))
         if lookback_minutes>WINDOW_MINUTES:
             original_sources=sources
+            # The historical backfill MUST exclude the already-scanned
+            # recent window. Otherwise its source cursors return the same
+            # latest posts and never reach material missed-schedule history.
             sources+=tuple((
                 lambda term,_start,end,origin=origin,mins=lookback_minutes:
-                    origin(term,end-mins*60,end)
+                    origin(term,end-mins*60,end-WINDOW_MINUTES*60)
             ) for origin in original_sources)
     saved = partial = duplicates = fetched = failures = buffered = 0
     storage_failures=0 if cloud_available or defer_remote else 1
@@ -708,13 +711,33 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                              "misskey":0,"lemmy":0,"other":0}
     def register_public_source_failure(platform):
         platform_query_failures[platform]+=1
-    # Query current-period sources BEFORE catch-up history, but interleave
-    # providers inside each period. A busy Bluesky cursor cannot prevent
-    # Mastodon/Misskey/Lemmy first-sighting attempts.
-    for source_group in (sources[:current_source_count],
-                         sources[current_source_count:]):
+    # Query current-period sources FIRST, then disjoint historical history.
+    # Reserve part of the fixed encrypted spool capacity for real missed
+    # intervals instead of allowing the recent cursor to consume all 48
+    # first-sighting slots. If history is empty, revisit recent search with
+    # remaining capacity so the reserved slots are never wasted.
+    total_limit=(FAST_FIRST_SIGHTING_LIMIT if defer_remote else
+                 24 if fast_mode else MAX_PER_RUN)
+    catchup_enabled=len(sources)>current_source_count
+    reserved_history_slots=(max(4,total_limit//3) if catchup_enabled else 0)
+    recent_first_limit=total_limit-reserved_history_slots
+    recent_sources=sources[:current_source_count]
+    historic_sources=sources[current_source_count:]
+    periods=[("recent",recent_sources)]
+    if catchup_enabled:
+        periods.extend((("historic",historic_sources),
+                        ("recent_refill",recent_sources)))
+    catchup_window_queried=False
+    recent_refill_queried=False
+    for period,source_group in periods:
         if budget_exhausted or capture_interrupted:
             break
+        if period=="recent_refill" and saved+buffered>=total_limit:
+            break
+        if period=="historic":
+            catchup_window_queried=True
+        if period=="recent_refill":
+            recent_refill_queried=True
         for row in round_robin_public_rows(
                 source_group,TERMS,start,now,
                 on_failure=register_public_source_failure):
@@ -740,9 +763,13 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
             if pid in known_ids or pid in known or pid in seen_this_scan:
                 duplicates += 1
                 continue
-            if saved + buffered >= (FAST_FIRST_SIGHTING_LIMIT if defer_remote else
-                                  24 if fast_mode else MAX_PER_RUN):
-                budget_exhausted = True
+            if (period=="recent" and catchup_enabled and
+                    saved+buffered>=recent_first_limit):
+                # Only defer the remainder of this recent cursor. Do not
+                # suppress the older public interval or call it completed.
+                break
+            if saved+buffered>=total_limit:
+                budget_exhausted=True
                 break
             seen_this_scan.add(pid)
             phase="read_first_snapshot"
