@@ -400,6 +400,7 @@ def test_queue_detail_does_not_expose_other_users_requests(client,monkeypatch):
 def test_fifteen_workflow_statuses_use_independent_cache_not_rate_limit_flood(monkeypatch):
     """One cached GH API record per receipt; no global clear on other jobs."""
     import io
+    import json
     monkeypatch.delenv("DEMAND_ARCHIVE_DISPATCH_TOKEN",raising=False)
     monkeypatch.setattr(target_archive_api,"_public_run_cache",{})
     called=[]
