@@ -58,11 +58,15 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   const name=page.locator('#social-modal [name="name"]');
   await name.fill('서버 실패 안내 검증');
   await page.locator('#social-modal button[type="submit"]').click();
-  await page.waitForFunction(()=>document.querySelector('#social-modal [name="name"]')?.validity.customError);
-  assert.match(await name.evaluate(el=>el.validationMessage),/개설 실패/);
+  // V2 reports server validation outside the historical owner form sprite.
+  // The native 2004 bitmap must never be covered by customValidity bubbles.
+  await page.waitForFunction(()=>document.querySelector('#social-create-error:not([hidden])')?.textContent.includes('개설 실패'));
+  assert.match(await page.locator('#social-create-error').textContent(),/개설 실패/);
   await name.fill('다시 입력하면 수정 가능');
   assert.equal(await name.evaluate(el=>el.validity.customError),false,
-   'editing the native owner field must permit retry after a failed server create');
+   'editing the original owner field must not be blocked by a stale validation error');
+  assert.equal(await page.locator('#social-create-error').isVisible(),false,
+   'editing the original owner field clears the separate server error message');
   assert.deepEqual(errs,[]);
   console.log('4LEAF_CENTRAL_READY_THEN_503_PUBLIC_ROOM_PASS',JSON.stringify({
    engine:engine.name(),offlineRoom:state.offlineRoom,roomId:state.roomId,
