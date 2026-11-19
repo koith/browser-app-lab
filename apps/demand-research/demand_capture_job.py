@@ -88,12 +88,17 @@ def normalized(platform, original_id, url, text, published, media_urls=(), profi
     if not public_url(url) or not isinstance(text, str) or not any(t in text for t in TERMS):
         return None
     text = text[:30000]
-    media = [u for u in media_urls if isinstance(u, str) and public_url(u)]
+    # Keep exact original attachment positions. Filtering an invalid first
+    # URL must never turn the second image into slot 0001 or silently declare
+    # a truncated/duplicate original list complete. None means unverified.
+    slots=list(media_urls)
+    retained=[u if isinstance(u,str) and public_url(u) else None
+              for u in slots[:MAX_MEDIA_PER_POST]]
     return {"platform": platform, "original_id": original_id,
             "source_url": url, "text": text, "posted_at": published,
             "profile_url": profile_url if public_url(profile_url) else "",
-            "media_urls": list(dict.fromkeys(media))[:MAX_MEDIA_PER_POST],
-            "media_expected": len(list(dict.fromkeys(media_urls)))}
+            "media_urls": retained,
+            "media_expected": len(slots)}
 
 
 
@@ -457,6 +462,10 @@ def make_post(row, now, get_media=download_media, pid_override=None, cloud=None)
     media = []
     blobs = []
     for index, url in enumerate(sources, start=1):
+        if not public_url(url):
+            # Preserve this absent source slot in media_expected; do not
+            # download a substitute or shift later originals to its index.
+            continue
         item = get_media(url)
         if item is None and cloud is not None:
             # This slot may already contain the same original media from an
@@ -674,13 +683,17 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         or not 1577836800 <= first["observed_at"] <= now+120
                         or not isinstance(first.get("media_links"), list)
                         or len(first["media_links"]) > MAX_MEDIA_PER_POST
-                        or any(not public_url(link) for link in first["media_links"])):
+                        or any(link is not None and not public_url(link)
+                               for link in first["media_links"])
+                        or type(first.get("media_expected",len(first["media_links"]))) is not int
+                        or not len(first["media_links"])<=first.get(
+                            "media_expected",len(first["media_links"]))<=10000):
                     raise ValueError("invalid original public capture record")
                 row = {"platform": first["platform"], "source_url": first["source_url"],
                        "text": first["text"], "posted_at": first["posted_at"],
                        "profile_url": first.get("profile_url", ""),
                        "media_urls": first["media_links"],
-                       "media_expected": len(first["media_links"])}
+                       "media_expected": first.get("media_expected",len(first["media_links"]))}
                 post, blobs = make_post(row, first["observed_at"], pid_override=pid, cloud=cloud)
                 if not post["archive_complete"]:
                     cloud.stage_partial_media(post,blobs)
@@ -778,6 +791,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                 early = {"id": pid, "platform": row["platform"], "text": row["text"],
                          "source_url": row["source_url"], "posted_at": row["posted_at"],
                          "observed_at": now, "media_links": row["media_urls"],
+                         "media_expected": row["media_expected"],
                          "profile_url": row.get("profile_url", "")}
                 if spool is not None:
                     # Authenticated encryption BEFORE the first cloud call.
@@ -833,7 +847,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                        "posted_at": first["posted_at"],
                        "profile_url": first.get("profile_url", ""),
                        "media_urls": first["media_links"],
-                       "media_expected": len(first["media_links"])}
+                       "media_expected": first.get("media_expected",len(first["media_links"]))}
                 phase="write_post_and_verify_media"
                 post, blobs = make_post(row, first["observed_at"], cloud=cloud)
                 if spool is not None:
