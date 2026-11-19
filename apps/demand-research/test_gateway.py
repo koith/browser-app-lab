@@ -762,3 +762,34 @@ def test_verified_catalog_invalid_remote_refresh_never_replaces_existing_sha_cac
         assert await gateway.get_catalog()==safe
         assert gateway._catalog_retry_after>time.monotonic()
     asyncio.run(run())
+
+
+def test_auto_archive_api_exposes_source_media_slot_separately_from_url_index(monkeypatch):
+    """When photo #1 is missing, saved photo #2 must NOT appear as photo #1."""
+    from demand_archive import sha256
+    post_id="a"*40
+    blob=b"synthetic verified source photo number two"
+    item={"key":"posts/"+post_id+"/media/0002.jpg","mime":"image/jpeg",
+          "bytes":len(blob),"sha256":sha256(blob),"remote_verified":True,
+          "kind":"image"}
+    p={"id":post_id,"platform":"bluesky","text":"synthetic search keyword",
+       "source_url":"https://bsky.app/profile/test/post/test",
+       "posted_at":"2026-11-19T00:00:00Z",
+       "media":[item],"media_expected":2,"media_saved":1,
+       "archive_complete":False}
+    async def read_catalog(): return [p]
+    monkeypatch.setattr(gateway,"get_catalog",read_catalog)
+    monkeypatch.setattr(gateway,"check_auth",lambda req:None)
+    monkeypatch.setattr(gateway,"TOKEN","synthetic-private-media-link-"+"f"*32)
+    response=TestClient(gateway.app).get("/api/posts?q=synthetic&media_status=partial")
+    assert response.status_code==200
+    posts=response.json()["posts"]
+    assert len(posts)==1 and posts[0]["media_expected"]==2
+    original=posts[0]["media"]
+    assert len(original)==1 and original[0]["index"]==1
+    assert original[0]["verified"] is True
+    # The signed media route still uses saved-array index zero, while the
+    # renderer receives original source position one (displayed as #2).
+    assert original[0]["url"].startswith("/api/media/"+post_id+"/0?exp=")
+    assert TestClient(gateway.app).get(
+        "/api/posts?q=synthetic&media_status=complete").json()["total"]==0
