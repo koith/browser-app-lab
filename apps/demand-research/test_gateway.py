@@ -776,7 +776,7 @@ def test_auto_archive_api_exposes_source_media_slot_separately_from_url_index(mo
        "source_url":"https://bsky.app/profile/test/post/test",
        "posted_at":"2026-11-19T00:00:00Z",
        "media":[item],"media_expected":2,"media_saved":1,
-       "archive_complete":True  # deliberately stale/mistaken legacy flag}
+       "archive_complete":True}  # deliberately stale/mistaken legacy flag
     async def read_catalog(): return [p]
     monkeypatch.setattr(gateway,"get_catalog",read_catalog)
     monkeypatch.setattr(gateway,"check_auth",lambda req:None)
