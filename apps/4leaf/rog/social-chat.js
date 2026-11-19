@@ -1465,6 +1465,7 @@
   // and UI callbacks; acknowledged server membership is owned by domain code.
   const creation=window.__LEAF_ROOM_DOMAIN__.makeCreationSession({
    create:details=>central.create(details),
+   newRequestId:()=>uuid(),
    join:(id,password)=>central.join(id,password),
    leave:()=>central.leave(),
    connect:()=>central.connect(nick()),
@@ -1523,8 +1524,11 @@
       if(!centralOutage(error)){
        showCreateFailure('채팅방 개설 실패: '+error.message);return;
       }
-      systemLine('중앙 서버에 방을 만들지 못했습니다: '+error.message+
-       ' · 대신 오프라인 방을 개설합니다.');
+      // HTTP 503 may arrive AFTER the server has committed the room.
+      // Do not substitute a duplicate local room for an unknown online result.
+      showCreateFailure('서버의 방 생성 응답을 확인하지 못했습니다: '+error.message+
+       ' · 다시 누르면 동일 요청으로 생성 여부를 확인하고 입장합니다.');
+      return;
      }
     }
     const salt=password?uuid():'';
