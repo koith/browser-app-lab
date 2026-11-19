@@ -123,7 +123,8 @@ def test_first_observation_fails_closed_if_both_remote_paths_reject_writes():
         def fake(self,args,data=None,timeout=150,allow_missing=False):
             if args[0] in ("copyto","rcat"):
                 target=args[2] if args[0]=="copyto" else args[1]
-                if "/capture.json" in target or "/early-" in target:
+                if ("/capture.json" in target or "/early-" in target
+                        or "/first-observation-" in target):
                     raise RuntimeError("private cloud upload failed (missing)")
             return super().fake(args,data=data,timeout=timeout,
                                 allow_missing=allow_missing)
