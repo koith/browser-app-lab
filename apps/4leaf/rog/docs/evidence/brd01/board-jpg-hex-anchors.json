@@ -1,0 +1,32 @@
+{
+ "task": "BRD-01 / M04",
+ "date": "2026-11-19",
+ "map": {"id": "0172", "evidence": "board.jpg and battle.jpg minimap show the four-loop clover route with a centre cell; only DMP 0172 (104 cells) has that shape among the 26 source maps", "level": "VERIFIED"},
+ "method": "OpenCV TM_CCOEFF_NORMED with the native 145x97 TIS alpha mask (alpha>200), sprite rows reversed (the PNG export is stored bottom-up), scale 1:1. 'global' = best match over the whole 800x600 capture; 'local' = best match within +-60 px of the hex formula prediction. tools/brd01_measure_board_jpg.py reproduces every number.",
+ "projection": {
+  "grid": "odd-q flat-top hex: odd DMP columns sit half a row lower",
+  "pitchX": 105, "pitchY": 80, "oddColumnDrop": 40, "scale": 1,
+  "level": "VERIFIED (screenshot anchors + route structure + sprite tessellation)",
+  "routeStructure": "451 of 452 diagonal route steps in all 26 DMP maps go down from odd columns / up from even columns (only exception: 0193 step 24, a jump); even-q would contradict 450 of them",
+  "tessellation": "at 105x80 with a 40 px odd-column drop the 145x97 TIS top faces meet edge to edge; nearer cells cover only the 17 px side faces"
+ },
+ "anchors": [
+  {"capture": "board.jpg",  "cell": 17, "dmp": [0,6], "art": "0017", "center": [218.5,227.5], "score": 0.800, "search": "global"},
+  {"capture": "board.jpg",  "cell": 21, "dmp": [4,8], "art": "0020", "center": [638.5,387.5], "score": 0.883, "search": "global"},
+  {"capture": "board.jpg",  "cell": 15, "dmp": [0,4], "art": "0015", "center": [218.5,67.5],  "score": 0.426, "search": "local"},
+  {"capture": "board.jpg",  "cell": 16, "dmp": [0,5], "art": "0001", "center": [218.5,147.5], "score": 0.334, "search": "local"},
+  {"capture": "battle.jpg", "cell": 16, "dmp": [0,5], "art": "0001", "center": [218.5,182.5], "score": 0.509, "search": "global"},
+  {"capture": "battle.jpg", "cell": 21, "dmp": [4,8], "art": "0020", "center": [638.5,422.5], "score": 0.632, "search": "global"},
+  {"capture": "battle.jpg", "cell": 14, "dmp": [0,3], "art": "0010", "center": [218.5,22.5],  "score": 0.256, "search": "local"},
+  {"capture": "battle.jpg", "cell": 17, "dmp": [0,6], "art": "0017", "center": [218.5,262.5], "score": 0.281, "search": "local"},
+  {"capture": "battle.jpg", "cell": 20, "dmp": [3,7], "art": "0025", "center": [533.5,382.5], "score": 0.435, "search": "local (odd column, +40)"}
+ ],
+ "occluded": "cells 18, 19, 22 and the rest of the view are covered by the BATTLE overlay, podiums, dice and the right UI column in both captures; no other board-state capture exists in the repository (dice_ref*.png are lobby backgrounds)",
+ "terrain": {
+  "layer": "original/IMG/bgtile.png 725x485, repeated",
+  "originRelativeToCell17": {"board.jpg": [602.5,62.5], "battle.jpg": [602.5,44.5]},
+  "observation": "between the two captures the tiles move +35 px and the terrain +17 px: the terrain scrolls at about half the camera speed (one vertical sample; horizontal not observed) - INFERRED, not implemented",
+  "webAtBoardJpgState": {"main fe94d750": [262.5,107.5], "this patch": [582.5,57.5]}
+ },
+ "artMismatch": {"cell": 17, "original": "0017 (싸움/arena art)", "web": "0035 (랜덤한번/random art from tiles.js)", "note": "the 2002 DMP event label decodes to random; the 2004 capture shows the arena art. Data left unchanged; UNVERIFIED whether the 2004 map revision changed this cell"}
+}

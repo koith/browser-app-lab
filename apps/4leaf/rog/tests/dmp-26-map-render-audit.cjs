@@ -51,7 +51,11 @@ async function footDiff(page,sel){
  const area=await page.evaluate(sel=>{const a=document.getElementById('board-area').getBoundingClientRect(),
    p=document.querySelector(sel).getBoundingClientRect();
   for(const o of document.querySelectorAll('#board-pawns .board-pawn'))if(o!==document.querySelector(sel))o.dataset.auditHidden=o.style.visibility||'-',o.style.visibility='hidden';
-  const l=Math.max(0,a.left,p.left-60),t=Math.max(0,a.top,p.top-60),r=Math.min(innerWidth,a.right,p.right+60),b=Math.min(innerHeight,a.bottom,p.bottom+60);
+  // Horizontally the window stays within 20 px of the pawn's own box: on the
+  // 105x80 honeycomb (BRD-01) a neighbour cell, with its own turn markers,
+  // lies within the former +-60 px band. The foot is still compared with
+  // the tile centre, so a pawn standing off its tile still fails.
+  const l=Math.max(0,a.left,p.left-20),t=Math.max(0,a.top,p.top-60),r=Math.min(innerWidth,a.right,p.right+20),b=Math.min(innerHeight,a.bottom,p.bottom+60);
   return {x:l,y:t,width:Math.max(1,r-l),height:Math.max(1,b-t)}},sel);
  const a=await page.screenshot({clip:area});
  await page.evaluate(s=>{const e=document.querySelector(s);e.style.visibility='hidden'},sel);
@@ -102,7 +106,7 @@ function categories(route){
  const report={generated:new Date().toISOString(),engine,viewport:'800x600',
   scope:'all 26 source DMP maps, every route cell; live DOM + real TIS alpha',
   tolerances:{footX:FOOT_X,footY:FOOT_Y,status:'INFERRED WEB'},
-  unverified:['2002 MVE mesh elevation/camera matrix','true on-screen tile spacing (web pitch 150x100 is a calibration)'],
+  unverified:['2002 MVE mesh elevation/camera matrix','terrain parallax (projection 105x80 odd-q is VERIFIED from board.jpg/battle.jpg)'],
   maps:[]};
  const failures=[];const seenArt=new Set();
  try{
@@ -162,11 +166,13 @@ function categories(route){
     if(!n)continue;
     maxOverlap=Math.max(maxOverlap,n);
     overlapPairs.push([T[p].i,T[q].i,n]);
-    const front=(T[q].dmp[1]>T[p].dmp[1]||(T[q].dmp[1]===T[p].dmp[1]&&T[q].dmp[0]>T[p].dmp[0]))?q:p,back=front===p?q:p;
+    // Odd-q hex (BRD-01, VERIFIED): an odd column is half a row nearer.
+    const half=t=>2*t.dmp[1]+(t.dmp[0]&1);
+    const front=(half(T[q])>half(T[p])||(half(T[q])===half(T[p])&&T[q].dmp[0]>T[p].dmp[0]))?q:p,back=front===p?q:p;
     if(!(T[front].z>T[back].z))depthViolations.push([T[back].i,T[front].i]);
    }
    // painter order monotone over the whole map
-   const sorted=[...T].sort((a,b)=>a.dmp[1]-b.dmp[1]||a.dmp[0]-b.dmp[0]);
+   const sorted=[...T].sort((a,b)=>(2*a.dmp[1]+(a.dmp[0]&1))-(2*b.dmp[1]+(b.dmp[0]&1))||a.dmp[0]-b.dmp[0]);
    let zMonotone=true;for(let s=1;s<sorted.length;s++)if(!(sorted[s].z>sorted[s-1].z))zMonotone=false;
    // min opaque gap between consecutive cells along the route (px, world)
    const gaps=[];

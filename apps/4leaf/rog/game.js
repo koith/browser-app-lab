@@ -714,7 +714,17 @@ function generateTiles(map){
 }
 function pathCoords(){let pts=[],left=0,right=13,top=0,bottom=7;while(left<=right&&top<=bottom){for(let x=left;x<=right;x++)pts.push([x,top]);for(let y=top+1;y<=bottom;y++)pts.push([right,y]);if(top<bottom)for(let x=right-1;x>=left;x--)pts.push([x,bottom]);if(left<right)for(let y=bottom-1;y>top;y--)pts.push([left,y]);left+=1;right-=1;top+=1;bottom-=1}return pts.map(([x,y])=>({x:5.5+x*(89/13),y:8.5+y*(83/7)}))}
 let PATH=pathCoords();
-function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}/* Authentic DMP index positions are unchanged. The browser camera owns ONE explicit 150x100 WEB display pitch, and all maps share that projection. */const grid=window.__LEAF_CAMERA__?.getState?.().sourceGrid||{width:2800,height:1551,pitchX:70,pitchY:47};const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]);const midX=(Math.min(...xs)+Math.max(...xs))/2,midY=(Math.min(...ys)+Math.max(...ys))/2;PATH=records.map(p=>({x:50+(p[0]-midX)*grid.pitchX/grid.width*100,y:50+(p[1]-midY)*grid.pitchY/grid.height*100}))}
+function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}
+ /* VERIFIED projection (BRD-01/M04, 2026-11-19). DMP (x,y) is an odd-q
+    flat-top hex grid: 451 of 452 diagonal route steps in all 26 source maps
+    go down-right/left only from odd columns. board.jpg and battle.jpg (map
+    0172, cells 14-21) place the native 145x97 TIS at exactly 105 px per DMP
+    column and 80 px per row, odd columns 40 px lower, 1:1 scale - the same
+    numbers at which the sprite's top faces tessellate edge to edge. */
+ const hex=window.__LEAF_CAMERA__?.getState?.().hexProjection||{pitchX:105,pitchY:80,oddColumnDrop:40};
+ const size=window.__LEAF_CAMERA__?.getState?.().size||{width:6000,height:3300};
+ const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]);const midX=(Math.min(...xs)+Math.max(...xs))/2,midY=(Math.min(...ys)+Math.max(...ys))/2;
+ PATH=records.map(p=>({x:50+(p[0]-midX)*hex.pitchX/size.width*100,y:50+((p[1]-midY)*hex.pitchY+(p[0]&1?hex.oddColumnDrop:0)-hex.oddColumnDrop/2)/size.height*100}))}
 function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:isHistoricalNonBattleTitle(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;
  opt.textContent=title+' · '+length+'칸 [원본 '+id+
   (SOURCE_TILES[id]?' · 발판 복원':' · 경로 복원')+
@@ -829,10 +839,10 @@ function drawBoard(){
    coords.forEach((pos,i)=>{
      const type=match.tiles[i],b=document.createElement('div');b.className='tile '+type;
      b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';b.dataset.tile=i;
-     // Genuine original DMP axial-grid coordinates are unchanged.
-     // Render full SOURCE 145x97 pixels with screenshot-calibrated WEB
-     // spacing 150x100. Original DMP indices stay 70x47; the modest
-     // overlap is painted in DMP depth order, not by route index.
+     // Genuine original DMP odd-q hex coordinates are unchanged.
+     // Full SOURCE 145x97 pixels on the 105x80 (+40 odd column) honeycomb
+     // measured in board.jpg/battle.jpg; neighbouring sprites interlock as
+     // in the original and are painted in half-row depth order.
      // Original MVE elevation and camera matrix remain unrecovered.
      const dmp=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[i];
      if(dmp){
@@ -842,13 +852,16 @@ function drawBoard(){
      }
      b.dataset.nativeTisSize='145x97';
      b.dataset.dmpLogicalPitch='70x47';
-     b.dataset.projectedPitch='150x100-web-nonoverlap';
+     b.dataset.projectedPitch='105x80-odd-q-hex';
      // Painter order follows the original DMP grid, not route parity.
      // Cells on the same row are sorted by their genuine x coordinate;
      // a row ahead ALWAYS paints over rows behind it. Reserve +1 for actors.
      const sourceY=dmp?dmp[1]:Math.round(PATH[i].y*100);
      const sourceX=dmp?dmp[0]:Math.round(PATH[i].x);
-     b.style.zIndex=String((sourceY*256+sourceX)*8);
+     // Odd-q hex: an odd column sits half a row lower, so painter depth is
+     // counted in half rows (2y + column parity), then by column.
+     const halfRow=dmp?2*sourceY+(sourceX&1):sourceY;
+     b.style.zIndex=String((halfRow*256+sourceX)*8);
      const sourceArt=sourceTileGraphic(type,i);
      b.dataset.originalArt=sourceArt;
      b.style.setProperty('background','url("./original/Tiles/'+sourceArt+'.png") center / 100% 100% no-repeat','important');

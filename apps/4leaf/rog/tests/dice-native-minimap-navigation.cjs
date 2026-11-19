@@ -157,10 +157,15 @@ const {chromium}=require('playwright');
   await page.screenshot({path:'leaf-real-dmp-interactive-minimap-desktop.png'});
 
   await canvas.focus();
-  await page.keyboard.press('ArrowRight');
+  // On the 105x80 honeycomb (BRD-01) the route is narrower, and the drag
+  // above can end exactly on the route's right clamp. Then the arrow key
+  // must still move the camera, so test the direction that has room.
+  const edge=await page.evaluate(()=>{const s=window.__LEAF_CAMERA__.getState();
+   return s.visible.width>=1||s.visible.x+s.visible.width>=s.routeBounds.maxX/s.size.width-0.0005});
+  await page.keyboard.press(edge?'ArrowLeft':'ArrowRight');
   const keyed=await snap();
-  assert.ok(keyed.visible.x>dragged.visible.x || (keyed.visible.x===dragged.visible.x&&keyed.visible.width===1),
-   'minimap arrow keys pan right using world-relative camera coordinates');
+  assert.ok(edge?keyed.visible.x<dragged.visible.x||keyed.visible.width===1:keyed.visible.x>dragged.visible.x,
+   'minimap arrow keys pan '+(edge?'left from the right clamp':'right')+' using world-relative camera coordinates');
   await page.keyboard.press('Home');
   const followed=await snap();
   assert.equal(followed.follow,true,'Home restores original active pawn tracking');

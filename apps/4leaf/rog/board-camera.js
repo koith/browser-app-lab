@@ -14,8 +14,12 @@
  // This is NOT a recovered original MVE camera/3D projection.
  const SOURCE_GRID={width:2800,height:1551,pitchX:70,pitchY:47};
  const SIZE={width:6000,height:3300};
- const PROJECTED_PITCH={x:70*SIZE.width/SOURCE_GRID.width,
-  y:47*SIZE.height/SOURCE_GRID.height};
+ // VERIFIED 2026-11-19: the DMP grid is odd-q flat-top hex and the 2002
+ // client draws the 145x97 TIS 1:1 at 105 px per column, 80 px per row,
+ // odd columns 40 px lower (board.jpg/battle.jpg, map 0172). This replaces
+ // the 150x100 non-overlapping WEB spacing described above.
+ const HEX_PROJECTION={pitchX:105,pitchY:80,oddColumnDrop:40};
+ const PROJECTED_PITCH={x:HEX_PROJECTION.pitchX,y:HEX_PROJECTION.pitchY,oddColumnDrop:HEX_PROJECTION.oddColumnDrop};
  const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null,visible:null,routeBounds:null};
  const $=id=>document.getElementById(id);
  const clamp=(n,low,high)=>Math.min(high,Math.max(low,n));
@@ -163,7 +167,7 @@
      window.__LEAF_MINIMAP_NAV__?.onCameraRender?.();
    },
    getState(){return {...state,size:{...SIZE},sourceGrid:{...SOURCE_GRID},
-     projectedPitch:{...PROJECTED_PITCH},
+     projectedPitch:{...PROJECTED_PITCH},hexProjection:{...HEX_PROJECTION},
      routeBounds:state.routeBounds?{...state.routeBounds}:null,
      visible:state.visible?{...state.visible}:null}}
  };

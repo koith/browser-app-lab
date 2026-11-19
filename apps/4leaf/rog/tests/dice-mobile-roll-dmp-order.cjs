@@ -45,21 +45,25 @@ const {chromium,webkit}=require('playwright');
   let horizontal=0,vertical=0,sameRow=0;
   for(let i=0;i<board.length;i++)for(let j=i+1;j<board.length;j++){
    const a=board[i],b=board[j];
-   if(a.y===b.y){
+   // Odd-q hex (BRD-01, VERIFIED from board.jpg/battle.jpg): odd columns sit
+   // half a row lower, so painter depth counts half rows, then source x.
+   const ha=2*a.y+(a.x&1),hb=2*b.y+(b.x&1);
+   if(ha===hb){
     sameRow++;
     if(a.x!==b.x)assert.equal(Math.sign(b.z-a.z),Math.sign(b.x-a.x),
-     'same DMP row must paint in source x order, never route-index parity');
-   }else assert.equal(Math.sign(b.z-a.z),Math.sign(b.y-a.y),
-    'different source rows must paint in verified y order');
+     'same half row must paint in source x order, never route-index parity');
+   }else assert.equal(Math.sign(b.z-a.z),Math.sign(hb-ha),
+    'different half rows must paint nearer-above (odd-q y order)');
    if(a.y===b.y&&Math.abs(a.x-b.x)===1){
     horizontal++;
-    assert.ok(Math.abs(Math.abs(a.left-b.left)-projection.projectedPitch.x)<2.5&&Math.abs(a.left-b.left)>105,
-     'DMP x delta stays 1 original logical cell; original 145px artwork overlaps moderately at source screenshot camera pitch');
+    assert.ok(Math.abs(Math.abs(a.left-b.left)-projection.projectedPitch.x)<2.5&&
+     Math.abs(Math.abs(a.top-b.top)-projection.projectedPitch.oddColumnDrop)<2.5,
+     'DMP x delta of 1 = original 105 px column pitch with the 40 px odd-column drop');
    }
    if(a.x===b.x&&Math.abs(a.y-b.y)===1){
     vertical++;
-    assert.ok(Math.abs(Math.abs(a.top-b.top)-projection.projectedPitch.y)<2.5&&Math.abs(a.top-b.top)>70,
-     'DMP y delta stays 1 original source cell; WEB pitch shows the raised original tiles in source screenshot density');
+    assert.ok(Math.abs(Math.abs(a.top-b.top)-projection.projectedPitch.y)<2.5&&Math.abs(a.left-b.left)<0.5,
+     'DMP y delta of 1 = original 80 px row pitch in the same column');
    }
   }
   assert.ok(horizontal>5&&vertical>5&&sameRow>5,

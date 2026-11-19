@@ -25,9 +25,15 @@ function constants(name,keys){
 }
 const sourceGrid=constants('SOURCE_GRID',['width','height','pitchX','pitchY']);
 const size=constants('SIZE',['width','height']);
-const stepX=sourceGrid.pitchX*size.width/sourceGrid.width;
-const stepY=sourceGrid.pitchY*size.height/sourceGrid.height;
+// BRD-01 (VERIFIED, board.jpg/battle.jpg): odd-q flat-top hex, 105 px per
+// column, 80 px per row, odd columns 40 px lower, 145x97 TIS at 1:1.
+const hex=constants('HEX_PROJECTION',['pitchX','pitchY','oddColumnDrop']);
+const stepX=hex.pitchX,stepY=hex.pitchY,drop=hex.oddColumnDrop;
 const tileW=145,tileH=97;
+const screen=c=>[c[0]*stepX,c[1]*stepY+(c[0]&1?drop:0)];
+// The largest bounding overlap two true hex neighbours can have; anything
+// above it means two different cells were stacked onto each other.
+const neighbourOverlap=Math.max((tileW-stepX)*(tileH-drop),tileW*(tileH-stepY))/(tileW*tileH);
 const results=[];
 for(const [id,cells] of Object.entries(maps)){
  assert.ok(Array.isArray(cells)&&cells.length>8,'invalid DMP map: '+id);
@@ -38,7 +44,7 @@ for(const [id,cells] of Object.entries(maps)){
  // source sprite at the outermost centre.
  const xRange=cells.map(c=>c[0]),yRange=cells.map(c=>c[1]);
  const projectedW=(Math.max(...xRange)-Math.min(...xRange))*stepX+tileW;
- const projectedH=(Math.max(...yRange)-Math.min(...yRange))*stepY+tileH;
+ const projectedH=(Math.max(...yRange)-Math.min(...yRange))*stepY+drop+tileH;
  assert.ok(projectedW<=size.width&&projectedH<=size.height,
   'Native source sprite cropped at world edge '+id+
   ' '+JSON.stringify({projectedW,projectedH,size}));
@@ -49,15 +55,14 @@ for(const [id,cells] of Object.entries(maps)){
   const key=a[0]+','+a[1];
   if(seen.has(key))duplicate++;else seen.set(key,i);
   for(let j=0;j<i;j++){
-   const b=cells[j],dx=Math.abs(a[0]-b[0])*stepX,dy=Math.abs(a[1]-b[1])*stepY;
+   const b=cells[j],pa=screen(a),pb=screen(b),dx=Math.abs(pa[0]-pb[0]),dy=Math.abs(pa[1]-pb[1]);
    if((Math.abs(a[0]-b[0])===1&&a[1]===b[1])||
       (Math.abs(a[1]-b[1])===1&&a[0]===b[0]))adjacent++;
-   // Conservative full rectangular bounding boxes, NOT source-alpha pixel
-   // collision. Actual 2002 art has transparent corners; a small overlap
-   // is expected. 40%+ is abnormal in the current WEB projection.
+   // Full rectangular bounding boxes. Hex neighbours interlock by design
+   // (side faces tuck under the nearer row); more than that is abnormal.
    const ratio=Math.max(0,tileW-dx)*Math.max(0,tileH-dy)/(tileW*tileH);
    maxBoundingOverlap=Math.max(maxBoundingOverlap,ratio);
-   if(ratio>.40)severe++;
+   if(ratio>neighbourOverlap+1e-9)severe++;
   }
  }
  results.push({map:id,tiles:cells.length,duplicate,severeBoundingCollisions:severe,
@@ -68,11 +73,11 @@ assert.equal(results.reduce((n,x)=>n+x.tiles,0),1920,'original source path count
 assert.ok(results.every(x=>x.duplicate===0),'DMP cell duplicate means fully stacked boards');
 assert.ok(results.every(x=>x.severeBoundingCollisions===0),
  'WEB renderer now puts unrelated source TIS platforms on top of each other');
-assert.ok(results.every(x=>x.maxRectangularOverlapPercent===0),
- 'HORIZONTAL 145px/vertical 97px ORIGINAL TIS platforms may not overlap: '+
- JSON.stringify(results.filter(x=>x.maxRectangularOverlapPercent>0)));
-assert.ok(stepX>=tileW+1&&stepY>=tileH+1,
- 'Native source TIS 145x97 center pitch must include pixel-visible gaps');
+assert.ok(results.every(x=>x.maxRectangularOverlapPercent<=+(neighbourOverlap*100).toFixed(2)),
+ 'no two cells overlap more than true hex neighbours: '+
+ JSON.stringify(results.filter(x=>x.maxRectangularOverlapPercent>neighbourOverlap*100)));
+assert.deepEqual({stepX,stepY,drop},{stepX:105,stepY:80,drop:40},
+ 'camera uses the projection measured in board.jpg/battle.jpg');
 assert.ok(results.some(x=>x.adjacent>10),'source grid connectivity was audited');
 const report={
  checkedMaps:results.length,checkedCells:results.reduce((n,x)=>n+x.tiles,0),
