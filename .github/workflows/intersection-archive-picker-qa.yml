@@ -85,17 +85,22 @@ concurrency:
 jobs:
   archive-picker:
     runs-on: ubuntu-24.04
+    # Same pre-installed, SHA-pinned Chromium/WebKit image as the proven
+    # INTERSECTION deployed-live suite. Avoid repeating the 1GB+ apt/browser
+    # setup on every UI CI run while preserving exactly the same engines.
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.56.0-noble@sha256:a7f6cf3ae520c9d670ad956572c13747ed5abdbba5123a01526f873ed1662528
+      options: --ipc=host
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Install pinned private viewer test and browser dependencies
+      - name: Install pinned private viewer test dependencies
         run: |
           set -euo pipefail
           python -m pip install --disable-pip-version-check --quiet fastapi==0.115.12 httpx==0.28.1 pytest==8.4.2 PyJWT==2.10.1 cryptography==46.0.4 playwright==1.56.0
-          python -m playwright install --with-deps chromium webkit
       - name: Verify private account metadata and source identity binding
         run: |
           set -euo pipefail
