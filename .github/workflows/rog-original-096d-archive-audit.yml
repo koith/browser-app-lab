@@ -102,6 +102,17 @@ jobs:
           echo "File count: $(find source-client -type f | wc -l)"
           echo 'Potential original .PAK/.EXE/.DLL or 3D file types:'
           grep -Ei '\\.(pak|exe|dll|dmp|mve|obs|chr|tis|spr|mesh|bin)[[:space:]]'             "$GITHUB_WORKSPACE/leaf-096d-file-sizes.tsv" | head -100 || true
+      - name: Decode ORIGINAL ChatMap/MapData/MapInfo/MapObject member indexes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f /tmp/leaf096d/source-client/4Leaf_Files/ChatMap.pak ]; then
+            python3 apps/4leaf/rog/tools/audit-native-chatmap-members.py \
+              /tmp/leaf096d/source-client/4Leaf_Files \
+              leaf-096d-native-chatmap-members.json
+          else
+            echo 'Original source files unavailable; do not fabricate PAK member names'
+          fi
       - name: Upload original client resource inventory only (no binaries)
         if: always()
         uses: actions/upload-artifact@v4
@@ -111,6 +122,7 @@ jobs:
             leaf-096d-cab-inventory.txt
             leaf-096d-file-sha256.txt
             leaf-096d-file-sizes.tsv
+            leaf-096d-native-chatmap-members.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Upload public file inventory only, not copyrighted binaries
