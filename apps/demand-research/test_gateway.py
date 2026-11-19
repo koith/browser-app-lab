@@ -776,7 +776,7 @@ def test_auto_archive_api_exposes_source_media_slot_separately_from_url_index(mo
        "source_url":"https://bsky.app/profile/test/post/test",
        "posted_at":"2026-11-19T00:00:00Z",
        "media":[item],"media_expected":2,"media_saved":1,
-       "archive_complete":False}
+       "archive_complete":True  # deliberately stale/mistaken legacy flag}
     async def read_catalog(): return [p]
     monkeypatch.setattr(gateway,"get_catalog",read_catalog)
     monkeypatch.setattr(gateway,"check_auth",lambda req:None)
@@ -785,6 +785,8 @@ def test_auto_archive_api_exposes_source_media_slot_separately_from_url_index(mo
     assert response.status_code==200
     posts=response.json()["posts"]
     assert len(posts)==1 and posts[0]["media_expected"]==2
+    assert posts[0]["capture_status"]=="partial_media",(
+        "false complete badge must not override missing actual media")
     original=posts[0]["media"]
     assert len(original)==1 and original[0]["index"]==1
     assert original[0]["verified"] is True
