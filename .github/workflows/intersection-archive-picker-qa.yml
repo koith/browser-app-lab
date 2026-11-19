@@ -77,10 +77,12 @@ permissions:
   contents: read
 
 concurrency:
-  # A new PR revision may cancel its own obsolete QA, but frequent main
-  # commits from other apps must not erase an ongoing private-live acceptance.
+  # A production run is triggered ONLY by the archive/viewer paths above.
+  # Supersede obsolete same-branch QA (including the old browser-install
+  # runner) after a verified fix, while never touching an unrelated app.
+  # The current HEAD's live acceptance must still run to completion.
   group: intersection-archive-picker-${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 jobs:
   archive-picker:
