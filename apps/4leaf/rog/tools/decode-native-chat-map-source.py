@@ -89,7 +89,8 @@ for fname in ("MapInfo.pak","MapData.pak","MapObject.pak"):
                 if idx<24:
                     try:
                         img,diagnostic=codec.decode_rows(body,w,h,palette,
-                           minimum_opaque_pixels=0,alpha_from_runs=True)
+                           minimum_opaque_pixels=0,alpha_from_runs=True,
+                           allow_zero_length_row_end=True)
                         item["status"]="decoded"
                         item["opaquePixels"]=diagnostic["opaquePixels"]
                         sheet.append((idx,img,(w,h)))
