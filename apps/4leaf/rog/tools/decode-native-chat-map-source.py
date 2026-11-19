@@ -103,3 +103,5 @@ print("REAL_ORIGINAL_CT_MAPS",len([k for k in report["mapScenes"] if k.startswit
 print("REAL_ORIGINAL_KT_MAPS",len([k for k in report["mapScenes"] if k.startswith("KT_")]))
 for k,v in report["sprites"].items():print("SPRITE",k,v["status"],v.get("nativeFrameCount"),v.get("contactSheet"),v.get("error",""))
 print("NATIVE_MAP_SCENE_DECODER_EVIDENCE_READY",len(report["sprites"]))
+print("NATIVE_ORIGINAL_SPR_FRAME_DECODED",sum(1 for v in report["sprites"].values() for f in v["frames"] if f.get("status")=="decoded"))
+print("NATIVE_ORIGINAL_SPR_FRAME_FAILED",sum(1 for v in report["sprites"].values() for f in v["frames"] if f.get("status")=="decode-failed"))
