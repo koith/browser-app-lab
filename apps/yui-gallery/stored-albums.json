@@ -513,6 +513,18 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 477,
+          "url": "stored-albums/public-yui-sns/2dab80611e24323b1f89.jpg",
+          "sha256": "2dab80611e24323b1f89c927e6956b8ab7c1b0de73c2ec9335148036ac8e1977",
+          "bytes": 420164,
+          "width": 1536,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -2101,5 +2113,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 166
+  "physical_verified_image_count": 167
 }
