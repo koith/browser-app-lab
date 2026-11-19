@@ -86,8 +86,10 @@ def test_catchup_fetches_fresh_first_then_older_public_originals(tmp_path,monkey
     query_count=len(job.TERMS)
     assert starts[:query_count]==[now-16*60]*query_count, (
         "every configured keyword must be searched in the fresh public window first")
-    assert starts[query_count:]==[now-80*60]*query_count, (
-        "the missed source window must be searched for every configured keyword")
+    assert starts[query_count:2*query_count]==[now-80*60]*query_count, (
+        "the disjoint missed source window must be searched for every keyword")
+    assert starts[2*query_count:]==[now-16*60]*query_count, (
+        "unused historical quota must return to fresh public source search")
     assert len(list(tmp_path.glob("*.enc")))==2, "exact same original not counted twice"
 
 
