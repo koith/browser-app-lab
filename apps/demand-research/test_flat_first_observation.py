@@ -198,3 +198,17 @@ def test_recovery_original_root_read_probes_are_bounded_without_data_loss():
     cloud.objects[cloud.root_first_observation_key(pid)]=canonical_json(first_payload(pid))
     assert cloud.read_first_observation(pid) is not None
     assert cloud.probes and all(0<t<=9 for t in cloud.probes)
+
+
+def test_root_listing_outage_does_not_hide_legacy_first_observations():
+    class RootUnavailable(UnavailableNestedCapture):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0]=="lsf" and args[1].rstrip("/")==self.remote:
+                raise RuntimeError("private root listing temporarily unavailable")
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=RootUnavailable()
+    pid="b"*40
+    cloud.objects[cloud.first_observation_keys(pid)[1]]=canonical_json(first_payload(pid))
+    assert pid in cloud.pending_capture_ids({})
+    assert cloud.read_first_observation(pid) is not None
