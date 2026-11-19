@@ -61,7 +61,7 @@ def unpack_frames(source):
     return frames,palette
 
 def decode_rows(body,width,height,palette,minimum_opaque_pixels=45,
-                alpha_from_runs=False):
+                alpha_from_runs=False,allow_zero_length_row_end=False):
     """Decode the exact 2002 FAST.PAL.COLORKEY 640-stride run stream.
 
     Same native packet format as verified Dice/IMG.pak roll.spr:
@@ -105,7 +105,7 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45,
         if pos+length>len(body):
             raise ValueError("OBS 640-stride palette data truncated")
         y,x=divmod(cursor,640)
-        if y>=height or x>=width or x+length>width:
+        # MapData/MapObject SPRs end each native row with a zero-pixel packet\n        # positioned at x==width; it writes no pixels and is source-valid.\n        # Keep the stricter OBS behavior unless explicitly opted in.\n        empty_right_edge=(allow_zero_length_row_end and x==width and length==0)\n        if y>=height or (x>=width and not empty_right_edge) or x+length>width:
             raise ValueError("OBS source buffer packet outside frame "+
                              str((run,x,y,length,width,height)))
         if length:
