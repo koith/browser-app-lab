@@ -145,6 +145,46 @@ def exercise(browser_type,label):
         assert page.locator("#posts article.post").count()==1
         assert "obsolete delayed result" not in page.locator("#posts").inner_text()
         assert "1건 중 1건" in page.locator("#status").inner_text()
+        # Exercise the *real archive UI* through its normal mocked API
+        # response rather than invoking a private JS function from outside
+        # its closure. This catches both query rendering and slot mapping.
+        pid="d"*40
+        second_url=SRC(pid,0)
+        POSTS.append({"id":pid,"platform":"bluesky",
+          "posted_at":"2026-11-07T00:00:00Z",
+          "text":"source-slot-original-second",
+          "source_url":"https://bsky.app/profile/qa-public.test/post/synthetic-second",
+          "media_expected":2,"media_saved":1,"capture_status":"partial_media",
+          "media":[{"index":1,"kind":"image","mime":"image/png",
+                    "bytes":10,"verified":True,"url":second_url}]})
+        try:
+            page.locator("#query").fill("source-slot-original-second")
+            page.locator("#search button").click()
+            page.wait_for_function(
+                "document.querySelector('#posts .post-body')?.textContent.includes('source-slot-original-second')")
+            assert page.locator("#posts figure.media").count()==2
+            assert "첨부 1" in page.locator("#posts .media-unavailable").first.inner_text()
+            assert page.locator("#posts img").count()==1
+            assert page.locator("#posts img").first.get_attribute("src")==second_url
+            POSTS.append({"id":"e"*40,"platform":"bluesky",
+              "posted_at":"2026-11-07T00:00:00Z",
+              "text":"source-slot-duplicate-conflict",
+              "media_expected":2,"media_saved":2,"capture_status":"partial_media",
+              "media":[{"index":1,"kind":"image","mime":"image/png",
+                        "bytes":10,"verified":True,"url":SRC("e"*40,0)},
+                       {"index":1,"kind":"image","mime":"image/png",
+                        "bytes":10,"verified":True,"url":SRC("e"*40,1)}]})
+            try:
+                page.locator("#query").fill("source-slot-duplicate-conflict")
+                page.locator("#search button").click()
+                page.wait_for_function(
+                    "document.querySelector('#posts .post-body')?.textContent.includes('source-slot-duplicate-conflict')")
+                assert page.locator("#posts img").count()==0
+                assert page.locator("#posts .media-unavailable").count()==2
+            finally:
+                POSTS.pop()
+        finally:
+            POSTS.pop()
         w=page.evaluate("({scroll:document.documentElement.scrollWidth,width:innerWidth})")
         assert w["scroll"]<=w["width"]+2,w
         assert not errors,errors

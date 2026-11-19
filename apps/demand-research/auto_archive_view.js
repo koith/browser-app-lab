@@ -108,9 +108,26 @@ function postCard(post){
   // The archive may have a verified record for an attachment whose metadata
   // file was never uploaded. Display its absent position instead of silently
   // shrinking the media grid or filling it with a different post's picture.
-  const count=Math.min(16,Math.max(expectedSlots,stored.length));
+  // The server's media array is compact, but its "index" is the original
+  // attachment position derived from immutable media/000N keys. Rebuild
+  // actual source slots: otherwise 0002 becomes displayed as photo #1 when
+  // the first original was lost. Older responses without an index retain
+  // their original positional interpretation for compatibility.
+  const bySlot=new Map();
+  for(let ordinal=0;ordinal<stored.length;ordinal++){
+    const item=stored[ordinal];
+    if(!item||typeof item!=="object")continue;
+    const slot=Object.prototype.hasOwnProperty.call(item,"index")?
+      item.index:ordinal;
+    if(!Number.isSafeInteger(slot)||slot<0||slot>=16)continue;
+    // Conflicting evidence for one source slot must never be presented as
+    // one arbitrarily selected original.
+    bySlot.set(slot,bySlot.has(slot)?null:item);
+  }
+  const maxSlot=bySlot.size?Math.max(...bySlot.keys())+1:0;
+  const count=Math.min(16,Math.max(expectedSlots,maxSlot,stored.length));
   for(let index=0;index<count;index++)
-    media.append(mediaView(stored[index],index));
+    media.append(mediaView(bySlot.get(index),index));
   if(media.children.length)card.append(media);
   const saved=Number(post.media_saved||0),expected=Number(post.media_expected||0);
   const partial=post.capture_status!=="remote_verified"||saved<expected;
