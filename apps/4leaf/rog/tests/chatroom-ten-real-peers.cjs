@@ -89,6 +89,22 @@ const assert=require('node:assert/strict');
   assert.ok(proof.scroll.content>proof.scroll.height&&proof.scroll.top>0,
    'ten authentic names cause native user roster to scroll, not clip');
   assert.equal(proof.chatCount,0,'no synthetic peer menus');
+  // The roster scroll column (chat.jpg 758,35) follows and drives the list.
+  const rosterScroll=await host.evaluate(async()=>{
+   const list=document.getElementById('social-peer-list'),thumb=document.getElementById('leaf-roster-scroll-thumb');
+   list.scrollTop=0;list.dispatchEvent(new Event('scroll'));await new Promise(r=>requestAnimationFrame(r));
+   const top0=thumb.offsetTop;document.getElementById('leaf-roster-scroll-down').click();
+   await new Promise(r=>requestAnimationFrame(r));
+   const afterDown={list:list.scrollTop,thumb:thumb.offsetTop};
+   list.scrollTop=list.scrollHeight;list.dispatchEvent(new Event('scroll'));await new Promise(r=>requestAnimationFrame(r));
+   const end=thumb.offsetTop;document.getElementById('leaf-roster-scroll-up').click();
+   return {top0,afterDown,end,afterUp:list.scrollTop,max:list.scrollHeight-list.clientHeight,
+    overflow:document.getElementById('leaf-roster-scroll').dataset.overflow}});
+  assert.equal(rosterScroll.overflow,'true','roster column knows the list overflows '+JSON.stringify(rosterScroll));
+  assert.ok(rosterScroll.afterDown.list===16&&rosterScroll.afterDown.thumb>rosterScroll.top0,
+   'down cell scrolls one 16px row and moves the thumb '+JSON.stringify(rosterScroll));
+  assert.ok(rosterScroll.end>rosterScroll.afterDown.thumb&&rosterScroll.afterUp===rosterScroll.max-16,
+   'thumb reaches the bottom and the up cell scrolls back one row '+JSON.stringify(rosterScroll));
   await host.screenshot({path:'leaf-original-wood-room-ten-real-participants.png'});
   // 2004 chat_ref.jpg also records 11 real people. Reproduce that STATE
   // with a genuine ELEVENTH independent browser tab, never a fake NPC.

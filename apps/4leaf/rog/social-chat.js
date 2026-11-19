@@ -356,6 +356,9 @@
   window.__LEAF_NATIVE_SCROLLBAR__?.update?.();
  }
  function renderMessage(m){
+  // P0-CHAT: the room screen module owns the original "닉네임 : 내용" line.
+  const screenLine=window.__LEAF_CHATROOM_SCREEN__?.messageLine?.(m);
+  if(screenLine){appendChatLine($('chat-log'),screenLine);return}
   const el=document.createElement('div');el.className='social-chat-message';
   const time=document.createElement('time');time.textContent=new Date(m.time).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
   const name=document.createElement('b');name.textContent=m.user+'　';
@@ -656,6 +659,7 @@
  }
  function render(){
   if(!sceneInit)return;
+  if(state.view!=='room')window.__LEAF_CHATROOM_SCREEN__?.leftRoom?.();
   // Old phone map may own reparented buttons. Remove it BEFORE creating
   // replacement canonical buttons, or getElementById would bind a stale one.
   $('social-mobile-room-map')?.remove();
@@ -1282,6 +1286,7 @@
   if(state.view!=='room')return;
   const layer=$('social-avatar-layer');if(!layer)return;
   const users=onlinePeers(state.scope);
+  window.__LEAF_CHATROOM_SCREEN__?.occupants(state.roomId,users.map(u=>({id:u.id,nick:u.nick})),{central:Boolean(central.enabled&&!state.offlineRoom)});
   const openMenu=$('social-actor-menu');
   if(openMenu&&!users.some(p=>p.id===openMenu.dataset.peer))closeActorMenu();
   for(const stale of [...layer.querySelectorAll('.social-avatar')]){
@@ -1319,6 +1324,8 @@
   const layer=$('social-avatar-layer');if(!layer)return;
   const node=[...layer.querySelectorAll('.social-avatar')].find(el=>el.dataset.peer===sender);
   if(!node)return;
+  // P0-CHAT: balloons are laid out by the room screen module (tag on top, over the scene).
+  if(window.__LEAF_CHATROOM_SCREEN__?.say(sender,safe(text,55)))return;
   node.querySelector('.social-speech')?.remove();
   const bubble=document.createElement('div');bubble.className='social-speech';bubble.textContent=safe(text,55);bubble.setAttribute('role','status');node.append(bubble);
   // Actual archived 4LEAF talkbox pieces, assembled around real chat text.
@@ -1745,6 +1752,7 @@
       acceptPacket({v:1,kind:'chat',id:entry.id,scope:'room:'+event.roomId,
        sender:entry.sender,user:entry.user,text:entry.text,time:entry.time},'central');
      }
+     window.__LEAF_CHATROOM_SCREEN__?.serverRoster?.(state.roomId);
      renderOccupants();
     }
     updateCounts();
