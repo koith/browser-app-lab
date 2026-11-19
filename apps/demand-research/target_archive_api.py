@@ -271,6 +271,27 @@ def read_matching_recent_verified_archive(platform,account,requested_at):
     return None
 
 
+# A failed older job can be superseded by a NEWER, independently SHA-
+# authenticated ZIP for exactly the same selected public account. Memoize
+# bounded read-only proofs (including negative lookups) so a mobile browser
+# with many older receipts does not repeatedly decrypt the same cloud index.
+_recent_proof_cache={}
+
+
+def matching_recent_verified_cached(platform,account,requested_at):
+    key=(platform,account,int(requested_at))
+    now=time.monotonic()
+    seen=_recent_proof_cache.get(key)
+    if seen is not None and now-seen[0]<120:
+        return seen[1]
+    verified=read_matching_recent_verified_archive(platform,account,requested_at)
+    _recent_proof_cache[key]=(time.monotonic(),verified)
+    while len(_recent_proof_cache)>48:
+        oldest=min(_recent_proof_cache,key=lambda item:_recent_proof_cache[item][0])
+        del _recent_proof_cache[oldest]
+    return verified
+
+
 def same_origin_operator(request):
     # The signed private site is behind a TLS-terminating reverse proxy.
     # Compare the browser Origin against the server's Host, not an internal
@@ -509,6 +530,25 @@ def create_router(auth):
                                         headers={"Cache-Control":"private, no-store"})
                 state="VERIFYING_STORAGE"
             else:
+                # The current run may have failed after a provider returned a
+                # transient 400/timeout, yet a later approved run could have
+                # captured and SHA-verified the SAME public account. Never
+                # require the user to resubmit or leave its old receipt in a
+                # fake "pending" state when a newer immutable proof exists.
+                # The helper enforces account identity + capture time and
+                # authenticates actual encrypted ZIP and per-file SHA; a
+                # green GitHub workflow alone is NOT sufficient.
+                if github_temp_bundle.enabled():
+                    try:
+                        repaired=await asyncio.wait_for(asyncio.to_thread(
+                            matching_recent_verified_cached,
+                            item["platform"],item["account"],item["at"]),timeout=11)
+                    except (RuntimeError,ValueError,KeyError,TypeError,
+                            asyncio.TimeoutError):
+                        repaired=None
+                    if repaired and repaired.get("remote_verified") is True:
+                        return JSONResponse({"run_id":run_id,**repaired},
+                                            headers={"Cache-Control":"private, no-store"})
                 # Trusted bridge can rerun a failed workflow twice with its
                 # ORIGINAL run ID, keeping the signed request receipt valid.
                 attempt=run.get("run_attempt")

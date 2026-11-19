@@ -433,3 +433,71 @@ def test_fifteen_workflow_statuses_use_independent_cache_not_rate_limit_flood(mo
             "path":".github/workflows/intersection-target-account-bundle.yml"})
     target_archive_api.get_workflow_run(first)
     assert called.count(first)==2
+
+
+def test_failed_receipt_is_closed_by_newer_exact_account_sha_verified_backup(
+        client,monkeypatch):
+    """A later verified ZIP can repair an old failed receipt, never a green CI."""
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(target_archive_api,"_recent_proof_cache",{})
+    monkeypatch.setattr(target_archive_api.backup_queue,"create_request",
+                        lambda *_:2566815854)
+    monkeypatch.setattr(target_archive_api.backup_queue,"state",
+                        lambda *_:{"request":{"job_id":2566815854},
+                                  "accepted":{"workflow_run_id":43827196049}})
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",
+                        lambda *_:{"id":43827196049,"status":"completed",
+                                  "conclusion":"failure","run_attempt":3})
+    looks=[]
+    def source(platform,account,at):
+        looks.append((platform,account,at))
+        if platform=="bluesky" and account=="sample.bsky.social":
+            return {"state":"PARTIAL_BACKUP","remote_verified":True,
+                    "posts":7,"objects":31,
+                    "account_key":"bluesky-"+"b"*40,
+                    "recorded_at":"2026-11-20T00:00:00+00:00"}
+        return None
+    monkeypatch.setattr(target_archive_api,
+                        "read_matching_recent_verified_archive",source)
+    response=client.post("/api/target-archive/start",
+        headers={"Origin":"https://testserver",
+                 "X-Archive-Intent":"selected-public-account-v1"},
+        json={"platform":"bluesky","account":"sample.bsky.social"})
+    assert response.status_code==202,response.text
+    receipt=response.json()["receipt"]
+    uri="/api/target-archive/jobs/2566815854?receipt="+receipt
+    first=client.get(uri)
+    assert first.status_code==200,first.text
+    assert first.json()["state"]=="PARTIAL_BACKUP"
+    assert first.json()["remote_verified"] is True
+    assert first.json()["posts"]==7 and first.json()["objects"]==31
+    # Mobile refreshes must reuse the verified proof rather than download
+    # all ZIPs again or count the old receipt as a second outstanding job.
+    assert client.get(uri).json()["state"]=="PARTIAL_BACKUP"
+    assert len(looks)==1
+
+
+def test_old_failed_receipt_cannot_use_another_accounts_backup(client,monkeypatch):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(target_archive_api,"_recent_proof_cache",{})
+    monkeypatch.setattr(target_archive_api.backup_queue,"create_request",
+                        lambda *_:2566815855)
+    monkeypatch.setattr(target_archive_api.backup_queue,"state",
+                        lambda *_:{"request":{"job_id":2566815855},
+                                  "accepted":{"workflow_run_id":43827196050}})
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",
+                        lambda *_:{"id":43827196050,"status":"completed",
+                                  "conclusion":"failure","run_attempt":3})
+    monkeypatch.setattr(target_archive_api,
+                        "read_matching_recent_verified_archive",lambda *_:None)
+    response=client.post("/api/target-archive/start",
+        headers={"Origin":"https://testserver",
+                 "X-Archive-Intent":"selected-public-account-v1"},
+        json={"platform":"bluesky","account":"unrelated.bsky.social"})
+    assert response.status_code==202
+    result=client.get("/api/target-archive/jobs/2566815855?receipt="+
+                      response.json()["receipt"])
+    assert result.status_code==200 and result.json()["state"]=="FAILED"
+    assert result.json()["remote_verified"] is False
