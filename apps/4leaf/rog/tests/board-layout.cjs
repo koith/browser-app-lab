@@ -38,8 +38,10 @@ const {startGameWithConfirmation}=require('./game-start-confirmation.cjs');
      const vertical=a.dmpX===b.dmpX&&Math.abs(a.dmpY-b.dmpY)===1;
      if(horizontal||vertical){
       adjacent++;
-      if(horizontal){minimumH=Math.min(minimumH,dx);if(Math.abs(dx-camera.projectedPitch.x)>1)bad++}
-      if(vertical){minimumV=Math.min(minimumV,dy);if(Math.abs(dy-camera.projectedPitch.y)>1)bad++}
+      // Odd-q hex (BRD-01, VERIFIED): a column step is 105 px across and
+      // 40 px down/up; a row step is 80 px straight down.
+      if(horizontal){minimumH=Math.min(minimumH,dx);if(Math.abs(dx-camera.projectedPitch.x)>1||Math.abs(dy-camera.projectedPitch.oddColumnDrop)>1)bad++}
+      if(vertical){minimumV=Math.min(minimumV,dy);if(Math.abs(dy-camera.projectedPitch.y)>1||dx>1)bad++}
      }
     }
     return {count:tiles.length,sizes,adjacent,bad,minimumH,minimumV,
@@ -69,9 +71,11 @@ const {startGameWithConfirmation}=require('./game-start-confirmation.cjs');
     'all tiles show their independently decoded recovered TIS PNG, not a fake or an unkeyed source');
    assert.deepEqual(result.sourceGrid,{width:2800,height:1551,pitchX:70,pitchY:47});
    assert.equal(result.bad,0,'every source DMP neighboring position uses projected sprite pitch');
-   assert.ok(result.minimumH>=149&&result.minimumH<=151&&
-     result.minimumV>=99&&result.minimumV<=101,
-    'Original 145x97 artwork MUST NOT intersect a horizontal/vertical DMP neighbor: '+JSON.stringify(result));
+   // board.jpg/battle.jpg (BRD-01): the original 145x97 sprites interlock on
+   // a 105x80 honeycomb; the former 150x100 no-overlap rule was a WEB guess.
+   assert.ok(result.minimumH>=104&&result.minimumH<=106&&
+     result.minimumV>=79&&result.minimumV<=81,
+    'original 145x97 artwork sits on the measured 105x80 odd-q honeycomb: '+JSON.stringify(result));
    assert.ok(result.adjacent>10,'adjacent cells were checked');
    await page.screenshot({path:shot});
    await page.locator('#exit-game').click();
