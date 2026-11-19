@@ -91,7 +91,22 @@ def get_workflow_run(run_id):
         # GitHub run metadata for a public repository is public; no private
         # workflow token leaves GitHub Actions or gets embedded in the page.
         cached=_public_run_cache.get(run_id)
-        if cached is not None and time.monotonic()-cached[0]<50:
+        # The old single-entry cache was wiped for EVERY different job ID.
+        # With 15 signed requests polled every 12 seconds it generated 4,000+
+        # anonymous GitHub REST requests/hour and hit GitHub's 60/h rate
+        # limit. Keep a per-run bounded cache, with shorter refresh for live
+        # states and bounded eventual retries for failed runs.
+        if cached is not None:
+            status=cached[1].get("status")
+            conclusion=cached[1].get("conclusion")
+            attempts=cached[1].get("run_attempt")
+            ttl=(60 if status in ("queued","pending","in_progress","waiting","requested")
+                 else 300 if conclusion in ("failure","timed_out") and
+                    type(attempts) is int and attempts<3
+                 else 3600)
+        else:
+            ttl=0
+        if cached is not None and time.monotonic()-cached[0]<ttl:
             run=cached[1]
         else:
             repo=os.getenv("DEMAND_ARCHIVE_DISPATCH_REPO","koith/browser-app-lab")
@@ -108,8 +123,13 @@ def get_workflow_run(run_id):
                     run=json.loads(response.read(100000))
             except (HTTPError,URLError,ValueError,TimeoutError,OSError):
                 raise RuntimeError("GitHub status unavailable") from None
-            _public_run_cache.clear()
             _public_run_cache[run_id]=(time.monotonic(),run)
+            # No unbounded accumulation of historical job metadata in the
+            # free Render gateway. Eviction cannot turn a run into success.
+            while len(_public_run_cache)>96:
+                oldest=min(_public_run_cache,
+                           key=lambda key:_public_run_cache[key][0])
+                del _public_run_cache[oldest]
     if (run.get("id")!=run_id or
         run.get("path")!=".github/workflows/"+WORKFLOW or
         run.get("event")!="workflow_dispatch" or

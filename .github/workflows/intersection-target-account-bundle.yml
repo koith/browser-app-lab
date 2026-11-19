@@ -77,8 +77,12 @@ jobs:
   private-public-account-bundle:
     if: ${{ inputs.profile_backfill_all != true && inputs.profile_index_only != true }}
     concurrency:
-      # Independent immutable ZIP writes must not queue behind journal repair.
-      group: intersection-target-zip-production
+      # The former constant group serialized EVERY requested account, even
+      # when 15 unrelated accounts were already dispatched. A 22-minute job
+      # could block all others. Keep each account's immutable ZIP generation
+      # ordered, but allow DISTINCT public accounts to run in parallel.
+      # The hourly scanner keeps its own isolated single-flight group.
+      group: ${{ github.event_name == 'workflow_dispatch' && format('intersection-target-zip-{0}-{1}', inputs.platform, inputs.account) || 'intersection-target-zip-scheduled' }}
       cancel-in-progress: false
       queue: max
     runs-on: ubuntu-24.04

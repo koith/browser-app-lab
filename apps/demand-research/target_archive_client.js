@@ -58,6 +58,12 @@
   let currentRun=null;
   let pendingJobs=[];
   const pollTimers=new Map(),polling=new Set();
+  // The original client opened one expensive SHA/ZIP status request every
+  // twelve seconds for EACH pending receipt. 15 simultaneous requests can
+  // exhaust the free 512 MiB reader and keep verified jobs pending forever.
+  // Two bounded checks protect both the gateway and older signed receipts.
+  let activeStatusReads=0;
+  const MAX_PARALLEL_STATUS_READS=2;
   let submitSequence=Promise.resolve();
   let connectionAttempting=false;
   let inlineStatus=null;
@@ -194,18 +200,30 @@
   // A later selected account never cancels or replaces an earlier job.
   async function pollJob(job=currentRun){
     if(!gatewayReady||!job||!pendingJobs.includes(job)||polling.has(job.run_id))return;
-    clearPoll(job);polling.add(job.run_id);
+    clearPoll(job);
+    if(activeStatusReads>=MAX_PARALLEL_STATUS_READS){
+      // Round-robin, not a single blocking queue: every older signed receipt
+      // gets another chance, but we never flood verified ZIP reader with 15.
+      const timer=window.setTimeout(()=>{
+        pollTimers.delete(job.run_id);void pollJob(job);
+      },1100+Math.min(4000,Math.max(0,pendingJobs.indexOf(job))*180));
+      pollTimers.set(job.run_id,timer);
+      return;
+    }
+    activeStatusReads++;polling.add(job.run_id);
     const visible=(text,kind,accountKey)=>{
       job.state=kind;
       if(currentRun===job)showJob(text,kind,accountKey);
       renderQueueInfo();
     };
+    const controller=new AbortController();
+    const requestTimeout=window.setTimeout(()=>controller.abort(),18000);
     try{
       const response=await fetch("/api/target-archive/jobs/"+
         encodeURIComponent(String(job.run_id))+"?receipt="+
         encodeURIComponent(job.receipt),{
           credentials:"same-origin",cache:"no-store",
-          headers:{Accept:"application/json"}
+          headers:{Accept:"application/json"},signal:controller.signal
         });
       if(!response.ok)throw Error("Job status HTTP "+response.status);
       const result=await response.json();
@@ -247,7 +265,9 @@
       if(pendingJobs.includes(job))
         visible("접수된 백업의 진행 상태를 다시 확인 중입니다.","verifying");
     }finally{
+      window.clearTimeout(requestTimeout);
       polling.delete(job.run_id);
+      activeStatusReads=Math.max(0,activeStatusReads-1);
       if(pendingJobs.includes(job)){
         const timer=window.setTimeout(()=>{pollTimers.delete(job.run_id);void pollJob(job)},12000);
         pollTimers.set(job.run_id,timer);

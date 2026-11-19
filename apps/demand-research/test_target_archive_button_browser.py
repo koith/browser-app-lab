@@ -184,7 +184,79 @@ Object.defineProperty(navigator,"clipboard",{
         browser.close()
 
 
+def verify_fifteen_existing_receipts(browser_type,label):
+    """All 15 signed jobs finish without 15 concurrent private ZIP reads."""
+    browser=browser_type.launch(headless=True)
+    try:
+        page=browser.new_page(viewport={"width":390 if label.startswith("mobile") else 1200,
+                                       "height":844})
+        errors=[]
+        page.on("pageerror",lambda error:errors.append(str(error)))
+        page.add_init_script("""(() => {
+          const receipts=Array.from({length:15},(_,i)=>({
+            run_id:41999001001+i,receipt:'synthetic-signed-request-'+String(i),
+            platform:'bluesky',account:'public-test'+i+'.bsky.social',
+            createdAt:Date.now()-60000+i*100
+          }));
+          sessionStorage.setItem('intersection:private-archive-jobs:v2',
+                                 JSON.stringify(receipts));
+          window.__statusActive=0;window.__statusPeak=0;window.__statusCalls=0;
+          const oldFetch=window.fetch.bind(window);
+          window.fetch=(uri,opts)=>{
+            if(String(uri).startsWith('/api/target-archive/jobs/')){
+              window.__statusActive++;window.__statusCalls++;
+              window.__statusPeak=Math.max(window.__statusPeak,window.__statusActive);
+              return new Promise(resolve=>setTimeout(()=>{
+                window.__statusActive--;
+                resolve(new Response(JSON.stringify({
+                  state:'REMOTE_VERIFIED',remote_verified:true,posts:2,objects:5,
+                  account_key:'bluesky-'+'a'.repeat(40)
+                }),{status:200,headers:{'Content-Type':'application/json'}}));
+              },250));
+            }
+            return oldFetch(uri,opts);
+          };
+        })();""")
+        def route_it(route):
+            from urllib.parse import urlsplit
+            parsed=urlsplit(route.request.url)
+            if parsed.hostname!="intersection-originals-free.onrender.com":
+                route.abort();return
+            if parsed.path=="/":
+                route.fulfill(status=200,content_type="text/html; charset=utf-8",body=HTML)
+            elif parsed.path=="/target_archive_client.js":
+                route.fulfill(status=200,content_type="application/javascript",
+                              body=(ROOT/"target_archive_client.js").read_text("utf-8"))
+            elif parsed.path=="/api/target-archive/status":
+                route.fulfill(status=200,content_type="application/json",
+                              body='{"enabled":true}')
+            elif parsed.path=="/api/account-archives":
+                route.fulfill(status=200,content_type="application/json",
+                              body='{"accounts":[]}')
+            else:
+                route.abort()
+        page.route("**/*",route_it)
+        page.goto(PRIVATE,wait_until="domcontentloaded",timeout=30000)
+        page.wait_for_function("""() =>
+          sessionStorage.getItem('intersection:private-archive-jobs:v2')===null
+          && window.__statusCalls>=15""",timeout=24000)
+        result=page.evaluate("""() => ({
+          maximum:window.__statusPeak,calls:window.__statusCalls,
+          pending:document.querySelector('.target-archive-queue-count')?.hidden
+        })""")
+        assert result["maximum"]<=2,result
+        assert result["calls"]==15,result
+        assert result["pending"] is True,result
+        assert not errors,errors
+        print("INTERSECTION_FIFTEEN_BACKUP_RECEIPTS_RECONCILED_PASS",
+              label,"verified=15 max_simultaneous="+str(result["maximum"]))
+    finally:
+        browser.close()
+
+
 if __name__=="__main__":
     with sync_playwright() as p:
         verify(p.chromium,"desktop-chromium",1200,800)
         verify(p.webkit,"mobile-webkit",390,844)
+        verify_fifteen_existing_receipts(p.chromium,"desktop-chromium")
+        verify_fifteen_existing_receipts(p.webkit,"mobile-webkit")
