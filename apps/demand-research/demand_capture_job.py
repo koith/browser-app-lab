@@ -847,7 +847,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                        "posted_at": first["posted_at"],
                        "profile_url": first.get("profile_url", ""),
                        "media_urls": first["media_links"],
-                       "media_expected": len(first["media_links"])}
+                       "media_expected": first.get("media_expected",len(first["media_links"]))}
                 phase="write_post_and_verify_media"
                 post, blobs = make_post(row, first["observed_at"], cloud=cloud)
                 if spool is not None:
