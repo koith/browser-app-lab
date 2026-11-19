@@ -29,6 +29,8 @@ import requests
 from photo_visual_dedupe import WorkVisualIndex
 from perceptual_duplicate_audit import scan_image, candidate_relation
 from photo_quality_evidence import preferred_pair
+from collector_v2_strategy import (publisher_targets, source_evidence_pages,
+                                   verify_identity, best_observed_variants)
 
 ROOT = Path(__file__).resolve().parents[2]
 USER_AGENT = "GalleryCollectorV2/0.1 (public pages only; respectful crawling)"
@@ -94,6 +96,7 @@ def load_inventory(root, model):
             if isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{64}", sha):
                 known.add(sha)
                 counts[book["id"]].add(sha)
+    official = publisher_targets(root, model)
     works = []
     for a in src.get("albums", []):
         aid = a.get("id")
@@ -103,14 +106,26 @@ def load_inventory(root, model):
             continue
         if not urls:
             continue
-        expected = next((a[k] for k in ("advertised_photos", "public_web_edition_photos",
-                                       "source_claimed_total_edition_photos")
-                         if type(a.get(k)) is int and 1 <= a[k] <= 25000), None)
+        publisher_count = official.get(aid, {}).get("declared_photo_count")
+        source_count = next((a[k] for k in ("advertised_photos", "public_web_edition_photos",
+                                            "source_claimed_total_edition_photos")
+                             if type(a.get(k)) is int and 1 <= a[k] <= 25000), None)
+        # Publisher-confirmed count beats preview-list labels and catalogue
+        # claims. Union-of-SHA may still contain re-encodes, so the computed
+        # gap is only a CONSERVATIVE minimum, never edition completion proof.
+        expected = publisher_count or source_count
         works.append({"id": aid, "title": a.get("title") or aid, "urls": urls,
                       "priority": (PRIORITY[model].index(aid)
                                    if aid in PRIORITY[model] else 100 + int(a.get("priority") or 0)),
                       "observed_sha_count": len(counts[aid]), "expected": expected,
-                      "gap": max(0, expected - len(counts[aid])) if expected else None})
+                      "target_basis": "publisher" if publisher_count else (
+                          "public_source_claim" if source_count else "unknown"),
+                      "declared_resolution": [
+                          official.get(aid, {}).get("declared_width"),
+                          official.get(aid, {}).get("declared_height")] if publisher_count else None,
+                      "gap": max(0, expected - len(counts[aid])) if expected else None,
+                      "missing_lower_bound_by_sha": max(0, expected - len(counts[aid]))
+                          if expected else None})
     works.sort(key=lambda a: (a["priority"], -(a["gap"] or 0), a["id"]))
     return works, known
 
@@ -145,9 +160,12 @@ class QueueDB:
                 ready.append(w)
         return ready[:max_works]
 
-    def visited_media(self, url):
-        row = self.db.execute("SELECT checked FROM media WHERE url=?", (url,)).fetchone()
-        return bool(row and row[0] > self.now - 1209600)
+    def visited_media(self, url, saved_sha=None):
+        row = self.db.execute("SELECT sha,checked FROM media WHERE url=?", (url,)).fetchone()
+        # A downloaded candidate isn't a published image. Retrying its URL
+        # is necessary until the NEW SHA actually appears in the saved index.
+        return bool(row and (saved_sha is None or row[0] in saved_sha)
+                    and row[1] > self.now - 1209600)
 
     def remember_media(self, url, sha):
         self.db.execute("INSERT OR REPLACE INTO media VALUES (?,?,?)",
@@ -291,7 +309,7 @@ def page_candidates(raw, origin, max_candidates=160):
     for tag in container.select("a[href]"):
         if tag.find("img") is None:
             add(tag.get("href"))
-    return result[:max_candidates]
+    return best_observed_variants(result, max_candidates)
 
 
 def inspect_photo(raw):
@@ -313,14 +331,29 @@ def inspect_photo(raw):
             "ext": {"JPEG": "jpg", "PNG": "png", "WEBP": "webp"}[fmt]}
 
 
-def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
-            max_pages_per_work=3, deadline_seconds=600, http=None, now=None):
+def collect(root, model, stage, state_file, *, max_works=12, max_photos=48,
+            max_per_work=6, max_pages_per_work=5, deadline_seconds=900,
+            discovery_evidence=None, http=None, now=None):
     if not (1 <= max_works <= 200 and 1 <= max_photos <= 500
+            and 1 <= max_per_work <= 500
             and 1 <= max_pages_per_work <= 20 and 1 <= deadline_seconds <= 3600):
         raise ValueError("invalid bounded campaign")
     stage = Path(stage)
     stage.mkdir(parents=True, exist_ok=True)
     works, known = load_inventory(root, model)
+    evidence = {}
+    if discovery_evidence:
+        evidence_path = Path(discovery_evidence)
+        if evidence_path.is_file():
+            evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    extra_sources = source_evidence_pages(evidence, model, safe_url=public_https)
+    extra_found = 0
+    for work in works:
+        added = [url for url in extra_sources.get(work["id"], [])
+                 if url not in work["urls"]]
+        work["discovered_urls"] = added
+        work["urls"].extend(added)
+        extra_found += len(added)
     base = Path(root) / "apps" / (model + "-gallery")
     saved = json.loads((base / "stored-albums.json").read_text(encoding="utf-8"))
     by_id = {a["id"]: a for a in saved.get("albums", [])}
@@ -330,9 +363,10 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
     client = http or PublicHTTP()
     cutoff = time.monotonic() + deadline_seconds
     report = {"model": model, "registered_works": len(works),
-              "eligible_works": len(selected), "works": [],
+              "eligible_works": len(selected),
+              "admitted_discovered_pages": extra_found, "works": [],
               "new_physical_sha_staged": 0, "bytes_staged": 0,
-              "gallery_verified": False}
+              "gallery_verified": False, "counts_are_not_completion_proof": True}
     albums = []
     session_sha = set()
     for work in selected:
@@ -340,7 +374,10 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
             break
         details = {"id": work["id"], "pages": 0, "media_candidates": 0,
                    "files_staged": 0, "known_sha": 0, "same_frame_filtered": 0,
-                   "errors": {}}
+                   "errors": {}, "target_count": work["expected"],
+                   "minimum_missing_by_sha": work["missing_lower_bound_by_sha"],
+                   "target_basis": work["target_basis"],
+                   "discovered_sources": len(work["discovered_urls"])}
         photos = []
         stage_visual = []
         if work["id"] not in visual_indexes:
@@ -349,7 +386,8 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
         previous_visual = visual_indexes[work["id"]]
         pages_without_failure = 0
         for page in work["urls"][:max_pages_per_work]:
-            if time.monotonic() >= cutoff or len(session_sha) >= max_photos:
+            if (time.monotonic() >= cutoff or len(session_sha) >= max_photos
+                    or len(photos) >= min(max_per_work, max_photos)):
                 break
             if not is_specific_edition(work, page):
                 details["errors"]["generic_page_needs_adapter"] = (
@@ -358,6 +396,12 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
             try:
                 page_raw = client.fetch(page, kind="html", max_bytes=3000000)
                 details["pages"] += 1
+                matched, proof = verify_identity(
+                    page_raw, work, model, discovered=page in work["discovered_urls"])
+                if not matched:
+                    details["errors"]["identity_"+proof] = (
+                        details["errors"].get("identity_"+proof, 0) + 1)
+                    continue
                 candidates = page_candidates(page_raw, page)
                 details["media_candidates"] += len(candidates)
                 pages_without_failure += 1
@@ -365,9 +409,10 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
                 details["errors"][exc.code] = details["errors"].get(exc.code, 0) + 1
                 continue
             for url in candidates:
-                if len(session_sha) >= max_photos or time.monotonic() >= cutoff:
+                if (len(session_sha) >= max_photos or time.monotonic() >= cutoff
+                        or len(photos) >= min(max_per_work, max_photos)):
                     break
-                if queue.visited_media(url):
+                if queue.visited_media(url, known):
                     continue
                 try:
                     raw = client.fetch(url, kind="image", max_bytes=40000000)
@@ -432,6 +477,8 @@ def collect(root, model, stage, state_file, *, max_works=5, max_photos=20,
             status = "new_staged"
         elif pages_without_failure:
             status = "unchanged" if details["media_candidates"] else "no_public_images"
+        elif any(k.startswith("identity_") for k in details["errors"]):
+            status = "unverified_page"
         elif any(k.startswith("blocked") for k in details["errors"]):
             status = "blocked"
         elif "generic_page_needs_adapter" in details["errors"] and len(details["errors"]) == 1:
@@ -460,10 +507,12 @@ def main():
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--stage", type=Path, required=True)
     parser.add_argument("--state", type=Path)
-    parser.add_argument("--max-works", type=int, default=5)
-    parser.add_argument("--max-photos", type=int, default=20)
-    parser.add_argument("--max-pages-per-work", type=int, default=3)
-    parser.add_argument("--deadline-seconds", type=int, default=600)
+    parser.add_argument("--max-works", type=int, default=12)
+    parser.add_argument("--max-photos", type=int, default=48)
+    parser.add_argument("--max-per-work", type=int, default=6)
+    parser.add_argument("--max-pages-per-work", type=int, default=5)
+    parser.add_argument("--deadline-seconds", type=int, default=900)
+    parser.add_argument("--discovery-evidence", type=Path)
     parser.add_argument("--plan-only", action="store_true")
     a = parser.parse_args()
     works, known = load_inventory(a.root, a.model)
@@ -474,12 +523,16 @@ def main():
         selected = q.eligible(works, a.max_works)
         print("COLLECTOR_V2_PLAN", json.dumps({
             "model": a.model, "known_sha": len(known),
-            "eligible": [dict(id=w["id"], saved=w["observed_sha_count"], gap=w["gap"])
+            "eligible": [dict(id=w["id"], saved_SHA_upper_bound=w["observed_sha_count"],
+                              minimum_missing=w["missing_lower_bound_by_sha"],
+                              target=w["expected"], basis=w["target_basis"])
                          for w in selected]}, ensure_ascii=False))
         return
     result = collect(a.root, a.model, a.stage, state, max_works=a.max_works,
-                     max_photos=a.max_photos, max_pages_per_work=a.max_pages_per_work,
-                     deadline_seconds=a.deadline_seconds)
+                     max_photos=a.max_photos, max_per_work=a.max_per_work,
+                     max_pages_per_work=a.max_pages_per_work,
+                     deadline_seconds=a.deadline_seconds,
+                     discovery_evidence=a.discovery_evidence)
     print("COLLECTOR_V2_STAGED_NOT_YET_PUBLISHED", json.dumps(
         result, ensure_ascii=False), flush=True)
 
