@@ -59,3 +59,45 @@ test('closed form cannot JOIN after delayed CREATE ACK',async()=>{
  assert.equal(h.calls.filter(x=>x==='JOIN').length,0);
  assert.equal(h.session.room.id,'server-431');
 });
+test('lost CREATE acknowledgement reuses one logical request, never duplicates a room',async()=>{
+ const requests=[],ack={room:{id:'created-once',name:'Original Room'}};
+ let n=0;
+ const h=harness({
+  newRequestId:()=> 'b23a9ad3-51aa-48e3-a70f-9d2ca08db813',
+  create:async payload=>{
+   requests.push({...payload});
+   if(n++===0)throw Error('Lost HTTP 201 after server commit');
+   return ack;
+  }
+ });
+ await assert.rejects(h.session.submit(input),/Lost HTTP 201/);
+ assert.equal(h.session.state.phase,'retryable-create');
+ assert.equal(h.session.room,null);
+ const previousDraft=h.session.draft;
+ await h.session.submit({...input,name:'changed after timeout'});
+ assert.equal(requests.length,2);
+ assert.deepEqual(requests[0],requests[1],
+  'same room request must be replayed after an ambiguous lost acknowledgement');
+ assert.equal(requests[0].createRequestId,'b23a9ad3-51aa-48e3-a70f-9d2ca08db813');
+ assert.strictEqual(h.session.draft,previousDraft);
+ assert.equal(h.session.room.id,'created-once');
+});
+test('definitive invalid CREATE permits a corrected new request',async()=>{
+ let n=0;
+ const ids=['a23a9ad3-51aa-48e3-a70f-9d2ca08db813',
+  'a23a9ad3-51aa-48e3-a70f-9d2ca08db814'];
+ const sent=[];
+ const h=harness({
+  newRequestId:()=>ids[n++],
+  create:async data=>{
+   sent.push({...data});
+   if(sent.length===1){const err=Error('Bad name');err.status=400;throw err}
+   return {room:{id:'corrected-room'}};
+  }
+ });
+ await assert.rejects(h.session.submit(input),/Bad name/);
+ assert.equal(h.session.draft,null);
+ await h.session.submit({...input,name:'Corrected name'});
+ assert.equal(sent[1].name,'Corrected name');
+ assert.notEqual(sent[0].createRequestId,sent[1].createRequestId);
+});
