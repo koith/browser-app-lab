@@ -395,3 +395,40 @@ def test_queue_detail_does_not_expose_other_users_requests(client,monkeypatch):
     anonymous=TestClient(gateway.app,base_url="https://testserver")
     resp=anonymous.get("/api/target-archive/queue")
     assert resp.status_code==401
+
+
+def test_fifteen_workflow_statuses_use_independent_cache_not_rate_limit_flood(monkeypatch):
+    """One cached GH API record per receipt; no global clear on other jobs."""
+    import io
+    monkeypatch.delenv("DEMAND_ARCHIVE_DISPATCH_TOKEN",raising=False)
+    monkeypatch.setattr(target_archive_api,"_public_run_cache",{})
+    called=[]
+    class Response(io.BytesIO):
+        status=200
+    def source(request,timeout=12):
+        run_id=int(request.full_url.rstrip("/").split("/")[-1])
+        called.append(run_id)
+        return Response(json.dumps({
+            "id":run_id,"status":"completed","conclusion":"success",
+            "event":"workflow_dispatch","head_branch":"main",
+            "path":".github/workflows/intersection-target-account-bundle.yml",
+            "run_attempt":1
+        }).encode())
+    monkeypatch.setattr(target_archive_api,"urlopen",source)
+    ids=list(range(43000002001,43000002016))
+    for run_id in ids:
+        assert target_archive_api.get_workflow_run(run_id)["conclusion"]=="success"
+    for _ in range(7):
+        for run_id in ids:
+            assert target_archive_api.get_workflow_run(run_id)["id"]==run_id
+    assert called==ids,"15 signed jobs must not burn 120 GitHub API requests"
+    assert len(target_archive_api._public_run_cache)==15
+    # Cached in-progress status has a short, bounded refresh interval.
+    first=ids[0]
+    target_archive_api._public_run_cache[first]=(
+        __import__("time").monotonic()-61, {
+            "id":first,"status":"in_progress",
+            "event":"workflow_dispatch","head_branch":"main",
+            "path":".github/workflows/intersection-target-account-bundle.yml"})
+    target_archive_api.get_workflow_run(first)
+    assert called.count(first)==2
