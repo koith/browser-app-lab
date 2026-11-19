@@ -432,7 +432,20 @@ def run_bundle(run_id,account=None):
         bundle=tagged_bundle(tag,missing_ok=True)
         if bundle is None:
             continue
-        if account is None or bundle.selected_account==account:
+        if account is None:
+            return bundle
+        # Request receipts can carry a canonical handle whereas the ZIP
+        # manifest records the provider's verified profile URL (or vice
+        # versa). An exact string check stranded otherwise SHA-verified
+        # backups in "verifying" forever. Use the same strict provider
+        # identity parser for BOTH; never compare across platforms.
+        from target_account_archive import profile_input
+        try:
+            candidate=profile_input(bundle.selected_platform,bundle.selected_account)
+            requested=profile_input(bundle.selected_platform,account)
+        except (ValueError,TypeError,KeyError):
+            continue
+        if candidate==requested:
             return bundle
     return None
 
