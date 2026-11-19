@@ -110,8 +110,21 @@ jobs:
             python3 apps/4leaf/rog/tools/audit-native-chatmap-members.py \
               /tmp/leaf096d/source-client/4Leaf_Files \
               leaf-096d-native-chatmap-members.json
+            leaf-096d-native-map-assets/
           else
             echo 'Original source files unavailable; do not fabricate PAK member names'
+          fi
+      - name: Decode source 16 CT maps, 6 KT maps, and original tile/object sprites
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f /tmp/leaf096d/source-client/4Leaf_Files/MapData.pak ]; then
+            python3 -m venv /tmp/leaf096d/sprite-venv
+            /tmp/leaf096d/sprite-venv/bin/python -m pip -q install Pillow
+            /tmp/leaf096d/sprite-venv/bin/python \
+              apps/4leaf/rog/tools/decode-native-chat-map-source.py \
+              /tmp/leaf096d/source-client/4Leaf_Files \
+              leaf-096d-native-map-assets
           fi
       - name: Upload original client resource inventory only (no binaries)
         if: always()
