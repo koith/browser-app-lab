@@ -277,12 +277,30 @@ def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=64,
         try:
             row=db.execute("SELECT value FROM index_meta WHERE key='journal_page_cursor'").fetchone()
             cursor=row[0] if row else ""
+            # A previous SHA-verified checkpoint is not a license to skip
+            # rechecking forever. Reserve a small portion of each page for
+            # its immutable originals, while putting still-unverified posts
+            # first so slow/stale remote paths cannot starve missing entries.
+            has_receipts=db.execute("""SELECT 1 FROM sqlite_master
+                WHERE type='table' AND name='verified_archive_markers'""").fetchone()
+            already_verified=({r[0] for r in db.execute(
+                "SELECT id FROM verified_archive_markers")} if has_receipts else set())
         finally:
             db.close()
-        # Sorted circular order automatically revisits earlier damaged
-        # markers on later scans. No post IDs are printed to logs.
+        # Circular source cursor prevents a single permanently bad marker
+        # from blocking later unread markers over successive scheduled runs.
         start=next((i for i,pid in enumerate(ids) if pid>cursor),0)
-        chosen=(ids[start:]+ids[:start])[:max_items]
+        rotated=ids[start:]+ids[:start]
+        missing=[pid for pid in rotated if pid not in already_verified]
+        prior=[pid for pid in rotated if pid in already_verified]
+        reserved=max(1,max_items//8) if missing and prior else 0
+        chosen=(missing[:max_items-reserved]+prior[:reserved])[:max_items]
+        # If there are fewer missing than reserved slots, use the remainder
+        # for rechecking old verified records without changing archive bytes.
+        if len(chosen)<max_items:
+            chosen+=([pid for pid in prior if pid not in chosen]
+                     +[pid for pid in missing if pid not in chosen])[:max_items-len(chosen)]
+        repaired_ids=getattr(active,"_last_repaired_marker_ids",set())
         posts=[]
         verified=[]
         attempted=0
@@ -290,7 +308,16 @@ def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=64,
             if deadline-time.monotonic()<22:
                 break
             attempted+=1
-            for directory in ("metadata/entries-repaired","metadata/entries"):
+            # Most original posts have no repaired marker. The cloud listing
+            # already told us which have repairs; a redundant missing-path
+            # read can consume 22s for EVERY otherwise healthy original.
+            # Keep the repaired marker first only when it actually exists
+            # in the latest provider inventory; still use as fallback when
+            # the ordinary marker is absent or corrupt.
+            directories=(("metadata/entries-repaired","metadata/entries")
+                         if pid in repaired_ids else
+                         ("metadata/entries","metadata/entries-repaired"))
+            for directory in directories:
                 try:
                     marker=active.read(directory+"/"+pid+".json",cap=1024,
                                        optional=True)
@@ -322,6 +349,8 @@ def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=64,
             str(db_path),posts,verified,ids,last)
         print("PRIVATE_JOURNAL_PAGE_SHA_VERIFIED",json.dumps({
             "remote_marker_candidates":len(ids),
+            "not_yet_verified_candidates":len(missing),
+            "already_verified_recheck_candidates":len(prior),
             "attempted":attempted,
             "verified_post_markers_this_run":len(verified),
             "pending_post_markers":summary["pending_marker_count"],
