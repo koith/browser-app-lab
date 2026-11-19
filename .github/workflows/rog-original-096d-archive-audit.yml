@@ -1,0 +1,74 @@
+name: 4LEAF 0.96d original client 7-part source audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-original-096d-archive-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archive-source-inspection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original public 4Leaf096d seven-part archive and inspect (never execute)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/leaf096d
+          cd /tmp/leaf096d
+          links=(
+            '150DCE41502C60D919'
+            '19102341502C60E718'
+            '200FD441502C60E917'
+            '19207A41502C60EC07'
+            '1804D241502C60EF1F'
+            '17792C41502C60F11D'
+            '177FD041502C60F622'
+          )
+          : > status.tsv
+          printf 'source\tpart\tstatus\tbytes\tsha256\n' > summary.tsv
+          for idx in "${!links[@]}"; do
+            part="$((idx+1))"
+            file="4Leaf096d.part${part}.rar"
+            url="https://t1.daumcdn.net/cfile/tistory/${links[$idx]}"
+            echo "Fetching original client part ${part}/7"
+            status="$(curl -L --compressed --silent --show-error --max-time 60               --retry 1 --retry-delay 2 -A 'Mozilla/5.0 (compatible; archival verification)'               -H 'Referer: https://dev-trip.tistory.com/120'               -w '%{http_code}' -o "$file" "$url" || true)"
+            bytes="$(stat -c %s "$file" 2>/dev/null || echo 0)"
+            sha="$(sha256sum "$file" 2>/dev/null | awk '{print $1}')"
+            printf '%s\t%s\t%s\t%s\t%s\n' "$url" "$part" "$status" "$bytes" "$sha" >> summary.tsv
+            if [ "$bytes" -gt 65536 ]; then
+              file "$file"
+              xxd -l 16 "$file"
+            else
+              echo "Part ${part} missing/blocked or smaller than RAR header expectation"
+              [ -f "$file" ] && head -c 100 "$file" | tr -cd '[:print:]' || true
+            fi
+          done
+          cp summary.tsv "$GITHUB_WORKSPACE/leaf-096d-archive-availability.tsv"
+          if [ "$(awk 'NR>1 && $4>65536 {a++} END {print a+0}' summary.tsv)" -ne 7 ]; then
+            echo "ARCHIVE_INCOMPLETE: No extraction attempted; retain exact HTTP and hashes."
+            exit 0
+          fi
+          if ! command -v 7z >/dev/null; then
+            sudo apt-get -qq update && sudo apt-get -qq install -y p7zip-full
+          fi
+          if 7z l -slt 4Leaf096d.part1.rar > "$GITHUB_WORKSPACE/leaf-096d-archive-list.txt" 2>&1; then
+            echo "ARCHIVE_LIST_PASS: original client archive directory inventory collected."
+            grep -Ei 'Path = .*\.(pak|exe|dll|dmp|chr|mve|spr|tis)$'               "$GITHUB_WORKSPACE/leaf-096d-archive-list.txt" | head -100 || true
+          else
+            echo "ARCHIVE_LIST_FAIL: split archive type/password/damage must be inspected."
+            tail -60 "$GITHUB_WORKSPACE/leaf-096d-archive-list.txt" || true
+          fi
+      - name: Upload public file inventory only, not copyrighted binaries
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fourleaf-original-096d-client-metadata
+          path: |
+            leaf-096d-archive-availability.tsv
+            leaf-096d-archive-list.txt
+          if-no-files-found: ignore
+          retention-days: 7
