@@ -1508,7 +1508,7 @@
    }
    submitting=true;createButton.disabled=true;
    try{
-    if(creation.room||(central.enabled&&central.ready)){
+    if(creation.room||creation.draft||(central.enabled&&central.ready)){
      try{
       await creation.submit({name,region:state.region,district:state.district,
        capacity:allowedCapacity(form.get('capacity')),
