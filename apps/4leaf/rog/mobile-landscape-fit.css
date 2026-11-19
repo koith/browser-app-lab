@@ -196,3 +196,19 @@ html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #board-area>.l
  position:relative!important;
  pointer-events:auto!important;
 }
+
+
+/* Real iPhone landscape usability: the native 800x600 battle scene is
+ * uniformly downscaled, so a 30px source-height roll button becomes only
+ * ~19 physical CSS pixels. Enlarge the interactive control box without
+ * stretching the 2002 dice sprites or changing turn semantics. */
+html[data-leaf-phone-fit="landscape"] #app.app-classic-dice #game #roll-btn{
+ box-sizing:border-box!important;
+ min-width:80px!important;
+ min-height:48px!important;
+ display:inline-flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ white-space:nowrap!important;
+ touch-action:manipulation!important;
+}
