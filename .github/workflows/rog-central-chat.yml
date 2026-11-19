@@ -97,6 +97,8 @@ jobs:
         run: node apps/4leaf/rog/tests/central-browser.cjs
       - name: Reject duplicate CREATE and retry the SAME remote room after JOIN failure
         run: node apps/4leaf/rog/tests/chat-create-join-retry.cjs
+      - name: Lost CREATE ACK may only replay the original committed room
+        run: node apps/4leaf/rog/tests/chat-create-lost-ack-real-browser.cjs
       - name: Publish server logs on failure
         if: failure()
         run: cat /tmp/leaf-authority.log /tmp/leaf-static.log
