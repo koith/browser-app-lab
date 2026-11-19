@@ -86,8 +86,10 @@ def test_catchup_fetches_fresh_first_then_older_public_originals(tmp_path,monkey
     query_count=len(job.TERMS)
     assert starts[:query_count]==[now-16*60]*query_count, (
         "every configured keyword must be searched in the fresh public window first")
-    assert starts[query_count:]==[now-80*60]*query_count, (
-        "the missed source window must be searched for every configured keyword")
+    assert starts[query_count:2*query_count]==[now-80*60]*query_count, (
+        "the disjoint missed source window must be searched for every keyword")
+    assert starts[2*query_count:]==[now-16*60]*query_count, (
+        "unused historical quota must return to fresh public source search")
     assert len(list(tmp_path.glob("*.enc")))==2, "exact same original not counted twice"
 
 
@@ -159,3 +161,73 @@ def test_queued_five_minute_capture_is_not_silently_replaced():
     assert 'cancel-in-progress: false' in concurrency
     assert "pull_request" in concurrency and "production" in concurrency
     assert 'cron: "3-58/5 * * * *"' in workflow
+
+
+def test_delayed_capture_reserves_real_historical_slots_instead_of_repeating_recent(
+        tmp_path,monkeypatch,capsys):
+    """With a >5h GitHub gap, current posts cannot starve old public originals."""
+    import json
+    from recovery_spool import RecoverySpool
+    class Offline(FakeCloud):
+        def preflight(self):
+            raise RuntimeError("synthetic provider unavailable")
+    install_fake_media_fetch(monkeypatch)
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE","1")
+    monkeypatch.setenv("DEMAND_CAPTURE_LOOKBACK_MINUTES","378")
+    now=1793667900
+    seen_windows=[]
+    recent=[source(i) for i in range(40)]
+    historical=[source(100+i) for i in range(20)]
+    def getter(term,start,end):
+        seen_windows.append((start,end))
+        if term!=job.TERMS[0]:
+            return []
+        if end==now:
+            return recent
+        assert end==now-job.WINDOW_MINUTES*60
+        assert start==now-378*60
+        return historical
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[getter],cloud=Offline(),clock=lambda:now,
+                run_id="123456989",fast_mode=True)
+    captured={RecoverySpool(tmp_path).read(path)["first"]["id"]
+              for path in tmp_path.glob("*.enc")}
+    recent_ids={job.post_key("bluesky",r["original_id"]) for r in recent}
+    historic_ids={job.post_key("bluesky",r["original_id"]) for r in historical}
+    assert len(captured)==job.FAST_FIRST_SIGHTING_LIMIT
+    assert len(captured&recent_ids)==32
+    assert len(captured&historic_ids)==16
+    assert seen_windows[0]==(now-job.WINDOW_MINUTES*60,now)
+    assert (now-378*60,now-job.WINDOW_MINUTES*60) in seen_windows
+    prefix="DEMAND_CAPTURE_AGGREGATE_ONLY "
+    summaries=[json.loads(s[len(prefix):]) for s in capsys.readouterr().out.splitlines()
+               if s.startswith(prefix)]
+    assert summaries[-1]["historic_slots_reserved"]==16
+    assert summaries[-1]["catchup_window_queried"] is True
+    assert summaries[-1]["completeness_guaranteed"] is False
+
+
+def test_unused_historical_reserve_returns_to_current_posts(
+        tmp_path,monkeypatch,capsys):
+    """An empty historical interval must not arbitrarily drop recent originals."""
+    import json
+    monkeypatch.setenv("DEMAND_FAST_CAPTURE_DEFER_REMOTE","1")
+    monkeypatch.setenv("DEMAND_CAPTURE_LOOKBACK_MINUTES","90")
+    install_fake_media_fetch(monkeypatch)
+    now=1793667900
+    recent=[source(i) for i in range(40)]
+    windows=[]
+    def getter(term,start,end):
+        windows.append((start,end))
+        return recent if term==job.TERMS[0] and end==now else []
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[getter],cloud=FakeCloud(),clock=lambda:now,
+                run_id="123456990",fast_mode=True)
+    assert len(list(tmp_path.glob("*.enc")))==40
+    assert windows.count((now-job.WINDOW_MINUTES*60,now))==2*len(job.TERMS)
+    assert (now-90*60,now-job.WINDOW_MINUTES*60) in windows
+    prefix="DEMAND_CAPTURE_AGGREGATE_ONLY "
+    summaries=[json.loads(s[len(prefix):]) for s in capsys.readouterr().out.splitlines()
+               if s.startswith(prefix)]
+    assert summaries[-1]["recent_refill_queried"] is True
+    assert summaries[-1]["historic_slots_reserved"]==16
