@@ -283,7 +283,7 @@ class CloudArchive:
             raise RuntimeError("private TeraBox authentication not configured")
         self.command(["lsf", "archive:", "--max-depth", "1", "--retries", "2"], timeout=90)
 
-    def _read_physical(self, key, *, cap=MAX_CATALOG, optional=False, domain=None):
+    def _read_physical(self, key, *, cap=MAX_CATALOG, optional=False, domain=None, timeout=120):
         if not isinstance(key, str) or not key or ".." in key or "\\" in key:
             raise ValueError("unsafe remote key")
         args=["cat",self.remote+"/"+key,"--retries","2"]
@@ -291,7 +291,7 @@ class CloudArchive:
             if domain!="https://nephobox.com":
                 raise ValueError("unapproved alternate cloud endpoint")
             args.extend(["--terabox-domain",domain])
-        data=self.command(args,timeout=120,allow_missing=optional)
+        data=self.command(args,timeout=timeout,allow_missing=optional)
         if data is None:
             return None
         if len(data)>cap:
@@ -781,27 +781,32 @@ class CloudArchive:
             raise ValueError("invalid public capture id")
         return ("posts/"+pid+"/capture.json","metadata/early-"+pid+".json")
 
-    def read_first_observation(self, pid):
-        """Read either private original without promoting or replacing bytes.
+    @staticmethod
+    def root_first_observation_key(pid):
+        """Root file fallback when the private provider rejects child folders."""
+        if not isinstance(pid,str) or not ID.fullmatch(pid):
+            raise ValueError("invalid public capture id")
+        return "first-observation-"+pid+".json"
 
-        An upload to a freshly created posts/<id> folder may fail before the
-        source is archived. The metadata root has existed since catalog setup
-        and offers a shallower independent storage route.
+    def read_first_observation(self, pid):
+        """Read existing originals in historical precedence order.
+
+        Slow missing child-path lookups are bounded during trusted private
+        recovery, permitting a SHA-verified root-write attempt within the
+        per-record deadline. Never elevate an unverified read or other ID.
         """
         canonical,flat=self.first_observation_keys(pid)
-        for key in (canonical,flat):
-            try:
-                raw=self.read(key,cap=100_000,optional=True)
-            except RuntimeError:
-                raw=None
-            if raw is None:
+        root=self.root_first_observation_key(pid)
+        timeout=9 if self.recovery_flat_first else 120
+        for key in (canonical,flat,root):
+            for domain in (None,"https://nephobox.com"):
                 try:
-                    raw=self.read(key,cap=100_000,optional=True,
-                                  domain="https://nephobox.com")
+                    raw=self._read_physical(key,cap=100_000,optional=True,
+                                            domain=domain,timeout=timeout)
                 except RuntimeError:
                     raw=None
-            if raw is not None:
-                # Never return a record for another public post.
+                if raw is None:
+                    continue
                 try:
                     data=json.loads(raw)
                 except (ValueError,TypeError):
@@ -834,7 +839,12 @@ class CloudArchive:
         # The five-minute watcher prioritizes a shallow already-used metadata
         # directory to preserve the first observation immediately. The slower
         # repair pass retains canonical-first compatibility.
-        locations=(flat,canonical) if prefer_flat else (canonical,flat)
+        root=self.root_first_observation_key(pid)
+        # The already-verified TeraBox root transport is faster than broken
+        # child-folder paths. Do not alter the ordinary capture preference.
+        locations=((root,flat,canonical) if self.recovery_flat_first and prefer_flat
+                   else (flat,canonical,root) if prefer_flat
+                   else (canonical,flat,root))
         for key in locations:
             try:
                 self.write_immutable(key,raw)
@@ -849,7 +859,7 @@ class CloudArchive:
                 previous=self.read_first_observation(pid)
                 if previous is not None:
                     return previous
-        raise RuntimeError("first observation unavailable on both private paths") from last
+        raise RuntimeError("first observation unavailable on all private paths") from last
 
     def pending_capture_ids(self, existing):
         # Early snapshots survive a crash even before a verified entry is written.
@@ -865,6 +875,23 @@ class CloudArchive:
         for name in self.names("metadata"):
             if re.fullmatch(r"early-[a-f0-9]{40}\.json",name):
                 ids.add(name[6:-5])
+        # Root-only immutable sightings must remain recoverable after process
+        # restart, even when no provider post-folder was ever created.
+        # Root listing is best-effort: an unrelated provider outage must not
+        # abort the older metadata/post-folder recovery paths. Restrict both
+        # the network time budget and the accepted filename set.
+        try:
+            root_entries=self.command(
+                ["lsf",self.remote,"--files-only","--retries","2"],
+                timeout=25,allow_missing=True)
+        except RuntimeError:
+            root_entries=None
+        if root_entries:
+            if len(root_entries)>2_000_000:
+                raise ValueError("private root inventory response exceeds cap")
+            for name in root_entries.decode("utf-8","replace").splitlines():
+                if re.fullmatch(r"first-observation-[a-f0-9]{40}\.json",name):
+                    ids.add(name[len("first-observation-"):-5])
         return sorted(pid for pid in ids if pid not in existing
                       and pid not in self.quarantined_ids)
 

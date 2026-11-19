@@ -123,7 +123,8 @@ def test_first_observation_fails_closed_if_both_remote_paths_reject_writes():
         def fake(self,args,data=None,timeout=150,allow_missing=False):
             if args[0] in ("copyto","rcat"):
                 target=args[2] if args[0]=="copyto" else args[1]
-                if "/capture.json" in target or "/early-" in target:
+                if ("/capture.json" in target or "/early-" in target
+                        or "/first-observation-" in target):
                     raise RuntimeError("private cloud upload failed (missing)")
             return super().fake(args,data=data,timeout=timeout,
                                 allow_missing=allow_missing)
@@ -134,3 +135,80 @@ def test_first_observation_fails_closed_if_both_remote_paths_reject_writes():
         cloud.save_first_observation(pid,raw,prefer_flat=True)
     assert cloud.read_first_observation(pid) is None
     assert not any("early-"+pid in k for k in cloud.objects)
+
+
+def test_root_original_fallback_preserves_real_bytes_when_both_nested_paths_fail():
+    """Remote root verified ZIP transport can also carry an immutable sighting."""
+    class BrokenChildPaths(UnavailableNestedCapture):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0] in ("copyto","rcat"):
+                target=args[2] if args[0]=="copyto" else args[1]
+                if "/capture.json" in target or "/early-" in target:
+                    raise RuntimeError("private cloud upload failed (missing)")
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+
+    cloud=BrokenChildPaths()
+    cloud.recovery_flat_first=True
+    pid="d"*40
+    raw=canonical_json(first_payload(pid))
+    assert cloud.save_first_observation(pid,raw,prefer_flat=True)==raw
+    key=cloud.root_first_observation_key(pid)
+    assert cloud.objects[key]==raw
+    assert cloud.read_verified(key,__import__("hashlib").sha256(raw).hexdigest(),cap=100000)==raw
+    assert cloud.read_first_observation(pid)==raw
+    assert pid in cloud.pending_capture_ids({})
+    # No later public edit may mutate the first sighting.
+    later=canonical_json(first_payload(pid,1793668200))
+    assert cloud.save_first_observation(pid,later,prefer_flat=True)==raw
+    assert cloud.objects[key]==raw
+
+
+def test_root_first_observation_never_masks_older_canonical_or_wrong_identity():
+    cloud=UnavailableNestedCapture()
+    pid="e"*40
+    canonical,_=cloud.first_observation_keys(pid)
+    root=cloud.root_first_observation_key(pid)
+    older=canonical_json(first_payload(pid))
+    later=canonical_json(first_payload(pid,1793668200))
+    cloud.objects[canonical]=older
+    cloud.objects[root]=later
+    assert cloud.read_first_observation(pid)==older
+    assert cloud.save_first_observation(pid,later,prefer_flat=True)==older
+    assert cloud.objects[canonical]==older
+    other="f"*40
+    cloud.objects[cloud.root_first_observation_key(other)]=later
+    with pytest.raises(ValueError,match="identity mismatch"):
+        cloud.read_first_observation(other)
+
+
+def test_recovery_original_root_read_probes_are_bounded_without_data_loss():
+    class InspectReadTimeout(UnavailableNestedCapture):
+        def __init__(self):
+            super().__init__()
+            self.probes=[]
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0]=="cat":
+                self.probes.append(timeout)
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=InspectReadTimeout()
+    cloud.recovery_flat_first=True
+    pid="a"*40
+    cloud.objects[cloud.root_first_observation_key(pid)]=canonical_json(first_payload(pid))
+    assert cloud.read_first_observation(pid) is not None
+    assert cloud.probes and all(0<t<=9 for t in cloud.probes)
+
+
+def test_root_listing_outage_does_not_hide_legacy_first_observations():
+    class RootUnavailable(UnavailableNestedCapture):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0]=="lsf" and args[1].rstrip("/")==self.remote:
+                raise RuntimeError("private root listing temporarily unavailable")
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=RootUnavailable()
+    pid="b"*40
+    cloud.objects[cloud.first_observation_keys(pid)[1]]=canonical_json(first_payload(pid))
+    assert pid in cloud.pending_capture_ids({})
+    assert cloud.read_first_observation(pid) is not None
