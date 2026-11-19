@@ -767,11 +767,20 @@ class CloudArchive:
         integrity/recovery job continues byte-by-byte SHA256 validation.
         """
         ids=set()
+        repaired=set()
+        # Discover once per scan; a repaired marker is authoritative when
+        # listed, but most originals have ONLY their ordinary entry. Saving
+        # this verified inventory avoids a slow 404 remote read for every
+        # nonexistent repaired marker in the incremental index worker.
         for directory in ("metadata/entries", "metadata/entries-repaired"):
             for name in self.names(directory):
                 m=ENTRY.fullmatch(name)
                 if m:
-                    ids.add(m.group(1))
+                    pid=m.group(1)
+                    ids.add(pid)
+                    if directory=="metadata/entries-repaired":
+                        repaired.add(pid)
+        self._last_repaired_marker_ids=repaired
         return ids
 
     @staticmethod
