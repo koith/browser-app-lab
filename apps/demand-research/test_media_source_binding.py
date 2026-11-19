@@ -331,3 +331,66 @@ def test_bluesky_video_untrusted_or_unreachable_pds_remains_incomplete(
     p,blobs=capture.make_post(results[0],now)
     assert p["archive_complete"] is False
     assert p["media_expected"]==1 and p["media_saved"]==0 and blobs==[]
+
+
+def test_missing_first_original_keeps_second_photo_in_slot_two():
+    """Never replace a missing photo with the next author's original."""
+    from demand_capture_job import normalized
+    second="https://cdn.bsky.app/img/synthetic-second.jpg"
+    row=normalized("bluesky","at://did:plc:synthetic/app.bsky.feed.post/missing1",
+                   "https://bsky.app/profile/synthetic/post/missing1",
+                   "섹트 synthetic two slots","2026-11-04T00:00:00Z",
+                   [None,second])
+    assert row["media_urls"]==[None,second]
+    assert row["media_expected"]==2
+    observed=[]
+    def downloader(url):
+        observed.append(url)
+        return "image/jpeg",b"verified actual second image"
+    saved,blobs=make_post(row,1793667900,get_media=downloader)
+    assert observed==[second]
+    assert len(blobs)==1 and saved["media_expected"]==2
+    assert saved["media_saved"]==1 and saved["archive_complete"] is False
+    assert saved["media"][0]["key"].endswith("/0002.jpg")
+    assert saved["media"][0]["source_url"]==second
+
+
+def test_two_attachment_slots_remain_distinct_even_if_original_urls_match():
+    from demand_capture_job import normalized
+    url="https://cdn.bsky.app/img/same-author-source.jpg"
+    row=normalized("bluesky","at://did:plc:synthetic/app.bsky.feed.post/duplicate",
+                   "https://bsky.app/profile/synthetic/post/duplicate",
+                   "섹블 synthetic repeated media slot","2026-11-04T00:00:00Z",
+                   [url,url])
+    assert row["media_urls"]==[url,url] and row["media_expected"]==2
+    saved,blobs=make_post(row,1793667900,
+                          get_media=lambda _:("image/jpeg",b"exact original"))
+    assert saved["archive_complete"] is True
+    assert len(blobs)==2
+    assert [media["key"].rsplit("/",1)[-1] for media in saved["media"]]==[
+        "0001.jpg","0002.jpg"]
+
+
+def test_encrypted_replay_keeps_missing_position_and_total_slot_count(tmp_path):
+    from recovery_spool import RecoverySpool,recover_directory
+    from demand_capture_job import normalized
+    url="https://cdn.bsky.app/img/only-original-in-position-two.jpg"
+    row=normalized("bluesky","at://did:plc:synthetic/app.bsky.feed.post/aes",
+                   "https://bsky.app/profile/synthetic/post/aes",
+                   "섹트 public synthetic AES original","2026-11-04T00:00:00Z",
+                   [None,url])
+    p,blobs=make_post(row,1793667900,
+                      get_media=lambda _:("image/jpeg",b"genuine second bytes"))
+    pid=p["id"]
+    first={"id":pid,"platform":"bluesky","source_url":row["source_url"],
+           "posted_at":row["posted_at"],"text":row["text"],
+           "media_links":row["media_urls"],"media_expected":2,
+           "observed_at":1793667900}
+    spool=RecoverySpool(tmp_path,secret=b"synthetic-private-key")
+    packed=spool.save(pid,first,p,blobs)
+    assert spool.read(packed)["first"]["media_links"]==[None,url]
+    restored=FakeCloud()
+    result=recover_directory(tmp_path,restored,secret=b"synthetic-private-key")
+    assert result["original_media_incomplete"]==1
+    assert result["failures"]==0
+    assert restored.read_first_observation(pid)==canonical_json(first)
