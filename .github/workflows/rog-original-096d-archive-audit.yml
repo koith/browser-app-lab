@@ -110,7 +110,6 @@ jobs:
             python3 apps/4leaf/rog/tools/audit-native-chatmap-members.py \
               /tmp/leaf096d/source-client/4Leaf_Files \
               leaf-096d-native-chatmap-members.json
-            leaf-096d-native-map-assets/
           else
             echo 'Original source files unavailable; do not fabricate PAK member names'
           fi
@@ -136,6 +135,7 @@ jobs:
             leaf-096d-file-sha256.txt
             leaf-096d-file-sizes.tsv
             leaf-096d-native-chatmap-members.json
+            leaf-096d-native-map-assets/
           if-no-files-found: ignore
           retention-days: 7
       - name: Upload public file inventory only, not copyrighted binaries
