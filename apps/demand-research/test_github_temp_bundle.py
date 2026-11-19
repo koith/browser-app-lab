@@ -337,3 +337,22 @@ def test_missing_signed_ancestor_rejects_history_without_caching(
     state["valid"]=True
     assert gh.matching_bundles(account)==[head,ancestor]
     assert state["lookups"]==4
+
+
+def test_exact_sha_verified_run_accepts_canonical_profile_name(monkeypatch):
+    """The same Bluesky/Mastodon identity must clear its queued receipt."""
+    from types import SimpleNamespace
+    bundle=SimpleNamespace(selected_account="https://bsky.app/profile/qa-example.bsky.social",
+        selected_platform="bluesky",post_count=2,object_count=4)
+    def verified_release(tag,*,missing_ok=False):
+        assert tag.startswith("intersection-github-archive-42340001000-")
+        return bundle if tag.endswith("-a1") else None
+    monkeypatch.setattr(gh,"tagged_bundle",verified_release)
+    assert gh.run_bundle(42340001000,"qa-example.bsky.social") is bundle
+    assert gh.run_bundle(42340001000,"@qa-example") is bundle
+    assert gh.run_bundle(42340001000,"other-account.bsky.social") is None
+    monkeypatch.setattr(gh,"tagged_bundle",lambda tag,missing_ok=False:
+        SimpleNamespace(selected_account="https://mastodon.social/@qa",
+                        selected_platform="mastodon") if tag.endswith("-a1") else None)
+    assert gh.run_bundle(42340001000,"qa@mastodon.social") is not None
+    assert gh.run_bundle(42340001000,"unrelated@mastodon.social") is None
