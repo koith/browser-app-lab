@@ -310,3 +310,67 @@ def test_scaled_sha_journal_page_can_complete_32_verified_posts_in_one_checkpoin
     assert receipt["pending"]==0
     assert account_index.status(str(db))["source_rows"]==32
     assert account_index.status(str(db))["last_catalog_sync"]==0
+
+
+def test_private_index_prioritizes_missing_journal_receipts_before_existing(tmp_path,monkeypatch):
+    """An old SHA-verified entry cannot exhaust a one-item unverified page."""
+    from test_demand_archive import FakeCloud,post as source
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","synthetic-private-test")
+    cloud=FakeCloud()
+    template=source()
+    ids=[format(i,"040x") for i in range(1,5)]
+    for i,pid in enumerate(ids):
+        cloud.save_post({**template,"id":pid,
+            "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/test"+str(i)})
+    db=tmp_path/"index.sqlite3"
+    conn=account_index.connect(str(db))
+    with conn:
+        conn.execute("""CREATE TABLE verified_archive_markers(
+            id TEXT PRIMARY KEY, verified_at INTEGER NOT NULL)""")
+        conn.executemany("INSERT INTO verified_archive_markers VALUES(?,123)",
+                         [(ids[1],),(ids[3],)])
+        conn.execute("""INSERT INTO index_meta(key,value) VALUES('journal_page_cursor',?)""",
+                     (ids[0],))
+    conn.close()
+    receipt=tmp_path/"receipt.json"
+    job.catalog_sync_child(db,receipt,cloud=cloud,max_items=1,max_seconds=120)
+    output=json.loads(receipt.read_text())
+    assert output["verified"]==1
+    conn=account_index.connect(str(db))
+    try:
+        assert conn.execute("SELECT value FROM index_meta WHERE key='journal_page_cursor'").fetchone()[0]==ids[2]
+        assert conn.execute("SELECT id FROM verified_archive_markers WHERE id=?",
+                            (ids[2],)).fetchone()
+    finally:
+        conn.close()
+
+
+def test_private_index_skips_empty_repair_path_but_honors_existing_repair(tmp_path,monkeypatch):
+    """Do not spend 22 seconds per absent repair while retaining repair precedence."""
+    from test_demand_archive import FakeCloud,post as source
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","synthetic-private-test")
+    cloud=FakeCloud()
+    template=source()
+    ids=["a"*40,"b"*40,"c"*40]
+    for i,pid in enumerate(ids):
+        cloud.save_post({**template,"id":pid,
+            "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/repair"+str(i)})
+    repaired="b"*40
+    cloud.objects["metadata/entries-repaired/"+repaired+".json"]=cloud.objects[
+        "metadata/entries/"+repaired+".json"]
+    fetched=[]
+    original=cloud.read
+    def observe(key,**kwargs):
+        if key.endswith(".json") and "entries" in key:
+            fetched.append(key)
+        return original(key,**kwargs)
+    monkeypatch.setattr(cloud,"read",observe)
+    result=tmp_path/"index.sqlite3"
+    marker=tmp_path/"journal.json"
+    job.catalog_sync_child(result,marker,cloud=cloud,max_items=64,max_seconds=120)
+    assert json.loads(marker.read_text())["pending"]==0
+    assert account_index.status(str(result))["source_rows"]==3
+    assert not any("entries-repaired/"+pid+".json" in key
+                   for pid in (ids[0],ids[2]) for key in fetched)
+    repair_reads=[key for key in fetched if key.endswith(repaired+".json")]
+    assert repair_reads[0]=="metadata/entries-repaired/"+repaired+".json"
