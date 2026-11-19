@@ -972,7 +972,7 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
             # first photo, the next verified photo keeps its source slot 2
             # (0002) even though it is array element 0. Expose both.
             key=str(m.get("key",""))
-            slot_match=re.search(r"/media/([0-9]{4})\\.[a-z0-9]+$",key)
+            slot_match=re.search(r"/media/([0-9]{4})\.[a-z0-9]+$",key)
             slot=int(slot_match.group(1))-1 if slot_match else None
             media.append({"index":slot,"kind":m.get("kind","unknown"),
                           "mime":m["mime"],"bytes":m["bytes"],
