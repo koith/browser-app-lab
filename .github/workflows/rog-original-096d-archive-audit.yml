@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/rog-original-096d-archive-audit.yml'
+      - 'apps/4leaf/rog/tools/decode-native-chat-map-source.py'
+      - 'apps/4leaf/rog/tools/decode-original-obs-bulk.py'
   workflow_dispatch:
 permissions:
   contents: read
