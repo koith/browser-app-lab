@@ -93,12 +93,20 @@ def _decode_file(raw,secret):
         raise ValueError("invalid original id")
     if not isinstance(result.get("media"),list) or len(result["media"])>MAX_BLOBS:
         raise ValueError("invalid original attachment list")
+    # The immutable original list may contain missing-slot placeholders or
+    # be capped to 16 media downloads. Preserve the provider's full expected
+    # slot count independently, without accepting a shortened as complete.
+    expected_slots=first.get("media_expected",len(first.get("media_links",[])))
+    if (type(expected_slots) is not int or
+            not len(first.get("media_links",[]))<=expected_slots<=10000):
+        raise ValueError("invalid original attachment slot count")
     if result.get("post") is not None:
         post=validate_post(result["post"])
         compared=("id","platform","source_url","posted_at","text")
         if (len(post["media"])!=len(result["media"])
                 or any(post.get(field)!=first.get(field) for field in compared)
-                or post.get("media_expected")!=len(first.get("media_links",[]))):
+                or post.get("media_expected")!=first.get(
+                    "media_expected",len(first.get("media_links",[])))):
             raise ValueError("post and original media identity mismatch")
     return result
 
