@@ -877,9 +877,21 @@ class CloudArchive:
                 ids.add(name[6:-5])
         # Root-only immutable sightings must remain recoverable after process
         # restart, even when no provider post-folder was ever created.
-        for name in self.names(""):
-            if re.fullmatch(r"first-observation-[a-f0-9]{40}\\.json",name):
-                ids.add(name[len("first-observation-"):-5])
+        # Root listing is best-effort: an unrelated provider outage must not
+        # abort the older metadata/post-folder recovery paths. Restrict both
+        # the network time budget and the accepted filename set.
+        try:
+            root_entries=self.command(
+                ["lsf",self.remote,"--files-only","--retries","2"],
+                timeout=25,allow_missing=True)
+        except RuntimeError:
+            root_entries=None
+        if root_entries:
+            if len(root_entries)>2_000_000:
+                raise ValueError("private root inventory response exceeds cap")
+            for name in root_entries.decode("utf-8","replace").splitlines():
+                if re.fullmatch(r"first-observation-[a-f0-9]{40}\.json",name):
+                    ids.add(name[len("first-observation-"):-5])
         return sorted(pid for pid in ids if pid not in existing
                       and pid not in self.quarantined_ids)
 
