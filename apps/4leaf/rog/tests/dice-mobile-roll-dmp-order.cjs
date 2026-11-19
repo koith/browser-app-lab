@@ -12,7 +12,7 @@ const {chromium,webkit}=require('playwright');
  const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
  const browser=await (engine==='webkit'?webkit:chromium).launch({
   headless:true,args:engine==='webkit'?[]:['--no-sandbox']});
- const page=await browser.newPage({viewport:{width:390,height:844},
+ const page=await browser.newPage({viewport:{width:844,height:390}, // landscape-only client
   isMobile:true,hasTouch:true,deviceScaleFactor:2,serviceWorkers:'block'});
  const errors=[];
  page.on('pageerror',error=>errors.push(String(error)));

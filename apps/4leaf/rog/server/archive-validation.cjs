@@ -8,7 +8,7 @@ function validateArchive(archive,validDistrict){
  if(!isObject(archive)||!Array.isArray(archive.rooms)||
   !Array.isArray(archive.history)||!Number.isSafeInteger(archive.sequence)||
   archive.sequence<0)bad('root shape or sequence');
- const ids=new Set();
+ const ids=new Set(),createIds=new Set();
  for(const r of archive.rooms){
   if(!isObject(r)||typeof r.id!=='string'||!r.id||r.id.length>128||
    !validDistrict(r.region,r.district)||typeof r.name!=='string'||!r.name.trim()||
@@ -17,6 +17,15 @@ function validateArchive(archive,validDistrict){
    bad('room record');
   if(ids.has(r.id))bad('duplicate room id');
   ids.add(r.id);
+  if(r.createRequestId!==undefined){
+   if(typeof r.ownerId!=='string'||!r.ownerId||
+    typeof r.createRequestId!=='string'||
+    !/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(r.createRequestId))
+    bad('invalid create request identifier');
+   const key=r.ownerId+':'+r.createRequestId.toLowerCase();
+   if(createIds.has(key))bad('duplicate owner create request identifier');
+   createIds.add(key);
+  }
   if(r.ownerId!==undefined&&(typeof r.ownerId!=='string'||!r.ownerId))
    bad('room owner identity');
   if(r.ownerTokenHash!==undefined&&

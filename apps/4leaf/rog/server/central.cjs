@@ -27,7 +27,7 @@ function makeServer(options={}){
   createSupabasePersistence({url:dbUrl,secret:dbSecret,archiveKey,
    slot:(options.dbSlot??process.env.LEAF_CENTRAL_DB_SLOT)||'production'}):null);
  if(persistent&&store)throw new Error('Do not enable both remote and local chat storage; migrate and explicitly choose one');
- const sessions=new Map(),rooms=new Map(),history=new Map(),kicked=new Map();let sequence=0;
+ const sessions=new Map(),rooms=new Map(),history=new Map(),kicked=new Map(),creatingRooms=new Map();let sequence=0;
  if(store&&fs.existsSync(store)){
   // Local/mounted-volume recovery must be as strict as the remote encrypted
   // recovery. Ignoring a malformed room or truncating a damaged chat history
@@ -225,19 +225,47 @@ function makeServer(options={}){
     if(!valid(b.region,district))fail(400,'Unknown ChatTown area');
     const name=safe(b.name,26);
     if(!name)fail(400,'A room name is required');
-    if([...rooms.values()].filter(r=>r.region===b.region&&r.district===district).length>=192)fail(409,'No free room slots');
     const capacity=+b.capacity,background=+b.background;
     if(![2,4,8,12].includes(capacity)||!Number.isInteger(background)||background<0||background>5)fail(400,'Invalid room type');
     const password=String(b.password||'');
     if(password&&(password.length<6||password.length>24))fail(400,'Password length 6–24');
+    const rawRequestId=b.createRequestId;
+    if(rawRequestId!==undefined&&
+      (typeof rawRequestId!=='string'||
+       !/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(rawRequestId)))
+      fail(400,'Invalid create request identifier');
+    const createRequestId=rawRequestId?.toLowerCase()||null;
+    const createKey=createRequestId?s.id+':'+createRequestId:null;
+    // A network timeout does not prove rollback. Replay the original
+    // committed room (including after a durable archive reload).
+    if(createKey&&creatingRooms.has(createKey)){
+     try{await creatingRooms.get(createKey)}catch{/* failed commit rolled back */}
+    }
+    const prior=createRequestId?[...rooms.values()].find(r=>
+     r.ownerId===s.id&&r.createRequestId===createRequestId):null;
+    if(prior){
+     const same=prior.region===b.region&&prior.district===district&&prior.name===name&&
+      prior.capacity===capacity&&prior.background===background&&
+      (prior.passwordHash
+       ?Boolean(password)&&timingSafeEqual(
+         scryptSync(password,prior.passwordSalt,32),Buffer.from(prior.passwordHash,'hex'))
+       :!password);
+     if(!same)fail(409,'Create request identifier reused for different room details');
+     return send(res,200,{room:dto(prior,s),replayed:true},origin);
+    }
+    if([...rooms.values()].filter(r=>r.region===b.region&&r.district===district).length>=192)fail(409,'No free room slots');
     if([...rooms.values()].filter(r=>r.ownerId===s.id).length>=24)
      fail(429,'Too many user-created ChatTown rooms');
     guard.createRoom(s.id);
     const salt=password?randomBytes(16).toString('hex'):'';
     const r={id:randomUUID(),region:b.region,district,name,capacity,background,preset:false,
      ownerId:s.id,ownerTokenHash:secretFingerprint(token),created:clock(),passwordSalt:salt,
-     passwordHash:password?scryptSync(password,salt,32).toString('hex'):''};
-    await transactional(()=>{rooms.set(r.id,r)});return send(res,201,{room:dto(r,s)},origin);
+     passwordHash:password?scryptSync(password,salt,32).toString('hex'):'',
+     ...(createRequestId?{createRequestId}:{})};
+    const pending=transactional(()=>{rooms.set(r.id,r)});
+    if(createKey)creatingRooms.set(createKey,pending);
+    try{await pending}finally{if(createKey&&creatingRooms.get(createKey)===pending)creatingRooms.delete(createKey)}
+    return send(res,201,{room:dto(r,s)},origin);
    }
    const action=/^\/api\/rooms\/([^/]+)\/(join|close|transfer|kick)$/.exec(route);
    if(req.method==='POST'&&action){

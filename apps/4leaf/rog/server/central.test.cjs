@@ -259,3 +259,52 @@ test('unknown chat ACK replays one persisted message id, never inserts a duplica
  assert.equal(second.code,201,'two deliberate identical messages with different IDs are allowed');
  assert.equal((await call('GET','/api/snapshot?after=0',author.token)).data.entries.length,2);
 });
+
+test('lost CREATE ACK replays one durable room by owner and request ID after restart',async t=>{
+ const dir=mkdtempSync(path.join(tmpdir(),'4leaf-create-replay-'));
+ t.after(()=>rmSync(dir,{recursive:true,force:true}));
+ const file=path.join(dir,'archive.json');
+ const requestId='5df27db2-1f93-48cf-bd02-c9f3aab0963e';
+ const details={region:'north',district:'샤이닝 브리즈',name:'잃어버린 응답',capacity:4,
+  background:3,password:'same-password',createRequestId:requestId};
+ const first=await open({storageFile:file});
+ const owner=await first.auth('IdempotentOwner');
+ const initial=await first.call('POST','/api/rooms',owner.token,details);
+ assert.equal(initial.code,201);
+ const replay=await first.call('POST','/api/rooms',owner.token,details);
+ assert.equal(replay.code,200);
+ assert.equal(replay.data.replayed,true);
+ assert.equal(replay.data.room.id,initial.data.room.id);
+ assert.equal(first.app.inspect().rooms,1);
+ assert.equal((await first.call('POST','/api/rooms',owner.token,
+  {...details,name:'a different room'})).code,409,
+  'an existing ID may not silently create a different room');
+ await first.app.close();
+ const second=await open({storageFile:file});
+ t.after(()=>second.app.close());
+ const resumed=await second.call('POST','/api/session',null,{resume:owner.token,nick:'IdempotentOwner'});
+ assert.equal(resumed.data.id,owner.id,'archive token owner identity survives restart');
+ const restored=await second.call('POST','/api/rooms',resumed.data.token,details);
+ assert.equal(restored.code,200);
+ assert.equal(restored.data.room.id,initial.data.room.id);
+ assert.equal(second.app.inspect().rooms,1);
+ const distinct=await second.call('POST','/api/rooms',resumed.data.token,
+  {...details,createRequestId:'5df27db2-1f93-48cf-bd02-c9f3aab0963f'});
+ assert.equal(distinct.code,201);
+ assert.notEqual(distinct.data.room.id,initial.data.room.id);
+});
+test('simultaneous CREATE retries do not consume two room slots',async t=>{
+ const {app,call,auth}=await open();t.after(()=>app.close());
+ const owner=await auth('DoubleSubmit');
+ const details={region:'north',district:'샤이닝 브리즈',name:'원작 1방',
+  background:2,capacity:12,createRequestId:'d49303fa-c5a6-4115-ae91-b1ee59646c3e'};
+ const responses=await Promise.all([
+  call('POST','/api/rooms',owner.token,details),
+  call('POST','/api/rooms',owner.token,details)
+ ]);
+ assert.deepEqual(responses.map(x=>x.code).sort(),[200,201]);
+ assert.equal(responses[0].data.room.id,responses[1].data.room.id);
+ assert.equal(app.inspect().rooms,1);
+ assert.equal((await call('POST','/api/rooms',owner.token,
+  {...details,createRequestId:'obviously-invalid'})).code,400);
+});

@@ -19,7 +19,13 @@
    assertActive();
    try{
     if(!room){
-     draft=Object.freeze({...input});
+     // Reuse one logical request when the server committed CREATE but its ACK was lost.
+     if(!draft){
+      const requestId=options.newRequestId?.()||
+       (typeof crypto!=='undefined'&&crypto.randomUUID?.());
+      if(!requestId)throw Error('Secure create request ID unavailable');
+      draft=Object.freeze({...input,createRequestId:requestId});
+     }
      phase='creating';
      const response=await options.create(draft);
      if(!response?.room?.id)throw Error('Missing authoritative room ID in CREATE response');
@@ -42,7 +48,11 @@
     joined=true;phase='joined';lastError=null;
     return {room,joined:true};
    }catch(error){
-    phase=room?'retryable':'failed';lastError=error;
+    // Correct a definitively rejected form with a NEW id. Timeout/503 is
+    // ambiguous, so keep the exact original payload and request identifier.
+    if(!room&&error?.status>=400&&error.status<500&&
+      ![401,408,429].includes(error.status))draft=null;
+    phase=room?'retryable':draft?'retryable-create':'failed';lastError=error;
     throw error;
    }
   }

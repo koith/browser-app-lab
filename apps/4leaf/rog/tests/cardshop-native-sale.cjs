@@ -34,8 +34,8 @@ const path=require('node:path');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_SHOP_NATIVE__);
   await page.locator('[data-route="shop"]').first().click();
   await page.waitForSelector('#shop:not(.hidden)');
-  assert.equal(await page.locator('#shop-grid .shop-card').count(),9,
-   'source CardShop/cardshopback.png has 3 columns by 3 rows, do not mistakenly replace with different-version 4x2 screenshot');
+  assert.equal(await page.locator('#shop-grid .shop-card').count(),8,
+   'live 2004 Magic Carden screenshot has 4x2 visible cards; the 2002 3x3 source atlas remains separately retained');
   const oldOwned=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')).owned);
   const first=page.locator('#shop-grid .shop-card[data-owned="false"]').first();
   assert.ok(await first.count(),'at least one purchasable unowned archive chessman appears');
