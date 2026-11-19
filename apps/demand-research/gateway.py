@@ -957,9 +957,19 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
     posts=await get_catalog()
     if q: posts=[p for p in posts if q.casefold() in p["text"].casefold()]
     if platform: posts=[p for p in posts if p.get("platform")==platform]
+    def complete(p):
+        media=p.get("media",[])
+        expected=p.get("media_expected",len(media))
+        flag=p.get("archive_complete")
+        # An inconsistent/legacy catalog flag is not proof that absent
+        # attachments have been retained. Classify the same way in both
+        # the server-side filter and the delivered public status.
+        return (isinstance(media,list) and type(expected) is int and
+                0<=expected<=16 and len(media)>=expected and
+                (flag is True or flag is None) and
+                all(isinstance(item,dict) and
+                    item.get("remote_verified") is True for item in media))
     if media_status:
-        def complete(p):
-            return bool(p.get("archive_complete",len(p.get("media",[]))>=p.get("media_expected",len(p.get("media",[])))))
         posts=[p for p in posts if complete(p)==(media_status=="complete")]
     posts=sorted(posts,key=lambda p:p.get("posted_at",""),reverse=True)
     exp=int(time.time())+3600
@@ -984,7 +994,7 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
                         "profile_url":post.get("profile_url",""),
                         "media_expected":post.get("media_expected",len(post["media"])),
                         "media_saved":len(post["media"]),
-                        "capture_status":"remote_verified" if post.get("archive_complete",True) else "partial_media"})
+                        "capture_status":"remote_verified" if complete(post) else "partial_media"})
     age=max(0,int(time.time()-_cache["at"])) if _cache["posts"] is not None else None
     return {"total":len(posts),"offset":offset,"limit":limit,"posts":output,
             "storage":"TeraBox",
