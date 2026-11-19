@@ -24218,6 +24218,30 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 332,
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/50bbf0ee0346f3cb3c43.jpg",
+          "sha256": "50bbf0ee0346f3cb3c43a30360c3fdfb30e91472f808f1ad66e9313ee6ad7473",
+          "bytes": 47756,
+          "width": 500,
+          "height": 750,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 333,
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/ee45fe4043cc35146b4d.jpg",
+          "sha256": "ee45fe4043cc35146b4dc846e846c421e6fb68a186813d3781a1e3b93268104d",
+          "bytes": 13452,
+          "width": 300,
+          "height": 450,
+          "origin_page": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -34729,5 +34753,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3396
+  "physical_verified_image_count": 3398
 }
