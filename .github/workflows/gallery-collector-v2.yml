@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'apps/gallery-archive/collector_v2.py'
+      - 'apps/gallery-archive/collector_v2_strategy.py'
       - 'apps/gallery-archive/test_collector_v2.py'
       - 'apps/gallery-archive/COLLECTOR-V2.md'
       - '.github/workflows/gallery-collector-v2.yml'
@@ -10,6 +11,7 @@ on:
     branches: [main]
     paths:
       - 'apps/gallery-archive/collector_v2.py'
+      - 'apps/gallery-archive/collector_v2_strategy.py'
       - 'apps/gallery-archive/test_collector_v2.py'
       - '.github/workflows/gallery-collector-v2.yml'
   workflow_dispatch:
@@ -30,10 +32,10 @@ jobs:
       - run: python -m pip install --quiet 'Pillow==11.3.0' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
       - name: Test source boundaries, SQLite queue, real photo SHA and retry
         run: |
-          python -m py_compile apps/gallery-archive/collector_v2.py
+          python -m py_compile apps/gallery-archive/collector_v2.py apps/gallery-archive/collector_v2_strategy.py
           python apps/gallery-archive/test_collector_v2.py
-          python apps/gallery-archive/collector_v2.py --model mimmi --stage "$RUNNER_TEMP/v2-test" --max-works 5 --plan-only
-          python apps/gallery-archive/collector_v2.py --model yui --stage "$RUNNER_TEMP/v2-test" --max-works 5 --plan-only
+          python apps/gallery-archive/collector_v2.py --model mimmi --stage "$RUNNER_TEMP/v2-test" --max-works 12 --plan-only
+          python apps/gallery-archive/collector_v2.py --model yui --stage "$RUNNER_TEMP/v2-test" --max-works 12 --plan-only
   real-photo-pilot:
     needs: offline
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -59,16 +61,30 @@ jobs:
         with:
           node-version: '24'
       - run: python -m pip install --quiet 'Pillow==11.3.0' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
-      - name: Acquire real images from exact registered public source pages
+      - name: Independently discover same-work pages using saved model/title aliases
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$STAGE"
+          if ! timeout 240s python apps/gallery-archive/source_alias_search.py \
+              --model "$MODEL" --offset "$((GITHUB_RUN_NUMBER * 2))" \
+              --work-budget 6 --per-work 2 --max-pages 16 \
+              --out "$STAGE/discovery-evidence.json"; then
+            echo "::warning::V2_DISCOVERY_UNAVAILABLE; prior vetted sources still collected"
+            printf '{"schema_version":1,"model":"%s","search_results":[],"targets":[]}' "$MODEL" > "$STAGE/discovery-evidence.json"
+          fi
+      - name: Acquire genuine files from exact-work sources with fair per-work quotas
         run: |
           python apps/gallery-archive/collector_v2.py --model "$MODEL" \
             --stage "$STAGE" \
+            --discovery-evidence "$STAGE/discovery-evidence.json" \
             --state "apps/gallery-archive/verification/collector-v2-$MODEL.json" \
-            --max-works 5 --max-photos 20 --max-pages-per-work 3 --deadline-seconds 600
+            --max-works 12 --max-photos 48 --max-per-work 6 \
+            --max-pages-per-work 5 --deadline-seconds 900
       - name: Prove images through independent visual-dedupe and immutable publisher
         run: |
           python apps/gallery-archive/publish_new_public_photos_to_pages.py \
-            --model "$MODEL" --stage "$STAGE" --limit 20 --budget 20000000
+            --model "$MODEL" --stage "$STAGE" --limit 48 --budget 45000000
           node apps/gallery-archive/test_saved_photo_union.cjs
           python - <<'PY'
           import json,os
@@ -81,6 +97,7 @@ jobs:
                    f"- New physical photos added to Pages files: {published['new_sha_verified_originals']}\n"
                    f"- Verified visual upgrades: {published['higher_visual_quality_replacements']}\n"
                    f"- Deployed real browser opening: pending separate QA\n"
+                   f"- Verified discovered pages used for same-work discovery: {discovery['admitted_discovered_pages']}\n"
                    f"- Per-work outcomes: {json.dumps(discovery['works'],ensure_ascii=False)}\n")
           with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
               f.write(summary)
@@ -124,5 +141,6 @@ jobs:
           path: |
             /tmp/gallery-collector-v2/metadata/collector-v2-report.json
             /tmp/gallery-collector-v2/metadata/pages-publication.json
+            /tmp/gallery-collector-v2/discovery-evidence.json
           retention-days: 7
           if-no-files-found: ignore

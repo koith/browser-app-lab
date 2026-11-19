@@ -27,3 +27,27 @@ PASS, and downloaded bytes do not by themselves prove gallery acquisition.
 Only final publisher output and deployed image opening count as success.
 Full manufacturer editions require every count, resolution, watermark and
 available package-size evidence; public previews cannot invent paid originals.
+
+## Four operational collection upgrades (2026-11-19)
+
+1. Existing model/edition aliases and public source-name search now run before
+   each bounded V2 collection. Only independently observed, exact named-work
+   page proofs enter discovery. Every source page is rechecked on acquisition;
+   no search-result snippet or unreviewed archive qualifies as photo proof.
+2. The manufacturer's count in publisher-targets.json supersedes public
+   preview-page labels. Unique SHA counts can overstate unique photographed
+   frames; the reported remaining work is a conservative minimum by SHA, never
+   an unverified claim of full-edition completion.
+3. A bounded 12-work / 48-staged-image pilot uses at most SIX new files per
+   edition in one run. One work cannot starve all others. Candidate URL
+   checkpoints skip a URL only if its SHA actually appears in inventory;
+   otherwise an uncommitted candidate is retried when eligible.
+4. Fresh article title and contextual model/edition identity are mandatory,
+   including for sites found by aliases/reverse-source evidence. Observed
+   WordPress full-size URLs are preferred over observed resized variants
+   without guessing any new URL paths.
+
+References applied: Scrapy JOBDIR persistence, gallery-dl archive dedup,
+WordPress responsive srcset, project's verified_source_bridge.py,
+source_alias_search.py and publisher-targets.json. The old collector remains
+available until this pilot passes actual acquisition and live gallery QA.
