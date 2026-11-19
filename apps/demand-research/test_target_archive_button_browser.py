@@ -192,7 +192,7 @@ def verify_fifteen_existing_receipts(browser_type,label):
                                        "height":844})
         errors=[]
         page.on("pageerror",lambda error:errors.append(str(error)))
-        page.add_init_script("""() => {
+        page.add_init_script("""(() => {
           const receipts=Array.from({length:15},(_,i)=>({
             run_id:41999001001+i,receipt:'synthetic-signed-request-'+String(i),
             platform:'bluesky',account:'public-test'+i+'.bsky.social',
@@ -216,7 +216,7 @@ def verify_fifteen_existing_receipts(browser_type,label):
             }
             return oldFetch(uri,opts);
           };
-        }""")
+        })();""")
         def route_it(route):
             from urllib.parse import urlsplit
             parsed=urlsplit(route.request.url)
