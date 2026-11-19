@@ -293,7 +293,7 @@ def catalog_sync_child(db_path, marker_path, *, cloud=None, max_items=64,
         rotated=ids[start:]+ids[:start]
         missing=[pid for pid in rotated if pid not in already_verified]
         prior=[pid for pid in rotated if pid in already_verified]
-        reserved=max(1,max_items//8) if missing and prior else 0
+        reserved=min(max_items-1,max(1,max_items//8)) if missing and prior else 0
         chosen=(missing[:max_items-reserved]+prior[:reserved])[:max_items]
         # If there are fewer missing than reserved slots, use the remainder
         # for rechecking old verified records without changing archive bytes.
