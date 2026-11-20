@@ -1,5 +1,5 @@
 'use strict';
-/* Live Chromium/WebKit: original block-0 fall (slot 20) and own-palette
+/* DIE-02: all 4 D4 and all 6 D6 faces replayed twice in live Chromium/WebKit.\n * Original source keys/ticks VERIFIED, historical EXE physics/slot semantics UNVERIFIED.\n * Live Chromium/WebKit: original block-0 fall (slot 20) and own-palette
  * impact (slot 12) followed by verified original final pip face.
  * Original frame indices/ticks VERIFIED; mapping fall/impact and ms INFERRED.
  * No dice roll result or match-state mutation is allowed.
@@ -26,7 +26,8 @@ const assert=require('node:assert/strict');
   await page.waitForSelector('#game:not(.hidden)');
   const before=await page.evaluate(()=>JSON.stringify(window.__ROG_TEST__.getMatch()));
   const report={};
-  for(const [sides,result] of [[6,5],[4,3],[6,1]]){
+  // Fixed exhaustive replay: every genuine D4/D6 source face, twice, same game state.
+  for(let replay=1;replay<=2;replay++)for(const sides of [4,6])for(let result=1;result<=sides;result++){
    const out=await page.evaluate(async({sides,result})=>{
     const table=window.__LEAF_DICE_FALL__.originalRollTable(sides);
     if(!table)return {failure:'no native original table '+sides};
@@ -64,8 +65,9 @@ const assert=require('node:assert/strict');
    assert.equal(impacts.at(-1),out.impact.at(-1),'source impact must reach final original key');
    assert.equal(out.log.at(-1).url,out.face,'die rests on engine-predetermined verified D4/D6 pip face');
    assert.deepEqual(out.sounds,[[1,2125]],'impact 2125 is archived only, NOT guessed audio');
-   report['D'+sides+'-'+result]={fallObserved:falls.length,impactObserved:impacts.length};
+   report['replay'+replay+'-D'+sides+'-'+result]={fallObserved:falls.length,impactObserved:impacts.length};
   }
+  assert.equal(Object.keys(report).length,20,'D4×4 + D6×6 replay twice = 20 independent original animation outcome checks');
   assert.equal(await page.evaluate(()=>JSON.stringify(window.__ROG_TEST__.getMatch())),before,
    'presentation cannot mutate real saved match or RNG');
   const tampered=await page.evaluate(async()=>{
