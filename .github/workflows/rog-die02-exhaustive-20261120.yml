@@ -1,0 +1,34 @@
+name: 4LEAF DIE-02 original D4 and D6 all ten outcome acceptance
+on:
+  push:
+    branches: ['feat/4leaf-die02-d4-d6-all-face-20261120']
+    paths: ['apps/4leaf/rog/tests/dice-original-roll-tables.cjs','.github/workflows/rog-die02-exhaustive-20261120.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  die02-real-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    env:
+      FOURLEAF_BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install "$FOURLEAF_BROWSER" --with-deps
+      - name: Start local shipped game
+        run: |
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-die02-server.log 2>&1 &
+          sleep 2
+          curl -fSsI http://127.0.0.1:8765/index.html
+      - name: DIE-02 all ten source faces twice, game-state safety
+        run: node apps/4leaf/rog/tests/dice-original-roll-tables.cjs
