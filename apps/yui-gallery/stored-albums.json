@@ -525,6 +525,30 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 478,
+          "url": "stored-albums/public-yui-sns/e9fe4da0f4b9468f2d2f.jpg",
+          "sha256": "e9fe4da0f4b9468f2d2fa4bcb90341626b74f74b23af76b100c1bfc02a001a36",
+          "bytes": 227068,
+          "width": 1366,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 479,
+          "url": "stored-albums/public-yui-sns/9b9b782236e3cc778087.jpg",
+          "sha256": "9b9b782236e3cc778087a131df85b5cdacdae7be884ff9d466b435664e1671e9",
+          "bytes": 244103,
+          "width": 1366,
+          "height": 2048,
+          "origin_page": "https://teapawt.net/super_yuisan",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -8759,5 +8783,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 640
+  "physical_verified_image_count": 642
 }

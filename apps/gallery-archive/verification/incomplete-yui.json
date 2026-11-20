@@ -2,10 +2,15 @@
   "schema_version": 1,
   "model": "yui",
   "unresolved_work_ids": [
+    "artgravia-707-yui-public-samples",
     "cn-chaotuji",
     "cn-huantuji",
     "cn-wantuzhi-everyday",
     "cn-yingyuge",
-    "cn-yuntu8"
+    "cn-yuntu8",
+    "yui-date-yui-public-samples",
+    "yui-fun-public-samples",
+    "yui-halloween-nun-public-samples",
+    "yui-time-to-eat-strawberries-public-samples"
   ]
 }
