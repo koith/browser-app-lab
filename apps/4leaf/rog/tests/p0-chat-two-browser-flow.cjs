@@ -44,12 +44,16 @@ async function user(api,view,name){
  const browser=await ENGINE.launch(ENGINE===chromium?{args:['--no-sandbox']}:{});
  const ctx=await browser.newContext({...VIEW_SPEC[view],serviceWorkers:'block'});
  if(api!=='page')await ctx.addInitScript(a=>{window.LEAF_CENTRAL_API_URL=a},api);
- const page=await ctx.newPage();const errors=[];
+ const page=await ctx.newPage();const errors=[],socketProof={frames:0};
+ if(process.env.P0_CHAT_CLIENT_OVERRIDE==='1'){
+  await page.route('**/central-client.js',route=>route.fulfill({path:path.join(__dirname,'..','central-client.js'),contentType:'application/javascript'}));
+  page.on('websocket',ws=>{if(ws.url().includes('/api/socket'))ws.on('framesent',()=>socketProof.frames++)});
+ }
  page.on('pageerror',e=>errors.push(String(e)));
  await page.goto(BASE);
  await page.waitForFunction(()=>window.__LEAF_SOCIAL__&&window.__LEAF_CHATROOM_SCREEN__&&window.__LEAF_CENTRAL_CHAT__?.ready,null,{timeout:30000});
  await page.evaluate(n=>{const e=document.getElementById('profile-name');if(e)e.textContent=n},name);
- return {browser,page,errors,name};
+ return {browser,page,errors,name,socketProof};
 }
 async function hitClick(page,loc,label){
  await loc.scrollIntoViewIfNeeded().catch(()=>{});
@@ -153,6 +157,7 @@ async function run(api,viewName){
   assert.ok(!linesA.concat(linesB).some(l=>/\d{1,2}:\d{2}/.test(l)),'no web timestamps in the log');
   rec.linesA=linesA;rec.linesB=linesB;
   assert.deepEqual(A.errors,[]);assert.deepEqual(B.errors,[]);
+  if(process.env.P0_CHAT_CLIENT_OVERRIDE==='1')assert.ok(A.socketProof.frames>10&&B.socketProof.frames>10,'actual candidate uses WebSocket, not high-volume HTTP polling');
   return rec;
  }finally{
   try{
