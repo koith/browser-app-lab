@@ -1,0 +1,97 @@
+name: Recover previously held photos into private owner archive
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-private-held-files-once.yml'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-private-held-files-once.yml'
+      - 'apps/gallery-archive/recover_held_private_files.py'
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Verify exact previously held bytes and current SHA deduplication
+        run: |
+          git fetch --no-tags --depth=1 origin 1da6ff3d78b6f316374d63d9a664d1013dd3096a
+          git fetch --no-tags --depth=1 origin 5c8e09257044ab33d5b588f84ee5dbef09636622
+          python apps/gallery-archive/recover_held_private_files.py --owner apps/mimmi-gallery/owner-index.json --stage "$RUNNER_TEMP/held-check"
+  private-import:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    concurrency:
+      group: gallery-terabox-private-mass-upload-mimmi
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: '1'
+      ARCHIVE_REMOTE: archive:MimmiArchive
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow 'httpx==0.28.1'
+      - name: Install existing checksum-pinned owner client
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/client" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/client"
+          binary="$(find "$RUNNER_TEMP/client" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Read actual existing private owner catalog
+        run: |
+          python - <<'PY'
+          import os,sys
+          sys.path.insert(0,'apps/mimmi-gallery/cloud/gateway')
+          from cookie_format import cookie_header
+          header=cookie_header(os.environ['MIMMI_COOKIE'])
+          if not header:raise ValueError('Existing owner credential unavailable')
+          print('::add-mask::'+header)
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('RCLONE_CONFIG_ARCHIVE_COOKIE='+header+'\n')
+          PY
+      - run: python apps/gallery-archive/read_owner_metadata.py --remote "$ARCHIVE_REMOTE" --model mimmi --out "$RUNNER_TEMP/owner-before.json" --published-index apps/mimmi-gallery/owner-index.json --refresh-existing-web-session
+      - name: Stage only previously held exact original bytes
+        id: stage
+        run: |
+          git fetch --no-tags --depth=1 origin 1da6ff3d78b6f316374d63d9a664d1013dd3096a
+          git fetch --no-tags --depth=1 origin 5c8e09257044ab33d5b588f84ee5dbef09636622
+          python apps/gallery-archive/recover_held_private_files.py --owner "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE"
+          python apps/gallery-archive/merge_incremental.py --model mimmi --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          j=json.loads((Path(os.environ['RUNNER_TEMP'])/'stage/metadata/incremental-merge.json').read_text())
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('changed='+str(j['new_photos']>0).lower()+'\n')
+          PY
+      - name: Store originals and thumbnails privately, independently read exact bytes
+        if: steps.stage.outputs.changed == 'true'
+        run: |
+          python apps/gallery-archive/owner_upload_web_token.py --github-env "$GITHUB_ENV" --best-effort
+          python apps/gallery-archive/upload_verified_individual.py --stage "$RUNNER_TEMP/stage" --previous "$RUNNER_TEMP/owner-before.json" --remote "$ARCHIVE_REMOTE" --model mimmi
+          python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2 --only-staged
+      - name: Commit only remotely verified private catalog, then viewer metadata
+        if: steps.stage.outputs.changed == 'true'
+        run: |
+          python apps/gallery-archive/commit_verified_owner_catalog.py --stage "$RUNNER_TEMP/stage" --model mimmi --remote "$ARCHIVE_REMOTE" --out "$RUNNER_TEMP/catalog-readback.json"
+          python apps/gallery-archive/publish_owner_index.py --model mimmi --input "$RUNNER_TEMP/catalog-readback.json" --output "$RUNNER_TEMP/owner-index.json"
+          python apps/gallery-archive/commit_owner_index.py --model mimmi --input "$RUNNER_TEMP/owner-index.json"
+          gh workflow run static.yml --ref main
+          gh workflow run gallery-newly-stored-photo-qa.yml --ref main
