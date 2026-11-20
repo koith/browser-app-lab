@@ -73,7 +73,7 @@ jobs:
         run: |
           git fetch --no-tags --depth=1 origin 1da6ff3d78b6f316374d63d9a664d1013dd3096a
           git fetch --no-tags --depth=1 origin 5c8e09257044ab33d5b588f84ee5dbef09636622
-          python apps/gallery-archive/recover_held_private_files.py --owner "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
+          python apps/gallery-archive/recover_held_private_files.py --owner "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE"
           python apps/gallery-archive/merge_incremental.py --model mimmi --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
           python - <<'PY'
           import json,os
