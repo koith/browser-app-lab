@@ -2,6 +2,7 @@ name: Gallery Direct Individual Photo Collection and Verified Storage
 on:
   workflow_dispatch:
   # Single explicitly user-requested restart on this workflow file's main merge.
+  # 2026-11-21 one-time user request: retry registered public costume previews and creator originals.
   # Ordinary photo/index pushes and schedules cannot launch new collectors.
   push:
     branches: [main]
