@@ -29,6 +29,8 @@ def main():
         q=Queue(path)
         assert q.next()[1]=="page"
         assert q.report()["queue"]["search:blocked"]==1
+        q.pause_engine('yandex','robots_disallowed')
+        assert q.report()['queue']['search:paused']==1
         q.db.close()
     for model in ("yui","mimmi"):
         _,_,records,queries,types=plan(model)

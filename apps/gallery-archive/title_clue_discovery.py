@@ -10,6 +10,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import time
 import unicodedata
 from collections import Counter, defaultdict, deque
 from pathlib import Path
@@ -23,10 +24,14 @@ from bs4 import BeautifulSoup
 
 from source_name_ledger import LEDGER, key
 from source_alias_search import hydrate_all_registered_works, https_page, page_matches, source_headings
+from official_sample_recovery import _publisher_page
 
 ROOT = Path(__file__).resolve().parents[2]
 ENGINES = {"google": "https://www.google.com/search", "yandex": "https://yandex.com/search/"}
 ENGINE_PARAM = {"google": "q", "yandex": "text"}
+# Ordinary public alternative search. No CAPTCHA bypass or restricted endpoint.
+ENGINES.update({"bing":"https://www.bing.com/search","duckduckgo":"https://html.duckduckgo.com/html/"})
+ENGINE_PARAM.update({"bing":"q","duckduckgo":"q"})
 PUBLISHERS = {
     "artgravia": ("ArtGravia", "AG", "아트그라비아"),
     "sweetbox": ("SWEETBOX", "SWTB", "스위트박스"),
@@ -175,6 +180,9 @@ def canonical(url):
     except (TypeError,ValueError):return None
 
 def search_hits(raw, engine):
+    if engine in ("bing","duckduckgo"):
+        from visual_work_discovery import hits_from_html
+        return {u:h["title"] for h in hits_from_html(raw,engine) if (u:=canonical(h["url"]))}
     soup=BeautifulSoup(raw,"html.parser")
     selectors={"google":"div#search a[href], div#rso a[href]", 
                "yandex":"li.serp-item a[href], div.serp-item a[href], a.OrganicTitle-Link[href]"}
@@ -201,9 +209,16 @@ class Queue:
         self.add_many([(kind,value,engine)])
     def add_many(self, tasks):
         self.db.executemany("INSERT OR IGNORE INTO task(kind,value,engine) VALUES(?,?,?)",tasks); self.db.commit()
-    def next(self):
-        # Page tasks precede new searches, but retain all queued search work.
-        return self.db.execute("SELECT id,kind,value,engine FROM task WHERE status='pending' ORDER BY CASE kind WHEN 'page' THEN 0 ELSE 1 END,id LIMIT 1").fetchone()
+    def next(self, search=False):
+        # Prioritize queued work pages; reserve every fifth slot for ordinary
+        # search so a large site cannot starve external discovery.
+        sql="SELECT id,kind,value,engine FROM task WHERE status='pending' AND kind=? ORDER BY id LIMIT 1"
+        preferred="search" if search else "page"
+        return self.db.execute(sql,(preferred,)).fetchone() or self.db.execute(sql,("page" if search else "search",)).fetchone()
+    def pause_engine(self, engine, detail):
+        # A robots prohibition for the search endpoint applies to its
+        # query variants. Park, rather than delete or count as inspected.
+        self.db.execute("UPDATE task SET status='paused', detail=? WHERE kind='search' AND engine=? AND status='pending'",(detail,engine));self.db.commit()
     def finish(self,id,status,detail=""):
         self.db.execute("UPDATE task SET status=?,attempts=attempts+1,detail=? WHERE id=?",(status,detail,id)); self.db.commit()
     def site(self,host,evidence):
@@ -222,6 +237,7 @@ class PublicMetadata:
         self.session=requests.Session()
         self.agent="PersonalPublicCatalogueResearch/1.0"
         self.robots={}
+        self.last_request={}
     def get(self,url):
         url=canonical(url)
         if not url:return None,"unsafe_url"
@@ -240,6 +256,9 @@ class PublicMetadata:
                 else:return None,"robots_unavailable_"+str(robot.status_code)
                 self.robots[host]=rp
             if not self.robots[host].can_fetch(self.agent,url):return None,"robots_disallowed"
+            gap=time.monotonic()-self.last_request.get(host,0)
+            if gap<0.75:time.sleep(0.75-gap)
+            self.last_request[host]=time.monotonic()
             with self.session.get(url,headers={"User-Agent":self.agent,"Accept":"text/html"},timeout=(4,8),allow_redirects=False,stream=True) as r:
                 if r.status_code!=200:return None,"http_"+str(r.status_code)
                 if "html" not in r.headers.get("content-type","").lower():return None,"not_html"
@@ -295,7 +314,7 @@ def official_seeds(root,model):
     return [r["url"] for r in json.loads(path.read_text()).get("sources",[])
             if r.get("model")==model and r.get("tier")=="official" and canonical(r.get("url",""))]
 
-def process(queue, db, aliases, model, budget, transport):
+def process(queue, db, aliases, model, budget, transport, max_seconds=240):
     clues={key(a) for a in aliases if len(key(a))>=2}
     for names in db["works"].values():
         for r in names:
@@ -306,14 +325,18 @@ def process(queue, db, aliases, model, budget, transport):
         for row in rows:
             c=title_clues(row["name"],aliases)
             site_terms.update(p+" "+n for p in c["publishers"] for _,n in c["editions"])
-    for _ in range(budget):
-        task=queue.next()
+    deadline=time.monotonic()+max_seconds
+    for i in range(budget):
+        if time.monotonic()>=deadline:break
+        task=queue.next(search=(i%5==4))
         if not task:break
         id,kind,value,engine=task
         url=ENGINES[engine]+"?"+urlencode({ENGINE_PARAM[engine]:value}) if kind=="search" else value
         raw,status=transport.get(url)
         if raw is None:
             queue.finish(id,"blocked" if status.startswith(("robots","http_401","http_403","access_boundary")) else "failed",status)
+            if kind=="search" and status in ("robots_disallowed","access_boundary","http_403","http_401"):
+                queue.pause_engine(engine,status)
             continue
         if kind=="search":
             hits=search_hits(raw,engine)
@@ -343,18 +366,46 @@ def process(queue, db, aliases, model, budget, transport):
         queue.finish(id,"inspected",str(len(matching)))
     return queue.report()
 
+def official_collection_evidence(report, db, model, root=ROOT):
+    """Only observed official publisher articles with a model-linked work.
+
+    Do not promote generic catalogue pages or unreviewed mirrors to storage.
+    Known official work URLs are independently identified in the existing
+    registry; newly observed ones need the exact work proof from the queue.
+    """
+    stored=json.loads((root/"apps"/(model+"-gallery")/"public-work-pages.json").read_text())
+    rows={}
+    for row in stored.get("albums",[]):
+        aid=row.get("id")
+        url=row.get("source")
+        if isinstance(aid,str) and _publisher_page(url):
+            rows[aid]={"id":aid,"title":row["title"],"urls":[url],"observations":[]}
+    for obs in report["observations"]:
+        if not obs["work"].startswith(model+":") or not _publisher_page(obs["url"]):continue
+        aid=obs["work"].split(":",1)[1]
+        if aid not in db["works"] and obs["work"] not in db["works"]:continue
+        row=rows.setdefault(aid,{"id":aid,"title":db["works"][obs["work"]][0]["name"],"urls":[],"observations":[]})
+        if obs["url"] not in row["urls"]:row["urls"].append(obs["url"])
+        row["observations"].append({"model":model,"album_id":aid,"name":obs["title"],"source":obs["url"],
+             "proof":"unique_named_work_page_model_and_edition"})
+    return {"schema_version":1,"model":model,"targets":[{k:v for k,v in x.items() if k!="observations"} for x in rows.values()],
+            "search_results":list(rows.values()),"research_only_not_yet_saved":True}
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--model",choices=["yui","mimmi"],required=True)
     p.add_argument("--state",type=Path,required=True)
     p.add_argument("--out",type=Path,required=True)
     p.add_argument("--budget",type=int,default=0)
+    p.add_argument("--max-seconds",type=int,default=240)
+    p.add_argument("--collection-evidence",type=Path)
+    p.add_argument("--resume-engines",action="store_true")
     p.add_argument("--root",type=Path,default=ROOT)
     p.add_argument("--retry-failed",action="store_true")
     p.add_argument("--official-seeds",action="store_true")
     p.add_argument("--observed-pages",type=Path,help="JSON list of independently observed public page URLs (metadata only)")
     a=p.parse_args()
-    if not 0<=a.budget<=200:raise ValueError("invalid execution budget")
+    if not 0<=a.budget<=200 or not 1<=a.max_seconds<=900:raise ValueError("invalid execution budget")
     db,aliases,records,queries,types=plan(a.model,a.root)
     q=Queue(a.state)
     q.add_many(("search",item["query"],engine) for item in queries for engine in ENGINES)
@@ -363,12 +414,20 @@ def main():
         rows=json.loads(a.observed_pages.read_text())
         if not isinstance(rows,list):raise ValueError("expected observed page URL list")
         q.add_many(("page",u,"") for u in rows if isinstance(u,str) and canonical(u))
+    if a.resume_engines:
+        q.db.execute("UPDATE task SET status='pending' WHERE status='paused'")
+        q.db.commit()
     if a.retry_failed:
         q.db.execute("UPDATE task SET status='pending' WHERE status IN ('failed','unparsed')")
         q.db.commit()
-    report=process(q,db,aliases,a.model,a.budget,PublicMetadata()) if a.budget else q.report()
+    report=process(q,db,aliases,a.model,a.budget,PublicMetadata(),a.max_seconds) if a.budget else q.report()
     result={"model":a.model,"catalogue_records":len(records),"query_count":len(queries),
             "query_families":types,"research_only":True,"physical_new_files":0,**report}
     a.out.write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n")
+    if a.collection_evidence:
+        evidence=official_collection_evidence(report,db,a.model,a.root)
+        a.collection_evidence.write_text(json.dumps(evidence,ensure_ascii=False,indent=2)+"\n")
+        print("TITLE_CLUE_OFFICIAL_COLLECTION_TARGETS",a.model,len(evidence["targets"]),sum(len(x["observations"]) for x in evidence["search_results"]))
+    q.db.close()
     print("TITLE_CLUE_DISCOVERY",json.dumps({k:v for k,v in result.items() if k not in ("sites","observations")},ensure_ascii=False))
 if __name__=="__main__":main()
