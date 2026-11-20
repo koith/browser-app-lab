@@ -38,7 +38,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(links_from_search(raw,"yui"),["https://jjtv.kr/15/154066"])
     def test_real_video_bytes_only(self):
         with self.assertRaises(SiteError):inspect_mp4(b"hello")
-        self.assertEqual(len(inspect_mp4(b"\\0\\0\\0\\x18ftyp"+bytes(1100))),64)
+        self.assertEqual(len(inspect_mp4(b"\0\0\0\x18ftyp"+bytes(1100))),64)
     def test_blocked_site_does_not_claim_archived_video(self):
         with TemporaryDirectory() as d:
             base=Path(d)/"apps/yui-gallery"
