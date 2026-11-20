@@ -12,9 +12,16 @@
       "visual_reference_required": true,
       "identity_evidence": "Observed Mimmi model-index link, album title and public individual-image JSON declaration. Local full-edition decoding found 9 clear whole-frame matches to SHA-verified saved originals and 36 new files. Keep all larger saved originals; require independent private-storage readback before publication.",
       "source_pages": [
-        "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/"
+        "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/",
+        "https://showartx.net/mimmis-my-summer-vacation-vol-5/",
+        "https://www.nicewww.com/archives/mij/dja/584207.html"
       ],
-      "official_publisher_page": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/"
+      "official_publisher_page": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/",
+      "verified_public_priority_pages": [
+        "https://showartx.net/mimmis-my-summer-vacation-vol-5/",
+        "https://www.nicewww.com/archives/mij/dja/584207.html"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "v2ph-actor-z7exoo5z",
@@ -54,7 +61,14 @@
       "public_web_edition_photos": 51,
       "advertised_photos": 51,
       "visual_reference_required": true,
-      "identity_evidence": "Observed Mimmi search result and matching work name. Publication requires every declared public file number and at least 3 whole-frame matches to existing saved originals; no protected or archive download."
+      "identity_evidence": "Observed Mimmi search result and matching work name. Publication requires every declared public file number and at least 3 whole-frame matches to existing saved originals; no protected or archive download.",
+      "source_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-the-pet-girl"
+      ],
+      "verified_public_priority_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-the-pet-girl"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "v2ph-actor-z6exx6ma",
@@ -179,7 +193,14 @@
       "source_claimed_total_edition_photos": 199,
       "priority": 0,
       "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
-      "storage_scope": "public_publisher_samples_only_not_purchased_master"
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_pages": [
+        "https://showartx.net/mimmi-blossom-reverie/"
+      ],
+      "verified_public_priority_pages": [
+        "https://showartx.net/mimmi-blossom-reverie/"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "djawa-christmas-special-2025-mimmi-the-christmas-witch",
@@ -189,7 +210,14 @@
       "source_claimed_total_edition_photos": 151,
       "priority": 0,
       "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
-      "storage_scope": "public_publisher_samples_only_not_purchased_master"
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_pages": [
+        "https://showartx.net/mimmi-christmas-special-2025-the-christmas-witch/"
+      ],
+      "verified_public_priority_pages": [
+        "https://showartx.net/mimmi-christmas-special-2025-the-christmas-witch/"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "djawa-asuna-the-maid",
@@ -199,7 +227,17 @@
       "source_claimed_total_edition_photos": 125,
       "priority": 0,
       "identity_evidence": "Exact Mimmi-attributed official DJAWA portfolio page, model confirmed in full article and its 2026 published sample_N JPEG links. Only directly observed public /wp-content/uploads/YYYY/MM/ image URLs; excludes Gumroad paid/download links and related works. Captured photo SHA must not already exist in owner or free Pages; published only after actual original bytes decode, SHA and live browser QA.",
-      "storage_scope": "public_publisher_samples_only_not_purchased_master"
+      "storage_scope": "public_publisher_samples_only_not_purchased_master",
+      "source_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-asuna-the-maid",
+        "https://showartx.net/mimmi-asuna-the-maid/",
+        "https://www.nicewww.com/archives/mij/dja/654398.html"
+      ],
+      "verified_public_priority_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-asuna-the-maid",
+        "https://showartx.net/mimmi-asuna-the-maid/"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "djawa-christmas-special-2021-mimmi",
@@ -209,7 +247,14 @@
       "priority": 3,
       "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
       "storage_scope": "public_publisher_samples_only_not_purchased_master",
-      "source_claimed_total_edition_photos": null
+      "source_claimed_total_edition_photos": null,
+      "source_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-christmas-special-2021"
+      ],
+      "verified_public_priority_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-christmas-special-2021"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "djawa-christmas-special-2023-mimmi",
@@ -269,7 +314,16 @@
       "priority": 3,
       "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
       "storage_scope": "public_publisher_samples_only_not_purchased_master",
-      "source_claimed_total_edition_photos": null
+      "source_claimed_total_edition_photos": null,
+      "source_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-in-the-summer-sunshine-part-1",
+        "https://showartx.net/mimmi-in-the-summer-sunshine-part-1/"
+      ],
+      "verified_public_priority_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-in-the-summer-sunshine-part-1",
+        "https://showartx.net/mimmi-in-the-summer-sunshine-part-1/"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "djawa-janus-scary-lantern-night",
@@ -369,7 +423,16 @@
       "priority": 3,
       "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
       "storage_scope": "public_publisher_samples_only_not_purchased_master",
-      "source_claimed_total_edition_photos": null
+      "source_claimed_total_edition_photos": null,
+      "source_pages": [
+        "https://showartx.net/mimmi-nikke-elegg/",
+        "https://www.nicewww.com/archives/mij/dja/645379.html"
+      ],
+      "verified_public_priority_pages": [
+        "https://showartx.net/mimmi-nikke-elegg/",
+        "https://www.nicewww.com/archives/mij/dja/645379.html"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "djawa-nikke-yuni",
@@ -389,7 +452,14 @@
       "priority": 3,
       "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
       "storage_scope": "public_publisher_samples_only_not_purchased_master",
-      "source_claimed_total_edition_photos": null
+      "source_claimed_total_edition_photos": null,
+      "source_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-x-ceyatic-pop-kitty-party"
+      ],
+      "verified_public_priority_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-x-ceyatic-pop-kitty-party"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "djawa-rei-beyond-the-heart",
@@ -399,7 +469,16 @@
       "priority": 3,
       "identity_evidence": "Real official DJAWA Mimmi portfolio indexed under the publisher's Mimmi model category. Only actual public /wp-content/uploads image links within the corresponding work; any SHA must be checked against saved owner and local gallery. Does not claim paid master edition completeness.",
       "storage_scope": "public_publisher_samples_only_not_purchased_master",
-      "source_claimed_total_edition_photos": null
+      "source_claimed_total_edition_photos": null,
+      "source_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-rei-beyond-the-heart",
+        "https://showartx.net/mimmis-rei-beyond-the-heart/"
+      ],
+      "verified_public_priority_pages": [
+        "https://cup2d.com/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-rei-beyond-the-heart",
+        "https://showartx.net/mimmis-rei-beyond-the-heart/"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "djawa-retrospection",

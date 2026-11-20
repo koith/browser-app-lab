@@ -118,8 +118,12 @@ def load_inventory(root, model):
     works = []
     for a in src.get("albums", []):
         aid = a.get("id")
-        urls = list(dict.fromkeys(u for u in [a.get("source"), *(a.get("source_pages") or [])]
-                                  if public_https(u)))
+        # Exact-edition public pages supplied by the user are tried first.
+        # Catalogue/search pages or inferred media URLs are never promoted.
+        urls = list(dict.fromkeys(u for u in [
+            *(a.get("verified_public_priority_pages") or []),
+            a.get("source"), *(a.get("source_pages") or [])]
+            if public_https(u)))
         if not isinstance(aid, str) or not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}", aid):
             continue
         if not urls:
@@ -144,6 +148,9 @@ def load_inventory(root, model):
                       "target_basis": "publisher" if publisher_count else (
                           "public_source_claim" if source_count else "unknown"),
                       "unresolved_priority": aid in pending,
+                      "newly_added_public_sources": bool(a.get("newly_added_public_sources")),
+                      "source_fingerprint": hashlib.sha256(
+                          "\n".join(urls).encode("utf-8")).hexdigest(),
                       "browser_pagination_candidate": any(
                           urlsplit(u).hostname in ("shypetal.com", "www.shypetal.com")
                           for u in urls),
@@ -156,7 +163,10 @@ def load_inventory(root, model):
     # Missing edition cuts first; next, works with a short public gallery
     # even when the private owner vault lists many SHA. Do not conflate them.
     works.sort(key=lambda a: (
-        0 if a["unresolved_priority"] else 1,
+        # A user-supplied exact-edition source is immediately actionable.
+        # Check it before repeating old blocked pages with no new links.
+        0 if a["newly_added_public_sources"] else
+        1 if a["unresolved_priority"] else 2,
         0 if a["gap"] is not None and a["gap"] > 0 else
         1 if a["public_storage_gap"] is not None and a["public_storage_gap"] > 0 else
         2 if a["gap"] is None else 3,
@@ -175,12 +185,16 @@ class QueueDB:
         self.db.execute("CREATE TABLE IF NOT EXISTS media (url TEXT PRIMARY KEY, "
                         "sha TEXT NOT NULL, checked REAL NOT NULL)")
         self.browser_checked = set()
+        self.source_checked = {}
         if snapshot and Path(snapshot).is_file():
             doc = json.loads(Path(snapshot).read_text(encoding="utf-8"))
             if doc.get("schema_version") != SCHEMA:
                 raise ValueError("invalid checkpoint version")
             self.browser_checked = {x for x in doc.get("browser_checked_work_ids", [])
                                     if isinstance(x, str)}
+            self.source_checked = {str(k):str(v) for k,v in
+                                   doc.get("source_checked", {}).items()
+                                   if isinstance(v, str)}
             for r in doc.get("works", []):
                 if len(r) == 6:
                     self.db.execute("INSERT OR REPLACE INTO work VALUES (?,?,?,?,?,?)", r)
@@ -194,6 +208,8 @@ class QueueDB:
         for w in works:
             row = self.db.execute("SELECT next_at FROM work WHERE id=?", (w["id"],)).fetchone()
             if (row is None or row[0] <= self.now
+                    or (w.get("newly_added_public_sources") and
+                        self.source_checked.get(w["id"]) != w.get("source_fingerprint"))
                     or (w.get("browser_pagination_candidate")
                         and w["id"] not in self.browser_checked)):
                 ready.append(w)
@@ -211,13 +227,15 @@ class QueueDB:
                         (url, sha, self.now))
         self.db.commit()
 
-    def finish(self, aid, status, staged):
+    def finish(self, aid, status, staged, source_fingerprint=None):
         if status not in RETRY_SECONDS:
             raise ValueError("unknown queue status")
         old = self.db.execute("SELECT attempts FROM work WHERE id=?", (aid,)).fetchone()
         self.db.execute("INSERT OR REPLACE INTO work VALUES (?,?,?,?,?,?)",
                         (aid, self.now, self.now + RETRY_SECONDS[status],
                          (old[0] if old else 0) + 1, status, int(staged)))
+        if source_fingerprint:
+            self.source_checked[aid] = source_fingerprint
         self.db.commit()
 
     def checkpoint(self, path):
@@ -225,6 +243,7 @@ class QueueDB:
         target.parent.mkdir(parents=True, exist_ok=True)
         data = {"schema_version": SCHEMA,
                 "browser_checked_work_ids": sorted(self.browser_checked),
+                "source_checked": dict(sorted(self.source_checked.items())),
                 "works": self.db.execute("SELECT id,checked,next_at,attempts,status,staged "
                                          "FROM work ORDER BY id").fetchall(),
                 "media": self.db.execute("SELECT url,sha,checked FROM media ORDER BY url").fetchall()}
@@ -551,7 +570,8 @@ def collect(root, model, stage, state_file, *, max_works=12, max_photos=48,
             status = "unverified_page"
         else:
             status = "fetch_error"
-        queue.finish(work["id"], status, details["files_staged"])
+        queue.finish(work["id"], status, details["files_staged"],
+                     source_fingerprint=work.get("source_fingerprint"))
         if details["browser_scanned_pages"]:
             queue.browser_checked.add(work["id"])
         details["status"] = status

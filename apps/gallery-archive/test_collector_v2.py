@@ -347,6 +347,38 @@ class CollectorV2Test(unittest.TestCase):
         self.assertEqual(restored.eligible([work], 1), [])
         restored.db.close()
 
+    def test_blogger_observed_full_frame_preferred_to_small_tile(self):
+        tile = ("https://blogger.googleusercontent.com/img/b/ABC123/"
+                "s320/Mimmi-The-Pet-Girl-001.jpg")
+        full = ("https://blogger.googleusercontent.com/img/b/ABC123/"
+                "s6000/Mimmi-The-Pet-Girl-001.jpg")
+        other = ("https://blogger.googleusercontent.com/img/b/ABC123/"
+                 "s6000/Mimmi-The-Pet-Girl-002.jpg")
+        self.assertEqual(best_observed_variants([tile, full, other]), [full, other])
+        self.assertEqual(best_observed_variants([tile]), [tile])
+
+    def test_new_user_source_forces_one_retry_despite_week_cooldown(self):
+        state = self.root / "new-source-resume.json"
+        http = FakeHTTP({self.page: self.html, self.one: self.first_bytes,
+                         self.two: self.second_bytes})
+        collect(self.root, "mimmi", self.root / "first-source", state,
+                max_works=1, http=http, now=100000.0)
+        source = "https://cup2d.com/djawa-photo-mimmi-pop-kitty-party"
+        doc = json.loads((self.base / "public-work-pages.json").read_text())
+        doc["albums"][0]["verified_public_priority_pages"] = [source]
+        doc["albums"][0]["newly_added_public_sources"] = True
+        (self.base / "public-work-pages.json").write_text(json.dumps(doc))
+        works, _ = load_inventory(self.root, "mimmi")
+        self.assertEqual(works[0]["urls"][0], source)
+        q = QueueDB(":memory:", state, now=100010.0)
+        self.assertEqual([w["id"] for w in q.eligible(works, 1)], [self.work])
+        q.finish(self.work, "unchanged", 0, works[0]["source_fingerprint"])
+        q.checkpoint(state)
+        q.db.close()
+        q2 = QueueDB(":memory:", state, now=100020.0)
+        self.assertEqual(q2.eligible(works, 1), [])
+        q2.db.close()
+
     def test_bad_photo_does_not_become_sha(self):
         with self.assertRaises(DownloadFailure):
             inspect_photo(b"<html>not a photo</html>")
