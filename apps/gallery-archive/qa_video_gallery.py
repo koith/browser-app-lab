@@ -30,10 +30,10 @@ def run(browser):
             page.locator("#stats span").first.wait_for(timeout=15000)
             title=page.title()
             assert "동영상" in title,(model,title)
-            assert page.locator(".card").count()==(8 if model=="yui" else 3),model
+            assert page.locator(".card").count()==(16 if model=="yui" else 3),model
             assert page.locator('nav a[aria-current="page"]').count()==1
             if model=="yui":
-                assert page.locator(".preview button").count()==8
+                assert page.locator(".preview button").count()==16
                 page.locator(".preview button").first.click()
                 assert page.locator("#modal").is_visible()
                 src=page.locator("#player iframe").get_attribute("src")
