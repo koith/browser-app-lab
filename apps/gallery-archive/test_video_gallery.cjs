@@ -20,7 +20,8 @@ for(const model of ['yui','mimmi']){
  for(const item of data.videos){
   assert.ok(!ids.has(item.id),'duplicate video item '+item.id);ids.add(item.id);
   assert.ok(item.title&&item.source_url?.startsWith('https://'));
-  assert.ok(['youtube','local_mp4','source_only','remote_mp4'].includes(item.kind));
+  assert.ok(['youtube','local_mp4','source_only','remote_mp4','instagram'].includes(item.kind));
+  if(item.kind==='instagram')assert.match(item.instagram_id,/^[A-Za-z0-9_-]{11}$/);
   if(item.kind==='remote_mp4'){
    const u=new URL(item.media_url);
    assert.equal(u.protocol,'https:');assert.equal(u.hostname,'manpeace.org');
