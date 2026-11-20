@@ -33,7 +33,14 @@ jobs:
           python3 deploy.py /tmp/leaf-chat-bundle
       - name: Confirm actual Worker health
         run: |
-          curl -fsSL --retry 5 --max-time 30 https://fourleaf-central-chat-free.gallery-9f7d03138f3f.workers.dev/api/health | tee /tmp/health.json
+          for i in $(seq 1 12); do
+            status=$(curl -sS -A '4leaf-chat-production-qa/1.0' --max-time 15 -w '%{http_code}' -o /tmp/health.json https://fourleaf-central-chat-free.gallery-9f7d03138f3f.workers.dev/api/health || true)
+            echo "Attempt $i HTTP $status"
+            head -c 300 /tmp/health.json || true
+            echo
+            if [ "$status" = 200 ]; then break; fi
+            sleep 5
+          done
           node -e 'const h=require("/tmp/health.json");if(h.ok!==true||h.archive!=="durable-object")process.exit(1)'
       - run: npm install --no-save playwright && npx playwright install chromium webkit --with-deps
       - name: Test live authority with two actual browsers on public Pages
