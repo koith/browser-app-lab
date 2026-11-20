@@ -172,6 +172,22 @@ class CollectorV2Test(unittest.TestCase):
         self.assertEqual(works[0]["target_basis"], "publisher")
         self.assertEqual(works[0]["declared_resolution"], [8640, 5760])
 
+    def test_cup2d_model_in_exact_header_h1_without_model_in_article_text(self):
+        from collector_v2_strategy import verify_identity
+        exact = (b'<html><title>[SWEETBOX] Yui - SWTB Vol.22 Seethrough</title>'
+                 b'<main><article><header class="entry-header">'
+                 b'<h1>[SWEETBOX] Yui - SWTB Vol.22 Seethrough</h1></header>'
+                 b'<p>RAR password</p><a href="https://images.example.org/photo1.jpg">'
+                 b'<img src="https://images.example.org/preview1.jpg"></a>'
+                 b'</article></main></html>')
+        work = {"id": "seethrough80",
+                "title": "SWTB Vol.22 Seethrough — Yui"}
+        self.assertEqual(
+            verify_identity(exact, work, "yui")[0], True)
+        bad = exact.replace(b'[SWEETBOX] Yui - SWTB', b'[SWEETBOX] Kim - SWTB')
+        self.assertEqual(
+            verify_identity(bad, work, "yui")[1], "model_not_proven_in_article")
+
     def test_wrong_edition_not_collected_even_on_registered_page(self):
         changed = self.html.replace(b"Pop Kitty Party", b"Nikke Yuni")
         result = collect(self.root, "mimmi", self.root / "wrong-edition",

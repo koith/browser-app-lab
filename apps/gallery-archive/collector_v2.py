@@ -149,8 +149,14 @@ def load_inventory(root, model):
                           "public_source_claim" if source_count else "unknown"),
                       "unresolved_priority": aid in pending,
                       "newly_added_public_sources": bool(a.get("newly_added_public_sources")),
-                      "source_fingerprint": hashlib.sha256(
-                          "\n".join(urls).encode("utf-8")).hexdigest(),
+                      # Identity/extractor revisions may invalidate a previous
+                      # rejected source without changing its URL. Explicitly
+                      # bump ONLY the affected registered work, not all queues.
+                      "source_fingerprint": hashlib.sha256((
+                          "\n".join(urls) +
+                          ("\n" + str(a["source_check_revision"])
+                           if a.get("source_check_revision") else "")
+                      ).encode("utf-8")).hexdigest(),
                       "browser_pagination_candidate": any(
                           urlsplit(u).hostname in ("shypetal.com", "www.shypetal.com")
                           for u in urls),

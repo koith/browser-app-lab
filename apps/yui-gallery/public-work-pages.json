@@ -220,7 +220,8 @@
       "verified_public_priority_pages": [
         "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/"
       ],
-      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded",
+      "source_check_revision": "cup2d-exact-h1-20261120"
     },
     {
       "id": "artgravia-663-yui-public-samples",
