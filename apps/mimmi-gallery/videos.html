@@ -42,11 +42,13 @@ const setText=(el,text)=>{el.textContent=text;return el};
 const localPath=value=>typeof value==='string'&&/^stored-videos\/[a-f0-9]{64}\.mp4$/.test(value);
 const youtubeId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{11}$/.test(value);
 const sourcePage=value=>{try{let u=new URL(value);return u.protocol==='https:'?u.href:null}catch{return null}};
-const playable=entry=>(entry.kind==='youtube'&&youtubeId(entry.youtube_id))||(entry.kind==='local_mp4'&&localPath(entry.path)&&/^[a-f0-9]{64}$/.test(entry.sha256||'')&&entry.path.endsWith(entry.sha256+'.mp4'));
+const instagramId=value=>typeof value==='string'&&/^[A-Za-z0-9_-]{11}$/.test(value);
+const playable=entry=>(entry.kind==='youtube'&&youtubeId(entry.youtube_id))||(entry.kind==='local_mp4'&&localPath(entry.path)&&/^[a-f0-9]{64}$/.test(entry.sha256||'')&&entry.path.endsWith(entry.sha256+'.mp4'))||(entry.kind==='instagram'&&instagramId(entry.instagram_id));
 function closePlayer(){document.getElementById('player').replaceChildren();modal.hidden=true;document.body.style.overflow=''}
 function openPlayer(entry){if(!playable(entry))return;
  const holder=document.getElementById('player');holder.replaceChildren();
  if(entry.kind==='youtube'){const iframe=document.createElement('iframe');iframe.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(entry.youtube_id)+'?playsinline=1&autoplay=1';iframe.title=entry.title;iframe.loading='lazy';iframe.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.allowFullscreen=true;holder.append(iframe);}
+ else if(entry.kind==='instagram'){const iframe=document.createElement('iframe');iframe.src='https://www.instagram.com/reel/'+encodeURIComponent(entry.instagram_id)+'/embed/';iframe.title=entry.title;iframe.loading='lazy';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.allowFullscreen=true;holder.append(iframe);}
  else{const player=document.createElement('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=entry.path;holder.append(player);player.play().catch(()=>{});}
  setText(document.getElementById('playing-title'),entry.title);const a=document.getElementById('player-source'),url=sourcePage(entry.source_url)||'#';a.href=url;a.hidden=url==='#';modal.hidden=false;document.body.style.overflow='hidden';document.getElementById('close').focus({preventScroll:true});
 }
@@ -63,7 +65,7 @@ function draw(entries){
  const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',entry.title+' 재생');const play=document.createElement('span');play.className='play';play.textContent='▶';b.append(play);b.addEventListener('click',()=>openPlayer(entry));preview.append(b)}
  else{const mark=document.createElement('span');mark.className='tag';mark.textContent='영상 파일 미확보';preview.append(mark)}
  const info=document.createElement('div');info.className='cardinfo';const h=document.createElement('h2');setText(h,entry.title);info.append(h);
- const tag=document.createElement('span');tag.className='tag';tag.textContent=entry.kind==='local_mp4'?'원본 파일 저장':can?'외부 공개 영상 재생':'영상 존재 정보만 확인';info.append(tag);
+ const tag=document.createElement('span');tag.className='tag';tag.textContent=entry.kind==='local_mp4'?'원본 파일 저장':entry.kind==='instagram'?'공식 Instagram · 외부 영상':can?'외부 공개 영상 재생':'영상 존재 정보만 확인';info.append(tag);
  if(entry.note){const p=document.createElement('p');setText(p,entry.note);info.append(p)}
  const source=sourcePage(entry.source_url);if(source){const a=document.createElement('a');a.className='source';a.href=source;a.target='_blank';a.rel='noopener noreferrer';a.textContent='출처 보기 ↗';info.append(a)}
  card.append(preview,info);cards.append(card);
