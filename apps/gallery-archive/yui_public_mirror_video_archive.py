@@ -57,7 +57,7 @@ class PublicMediaClient:
                     # closed if ANY published group disallows the media /data/
                     # directory instead of silently taking the permissive one.
                     lines=r.text.splitlines()
-                    if any(re.match(r"\\s*Disallow:\\s*/data/(?:\\s|$)",line,re.I)
+                    if any(re.match(r"\s*Disallow:\s*/data/(?:\s|$)",line,re.I)
                            for line in lines):
                         self._robots=False
                     else:
