@@ -64,7 +64,7 @@ on:
       - "apps/demand-research/account_archive_view.html"
       - "apps/demand-research/account_archive_view.css"
       - "apps/demand-research/account_archive_view.js"
-      - "apps/demand-research/test_target_account_archive.py"
+      - "apps/demand-research/test_target_account_archive.py test_target_account_profile_fallback.py"
       - "apps/demand-research/target_archive_api.py"
       - "apps/demand-research/backup_queue.py"
       - "apps/demand-research/backup_bridge_poller.py"
@@ -115,7 +115,7 @@ jobs:
           set -euo pipefail
           python -m pip install --disable-pip-version-check -r apps/demand-research/requirements-ci.txt
           cd apps/demand-research
-          python -m py_compile profile_backfill_dispatch.py test_profile_backfill_dispatch.py github_temp_bundle.py test_github_temp_bundle.py test_backup_queue_sqlite.py target_account_archive.py target_account_bundle.py verified_bundle_reader.py target_account_enrichment.py target_account_viewer.py target_archive_api.py backup_queue.py backup_bridge_poller.py sealed_credentials.py test_sealed_credentials.py test_backup_queue.py test_target_account_archive.py test_target_account_bundle.py test_account_append_only.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py gateway.py
+          python -m py_compile profile_backfill_dispatch.py test_profile_backfill_dispatch.py github_temp_bundle.py test_github_temp_bundle.py test_backup_queue_sqlite.py target_account_archive.py target_account_bundle.py verified_bundle_reader.py target_account_enrichment.py target_account_viewer.py target_archive_api.py backup_queue.py backup_bridge_poller.py sealed_credentials.py test_sealed_credentials.py test_backup_queue.py test_target_account_archive.py test_target_account_profile_fallback.py test_target_account_bundle.py test_account_append_only.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py gateway.py
           node --check target_archive_client.js
           node test_live_keyword_exclusion.js
           node --check account_archive_view.js
@@ -124,7 +124,7 @@ jobs:
           python -m py_compile gateway.py
           node --check auto_archive_view.js
           node --check account_watch.js
-          python -m pytest -q test_profile_backfill_dispatch.py test_archive_nonblocking.py test_target_account_archive.py test_target_account_bundle.py test_account_append_only.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py test_backup_queue.py test_backup_queue_sqlite.py test_github_temp_bundle.py test_sealed_credentials.py test_demand_archive.py test_gateway.py
+          python -m pytest -q test_profile_backfill_dispatch.py test_archive_nonblocking.py test_target_account_archive.py test_target_account_profile_fallback.py test_target_account_bundle.py test_account_append_only.py test_verified_bundle_reader.py test_target_account_viewer.py test_target_archive_api.py test_backup_queue.py test_backup_queue_sqlite.py test_github_temp_bundle.py test_sealed_credentials.py test_demand_archive.py test_gateway.py
 
   # Two independently isolated browser suites run at the same time as the
   # unit/SHA/security checks. Both are REQUIRED; no test is skipped.
