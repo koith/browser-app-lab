@@ -37,17 +37,19 @@ def test_abort_after_post_staging_keeps_originals_as_partial(monkeypatch):
                           "media_pending_total":0}))
         raise SourceUnavailable("synthetic PDS pagination failed")
     monkeypatch.setattr(bundler,"run_one",broken_run)
-    result=bundler.execute_bundle(
-        selected={"platform":"bluesky","account":"qa-example.bsky.social",
-                  "max_pages":1},
-        api=api,run_id="123456789",cloud_check=False,
-        uploader=_fake_uploader(originals))
-    assert result["remote_sha256_verified"] is True
-    assert result["source_state"]=="SOURCE_PARTIAL"
-    assert result["source_partial"] is True
-    assert result["public_posts_in_bundle"]==1
-    assert result["profile_snapshot_verified"] is True
-    assert originals and len(originals[0]["objects"])>=2
+    # Non-GitHub archival workers intentionally return a NONZERO exit for
+    # interrupted crawls even after a partial ZIP was remotely verified.
+    # Preserve that operational warning while checking the immutable bytes.
+    with pytest.raises(RuntimeError,
+                       match="remote backup verified but source crawl is partial"):
+        bundler.execute_bundle(
+            selected={"platform":"bluesky","account":"qa-example.bsky.social",
+                      "max_pages":1},
+            api=api,run_id="123456789",cloud_check=False,
+            uploader=_fake_uploader(originals))
+    assert originals and originals[0]["capture_state"]=="SOURCE_PARTIAL"
+    assert any("/posts/" in x["key"] for x in originals[0]["objects"])
+    assert any("/profile/snapshots/" in x["key"] for x in originals[0]["objects"])
 
 
 def test_profile_outage_does_not_discard_verified_public_post(monkeypatch):
