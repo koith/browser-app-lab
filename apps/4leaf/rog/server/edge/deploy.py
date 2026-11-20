@@ -2,11 +2,20 @@
 """Deploy only the isolated free 4LEAF Worker via official script APIs.
 Never alter gallery, subscriptions, domains, or another Worker.
 """
-import json, os, pathlib, re, secrets, sys, urllib.request, urllib.error
+import hashlib, json, os, pathlib, re, secrets, sys, urllib.request, urllib.error
 NAME="fourleaf-central-chat-free"
 ACCOUNT=os.environ["CLOUDFLARE_ACCOUNT_ID"].strip()
 TOKEN=os.environ["CLOUDFLARE_API_TOKEN"].strip()
-assert re.fullmatch("[a-f0-9]{32}",ACCOUNT) and TOKEN
+assert TOKEN,"Cloudflare token not configured"
+# Some installations omit ACCOUNT_ID; the already verified gallery account
+# has a uniquely derived subdomain. Resolve it through read-only account API.
+if not ACCOUNT:
+    request=urllib.request.Request("https://api.cloudflare.com/client/v4/accounts?per_page=50",headers={"Authorization":"Bearer "+TOKEN,"Accept":"application/json"})
+    with urllib.request.urlopen(request,timeout=30) as response: data=json.load(response)
+    candidates=[a["id"] for a in data["result"] if hashlib.sha256(a["id"].encode()).hexdigest()[:12]=="9f7d03138f3f"]
+    assert len(candidates)==1,"Exact existing free account not uniquely identified"
+    ACCOUNT=candidates[0]
+assert re.fullmatch("[a-f0-9]{32}",ACCOUNT)
 ROOT="https://api.cloudflare.com/client/v4/accounts/"+ACCOUNT+"/"
 def call(path,method="GET",payload=None,multipart=None,missing=False):
     headers={"Authorization":"Bearer "+TOKEN,"Accept":"application/json"}
@@ -25,6 +34,7 @@ def call(path,method="GET",payload=None,multipart=None,missing=False):
         raise RuntimeError(f"{method} {path}: HTTP {error.code}, codes {codes}") from None
     if result.get("success") is not True: raise RuntimeError(f"{method} {path}: {result.get('errors')}")
     return result
+assert call("workers/subdomain")["result"]["subdomain"]=="gallery-9f7d03138f3f","Refuse unrelated account"
 billing=call("subscriptions")
 rows=billing.get("result")
 assert rows==[] and billing.get("result_info",{}).get("total_count",0)==0,"Free default account not established"
