@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2'
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
       - name: Test public URL safety, model identity, embedded MP4 extraction and actual-byte gate
         run: |
           python -m py_compile apps/gallery-archive/jjtv_public_video_archive.py
@@ -46,20 +46,32 @@ jobs:
         with: {fetch-depth: 0, persist-credentials: true}
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2'
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
       - name: Search public JJTV model pages and archive only verified direct MP4 bytes
         run: |
           mkdir -p /tmp/jjtv-video-audit
           python apps/gallery-archive/jjtv_public_video_archive.py \
             --model "$MODEL" --archive --max-pages 16 --max-posts 80 \
+            --stage "/tmp/jjtv-photo-$MODEL" --max-photos 20 \
             --report "/tmp/jjtv-video-audit/$MODEL.json"
+      - name: Independently publish SHA-verified public article photos, not posters or URL leads
+        run: |
+          python apps/gallery-archive/publish_new_public_photos_to_pages.py \
+            --model "$MODEL" --stage "/tmp/jjtv-photo-$MODEL" \
+            --limit 20 --budget 25000000
+          node apps/gallery-archive/test_saved_photo_union.cjs
+          echo "JJTV_IMAGE_PUBLISHER_VERIFICATION_COMPLETE model=$MODEL"
       - name: Commit SHA-verified videos only if physical bytes were saved
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "apps/$MODEL-gallery/videos.json"
+          git add "apps/$MODEL-gallery/videos.json" \
+                  "apps/$MODEL-gallery/stored-albums.json"
+          if [[ -d "apps/$MODEL-gallery/stored-albums" ]]; then
+            git add "apps/$MODEL-gallery/stored-albums"
+          fi
           if [[ -d "apps/$MODEL-gallery/stored-videos" ]]; then
             git add "apps/$MODEL-gallery/stored-videos"
           fi
@@ -83,6 +95,13 @@ jobs:
           done
           echo "::error::JJTV_VIDEO_COMMIT_PUSH_FAILED"
           exit 1
+      - name: Copy photo publisher audit to shared report folder
+        if: always()
+        shell: bash
+        run: |
+          if [[ -f "/tmp/jjtv-photo-$MODEL/metadata/pages-publication.json" ]]; then
+            cp "/tmp/jjtv-photo-$MODEL/metadata/pages-publication.json" "/tmp/jjtv-video-audit/$MODEL-images.json"
+          fi
       - name: Preserve audit report, not user media, for review
         if: always()
         uses: actions/upload-artifact@v4
