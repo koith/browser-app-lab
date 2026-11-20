@@ -2607,6 +2607,54 @@
           "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_07s.jpg",
           "quality": "historically_sha_pinned_public_bytes_not_paid_master",
           "numbering_provenance": "observed_public_source_photo_not_publisher_master"
+        },
+        {
+          "number": 27,
+          "url": "stored-albums/djawa-asuna-the-maid/359d95c96a04f15cad76.jpg",
+          "sha256": "359d95c96a04f15cad762bf6ecf3d9aed313ed923ffce03bd285bfb9613a9596",
+          "bytes": 135297,
+          "width": 800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "https://www.nicewww.com/wp-content/uploads/2026/11/1793508266-c81e728d9d4c2f6.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 28,
+          "url": "stored-albums/djawa-asuna-the-maid/93902b0e702be2a19807.jpg",
+          "sha256": "93902b0e702be2a19807cba8947e97de6a1b52e7fccd3aff7794071a0b039633",
+          "bytes": 141557,
+          "width": 800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "https://www.nicewww.com/wp-content/uploads/2026/11/1793508278-eccbc87e4b5ce2f.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 29,
+          "url": "stored-albums/djawa-asuna-the-maid/3241400c167cb07dce9d.jpg",
+          "sha256": "3241400c167cb07dce9dcb0f44067a754aacf05e511d12f65c2e9f68e9250ffe",
+          "bytes": 132178,
+          "width": 800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "https://www.nicewww.com/wp-content/uploads/2026/11/1793508287-a87ff679a2f3e71.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 30,
+          "url": "stored-albums/djawa-asuna-the-maid/c2d1fb29c1fefcab0317.jpg",
+          "sha256": "c2d1fb29c1fefcab03175bd32823c55fb5689617e47dacb9499e1e68f875cae0",
+          "bytes": 131486,
+          "width": 800,
+          "height": 1200,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "https://www.nicewww.com/wp-content/uploads/2026/11/1793508295-e4da3b7fbbce234.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -2936,6 +2984,42 @@
           "origin_page": "https://djawaphoto.com/portfolio/blossom-reverie/",
           "source_url": "",
           "quality": "sha_verified_existing_owner_exact_static_fallback_no_new_cut_claim"
+        },
+        {
+          "number": 22,
+          "url": "stored-albums/djawa-blossom-reverie/567cfed6125a367198ba.webp",
+          "sha256": "567cfed6125a367198bae074f7920a74ce8b159bca1d61be64f982c695d1edcd",
+          "bytes": 111032,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/blossom-reverie/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/06/DJaV150_139.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 23,
+          "url": "stored-albums/djawa-blossom-reverie/0bb6572ddd6f0074736d.webp",
+          "sha256": "0bb6572ddd6f0074736d55f5745f0093be04ae42d0c3bca7eb0d80752139cb41",
+          "bytes": 116506,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/blossom-reverie/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/06/DJaV150_117.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 24,
+          "url": "stored-albums/djawa-blossom-reverie/40342b4f0ea12ad1e656.webp",
+          "sha256": "40342b4f0ea12ad1e65652619bc5b4596899167eedabf68d5d0e776adf59d441",
+          "bytes": 108868,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/blossom-reverie/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/06/DJaV150_83.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -7679,6 +7763,78 @@
           "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_07-4.jpg",
           "quality": "historically_sha_pinned_public_bytes_not_paid_master",
           "numbering_provenance": "observed_public_source_photo_not_publisher_master"
+        },
+        {
+          "number": 28,
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/3a08f965094166f26a1e.webp",
+          "sha256": "3a08f965094166f26a1e5f3f39aa40f18187300aac1a9dc06d5c8e82701722e9",
+          "bytes": 49320,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/12/DJaV127_131.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 29,
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/cd84ff666e0bc82518da.webp",
+          "sha256": "cd84ff666e0bc82518dafae6bd68ac710cd4de68d41b313cc05e630533118ed0",
+          "bytes": 86036,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/12/DJaV127_123.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 30,
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/e13b6d95962695641a98.webp",
+          "sha256": "e13b6d95962695641a982ce3deb4e5e6b3e8805330439c958803b8199bfa2c5e",
+          "bytes": 55744,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/12/DJaV127_117.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 31,
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/51ea0bde9e9b74bff394.webp",
+          "sha256": "51ea0bde9e9b74bff394e2a35d76a7be714821a7122aa216d679887936b039b3",
+          "bytes": 75672,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/12/DJaV127_111.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 32,
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/a982c60179dd459ca5ee.webp",
+          "sha256": "a982c60179dd459ca5ee5816b697682eab1956cbe208fefd544bc55ee10c083b",
+          "bytes": 92428,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/12/DJaV127_95.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 33,
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/7c20ca779b71ca6c8f6f.webp",
+          "sha256": "7c20ca779b71ca6c8f6f228dc5054cc53440b8e0fe4e6e5f50d50483e3563531",
+          "bytes": 86898,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/12/DJaV127_89.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -31519,6 +31675,54 @@
           "source_url": "https://djawaphoto.com/wp-content/uploads/2025/07/sample_b02.jpg",
           "quality": "historically_sha_pinned_public_bytes_not_paid_master",
           "numbering_provenance": "observed_public_source_photo_not_publisher_master"
+        },
+        {
+          "number": 23,
+          "url": "stored-albums/djawa-my-summer-vacation-vol-5/59be482293a2b334c8fe.webp",
+          "sha256": "59be482293a2b334c8feda7c11a4a74d38babdffe351d759b485d2f96ce9cbfb",
+          "bytes": 50902,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/07/DJv77_93.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 24,
+          "url": "stored-albums/djawa-my-summer-vacation-vol-5/7ec220f2be2b4553751c.jpg",
+          "sha256": "7ec220f2be2b4553751cc69c954665679517e9b86b8584ef940bacbef1721ee8",
+          "bytes": 195499,
+          "width": 800,
+          "height": 1200,
+          "origin_page": "https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/",
+          "source_url": "https://www.nicewww.com/wp-content/uploads/2026/05/1778904882-eccbc87e4b5ce2f.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 25,
+          "url": "stored-albums/djawa-my-summer-vacation-vol-5/04e434c7a7683a0b9d4f.jpg",
+          "sha256": "04e434c7a7683a0b9d4f1b1b0b6ec7fead0c14d816161668a84ec64a91d436ab",
+          "bytes": 162953,
+          "width": 800,
+          "height": 1200,
+          "origin_page": "https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/",
+          "source_url": "https://www.nicewww.com/wp-content/uploads/2026/05/1778904885-a87ff679a2f3e71.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 26,
+          "url": "stored-albums/djawa-my-summer-vacation-vol-5/51089b2ce54d933e4dd7.jpg",
+          "sha256": "51089b2ce54d933e4dd7cec12bbe266903562a75a502af129f0359f1daa9631e",
+          "bytes": 116893,
+          "width": 800,
+          "height": 1200,
+          "origin_page": "https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/",
+          "source_url": "https://www.nicewww.com/wp-content/uploads/2026/05/1778904888-e4da3b7fbbce234.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -34753,5 +34957,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3398
+  "physical_verified_image_count": 3415
 }
