@@ -35,6 +35,8 @@ PHOTO_RE=re.compile(r"\.(?:jpe?g|png|webp)$",re.I)
 NON_CUT=re.compile(r"(?:^|[-_.])(?:logo|avatar|icon|banner|poster|thumb|cover|favicon)(?:[-_.]|$)|_0000\.(?:jpg|jpeg|webp|png)$",re.I)
 PHOTO_LIMIT=20
 PHOTO_MAX_BYTES=9_000_000
+VIDEO_TOTAL_BUDGET=60_000_000
+VIDEO_MAX_COUNT=5
 
 class SiteError(Exception):pass
 
@@ -173,6 +175,7 @@ def crawl(model,root=ROOT,client=None,max_pages=16,max_posts=80,archive=False,de
     catalog=json.loads(catalog_path.read_text(encoding="utf-8"))
     if catalog.get("model")!=model:raise ValueError("wrong video catalog")
     existing=set(x.get("sha256") for x in catalog["videos"] if x.get("kind")=="local_mp4")
+    known_media_urls={x.get("media_url") for x in catalog["videos"] if x.get("kind")=="local_mp4" and x.get("media_url")}
     seen=set()
     source_pages=["https://jjtv.kr/15/154066"] if model=="yui" else []
     counts=Counter();reasons=Counter();verified=[]
@@ -246,9 +249,18 @@ def crawl(model,root=ROOT,client=None,max_pages=16,max_posts=80,archive=False,de
                                          "proof":"unique_named_work_page_model_and_edition"})
             for video_url in proof["videos"]:
                 if not archive:continue
+                if video_url in known_media_urls:
+                    counts["known_media_url_skipped"]+=1
+                    continue
+                if counts["stored_files"]>=VIDEO_MAX_COUNT or counts["stored_bytes"]>=VIDEO_TOTAL_BUDGET:
+                    reasons["video_campaign_budget_reached"]+=1
+                    break
                 try:
                     data=client.get(video_url,MEDIA_LIMIT,kind="video")
                     sha=inspect_mp4(data)
+                    if counts["stored_bytes"]+len(data)>VIDEO_TOTAL_BUDGET:
+                        reasons["video_total_bytes_limit"]+=1
+                        continue
                     if sha in existing:
                         counts["duplicate_video"]+=1
                         continue
@@ -260,9 +272,10 @@ def crawl(model,root=ROOT,client=None,max_pages=16,max_posts=80,archive=False,de
                         tmp.write_bytes(data)
                         tmp.replace(dest)
                     existing.add(sha)
+                    known_media_urls.add(video_url)
                     catalog["videos"].append({"id":"jjtv-"+urlsplit(url).path.rsplit("/",1)[-1]+"-"+sha[:10],
                         "title":proof["title"],"kind":"local_mp4","path":"stored-videos/"+sha+".mp4",
-                        "sha256":sha,"bytes":len(data),"source_url":url,
+                        "sha256":sha,"bytes":len(data),"source_url":url,"media_url":video_url,
                         "note":"JJTV 일반 공개 게시물에 직접 포함된 MP4 실파일 저장"})
                     counts["stored_files"]+=1
                     counts["stored_bytes"]+=len(data)
