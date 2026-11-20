@@ -334,7 +334,9 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
          ("/posts/" in key and key.endswith("/post.json")))
         for key in store.objects
     )
-    profile_proven=(isinstance(result,dict) and
+    profile_snapshot_staged=any("/profile/snapshots/" in key
+                                for key in store.objects)
+    profile_proven=(profile_snapshot_staged and isinstance(result,dict) and
                     result.get("profile",{}).get("profile_verified") is True)
     if interrupted is not None:
         # If collection failed after some originals were staged, preserve the
@@ -347,7 +349,8 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
                               "staged_source_objects":0},sort_keys=True),flush=True)
             raise RuntimeError("No independently captured account originals available")
         result={"status":"SOURCE_PARTIAL",
-                "profile":{"profile_verified":summary.get("profile_verified") is True,
+                "profile":{"profile_verified":(
+                    profile_snapshot_staged and summary.get("profile_verified") is True),
                            "profile_assets_unavailable":int(
                                summary.get("profile_assets_unavailable",0))},
                 "media_pending_total":int(summary.get("media_pending_total",0)),
@@ -356,6 +359,8 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
         raise RuntimeError("No verified public account capture result")
     elif not profile_proven:
         result["status"]="SOURCE_PARTIAL"
+        if isinstance(result.get("profile"),dict):
+            result["profile"]["profile_verified"]=False
 
     if not source_evidence:
         raise RuntimeError("No independently captured profile or post originals staged")
