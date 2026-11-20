@@ -705,12 +705,12 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
     graph_stats={}
     try:
         profile_stat=archive_profile(profile,api,archive)
-    except (RuntimeError,ValueError,TypeError,KeyError):
-        if os.getenv("DEMAND_REQUIRE_PROFILE_SNAPSHOT","0")=="1":
-            # A profile-repair job must never report success while silently
-            # dropping the account's published biography, header or avatar.
-            # Existing immutable backups remain untouched and retryable.
-            raise SourceUnavailable("public profile snapshot could not be verified") from None
+    except (RuntimeError,ValueError,TypeError,KeyError) as error:
+        # Do not discard publicly available authored posts, source JSON and
+        # media solely because a DIFFERENT profile endpoint failed. This is
+        # never called a complete profile: the outer immutable ZIP reader
+        # reports SOURCE_PARTIAL until a real profile snapshot is captured.
+        profile_stat["profile_error_class"]=type(error).__name__
     for graph_kind in ("followers","following"):
         try:
             graph_stats[graph_kind]=archive_graph(profile,graph_kind,api,archive)
@@ -855,7 +855,8 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                                 cap=1024,optional=True)):
                 continue
             outstanding+=1
-        status=("RESUME_NEEDED_MEDIA" if outstanding else
+        status=("SOURCE_PARTIAL" if not profile_stat["profile_verified"] else
+                "RESUME_NEEDED_MEDIA" if outstanding else
                 ("COMPLETE_CURRENT_PUBLIC_CURSOR" if pages and not cursor
                  else "RESUME_NEEDED"))
         # Bounded comment/thread backlog scans retain progress even when
@@ -877,6 +878,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                           "media_pending_total":locals().get("outstanding",media_pending),
                           "media_repaired":pending_repaired,
                           "profile_verified":profile_stat["profile_verified"],
+                          "profile_error_class":profile_stat.get("profile_error_class"),
                           "profile_assets_verified":profile_stat["profile_assets_verified"],
                           "profile_assets_unavailable":profile_stat["profile_assets_unavailable"],
                           "graph_pages_verified":sum(v["pages"] for v in graph_stats.values()),
