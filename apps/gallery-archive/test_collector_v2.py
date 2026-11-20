@@ -306,6 +306,24 @@ class CollectorV2Test(unittest.TestCase):
         html = (f'<main><article><img data-hires="{lazy}"></article></main>').encode()
         self.assertEqual(page_candidates(html, self.page), [lazy])
 
+    def test_private_owner_count_must_not_hide_public_gallery_gap(self):
+        (self.base / "public-work-pages.json").write_text(json.dumps({
+            "albums": [{"id": self.work, "title": "Pop Kitty Party",
+                        "advertised_photos": 2, "source": self.page}]}))
+        sha1 = hashlib.sha256(self.first_bytes).hexdigest()
+        sha2 = hashlib.sha256(self.second_bytes).hexdigest()
+        (self.base / "owner-index.json").write_text(json.dumps({
+            "albums": [{"id": self.work, "images": [
+                {"sha256": sha1}, {"sha256": sha2}]}]}))
+        (self.base / "stored-albums.json").write_text(json.dumps({
+            "albums": [{"id": self.work, "images": [{"sha256": sha1}]}]}))
+        works, known = load_inventory(self.root, "mimmi")
+        self.assertEqual(len(known), 2)
+        self.assertEqual(works[0]["gap"], 0)
+        self.assertEqual(works[0]["missing_lower_bound_by_sha"], 0)
+        self.assertEqual(works[0]["public_saved_sha_count"], 1)
+        self.assertEqual(works[0]["public_storage_gap"], 1)
+
     def test_bad_photo_does_not_become_sha(self):
         with self.assertRaises(DownloadFailure):
             inspect_photo(b"<html>not a photo</html>")
