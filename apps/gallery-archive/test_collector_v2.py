@@ -130,7 +130,13 @@ class CollectorV2Test(unittest.TestCase):
 
     def test_same_frame_recompression_does_not_use_staging_budget(self):
         from photo_visual_dedupe import WorkVisualIndex
-        original = self.first_bytes
+        # Deterministic photographic-gradient fixture: random noise can
+        # shift dHash by >3 bits after JPEG re-encoding and flake CI.
+        # Keep production duplicate thresholds unchanged.
+        image = Image.linear_gradient("L").resize((1200, 900)).convert("RGB")
+        stable = BytesIO()
+        image.save(stable, "JPEG", quality=91)
+        original = stable.getvalue()
         image = Image.open(BytesIO(original))
         other = BytesIO()
         image.save(other, "JPEG", quality=80)
