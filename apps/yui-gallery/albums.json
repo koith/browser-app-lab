@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-11",
+  "updated": "2026-11-20",
   "albums": [
     {
       "id": "v01",
@@ -649,6 +649,19 @@
       "kind": "reference",
       "site": "CTEE",
       "photos": null
+    },
+    {
+      "id": "ref-djawa-privaty-20261028",
+      "title": "Nikke : Privaty – Sharp Lesson",
+      "source": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+      "kind": "reference",
+      "site": "Djawa Photo",
+      "photos": 190,
+      "video_count": 1,
+      "announcement_date": "2026-10-28",
+      "site_registration_date": null,
+      "source_type": "official_publisher",
+      "notes": "Official Yui photobook; public previews on publisher page. Publication date not independently confirmed."
     }
   ]
 }
