@@ -2133,9 +2133,413 @@
           "source_url": "https://djawaphoto.com/wp-content/uploads/2026/10/sample_23-1.jpg",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 23,
+          "url": "stored-albums/djawa-privaty-public-samples/a8d9a9344e4ff622c130.webp",
+          "sha256": "a8d9a9344e4ff622c1307c0b27cc49a0e36f4ab99f7a4dcae01218b49baa829a",
+          "bytes": 74848,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/10/DJaV177_67.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
+    },
+    {
+      "id": "artgravia-639-yui-public-samples",
+      "title": "ArtGravia Vol.639 [Yui] — 공개 사진 미리보기",
+      "source": "https://showartx.net/artgravia-vol-639-yui/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/artgravia-639-yui-public-samples/6b0d1c66b76d137f5078.webp",
+          "sha256": "6b0d1c66b76d137f507870b55a9c6fbfffa3e6d7032ce2713a4af2ea9dcb7b42",
+          "bytes": 53670,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-639-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_639_70.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/artgravia-639-yui-public-samples/a06c9b85c7b1d215eb80.webp",
+          "sha256": "a06c9b85c7b1d215eb80c9ec9fae76bac3e5b21f7a90c728985874cedd671195",
+          "bytes": 36240,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-639-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_639_43.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/artgravia-639-yui-public-samples/78fdabbb81a858e6dede.webp",
+          "sha256": "78fdabbb81a858e6dede3461a5ea7da5261f63b3c11731291bbac78bbbf8919f",
+          "bytes": 59572,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-639-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_639_34.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/artgravia-639-yui-public-samples/f60394ecc08537d1b945.webp",
+          "sha256": "f60394ecc08537d1b9458fcc42ef61e9ee90c4ddb86557fc79bcc5e90447f091",
+          "bytes": 45944,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-639-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_639_26.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
+    },
+    {
+      "id": "artgravia-663-yui-public-samples",
+      "title": "Artgravia Vol.663 — Yui",
+      "source": "https://showartx.net/artgravia-vol-663-yui/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/artgravia-663-yui-public-samples/11e379730f1fb8c9b42b.webp",
+          "sha256": "11e379730f1fb8c9b42b7bc25d3353c9aba39f4c7ad799bb640b8ddcd1707b43",
+          "bytes": 40462,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-663-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_663_86.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/artgravia-663-yui-public-samples/ee5a55f6c4ce7aaf1a2b.webp",
+          "sha256": "ee5a55f6c4ce7aaf1a2bdcefae6b430fec10843c587c5a483336eac1fc9adb33",
+          "bytes": 65022,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-663-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_663_61.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/artgravia-663-yui-public-samples/c571f3d5432581515970.webp",
+          "sha256": "c571f3d5432581515970105ad972ea220d651a4a76cffeccae030debccb751f2",
+          "bytes": 36662,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-663-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_663_37.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/artgravia-663-yui-public-samples/f91817371ae9a7e1c54d.webp",
+          "sha256": "f91817371ae9a7e1c54d9d2ebe6a54fae43195aaeba212b836ec2d0de622064e",
+          "bytes": 42464,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-663-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_663_35.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 5,
+          "url": "stored-albums/artgravia-663-yui-public-samples/99d948fd4ab7f8f7a736.webp",
+          "sha256": "99d948fd4ab7f8f7a736f963de5c40121f8b9bf2932de18e4f10ede0c8a8f5ca",
+          "bytes": 42336,
+          "width": 1067,
+          "height": 800,
+          "origin_page": "https://showartx.net/artgravia-vol-663-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/ART_663_24.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-fun-public-samples",
+      "title": "Yui — Fun",
+      "source": "https://showartx.net/yui-fun/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-fun-public-samples/b58d40a2ccd1992d4fcd.webp",
+          "sha256": "b58d40a2ccd1992d4fcdfa4e8b71e42621249cfe5fbf1a07f216775f8a6b8515",
+          "bytes": 52296,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-fun/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/11/Yui_F_118.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-fun-public-samples/9bec1c56249302fe8005.webp",
+          "sha256": "9bec1c56249302fe80055bcc9a81880e9cfe7d286240828de1eac9bbb94840f4",
+          "bytes": 76564,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-fun/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/11/Yui_F_111.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/yui-fun-public-samples/05ed1e3e94998d11eccd.webp",
+          "sha256": "05ed1e3e94998d11eccd35cdaa94e5e06f698fa9fbae1907baa48ff56b8386ba",
+          "bytes": 120670,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-fun/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/11/Yui_F_97.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/yui-fun-public-samples/c2c6f1c83751756011c1.webp",
+          "sha256": "c2c6f1c83751756011c1eb2a63921f6730d35620839ac21a44bb44175a423baa",
+          "bytes": 103816,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-fun/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/11/Yui_F_55.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 5,
+          "url": "stored-albums/yui-fun-public-samples/5097b1f135e6e12bbd04.webp",
+          "sha256": "5097b1f135e6e12bbd04fa68787a8e7f9f77583d95968e7a0f8d56eeaddc6660",
+          "bytes": 65614,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-fun/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/11/Yui_F_44.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-date-yui-public-samples",
+      "title": "Yui — Date Yui",
+      "source": "https://showartx.net/yui-date-yui/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-date-yui-public-samples/99ad9767a11cc87bb371.webp",
+          "sha256": "99ad9767a11cc87bb371d16d9e9c10e8962aef72de636c131fb59debae5e13c0",
+          "bytes": 50788,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-date-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/10/Yui_DY_291.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-date-yui-public-samples/e3953297f6c986fa750c.webp",
+          "sha256": "e3953297f6c986fa750c2f0eaf0ad12c403ac262ffa5451de96b84a620cebdac",
+          "bytes": 46872,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-date-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/10/Yui_DY_194.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/yui-date-yui-public-samples/891f91f27d2b63d25232.webp",
+          "sha256": "891f91f27d2b63d252322a998303581c02dec05e03562c533a40f72de600097d",
+          "bytes": 36560,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-date-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/10/Yui_DY_173.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/yui-date-yui-public-samples/397c6a65436c2705ef79.webp",
+          "sha256": "397c6a65436c2705ef79bbb09aac1ab155c362ebe4e9170a14969048f5775264",
+          "bytes": 41484,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-date-yui/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/10/Yui_DY_102.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-time-to-eat-strawberries-public-samples",
+      "title": "Yui — Time To Eat Strawberries",
+      "source": "https://showartx.net/yui-time-to-eat-strawberries/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-time-to-eat-strawberries-public-samples/a4c7fbdf9b59669c10e9.webp",
+          "sha256": "a4c7fbdf9b59669c10e924ed19a0c03c93c77f933de48c84a073ebfdd1c59307",
+          "bytes": 30856,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-time-to-eat-strawberries/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/07/Yui_TTES_119.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-time-to-eat-strawberries-public-samples/cd543daa227ee895ba22.webp",
+          "sha256": "cd543daa227ee895ba2217430cfa76e61a7de4697380eb286d234de478d430b1",
+          "bytes": 36228,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-time-to-eat-strawberries/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/07/Yui_TTES_88.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/yui-time-to-eat-strawberries-public-samples/9a1848a25fa4f327f20f.webp",
+          "sha256": "9a1848a25fa4f327f20f241e37a2169d8d865307d18612434bc975ea4ab4abb0",
+          "bytes": 42298,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-time-to-eat-strawberries/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/07/Yui_TTES_74.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/yui-time-to-eat-strawberries-public-samples/9156b4319b6687f2a465.webp",
+          "sha256": "9156b4319b6687f2a465adc5909a79df5b6b392ae49e0f7417af5b53acb76b60",
+          "bytes": 42520,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-time-to-eat-strawberries/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/07/Yui_TTES_63.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 5,
+          "url": "stored-albums/yui-time-to-eat-strawberries-public-samples/ea915dee2bcef5d988e1.webp",
+          "sha256": "ea915dee2bcef5d988e1b66aac660525b6fac07345d9399cd00a339b2a670366",
+          "bytes": 45014,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-time-to-eat-strawberries/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/07/Yui_TTES_56.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 6,
+          "url": "stored-albums/yui-time-to-eat-strawberries-public-samples/d8f4a88e9d346fc3cbbc.webp",
+          "sha256": "d8f4a88e9d346fc3cbbc44c9a4f52f785ab04e69ae75eb42bcb7f3014fcb6b20",
+          "bytes": 41024,
+          "width": 1199,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-time-to-eat-strawberries/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/07/Yui_TTES_35.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
+    },
+    {
+      "id": "athletic-club104",
+      "title": "Athletic Club — Yui",
+      "source": "https://showartx.net/yui-athletic-club/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/athletic-club104/61efe8367355f1ec4e86.webp",
+          "sha256": "61efe8367355f1ec4e8687b84fd149e4a54d5bdf1f91aad394894cb7180799bf",
+          "bytes": 165414,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-athletic-club/",
+          "source_url": "https://showartx.net/wp-content/uploads/2025/10/AthleticClub_30.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
+    },
+    {
+      "id": "yui-halloween-nun-public-samples",
+      "title": "Yui — Halloween Nun",
+      "source": "https://showartx.net/yui-halloween-nun/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/yui-halloween-nun-public-samples/db94b94fae201a2fba41.webp",
+          "sha256": "db94b94fae201a2fba41c90ebdc61d1452f7df8ee7242b16987418bcabad942e",
+          "bytes": 70862,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-halloween-nun/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/11/Yui_HN_44.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/yui-halloween-nun-public-samples/9eeeddd302f01eb1b516.webp",
+          "sha256": "9eeeddd302f01eb1b5166efbb4ec897de323d5ffaf0cb5b6317b1fe832a45c19",
+          "bytes": 184226,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-halloween-nun/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/11/Yui_HN_42.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/yui-halloween-nun-public-samples/412983d8fa41bf2e1f96.webp",
+          "sha256": "412983d8fa41bf2e1f96249501dc1349ad76349519b2dc2417694bc5ebaf3e04",
+          "bytes": 99818,
+          "width": 1200,
+          "height": 800,
+          "origin_page": "https://showartx.net/yui-halloween-nun/",
+          "source_url": "https://showartx.net/wp-content/uploads/2026/11/Yui_HN_35.webp",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     }
   ],
-  "physical_verified_image_count": 169
+  "physical_verified_image_count": 198
 }
