@@ -21,8 +21,51 @@
  let pollFailures=0,nextPollAt=0;
  const listeners=new Set();
  const notify=e=>{for(const fn of listeners)try{fn(e)}catch(err){console.error('4LEAF central listener',err)}};
+ // Cloudflare fallback uses one WebSocket transport instead of a separate
+ // edge request for every 1.6s poll. No automatic HTTP replay after a write
+ // is sent: a disconnected acknowledgement is not proof of rollback.
+ const edgeSocket=endpoint.startsWith('https://')&&new URL(endpoint).hostname.endsWith('.workers.dev');
+ let socket=null,opening=null,serial=0;
+ const pending=new Map();
+ function openSocket(){
+  if(!edgeSocket||typeof WebSocket==='undefined')return Promise.reject(Error('No edge socket'));
+  if(socket?.readyState===WebSocket.OPEN)return Promise.resolve(socket);
+  if(opening)return opening;
+  opening=new Promise((resolve,reject)=>{
+   const ws=new WebSocket(endpoint.replace(/^https:/,'wss:')+'/api/socket');
+   const timer=setTimeout(()=>{ws.close();reject(Error('Edge socket connection timeout'))},8000);
+   ws.onopen=()=>{clearTimeout(timer);socket=ws;resolve(ws)};
+   ws.onerror=()=>{clearTimeout(timer);reject(Error('Edge socket unavailable'))};
+   ws.onclose=()=>{
+    clearTimeout(timer);if(socket===ws)socket=null;
+    for(const [key,item] of pending)if(item.ws===ws){
+     clearTimeout(item.timer);pending.delete(key);item.reject(Error('Edge socket closed before server acknowledgement'));
+    }
+    reject(Error('Edge socket closed'));
+   };
+   ws.onmessage=event=>{
+    let message;try{message=JSON.parse(event.data)}catch{return}
+    const item=pending.get(message.id);if(!item||item.ws!==ws)return;
+    pending.delete(message.id);clearTimeout(item.timer);
+    item.resolve(new Response(message.body??null,{status:message.status,
+      headers:{'content-type':'application/json'}}));
+   };
+  }).finally(()=>{opening=null});
+  return opening;
+ }
+ async function sendEdge(ws,method,route,data){
+  const key=String(++serial);
+  return new Promise((resolve,reject)=>{
+   const timer=setTimeout(()=>{pending.delete(key);reject(Error('Edge request acknowledgement timeout'))},30000);
+   pending.set(key,{ws,timer,resolve,reject});
+   try{ws.send(JSON.stringify({id:key,method,route,data,token}))}
+   catch(error){clearTimeout(timer);pending.delete(key);reject(error)}
+  });
+ }
  const request=async(method,route,data)=>{
-  const resp=await fetch(endpoint+route,{method,headers:{accept:'application/json',
+  // Only fallback to HTTP before sending any request over the socket.
+  const ws=edgeSocket?await openSocket().catch(()=>null):null;
+  const resp=ws?await sendEdge(ws,method,route,data):await fetch(endpoint+route,{method,headers:{accept:'application/json',
    ...(data?{'content-type':'application/json'}:{}),...(token?{authorization:'Bearer '+token}:{})},
    body:data?JSON.stringify(data):undefined,cache:'no-store',
    ...(typeof AbortSignal!=='undefined'&&typeof AbortSignal.timeout==='function'
@@ -207,6 +250,7 @@
   disconnect:()=>{
    wantsConnection=false;connectionGeneration++;ready=null;token='';id='';
    active=false;joinedId=null;lastJoin=null;listeners.clear();
+   if(socket){socket.close();socket=null}
    if(retryTimer){clearTimeout(retryTimer);retryTimer=null}
    if(pollTimer){clearInterval(pollTimer);pollTimer=null}
   }};

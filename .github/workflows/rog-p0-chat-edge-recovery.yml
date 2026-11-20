@@ -1,0 +1,55 @@
+name: 4LEAF P0-CHAT free authority recovery
+on:
+  push:
+    branches: ['fix/4leaf-p0-chat-single-delivery-20261120']
+    paths:
+      - 'apps/4leaf/rog/server/edge/**'
+      - 'apps/4leaf/rog/central-client.js'
+      - '.github/workflows/rog-p0-chat-edge-recovery.yml'
+permissions:
+  contents: read
+jobs:
+  recover-chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/4leaf
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Existing authority compatibility tests
+        run: |
+          node --check apps/4leaf/rog/central-client.js
+          node --test apps/4leaf/rog/server/central.test.cjs apps/4leaf/rog/server/abuse-guard.test.cjs apps/4leaf/rog/server/local-archive.test.cjs
+      - name: Build and deploy isolated free chat authority
+        run: |
+          cd apps/4leaf/rog/server/edge
+          npx --yes wrangler@4.158.0 deploy --config wrangler.json --dry-run --outdir /tmp/leaf-chat-bundle
+          npx --yes wrangler@4.158.0 deploy --config wrangler.json
+      - name: Confirm actual Worker health
+        run: |
+          curl -fsSL --retry 5 --max-time 30 https://fourleaf-central-chat-free.gallery-9f7d03138f3f.workers.dev/api/health | tee /tmp/health.json
+          node -e 'const h=require("/tmp/health.json");if(h.ok!==true||h.archive!=="durable-object")process.exit(1)'
+      - run: npm install --no-save playwright && npx playwright install chromium webkit --with-deps
+      - name: Serve candidate application locally
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-chat-static.log 2>&1 &
+          sleep 2
+          curl -fsSI http://127.0.0.1:8765/
+      - name: Test live authority with two actual browsers on public Pages
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+          LEAF_CENTRAL_API_URL: https://fourleaf-central-chat-free.gallery-9f7d03138f3f.workers.dev
+        run: |
+          FOURLEAF_BROWSER=chromium node apps/4leaf/rog/tests/p0-chat-two-browser-flow.cjs
+          FOURLEAF_BROWSER=webkit node apps/4leaf/rog/tests/p0-chat-two-browser-flow.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p0-chat-edge-recovery
+          path: p0-chat-*.png

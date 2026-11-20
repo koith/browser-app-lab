@@ -137,7 +137,7 @@ function makeServer(options={}){
   isOwner:!!user&&!r.preset&&r.ownerId===user.id});
  const clean=()=>{for(const [token,s] of sessions)if(clock()-s.lastSeen>45000)sessions.delete(token);
   for(const [key,until] of kicked)if(clock()>=until)kicked.delete(key)};
- const ticker=setInterval(clean,10000);ticker.unref?.();
+ const ticker=options.fetchOnly?null:setInterval(clean,10000);ticker?.unref?.();
  const send=(res,code,data,origin)=>{
   res.writeHead(code,{'content-type':'application/json; charset=utf-8','cache-control':'no-store',
    'x-content-type-options':'nosniff',...(origin&&origins.includes(origin)?{
@@ -168,7 +168,7 @@ function makeServer(options={}){
     if(persistent?.broken)return send(res,503,{ok:false,version:1,
      archive:'remote-encrypted',error:'Chat archive revision conflict; restart and recover remote state'},origin);
     return send(res,200,{ok:true,version:1,
-     archive:persistent?'remote-encrypted':store?'local-file':'volatile'},origin);
+     archive:persistent?.kind==='durable-object'?'durable-object':persistent?'remote-encrypted':store?'local-file':'volatile'},origin);
    }
    // Once a remote CAS conflict is known, another authority may have
    // committed newer rooms/messages. Returning this process's old snapshot
@@ -388,7 +388,7 @@ function makeServer(options={}){
  // Serialize requests in remote mode so uncommitted mutations cannot become
  // visible in snapshots or race with a second write's optimistic revision.
  let requestQueue=Promise.resolve();
- const server=http.createServer((req,res)=>{
+ const dispatch=(req,res)=>{
   const execute=async()=>{
    try{await ready;await handler(req,res)}
    catch{
@@ -398,8 +398,30 @@ function makeServer(options={}){
   if(persistent){
    const run=requestQueue.then(execute,execute);
    requestQueue=run.catch(()=>{});
-  }else void execute();
- });
+   return run;
+  }
+  return execute();
+ };
+ // The same authority, with no duplicate room/session/rule implementation.
+ // Worker supplies a trusted edge peer address, never client-supplied XFF.
+ if(options.fetchOnly)return {fetch:async(request,networkPeer)=>{
+  const u=new URL(request.url);
+  const req={method:request.method,url:u.pathname+u.search,
+   headers:Object.fromEntries(request.headers),socket:{remoteAddress:networkPeer||'edge-unknown'},
+   async *[Symbol.asyncIterator](){
+    if(!request.body)return;
+    const reader=request.body.getReader();
+    try{for(;;){const {value,done}=await reader.read();if(done)break;yield Buffer.from(value)}}
+    finally{reader.releaseLock()}
+   }};
+  let status=500,headers={},body=null,committed=false;
+  const res={get headersSent(){return committed},
+   writeHead(code,values){status=code;headers=values;committed=true},
+   end(value){body=value??null}};
+  await dispatch(req,res);
+  return new Response(body,{status,headers});
+ }};
+ const server=http.createServer((req,res)=>{void dispatch(req,res)});
  return {server,close:()=>{clearInterval(ticker);return new Promise(done=>server.close(done))},
   inspect:()=>({rooms:rooms.size,sessions:sessions.size,archive:persistent?.kind||'local',
    abuse:guard.inspect()})};
