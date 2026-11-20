@@ -128,11 +128,21 @@ def best_observed_variants(candidates, cap=200):
         parsed = urlsplit(url)
         name = parsed.path.rsplit("/", 1)[-1]
         resize = re.search(r"-(\d{2,5})x(\d{2,5})(?=\.(?:jpe?g|png|webp)$)", name, re.I)
-        canonical = (parsed.hostname, re.sub(
-            r"-(\d{2,5})x(\d{2,5})(?=\.(?:jpe?g|png|webp)$)", "",
-            parsed.path, flags=re.I))
-        # A filename without resize is preferred only when actually observed.
-        score = (1, 0) if not resize else (0, int(resize[1])*int(resize[2]))
+        # Blogger exposes the *same* frame in an observed /s320/ tile and
+        # an observed /s8640/ full-photo <a href>. Do not waste requests on
+        # tiny previews or invent a higher-resolution URL.
+        blogger_size = re.search(r"/s(\d{2,5})(?=/)", parsed.path, re.I) if (
+            parsed.hostname or "").endswith("googleusercontent.com") else None
+        if blogger_size:
+            canonical_path = parsed.path.replace(
+                blogger_size.group(0), "/sSIZE", 1)
+            canonical = (parsed.hostname, canonical_path)
+            score = (2, int(blogger_size[1]))
+        else:
+            canonical = (parsed.hostname, re.sub(
+                r"-(\d{2,5})x(\d{2,5})(?=\.(?:jpe?g|png|webp)$)", "",
+                parsed.path, flags=re.I))
+            score = (1, 0) if not resize else (0, int(resize[1])*int(resize[2]))
         if canonical not in grouped:
             order.append(canonical)
             grouped[canonical] = (score, url)
