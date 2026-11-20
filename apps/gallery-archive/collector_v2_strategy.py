@@ -60,6 +60,12 @@ def verify_identity(raw, work, model, *, discovered=False):
     heading_parts.extend(str(n.get("content") or "") for n in soup.select(
         'meta[property="og:title"],meta[name="twitter:title"]')[:4])
     title = normalize(" ".join(heading_parts))
+    # Snapshot the article-specific H1 before stripping <header> (Cup2D
+    # puts its H1 inside <header class=entry-header>).
+    identity_heading = normalize(" ".join(
+        [n.get_text(" ", strip=True) for n in soup.select("h1")]
+        + [str(n.get("content") or "") for n in soup.select(
+            'meta[property="og:title"]')]))
     for tag in soup.select("nav,footer,aside,header,.related,.sidebar"):
         tag.decompose()
     article = soup.select_one("article, main, .portfolio-content, .entry-content, #powerbbsContent")
@@ -81,10 +87,7 @@ def verify_identity(raw, work, model, *, discovered=False):
         # the remaining <article> text contains only media and comments.
         # Require actual H1/OG article title evidence; the page <title>
         # alone (which could be boilerplate) never proves a person's ID.
-        exact_headings = normalize(" ".join(
-            [n.get_text(" ", strip=True) for n in soup.select("article h1, main h1, h1")]
-            + [str(n.get("content") or "") for n in soup.select(
-                'meta[property="og:title"]')]))
+        exact_headings = identity_heading
         in_exact_heading = any(
             re.search(r"(?<!\w)" + re.escape(normalize(m)) + r"(?!\w)", exact_headings)
             for m in MODEL_WORDS[model])
