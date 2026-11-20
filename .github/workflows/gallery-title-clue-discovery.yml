@@ -1,0 +1,33 @@
+name: Gallery title clue discovery research gate
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/title_clue_discovery.py'
+      - 'apps/gallery-archive/test_title_clue_discovery.py'
+      - '.github/workflows/gallery-title-clue-discovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --quiet requests beautifulsoup4
+      - name: Test decomposition, translations, result parsing, queue resume and actual catalogues
+        run: python apps/gallery-archive/test_title_clue_discovery.py
+      - name: One bounded live metadata research run per model
+        run: |
+          mkdir -p /tmp/title-clue
+          for model in yui mimmi; do
+            python apps/gallery-archive/title_clue_discovery.py --model "$model" --state "/tmp/title-clue/$model.sqlite" --out "/tmp/title-clue/$model.json" --budget 4
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: title-clue-research-evidence
+          path: /tmp/title-clue/
+          retention-days: 7
