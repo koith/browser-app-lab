@@ -3927,6 +3927,90 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 139,
+          "url": "stored-albums/djawa-asuna-the-maid/c875db2de481a8124f33.jpg",
+          "sha256": "c875db2de481a8124f336989f01a98625c89abfc57f506d0f41eb55426392e74",
+          "bytes": 284588,
+          "width": 1365,
+          "height": 2048,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 36,
+          "url": "stored-albums/djawa-asuna-the-maid/567e5401fcce05af1ae5.jpg",
+          "sha256": "567e5401fcce05af1ae595cee7c4654bd3e18303a9ea28d72e8663a282610dd1",
+          "bytes": 335006,
+          "width": 2048,
+          "height": 1365,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 140,
+          "url": "stored-albums/djawa-asuna-the-maid/3208adfdb9b391bc6686.jpg",
+          "sha256": "3208adfdb9b391bc668669c404443727560131c2de53332eb08be439790e3ee0",
+          "bytes": 222470,
+          "width": 1365,
+          "height": 2048,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 141,
+          "url": "stored-albums/djawa-asuna-the-maid/b6ef55b880353d853373.jpg",
+          "sha256": "b6ef55b880353d853373032f354438b1ea9cd94548fabc20494197d73d6ef2a0",
+          "bytes": 396352,
+          "width": 1365,
+          "height": 2048,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 142,
+          "url": "stored-albums/djawa-asuna-the-maid/700de741b2133384f3f4.jpg",
+          "sha256": "700de741b2133384f3f44d5a6e1a6d7960bb676e64243c2f19a86a2d0741e201",
+          "bytes": 493878,
+          "width": 1365,
+          "height": 2048,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 143,
+          "url": "stored-albums/djawa-asuna-the-maid/a60036d164278251ce68.jpg",
+          "sha256": "a60036d164278251ce684648c60235eb52be87ff5030f877317dae4ee4b24761",
+          "bytes": 336051,
+          "width": 1365,
+          "height": 2048,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 144,
+          "url": "stored-albums/djawa-asuna-the-maid/9f825f6edb303eb8fd0b.jpg",
+          "sha256": "9f825f6edb303eb8fd0b54efeb615d14adaf7030e066d5ce59d8b35b36060886",
+          "bytes": 317936,
+          "width": 2048,
+          "height": 1365,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -35173,6 +35257,114 @@
           "source_url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv2-1.jpg",
           "quality": "historically_sha_pinned_public_bytes_not_paid_master",
           "numbering_provenance": "observed_public_source_photo_not_publisher_master"
+        },
+        {
+          "number": 5,
+          "url": "stored-albums/djawa-pop-kitty-party/f4a3a28a7ec45045321c.jpg",
+          "sha256": "f4a3a28a7ec45045321cf8527919422e04632a60f4aa587ebedd9866eab4a959",
+          "bytes": 9910454,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 6,
+          "url": "stored-albums/djawa-pop-kitty-party/45133b0750ec8b15f06f.jpg",
+          "sha256": "45133b0750ec8b15f06f3328c30c46ffe04d83d8948eae60e793e527b1768832",
+          "bytes": 12235525,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 7,
+          "url": "stored-albums/djawa-pop-kitty-party/238cd20a07d36f7cdfff.jpg",
+          "sha256": "238cd20a07d36f7cdfffa54d34d04a25ca8ee94da60e1ad52afb257313126c6d",
+          "bytes": 14589309,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 8,
+          "url": "stored-albums/djawa-pop-kitty-party/dd844c3cbd1e00be1b51.jpg",
+          "sha256": "dd844c3cbd1e00be1b510e6dcf099240e2823c0b60167cf207bb4e6b9b0f8429",
+          "bytes": 11446795,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 53,
+          "url": "stored-albums/djawa-pop-kitty-party/ea3d6d564a822f0125a3.jpg",
+          "sha256": "ea3d6d564a822f0125a30385a0339d4547493e353518ac0f4261298754fbbe31",
+          "bytes": 39859,
+          "width": 320,
+          "height": 320,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 9,
+          "url": "stored-albums/djawa-pop-kitty-party/7c33e2138a15f1ef2593.jpg",
+          "sha256": "7c33e2138a15f1ef2593340e2121b4350d0c0717deda601a6044c9c22e35d5a7",
+          "bytes": 13296811,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 10,
+          "url": "stored-albums/djawa-pop-kitty-party/5baf6bd139f92be339ac.jpg",
+          "sha256": "5baf6bd139f92be339ac6f9d73f9055e2bab549ddc5504befb568cbdfbbc6555",
+          "bytes": 11288179,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 11,
+          "url": "stored-albums/djawa-pop-kitty-party/0b4726b79e6430ccbc59.jpg",
+          "sha256": "0b4726b79e6430ccbc59c4a411748df45c6f49f23d346f97129b7bcd6fd28a7b",
+          "bytes": 13324820,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 12,
+          "url": "stored-albums/djawa-pop-kitty-party/38fdd047217a874a4779.jpg",
+          "sha256": "38fdd047217a874a47794bd776c326d4958bb535f367c49400486ef2fb1c7be0",
+          "bytes": 11528769,
+          "width": 8640,
+          "height": 5760,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -36073,5 +36265,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3508
+  "physical_verified_image_count": 3524
 }
