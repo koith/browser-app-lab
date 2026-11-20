@@ -829,7 +829,7 @@ def atomic_bytes(path,data):
     tmp=path.with_name(path.name+'.pending');tmp.write_bytes(data);tmp.replace(path)
 
 
-def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8,reverse_evidence=None,reviewed_source_only=False):
+def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8,reverse_evidence=None,reviewed_source_only=False,official_publisher_only=False):
     root=Path(root);out=Path(out)
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
@@ -950,6 +950,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     official_gaps=missing_verified_publisher_samples(base,owner,model)
     source_scope['known_official_unarchived_unique_urls']=sum(
         len(rows) for rows in official_gaps.values())
+    if official_publisher_only:
+        from official_sample_recovery import _publisher_page, _publisher_photo
+        reviewed_source_only=True
     if reviewed_source_only:
         approved=[]
         for book in books.values():
@@ -960,6 +963,10 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                             if reviewed_direct_source(u,model) or u in proved
                             or (book.get('census_existing_owner')
                                 and safe_registered_public_page(u,model))]
+            if official_publisher_only:
+                approved_pages=[u for u in approved_pages if _publisher_page(u)]
+                if book.get('visual_reference_required'):
+                    continue
             book['verified_discovered_pages']=[u for u in approved_pages if u in proved]
             if not approved_pages:
                 continue
@@ -1261,6 +1268,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     except (ImportError,ValueError,TypeError) as e:
                         errors.append({'page':page,'reason':'alternative_engine_'+type(e).__name__})
                 for p in more:
+                    if official_publisher_only and not _publisher_page(p):continue
                     if reviewed_source_only and not reviewed_direct_source(p,model):
                         continue
                     if p not in visited and p not in queue:queue.append(p)
@@ -1269,6 +1277,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             except Exception as e:
                 errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});continue
             for url in urls:
+                if official_publisher_only and not _publisher_photo(url):continue
                 if new_total>=max_new:break
                 if url in seen_urls:continue
                 # Previously processed original or held feed candidate is not
@@ -1473,7 +1482,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);p.add_argument('--alternative-engines',action='store_true');p.add_argument('--render-budget',type=int,default=8);p.add_argument('--reverse-evidence',type=Path);p.add_argument('--reviewed-source-only',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);p.add_argument('--alternative-engines',action='store_true');p.add_argument('--render-budget',type=int,default=8);p.add_argument('--reverse-evidence',type=Path);p.add_argument('--reviewed-source-only',action='store_true');p.add_argument('--official-publisher-only',action='store_true');a=p.parse_args()
     if not 1<=a.max_new<=500 or not 1<=a.max_pages<=60:raise SystemExit('Bounded collection budget required')
-    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget,reverse_evidence=a.reverse_evidence,reviewed_source_only=a.reviewed_source_only)
+    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget,reverse_evidence=a.reverse_evidence,reviewed_source_only=a.reviewed_source_only,official_publisher_only=a.official_publisher_only)
     print('DIRECT_FILE_COLLECTION_COMPLETE',report['model'],report['new_local_individual_files'],'REMOTE_VERIFIED',0,'GALLERY_VERIFIED',0)

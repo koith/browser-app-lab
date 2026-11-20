@@ -4,6 +4,7 @@ on:
     paths:
       - 'apps/gallery-archive/title_clue_discovery.py'
       - 'apps/gallery-archive/test_title_clue_discovery.py'
+      - 'apps/gallery-archive/direct_photo_pipeline.py'
       - '.github/workflows/gallery-title-clue-discovery.yml'
   push:
     branches: [main]
@@ -12,7 +13,7 @@ on:
       - '.github/workflows/gallery-title-clue-discovery.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   actions: read
 jobs:
   verify:
@@ -52,6 +53,49 @@ jobs:
       - name: Continue existing page queue and test permitted alternative search engines
         run: |
           python apps/gallery-archive/title_clue_discovery.py --model "$MODEL" --state "/tmp/title-clue/$MODEL.sqlite" --out "/tmp/title-clue/$MODEL.json" --official-seeds --budget 120 --max-seconds 180 --collection-evidence "/tmp/title-clue/$MODEL-collection.json"
+      - name: Collect and verify actual official public samples, not candidate URLs
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          python -m pip install --quiet Pillow
+          python - <<'PY'
+          import json,os,subprocess,sys
+          model=os.environ['MODEL']; root='/tmp/title-clue/'
+          evidence=root+model+'-collection.json'
+          rows=json.load(open(evidence))['targets']
+          ids=[r['id'] for r in rows if r.get('urls')]
+          if not ids:
+              print('TITLE_CLUE_NO_OFFICIAL_COLLECTION_TARGETS',model)
+              sys.exit(0)
+          stage=root+model+'-stage'
+          args=[sys.executable,'apps/gallery-archive/direct_photo_pipeline.py','--model',model,
+                '--owner','apps/'+model+'-gallery/owner-index.json','--out',stage,
+                '--reverse-evidence',evidence,'--official-publisher-only',
+                '--max-new','60','--max-pages','8','--render-budget','0']
+          for aid in ids[:60]: args.extend(['--album-id',aid])
+          subprocess.run(args,check=True,timeout=360)
+          audit=json.load(open(stage+'/metadata/collection-audit.json'))
+          print('TITLE_CLUE_PHYSICAL_STAGED',model,audit['new_local_individual_files'])
+          for row in audit.get('results',[]):
+              print('TITLE_CLUE_WORK',row.get('id'),row.get('individual_files_saved'),row.get('published_image_candidates'),len(row.get('failures',[])))
+          PY
+      - name: Reconcile public sample files into existing Gallery Pages manifest
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          STAGE="/tmp/title-clue/$MODEL-stage"
+          if ! test -f "$STAGE/metadata/catalog.json"; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for retry in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            python apps/gallery-archive/publish_new_public_photos_to_pages.py --model "$MODEL" --stage "$STAGE" --limit 60 --budget 36000000
+            git add "apps/$MODEL-gallery/stored-albums.json" "apps/$MODEL-gallery/stored-albums/" "apps/$MODEL-gallery/album-covers.json"
+            if git diff --cached --quiet; then echo "TITLE_CLUE_NO_NEW_GALLERY_BYTES $MODEL"; exit 0; fi
+            git commit -m "gallery: reconcile verified official public samples for $MODEL"
+            if git push origin HEAD:main; then echo "TITLE_CLUE_PHYSICAL_COMMITTED $MODEL $(git rev-parse HEAD)"; exit 0; fi
+          done
+          exit 1
       - name: Preserve durable per-model cursor and verified official collection input
         uses: actions/upload-artifact@v4
         if: always()
@@ -61,5 +105,7 @@ jobs:
             /tmp/title-clue/${{ matrix.model }}.sqlite
             /tmp/title-clue/${{ matrix.model }}.json
             /tmp/title-clue/${{ matrix.model }}-collection.json
+            /tmp/title-clue/${{ matrix.model }}-stage/metadata/collection-audit.json
+            /tmp/title-clue/${{ matrix.model }}-stage/metadata/pages-publication.json
           retention-days: 90
           if-no-files-found: error
