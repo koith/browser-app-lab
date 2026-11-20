@@ -63,11 +63,16 @@ jobs:
         with:
           node-version: '24'
       - run: python -m pip install --quiet 'Pillow==11.3.0' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
-      - name: Install browser for publicly visible numbered gallery pages
+      - name: Optional browser for publicly visible numbered gallery pages
         if: matrix.model == 'mimmi'
         run: |
-          python -m pip install --quiet 'playwright==1.56.0'
-          python -m playwright install --with-deps chromium
+          # Shypetal can use a real browser, but an exceptionally slow
+          # Chromium dependency download must NOT block the ordinary
+          # Cup2D/ShowArtx/NiceWWW source collector. Existing collector
+          # still catches optional-page-renderer failures independently.
+          if ! timeout 100s bash -c "python -m pip install --quiet 'playwright==1.56.0' && python -m playwright install chromium"; then
+            echo "::warning::OPTIONAL_BROWSER_NOT_READY_RUNNING_EXACT_PUBLIC_HTML_COLLECTION"
+          fi
       - name: Independently discover same-work pages using saved model/title aliases
         shell: bash
         run: |
