@@ -5,12 +5,14 @@ on:
     paths:
       - 'apps/4leaf/rog/dice-fall.js'
       - 'apps/4leaf/rog/tests/dice-waapi-never-finish-recovery.cjs'
+      - 'apps/4leaf/rog/tests/dice-original-roll-tables.cjs'
       - '.github/workflows/rog-dice-waapi-liveness.yml'
   push:
     branches: [main]
     paths:
       - 'apps/4leaf/rog/dice-fall.js'
       - 'apps/4leaf/rog/tests/dice-waapi-never-finish-recovery.cjs'
+      - 'apps/4leaf/rog/tests/dice-original-roll-tables.cjs'
       - '.github/workflows/rog-dice-waapi-liveness.yml'
   workflow_dispatch:
 permissions:
@@ -51,3 +53,8 @@ jobs:
           FOURLEAF_BROWSER: ${{ matrix.engine }}
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/dice-waapi-never-finish-recovery.cjs
+      - name: DIE-02 replay original D4x4 D6x6 outcomes twice with fixed seed
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/dice-original-roll-tables.cjs
