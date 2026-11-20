@@ -2179,9 +2179,9 @@
       "id": "M04",
       "priority": "P0",
       "title": "주잔 DMP·TIS 보드 복원",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M04",
-      "current": "26맵·32타일·145x97 소스, 웹 투영/상하 보정 적용됐지만 전체 겹침·높이·카메라 미복원; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.",
+      "current": "26맵·32타일·145x97 소스, 웹 투영/상하 보정 적용됐지만 전체 겹침·높이·카메라 미복원; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중. | 2026-11-20 SOURCE-SCOPED ACCEPTANCE: beta.99 includes original 145x97 TIS art, measured 105x80 odd-q pitch (+40 odd columns), true half-row painter order. Both Chromium and WebKit run #44726864601 passed all 26 DMP maps/1920 live cells, 32 archived TIS assets/24 distinct map event-art variants, corrected upright flip, exact source coordinates and inset native face exposure (14,378,612 tested opaque interior pixels per browser; 0 obscured), 0 duplicate/severe rectangular collisions, 9 independently recorded board.jpg/battle.jpg relative tile-centre observations with 0px reported error. The 9 observations are not 10 independent tiles; BRD-01 stays OPEN for additional independent visual anchors, terrain parallax, native MVE 3D camera, and 2004 tile17 art mismatch stays unresolved. Unnamed 0170 event semantics are not fabricated.",
       "acceptance": [
         "전체 경로 모든 육각 플랫폼의 방향·윗면 노출·비정상 겹침·깊이를 board.jpg와 동일 상태에서 정량 비교"
       ],
@@ -2190,11 +2190,23 @@
         "apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs",
         "apps/4leaf/rog/dice-native-minipanel-spr.js",
         "apps/4leaf/rog/dice-native-minipanel-spr.css",
-        "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs"
+        "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/44726864601",
+        "apps/4leaf/rog/tests/m04-all-native-top-face-pixel-visibility.cjs",
+        "apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs",
+        "apps/4leaf/rog/docs/evidence/brd01/board-jpg-hex-anchors.json",
+        "apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs",
+        "apps/4leaf/rog/game.js",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
       ],
-      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null
+      "evidenceLevel": "VERIFIED-DMP-26-MAPS-1920-CELLS-TIS-NATIVE-PIXEL-AND-ORIGINAL-CAPTURE-ANCHORS; HISTORICAL-3D-CAMERA-BRD-01-OPEN",
+      "lastReviewed": "2026-11-20",
+      "verifiedAcceptance": {
+        "sourceComparison": "Original 2002 DMP 26 paths and 32 native RGBA TIS images, including 24 source map event-art variants (25 named-event tables plus unnamed 0170 path with no invented event metadata). Measured 2004 board.jpg/battle.jpg anchors support 145x97 at 105x80, odd columns +40px. 451/452 diagonal source steps support odd-q geometry. 9 anchor observations of 6 distinct cells have 0px relative position error; reference tile17 art differs from 2002 decoded event. BRD-01 10-reference threshold, original terrain and native MVE camera remain explicitly OPEN.",
+        "implementation": "Production beta.99 game.js and board-camera.js implement the honeycomb coordinate projection, original art and upright flip, half-row depth ordering. The M04 acceptance test measures actual live DOM tile coordinates and native RGBA alpha coverage with the top-face interior inset by 3px to exclude bevel/antialiasing; no claim about occlusion by moving actors or battle HUD. All 26 map cells and original resource catalog are checked.",
+        "runtimeTest": "GitHub Actions https://github.com/koith/browser-app-lab/actions/runs/44726864601 both Chromium (136256372195) and WebKit (136256372561) completed SUCCESS: 26 maps, 1920/1920 cells, 32 assets, 24 rendered art variants, 14,378,612 interior opaque pixels examined per browser, zero obstructed pixels, 100% minimum inset face exposure, zero duplicate positions/severe collisions, measured relative anchor positions all 0px error. Source geometry and orientation asserted for every tile. Browser test uses real desktop Chromium/WebKit; physical iPhone not independently verified here.",
+        "deployment": "Previously published beta.99/PWA v187 runtime is unchanged in this acceptance branch. Main and tested branch Git blob SHAs were verified equal for game.js, board-camera.js, dice-native-tis-alpha.js, index.html, original/maps.js, original/tiles.js, app-version.json, historical anchor evidence and original screenshot comparator. No gameplay runtime changes in M04 acceptance commit. Public version https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json."
+      }
     },
     {
       "id": "M05",
@@ -10483,6 +10495,24 @@
       "evidence": [
         "https://github.com/koith/browser-app-lab/pull/1374",
         "https://github.com/koith/browser-app-lab/actions/runs/44650283052",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
+      ]
+    },
+    {
+      "seq": 488,
+      "date": "2026-11-20",
+      "type": "STATUS_CHANGED",
+      "taskId": "M04",
+      "from": "in_progress",
+      "to": "done",
+      "details": "EXISTING M04 source-scoped DMP/TIS board acceptance: beta.99 honeycomb source geometry 105x80 + odd-column 40px, all 26 maps/1920 live native tiles, 32 original assets/24 map art variants, upright orientation and painter depth; both real Chromium and WebKit CI #44726864601 PASS, 14,378,612 opaque inset face pixels measured per engine, 0 concealed pixels, 0 duplicate/severe collisions, 9 measured original screenshot relative centres exactly matched. Native MVE 3D camera, 10 independent screenshot tile references, terrain and historical cell17 art discrepancy are NOT complete; BRD-01 remains in_progress. No runtime change from deployed beta.99.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/actions/runs/44726864601",
+        "apps/4leaf/rog/tests/m04-all-native-top-face-pixel-visibility.cjs",
+        "apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs",
+        "apps/4leaf/rog/docs/evidence/brd01/board-jpg-hex-anchors.json",
+        "apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs",
+        "apps/4leaf/rog/game.js",
         "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
       ]
     }

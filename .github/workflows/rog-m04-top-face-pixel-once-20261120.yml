@@ -1,0 +1,45 @@
+name: 4LEAF M04 original pixel top-face exposure acceptance
+on:
+  push:
+    branches: ['main']
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/board-camera.js'
+      - 'apps/4leaf/rog/dice-native-tis-alpha.js'
+      - 'apps/4leaf/rog/original/maps.js'
+      - 'apps/4leaf/rog/original/tiles.js'
+      - 'apps/4leaf/rog/tests/m04-all-native-top-face-pixel-visibility.cjs'
+      - '.github/workflows/rog-m04-top-face-pixel-once-20261120.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  m04-real-pixels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    env:
+      FOURLEAF_BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run original source alpha browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install "$FOURLEAF_BROWSER" --with-deps
+      - name: Serve native game
+        run: |
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-m04-server.log 2>&1 &
+          sleep 2
+          curl -fSsI http://127.0.0.1:8765/index.html
+      - name: M04 all 26 maps 1920 original native RGBA pixel top-face exposure
+        run: node apps/4leaf/rog/tests/m04-all-native-top-face-pixel-visibility.cjs
+      - name: M04 original battle board historical anchors
+        run: node apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs
+      - name: M04 all 26 maps source grid and depth audit
+        run: node apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs
