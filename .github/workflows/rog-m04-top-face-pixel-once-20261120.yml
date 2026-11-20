@@ -1,8 +1,16 @@
 name: 4LEAF M04 original pixel top-face exposure acceptance
 on:
   push:
-    branches: ['feat/4leaf-m04-all-1920-native-tis-face-exposure-20261120']
-    paths: ['apps/4leaf/rog/tests/m04-all-native-top-face-pixel-visibility.cjs','.github/workflows/rog-m04-top-face-pixel-once-20261120.yml']
+    branches: ['main']
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/board-camera.js'
+      - 'apps/4leaf/rog/dice-native-tis-alpha.js'
+      - 'apps/4leaf/rog/original/maps.js'
+      - 'apps/4leaf/rog/original/tiles.js'
+      - 'apps/4leaf/rog/tests/m04-all-native-top-face-pixel-visibility.cjs'
+      - '.github/workflows/rog-m04-top-face-pixel-once-20261120.yml'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
