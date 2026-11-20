@@ -34,6 +34,20 @@ class Tests(unittest.TestCase):
                       "https://manpeace.org/private.mp4",
                       "https://user:password@manpeace.org/data/video/202512/a.mp4"):
             self.assertFalse(is_observed_public_video(value))
+    def test_duplicate_wildcard_robots_disallow_is_strictly_honored(self):
+        class Session:
+            def __init__(self):
+                self.headers={}
+            def get(self,*args,**kwargs):
+                class Response:
+                    status_code=200
+                    text="User-agent: *\\nAllow: /\\nUser-agent: *\\nDisallow: /data/\\n"
+                    content=text.encode("utf-8")
+                return Response()
+        from yui_public_mirror_video_archive import PublicMediaClient
+        client=PublicMediaClient(session=Session())
+        self.assertFalse(client.permitted(URL))
+
     def test_verified_real_mp4_stored_and_catalog_immutable_sha(self):
         raw=b"\0\0\0\x18ftyp"+bytes(5500)
         with TemporaryDirectory() as d:
