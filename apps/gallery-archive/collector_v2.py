@@ -97,6 +97,18 @@ def load_inventory(root, model):
                 known.add(sha)
                 counts[book["id"]].add(sha)
     official = publisher_targets(root, model)
+    # The persistent incomplete-work ledger is an acquisition target, not
+    # merely a separate reporting file. Only registered, proven public
+    # sources can be collected; unregistered IDs remain explicitly unresolved.
+    pending_path = Path(root) / "apps/gallery-archive/verification" / (
+        "incomplete-" + model + ".json")
+    pending = set()
+    if pending_path.is_file():
+        pending_doc = json.loads(pending_path.read_text(encoding="utf-8"))
+        if pending_doc.get("model") != model:
+            raise ValueError("incomplete_work_model_mismatch")
+        pending = {aid for aid in pending_doc.get("unresolved_work_ids", [])
+                   if isinstance(aid, str)}
     works = []
     for a in src.get("albums", []):
         aid = a.get("id")
@@ -120,6 +132,7 @@ def load_inventory(root, model):
                       "observed_sha_count": len(counts[aid]), "expected": expected,
                       "target_basis": "publisher" if publisher_count else (
                           "public_source_claim" if source_count else "unknown"),
+                      "unresolved_priority": aid in pending,
                       "declared_resolution": [
                           official.get(aid, {}).get("declared_width"),
                           official.get(aid, {}).get("declared_height")] if publisher_count else None,
@@ -129,6 +142,7 @@ def load_inventory(root, model):
     # Missing published cuts first, then unknown totals, finally albums whose
     # recorded SHA count already reaches their source-claimed public count.
     works.sort(key=lambda a: (
+        0 if a["unresolved_priority"] else 1,
         0 if a["gap"] is not None and a["gap"] > 0 else
         1 if a["gap"] is None else 2,
         a["priority"], -(a["gap"] or 0), a["id"]))
@@ -309,7 +323,9 @@ def page_candidates(raw, origin, max_candidates=160):
         srcset = tag.get("srcset") or tag.get("data-srcset") or ""
         for part in reversed(srcset.split(",")):
             add(part.strip().split(" ")[0])
-        for attr in ("data-full", "data-original", "data-src", "src"):
+        for attr in ("data-full", "data-original", "data-large-file",
+                     "data-hires", "data-lazy-src", "data-fancybox-src",
+                     "data-src", "src"):
             add(tag.get(attr))
     for tag in container.select("a[href]"):
         if tag.find("img") is None:
@@ -329,9 +345,10 @@ def inspect_photo(raw):
             w, h = img.size
     except (OSError, ValueError, Image.DecompressionBombError) as exc:
         raise DownloadFailure("invalid_decoded_photo") from exc
-    # Reject third-party 512px cards and 600x800 site posters, not real
-    # publisher-quality source photos. Never count small cards as new cuts.
-    if fmt not in ("JPEG", "PNG", "WEBP") or min(w, h) < 900 or w * h > 100000000:
+    # Keep rejecting 600x800 promotional tiles, but don't discard a verified
+    # 800x1063 public photo solely because its short side is below 900px.
+    # Publisher-grade completeness is a separate final gate.
+    if fmt not in ("JPEG", "PNG", "WEBP") or min(w, h) < 700 or w * h > 100000000:
         raise DownloadFailure("invalid_photo_dimensions")
     return {"sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw),
             "width": w, "height": h,

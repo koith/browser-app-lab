@@ -276,6 +276,36 @@ class CollectorV2Test(unittest.TestCase):
         self.assertEqual(works[0]["gap"], 123)
         self.assertEqual(works[1]["gap"], 0)
 
+    def test_unresolved_registered_album_runs_before_unfinished_background_work(self):
+        urgent = "v2ph-sukajan-gal"
+        (self.base / "public-work-pages.json").write_text(json.dumps({"albums": [
+            {"id": self.work, "title": "Pop Kitty Party", "source": self.page,
+             "advertised_photos": 123, "priority": 0},
+            {"id": urgent, "title": "Sukajan Gal",
+             "source": "https://example.org/gallery/sukajan-gal/",
+             "advertised_photos": 177, "priority": 99}]}))
+        pending = self.root / "apps/gallery-archive/verification/incomplete-mimmi.json"
+        pending.parent.mkdir(parents=True)
+        pending.write_text(json.dumps({
+            "model": "mimmi", "unresolved_work_ids": [urgent, "not-registered"]}))
+        works, _ = load_inventory(self.root, "mimmi")
+        self.assertEqual(works[0]["id"], urgent)
+        self.assertTrue(works[0]["unresolved_priority"])
+        self.assertEqual(len(works), 2)
+
+    def test_800px_genuine_public_photo_is_not_treated_as_a_600px_poster(self):
+        photo = Image.effect_noise((800, 1063), 70).convert("RGB")
+        buffer = BytesIO()
+        photo.save(buffer, "JPEG", quality=87)
+        meta = inspect_photo(buffer.getvalue())
+        self.assertEqual((meta["width"], meta["height"]), (800, 1063))
+        self.assertEqual(meta["ext"], "jpg")
+
+    def test_additional_observed_lazy_image_attrs(self):
+        lazy = "https://images.example.org/lazy.jpg"
+        html = (f'<main><article><img data-hires="{lazy}"></article></main>').encode()
+        self.assertEqual(page_candidates(html, self.page), [lazy])
+
     def test_bad_photo_does_not_become_sha(self):
         with self.assertRaises(DownloadFailure):
             inspect_photo(b"<html>not a photo</html>")
