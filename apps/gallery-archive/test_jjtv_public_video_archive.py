@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import unittest
+import hashlib
 from io import BytesIO
+from PIL import Image
 from tempfile import TemporaryDirectory
 from pathlib import Path
 import json
@@ -47,5 +49,45 @@ class Tests(unittest.TestCase):
             x=crawl("yui",root=d,client=FakeClient({}),max_pages=1,max_posts=3,archive=True,delay=0)
             self.assertEqual(x["archived_files"],0)
             self.assertGreater(sum(x["errors"].values()),0)
+
+    def test_article_photo_scope_excludes_video_poster_and_sidebar(self):
+        page=("https://jjtv.kr/15/154066")
+        html=('''<html><title>심유이 새 화보 사진</title><article>
+            <video poster="https://img2.jjtv.kr/video_0000.jpg"></video>
+            <img src="https://img2.jjtv.kr/video_0000.jpg">
+            <img data-original="https://img2.jjtv.kr/yui-cut-01.jpg">
+            </article><aside><img src="https://img2.jjtv.kr/unrelated.jpg"></aside></html>''').encode()
+        item,state=actual_article(html,page,"yui")
+        self.assertEqual(state,"ok")
+        self.assertEqual(item["photos"],["https://img2.jjtv.kr/yui-cut-01.jpg"])
+
+    def test_genuine_article_photo_is_staged_with_sha_and_publisher_provenance(self):
+        page="https://jjtv.kr/15/154066"
+        image_url="https://img2.jjtv.kr/yui-cut-01.jpg"
+        html=('''<html><title>심유이 공개 촬영 사진</title>
+                <article><h1>심유이 공개 촬영 사진</h1>
+                <img data-original="https://img2.jjtv.kr/yui-cut-01.jpg">
+                </article></html>''').encode()
+        image=Image.effect_noise((950,1150),85).convert("RGB")
+        out=BytesIO()
+        image.save(out,"JPEG",quality=86)
+        with TemporaryDirectory() as d:
+            base=Path(d)/"apps/yui-gallery"
+            base.mkdir(parents=True)
+            (base/"videos.json").write_text(json.dumps({"model":"yui","videos":[]}))
+            stage=Path(d)/"jjtv-stage"
+            result=crawl("yui",root=d,client=FakeClient({
+                page:html,image_url:out.getvalue()
+            }),max_pages=1,max_posts=2,archive=True,stage=stage,delay=0)
+            self.assertEqual(result["staged_photo_sha_not_published"],1)
+            self.assertEqual(result["archived_files"],0)
+            stored=json.loads((stage/"metadata/catalog.json").read_text())
+            self.assertEqual(stored["model"],"yui")
+            self.assertEqual(stored["verified_new_work_sources"][0]["source"],page)
+            self.assertEqual(stored["verified_new_work_sources"][0]["proof"],
+                "unique_named_work_page_model_and_edition")
+            photo=stored["albums"][0]["images"][0]
+            self.assertEqual(photo["sha256"],hashlib.sha256(out.getvalue()).hexdigest())
+            self.assertEqual((stage/photo["key"]).read_bytes(),out.getvalue())
 
 if __name__=="__main__":unittest.main(verbosity=2)
