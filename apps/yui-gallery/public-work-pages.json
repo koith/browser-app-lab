@@ -42,7 +42,16 @@
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
       "priority": 0,
-      "identity_evidence": "DJAWA ordinary official portfolio explicitly identifies Yui as its model and publishes its sample and cover image links; only these public image bytes may be collected, not the 190-photo paid product."
+      "identity_evidence": "DJAWA ordinary official portfolio explicitly identifies Yui as its model and publishes its sample and cover image links; only these public image bytes may be collected, not the 190-photo paid product.",
+      "source_pages": [
+        "https://showartx.net/yui-nikke-privaty-sharp-lesson/",
+        "https://www.nicewww.com/archives/mij/dja/654326.html"
+      ],
+      "verified_public_priority_pages": [
+        "https://showartx.net/yui-nikke-privaty-sharp-lesson/",
+        "https://www.nicewww.com/archives/mij/dja/654326.html"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "artgravia-693-yui-public-samples",
@@ -60,7 +69,14 @@
       "priority": 15,
       "source": "https://showartx.net/artgravia-vol-639-yui/",
       "source_claimed_total_edition_photos": 71,
-      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.639 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_639_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA."
+      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.639 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_639_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA.",
+      "source_pages": [
+        "https://www.nicewww.com/archives/mij/artgravia/648025.html"
+      ],
+      "verified_public_priority_pages": [
+        "https://www.nicewww.com/archives/mij/artgravia/648025.html"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "artgravia-650-yui-public-samples",
@@ -89,9 +105,14 @@
       "source_claimed_total_edition_photos": 75,
       "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.677 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_677_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA.",
       "source_pages": [
-        "https://www.nicesss.com/archives/mij/artgravia/469248.html"
+        "https://www.nicesss.com/archives/mij/artgravia/469248.html",
+        "https://www.nicewww.com/archives/mij/artgravia/583165.html"
       ],
-      "alternate_public_source_note": "Independent observed public page + four exact non-ShowArtx JPEG preview URLs, source and image GET are HTTP 200 from GitHub Actions, first image decoded 800x1063, 91904 bytes. Do not claim full paid 37/75-image edition. Priority is valid standalone samples only."
+      "alternate_public_source_note": "Independent observed public page + four exact non-ShowArtx JPEG preview URLs, source and image GET are HTTP 200 from GitHub Actions, first image decoded 800x1063, 91904 bytes. Do not claim full paid 37/75-image edition. Priority is valid standalone samples only.",
+      "verified_public_priority_pages": [
+        "https://www.nicewww.com/archives/mij/artgravia/583165.html"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "artgravia-684-yui-public-samples",
@@ -127,7 +148,14 @@
       "priority": 16,
       "source": "https://showartx.net/yui-meow/",
       "source_claimed_total_edition_photos": 180,
-      "identity_evidence": "Public article identifies Model Yui + Product Meow. It displays 12 distinct ordinary public work-specific numbered JPEG preview links. Source page's whole-edition total 180 is not a stored image count. Only actually observed exact work-prefix image URLs in article are eligible. No ads, resizes, membership-only downloads, invented files, or cross-work mixing. Remote SHA readback and real gallery QA required."
+      "identity_evidence": "Public article identifies Model Yui + Product Meow. It displays 12 distinct ordinary public work-specific numbered JPEG preview links. Source page's whole-edition total 180 is not a stored image count. Only actually observed exact work-prefix image URLs in article are eligible. No ads, resizes, membership-only downloads, invented files, or cross-work mixing. Remote SHA readback and real gallery QA required.",
+      "source_pages": [
+        "https://showartx.net/yui-meow/"
+      ],
+      "verified_public_priority_pages": [
+        "https://showartx.net/yui-meow/"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "yui-night-cat-public-samples",
@@ -136,7 +164,14 @@
       "priority": 16,
       "source": "https://showartx.net/yui-night-cat/",
       "source_claimed_total_edition_photos": 74,
-      "identity_evidence": "Public article identifies Model Yui + Product Night Cat. It displays 12 distinct ordinary public work-specific numbered JPEG preview links. Source page's whole-edition total 74 is not a stored image count. Only actually observed exact work-prefix image URLs in article are eligible. No ads, resizes, membership-only downloads, invented files, or cross-work mixing. Remote SHA readback and real gallery QA required."
+      "identity_evidence": "Public article identifies Model Yui + Product Night Cat. It displays 12 distinct ordinary public work-specific numbered JPEG preview links. Source page's whole-edition total 74 is not a stored image count. Only actually observed exact work-prefix image URLs in article are eligible. No ads, resizes, membership-only downloads, invented files, or cross-work mixing. Remote SHA readback and real gallery QA required.",
+      "source_pages": [
+        "https://showartx.net/yui-night-cat/"
+      ],
+      "verified_public_priority_pages": [
+        "https://showartx.net/yui-night-cat/"
+      ],
+      "newly_added_public_sources": true
     },
     {
       "id": "yui-night-training-public-samples",
@@ -172,6 +207,120 @@
       "priority": 0,
       "source": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
       "identity_evidence": "Publisher CRAZY GIANT public issue post identifies THE PLAYER ISSUE 5 [심혜성] and shows four public image samples. Only observed ordinary public article images from the exact issue can be acquired. Existing owner 4 SHA are not a claim of full magazine acquisition. Always decode each file, reject duplicate/other issues, remote SHA readback and deploy/browser QA before counting."
+    },
+    {
+      "id": "seethrough80",
+      "title": "SWTB Vol.22 Seethrough — Yui",
+      "source": "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/",
+      "priority": 1,
+      "source_pages": [],
+      "advertised_photos": 80,
+      "verification": "source_title_verified_public_article_only_not_full_edition",
+      "newly_added_public_sources": true,
+      "verified_public_priority_pages": [
+        "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/"
+      ],
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+    },
+    {
+      "id": "artgravia-663-yui-public-samples",
+      "title": "Artgravia Vol.663 — Yui",
+      "source": "https://showartx.net/artgravia-vol-663-yui/",
+      "priority": 2,
+      "source_pages": [
+        "https://www.nicewww.com/archives/mij/artgravia/579624.html"
+      ],
+      "advertised_photos": 86,
+      "verification": "source_title_verified_public_article_only_not_full_edition",
+      "newly_added_public_sources": true,
+      "verified_public_priority_pages": [
+        "https://showartx.net/artgravia-vol-663-yui/"
+      ],
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+    },
+    {
+      "id": "athletic-club104",
+      "title": "Athletic Club — Yui",
+      "source": "https://showartx.net/yui-athletic-club/",
+      "priority": 3,
+      "source_pages": [],
+      "advertised_photos": 104,
+      "verification": "source_title_verified_public_article_only_not_full_edition",
+      "newly_added_public_sources": true,
+      "verified_public_priority_pages": [
+        "https://showartx.net/yui-athletic-club/"
+      ],
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+    },
+    {
+      "id": "yui-fun-public-samples",
+      "title": "Yui — Fun",
+      "source": "https://showartx.net/yui-fun/",
+      "priority": 4,
+      "source_pages": [],
+      "advertised_photos": 130,
+      "verification": "source_title_verified_public_article_only_not_full_edition",
+      "newly_added_public_sources": true,
+      "verified_public_priority_pages": [
+        "https://showartx.net/yui-fun/"
+      ],
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+    },
+    {
+      "id": "yui-halloween-nun-public-samples",
+      "title": "Yui — Halloween Nun",
+      "source": "https://showartx.net/yui-halloween-nun/",
+      "priority": 5,
+      "source_pages": [],
+      "advertised_photos": null,
+      "verification": "source_title_verified_public_article_only_not_full_edition",
+      "newly_added_public_sources": true,
+      "verified_public_priority_pages": [
+        "https://showartx.net/yui-halloween-nun/"
+      ],
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+    },
+    {
+      "id": "artgravia-707-yui-public-samples",
+      "title": "Artgravia Vol.707 — Yui",
+      "source": "https://showartx.net/artgravia-vol-707-yui/",
+      "priority": 6,
+      "source_pages": [],
+      "advertised_photos": null,
+      "verification": "source_title_verified_public_article_only_not_full_edition",
+      "newly_added_public_sources": true,
+      "verified_public_priority_pages": [
+        "https://showartx.net/artgravia-vol-707-yui/"
+      ],
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+    },
+    {
+      "id": "yui-date-yui-public-samples",
+      "title": "Yui — Date Yui",
+      "source": "https://showartx.net/yui-date-yui/",
+      "priority": 7,
+      "source_pages": [],
+      "advertised_photos": 299,
+      "verification": "source_title_verified_public_article_only_not_full_edition",
+      "newly_added_public_sources": true,
+      "verified_public_priority_pages": [
+        "https://showartx.net/yui-date-yui/"
+      ],
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+    },
+    {
+      "id": "yui-time-to-eat-strawberries-public-samples",
+      "title": "Yui — Time To Eat Strawberries",
+      "source": "https://showartx.net/yui-time-to-eat-strawberries/",
+      "priority": 8,
+      "source_pages": [],
+      "advertised_photos": 121,
+      "verification": "source_title_verified_public_article_only_not_full_edition",
+      "newly_added_public_sources": true,
+      "verified_public_priority_pages": [
+        "https://showartx.net/yui-time-to-eat-strawberries/"
+      ],
+      "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
     }
   ]
 }
