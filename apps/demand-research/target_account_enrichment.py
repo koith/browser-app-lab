@@ -42,21 +42,55 @@ def safe_public_text(v,limit=4000):
 
 def profile_metadata(profile,api):
     if profile["platform"]=="bluesky":
-        raw=api.json("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile?"+
-                     urlencode({"actor":profile["identity"]}))
-        if not isinstance(raw,dict) or raw.get("did")!=profile["identity"]:
-            raise SourceUnavailable("public account profile identity mismatch")
+        # Resolution already proved the DID, but a later public AppView call
+        # may independently fail. Try the two official unauthenticated views,
+        # always checking that the returned DID is exactly the selected one.
+        lookup=urlencode({"actor":profile["identity"]})
+        for host in ("https://public.api.bsky.app","https://api.bsky.app"):
+            try:
+                raw=api.json(host+"/xrpc/app.bsky.actor.getProfile?"+lookup)
+            except (RuntimeError,ValueError,TypeError,KeyError):
+                continue
+            if not isinstance(raw,dict) or raw.get("did")!=profile["identity"]:
+                continue
+            return {"identity":profile["identity"],"platform":"bluesky",
+                    "handle":safe_public_text(raw.get("handle"),200),
+                    "display_name":safe_public_text(raw.get("displayName"),300),
+                    "description":safe_public_text(raw.get("description"),10000),
+                    "avatar_url":raw.get("avatar"),"banner_url":raw.get("banner"),
+                    "followers_count":raw.get("followersCount"),
+                    "following_count":raw.get("followsCount"),
+                    "posts_count":raw.get("postsCount"),
+                    "indexed_at":raw.get("indexedAt"),
+                    "labels":raw.get("labels",[]),
+                    "metadata_source":"official_bluesky_appview",
+                    "raw":raw}
+        # If both AppViews fail, preserve only an actually readable PUBLIC
+        # profile record from the identity-verified PDS. Never invent follower
+        # counts, CDN art or a handle, and label this lower-fidelity source.
+        expected_uri=("at://"+profile["identity"]+
+                      "/app.bsky.actor.profile/self")
+        try:
+            response=api.json(profile["pds"]+
+                "/xrpc/com.atproto.repo.getRecord?"+
+                urlencode({"repo":profile["identity"],
+                           "collection":"app.bsky.actor.profile","rkey":"self"}))
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            raise SourceUnavailable("public profile unavailable from AppView and PDS") from None
+        record=response.get("value") if isinstance(response,dict) else None
+        if (not isinstance(response,dict) or
+                response.get("uri")!=expected_uri or
+                not isinstance(record,dict) or
+                record.get("$type") not in (None,"app.bsky.actor.profile")):
+            raise SourceUnavailable("public PDS profile identity mismatch")
         return {"identity":profile["identity"],"platform":"bluesky",
-                "handle":safe_public_text(raw.get("handle"),200),
-                "display_name":safe_public_text(raw.get("displayName"),300),
-                "description":safe_public_text(raw.get("description"),10000),
-                "avatar_url":raw.get("avatar"),"banner_url":raw.get("banner"),
-                "followers_count":raw.get("followersCount"),
-                "following_count":raw.get("followsCount"),
-                "posts_count":raw.get("postsCount"),
-                "indexed_at":raw.get("indexedAt"),
-                "labels":raw.get("labels",[]),
-                "raw":raw}
+                "handle":"","display_name":safe_public_text(record.get("displayName"),300),
+                "description":safe_public_text(record.get("description"),10000),
+                "avatar_url":None,"banner_url":None,
+                "followers_count":None,"following_count":None,
+                "posts_count":None,"indexed_at":None,"labels":[],
+                "metadata_source":"public_pds_profile_record",
+                "profile_record":record,"raw":record}
     raw=api.json(profile["pds"]+"/api/v1/accounts/"+profile["actor"])
     if not isinstance(raw,dict) or str(raw.get("id"))!=profile["actor"]:
         raise SourceUnavailable("public account profile identity mismatch")
@@ -84,8 +118,8 @@ def public_profile_images(profile,meta,api,archive):
     """
     images={}
     missing=[]
-    record=None
-    if profile["platform"]=="bluesky":
+    record=meta.get("profile_record") if isinstance(meta.get("profile_record"),dict) else None
+    if profile["platform"]=="bluesky" and record is None:
         try:
             response=api.json(profile["pds"]+"/xrpc/com.atproto.repo.getRecord?"+
                        urlencode({"repo":profile["identity"],
