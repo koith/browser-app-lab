@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "updated": "2026-11-20",
+  "videos": [
+    {
+      "id": "mimmi-x-innocent-part2-catalogue",
+      "title": "x Innocent Part 2 — 영상 포함판",
+      "kind": "source_only",
+      "source_url": "https://www.cosmiao.info/mimmi/",
+      "note": "외부 화보 목록에 139장+영상 1개로 표시. 공개 영상 파일 주소는 아직 확인되지 않았습니다."
+    },
+    {
+      "id": "mimmi-x-innocent-catalogue",
+      "title": "x Innocent — 영상 포함판",
+      "kind": "source_only",
+      "source_url": "https://www.cosmiao.info/mimmi/",
+      "note": "외부 화보 목록에 343장+영상 1개로 표시. 공개 영상 파일 주소는 아직 확인되지 않았습니다."
+    }
+  ]
+}
