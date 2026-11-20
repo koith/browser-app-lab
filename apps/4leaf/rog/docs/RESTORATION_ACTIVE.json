@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "sourceOfTruth": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "warning": "Derived index only. Never treat this file as an independent task ledger.",
-  "sourceUpdatedAt": "2026-11-17",
+  "sourceUpdatedAt": "2026-11-20",
   "counts": {
     "total": 60,
-    "done": 44,
-    "in_progress": 15,
+    "done": 45,
+    "in_progress": 14,
     "todo": 1,
     "blocked": 0,
-    "active": 16
+    "active": 15
   },
-  "historicalEventsNotDuplicated": 486,
+  "historicalEventsNotDuplicated": 487,
   "active": [
     {
       "id": "M04",
@@ -176,21 +176,6 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39813521946"
       ],
       "lastReviewed": "2026-10-23"
-    },
-    {
-      "id": "DIE-02",
-      "priority": "P0",
-      "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
-      "status": "in_progress",
-      "acceptance": [
-        "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
-      ],
-      "currentTail": "…65/PWA v152 PUBLIC VERIFIED: 2026-11-05 original 1171/1223 extra block 63 own-palette frames active: slot20 tumble, slot12 bounce/impact, engine verified D6/D4 rest face; archive source record keys/ticks and PNG SHA authenticated. Roles and original EXE physics/time not verified.",
-      "evidence": [
-        "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
-        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
-      ],
-      "lastReviewed": "2026-11-02"
     },
     {
       "id": "SHOP-02",

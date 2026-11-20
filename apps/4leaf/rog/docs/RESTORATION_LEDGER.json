@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-17",
+  "updatedAt": "2026-11-20",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -2245,7 +2245,7 @@
       "title": "주사위 원본 모델·결과별 모션",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-11-08 원본 감사: 정품 2002 설치본 Dice 파일 31개·PAK 멤버 713개·Dice.dll 1개 PE32 검사; 확정 D4/D6 원본 3D 메시·텍스처·낙하 타임라인 0건. 현재 CSS/웹 대체 구조이며 원본 완성 아님.\n[이전 작업 이력] 원본 roll/eventRoll1 SPR 20프레임은 UI에 활용; 물리 주사위는 웹 대체물 | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Original own-palette D6 1171.obs and D4 1223.obs extra 63 PNG frames deployed. Source slot20 tumble -> slot12 impact -> confirmed engine final pips. Pixel/frame keys VERIFIED by source hashes and Chromium/WebKit. Fall/impact role, original timing, effect event 2125, slot13/3D native mesh unverified.",
+      "current": "2026-11-08 원본 감사: 정품 2002 설치본 Dice 파일 31개·PAK 멤버 713개·Dice.dll 1개 PE32 검사; 확정 D4/D6 원본 3D 메시·텍스처·낙하 타임라인 0건. 현재 CSS/웹 대체 구조이며 원본 완성 아님.\n[이전 작업 이력] 원본 roll/eventRoll1 SPR 20프레임은 UI에 활용; 물리 주사위는 웹 대체물 | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: Original own-palette D6 1171.obs and D4 1223.obs extra 63 PNG frames deployed. Source slot20 tumble -> slot12 impact -> confirmed engine final pips. Pixel/frame keys VERIFIED by source hashes and Chromium/WebKit. Fall/impact role, original timing, effect event 2125, slot13/3D native mesh unverified. | 2026-11-20: DIE-02 native 2D source animation/ten outcomes accepted separately; M07 remains OPEN for authentic original 3D mesh, source-defined fall/rebound trajectory, native EXE tick ms, and verified slot-to-action semantics.",
       "acceptance": [
         "D4/D6 결과별 하늘 낙하/튕김/정지 원본 시퀀스를 리소스 근거로 구현하고 실제 결과와 일치"
       ],
@@ -3203,9 +3203,9 @@
       "id": "DIE-02",
       "priority": "P0",
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.; 2026-11-01 source OBS 1223 D4 face sprites 1..4 are wired into browser move roll with CSS geometry as image-load failure fallback. Source member sprite frames do NOT establish native MVE collision/bounce timing; this task remains in_progress. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: 2026-11-05 original 1171/1223 extra block 63 own-palette frames active: slot20 tumble, slot12 bounce/impact, engine verified D6/D4 rest face; archive source record keys/ticks and PNG SHA authenticated. Roles and original EXE physics/time not verified.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.; 2026-11-01 source OBS 1223 D4 face sprites 1..4 are wired into browser move roll with CSS geometry as image-load failure fallback. Source member sprite frames do NOT establish native MVE collision/bounce timing; this task remains in_progress. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending. | 2026-11-05 beta.65/PWA v152 PUBLIC VERIFIED: 2026-11-05 original 1171/1223 extra block 63 own-palette frames active: slot20 tumble, slot12 bounce/impact, engine verified D6/D4 rest face; archive source record keys/ticks and PNG SHA authenticated. Roles and original EXE physics/time not verified. | 2026-11-20 SOURCE-SCOPED ACCEPTANCE: original D4/D6 OBS source-table 20/12 frames and recovered source 1–4/1–6 landing eyes verified with fixed seeded browser runtime and 20 repeat checks per engine in Chromium/WebKit. Live actual two-player turn and engine roll result verified. Historical original EXE/MVE 3D geometry, gravity, bounce timing, milliseconds and exact slot semantics remain OPEN in M07; this is NOT a 2004 3D motion equivalence claim.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
@@ -3228,11 +3228,21 @@
         "https://github.com/koith/browser-app-lab/pull/726",
         "https://github.com/koith/browser-app-lab/pull/727",
         "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
-        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
+        "apps/4leaf/rog/tests/dice-original-roll-tables.cjs",
+        "https://github.com/koith/browser-app-lab/pull/1374",
+        "https://github.com/koith/browser-app-lab/actions/runs/44650283052",
+        "https://github.com/koith/browser-app-lab/actions/runs/44649556014",
+        ".github/workflows/rog-dice-waapi-liveness.yml",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-02",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2002-OBS-SOURCE-FRAMES-AND-40-FIXED-SEED-RESULT-REPLAYS; HISTORICAL-EXE-3D-PHYSICS-UNVERIFIED-M07",
+      "lastReviewed": "2026-11-20",
+      "verifiedAcceptance": {
+        "sourceComparison": "Original archived Dice/OBS.pak/1223.obs D4 and 1171.obs D6 SHA-gated native member frames: verified original source slot20 and slot12 keys/frames/ticks; genuine source final faces D4=1..4, D6=1..6. Fall vs impact semantic assignment is INFERRED; original 2004 EXE/MVE 3D body, gravity, trajectory, event playback and milliseconds remain UNVERIFIED under M07.",
+        "implementation": "Existing runtime dice-fall.js renders native source verified 1171/1223 slot20/12 sequences, WEB inferred fall and bounce presentation, and final original native pip face supplied by game engine (no result mutation). PR #1374 (merged main 6b2ff2e0cf0e82fc76bc8767adb228e759c52a5a) adds browser fixed seed 0x4c454146, exhaustive D4×4/D6×6 two repeats and permanent dual-browser regression gate. Runtime source blob f0da55e723e235d28005620bce6d871499f376b4 identical to prior beta.99 main 9fbc722c.",
+        "runtimeTest": "GitHub Actions https://github.com/koith/browser-app-lab/actions/runs/44650283052 COMPLETED SUCCESS in BOTH Chromium and WebKit: each verifies 10 original source eye values twice (20 per browser, 40 total), native fall/impact source-frame ordering, source SHA tamper rejection, unchanged active match state, plus real user first and second engine turns, D4/D6 physical rendered eye placement and actual game result consistency. Earlier independent matrix https://github.com/koith/browser-app-lab/actions/runs/44649556014 also passed both browsers.",
+        "deployment": "Verified 2026-11-20 public https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json returned 0.86.0-beta.99 / 4leaf-revival-pwa-v187. The runtime dice-fall.js SHA is identical between published beta.99 main 9fbc722c and merged acceptance 6b2ff2e0; acceptance PR changes only E2E test and CI. This does not certify physical iPhone or native historical 3D EXE/MVE roll animation."
+      },
       "dependencies": [
         "DIE-01"
       ],
@@ -10459,6 +10469,20 @@
         "https://github.com/koith/browser-app-lab/actions/runs/43834266980",
         "https://github.com/koith/browser-app-lab/actions/runs/43835444796",
         "https://github.com/koith/browser-app-lab/actions/runs/43872380084",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
+      ]
+    },
+    {
+      "seq": 487,
+      "date": "2026-11-20",
+      "type": "STATUS_CHANGED",
+      "taskId": "DIE-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "EXISTING DIE-02 SOURCE-SCOPED acceptance: D4×4 + D6×6 authentic OBS source animation outcome tests with fixed seed, replayed twice in Chromium and twice in WebKit (40 source-animation outcome checks) and actual two-player match turn tests; both jobs PASS CI #44650283052, PR #1374 merged. Pixel/key-frame/tick evidence verified, correct original landing pip/engine result. Historical 2004 EXE/MVE physical 3D model, timing, native gravity and slot semantic roles NOT verified and remain independently OPEN in M07. Public beta.99 source runtime unchanged across acceptance merge.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/1374",
+        "https://github.com/koith/browser-app-lab/actions/runs/44650283052",
         "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
       ]
     }
