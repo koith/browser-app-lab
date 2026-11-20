@@ -57,11 +57,11 @@ jobs:
         run: |
           python apps/gallery-archive/collect_observed_gmh_public_images.py \
             --model "$MODEL" --stage "$STAGE" \
-            --max-photos 80 --max-per-work 12 --budget 45000000
+            --max-photos 120 --max-per-work 30 --budget 45000000
       - name: Publish only physically verified novel files into existing Gallery Pages
         run: |
           python apps/gallery-archive/publish_new_public_photos_to_pages.py \
-            --model "$MODEL" --stage "$STAGE" --limit 80 --budget 45000000
+            --model "$MODEL" --stage "$STAGE" --limit 120 --budget 45000000
           node apps/gallery-archive/test_saved_photo_union.cjs
           python - <<'PY'
           import json,os
