@@ -219,6 +219,10 @@ const path=require('path');
  // CardShop/cardshopback.png is a 794x404 native screen. Uniform scaling
  // must leave the original card backs visible beneath accessible controls.
  await host.waitForFunction(()=>Number(document.querySelector('#shop-native-stage')?.dataset.scale)>0,null,{timeout:9000});
+ // This section verifies the recovered 2002 3x3 PAK atlas, not the
+ // separate default 2004 4x2 reference. Exercise the visible era control.
+ await host.locator('#shop-era-toggle button[data-era="2002"]').click();
+ await host.waitForFunction(()=>window.__LEAF_SHOP_ERA__?.getState().era==='2002');
  const nativeShop=await host.evaluate(()=>{
   const viewport=document.querySelector('#shop .shop-scene'),stage=document.getElementById('shop-native-stage');
   const a=viewport.getBoundingClientRect(),b=stage.getBoundingClientRect();

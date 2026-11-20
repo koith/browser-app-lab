@@ -11,7 +11,7 @@ const {chromium,webkit}=require('playwright');
  const browser=await (which==='webkit'?webkit:chromium).launch({
   headless:true,args:which==='webkit'?[]:['--no-sandbox']});
  const mobile=process.env.FOURLEAF_MOBILE==='1';
- const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:800,height:600},
+ const page=await browser.newPage({viewport:mobile?{width:844,height:390}:{width:800,height:600},
   isMobile:mobile,hasTouch:mobile,deviceScaleFactor:mobile?2:1,serviceWorkers:'block'});
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});

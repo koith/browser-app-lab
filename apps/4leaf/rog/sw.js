@@ -1,5 +1,5 @@
 'use strict';
-const REVISION='4leaf-revival-pwa-v187';
+const REVISION='4leaf-revival-pwa-v188';
 // 32 genuinely archived 145×97 original TIS platform images. First offline
 // Genesis match must draw the same extracted raised platforms, not replace
 // uncached native source art with a CSS placeholder on first room entry.
