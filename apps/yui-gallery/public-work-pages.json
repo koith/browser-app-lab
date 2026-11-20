@@ -322,6 +322,42 @@
         "https://showartx.net/yui-time-to-eat-strawberries/"
       ],
       "acquisition_state": "public_page_confirmed_images_not_yet_downloaded"
+    },
+    {
+      "id": "heart-steal78",
+      "title": "SWEETBOX — Yui Heart Steal",
+      "source": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol30-heart-steal/",
+      "priority": 1,
+      "acquisition_mode": "observed_exact_image_cdn_only_site_origin_robots_block",
+      "public_source_provenance": "User-requested original G-MH page reviewed; exact CDN URLs in observed-gmh-public-media.json",
+      "allow_complete_edition_claim": false
+    },
+    {
+      "id": "sweet-dream110",
+      "title": "SWEETBOX — Yui Sweet Dream",
+      "source": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/",
+      "priority": 1,
+      "acquisition_mode": "observed_exact_image_cdn_only_site_origin_robots_block",
+      "public_source_provenance": "User-requested original G-MH page reviewed; exact CDN URLs in observed-gmh-public-media.json",
+      "allow_complete_edition_claim": false
+    },
+    {
+      "id": "ramen125",
+      "title": "SWEETBOX — Yui RAMEN",
+      "source": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol39-ramen-part1/",
+      "priority": 1,
+      "acquisition_mode": "observed_exact_image_cdn_only_site_origin_robots_block",
+      "public_source_provenance": "User-requested original G-MH page reviewed; exact CDN URLs in observed-gmh-public-media.json",
+      "allow_complete_edition_claim": false
+    },
+    {
+      "id": "thru-thru117",
+      "title": "SWEETBOX — Yui Thru Thru",
+      "source": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/",
+      "priority": 1,
+      "acquisition_mode": "observed_exact_image_cdn_only_site_origin_robots_block",
+      "public_source_provenance": "User-requested original G-MH page reviewed; exact CDN URLs in observed-gmh-public-media.json",
+      "allow_complete_edition_claim": false
     }
   ]
 }
