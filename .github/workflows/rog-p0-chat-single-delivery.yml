@@ -1,0 +1,56 @@
+name: 4LEAF P0-CHAT original room acceptance
+on:
+  push:
+    branches: ['fix/4leaf-p0-chat-single-delivery-20261120']
+    paths:
+      - '.github/workflows/rog-p0-chat-single-delivery.yml'
+      - 'apps/4leaf/rog/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-published-room:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright && npx playwright install ${{ matrix.browser }} --with-deps
+      - name: Verify actual deployed chat runtime matches checkout
+        run: |
+          set -euo pipefail
+          base=https://koith.github.io/browser-app-lab/apps/4leaf/rog
+          cd apps/4leaf/rog
+          for file in app-version.json index.html sw.js social-chat.js world-social.css central-client.js chatroom-screen.js chatroom-native-2004-frame.css chatroom-native-panels.js chatroom-native-panels.css chatroom-native-scrollbar.js chatroom-native-scrollbar.css; do
+            curl -fsSL --retry 3 --max-time 30 "$base/$file?qa=$GITHUB_SHA" -o /tmp/leaf-chat-check
+            cmp "$file" /tmp/leaf-chat-check
+          done
+      - name: Two independent devices through actual published chat authority
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+          LEAF_CENTRAL_API_URL: page
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+        run: node apps/4leaf/rog/tests/p0-chat-two-browser-flow.cjs
+      - name: Six original source room and roster pixel anchors
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+        run: node apps/4leaf/rog/tests/chatroom-userlist-scroll-source-anchors.cjs
+      - name: Historical input and real native talkbox
+        if: matrix.browser == 'chromium'
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p0-chat-${{ matrix.browser }}
+          path: |
+            p0-chat-*.png
+            leaf-2004-source-chat-input-row-registration.png

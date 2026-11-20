@@ -97,6 +97,7 @@ async function balloonOn(page,speaker,text){
 async function run(api,viewName){
  const A=await user(api,viewName,'겔드'),B=await user(api,viewName,'일루드');
  const rec={view:viewName};
+ let createdRoomId=null;
  try{
   await toMap(A);await toMap(B);
   await hitClick(A.page,A.page.locator('#social-new-room'),'+ 방 만들기');
@@ -104,6 +105,8 @@ async function run(api,viewName){
   await A.page.locator('#social-modal [name="name"]').fill(roomName);
   await hitClick(A.page,A.page.locator('#social-modal button[type="submit"]'),'create');
   await A.page.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='room',null,{timeout:30000});
+  createdRoomId=await A.page.evaluate(()=>window.__LEAF_CENTRAL_CHAT__.joinedId);
+  assert.ok(createdRoomId,'real central authority joined ID');
   assert.deepEqual((await view(A.page)).roster,['겔드'],'creator alone in the new room');
   // second browser finds the room on the map and enters through its card
   const card=B.page.locator('.social-map-rooms>button',{hasText:roomName});
@@ -151,7 +154,13 @@ async function run(api,viewName){
   rec.linesA=linesA;rec.linesB=linesB;
   assert.deepEqual(A.errors,[]);assert.deepEqual(B.errors,[]);
   return rec;
- }finally{await A.browser.close();await B.browser.close()}
+ }finally{
+  try{
+   if(createdRoomId)await A.page.evaluate(async id=>{
+    await window.__LEAF_CENTRAL_CHAT__.close(id);
+   },createdRoomId);
+  }finally{await A.browser.close();await B.browser.close()}
+ }
 }
 (async()=>{
  const central=await startCentral();
