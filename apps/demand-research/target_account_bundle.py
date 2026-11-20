@@ -303,7 +303,8 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     root=LayeredBundleCloud(store,prior=prior)
     result=None
     interrupted=None
-    with redirect_stdout(io.StringIO()):
+    captured=io.StringIO()
+    with redirect_stdout(captured):
         try:
             result=run_one(platform,account,root=root,
                            api=api or Transport(),max_pages=pages,
@@ -313,20 +314,71 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
                                    archive_key(profile)+"/",prior=prior))
         except (RuntimeError,ValueError,TypeError,KeyError) as error:
             interrupted=type(error).__name__
-    if os.getenv("DEMAND_REQUIRE_PROFILE_SNAPSHOT","0")=="1":
-        if (interrupted is not None or not isinstance(result,dict)
-                or result.get("profile",{}).get("profile_verified") is not True):
-            # A registration-only or post-only delta is not a restored
-            # profile. A failed backfill must not publish an empty release or
-            # present successful bytes as a complete SNS account page.
-            raise RuntimeError("Required public profile snapshot not captured")
-    if not store.objects:
-        raise RuntimeError("no verifiable public content staged")
+
+    # The old code discarded the real cause, then called ANY exception
+    # "Required public profile snapshot not captured". The archive worker's
+    # own aggregate contains only counts and stage flags, never identifiers.
+    summary={}
+    for line in captured.getvalue().splitlines():
+        if not line.startswith("TARGET_ACCOUNT_ARCHIVE_AGGREGATE "):
+            continue
+        try:
+            candidate=json.loads(line.split(" ",1)[1])
+            if isinstance(candidate,dict):
+                summary=candidate
+        except (ValueError,TypeError):
+            pass
+    source_evidence=any(
+        ("/profile/snapshots/" in key or
+         "/metadata/source-records/" in key or
+         ("/posts/" in key and key.endswith("/post.json")))
+        for key in store.objects
+    )
+    profile_snapshot_staged=any("/profile/snapshots/" in key
+                                for key in store.objects)
+    profile_proven=(profile_snapshot_staged and isinstance(result,dict) and
+                    result.get("profile",{}).get("profile_verified") is True)
+    if interrupted is not None:
+        # If collection failed after some originals were staged, preserve the
+        # SHA-verified bytes as explicitly PARTIAL instead of throwing them
+        # away. Never upload a registration-only or empty green archive.
+        if not source_evidence:
+            print("TARGET_ACCOUNT_SOURCE_UNAVAILABLE "+
+                  json.dumps({"error_class":interrupted,
+                              "profile_verified":summary.get("profile_verified",False),
+                              "staged_source_objects":0},sort_keys=True),flush=True)
+            raise RuntimeError("No independently captured account originals available")
+        result={"status":"SOURCE_PARTIAL",
+                "profile":{"profile_verified":(
+                    profile_snapshot_staged and summary.get("profile_verified") is True),
+                           "profile_assets_unavailable":int(
+                               summary.get("profile_assets_unavailable",0))},
+                "media_pending_total":int(summary.get("media_pending_total",0)),
+                "graph":{},"threads":{"threads_pending":True}}
+    elif not isinstance(result,dict):
+        raise RuntimeError("No verified public account capture result")
+    elif not profile_proven:
+        result["status"]="SOURCE_PARTIAL"
+        if isinstance(result.get("profile"),dict):
+            result["profile"]["profile_verified"]=False
+
+    if not source_evidence:
+        raise RuntimeError("No independently captured profile or post originals staged")
+    if os.getenv("DEMAND_REQUIRE_PROFILE_SNAPSHOT","0")=="1" and (
+            result.get("profile",{}).get("profile_verified") is not True):
+        # The ZIP may contain real posts even if the profile API is down.
+        # This result is always PARTIAL and must never close completeness QA.
+        result["status"]="SOURCE_PARTIAL"
+    if interrupted is not None or result.get("status")=="SOURCE_PARTIAL":
+        print("TARGET_ACCOUNT_CAPTURE_PARTIAL "+
+              json.dumps({"error_class":interrupted,
+                          "profile_verified":result["profile"].get("profile_verified",False),
+                          "posts_staged":sum(key.endswith("/post.json")
+                                              for key in store.objects),
+                          "source_records_staged":sum("/metadata/source-records/" in key
+                                                      for key in store.objects)},
+                         sort_keys=True),flush=True)
     refs=[k for k in store.objects if k.endswith("/post.json")]
-    if not refs and not prior:
-        has_profile=any("/profile/snapshots/" in key for key in store.objects)
-        if not has_profile:
-            raise RuntimeError("no public post or independently captured profile staged")
     account_name=next((k.split("/")[2] for k in store.objects
                        if k.startswith("account-archives/"+platform+"/")),None)
     if not account_name:

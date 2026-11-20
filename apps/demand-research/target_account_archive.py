@@ -462,22 +462,88 @@ def atproto_blobs(record):
     return list(dict.fromkeys(found))
 
 
+_APPVIEW_CURSOR_PREFIX="public-appview-v1:"
+
+
+def _bluesky_appview_records(profile,cursor,api):
+    """Public author-feed fallback for PDS listings that are unavailable.
+
+    This is an AppView replica, NOT an authoritative PDS record. Validate the
+    exact author DID and post URI for every item; mark the WHOLE capture as
+    partial and label the source, never fake original PDS or full chronology.
+    """
+    params={"actor":profile["identity"],"limit":100,
+            "filter":"posts_with_replies","includePins":"false"}
+    if cursor is not None:
+        if not isinstance(cursor,str) or not cursor.startswith(_APPVIEW_CURSOR_PREFIX):
+            raise SourceUnavailable("public PDS cursor is not an AppView cursor")
+        params["cursor"]=cursor[len(_APPVIEW_CURSOR_PREFIX):]
+    for host in ("https://public.api.bsky.app","https://api.bsky.app"):
+        try:
+            response=api.json(host+"/xrpc/app.bsky.feed.getAuthorFeed?"+
+                              urlencode(params))
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            continue
+        if not isinstance(response,dict) or not isinstance(response.get("feed"),list):
+            continue
+        if len(response["feed"])>100:
+            continue
+        rows=[]
+        for entry in response["feed"]:
+            post=entry.get("post") if isinstance(entry,dict) else None
+            author=post.get("author") if isinstance(post,dict) else None
+            value=post.get("record") if isinstance(post,dict) else None
+            uri=post.get("uri") if isinstance(post,dict) else None
+            if (not isinstance(author,dict) or
+                author.get("did")!=profile["identity"] or
+                not isinstance(uri,str) or
+                not uri.startswith("at://"+profile["identity"]+
+                                   "/app.bsky.feed.post/") or
+                not isinstance(value,dict) or
+                value.get("$type") not in (None,"app.bsky.feed.post")):
+                continue
+            rows.append({"uri":uri,"cid":post.get("cid"),
+                         "value":value,"source_tier":"public_appview_replica"})
+        nxt=response.get("cursor")
+        if nxt is not None and (not isinstance(nxt,str) or
+                                 not 0<len(nxt)<=480):
+            continue
+        # Fail closed if the provider gave no valid rows on a non-empty feed
+        # that claims a continuation: never silently discard other authors.
+        if response["feed"] and not rows and nxt:
+            continue
+        try:
+            setattr(api,"_archive_appview_fallback",True)
+        except (AttributeError,TypeError):
+            pass
+        return rows,(_APPVIEW_CURSOR_PREFIX+nxt if nxt else None)
+    raise SourceUnavailable("public original history unavailable from PDS and AppView")
+
+
 def page_records(profile, cursor, api):
     if profile["platform"]=="bluesky":
+        if isinstance(cursor,str) and cursor.startswith(_APPVIEW_CURSOR_PREFIX):
+            return _bluesky_appview_records(profile,cursor,api)
         params={"repo":profile["actor"],"collection":"app.bsky.feed.post","limit":100}
         if cursor:
             params["cursor"]=cursor
-        data=api.json(profile["pds"]+"/xrpc/com.atproto.repo.listRecords?"+urlencode(params))
-        if not isinstance(data,dict) or not isinstance(data.get("records"),list):
-            raise SourceUnavailable("invalid public repo listing")
-        rows=data["records"]
-        if len(rows)>100:
-            raise SourceUnavailable("unbounded public repo listing")
-        next_cursor=data.get("cursor")
-        if next_cursor is not None and (not isinstance(next_cursor,str)
-                                        or not 0<len(next_cursor)<=512):
-            raise SourceUnavailable("invalid public record cursor")
-        return rows,next_cursor
+        try:
+            data=api.json(profile["pds"]+"/xrpc/com.atproto.repo.listRecords?"+
+                          urlencode(params))
+            if not isinstance(data,dict) or not isinstance(data.get("records"),list):
+                raise SourceUnavailable("invalid public repo listing")
+            rows=data["records"]
+            if len(rows)>100:
+                raise SourceUnavailable("unbounded public repo listing")
+            next_cursor=data.get("cursor")
+            if next_cursor is not None and (not isinstance(next_cursor,str)
+                                            or not 0<len(next_cursor)<=512):
+                raise SourceUnavailable("invalid public record cursor")
+            return rows,next_cursor
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            # An old PDS cursor is not portable to the AppView. Restart from
+            # newest public feed and explicitly retain SOURCE_PARTIAL status.
+            return _bluesky_appview_records(profile,None,api)
     # Do not suppress any provider-returned, publicly accessible timeline
     # action at the API boundary. Preserve boosts and replies alongside posts.
     params={"limit":40,"exclude_reblogs":"false","exclude_replies":"false"}
@@ -522,7 +588,8 @@ def normalize_record(profile, raw):
                 "kind":"reply" if value.get("reply") else "post",
                 "reply_to":(value.get("reply",{}).get("parent",{}).get("uri","")
                             if isinstance(value.get("reply"),dict) else ""),
-                "blobs":atproto_blobs(value),"raw":raw}
+                "blobs":atproto_blobs(value),"raw":raw,
+                "source_tier":raw.get("source_tier","authoritative_public_pds")}
     if not isinstance(raw.get("account"),dict) or str(raw["account"].get("id")) != profile["actor"]:
         return None
     # Mastodon's 'unlisted' statuses are publicly readable when returned
@@ -643,7 +710,9 @@ def save_public_record(cloud, profile, item, api):
           "kind":item["kind"],"reply_to":item["reply_to"],"original_id":item["original_id"],
           "media":media,"media_expected":len(blobs),"media_saved":len(media),
           "archive_complete":len(blobs)==len(media),
-          "provenance":"selected_public_account","retention_review":"required_on_removal_request"}
+          "provenance":"selected_public_account",
+          "source_tier":item.get("source_tier","authoritative_public_pds"),
+          "retention_review":"required_on_removal_request"}
     if item.get("revision_of"):
         post["revision_of"]=item["revision_of"]
         post["revision_fingerprint"]=item["revision_fingerprint"]
@@ -705,12 +774,12 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
     graph_stats={}
     try:
         profile_stat=archive_profile(profile,api,archive)
-    except (RuntimeError,ValueError,TypeError,KeyError):
-        if os.getenv("DEMAND_REQUIRE_PROFILE_SNAPSHOT","0")=="1":
-            # A profile-repair job must never report success while silently
-            # dropping the account's published biography, header or avatar.
-            # Existing immutable backups remain untouched and retryable.
-            raise SourceUnavailable("public profile snapshot could not be verified") from None
+    except (RuntimeError,ValueError,TypeError,KeyError) as error:
+        # Do not discard publicly available authored posts, source JSON and
+        # media solely because a DIFFERENT profile endpoint failed. This is
+        # never called a complete profile: the outer immutable ZIP reader
+        # reports SOURCE_PARTIAL until a real profile snapshot is captured.
+        profile_stat["profile_error_class"]=type(error).__name__
     for graph_kind in ("followers","following"):
         try:
             graph_stats[graph_kind]=archive_graph(profile,graph_kind,api,archive)
@@ -855,7 +924,9 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                                 cap=1024,optional=True)):
                 continue
             outstanding+=1
-        status=("RESUME_NEEDED_MEDIA" if outstanding else
+        status=("SOURCE_PARTIAL" if (not profile_stat["profile_verified"] or
+                                      getattr(api,"_archive_appview_fallback",False)) else
+                "RESUME_NEEDED_MEDIA" if outstanding else
                 ("COMPLETE_CURRENT_PUBLIC_CURSOR" if pages and not cursor
                  else "RESUME_NEEDED"))
         # Bounded comment/thread backlog scans retain progress even when
@@ -877,6 +948,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                           "media_pending_total":locals().get("outstanding",media_pending),
                           "media_repaired":pending_repaired,
                           "profile_verified":profile_stat["profile_verified"],
+                          "profile_error_class":profile_stat.get("profile_error_class"),
                           "profile_assets_verified":profile_stat["profile_assets_verified"],
                           "profile_assets_unavailable":profile_stat["profile_assets_unavailable"],
                           "graph_pages_verified":sum(v["pages"] for v in graph_stats.values()),
