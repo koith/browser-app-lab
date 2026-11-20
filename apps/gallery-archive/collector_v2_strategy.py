@@ -77,12 +77,23 @@ def verify_identity(raw, work, model, *, discovered=False):
         return False, "different_edition"
     if not any(re.search(r"(?<!\w)" + re.escape(normalize(m)) + r"(?!\w)", context)
                for m in MODEL_WORDS[model]):
-        # The exact work name can be in an article title while the model
-        # identifier appears only in a meta description from the publisher.
+        # Cup2D keeps its exact *model + edition* in the article H1, while
+        # the remaining <article> text contains only media and comments.
+        # Require actual H1/OG article title evidence; the page <title>
+        # alone (which could be boilerplate) never proves a person's ID.
+        exact_headings = normalize(" ".join(
+            [n.get_text(" ", strip=True) for n in soup.select("article h1, main h1, h1")]
+            + [str(n.get("content") or "") for n in soup.select(
+                'meta[property="og:title"]')]))
+        in_exact_heading = any(
+            re.search(r"(?<!\w)" + re.escape(normalize(m)) + r"(?!\w)", exact_headings)
+            for m in MODEL_WORDS[model])
         descriptions = normalize(" ".join(str(x.get("content") or "")
             for x in soup.select('meta[name="description"],meta[property="og:description"]')))
-        if not any(re.search(r"(?<!\w)" + re.escape(normalize(m)) + r"(?!\w)", descriptions)
-                   for m in MODEL_WORDS[model]):
+        in_description = any(
+            re.search(r"(?<!\w)" + re.escape(normalize(m)) + r"(?!\w)", descriptions)
+            for m in MODEL_WORDS[model])
+        if not (in_exact_heading or in_description):
             return False, "model_not_proven_in_article"
     if "captcha" in context[:1000] or "verify you are human" in context[:1000]:
         return False, "access_challenge"
