@@ -26,25 +26,27 @@ def run(browser):
                                has_touch=True,device_scale_factor=3)
         page=ctx.new_page()
         for model in ("yui","mimmi"):
-            page.goto(f"{url}/apps/{model}-gallery/videos.html",wait_until="domcontentloaded")
+            photo_url=f"{url}/apps/{model}-gallery/"
+            video_url=photo_url+"videos.html"
+            page.goto(photo_url,wait_until="domcontentloaded")
+            toggle=page.locator(".logo .mode-toggle")
+            assert toggle.count()==1,(model,"photo toggle missing")
+            assert toggle.inner_text()=="GALLERY"
+            assert toggle.get_attribute("href")=="videos.html"
+            assert page.locator('.mainnav a[href="videos.html"]').count()==0
+            toggle.click()
+            page.wait_for_url(video_url,timeout=15000)
             page.locator("#stats span").first.wait_for(timeout=15000)
-            title=page.title()
-            assert "동영상" in title,(model,title)
-            assert page.locator(".card").count()==2,model
-            assert page.locator('nav a[aria-current="page"]').count()==1
-            if model=="yui":
-                assert page.locator(".preview button").count()==2
-                page.locator(".preview button").first.click()
-                assert page.locator("#modal").is_visible()
-                src=page.locator("#player iframe").get_attribute("src")
-                assert src.startswith("https://www.youtube-nocookie.com/embed/eOS8yoH1178"),src
-                page.locator("#close").click()
-                assert not page.locator("#modal").is_visible()
-                assert page.locator("#player iframe").count()==0
-            else:
-                assert page.locator(".preview button").count()==0
-                assert "실제 파일 저장 0개" in page.locator("#stats").inner_text()
-            print("GALLERY_VIDEO_LOCAL_BROWSER_PASS",browser,model)
+            assert page.locator(".mode-toggle").inner_text()=="MOVIE"
+            assert page.locator(".mode-toggle").get_attribute("href")=="./"
+            assert page.locator(".card").count()==(1 if model=="yui" else 2)
+            assert page.locator(".preview button").count()==0,"source-only cannot fake playable videos"
+            assert "실제 파일 저장 0개" in page.locator("#stats").inner_text()
+            assert page.locator("#player iframe").count()==0,"unrequested YouTube embed"
+            page.locator(".mode-toggle").click()
+            page.wait_for_url(photo_url,timeout=15000)
+            assert page.locator(".mode-toggle").inner_text()=="GALLERY"
+            print("GALLERY_MODE_TOGGLE_LOCAL_BROWSER_PASS",browser,model)
         ctx.close();driver.close()
 
 if __name__=="__main__":
