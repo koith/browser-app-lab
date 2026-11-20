@@ -141,14 +141,21 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  .edition-sticker{top:12px;right:10px}
  .album-count{font-size:11px;margin-top:5px}
 }
+
+/* One in-logo mode switch: PHOTO ⇄ MOVIE; separate from model navigation. */
+.logo{display:flex;align-items:baseline;gap:9px;min-width:0}
+.logo-name{font:inherit;color:inherit;letter-spacing:inherit;white-space:nowrap}
+.mode-toggle{display:inline-block;flex-shrink:0;font-size:11px;font-weight:650;letter-spacing:.09em;color:#bcb9c1;border:1px solid #4b4750;border-radius:7px;padding:6px 9px;line-height:1.2;transition:background .15s,border-color .15s}
+.mode-toggle:hover,.mode-toggle:focus-visible{background:#2d2930;color:#fff;border-color:#dcbccc;outline-offset:3px}
+@media(max-width:680px){.logo{gap:6px}.mode-toggle{display:inline-block;font-size:10px;letter-spacing:.035em;padding:6px 7px}}
 </style>
 </head>
 <body>
 <div class="shell">
 <header class="topbar">
- <a href="./" class="logo" aria-label="밈미 갤러리 홈">MIMMI<span>GALLERY</span></a>
+ <div class="logo"><a href="./" class="logo-name" aria-label="밈미 사진 화보 홈">MIMMI</a><a href="videos.html" class="mode-toggle" aria-label="밈미 사진에서 동영상으로 전환" title="동영상으로 전환">GALLERY</a></div>
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
- <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a><a href="videos.html" aria-label="밈미 동영상 보기">동영상</a></nav>
+ <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
  <small id="app-version" class="version-chip">v0.1.0-mimmi.19</small>
 </header>
