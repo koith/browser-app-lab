@@ -32,3 +32,5 @@ jobs:
           curl -fSsI http://127.0.0.1:8765/index.html
       - name: DIE-02 all ten source faces twice, game-state safety
         run: node apps/4leaf/rog/tests/dice-original-roll-tables.cjs
+      - name: DIE-02 real user turn and two independent engine dice results
+        run: node apps/4leaf/rog/tests/dice-fall.cjs
