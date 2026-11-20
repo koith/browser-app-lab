@@ -70,7 +70,7 @@ const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
     log.push({map:id,tiles:rows.length,visible,minTopFaceExposure:+min.toFixed(4),mostCovered,unsafeBelow70Percent:centerMisses});
    }
    game.setMatch(before);
-   return {maps:log,checked:visible,sourceTypes:source.size,
+   return {maps:log,checked:log.reduce((n,r)=>n+r.visible,0),sourceTypes:source.size,
     cells:log.reduce((n,r)=>n+r.tiles,0),unsafe:log.reduce((n,r)=>n+r.unsafeBelow70Percent,0),
     worst:log.reduce((m,r)=>r.minTopFaceExposure<m.minTopFaceExposure?r:m,log[0])};
   });
