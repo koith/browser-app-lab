@@ -144,6 +144,9 @@ def load_inventory(root, model):
                       "target_basis": "publisher" if publisher_count else (
                           "public_source_claim" if source_count else "unknown"),
                       "unresolved_priority": aid in pending,
+                      "browser_pagination_candidate": any(
+                          urlsplit(u).hostname in ("shypetal.com", "www.shypetal.com")
+                          for u in urls),
                       "declared_resolution": [
                           official.get(aid, {}).get("declared_width"),
                           official.get(aid, {}).get("declared_height")] if publisher_count else None,
@@ -171,10 +174,13 @@ class QueueDB:
                         "status TEXT NOT NULL, staged INTEGER NOT NULL)")
         self.db.execute("CREATE TABLE IF NOT EXISTS media (url TEXT PRIMARY KEY, "
                         "sha TEXT NOT NULL, checked REAL NOT NULL)")
+        self.browser_checked = set()
         if snapshot and Path(snapshot).is_file():
             doc = json.loads(Path(snapshot).read_text(encoding="utf-8"))
             if doc.get("schema_version") != SCHEMA:
                 raise ValueError("invalid checkpoint version")
+            self.browser_checked = {x for x in doc.get("browser_checked_work_ids", [])
+                                    if isinstance(x, str)}
             for r in doc.get("works", []):
                 if len(r) == 6:
                     self.db.execute("INSERT OR REPLACE INTO work VALUES (?,?,?,?,?,?)", r)
@@ -187,7 +193,9 @@ class QueueDB:
         ready = []
         for w in works:
             row = self.db.execute("SELECT next_at FROM work WHERE id=?", (w["id"],)).fetchone()
-            if row is None or row[0] <= self.now:
+            if (row is None or row[0] <= self.now
+                    or (w.get("browser_pagination_candidate")
+                        and w["id"] not in self.browser_checked)):
                 ready.append(w)
         return ready[:max_works]
 
@@ -216,6 +224,7 @@ class QueueDB:
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
         data = {"schema_version": SCHEMA,
+                "browser_checked_work_ids": sorted(self.browser_checked),
                 "works": self.db.execute("SELECT id,checked,next_at,attempts,status,staged "
                                          "FROM work ORDER BY id").fetchall(),
                 "media": self.db.execute("SELECT url,sha,checked FROM media ORDER BY url").fetchall()}
@@ -410,6 +419,7 @@ def collect(root, model, stage, state_file, *, max_works=12, max_photos=48,
             break
         details = {"id": work["id"], "pages": 0, "media_candidates": 0,
                    "files_staged": 0, "known_sha": 0, "same_frame_filtered": 0,
+                   "browser_scanned_pages": 0,
                    "errors": {}, "target_count": work["expected"],
                    "public_saved_sha_count": work["public_saved_sha_count"],
                    "public_storage_gap_not_edition_missing_proof": work["public_storage_gap"],
@@ -441,6 +451,24 @@ def collect(root, model, stage, state_file, *, max_works=12, max_photos=48,
                         details["errors"].get("identity_"+proof, 0) + 1)
                     continue
                 candidates = page_candidates(page_raw, page)
+                # Publicly visible JavaScript page buttons are not ordinary
+                # links. Observe them in a real browser, with the same work
+                # identity on EVERY page; no fabricated paths or media URLs.
+                if (isinstance(client, PublicHTTP)
+                        and urlsplit(page).hostname in ("shypetal.com", "www.shypetal.com")):
+                    try:
+                        from collector_v2_pagination import discover_rendered_button_pages
+                        observed, visits = discover_rendered_button_pages(
+                            page,
+                            verify_page=lambda html: verify_identity(
+                                html, work, model)[0],
+                            extract_images=page_candidates,
+                            max_pages=max_pages_per_work)
+                        candidates = list(dict.fromkeys(candidates + observed))
+                        details["browser_scanned_pages"] += visits
+                    except Exception as exc:
+                        code = "browser_pagination_" + type(exc).__name__
+                        details["errors"][code] = details["errors"].get(code, 0) + 1
                 details["media_candidates"] += len(candidates)
                 pages_without_failure += 1
             except DownloadFailure as exc:
@@ -524,6 +552,8 @@ def collect(root, model, stage, state_file, *, max_works=12, max_photos=48,
         else:
             status = "fetch_error"
         queue.finish(work["id"], status, details["files_staged"])
+        if details["browser_scanned_pages"]:
+            queue.browser_checked.add(work["id"])
         details["status"] = status
         report["works"].append(details)
     report["new_physical_sha_staged"] = len(session_sha)

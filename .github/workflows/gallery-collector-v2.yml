@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'apps/gallery-archive/collector_v2.py'
+      - 'apps/gallery-archive/collector_v2_pagination.py'
       - 'apps/gallery-archive/collector_v2_strategy.py'
       - 'apps/gallery-archive/test_collector_v2.py'
       - 'apps/gallery-archive/COLLECTOR-V2.md'
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - 'apps/gallery-archive/collector_v2.py'
+      - 'apps/gallery-archive/collector_v2_pagination.py'
       - 'apps/gallery-archive/collector_v2_strategy.py'
       - 'apps/gallery-archive/test_collector_v2.py'
       - '.github/workflows/gallery-collector-v2.yml'
@@ -32,7 +34,7 @@ jobs:
       - run: python -m pip install --quiet 'Pillow==11.3.0' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
       - name: Test source boundaries, SQLite queue, real photo SHA and retry
         run: |
-          python -m py_compile apps/gallery-archive/collector_v2.py apps/gallery-archive/collector_v2_strategy.py
+          python -m py_compile apps/gallery-archive/collector_v2.py apps/gallery-archive/collector_v2_strategy.py apps/gallery-archive/collector_v2_pagination.py
           python apps/gallery-archive/test_collector_v2.py
           python apps/gallery-archive/collector_v2.py --model mimmi --stage "$RUNNER_TEMP/v2-test" --max-works 12 --plan-only
           python apps/gallery-archive/collector_v2.py --model yui --stage "$RUNNER_TEMP/v2-test" --max-works 12 --plan-only
@@ -61,6 +63,11 @@ jobs:
         with:
           node-version: '24'
       - run: python -m pip install --quiet 'Pillow==11.3.0' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
+      - name: Install browser for publicly visible numbered gallery pages
+        if: matrix.model == 'mimmi'
+        run: |
+          python -m pip install --quiet 'playwright==1.56.0'
+          python -m playwright install --with-deps chromium
       - name: Independently discover same-work pages using saved model/title aliases
         shell: bash
         run: |

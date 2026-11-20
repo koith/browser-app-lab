@@ -12,6 +12,7 @@ from PIL import Image
 from collector_v2 import (DownloadFailure, QueueDB, collect, inspect_photo,
                           load_inventory, page_candidates, public_https)
 from collector_v2_strategy import source_evidence_pages, best_observed_variants
+from collector_v2_pagination import observed_numeric_page_buttons
 
 
 class FakeHTTP:
@@ -323,6 +324,28 @@ class CollectorV2Test(unittest.TestCase):
         self.assertEqual(works[0]["missing_lower_bound_by_sha"], 0)
         self.assertEqual(works[0]["public_saved_sha_count"], 1)
         self.assertEqual(works[0]["public_storage_gap"], 1)
+
+    def test_browser_pager_only_uses_visible_numeric_buttons(self):
+        html = (b'<main><div class="pagination">'
+                b'<button>Prev</button><button>1</button>'
+                b'<button>2</button><button>3</button>'
+                b'<button disabled>4</button><button>Next</button>'
+                b'<button>9999</button><button>123x</button>'
+                b'</div></main>')
+        self.assertEqual(observed_numeric_page_buttons(html), [1, 2, 3])
+
+    def test_browser_pager_is_forced_once_then_checkpointed(self):
+        path = self.root / "browser-checked.json"
+        work = {"id": self.work, "browser_pagination_candidate": True}
+        queue = QueueDB(":memory:", now=600000.0)
+        queue.finish(self.work, "unchanged", 0)
+        self.assertEqual(queue.eligible([work], 1), [work])
+        queue.browser_checked.add(self.work)
+        queue.checkpoint(path)
+        queue.db.close()
+        restored = QueueDB(":memory:", path, now=600100.0)
+        self.assertEqual(restored.eligible([work], 1), [])
+        restored.db.close()
 
     def test_bad_photo_does_not_become_sha(self):
         with self.assertRaises(DownloadFailure):
