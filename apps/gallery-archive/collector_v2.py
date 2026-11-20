@@ -163,7 +163,10 @@ def load_inventory(root, model):
     # Missing edition cuts first; next, works with a short public gallery
     # even when the private owner vault lists many SHA. Do not conflate them.
     works.sort(key=lambda a: (
-        0 if a["unresolved_priority"] else 1,
+        # A user-supplied exact-edition source is immediately actionable.
+        # Check it before repeating old blocked pages with no new links.
+        0 if a["newly_added_public_sources"] else
+        1 if a["unresolved_priority"] else 2,
         0 if a["gap"] is not None and a["gap"] > 0 else
         1 if a["public_storage_gap"] is not None and a["public_storage_gap"] > 0 else
         2 if a["gap"] is None else 3,
