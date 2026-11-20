@@ -90,6 +90,12 @@ def load_inventory(root, model):
     stored = json.loads((base / "stored-albums.json").read_text(encoding="utf-8"))
     known = set()
     counts = defaultdict(set)
+    public_saved = defaultdict(set)
+    for book in stored.get("albums", []):
+        for item in book.get("images", []):
+            sha = item.get("sha256")
+            if isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{64}", sha):
+                public_saved[book["id"]].add(sha)
     for book in owner.get("albums", []) + stored.get("albums", []):
         for item in book.get("images", []):
             sha = item.get("sha256")
@@ -130,6 +136,11 @@ def load_inventory(root, model):
                       "priority": (PRIORITY[model].index(aid)
                                    if aid in PRIORITY[model] else 100 + int(a.get("priority") or 0)),
                       "observed_sha_count": len(counts[aid]), "expected": expected,
+                      "public_saved_sha_count": len(public_saved[aid]),
+                      # Local Pages gap is NOT proof that the publisher's cuts
+                      # are missing from the private owner vault.
+                      "public_storage_gap": max(0, expected - len(public_saved[aid]))
+                          if expected else None,
                       "target_basis": "publisher" if publisher_count else (
                           "public_source_claim" if source_count else "unknown"),
                       "unresolved_priority": aid in pending,
@@ -139,13 +150,14 @@ def load_inventory(root, model):
                       "gap": max(0, expected - len(counts[aid])) if expected else None,
                       "missing_lower_bound_by_sha": max(0, expected - len(counts[aid]))
                           if expected else None})
-    # Missing published cuts first, then unknown totals, finally albums whose
-    # recorded SHA count already reaches their source-claimed public count.
+    # Missing edition cuts first; next, works with a short public gallery
+    # even when the private owner vault lists many SHA. Do not conflate them.
     works.sort(key=lambda a: (
         0 if a["unresolved_priority"] else 1,
         0 if a["gap"] is not None and a["gap"] > 0 else
-        1 if a["gap"] is None else 2,
-        a["priority"], -(a["gap"] or 0), a["id"]))
+        1 if a["public_storage_gap"] is not None and a["public_storage_gap"] > 0 else
+        2 if a["gap"] is None else 3,
+        a["priority"], -(a["public_storage_gap"] or 0), a["id"]))
     return works, known
 
 
@@ -399,6 +411,8 @@ def collect(root, model, stage, state_file, *, max_works=12, max_photos=48,
         details = {"id": work["id"], "pages": 0, "media_candidates": 0,
                    "files_staged": 0, "known_sha": 0, "same_frame_filtered": 0,
                    "errors": {}, "target_count": work["expected"],
+                   "public_saved_sha_count": work["public_saved_sha_count"],
+                   "public_storage_gap_not_edition_missing_proof": work["public_storage_gap"],
                    "minimum_missing_by_sha": work["missing_lower_bound_by_sha"],
                    "target_basis": work["target_basis"],
                    "discovered_sources": len(work["discovered_urls"])}
