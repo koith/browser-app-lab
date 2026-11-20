@@ -33,7 +33,8 @@
  background-image:url('./original/IMG/bgtile.png')!important;
  background-size:725px 485px!important;
  background-repeat:repeat!important;
- background-position:center center!important;
+ background-position:center calc(50% + var(--leaf-terrain-offset-y, 0px))!important;
+ transition:transform .20s ease-out,background-position .20s ease-out!important;
 }
 /* The original terrain already has rocks, cliffs, shading and cast shadows;
    overlaying a revival grid, center badge or synthetic blue wash breaks it. */

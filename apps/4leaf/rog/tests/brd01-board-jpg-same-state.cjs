@@ -83,6 +83,35 @@ assert.ok(consistent>=451&&exceptions.length<=1,'DMP routes are an odd-q hex gri
    for(const r of rows)assert.ok(Math.abs(r.errorPx[0])<=1&&Math.abs(r.errorPx[1])<=1,
     capture+' cell '+r.cell+' matches the original centre: '+JSON.stringify(r));
   }
+  // The archival screenshots show the terrain moving 17px for a 35px
+  // camera movement. Measure independently from the actual transformed DOM,
+  // not from the runtime ratio constant. The native repeat bitmap stays 1:1.
+  const terrainSample=()=>page.evaluate(()=>{
+   const w=document.querySelector('#board-world'),c=getComputedStyle(w);
+   const matrix=new DOMMatrixReadOnly(c.transform);
+   const offset=parseFloat(w.style.getPropertyValue('--leaf-terrain-offset-y'));
+   return {tile:matrix.m42,offset,image:c.backgroundImage,size:c.backgroundSize,
+    position:c.backgroundPosition};
+  });
+  const before=await terrainSample();
+  // Pan toward the interior if the initial route is clamped at one edge.
+  await page.evaluate(()=>window.__LEAF_CAMERA__.panBy(0,35));
+  await page.waitForTimeout(400);
+  let after=await terrainSample();
+  if(Math.abs(after.tile-before.tile)<20){
+   await page.evaluate(()=>window.__LEAF_CAMERA__.panBy(0,-70));
+   await page.waitForTimeout(400);after=await terrainSample();
+  }
+  const dy=after.tile-before.tile;
+  assert.ok(Math.abs(dy)>=20,'the live board actually moved vertically');
+  assert.ok(before.image.includes('original/IMG/bgtile.png'));
+  assert.equal(before.size,'725px 485px');
+  assert.notEqual(before.position,after.position,'computed source texture position actually changed');
+  assert.ok(Math.abs((dy+after.offset-before.offset)-dy*17/35)<0.1,
+    'original vertical terrain displacement 17/35 of tile displacement');
+  report.terrain={tileDy:dy,textureDy:dy+after.offset-before.offset,
+   scope:'one archived vertical sample; absolute phase/horizontal NOT verified'};
+  await page.evaluate(()=>window.__LEAF_CAMERA__.viewport(1,0,0));
   // 4. painter order and duplicates
   let overlaps=0,inverted=0,dupes=0;
   for(let i=0;i<live.tiles.length;i++)for(let j=i+1;j<live.tiles.length;j++){

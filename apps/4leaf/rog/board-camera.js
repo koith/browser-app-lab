@@ -19,6 +19,9 @@
  // odd columns 40 px lower (board.jpg/battle.jpg, map 0172). This replaces
  // the 150x100 non-overlapping WEB spacing described above.
  const HEX_PROJECTION={pitchX:105,pitchY:80,oddColumnDrop:40};
+ // board.jpg -> battle.jpg: +35px tile motion, +17px native terrain motion.
+ // This is a single archived vertical sample, NOT a recovered MVE camera.
+ const TERRAIN_VERTICAL_RATIO=17/35;
  const PROJECTED_PITCH={x:HEX_PROJECTION.pitchX,y:HEX_PROJECTION.pitchY,oddColumnDrop:HEX_PROJECTION.oddColumnDrop};
  const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null,visible:null,routeBounds:null};
  const $=id=>document.getElementById(id);
@@ -145,6 +148,15 @@
      };
      world.style.transform='translate3d('+x.toFixed(2)+'px,'+y.toFixed(2)+'px,0) scale('+scale+')';
      world.style.setProperty('--leaf-camera-scale',scale);
+     // Move the native repeating terrain independently of the tile plane.
+     // Its screen-space translation is y + scale*offset; choosing this
+     // inverse offset ensures a 35px camera shift moves the texture by 17px.
+     // Keep the preexisting center phase at the centered world position.
+     // Horizontal parallax and zoom behavior are not established by the archive.
+     const centeredY=height*.52-SIZE.height*scale/2;
+     const terrainOffset=(TERRAIN_VERTICAL_RATIO-1)*(y-centeredY)/scale;
+     world.style.setProperty('--leaf-terrain-offset-y',terrainOffset.toFixed(4)+'px');
+     world.dataset.terrainVerticalEvidence='board.jpg/battle.jpg:17/35-inferred';
      if($('board-zoom-reset'))$('board-zoom-reset').title='원본 게임 카메라 · '+Math.round(scale*100)+'% · 현재 체스맨 중심';
      const tileLayer=$('board-nodes');
      if(tileLayer){
