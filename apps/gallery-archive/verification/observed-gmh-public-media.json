@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_domain": "g-mh.com",
   "cdn_domain": "img.g-mh.com",
-  "observed_at": "2026-11-20T04:09:00Z",
+  "observed_at": "2026-11-20",
   "no_synthetic_urls": true,
   "source_page_robots_note": "g-mh.com disallows automated origin crawling; this frozen manifest contains URLs explicitly observed in user-requested review; runtime accesses only CDN images if allowed.",
   "works": [
@@ -612,6 +612,192 @@
         "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_038.webp",
         "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_039.webp",
         "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_040.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "heart-steal78",
+      "edition_identity": "SWTB Vol.30 Heart Steal",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol30-heart-steal/page/5/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.30 Heart Steal",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_041.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_042.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_043.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_044.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_045.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_046.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_047.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_048.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_049.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_050.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "heart-steal78",
+      "edition_identity": "SWTB Vol.30 Heart Steal",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol30-heart-steal/page/6/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.30 Heart Steal",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_051.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_052.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_053.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_054.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_055.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_056.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_057.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_058.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_059.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol30-heart-steal/g-mhcom_060.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "sweet-dream110",
+      "edition_identity": "SWTB Vol.36 Sweet Dream Part1",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/page/5/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.36 Sweet Dream Part1",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_041.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_042.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_043.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_044.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_045.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_046.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_047.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_048.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_049.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_050.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "sweet-dream110",
+      "edition_identity": "SWTB Vol.36 Sweet Dream Part1",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/page/6/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.36 Sweet Dream Part1",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_051.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_052.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_053.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_054.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_055.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol36-sweet-dream-part1/g-mhcom_056.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "ramen125",
+      "edition_identity": "SWTB Vol.39 RAMEN Part1",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol39-ramen-part1/page/5/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.39 RAMEN Part1",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_041.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_042.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_043.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_044.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_045.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_046.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_047.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_048.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_049.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_050.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "ramen125",
+      "edition_identity": "SWTB Vol.39 RAMEN Part1",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol39-ramen-part1/page/6/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.39 RAMEN Part1",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_051.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_052.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_053.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_054.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_055.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_056.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_057.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_058.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_059.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part1/g-mhcom_060.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "thru-thru117",
+      "edition_identity": "SWTB Vol.49 Thru Thru Part1",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/page/5/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.49 Thru Thru Part1",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_041.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_042.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_043.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_044.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_045.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_046.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_047.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_048.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_049.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_050.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "thru-thru117",
+      "edition_identity": "SWTB Vol.49 Thru Thru Part1",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/page/6/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.49 Thru Thru Part1",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_051.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_052.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_053.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_054.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_055.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_056.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_057.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_058.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_059.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part1/g-mhcom_060.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "ramen125",
+      "edition_identity": "SWTB Vol.39 RAMEN Part2",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol39-ramen-part2/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.39 RAMEN Part2",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_001.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_002.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_003.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_004.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_005.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_006.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_007.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_008.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_009.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol39-ramen-part2/g-mhcom_010.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "thru-thru117",
+      "edition_identity": "SWTB Vol.49 Thru Thru Part2",
+      "source_page": "https://g-mh.com/gallery/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/",
+      "observed_heading": "SWEETBOX Yui 유이 – SWTB Vol.49 Thru Thru Part2",
+      "media_urls": [
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_001.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_002.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_003.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_004.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_005.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_006.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_007.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_008.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_009.webp",
+        "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_010.webp"
       ]
     }
   ],
