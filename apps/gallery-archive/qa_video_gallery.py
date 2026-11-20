@@ -30,10 +30,10 @@ def run(browser):
             page.locator("#stats span").first.wait_for(timeout=15000)
             title=page.title()
             assert "동영상" in title,(model,title)
-            assert page.locator(".card").count()==2,model
+            assert page.locator(".card").count()==(16 if model=="yui" else 3),model
             assert page.locator('nav a[aria-current="page"]').count()==1
             if model=="yui":
-                assert page.locator(".preview button").count()==2
+                assert page.locator(".preview button").count()==16
                 page.locator(".preview button").first.click()
                 assert page.locator("#modal").is_visible()
                 src=page.locator("#player iframe").get_attribute("src")
@@ -41,9 +41,19 @@ def run(browser):
                 page.locator("#close").click()
                 assert not page.locator("#modal").is_visible()
                 assert page.locator("#player iframe").count()==0
+                page.locator(".preview button").nth(2).click()
+                assert page.locator("#modal").is_visible()
+                assert "manpeace.org/data/video/202512/" in page.locator("#player video").get_attribute("src")
+                page.locator("#close").click()
+                assert page.locator("#player video").count()==0
             else:
-                assert page.locator(".preview button").count()==0
+                assert page.locator(".preview button").count()==1
                 assert "실제 파일 저장 0개" in page.locator("#stats").inner_text()
+                page.locator(".preview button").first.click()
+                assert page.locator("#modal").is_visible()
+                assert "www.instagram.com/reel/DF74hk7zBqf/embed/" in page.locator("#player iframe").get_attribute("src")
+                page.locator("#close").click()
+                assert page.locator("#player iframe").count()==0
             print("GALLERY_VIDEO_LOCAL_BROWSER_PASS",browser,model)
         ctx.close();driver.close()
 

@@ -42,28 +42,29 @@ const setText=(el,text)=>{el.textContent=text;return el};
 const localPath=value=>typeof value==='string'&&/^stored-videos\/[a-f0-9]{64}\.mp4$/.test(value);
 const youtubeId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{11}$/.test(value);
 const sourcePage=value=>{try{let u=new URL(value);return u.protocol==='https:'?u.href:null}catch{return null}};
-const playable=entry=>(entry.kind==='youtube'&&youtubeId(entry.youtube_id))||(entry.kind==='local_mp4'&&localPath(entry.path)&&/^[a-f0-9]{64}$/.test(entry.sha256||'')&&entry.path.endsWith(entry.sha256+'.mp4'));
+const publicMp4=value=>{try{const u=new URL(value);const pathname=decodeURIComponent(u.pathname);return u.protocol==='https:'&&u.hostname==='manpeace.org'&&/^\/data\/video\/\d{6}\/[^/]+\.mp4$/i.test(pathname)?u.href:null}catch{return null}};
+const playable=entry=>(entry.kind==='youtube'&&youtubeId(entry.youtube_id))||(entry.kind==='local_mp4'&&localPath(entry.path)&&/^[a-f0-9]{64}$/.test(entry.sha256||'')&&entry.path.endsWith(entry.sha256+'.mp4'))||(entry.kind==='remote_mp4'&&!!publicMp4(entry.media_url));
 function closePlayer(){document.getElementById('player').replaceChildren();modal.hidden=true;document.body.style.overflow=''}
 function openPlayer(entry){if(!playable(entry))return;
  const holder=document.getElementById('player');holder.replaceChildren();
  if(entry.kind==='youtube'){const iframe=document.createElement('iframe');iframe.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(entry.youtube_id)+'?playsinline=1&autoplay=1';iframe.title=entry.title;iframe.loading='lazy';iframe.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.allowFullscreen=true;holder.append(iframe);}
- else{const player=document.createElement('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=entry.path;holder.append(player);player.play().catch(()=>{});}
+ else{const player=document.createElement('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=entry.kind==='remote_mp4'?publicMp4(entry.media_url):entry.path;holder.append(player);player.addEventListener('error',()=>{if(!modal.hidden){const warning=document.createElement('p');warning.textContent='원본 서버에서 영상을 열지 못했습니다. 출처 링크에서 확인해 주세요.';warning.style.cssText='text-align:center;padding:12px;color:white';holder.append(warning)}},{once:true});player.play().catch(()=>{});}
  setText(document.getElementById('playing-title'),entry.title);const a=document.getElementById('player-source'),url=sourcePage(entry.source_url)||'#';a.href=url;a.hidden=url==='#';modal.hidden=false;document.body.style.overflow='hidden';document.getElementById('close').focus({preventScroll:true});
 }
 document.getElementById('close').addEventListener('click',closePlayer);
 modal.addEventListener('click',e=>{if(e.target===modal)closePlayer()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closePlayer()});
 function draw(entries){
- cards.replaceChildren();const ok=entries.filter(playable), saved=ok.filter(x=>x.kind==='local_mp4'), pending=entries.filter(x=>!playable(x));
+ cards.replaceChildren();const ok=entries.filter(playable), saved=ok.filter(x=>x.kind==='local_mp4'), remote=ok.filter(x=>x.kind==='remote_mp4'), pending=entries.filter(x=>!playable(x));
  const stats=document.getElementById('stats');stats.replaceChildren();
- for(const value of ['재생 가능 '+ok.length+'개','실제 파일 저장 '+saved.length+'개','원본 확인 필요 '+pending.length+'개'])stats.append(setText(document.createElement('span'),value));
+ for(const value of ['재생 링크 '+ok.length+'개','실제 파일 저장 '+saved.length+'개','외부 영상 재생 확인 필요 '+remote.length+'개','원본 확인 필요 '+pending.length+'개'])stats.append(setText(document.createElement('span'),value));
  if(!entries.length){cards.append(setText(document.createElement('p'),'등록된 영상이 없습니다.'));return}
  for(const entry of entries){const card=document.createElement('article');card.className='card';const preview=document.createElement('div');preview.className='preview';
  const can=playable(entry);if(can){if(entry.kind==='youtube'){const image=document.createElement('img');image.src='https://i.ytimg.com/vi/'+encodeURIComponent(entry.youtube_id)+'/hqdefault.jpg';image.loading='lazy';image.alt='';preview.append(image)}
  const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',entry.title+' 재생');const play=document.createElement('span');play.className='play';play.textContent='▶';b.append(play);b.addEventListener('click',()=>openPlayer(entry));preview.append(b)}
  else{const mark=document.createElement('span');mark.className='tag';mark.textContent='영상 파일 미확보';preview.append(mark)}
  const info=document.createElement('div');info.className='cardinfo';const h=document.createElement('h2');setText(h,entry.title);info.append(h);
- const tag=document.createElement('span');tag.className='tag';tag.textContent=entry.kind==='local_mp4'?'원본 파일 저장':can?'외부 공개 영상 재생':'영상 존재 정보만 확인';info.append(tag);
+ const tag=document.createElement('span');tag.className='tag';tag.textContent=entry.kind==='local_mp4'?'원본 파일 저장':entry.kind==='remote_mp4'?'외부 MP4 · 재생 미검증':can?'외부 공개 영상 재생':'영상 존재 정보만 확인';info.append(tag);
  if(entry.note){const p=document.createElement('p');setText(p,entry.note);info.append(p)}
  const source=sourcePage(entry.source_url);if(source){const a=document.createElement('a');a.className='source';a.href=source;a.target='_blank';a.rel='noopener noreferrer';a.textContent='출처 보기 ↗';info.append(a)}
  card.append(preview,info);cards.append(card);
