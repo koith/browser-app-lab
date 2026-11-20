@@ -17,6 +17,7 @@ import re
 import subprocess
 import tempfile
 import zipfile
+from urllib.request import Request as UrlRequest, urlopen
 
 from demand_archive import CloudArchive, canonical_json, sha256, MAX_CATALOG
 from target_account_archive import run_one, archive_key, read_bootstrap_request, Transport, profile_input
@@ -303,6 +304,7 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     root=LayeredBundleCloud(store,prior=prior)
     result=None
     interrupted=None
+    interrupted_reason=None
     captured=io.StringIO()
     with redirect_stdout(captured):
         try:
@@ -314,6 +316,18 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
                                    archive_key(profile)+"/",prior=prior))
         except (RuntimeError,ValueError,TypeError,KeyError) as error:
             interrupted=type(error).__name__
+            # Only static, reviewed reason categories are ever printed.
+            # Raw provider messages and account identifiers remain private.
+            message=str(error)
+            interrupted_reason=(
+                "STAGING_LIMIT" if message==
+                    "public source exceeds bounded ZIP staging capacity"
+                else "IMMUTABLE_CONFLICT" if message==
+                    "historical archive path collision"
+                else "PUBLIC_SOURCE_UNAVAILABLE" if
+                    isinstance(error,RuntimeError) and
+                    message.startswith("public source ")
+                else "OTHER")
 
     # The old code discarded the real cause, then called ANY exception
     # "Required public profile snapshot not captured". The archive worker's
@@ -372,6 +386,7 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
     if interrupted is not None or result.get("status")=="SOURCE_PARTIAL":
         print("TARGET_ACCOUNT_CAPTURE_PARTIAL "+
               json.dumps({"error_class":interrupted,
+                          "reason":interrupted_reason,
                           "profile_verified":result["profile"].get("profile_verified",False),
                           "posts_staged":sum(key.endswith("/post.json")
                                               for key in store.objects),
@@ -402,6 +417,7 @@ def execute_bundle(*,selected=None,api=None,run_id=None,cloud_check=True,
             "remote_sha256_verified":True,
             "remote_zip_bytes":remote["bytes"],
             "source_state":manifest["capture_state"],
+            "source_interruption":interrupted_reason,
             "source_partial":(interrupted is not None or
                 result is None or result.get("status")!="COMPLETE_CURRENT_PUBLIC_CURSOR"),
             "unresolved_media_records":(result or {}).get("media_pending_total",0),
@@ -466,10 +482,73 @@ def execute_scheduled():
                      sort_keys=True),flush=True)
     raise SourceUnavailable("all registered public accounts unavailable; historical ZIPs retained")
 
+MAX_AUTOMATED_CONTINUATION_PASSES=8
+
+
+def dispatch_verified_followup(result, *, send=urlopen):
+    """Start another immutable account delta ONLY for a proved staging limit.
+
+    A job that uploaded and re-read an encrypted ZIP containing new posts can
+    continue from that exact preserved ancestry. Failed/empty/unverified jobs,
+    transient provider denials and AppView-only partiality MUST NOT auto-loop.
+    Never print selected account identifiers, raw source content, or tokens.
+    """
+    if (not isinstance(result,dict) or
+        result.get("remote_sha256_verified") is not True or
+        result.get("source_partial") is not True or
+        result.get("source_interruption")!="STAGING_LIMIT" or
+        type(result.get("public_posts_in_bundle")) is not int or
+        result["public_posts_in_bundle"]<1):
+        return "NOT_ELIGIBLE"
+    if (os.getenv("GITHUB_REPOSITORY")!="koith/browser-app-lab" or
+        os.getenv("GITHUB_REF")!="refs/heads/main" or
+        os.getenv("GITHUB_EVENT_NAME")!="workflow_dispatch"):
+        return "NOT_TRUSTED_CONTEXT"
+    raw=os.getenv("TARGET_RESUME_PASS","0") or "0"
+    if not re.fullmatch(r"[0-9]{1,2}",raw):
+        raise RuntimeError("Invalid bounded account continuation count")
+    depth=int(raw)
+    if depth>MAX_AUTOMATED_CONTINUATION_PASSES:
+        raise RuntimeError("Untrusted continuation count")
+    if depth==MAX_AUTOMATED_CONTINUATION_PASSES:
+        print("TARGET_ACCOUNT_RESUME_LIMIT_REACHED",depth,flush=True)
+        return "LIMIT_REACHED"
+    platform=os.getenv("TARGET_PLATFORM","")
+    account=os.getenv("TARGET_ACCOUNT","")
+    profile_input(platform,account)
+    token=os.getenv("GITHUB_TOKEN","")
+    if len(token)<20:
+        raise RuntimeError("Trusted account continuation token unavailable")
+    payload=canonical_json({"ref":"main","return_run_details":True,
+        "inputs":{"platform":platform,"account":account,
+                  "max_pages":"all","resume_pass":str(depth+1)}})
+    req=UrlRequest(
+        "https://api.github.com/repos/koith/browser-app-lab/actions/workflows/"
+        "intersection-target-account-bundle.yml/dispatches",
+        data=payload,method="POST",headers={
+          "Authorization":"Bearer "+token,
+          "Accept":"application/vnd.github+json",
+          "Content-Type":"application/json",
+          "X-GitHub-Api-Version":"2026-03-10",
+          "User-Agent":"intersection-verified-account-continuation"})
+    with send(req,timeout=30) as response:
+        if response.status!=200:
+            raise RuntimeError("Verified account continuation was not dispatched")
+        body=json.loads(response.read(10000))
+    new_run=body.get("workflow_run_id") if isinstance(body,dict) else None
+    if type(new_run) is not int or new_run<=0:
+        raise RuntimeError("Account continuation lacks trackable execution")
+    print("TARGET_ACCOUNT_VERIFIED_CONTINUATION_DISPATCHED "+
+          json.dumps({"pass":depth+1,"workflow_run_id":new_run},
+                     sort_keys=True),flush=True)
+    return "DISPATCHED"
+
+
 if __name__=="__main__":
     if "--scheduled" in os.sys.argv[1:]:
         if os.sys.argv[1:]!=["--scheduled"]:
             raise ValueError("invalid scheduled account options")
         execute_scheduled()
     else:
-        execute_bundle()
+        outcome=execute_bundle()
+        dispatch_verified_followup(outcome)

@@ -24,6 +24,11 @@ on:
         description: "Public handle/profile URL; no private login needed"
         required: false
         type: string
+      resume_pass:
+        description: "Trusted worker continuation pass, bounded and append-only"
+        required: false
+        default: "0"
+        type: string
       max_pages:
         description: "Public history pages checked (1-4)"
         required: false
@@ -90,10 +95,12 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      actions: write
     env:
       TARGET_PLATFORM: ${{ inputs.platform }}
       TARGET_ACCOUNT: ${{ inputs.account }}
       TARGET_MAX_PAGES: ${{ inputs.max_pages }}
+      TARGET_RESUME_PASS: ${{ inputs.resume_pass }}
       DEMAND_ACCOUNT_TEMP_STORAGE: github_release
       DEMAND_REQUIRE_PROFILE_SNAPSHOT: "1"
       GITHUB_TOKEN: ${{ github.token }}
