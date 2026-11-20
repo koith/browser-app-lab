@@ -29,6 +29,8 @@ def test_abort_after_post_staging_keeps_originals_as_partial(monkeypatch):
         root.write_immutable("metadata/target-accounts/" + platform +
                              "-"+archive_key(profile)+".json",b'{"schema":1}')
         archive=archive_factory(root,profile)
+        archive.write_immutable("profile/snapshots/snap-00000000000000000001-aaaaaaaaaaaaaaaa.json",
+                                b'{"verified":true}')
         archive.write_immutable("posts/original001/post.json",b'{"verified":true}')
         print("TARGET_ACCOUNT_ARCHIVE_AGGREGATE "+
               json.dumps({"profile_verified":True,"posts_verified":1,
