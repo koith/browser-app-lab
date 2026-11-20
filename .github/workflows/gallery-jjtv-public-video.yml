@@ -1,0 +1,93 @@
+name: JJTV Public Video Archive — Yui Mimmi
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/jjtv_public_video_archive.py'
+      - 'apps/gallery-archive/test_jjtv_public_video_archive.py'
+      - '.github/workflows/gallery-jjtv-public-video.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/jjtv_public_video_archive.py'
+      - '.github/workflows/gallery-jjtv-public-video.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: jjtv-public-video-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2'
+      - name: Test public URL safety, model identity, embedded MP4 extraction and actual-byte gate
+        run: |
+          python -m py_compile apps/gallery-archive/jjtv_public_video_archive.py
+          python apps/gallery-archive/test_jjtv_public_video_archive.py
+  real-public-video:
+    needs: offline
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        model: [yui, mimmi]
+    env:
+      MODEL: ${{ matrix.model }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0, persist-credentials: true}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2'
+      - name: Search public JJTV model pages and archive only verified direct MP4 bytes
+        run: |
+          mkdir -p /tmp/jjtv-video-audit
+          python apps/gallery-archive/jjtv_public_video_archive.py \
+            --model "$MODEL" --archive --max-pages 16 --max-posts 80 \
+            --report "/tmp/jjtv-video-audit/$MODEL.json"
+      - name: Commit SHA-verified videos only if physical bytes were saved
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "apps/$MODEL-gallery/videos.json"
+          if [[ -d "apps/$MODEL-gallery/stored-videos" ]]; then
+            git add "apps/$MODEL-gallery/stored-videos"
+          fi
+          if git diff --cached --quiet; then
+            echo "JJTV_REAL_VIDEO_NEW_FILES=0 model=$MODEL"
+            exit 0
+          fi
+          git commit -m "feat(gallery): archive public JJTV $MODEL verified MP4 bytes"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "::error::JJTV_ARCHIVE_REBASE_CONFLICT"
+              exit 1
+            fi
+            if git push origin HEAD:refs/heads/main; then
+              echo "JJTV_REAL_VIDEO_PERSISTED model=$MODEL sha=$(git rev-parse HEAD)"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::JJTV_VIDEO_COMMIT_PUSH_FAILED"
+          exit 1
+      - name: Preserve audit report, not user media, for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jjtv-video-audit-${{ matrix.model }}
+          path: /tmp/jjtv-video-audit/*.json
+          retention-days: 7
+          if-no-files-found: ignore

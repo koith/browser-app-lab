@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "model": "yui",
+  "updated": "2026-11-20",
+  "videos": [
+    {
+      "id": "yui-maid-official-2025",
+      "title": "[4K Lookbook] 큐티섹시 메이드복",
+      "kind": "youtube",
+      "youtube_id": "eOS8yoH1178",
+      "source_url": "https://www.youtube.com/watch?v=eOS8yoH1178",
+      "found_at": "https://jjtv.kr/15/154066",
+      "note": "심유이 공식 공개 영상. JJTV 게시물과 제목이 일치하지만 JJTV 내부 삽입 주소는 확인되지 않았습니다. 영상 파일 자체는 저장되지 않았습니다."
+    },
+    {
+      "id": "yui-cardigan-lookbook",
+      "title": "[Lookbook] 테니스스커트와 가디건",
+      "kind": "youtube",
+      "youtube_id": "Lnte98EQgbc",
+      "source_url": "https://www.youtube.com/watch?v=Lnte98EQgbc",
+      "found_at": "https://jjtv.kr/bbs/meili_search.php?page=3&stx=%EA%B0%80%EB%94%94%EA%B1%B4",
+      "note": "JJTV 공개 검색 색인에서 영상 주소 확인. 외부 재생만 가능하며 영상 파일은 별도 보관되지 않았습니다."
+    }
+  ]
+}

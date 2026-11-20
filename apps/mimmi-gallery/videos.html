@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<title>MIMMI — 동영상</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",system-ui,sans-serif;background:#101114;color:#f5f5f6;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button{cursor:pointer;font:inherit}
+.shell{max-width:1400px;margin:auto;padding:0 clamp(14px,3.2vw,48px)}
+.topbar{height:76px;display:flex;align-items:center;gap:22px;border-bottom:1px solid #2a2b2e}
+.logo{font-size:23px;font-weight:850;letter-spacing:.19em;white-space:nowrap}.logo span{font-size:10px;font-weight:500;letter-spacing:.13em;color:#96979c;margin-left:7px}
+nav{display:flex;gap:8px;margin-left:auto}nav a{padding:8px 12px;border:1px solid #46464d;border-radius:22px;font-size:13px}nav a[aria-current=page]{border-color:#e0acc0;color:#ffd0e0}
+main{padding-top:25px}.lead{font-size:12px;color:#acaeb8;margin:0 0 8px}.head{display:flex;justify-content:space-between;align-items:end;gap:10px}.head h1{font-size:clamp(25px,4vw,35px);margin:0 0 12px}.head p{color:#aaa9b0;margin:0 0 18px;font-size:13px;line-height:1.6}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px}.stats span{padding:7px 10px;background:#25262a;border-radius:10px;font-size:12px;color:#dad9df}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;padding-bottom:55px}
+.card{border:1px solid #303139;background:#1d1e22;border-radius:14px;overflow:hidden;min-width:0}
+.preview{aspect-ratio:16/9;position:relative;background:linear-gradient(135deg,#34313b,#121318);display:flex;align-items:center;justify-content:center}
+.preview img{position:absolute;width:100%;height:100%;object-fit:cover}
+.play{position:relative;width:60px;height:60px;border-radius:50%;border:1px solid #ffffffaa;background:#15151acc;color:white;font-size:26px;display:flex;align-items:center;justify-content:center;z-index:1}
+.preview button{position:absolute;inset:0;width:100%;border:0;background:transparent;display:flex;align-items:center;justify-content:center}.preview button:focus-visible{outline:3px solid #fff;outline-offset:-4px}
+.cardinfo{padding:14px}.cardinfo h2{font-size:15px;line-height:1.4;margin:0 0 10px;word-break:keep-all}.cardinfo p{margin:4px 0 9px;color:#b0afb8;font-size:12px;line-height:1.6}
+.tag{font-size:11px;border:1px solid #4d4c57;border-radius:20px;padding:3px 8px;display:inline-block;color:#eee0ea}
+.source{display:inline-flex;font-size:12px;text-decoration:underline;text-underline-offset:3px;color:#cdb9e7;margin-top:8px}
+.empty{padding:36px 0;color:#a9a9b2}
+#modal[hidden]{display:none}#modal{position:fixed;inset:0;background:#000e;z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.dialog{width:min(100%,1040px)}.dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.dialog-head strong{font-size:14px}.close{background:#292a2e;color:white;border:1px solid #55555b;border-radius:7px;padding:7px 15px}.player{aspect-ratio:16/9;background:#050505;width:100%;border-radius:8px;overflow:hidden}.player iframe,.player video{display:block;border:0;width:100%;height:100%}.dialog-foot{display:flex;gap:14px;align-items:center;justify-content:space-between;padding-top:12px;font-size:12px;color:#bab8bf}
+@media(max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.topbar{gap:10px}.logo{font-size:18px}nav a{padding:7px 9px;font-size:12px}.cards{grid-template-columns:1fr;gap:13px}.dialog-foot{flex-wrap:wrap}.head p{font-size:12px}}
+</style>
+</head>
+<body data-model="mimmi">
+<header class="topbar shell"><a class="logo" href="./">MIMMI<span>GALLERY</span></a><nav aria-label="갤러리 이동"><a href="./">사진</a><a href="videos.html" aria-current="page">동영상</a><a href="../yui-gallery/">심유이</a></nav></header>
+<main class="shell"><p class="lead">MIMMI GALLERY / VIDEOS</p>
+<div class="head"><div><h1>동영상</h1><p>공개 원본 영상을 연결해 재생합니다. 원본 파일이 저장된 영상과 외부 재생 영상은 구분됩니다.</p></div></div>
+<div id="stats" class="stats" aria-live="polite"></div><section id="cards" class="cards" aria-label="동영상 목록"><p class="empty">영상 목록을 불러오는 중…</p></section></main>
+<div id="modal" role="dialog" aria-modal="true" aria-label="동영상 재생" hidden><div class="dialog"><div class="dialog-head"><strong id="playing-title"></strong><button class="close" id="close" type="button">닫기 ✕</button></div><div class="player" id="player"></div><div class="dialog-foot"><span>닫으면 영상 재생이 중지됩니다.</span><a class="source" id="player-source" href="#" target="_blank" rel="noopener noreferrer">원본 출처 열기 ↗</a></div></div></div>
+<script>
+'use strict';
+const model=document.body.dataset.model, cards=document.getElementById('cards'), modal=document.getElementById('modal');
+const setText=(el,text)=>{el.textContent=text;return el};
+const localPath=value=>typeof value==='string'&&/^stored-videos\/[a-f0-9]{64}\.mp4$/.test(value);
+const youtubeId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{11}$/.test(value);
+const sourcePage=value=>{try{let u=new URL(value);return u.protocol==='https:'?u.href:null}catch{return null}};
+const playable=entry=>(entry.kind==='youtube'&&youtubeId(entry.youtube_id))||(entry.kind==='local_mp4'&&localPath(entry.path)&&/^[a-f0-9]{64}$/.test(entry.sha256||'')&&entry.path.endsWith(entry.sha256+'.mp4'));
+function closePlayer(){document.getElementById('player').replaceChildren();modal.hidden=true;document.body.style.overflow=''}
+function openPlayer(entry){if(!playable(entry))return;
+ const holder=document.getElementById('player');holder.replaceChildren();
+ if(entry.kind==='youtube'){const iframe=document.createElement('iframe');iframe.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(entry.youtube_id)+'?playsinline=1&autoplay=1';iframe.title=entry.title;iframe.loading='lazy';iframe.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.allowFullscreen=true;holder.append(iframe);}
+ else{const player=document.createElement('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=entry.path;holder.append(player);player.play().catch(()=>{});}
+ setText(document.getElementById('playing-title'),entry.title);const a=document.getElementById('player-source'),url=sourcePage(entry.source_url)||'#';a.href=url;a.hidden=url==='#';modal.hidden=false;document.body.style.overflow='hidden';document.getElementById('close').focus({preventScroll:true});
+}
+document.getElementById('close').addEventListener('click',closePlayer);
+modal.addEventListener('click',e=>{if(e.target===modal)closePlayer()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closePlayer()});
+function draw(entries){
+ cards.replaceChildren();const ok=entries.filter(playable), saved=ok.filter(x=>x.kind==='local_mp4'), pending=entries.filter(x=>!playable(x));
+ const stats=document.getElementById('stats');stats.replaceChildren();
+ for(const value of ['재생 가능 '+ok.length+'개','실제 파일 저장 '+saved.length+'개','원본 확인 필요 '+pending.length+'개'])stats.append(setText(document.createElement('span'),value));
+ if(!entries.length){cards.append(setText(document.createElement('p'),'등록된 영상이 없습니다.'));return}
+ for(const entry of entries){const card=document.createElement('article');card.className='card';const preview=document.createElement('div');preview.className='preview';
+ const can=playable(entry);if(can){if(entry.kind==='youtube'){const image=document.createElement('img');image.src='https://i.ytimg.com/vi/'+encodeURIComponent(entry.youtube_id)+'/hqdefault.jpg';image.loading='lazy';image.alt='';preview.append(image)}
+ const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',entry.title+' 재생');const play=document.createElement('span');play.className='play';play.textContent='▶';b.append(play);b.addEventListener('click',()=>openPlayer(entry));preview.append(b)}
+ else{const mark=document.createElement('span');mark.className='tag';mark.textContent='영상 파일 미확보';preview.append(mark)}
+ const info=document.createElement('div');info.className='cardinfo';const h=document.createElement('h2');setText(h,entry.title);info.append(h);
+ const tag=document.createElement('span');tag.className='tag';tag.textContent=entry.kind==='local_mp4'?'원본 파일 저장':can?'외부 공개 영상 재생':'영상 존재 정보만 확인';info.append(tag);
+ if(entry.note){const p=document.createElement('p');setText(p,entry.note);info.append(p)}
+ const source=sourcePage(entry.source_url);if(source){const a=document.createElement('a');a.className='source';a.href=source;a.target='_blank';a.rel='noopener noreferrer';a.textContent='출처 보기 ↗';info.append(a)}
+ card.append(preview,info);cards.append(card);
+ }
+}
+fetch('videos.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()}).then(d=>{if(d.schema_version!==1||d.model!==model||!Array.isArray(d.videos))throw Error('잘못된 영상 목록');draw(d.videos)}).catch(e=>{cards.replaceChildren(setText(document.createElement('p'),'영상 목록을 불러오지 못했습니다: '+e.message))});
+</script></body></html>
