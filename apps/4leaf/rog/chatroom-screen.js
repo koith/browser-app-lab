@@ -166,17 +166,26 @@
   // Central rooms: the first server snapshot of this room is authoritative
   // (local self-only rosters before it are not). Offline/BroadcastChannel
   // rooms have no snapshot, so they settle after GRACE.
+  if(opts.central)return; // only an authoritative snapshot can announce online membership changes
   if(!settled){
-   if(opts.central?serverSeen:now-presenceSince>GRACE){settled=true;known=next;return}
+   if(now-presenceSince>GRACE){settled=true;known=next;return}
    known=next;return;
   }
   for(const [id,nick] of next)if(!known.has(id))append(noticeLine(nick+' 님이 들어왔습니다.'));
   for(const [id,nick] of known)if(!next.has(id))append(noticeLine(nick+' 님이 나갔습니다.'));
   known=next;
  }
- function serverRoster(roomId){
-  if(roomId!==presenceRoom){presenceRoom=roomId;presenceSince=Date.now();settled=false;known=new Map()}
-  serverSeen=true;
+ function beginRoom(roomId,people){
+  presenceRoom=roomId;presenceSince=Date.now();settled=true;serverSeen=true;
+  known=new Map(people.map(p=>[String(p.id),String(p.nick)]));
+ }
+ function serverRoster(roomId,people){
+  if(!Array.isArray(people))return;
+  if(roomId!==presenceRoom||!settled){beginRoom(roomId,people);return}
+  const next=new Map(people.map(p=>[String(p.id),String(p.nick)]));
+  for(const [id,nick] of next)if(!known.has(id))append(noticeLine(nick+' 님이 들어왔습니다.'));
+  for(const [id,nick] of known)if(!next.has(id))append(noticeLine(nick+' 님이 나갔습니다.'));
+  known=next;serverSeen=true;
  }
  function leftRoom(){presenceRoom=null;settled=false;serverSeen=false;known=new Map()}
 
@@ -231,7 +240,7 @@
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',watch);else watch();
 
- window.__LEAF_CHATROOM_SCREEN__={say,messageLine,noticeLine,occupants,serverRoster,leftRoom,placeAll,
+ window.__LEAF_CHATROOM_SCREEN__={say,messageLine,noticeLine,occupants,beginRoom,serverRoster,leftRoom,placeAll,
   getState:()=>({ready:Boolean(source),room:presenceRoom,known:[...known.values()],
    balloons:document.querySelectorAll('#social-avatar-layer .leaf-speech-layer>.social-speech').length})};
  // compatibility for callers/tests that read the former talkbox module

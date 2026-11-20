@@ -1015,7 +1015,7 @@
      try{
       if(!central.ready)await central.connect(nick());
       if(intent!==roomJoinIntent||state.view!=='directory')return;
-      await central.join(id,password);
+      await central.join(id,password,nick());
       if(intent!==roomJoinIntent||state.view!=='directory'){
        await central.leave();return;
       }
@@ -1083,7 +1083,14 @@
   const preferred=seats[hash%seats.length];
   const seatIndex=closestSeat(preferred.x,preferred.y,occupied,seats);
   state.position={...seats[seatIndex]};
-  render();return true;
+  render();
+  const initial=!offline&&central.joinedRoster;
+  if(initial&&initial.roomId===room.id){
+   window.__LEAF_CHATROOM_SCREEN__?.beginRoom(room.id,initial.peers.map(u=>({
+    id:u.id===central.id?tabId:u.id,nick:u.id===central.id?nick():u.nick
+   })));
+  }
+  return true;
  }
  /* Source ChatRoom/ringbtn.png is the *actual* historical 104x330
     horizontal-state atlas: 4 columns of 26px and 15 rows of 22px. The live
@@ -1473,7 +1480,7 @@
   const creation=window.__LEAF_ROOM_DOMAIN__.makeCreationSession({
    create:details=>central.create(details),
    newRequestId:()=>uuid(),
-   join:(id,password)=>central.join(id,password),
+   join:(id,password)=>central.join(id,password,nick()),
    leave:()=>central.leave(),
    connect:()=>central.connect(nick()),
    isReady:()=>central.ready,
@@ -1752,7 +1759,7 @@
       acceptPacket({v:1,kind:'chat',id:entry.id,scope:'room:'+event.roomId,
        sender:entry.sender,user:entry.user,text:entry.text,time:entry.time},'central');
      }
-     window.__LEAF_CHATROOM_SCREEN__?.serverRoster?.(state.roomId);
+     window.__LEAF_CHATROOM_SCREEN__?.serverRoster?.(state.roomId,onlinePeers(state.scope));
      renderOccupants();
     }
     updateCounts();

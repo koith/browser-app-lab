@@ -308,8 +308,14 @@ function makeServer(options={}){
     const rejoining=s.roomId===r.id;
     const wanted=rejoining?s.position:{x:52,y:76};
     s.roomId=r.id;
+    if(typeof b.nick==='string')s.nick=safe(b.nick,12)||s.nick;
     const seat=reserveSeat(s,wanted);
-    return send(res,200,{joined:true,room:dto(r,s),position:s.position,seat},origin);
+    // Capture the exact roster atomically at the join acknowledgement.
+    // A subsequent poll can already include another arriving participant.
+    const peers=[...sessions.values()].filter(x=>x.roomId===r.id).map(x=>({
+      id:x.id,nick:x.nick,avatar:x.avatar,facing:x.facing,position:x.position,roomId:r.id
+    }));
+    return send(res,200,{joined:true,room:dto(r,s),position:s.position,seat,peers},origin);
    }
    if(req.method==='POST'&&route==='/api/leave'){
     s.roomId=null;return send(res,200,{left:true},origin);

@@ -15,7 +15,7 @@
    endpoint=url.origin+url.pathname.replace(/\/$/,'');
  }catch{}
  if(!endpoint){window.__LEAF_CENTRAL_CHAT__={enabled:false};return}
- let token='',id='',joinedId=null,lastSequence=0,ready=null,active=false;
+ let token='',id='',joinedId=null,joinedRoster=null,lastSequence=0,ready=null,active=false;
  let lastNick='Guest',lastJoin=null,recovering=null,pollBusy=false,pollTimer=null;
  let wantsConnection=false,retryTimer=null,retryDelay=1500,connectionGeneration=0;
  let pollFailures=0,nextPollAt=0;
@@ -228,15 +228,15 @@
   const state=await withAuth(()=>request('GET','/api/rooms?region='+encodeURIComponent(region)+'&district='+encodeURIComponent(district)));
   notify({type:'rooms',region,district,rooms:state.rooms});return state.rooms;
  };
- const join=(roomId,password='')=>serialize(async()=>{
+ const join=(roomId,password='',nick)=>serialize(async()=>{
   await afterReady();
-  const result=await withAuth(()=>request('POST','/api/rooms/'+encodeURIComponent(roomId)+'/join',{password}));
-  joinedId=roomId;lastJoin={id:roomId,password};lastSequence=0;return result;
+  const result=await withAuth(()=>request('POST','/api/rooms/'+encodeURIComponent(roomId)+'/join',{password,...(nick?{nick}:{})}));
+  joinedId=roomId;joinedRoster=Array.isArray(result.peers)?{roomId,peers:result.peers}:null;lastJoin={id:roomId,password};lastSequence=0;return result;
  });
  const leave=()=>serialize(async()=>{
   if(!joinedId)return {left:true};
   await afterReady();const result=await withAuth(()=>request('POST','/api/leave',{}));
-  joinedId=null;lastJoin=null;lastSequence=0;return result;
+  joinedId=null;joinedRoster=null;lastJoin=null;lastSequence=0;return result;
  });
  const create=details=>serialize(async()=>{await afterReady();return withAuth(()=>request('POST','/api/rooms',details))});
  const close=roomId=>serialize(async()=>{await afterReady();return withAuth(()=>request('POST','/api/rooms/'+encodeURIComponent(roomId)+'/close',{}))});
@@ -245,7 +245,7 @@
  const chat=async(text,clientMessageId)=>{await afterReady();return withAuth(()=>request('POST','/api/chat',{text,...(clientMessageId?{clientMessageId}:{})}))};
  const presence=async details=>{await afterReady();return withAuth(()=>request('POST','/api/presence',details))};
  window.__LEAF_CENTRAL_CHAT__={enabled:true,connect,list,join,leave,create,close,transfer,kick,chat,presence,
-  get ready(){return Boolean(token)},get id(){return id},get joinedId(){return joinedId},
+  get ready(){return Boolean(token)},get id(){return id},get joinedId(){return joinedId},get joinedRoster(){return joinedRoster},
   subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn)},
   disconnect:()=>{
    wantsConnection=false;connectionGeneration++;ready=null;token='';id='';
