@@ -38,7 +38,7 @@ main{padding-top:25px}.lead{font-size:12px;color:#acaeb8;margin:0 0 8px}.head{di
 <body data-model="yui">
 <header class="topbar shell"><div class="logo"><a class="logo-name" href="./" aria-label="심유이 사진 화보 홈">YUI</a><a class="mode-toggle" href="./" aria-label="심유이 동영상에서 사진 화보로 전환" title="사진 화보로 전환">MOVIE</a></div><nav aria-label="모델 전환"><a href="../mimmi-gallery/" target="_blank" rel="noopener noreferrer">밈미 ↗</a></nav></header>
 <main class="shell"><p class="lead">YUI GALLERY / VIDEOS</p>
-<div class="head"><div><h1>동영상</h1><p>공개 원본 영상을 연결해 재생합니다. 원본 파일이 저장된 영상과 외부 재생 영상은 구분됩니다.</p></div></div>
+<div class="head"><div><h1>동영상</h1><p>원본 영상 파일을 실제로 확보한 경우에만 갤러리에서 재생됩니다. 미확보 자료는 출처만 표시합니다.</p></div></div>
 <div id="stats" class="stats" aria-live="polite"></div><section id="cards" class="cards" aria-label="동영상 목록"><p class="empty">영상 목록을 불러오는 중…</p></section></main>
 <div id="modal" role="dialog" aria-modal="true" aria-label="동영상 재생" hidden><div class="dialog"><div class="dialog-head"><strong id="playing-title"></strong><button class="close" id="close" type="button">닫기 ✕</button></div><div class="player" id="player"></div><div class="dialog-foot"><span>닫으면 영상 재생이 중지됩니다.</span><a class="source" id="player-source" href="#" target="_blank" rel="noopener noreferrer">원본 출처 열기 ↗</a></div></div></div>
 <script>
@@ -46,14 +46,12 @@ main{padding-top:25px}.lead{font-size:12px;color:#acaeb8;margin:0 0 8px}.head{di
 const model=document.body.dataset.model, cards=document.getElementById('cards'), modal=document.getElementById('modal');
 const setText=(el,text)=>{el.textContent=text;return el};
 const localPath=value=>typeof value==='string'&&/^stored-videos\/[a-f0-9]{64}\.mp4$/.test(value);
-const youtubeId=value=>typeof value==='string'&&/^[a-zA-Z0-9_-]{11}$/.test(value);
 const sourcePage=value=>{try{let u=new URL(value);return u.protocol==='https:'?u.href:null}catch{return null}};
-const playable=entry=>(entry.kind==='youtube'&&youtubeId(entry.youtube_id))||(entry.kind==='local_mp4'&&localPath(entry.path)&&/^[a-f0-9]{64}$/.test(entry.sha256||'')&&entry.path.endsWith(entry.sha256+'.mp4'));
+const playable=entry=>entry.kind==='local_mp4'&&localPath(entry.path)&&/^[a-f0-9]{64}$/.test(entry.sha256||'')&&entry.path.endsWith(entry.sha256+'.mp4');
 function closePlayer(){document.getElementById('player').replaceChildren();modal.hidden=true;document.body.style.overflow=''}
 function openPlayer(entry){if(!playable(entry))return;
  const holder=document.getElementById('player');holder.replaceChildren();
- if(entry.kind==='youtube'){const iframe=document.createElement('iframe');iframe.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(entry.youtube_id)+'?playsinline=1&autoplay=1';iframe.title=entry.title;iframe.loading='lazy';iframe.allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share';iframe.referrerPolicy='strict-origin-when-cross-origin';iframe.allowFullscreen=true;holder.append(iframe);}
- else{const player=document.createElement('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=entry.path;holder.append(player);player.play().catch(()=>{});}
+ const player=document.createElement('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=entry.path;holder.append(player);player.play().catch(()=>{});
  setText(document.getElementById('playing-title'),entry.title);const a=document.getElementById('player-source'),url=sourcePage(entry.source_url)||'#';a.href=url;a.hidden=url==='#';modal.hidden=false;document.body.style.overflow='hidden';document.getElementById('close').focus({preventScroll:true});
 }
 document.getElementById('close').addEventListener('click',closePlayer);
@@ -65,11 +63,10 @@ function draw(entries){
  for(const value of ['재생 가능 '+ok.length+'개','실제 파일 저장 '+saved.length+'개','원본 확인 필요 '+pending.length+'개'])stats.append(setText(document.createElement('span'),value));
  if(!entries.length){cards.append(setText(document.createElement('p'),'등록된 영상이 없습니다.'));return}
  for(const entry of entries){const card=document.createElement('article');card.className='card';const preview=document.createElement('div');preview.className='preview';
- const can=playable(entry);if(can){if(entry.kind==='youtube'){const image=document.createElement('img');image.src='https://i.ytimg.com/vi/'+encodeURIComponent(entry.youtube_id)+'/hqdefault.jpg';image.loading='lazy';image.alt='';preview.append(image)}
- const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',entry.title+' 재생');const play=document.createElement('span');play.className='play';play.textContent='▶';b.append(play);b.addEventListener('click',()=>openPlayer(entry));preview.append(b)}
+ const can=playable(entry);if(can){const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',entry.title+' 재생');const play=document.createElement('span');play.className='play';play.textContent='▶';b.append(play);b.addEventListener('click',()=>openPlayer(entry));preview.append(b)}
  else{const mark=document.createElement('span');mark.className='tag';mark.textContent='영상 파일 미확보';preview.append(mark)}
  const info=document.createElement('div');info.className='cardinfo';const h=document.createElement('h2');setText(h,entry.title);info.append(h);
- const tag=document.createElement('span');tag.className='tag';tag.textContent=entry.kind==='local_mp4'?'원본 파일 저장':can?'외부 공개 영상 재생':'영상 존재 정보만 확인';info.append(tag);
+ const tag=document.createElement('span');tag.className='tag';tag.textContent=entry.kind==='local_mp4'?'원본 파일 저장':can?'저장된 MP4 재생':'영상 출처만 확인 — 파일 미확보';info.append(tag);
  if(entry.note){const p=document.createElement('p');setText(p,entry.note);info.append(p)}
  const source=sourcePage(entry.source_url);if(source){const a=document.createElement('a');a.className='source';a.href=source;a.target='_blank';a.rel='noopener noreferrer';a.textContent='출처 보기 ↗';info.append(a)}
  card.append(preview,info);cards.append(card);
