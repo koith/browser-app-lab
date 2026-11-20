@@ -256,7 +256,7 @@ def latest_snapshot(archive,folder,pattern,cap=300_000):
 
 
 
-def retained_profile_asset(archive, current, kind):
+def retained_profile_asset(archive, current, kind, *, verify_bytes=False):
     """Find the latest immutable, SHA-addressed profile image across snapshots.
 
     A provider's transient header failure or later removal must not erase an
@@ -288,6 +288,16 @@ def retained_profile_asset(archive, current, kind):
                 or key!="profile/assets/"+digest+extensions[mime]
                 or not isinstance(length,int) or not 0<length<=24_000_000):
             return None
+        if verify_bytes:
+            # A signed snapshot pointer is not proof that its image is in
+            # the currently readable, account-bound ZIP history. Check the
+            # already saved object; never fetch a live SNS image here.
+            try:
+                body=archive.read_verified(key,digest,cap=length+1)
+            except (RuntimeError,ValueError,KeyError,TypeError):
+                return None
+            if body is None or len(body)!=length:
+                return None
         return item
 
     selected=valid(current)
@@ -707,7 +717,11 @@ def create_router(auth):
             view["assets"]={}
             view["asset_details"]={}
             for name in ("avatar","banner"):
-                selected,historical=retained_profile_asset(archive,doc,name)
+                # ZIP objects have already been read and authenticated in
+                # this session. Do not advertise a missing header as saved.
+                # Legacy remote objects are verified by their media endpoint.
+                selected,historical=retained_profile_asset(
+                    archive,doc,name,verify_bytes=isinstance(archive,BundleAccountCloud))
                 view["assets"][name]=(
                     "/api/account-archives/"+account+"/profile-asset/"+name
                     if selected else None
@@ -807,7 +821,8 @@ def create_router(auth):
         doc=latest_snapshot(archive,"profile/snapshots",PROFILE_FILE_RE)
         if not doc:
             raise HTTPException(404,"Profile snapshot unavailable")
-        asset,_historical=retained_profile_asset(archive,doc,kind)
+        asset,_historical=retained_profile_asset(
+            archive,doc,kind,verify_bytes=isinstance(archive,BundleAccountCloud))
         if asset is None:
             raise HTTPException(404,"Profile image not archived")
         return get_verified_media(archive,
