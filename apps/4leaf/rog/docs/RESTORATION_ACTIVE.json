@@ -5,29 +5,14 @@
   "sourceUpdatedAt": "2026-11-20",
   "counts": {
     "total": 60,
-    "done": 45,
-    "in_progress": 14,
+    "done": 46,
+    "in_progress": 13,
     "todo": 1,
     "blocked": 0,
-    "active": 15
+    "active": 14
   },
-  "historicalEventsNotDuplicated": 487,
+  "historicalEventsNotDuplicated": 488,
   "active": [
-    {
-      "id": "M04",
-      "priority": "P0",
-      "title": "주잔 DMP·TIS 보드 복원",
-      "status": "in_progress",
-      "acceptance": [
-        "전체 경로 모든 육각 플랫폼의 방향·윗면 노출·비정상 겹침·깊이를 board.jpg와 동일 상태에서 정량 비교"
-      ],
-      "currentTail": "26맵·32타일·145x97 소스, 웹 투영/상하 보정 적용됐지만 전체 겹침·높이·카메라 미복원; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.",
-      "evidence": [
-        "apps/4leaf/rog/dice-native-minipanel-spr.css",
-        "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs"
-      ],
-      "lastReviewed": "2026-10-19"
-    },
     {
       "id": "M05",
       "priority": "P0",
