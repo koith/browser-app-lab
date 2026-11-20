@@ -2539,7 +2539,75 @@
           "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
+    },
+    {
+      "id": "seethrough80",
+      "title": "SWTB Vol.22 Seethrough — Yui",
+      "source": "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/",
+      "status": "public_verified_local_orig_files",
+      "images": [
+        {
+          "number": 1,
+          "url": "stored-albums/seethrough80/8216c38d4285c9084d17.jpg",
+          "sha256": "8216c38d4285c9084d17b91df72b817a0649e1cd901401d9f4bd7cdb27b1d5df",
+          "bytes": 8196339,
+          "width": 5464,
+          "height": 8192,
+          "origin_page": "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/",
+          "source_url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj0yd0u-kzAfmuSfmrufWiNxlGnqVPaB0w_sT771k2nQxxn4SB_T47M6bsfs4K7iopxIg6bCwQNXKRUSL1u70jltZfyZUS0oY_ldxCXUIYDeoqaEwir6QDYEbXsm7Iif2k4IcnCbhVBeR8hQb8-JJVUUVw7yxoWHeZygPhGIirhDH63fgU8z1X426ci0ZDJ/s8192/SWEETBOX-Yui-SWTB-Vol.22-Seethrough-Cup2D-001.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 2,
+          "url": "stored-albums/seethrough80/129582c13615abe7a551.jpg",
+          "sha256": "129582c13615abe7a551e604cdb213d4b30326aa1104a1002076750df98521a9",
+          "bytes": 14093975,
+          "width": 5464,
+          "height": 8192,
+          "origin_page": "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/",
+          "source_url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgklQq7J_n5BZyP3KZqQHl4Gau6hc0ea5kkqY2BDKUMDSrSRVaLaFcThL2bHmOF-b8P1_mw6B4XR9tGBhiFWGZCM6NdZ_EQiWiNJPISYBvNY5az9o-mjzoqm2CtE7kY73dbgy2jBIwbgtJKsIBsdv168vy-od8-0vsxfe7eakZ9lssNOkIZCTfPTPdCO-fC/s8192/SWEETBOX-Yui-SWTB-Vol.22-Seethrough-Cup2D-002.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 3,
+          "url": "stored-albums/seethrough80/a2b549328eb9471b996c.jpg",
+          "sha256": "a2b549328eb9471b996cfbdc2c8aea11e72f8833af771069058685d77e0cb6a6",
+          "bytes": 7674517,
+          "width": 5464,
+          "height": 8192,
+          "origin_page": "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/",
+          "source_url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiJ2zVQUuLhSHAg6DR1GhVCEJ8rPBQy9zL_wyMKPIhq5Np1zsod0SaOYjjeGkc2sUw-SzBvVzx-KLnWtV24WeKh1UnBI9F03NIKkKXSyAu_U46H8Xg6A2_5PqU8M-2st2_PqQC0YF88bEa_VRa9KVLSx0mSkdahU8_OpvJwFqkCQhL7oxyM8KoEy_J6sPKm/s8192/SWEETBOX-Yui-SWTB-Vol.22-Seethrough-Cup2D-003.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 4,
+          "url": "stored-albums/seethrough80/cdc49cbfe441ec790ead.jpg",
+          "sha256": "cdc49cbfe441ec790ead37704da5f2a737e1c9d719fdae37fa2f350b8010a340",
+          "bytes": 7174746,
+          "width": 8192,
+          "height": 5464,
+          "origin_page": "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/",
+          "source_url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgMMB0fU_gFhtAFphoFccsTCBtY0QMqUbILBXzlPD4AMnaSd5XRt-JoQsT5IvaBeMNE70u51EqiwwjXPfINOGe3H9O_T5BwYVYUEUl0l1sjZbM1Uc9L88DqCv1bPp1GCKG64O1IZ8BnP_zNy54xCAk_No3YUpgQKWtmY1odx0jygOhVlNZHekEI6dn60Aw_/s8192/SWEETBOX-Yui-SWTB-Vol.22-Seethrough-Cup2D-004.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 5,
+          "url": "stored-albums/seethrough80/ae1fe8ac80c986ce0e24.jpg",
+          "sha256": "ae1fe8ac80c986ce0e24ec65d7ac7d41a54b95332dc40d91cbff0e5a7985ec3c",
+          "bytes": 6478343,
+          "width": 8192,
+          "height": 5464,
+          "origin_page": "https://cup2d.com/sweetbox-yui-%EC%9C%A0%EC%9D%B4-swtb-vol-22-seethrough/",
+          "source_url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgOTETm7qZYFzLIC1ECsHTf2nH3ZNrTOhgrNmDd-9ThAW7N2pmNpiT0wn5CyuvuWh569IzoWBaE6-gU_MTwEnvWorlYo9YvsdnKnwbFNJVJ0B-Z1MyeEy-_VtBi-kU1LqeiM-6IeKji4BXK9-GmzlOJk3W0TJhoyJaBhrHVXocBrtt35ufOoPj3Vc6ZDf25/s8192/SWEETBOX-Yui-SWTB-Vol.22-Seethrough-Cup2D-005.jpg",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        }
+      ]
     }
   ],
-  "physical_verified_image_count": 198
+  "physical_verified_image_count": 203
 }
