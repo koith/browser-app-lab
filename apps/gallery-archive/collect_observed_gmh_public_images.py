@@ -50,7 +50,7 @@ def verified_item(entry, model, registry):
     if not public_https(source):
         return False,"invalid_source"
     parsed=urlsplit(source)
-    match=re.fullmatch(r"/gallery/([a-z0-9-]{8,120})/?",parsed.path,re.I)
+    match=re.fullmatch(r"/gallery/([a-z0-9-]{8,120})/(?:page/([1-9][0-9]{0,2})/)?",parsed.path,re.I)
     if parsed.hostname!="g-mh.com" or not match or parsed.query or parsed.fragment:
         return False,"unreviewed_source_path"
     images=entry.get("media_urls")
