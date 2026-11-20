@@ -39,6 +39,18 @@ class Tests(unittest.TestCase):
     def test_cannot_mix_other_models_even_if_filename_looks_similar(self):
         bad={**ITEM,"observed_heading":"DJAWA Yui – Your Panties A"}
         self.assertEqual(verified_item(bad,"mimmi",REG)[1],"wrong_model")
+    def test_public_page2_provenance_preserves_exact_model_and_slug(self):
+        page2={**ITEM,"source_page":PAGE+"page/2/","media_urls":[
+            "https://img.g-mh.com/"+SLUG+"/g-mhcom_011.webp"]}
+        self.assertEqual(verified_item(page2,"mimmi",REG),(True,"exact_observed_album_and_cdn"))
+        bad={**page2,"source_page":PAGE+"page/0/"}
+        self.assertEqual(verified_item(bad,"mimmi",REG)[1],"unreviewed_source_path")
+        bad={**page2,"source_page":PAGE+"page/2/?preview=1"}
+        self.assertEqual(verified_item(bad,"mimmi",REG)[1],"unreviewed_source_path")
+        bad={**page2,"media_urls":[
+            "https://img.g-mh.com/other-book/g-mhcom_011.webp"]}
+        self.assertEqual(verified_item(bad,"mimmi",REG)[1],"cdn_media_not_observed_for_exact_work")
+
     def test_wrong_album_cdn_not_imported(self):
         bad={**ITEM,"media_urls":[PHOTO.replace(SLUG,"another-album")]}
         self.assertEqual(verified_item(bad,"mimmi",REG)[1],"cdn_media_not_observed_for_exact_work")
