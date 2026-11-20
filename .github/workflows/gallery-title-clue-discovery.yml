@@ -25,6 +25,7 @@ jobs:
           mkdir -p /tmp/title-clue
           for model in yui mimmi; do
             python apps/gallery-archive/title_clue_discovery.py --model "$model" --state "/tmp/title-clue/$model.sqlite" --out "/tmp/title-clue/$model.json" --budget 4
+            python apps/gallery-archive/title_clue_discovery.py --model "$model" --state "/tmp/title-clue/$model.sqlite" --out "/tmp/title-clue/$model-seeds.json" --official-seeds --budget 8
           done
       - uses: actions/upload-artifact@v4
         with:

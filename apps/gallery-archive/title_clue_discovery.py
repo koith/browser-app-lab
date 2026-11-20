@@ -14,6 +14,8 @@ import unicodedata
 from collections import Counter, defaultdict, deque
 from pathlib import Path
 from urllib.parse import parse_qs, urlencode, urljoin, urlsplit, urlunsplit
+import socket
+import ipaddress
 from urllib.robotparser import RobotFileParser
 
 import requests
@@ -127,7 +129,8 @@ def catalog(model, root=ROOT):
     for filename in ("public-work-pages.json","owner-index.json","albums.json","publisher-catalogue.json"):
         p=base/filename
         if not p.is_file():continue
-        for row in json.loads(p.read_text()).get("albums",[]):
+        doc=json.loads(p.read_text())
+        for row in doc.get("albums",doc.get("works",[])):
             title=row.get("title","")
             if not title:continue
             rid=row.get("id") or "catalogue-"+hashlib.sha256((str(row.get("publisher",""))+title).encode()).hexdigest()[:16]
@@ -195,14 +198,17 @@ class Queue:
         self.db.execute("CREATE TABLE IF NOT EXISTS observations(url TEXT, work TEXT, title TEXT, UNIQUE(url,work))")
         self.db.commit()
     def add(self,kind,value,engine=""):
-        self.db.execute("INSERT OR IGNORE INTO task(kind,value,engine) VALUES(?,?,?)",(kind,value,engine)); self.db.commit()
+        self.add_many([(kind,value,engine)])
+    def add_many(self, tasks):
+        self.db.executemany("INSERT OR IGNORE INTO task(kind,value,engine) VALUES(?,?,?)",tasks); self.db.commit()
     def next(self):
         # Page tasks precede new searches, but retain all queued search work.
         return self.db.execute("SELECT id,kind,value,engine FROM task WHERE status='pending' ORDER BY CASE kind WHEN 'page' THEN 0 ELSE 1 END,id LIMIT 1").fetchone()
     def finish(self,id,status,detail=""):
         self.db.execute("UPDATE task SET status=?,attempts=attempts+1,detail=? WHERE id=?",(status,detail,id)); self.db.commit()
     def site(self,host,evidence):
-        self.db.execute("INSERT OR IGNORE INTO sites VALUES (?,?)",(host,evidence)); self.db.commit()
+        cursor=self.db.execute("INSERT OR IGNORE INTO sites VALUES (?,?)",(host,evidence)); self.db.commit()
+        return bool(cursor.rowcount)
     def observation(self,url,work,title):
         self.db.execute("INSERT OR IGNORE INTO observations VALUES (?,?,?)",(url,work,title));self.db.commit()
     def report(self):
@@ -220,6 +226,11 @@ class PublicMetadata:
         url=canonical(url)
         if not url:return None,"unsafe_url"
         host=urlsplit(url).netloc
+        try:
+            addresses=socket.getaddrinfo(host,443,type=socket.SOCK_STREAM)
+            if not addresses or any(not ipaddress.ip_address(a[4][0]).is_global for a in addresses):
+                return None,"nonpublic_dns"
+        except (OSError,ValueError):return None,"dns_unavailable"
         try:
             if host not in self.robots:
                 robot=self.session.get("https://"+host+"/robots.txt",headers={"User-Agent":self.agent},timeout=(4,6),allow_redirects=False)
@@ -243,7 +254,7 @@ class PublicMetadata:
                 return raw,"ok"
         except requests.RequestException as e:return None,type(e).__name__
 
-def related_links(raw,url,model_words):
+def related_links(raw,url,model_words,listing=False):
     soup=BeautifulSoup(raw,"html.parser")
     host=urlsplit(url).hostname
     found=set()
@@ -252,18 +263,49 @@ def related_links(raw,url,model_words):
         if not target or urlsplit(target).hostname!=host or target==url:continue
         label=key(a.get_text(" ",strip=True)+" "+a.get("href",""))
         rel=a.get("rel",[])
-        if (any(w and w in label for w in model_words)
+        if ((listing and (a.find_parent(["article","h2","h3"]) is not None))
+            or any(w and w in label for w in model_words)
             or any(x in rel for x in ("next","prev"))
             or re.search(r"(?:^| )(?:next|previous|more|page|category|tag|model|artist|publisher|portfolio)(?: |$)",label)
             or re.fullmatch(r"\d+",a.get_text(" ",strip=True))):
             found.add(target)
     return sorted(found)
 
+def internal_search_links(raw,url,terms):
+    """Only observed ordinary GET search forms, never guess search endpoints."""
+    soup=BeautifulSoup(raw,"html.parser")
+    host=urlsplit(url).hostname
+    found=set()
+    for f in soup.select("form"):
+        if f.get("method","get").lower()!="get":continue
+        target=canonical(urljoin(url,f.get("action") or url))
+        if not target or urlsplit(target).hostname!=host:continue
+        for i in f.select("input[name]"):
+            name=i.get("name","")
+            if name.casefold() not in ("s","q","search","query","keyword","text"):continue
+            if i.get("type","text").lower() not in ("search","text"):continue
+            for term in terms:
+                p=urlsplit(target); params=parse_qs(p.query);params[name]=[term]
+                found.add(urlunsplit(p._replace(query=urlencode(params,doseq=True))))
+    return sorted(found)
+
+def official_seeds(root,model):
+    path=root/"apps/gallery-archive/global_source_registry.json"
+    if not path.is_file():return []
+    return [r["url"] for r in json.loads(path.read_text()).get("sources",[])
+            if r.get("model")==model and r.get("tier")=="official" and canonical(r.get("url",""))]
+
 def process(queue, db, aliases, model, budget, transport):
     clues={key(a) for a in aliases if len(key(a))>=2}
     for names in db["works"].values():
         for r in names:
             clues.update(key(p) for p in title_clues(r["name"],aliases)["publishers"])
+    site_terms=set(clues)
+    for name,rows in db["works"].items():
+        if not name.startswith(model+":"):continue
+        for row in rows:
+            c=title_clues(row["name"],aliases)
+            site_terms.update(p+" "+n for p in c["publishers"] for _,n in c["editions"])
     for _ in range(budget):
         task=queue.next()
         if not task:break
@@ -275,7 +317,7 @@ def process(queue, db, aliases, model, budget, transport):
             continue
         if kind=="search":
             hits=search_hits(raw,engine)
-            for u in hits:queue.add("page",u)
+            queue.add_many(("page",u,"") for u in hits)
             # Empty/unparseable SERPs are not evidence that no sites exist.
             queue.finish(id,"inspected" if hits else "unparsed",str(len(hits)))
             continue
@@ -283,12 +325,21 @@ def process(queue, db, aliases, model, budget, transport):
         evidence=key(heading+" "+context)
         matching=[w for w in db["works"] if w.startswith(model+":") and page_matches(w,heading,context)]
         weak=any(re.search(r"(?<!\w)"+re.escape(c)+r"(?!\w)",evidence) for c in clues)
+        listing=bool(re.search(r"/(?:portfolio-cat|category|tag|model|artist|page)/",urlsplit(url).path))
+        # A catalogue can mention multiple editions; it is not an individual work.
         if matching or weak:
             host=urlsplit(url).hostname
-            queue.site(host,url)
-            # Weak clues open a research site, never promote a title or media.
-            for u in related_links(raw,url,clues):queue.add("page",u)
-        if len(matching)==1:queue.observation(url,matching[0],heading[:220])
+            new_site=queue.site(host,url)
+            queue.add_many(("page",u,"") for u in related_links(raw,url,clues,listing))
+            if new_site:
+                queue.add_many(("search","site:"+host+" "+t,e)
+                               for t in sorted(site_terms) for e in ENGINES)
+                queue.add_many(("page",u,"") for u in internal_search_links(raw,url,sorted(site_terms)))
+        if len(matching)==1 and not listing:
+            queue.observation(url,matching[0],heading[:220])
+            # Observed heading is a new research hint with its source recorded.
+            families=query_families(heading[:220],aliases)
+            queue.add_many(("search",v,e) for _,v in interleave(families) for e in ENGINES)
         queue.finish(id,"inspected",str(len(matching)))
     return queue.report()
 
@@ -300,12 +351,18 @@ def main():
     p.add_argument("--budget",type=int,default=0)
     p.add_argument("--root",type=Path,default=ROOT)
     p.add_argument("--retry-failed",action="store_true")
+    p.add_argument("--official-seeds",action="store_true")
+    p.add_argument("--observed-pages",type=Path,help="JSON list of independently observed public page URLs (metadata only)")
     a=p.parse_args()
     if not 0<=a.budget<=200:raise ValueError("invalid execution budget")
     db,aliases,records,queries,types=plan(a.model,a.root)
     q=Queue(a.state)
-    for item in queries:
-        for engine in ENGINES:q.add("search",item["query"],engine)
+    q.add_many(("search",item["query"],engine) for item in queries for engine in ENGINES)
+    if a.official_seeds:q.add_many(("page",u,"") for u in official_seeds(a.root,a.model))
+    if a.observed_pages:
+        rows=json.loads(a.observed_pages.read_text())
+        if not isinstance(rows,list):raise ValueError("expected observed page URL list")
+        q.add_many(("page",u,"") for u in rows if isinstance(u,str) and canonical(u))
     if a.retry_failed:
         q.db.execute("UPDATE task SET status='pending' WHERE status IN ('failed','unparsed')")
         q.db.commit()

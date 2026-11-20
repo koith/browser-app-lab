@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import tempfile
 from pathlib import Path
-from title_clue_discovery import title_clues,query_families,Queue,search_hits,related_links,plan
+from title_clue_discovery import title_clues,query_families,Queue,search_hits,related_links,internal_search_links,plan
 
 def main():
     c=title_clues("ARTGRAVIA VOL.639 Yui (118 photos)",["Yui","심유이"])
@@ -18,6 +18,8 @@ def main():
     assert len(search_hits(raw,"yandex"))==1
     links=related_links('<a href="/page/2" rel="next">next</a><a href="/model/sample">Sample</a>','https://catalog.example.org/a',{"sample"})
     assert len(links)==2
+    assert len(related_links('<h2><a href="/portfolio/x">Unlabelled edition</a></h2>','https://catalog.example.org/model/sample',{"sample"},listing=True))==1
+    assert internal_search_links('<form action="/" method="get"><input name="s" type="search"></form>','https://catalog.example.org/a',["sample"])==["https://catalog.example.org/?s=sample"]
     with tempfile.TemporaryDirectory() as tmp:
         path=Path(tmp)/"q.db"
         q=Queue(path);q.add("search","Sample","google");q.add("search","Other","yandex")
