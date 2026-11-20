@@ -52,9 +52,18 @@ class PublicMediaClient:
                                    timeout=(7,10),allow_redirects=False)
                 if r.status_code==404:self._robots=True
                 elif r.status_code==200 and len(r.content)<300000:
-                    parser=RobotFileParser()
-                    parser.parse(r.text.splitlines())
-                    self._robots=parser
+                    # Some sites use duplicate wildcard User-agent blocks.
+                    # RobotFileParser may honor the FIRST block only; fail
+                    # closed if ANY published group disallows the media /data/
+                    # directory instead of silently taking the permissive one.
+                    lines=r.text.splitlines()
+                    if any(re.match(r"\\s*Disallow:\\s*/data/(?:\\s|$)",line,re.I)
+                           for line in lines):
+                        self._robots=False
+                    else:
+                        parser=RobotFileParser()
+                        parser.parse(lines)
+                        self._robots=parser
                 else:self._robots=False
             except requests.RequestException:self._robots=False
         return self._robots is True or (self._robots is not False
