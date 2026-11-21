@@ -1054,3 +1054,38 @@ def test_unobservable_nested_parent_only_counts_sha_verified_shallow_original():
     assert cloud.objects[cloud.flat_storage_key(original)]==canonical_json(p)
     assert cloud.read_verified(original,sha256(canonical_json(p)))==canonical_json(p)
     assert cloud.load_catalog()==[p]
+
+
+def test_remote_read_cap_stops_child_process_before_full_buffer():
+    """Synthetic subprocess only: no provider or account data is used."""
+    import sys
+    from demand_archive import _bounded_list_output
+    command=[sys.executable,"-c",
+             "import sys; sys.stdout.buffer.write(b'x'*1000000); sys.stdout.flush()"]
+    with pytest.raises(ValueError,match="remote object exceeds cap"):
+        _bounded_list_output(command,timeout=5,cap=4096,object_read=True)
+    success=_bounded_list_output([sys.executable,"-c",
+        "import sys; sys.stdout.buffer.write(b'a'*16)"],timeout=5,
+        cap=16,object_read=True)
+    assert success.returncode==0 and success.stdout==b"a"*16
+
+
+def test_default_storage_reader_passes_cap_before_downloading(monkeypatch):
+    import subprocess
+    import demand_archive
+    observed=[]
+    def bounded(command,timeout,cap,*,object_read):
+        observed.append((command[0],command[1],cap,object_read))
+        return subprocess.CompletedProcess(command,0,b"test",b"")
+    monkeypatch.setattr(demand_archive,"_bounded_list_output",bounded)
+    cloud=CloudArchive(remote="archive:synthetic")
+    assert cloud.read("metadata/example.bin",cap=4)==b"test"
+    assert observed==[("rclone","cat",4,True)]
+
+
+def test_custom_storage_adapter_keeps_backward_compatible_signature():
+    cloud=FakeCloud()
+    cloud.objects["metadata/example.bin"]=b"test"
+    assert cloud.read("metadata/example.bin",cap=4)==b"test"
+    with pytest.raises(ValueError,match="remote object exceeds cap"):
+        cloud.read("metadata/example.bin",cap=3)
