@@ -8,9 +8,9 @@
   "counts": {
     "total": 60,
     "done": 44,
-    "in_progress": 15,
+    "in_progress": 14,
     "todo": 1,
-    "review_required": 0,
+    "review_required": 1,
     "remaining": 16
   },
   "openTasks": [
@@ -27,7 +27,7 @@
       "issue": 1238,
       "priority": "P0",
       "title": "카메라 투영·발판 크기 원본 시점 맞춤",
-      "status": "in_progress",
+      "status": "review_required",
       "url": "https://github.com/koith/browser-app-lab/issues/1238"
     },
     {
