@@ -42,14 +42,17 @@
       "content": "draft",
       "verification": "partial",
       "acceptance": "단계 및 선수학습 근거 문서화",
-      "result": "설계 초안, 전문가 검토 대기",
+      "result": "통합된 인수인계 H01-20261121-CUR02-W01W02-R1 / PR #1410; 최종 검증 대기",
       "complete": false,
       "owner": "01",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "curriculum-mapping/outline-audit-r1.json",
+        "curriculum-mapping/sources-r1.json"
+      ]
     },
     {
       "id": "CUR-01",
@@ -58,55 +61,66 @@
       "content": "draft",
       "verification": "structure_pass",
       "acceptance": "120 unique IDs, day1-120, day30/60/90/120",
-      "result": "GitHub readback pass",
+      "result": "통합된 인수인계 H01-20261121-CUR02-W01W02-R1 / PR #1410; 최종 검증 대기",
       "complete": false,
       "owner": "01",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "curriculum-mapping/outline-audit-r1.json",
+        "curriculum-mapping/validation-w01-w02-r1.json"
+      ]
     },
     {
       "id": "CUR-02",
       "requirement": "CEFR·Maarif 세부 성취기준 매핑",
-      "implementation": "pending",
-      "content": "pending",
-      "verification": "pending",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "structure_pass",
       "acceptance": "일일 목표별 descriptor 및 원문 위치",
-      "result": "미완료",
+      "result": "통합된 인수인계 H01-20261121-CUR02-W01W02-R1 / PR #1410; 최종 검증 대기",
       "complete": false,
       "owner": "01",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "curriculum-mapping/D001.json",
+        "curriculum-mapping/D007.json",
+        "curriculum-mapping/D014.json",
+        "curriculum-mapping/sources-r1.json"
+      ]
     },
     {
       "id": "CUR-03",
       "requirement": "어휘 선정/중복 제거",
-      "implementation": "pending",
+      "implementation": "partial",
       "content": "draft",
       "verification": "partial",
       "acceptance": "1000 활용+500 이해 목표, 표제어/구문 검수",
-      "result": "56개 초안 항목",
+      "result": "통합된 인수인계 H01-20261121-CUR02-W01W02-R1 / PR #1410; 최종 검증 대기",
       "complete": false,
       "owner": "01",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "curriculum-mapping/vocabulary-policy-r1.json",
+        "curriculum-mapping/outline-audit-r1.json"
+      ]
     },
     {
       "id": "CON-01",
       "requirement": "D001~D007 콘텐츠",
-      "implementation": "done",
-      "content": "draft",
-      "verification": "structure_pass",
+      "implementation": "partial",
+      "content": "review_candidate_d001_d007",
+      "verification": "structure_pass_author_only",
       "acceptance": "7일 본문·단어·예문·회화·문제와 독립 언어/음성 검수",
-      "result": "7일·56개·25문항, 언어 미검수",
+      "result": "통합된 인수인계 H02-20261121-first-fortnight-r1 / PR #1408; 최종 검증 대기",
       "complete": false,
       "owner": "02",
       "verificationOwner": "05",
@@ -116,16 +130,21 @@
         "CUR-02"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ]
     },
     {
       "id": "CON-02",
       "requirement": "D008~D063 A1 본문 콘텐츠",
-      "implementation": "pending",
-      "content": "pending",
-      "verification": "pending",
+      "implementation": "partial",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
       "acceptance": "56일 완전 수업 및 검수",
-      "result": "미착수",
+      "result": "통합된 인수인계 H02-20261121-first-fortnight-r1 / PR #1408; 최종 검증 대기",
       "complete": false,
       "owner": "02",
       "verificationOwner": "05",
@@ -134,7 +153,12 @@
         "CUR-02"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ]
     },
     {
       "id": "CON-03",
@@ -155,34 +179,44 @@
     {
       "id": "CON-04",
       "requirement": "문법 교재/활용형/모음조화",
-      "implementation": "pending",
-      "content": "draft",
-      "verification": "pending",
+      "implementation": "partial",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
       "acceptance": "검색·규칙·예외·독립 검수",
-      "result": "1주차 설명만",
+      "result": "통합된 인수인계 H02-20261121-first-fortnight-r1 / PR #1408; 최종 검증 대기",
       "complete": false,
       "owner": "02",
       "verificationOwner": "05",
       "priority": "P2",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ]
     },
     {
       "id": "CON-05",
       "requirement": "실전 회화 및 분기형 시나리오",
       "implementation": "partial",
-      "content": "draft",
-      "verification": "pending",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
       "acceptance": "상황별 자연스러운 분기와 한국어 설명",
-      "result": "1주차 선형 예문",
+      "result": "통합된 인수인계 H02-20261121-first-fortnight-r1 / PR #1408; 최종 검증 대기",
       "complete": false,
       "owner": "02",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ]
     },
     {
       "id": "CON-06",
@@ -204,49 +238,64 @@
       "id": "CON-07",
       "requirement": "듣기/말하기/받아쓰기 문제 풀",
       "implementation": "partial",
-      "content": "draft",
-      "verification": "pending",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
       "acceptance": "일일 모든 수업에 독립 듣기 및 말하기 과업",
-      "result": "첫 주 예문 기반",
+      "result": "통합된 인수인계 H02-20261121-first-fortnight-r1 / PR #1408; 최종 검증 대기",
       "complete": false,
       "owner": "02",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ]
     },
     {
       "id": "CON-08",
       "requirement": "일일 평가 문제와 해설",
       "implementation": "partial",
-      "content": "draft",
-      "verification": "structure_pass",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
       "acceptance": "120일 모든 필수 문제, 정답 및 선수학습 감사",
-      "result": "25개 객관식",
+      "result": "통합된 인수인계 H02-20261121-first-fortnight-r1 / PR #1408; 최종 검증 대기",
       "complete": false,
       "owner": "02",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ]
     },
     {
       "id": "CON-09",
       "requirement": "주간 평가",
       "implementation": "partial",
-      "content": "draft",
-      "verification": "pending",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
       "acceptance": "17주 4기능 평가",
-      "result": "1주차 객관식만",
+      "result": "통합된 인수인계 H02-20261121-first-fortnight-r1 / PR #1408; 최종 검증 대기",
       "complete": false,
       "owner": "02",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ]
     },
     {
       "id": "CON-10",
@@ -255,39 +304,44 @@
       "content": "draft",
       "verification": "pending",
       "acceptance": "D30/60/90/120 평가 구현 및 전문가 검토",
-      "result": "루브릭 설계 초안",
+      "result": "통합된 인수인계 H01-20261121-CUR02-W01W02-R1 / PR #1410; 최종 검증 대기",
       "complete": false,
       "owner": "01",
       "verificationOwner": "05",
       "priority": "P2",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "curriculum-mapping/week01-assessment.json",
+        "curriculum-mapping/week02-assessment.json"
+      ]
     },
     {
       "id": "QA-01",
       "requirement": "구조 검증 및 콘텐츠 ID 검사",
       "implementation": "done",
       "content": "draft",
-      "verification": "structure_pass",
+      "verification": "structure_pass_partial_p0",
       "acceptance": "현재 목차/퀴즈 정답/IDs 검사",
-      "result": "readback 검사 pass",
+      "result": "통합된 인수인계 05-P0-20261121-baseline / PR #1406; 최종 검증 대기",
       "complete": false,
       "owner": "05",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "qa/p0-baseline-20261121.json"
+      ]
     },
     {
       "id": "QA-02",
       "requirement": "언어 정확성·번역·구어 자연스러움 검수",
-      "implementation": "pending",
-      "content": "pending",
-      "verification": "pending",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "partial_review_blocked",
       "acceptance": "모든 콘텐츠 독립 검토 기록 및 출처",
-      "result": "미착수",
+      "result": "통합된 인수인계 05-P0-20261121-baseline / PR #1406; 최종 검증 대기",
       "complete": false,
       "owner": "05",
       "verificationOwner": "05",
@@ -296,16 +350,18 @@
         "CON-01"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md"
+      ]
     },
     {
       "id": "QA-03",
       "requirement": "난이도·선수학습·중복·누락 감사",
-      "implementation": "pending",
-      "content": "pending",
-      "verification": "pending",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "partial_review_blocked",
       "acceptance": "고정 코스 전체 의존성 검증",
-      "result": "미착수",
+      "result": "통합된 인수인계 05-P0-20261121-baseline / PR #1406; 최종 검증 대기",
       "complete": false,
       "owner": "05",
       "verificationOwner": "05",
@@ -315,7 +371,9 @@
         "CON-01"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md"
+      ]
     },
     {
       "id": "QA-04",
@@ -324,7 +382,7 @@
       "content": "pending",
       "verification": "pending",
       "acceptance": "음성별 음질·발음·라이선스 확인",
-      "result": "미착수",
+      "result": "통합된 인수인계 05-P0-20261121-baseline / PR #1406; 최종 검증 대기",
       "complete": false,
       "owner": "05",
       "verificationOwner": "05",
@@ -333,7 +391,9 @@
         "AUD-01"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md"
+      ]
     },
     {
       "id": "APP-01",
@@ -358,30 +418,36 @@
       "content": "draft",
       "verification": "simulated_runtime_pass",
       "acceptance": "실제 렌더링·모바일 동작",
-      "result": "소스 구현, 브라우저 미검증; simulated DOM/localStorage tests pass (VALIDATION.json), real browser pending",
+      "result": "통합된 인수인계 20261121-03-P0-GATE-01 / PR #1407; 최종 검증 대기",
       "complete": false,
       "owner": "03",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ]
     },
     {
       "id": "APP-03",
       "requirement": "단어장 검색·상세·즐겨찾기",
       "implementation": "partial",
       "content": "draft",
-      "verification": "syntax_pass",
+      "verification": "simulated_runtime_pass",
       "acceptance": "검색·활용·즐겨찾기 저장",
-      "result": "검색만 구현",
+      "result": "통합된 인수인계 20261121-03-P0-GATE-01 / PR #1407; 최종 검증 대기",
       "complete": false,
       "owner": "03",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ]
     },
     {
       "id": "APP-04",
@@ -390,14 +456,17 @@
       "content": "draft",
       "verification": "simulated_runtime_pass",
       "acceptance": "실제 시험 및 점수, 재접속 검증",
-      "result": "소스만 검증; simulated DOM/localStorage tests pass (VALIDATION.json), real browser pending",
+      "result": "통합된 인수인계 20261121-03-P0-GATE-01 / PR #1407; 최종 검증 대기",
       "complete": false,
       "owner": "03",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ]
     },
     {
       "id": "APP-05",
@@ -406,14 +475,17 @@
       "content": "draft",
       "verification": "simulated_runtime_pass",
       "acceptance": "간격 계산·복습 기록 지속",
-      "result": "기본 1/3/7/14/30일 구현; simulated DOM/localStorage tests pass (VALIDATION.json), real browser pending",
+      "result": "통합된 인수인계 20261121-03-P0-GATE-01 / PR #1407; 최종 검증 대기",
       "complete": false,
       "owner": "03",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ]
     },
     {
       "id": "APP-06",
@@ -466,49 +538,49 @@
     {
       "id": "AUD-01",
       "requirement": "브라우저 TTS와 속도",
-      "implementation": "done",
-      "content": "draft",
-      "verification": "syntax_pass",
+      "implementation": "in_progress_unmerged",
+      "content": "draft_unmerged",
+      "verification": "unmerged_evidence_only",
       "acceptance": "tr-TR 음성 존재 및 iPhone 청취",
-      "result": "코드만 구현",
+      "result": "미병합 draft #1409; 이전 lesson blob 기반 로컬 MP3 100개 생성 주장 및 저장소 샘플 1개. 최신 220개 대상 재생성/전송/청취 필요.",
       "complete": false,
       "owner": "04",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
-      "activePR": null,
+      "activePR": 1409,
       "evidence": []
     },
     {
       "id": "AUD-02",
       "requirement": "녹음·재생",
-      "implementation": "done",
-      "content": "draft",
-      "verification": "syntax_pass",
+      "implementation": "in_progress_unmerged",
+      "content": "draft_unmerged",
+      "verification": "unmerged_evidence_only",
       "acceptance": "iPhone 권한 및 녹음 재생",
-      "result": "코드만 구현",
+      "result": "미병합 draft #1409; 이전 lesson blob 기반 로컬 MP3 100개 생성 주장 및 저장소 샘플 1개. 최신 220개 대상 재생성/전송/청취 필요.",
       "complete": false,
       "owner": "04",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
-      "activePR": null,
+      "activePR": 1409,
       "evidence": []
     },
     {
       "id": "AUD-03",
       "requirement": "무료 음성 파일 생성/검수",
-      "implementation": "pending",
-      "content": "pending",
-      "verification": "pending",
+      "implementation": "in_progress_unmerged",
+      "content": "draft_unmerged",
+      "verification": "unmerged_evidence_only",
       "acceptance": "라이선스 및 음성 파일·청취 검증",
-      "result": "Piper 후보 조사",
+      "result": "미병합 draft #1409; 이전 lesson blob 기반 로컬 MP3 100개 생성 주장 및 저장소 샘플 1개. 최신 220개 대상 재생성/전송/청취 필요.",
       "complete": false,
       "owner": "04",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
-      "activePR": null,
+      "activePR": 1409,
       "evidence": []
     },
     {
@@ -582,14 +654,17 @@
       "content": "draft",
       "verification": "simulated_runtime_pass",
       "acceptance": "각 프로필 독립, 백업 후 복원 시험",
-      "result": "localStorage/JSON 코드; simulated DOM/localStorage tests pass (VALIDATION.json), real browser pending",
+      "result": "통합된 인수인계 20261121-03-P0-GATE-01 / PR #1407; 최종 검증 대기",
       "complete": false,
       "owner": "03",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ]
     },
     {
       "id": "DB-03",
@@ -648,25 +723,28 @@
       "requirement": "PWA 자산과 캐시",
       "implementation": "done",
       "content": "draft",
-      "verification": "syntax_pass",
+      "verification": "simulated_runtime_pass",
       "acceptance": "실제 HTTPS 설치 및 오프라인 동작",
-      "result": "manifest/sw/icon 코드",
+      "result": "통합된 인수인계 20261121-03-P0-GATE-01 / PR #1407; 최종 검증 대기",
       "complete": false,
       "owner": "03",
       "verificationOwner": "05",
       "priority": "P0",
       "dependencies": [],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ]
     },
     {
       "id": "DEP-02",
       "requirement": "공개 URL 배포",
       "implementation": "partial",
       "content": "draft",
-      "verification": "failed_path",
+      "verification": "partial",
       "acceptance": "실서비스 HTTP 200 및 렌더링",
-      "result": "GitHub 커밋 성공, Pages 404",
+      "result": "통합된 인수인계 20261121-03-P0-GATE-01 / PR #1407; 최종 검증 대기",
       "complete": false,
       "owner": "03",
       "verificationOwner": "05",
@@ -676,16 +754,19 @@
         "DEP-01"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ]
     },
     {
       "id": "DEP-03",
       "requirement": "PC 브라우저 기능 테스트",
       "implementation": "pending",
       "content": "pending",
-      "verification": "pending",
+      "verification": "failed_path",
       "acceptance": "수업/시험/복습/백업 E2E",
-      "result": "미검증",
+      "result": "통합된 인수인계 05-P0-20261121-baseline / PR #1406; 최종 검증 대기",
       "complete": false,
       "owner": "05",
       "verificationOwner": "05",
@@ -694,7 +775,9 @@
         "DEP-02"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "qa/p0-browser-attempt-20261121.json"
+      ]
     },
     {
       "id": "DEP-04",
@@ -703,7 +786,7 @@
       "content": "pending",
       "verification": "pending",
       "acceptance": "실기기 화면·음성·녹음·설치",
-      "result": "미검증",
+      "result": "통합된 인수인계 05-P0-20261121-baseline / PR #1406; 최종 검증 대기",
       "complete": false,
       "owner": "05",
       "verificationOwner": "05",
@@ -712,7 +795,9 @@
         "DEP-02"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "qa/p0-browser-attempt-20261121.json"
+      ]
     },
     {
       "id": "DEP-05",
@@ -721,7 +806,7 @@
       "content": "pending",
       "verification": "pending",
       "acceptance": "전체 코스 및 클라우드 데이터, 운영 검수",
-      "result": "미완료",
+      "result": "통합된 인수인계 05-P0-20261121-baseline / PR #1406; 최종 검증 대기",
       "complete": false,
       "owner": "05",
       "verificationOwner": "05",
@@ -737,11 +822,78 @@
         "QA-04"
       ],
       "activePR": null,
-      "evidence": []
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md"
+      ]
     }
   ],
   "governanceVersion": "1.0.0",
   "milestone": "P0_FIRST_WEEK",
-  "processedHandoffs": [],
-  "milestoneNote": "P0 focuses on D001-D007 subset of affected tasks; whole-task completion rules unchanged. D008-D014 preparation in parallel. No new original tasks counted complete."
+  "processedHandoffs": [
+    "H01-20261121-CUR02-W01W02-R1",
+    "H02-20261121-first-fortnight-r1",
+    "20261121-03-P0-GATE-01",
+    "05-P0-20261121-baseline"
+  ],
+  "milestoneNote": "P0 focuses on D001-D007 subset of affected tasks; whole-task completion rules unchanged. D008-D014 preparation in parallel. No new original tasks counted complete.",
+  "integration": {
+    "mergedPRs": [
+      1406,
+      1407,
+      1408,
+      1410
+    ],
+    "openDraftPRs": [
+      1409
+    ],
+    "readHandoffs": [
+      {
+        "role": "01",
+        "path": "handoffs/01/20261121-CUR-02-w01-w02-r1.json",
+        "pr": 1410,
+        "ref": "main",
+        "id": "H01-20261121-CUR02-W01W02-R1",
+        "applied": true
+      },
+      {
+        "role": "02",
+        "path": "handoffs/02/20261121-CON-01-first-fortnight.json",
+        "pr": 1408,
+        "ref": "main",
+        "id": "H02-20261121-first-fortnight-r1",
+        "applied": true
+      },
+      {
+        "role": "03",
+        "path": "handoffs/03/20261121-APP-02-p0-gate.json",
+        "pr": 1407,
+        "ref": "main",
+        "id": "20261121-03-P0-GATE-01",
+        "applied": true
+      },
+      {
+        "role": "04",
+        "path": "handoffs/04/20261121-AUD-01-03-first-week.json",
+        "pr": 1409,
+        "ref": "turkish/04-first-week-audio-20261121",
+        "id": "20261121-04-AUD-01-03-first-week",
+        "applied": false
+      },
+      {
+        "role": "05",
+        "path": "handoffs/05/20261121-QA-02-p0-baseline.json",
+        "pr": 1406,
+        "ref": "main",
+        "id": "05-P0-20261121-baseline",
+        "applied": true
+      }
+    ],
+    "publishedDays": 0,
+    "authoredDraftDays": 14,
+    "independentFinalApprovedDays": 0,
+    "sourceRevision": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
+    "liveObservedVersion": "0.1.0",
+    "mainAppVersion": "0.1.1",
+    "newlyComplete": 0
+  }
 }
