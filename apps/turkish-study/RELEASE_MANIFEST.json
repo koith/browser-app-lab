@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "courseVersion": "0.1.0-draft",
-  "appVersion": "0.1.0",
+  "courseVersion": "0.2.0-draft",
+  "appVersion": "0.1.1",
   "releaseId": null,
   "stage": "development",
   "publishedDayIds": [],
@@ -16,15 +16,25 @@
   ],
   "contentRevision": null,
   "audioRevision": null,
-  "deploymentUrl": null,
+  "deploymentUrl": "https://koith.github.io/browser-app-lab/apps/turkish-study/",
   "verifiedAt": null,
-  "evidence": [],
+  "evidence": [
+    "ops/runs/20261121-00-integration-r1.json",
+    "qa/p0-baseline-20261121.json"
+  ],
   "limitations": [
-    "No independently reviewed lessons yet",
-    "Public Pages route previously 404",
-    "Runtime manifest enforcement not implemented",
+    "14 authored candidate days; 0 independently approved current-revision days",
+    "Public Pages rendered previous 0.1.0; main 0.1.1 not verified live",
+    "Weekly assessment rubric mismatch; actual assessment/dictation UI not integrated",
+    "Draft audio PR old revision; 1 committed candidate asset only",
+    "Exact approved payload digest binding pending",
+    "Actual physical iPhone and recording/audio verification pending",
     "Local storage only; no verified cloud synchronization"
   ],
   "nextMilestone": "P0_FIRST_WEEK",
-  "runtimeEnforcement": "pending"
+  "runtimeEnforcement": "main_implemented_fixture_pass_public_pending",
+  "candidateContentRevision": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
+  "deployedObservedVersion": "0.1.0",
+  "deploymentVerification": "public_preview_rendered_previous_version; current main not verified",
+  "artifactDigests": null
 }
