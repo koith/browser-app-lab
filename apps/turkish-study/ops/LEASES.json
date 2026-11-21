@@ -1,6 +1,55 @@
 {
   "version": "1.0.0",
-  "generation": 6,
-  "leases": {},
+  "generation": 7,
+  "leases": {
+    "role:00": {
+      "token": "auto-20261121-1243-r4",
+      "actor": "auto",
+      "role": "00",
+      "taskIds": [],
+      "branch": "main",
+      "baseCommit": "1aecee4208d9af0584ca149e6ede9ff4a98f22cc",
+      "paths": [
+        "ops/runs/",
+        "ops/WORK_QUEUE.json",
+        "ops/DEFECTS.json",
+        "DEVELOPMENT_LEDGER.json"
+      ],
+      "acquiredAt": "2026-11-21T12:43:09Z",
+      "heartbeatAt": "2026-11-21T12:43:09Z",
+      "expiresAt": "2026-11-21T14:13:09Z"
+    },
+    "role:02": {
+      "token": "auto-20261121-1243-r4",
+      "actor": "auto",
+      "role": "02",
+      "taskIds": [
+        "CON-01",
+        "CON-08",
+        "CON-09"
+      ],
+      "branch": "turkish/02-w01-alignment-1243",
+      "baseCommit": "1aecee4208d9af0584ca149e6ede9ff4a98f22cc",
+      "paths": [
+        "content/assessments.json",
+        "handoffs/02/"
+      ],
+      "acquiredAt": "2026-11-21T12:43:09Z",
+      "heartbeatAt": "2026-11-21T12:43:09Z",
+      "expiresAt": "2026-11-21T14:13:09Z"
+    },
+    "orchestrator:auto": {
+      "token": "auto-20261121-1243-r4",
+      "actor": "auto",
+      "role": "orchestrator",
+      "taskIds": [],
+      "branch": "main",
+      "baseCommit": "1aecee4208d9af0584ca149e6ede9ff4a98f22cc",
+      "paths": [],
+      "acquiredAt": "2026-11-21T12:43:09Z",
+      "heartbeatAt": "2026-11-21T12:43:09Z",
+      "expiresAt": "2026-11-21T14:13:09Z"
+    }
+  },
   "note": "CAS via GitHub update_file using latest blob SHA; coordination-only exception to 00 merge rule; no secret/user data."
 }
