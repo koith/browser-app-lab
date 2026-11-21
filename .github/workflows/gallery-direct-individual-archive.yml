@@ -243,13 +243,16 @@ jobs:
       - name: Store only reviewed publisher/creator originals; public rehosts remain discovery leads, never storage
         if: steps.incoming.outputs.found != 'true'
         run: echo 'STORAGE_RIGHTS_GATE publisher-verified-only; discovery elsewhere unchanged'
-      - name: Collect all observed public pages into individually verified files, without photo ZIPs
+      # A 500-photo stage previously hit the job deadline during serial uploads.
+      # Cap the staged transaction so upload, independent readback and publication
+      # retain enough runner time; a later explicit run starts from the live index.
+      - name: Collect a bounded batch into individually verified files, without photo ZIPs
         if: steps.incoming.outputs.found != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
           focused=()
           if [[ "$ARCHIVE_PUBLICATION_MODE" == deferred ]]; then focused=(--focused-only); fi
-          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 60 --page-cycle "$GITHUB_RUN_NUMBER" --alternative-engines --render-budget 30 --reviewed-source-only --reverse-evidence "$RUNNER_TEMP/reverse-page-leads.json" "${focused[@]}"
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 24 --max-pages 60 --page-cycle "$GITHUB_RUN_NUMBER" --alternative-engines --render-budget 30 --reviewed-source-only --reverse-evidence "$RUNNER_TEMP/reverse-page-leads.json" "${focused[@]}"
       - name: Content-address focused files for an unpublished private batch
         if: env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
         run: python apps/gallery-archive/defer_verified_batch.py prepare --stage "$RUNNER_TEMP/stage" --owner "$RUNNER_TEMP/owner-before.json"

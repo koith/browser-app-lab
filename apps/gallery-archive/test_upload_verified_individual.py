@@ -82,6 +82,11 @@ class SinglePhotoUploadTests(unittest.TestCase):
         self.assertTrue((self.stage/self.photos[1]['preview']).is_file())
         self.assertFalse((self.stage/self.photos[0]['key']).exists())
         self.assertFalse((self.stage/self.photos[0]['preview']).exists())
+        for key in ('key','preview'):
+            saved=self.stage/'held-upload-files'/self.photos[0][key]
+            self.assertTrue(saved.is_file(),key)
+            self.assertEqual(hashlib.sha256(saved.read_bytes()).hexdigest(),
+                             self.photos[0]['sha256' if key=='key' else 'preview_sha256'])
 
     def test_client_success_without_correct_sha_cannot_publish(self):
         def uploader(args):
