@@ -1,0 +1,159 @@
+{
+  "id": "H01-20261121-CUR02-W01W02-R1",
+  "from": "01",
+  "to": [
+    "02",
+    "05",
+    "00",
+    "04"
+  ],
+  "createdAt": "2026-11-21T17:12:00+09:00",
+  "taskIds": [
+    "RES-03",
+    "CUR-01",
+    "CUR-02",
+    "CUR-03",
+    "CON-10"
+  ],
+  "baseRef": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "contractVersion": "1.0.0",
+  "status": "review_requested",
+  "summary": "D001–D007 상세 설계 작성 완료(독립검수 전), D008–D014 선행 초안, 120일 구조 유지, 1·2주 평가 루브릭 및 원문 출처·어휘 선정 기준. 00만 병합/원장 갱신.",
+  "changedFiles": [
+    "curriculum-mapping/D001.json",
+    "curriculum-mapping/D002.json",
+    "curriculum-mapping/D003.json",
+    "curriculum-mapping/D004.json",
+    "curriculum-mapping/D005.json",
+    "curriculum-mapping/D006.json",
+    "curriculum-mapping/D007.json",
+    "curriculum-mapping/D008.json",
+    "curriculum-mapping/D009.json",
+    "curriculum-mapping/D010.json",
+    "curriculum-mapping/D011.json",
+    "curriculum-mapping/D012.json",
+    "curriculum-mapping/D013.json",
+    "curriculum-mapping/D014.json",
+    "curriculum-mapping/sources-r1.json",
+    "curriculum-mapping/outline-audit-r1.json",
+    "curriculum-mapping/vocabulary-policy-r1.json",
+    "curriculum-mapping/week01-assessment.json",
+    "curriculum-mapping/week02-assessment.json",
+    "curriculum-mapping/validation-w01-w02-r1.json",
+    "handoffs/01/20261121-CUR-02-w01-w02-r1.json"
+  ],
+  "verification": [
+    {
+      "result": "pass",
+      "scope": "author structural checks (15)",
+      "evidence": "curriculum-mapping/validation-w01-w02-r1.json",
+      "revision": "31deb22c2226d1c9ee72ff15cb55072e46583fbf"
+    },
+    {
+      "result": "pass",
+      "scope": "GitHub compare 20 additions only, curriculum.json blob unchanged, D001/D007/D014/validation/rubric readback",
+      "evidence": "https://github.com/koith/browser-app-lab/commit/31deb22c2226d1c9ee72ff15cb55072e46583fbf",
+      "revision": "31deb22c2226d1c9ee72ff15cb55072e46583fbf"
+    },
+    {
+      "result": "pending",
+      "scope": "independent linguistic/pedagogical review, assessment item coverage, timed pilot",
+      "evidence": "curriculum-mapping/week01-assessment.json",
+      "revision": "31deb22c2226d1c9ee72ff15cb55072e46583fbf"
+    },
+    {
+      "result": "pending",
+      "scope": "Maarif PDF visual audit and YEE full textbook verification; Maarif official indexed text checked, YEE official audio topic listing checked",
+      "evidence": "curriculum-mapping/sources-r1.json",
+      "revision": "31deb22c2226d1c9ee72ff15cb55072e46583fbf"
+    }
+  ],
+  "requests": [
+    {
+      "to": "02",
+      "action": "D001–D007 매핑 및 루브릭 우선 사용해 실제 학습자료 제작/보완. 다음 D008–D014 초안 참고. 원본 어휘 순서/표기·ID 보존, 각 목표에 콘텐츠·연습·해설 연결. 25개 기존 문항만으로 평가 대체 금지; 듣기·읽기·쓰기·상호작용 제공, 음원 준비 전 듣기 합격 미부여.",
+      "acceptance": "각 목표와 선행 범위 충족, 60분 분량 및 W01 루브릭 채점 증거 제공. ID 변경이나 새로운 스키마 필요시 00 제안."
+    },
+    {
+      "to": "05",
+      "action": "data commit 고정 후 독립 검수: CEFR/Maarif 원문과 목표 대응, 터키어 표기·의미·격식, 선행 범위, 어휘 중복/문법, 실제 콘텐츠와 평가 정합, 난도·실측 시간 검증.",
+      "acceptance": "검수 증거 및 결함 ID 기록; 4영역 누락·79.99점/역량 15점 경계·재평가 가이드 검증. 프로젝트 형성평가를 공식 CEFR 인증으로 표기하지 않음."
+    },
+    {
+      "to": "04",
+      "action": "02와 협의하여 D001–D006 발음 모델 및 W01 평가용 듣기 음원 준비; D002 모음과 D003 ğ 대조 포함.",
+      "acceptance": "원어 발음/음원 검수 근거와 목표 ID, 음원 없이 추측 채점하지 않음."
+    },
+    {
+      "to": "00",
+      "action": "PR 범위·독립검수 확인 및 병합/원장 갱신 결정. 현재 완료 플래그 유지, 하위 범위 성과만 기록.",
+      "acceptance": "타 소유 파일 미변경, release gate 충족 전 최종 완료 표시 금지."
+    }
+  ],
+  "ledgerProposals": [
+    {
+      "id": "RES-03",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "partial",
+      "evidence": [
+        "curriculum-mapping/outline-audit-r1.json",
+        "curriculum-mapping/sources-r1.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CUR-01",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "structure_pass",
+      "evidence": [
+        "curriculum-mapping/outline-audit-r1.json",
+        "curriculum-mapping/validation-w01-w02-r1.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CUR-02",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "structure_pass",
+      "evidence": [
+        "curriculum-mapping/D001.json",
+        "curriculum-mapping/D007.json",
+        "curriculum-mapping/D014.json",
+        "curriculum-mapping/sources-r1.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CUR-03",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "partial",
+      "evidence": [
+        "curriculum-mapping/vocabulary-policy-r1.json",
+        "curriculum-mapping/outline-audit-r1.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-10",
+      "implementation": "draft",
+      "content": "draft",
+      "verification": "pending",
+      "evidence": [
+        "curriculum-mapping/week01-assessment.json",
+        "curriculum-mapping/week02-assessment.json"
+      ],
+      "proposedComplete": false
+    }
+  ],
+  "knownIssues": [
+    "Maarif 대체 공식 PDF 본문은 확인, 이미지 캡처 용량 제한; YEE 공식 목록으로 주제/순서 확인, 교재 전체 미검수.",
+    "60분은 설계 추정, 실제 학습자 시간 측정 필요. D012 숫자 분량 집중 위험, 십단위 표 지원 및 이후 재인출.",
+    "어휘 1000/500은 도전 목표. 실측 습득률과 목표별 중복/의미 구분 검수 필요.",
+    "D015–D120 상세 매핑 106일 잔여; 월간 평가는 상위 로드맵만 작성.",
+    "원장·출고 상태·curriculum.json·lessons.json 변경 없음."
+  ]
+}
