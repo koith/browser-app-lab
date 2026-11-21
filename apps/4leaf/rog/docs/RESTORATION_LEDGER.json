@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-20",
+  "updatedAt": "2026-11-21",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -2597,9 +2597,9 @@
       "id": "BRD-01",
       "priority": "P0",
       "title": "카메라 투영·발판 크기 원본 시점 맞춤",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 145×97 TIS 원화에 현 웹 중심 피치 150×100을 사용해 가로 겹침을 해소했지만 실제 역사적 3D 카메라 공식은 미확인 | 구현 목표: 원본 board/battle의 동일 DMP 지도·좌표·줌 상태에서 발판 중심/소실점/배경 시야를 추적해 실제 카메라 수치 결정; 2026-10-20 board.jpg 및 battle.jpg 원본 800x600 실제 열람 비교: 두 자료는 VS/두 금속 발판/주사위가 있는 전투 씬임. 일반 26 DMP 맵과 동일 시점·주사위/맵 상태가 아니므로 가짜 1:1 원작 카메라 값 산출 불가. WEB 진짜 TIS 145x97/150x100 non-overlap/32 소스 픽셀 검사 보존, 추가 원본 일반 게임 영상/클라이언트 MVE camera 찾는 중. 소스 3D 투영 완료 아님.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 145×97 TIS 원화에 현 웹 중심 피치 150×100을 사용해 가로 겹침을 해소했지만 실제 역사적 3D 카메라 공식은 미확인 | 구현 목표: 원본 board/battle의 동일 DMP 지도·좌표·줌 상태에서 발판 중심/소실점/배경 시야를 추적해 실제 카메라 수치 결정; 2026-10-20 board.jpg 및 battle.jpg 원본 800x600 실제 열람 비교: 두 자료는 VS/두 금속 발판/주사위가 있는 전투 씬임. 일반 26 DMP 맵과 동일 시점·주사위/맵 상태가 아니므로 가짜 1:1 원작 카메라 값 산출 불가. WEB 진짜 TIS 145x97/150x100 non-overlap/32 소스 픽셀 검사 보존, 추가 원본 일반 게임 영상/클라이언트 MVE camera 찾는 중. 소스 3D 투영 완료 아님. | 2026-11-21 VERIFIED original-source 2D board-camera scope: PR #1395 main e9a441ad beta.100; 18 source observations, 12 distinct DMP 0172 cells across board.jpg, battle.jpg and one additional same-map historical 800x600 archive capture (four additional cells #5, #6, #9, #10; source mask NCC 0.9825–0.9972). 105×80 odd-q grid, odd columns +40, native 145×97 upright TIS, relative centre error <=1px, no inverted/duplicate cells. Actual source terrain phase and 35px tile / 17px background displacement matched in live play. Chromium/WebKit source and byte-matching public live beta.100 verification PASS https://github.com/koith/browser-app-lab/actions/runs/44862586162. Historical original MVE 3D matrix, horizontal generalization and native zoom semantics are not source-established; retain under M09/P0-RELEASE and existing M06/M07 as applicable, not claimed restored. 2002/2004 cell17 art conflict remains explicitly noted in source evidence; geometry task only.",
       "acceptance": [
         "동일 상태 캡처에서 최소 10개 기준 타일 중심·사이즈·상하 방향·배경 지형 오차를 기록하고 역전/비정상 중첩 0건"
       ],
@@ -2609,11 +2609,21 @@
         "tests/dice-horizontal-native-actors.cjs",
         "apps/4leaf/assets/board.jpg",
         "apps/4leaf/assets/battle.jpg",
-        "apps/4leaf/rog/docs/OBS_640_STRIDE_SOURCE_RESTORATION_2026-10-20.md"
+        "apps/4leaf/rog/docs/OBS_640_STRIDE_SOURCE_RESTORATION_2026-10-20.md",
+        "apps/4leaf/rog/docs/evidence/brd01/board-jpg-hex-anchors.json",
+        "apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs",
+        "https://t1.daumcdn.net/cfile/tistory/130D143A5142AFA11F",
+        "https://github.com/koith/browser-app-lab/actions/runs/44862586162",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-20",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-ORIGINAL-SCREENSHOT-PROJECTION/REAL-BROWSER/PUBLIC-BYTE-MATCH; HISTORICAL-MVE-3D-UNVERIFIED",
+      "lastReviewed": "2026-11-21",
+      "verifiedAcceptance": {
+        "sourceComparison": "18 source image observations across three same-map original screenshots, 12 independent DMP cells; four newly measured cells from https://t1.daumcdn.net/cfile/tistory/130D143A5142AFA11F SHA256 b64582f5c9622f0a55f2cb7340e109838c398725e97adbecc7c56e88b607c166. Native 145x97 art and 105x80/+40 geometry; archive matching NCC scores 0.9825–0.9972; actual 35:17 vertical terrain displacement measured; horizontal/native MVE unverified.",
+        "implementation": "PR #1395 / e9a441adb831f92f2714134d737940ba1a13ec08 beta.100 native continuous terrain phase, vertical parallax and source projection. Production geometry remains unchanged from successfully deployed runtime.",
+        "runtimeTest": "https://github.com/koith/browser-app-lab/actions/runs/44862586162 Chromium and WebKit both PASS local and exact-byte matching production live DOM; 26 maps 1920 cells all native top faces exposure, 104 source DMP 0172 cells, 12 independent reference positions, zero inverted or duplicate. Actual live tile delta 35, terrain delta 17.",
+        "deployment": "Public beta.100/PWA v188 verified via six cmp source files (app-version, board-camera, native client CSS, game, original maps, original tiles) and both public actual game browser tests in https://github.com/koith/browser-app-lab/actions/runs/44862586162. Original MVE equivalence and physical iPhone not claimed."
+      },
       "dependencies": [
         "EVID-01"
       ],
@@ -10513,6 +10523,22 @@
         "apps/4leaf/rog/docs/evidence/brd01/board-jpg-hex-anchors.json",
         "apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs",
         "apps/4leaf/rog/game.js",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
+      ]
+    },
+    {
+      "seq": 489,
+      "date": "2026-11-21",
+      "type": "STATUS_CHANGED",
+      "taskId": "BRD-01",
+      "from": "in_progress",
+      "to": "done",
+      "details": "2026-11-21 VERIFIED original-source 2D board-camera scope: PR #1395 main e9a441ad beta.100; 18 source observations, 12 distinct DMP 0172 cells across board.jpg, battle.jpg and one additional same-map historical 800x600 archive capture (four additional cells #5, #6, #9, #10; source mask NCC 0.9825–0.9972). 105×80 odd-q grid, odd columns +40, native 145×97 upright TIS, relative centre error <=1px, no inverted/duplicate cells. Actual source terrain phase and 35px tile / 17px background displacement matched in live play. Chromium/WebKit source and byte-matching public live beta.100 verification PASS https://github.com/koith/browser-app-lab/actions/runs/44862586162. Historical original MVE 3D matrix, horizontal generalization and native zoom semantics are not source-established; retain under M09/P0-RELEASE and existing M06/M07 as applicable, not claimed restored. 2002/2004 cell17 art conflict remains explicitly noted in source evidence; geometry task only.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/actions/runs/44862586162",
+        "https://t1.daumcdn.net/cfile/tistory/130D143A5142AFA11F",
+        "apps/4leaf/rog/docs/evidence/brd01/board-jpg-hex-anchors.json",
+        "apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs",
         "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
       ]
     }

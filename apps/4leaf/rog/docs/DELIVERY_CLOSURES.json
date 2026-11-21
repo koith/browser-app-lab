@@ -1,5 +1,39 @@
 {
   "schemaVersion": 1,
   "description": "Only NEW task closures after the 2026-11-18 baseline. Historical completions remain in RESTORATION_LEDGER.json. A closure is not accepted until real original+renewal reference, implementation, actual browser flows and public deployment evidence are linked.",
-  "newClosures": {}
+  "newClosures": {
+    "DIE-02": {
+      "originalSource": "Original OBS.pak 1223.obs D4, 1171.obs D6 source keyed images and animation tables",
+      "renewalSource": "Later mobile renewal timing/model not verified; original source frame acceptance only, M07 retains historic physics.",
+      "referenceComparison": "Existing canonical ledger event 487; source exact animation keys, 10 outcomes twice per engine; no claims of native 3D physics.",
+      "implementedCommit": "6b2ff2e0cf0e82fc76bc8767adb228e759c52a5a",
+      "chromiumRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44650283052",
+      "webkitRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44650283052",
+      "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44534311541",
+      "publicVersion": "0.86.0-beta.99",
+      "fullUserFlow": "Actual two-player first and second engine turns, original native final face equals engine result. Prior accepted closure, not new count."
+    },
+    "M04": {
+      "originalSource": "26 DMP source maps, 32 native original TIS images, board.jpg and battle.jpg",
+      "renewalSource": "Later mobile renewal is a different version; no verified same MVE model or camera. Existing original DMP/TIS scope only.",
+      "referenceComparison": "Existing canonical ledger event 488; 1920 cells, 14,378,612 opaque pixels each browser, zero obscured inset pixels; 105x80 odd-q geometry.",
+      "implementedCommit": "1da6ff3d78b6f316374d63d9a664d1013dd3096a",
+      "chromiumRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44726864601",
+      "webkitRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44726864601",
+      "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44534311541",
+      "publicVersion": "0.86.0-beta.99",
+      "fullUserFlow": "All 26 native maps playable / real source DOM tiles, publicly released native beta.99 runtime unchanged between implementation and acceptance. Prior accepted closure, not new count."
+    },
+    "BRD-01": {
+      "originalSource": "Original 800×600 board.jpg, battle.jpg and actual 2003 last-night screenshots at https://t1.daumcdn.net/cfile/tistory/130D143A5142AFA11F SHA256 b64582f5c9622f0a55f2cb7340e109838c398725e97adbecc7c56e88b607c166 (archive https://4leafmemorial.geld.kr/category/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7/%EC%A3%BC%EC%82%AC%EC%9C%84%EC%9D%98%20%EC%9E%94%EC%98%81)",
+      "renewalSource": "Later mobile renewal is distinct; no matching historic MVE camera reference established. Keep original 2D screenshots as primary, not a claim of renewal or native MVE equivalence.",
+      "referenceComparison": "18 source image observations across three same-map original screenshots, 12 independent DMP cells; four newly measured cells from https://t1.daumcdn.net/cfile/tistory/130D143A5142AFA11F SHA256 b64582f5c9622f0a55f2cb7340e109838c398725e97adbecc7c56e88b607c166. Native 145x97 art and 105x80/+40 geometry; archive matching NCC scores 0.9825–0.9972; actual 35:17 vertical terrain displacement measured; horizontal/native MVE unverified.",
+      "implementedCommit": "e9a441adb831f92f2714134d737940ba1a13ec08",
+      "chromiumRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44862586162",
+      "webkitRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44862586162",
+      "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44862586162",
+      "publicVersion": "0.86.0-beta.100",
+      "fullUserFlow": "Actual public WorldMap -> lobby -> CREATE -> hotseat -> select source map 0172 -> start match -> camera focus and pan on actual game. Both public Chromium and WebKit confirm same release byte-matched source and 12 distinct 18 reference observations, 145x97 upright orientation, zero inversion, 35:17 terrain movement."
+    }
+  }
 }
