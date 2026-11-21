@@ -1,7 +1,7 @@
 'use strict';
 /* Native 2002 CardShop actual buy/sell GUI and stateful GP transaction QA.
  * Source authenticity is limited to source atlas button pixels and 9
- * card backs. 50% resale is explicitly INFERRED WEB economy policy.
+ * card backs. 25% ordinary resale is a secondary historical rule; exact rounding remains inferred.
  */
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
@@ -83,8 +83,8 @@ const path=require('node:path');
   }));
   assert.ok(afterBuy.p.owned.includes(cardId),'real chessman added to saved inventory');
   assert.equal(afterBuy.enabled,true,'newly purchased un-equipped card may be sold');
-  assert.equal(afterBuy.known,'inferred-web-price-not-original',
-   'never misrepresent 50% resale as confirmed original rule');
+  assert.equal(afterBuy.known,'historical-pc-secondary-resale-25-percent',
+   'ordinary resale uses the secondary historical 25% rule, not official serial rule');
   assert.equal(afterBuy.pos,'0px -481px','genuine 판매하기 original first-frame atlas');
   assert.equal(afterBuy.clickTarget,'shop-sell',
    'source sale button must be physically clickable below open inventory');
@@ -126,7 +126,7 @@ const path=require('node:path');
   assert.deepEqual(errors,[],'real shop resale causes no browser exceptions');
   console.log('ORIGINAL SOURCE CARDSHOP BUY/SELL PASS',JSON.stringify({
    source:'CardShop/cardshopbutton.png',grid:'3x3-native-atlas',
-   buyCard:cardId,protectedCard:protectedId,resalePolicy:'WEB-inferred-50-percent',
+   buyCard:cardId,protectedCard:protectedId,resalePolicy:'historical-secondary-25-percent',
    gpBefore:before.old,gpAfterBuy:afterBuy.p.gp,
    gpAfterSell:afterSell.gp,saleCredit:afterBuy.sellGp,
    sameInventoryAfterRoundtrip:true}));

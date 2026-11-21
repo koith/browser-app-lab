@@ -1,0 +1,19 @@
+{
+  "source": "https://namu.moe/w/주사위의%20잔영",
+  "sourceLevel": "RETROSPECTIVE-SECONDARY; original DMP source warp target directly verified",
+  "officialSerial": "https://4leafmemorial.geld.kr/959",
+  "changes": [
+    "60 reciprocal original warp entries stop after one hop",
+    "bonus +3/+4 tile uses normal 3 per tile gauge increment",
+    "unreleased items excluded from treasure/blessing",
+    "keeper A/B/C strength ordering corrected",
+    "Armageddon global and halves movement die count without changing die type",
+    "flipper restricted to losing participant",
+    "normal 25% ordinary resale distinguished from official serial 1000 GP"
+  ],
+  "limitations": [
+    "Original 2004 random tile distribution and exact remaining ability/card rules not exhaustively established",
+    "25% retrospective; original purchase-base rounding unknown",
+    "No historical-equivalence completion claimed before acceptance"
+  ]
+}

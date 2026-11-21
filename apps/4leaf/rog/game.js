@@ -549,7 +549,11 @@ window.__LEAF_DICE_ROSTER__={
 // Archived CardShop sprite atlas includes actual 판매하기 button art, but
 // surviving client has NOT verified its resale GP rule. 50% is a clearly
 // labeled WEB economic fallback, never represented as source historical data.
-const inferredShopResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/2));
+// Retrospective PC 4LEAF rules archive: ordinary item resale was reduced to 25%.
+// Secondary historical report, not a recovered server formula. Use current quoted
+// shop price; exact historical rounding/basis are not independently confirmed.
+// https://namu.moe/w/주사위의%20잔영 (4.1 서비스 자체의 문제)
+const historicalOrdinaryResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/4));
 // Original 4LEAF operation notice, 2003-09-18: serial-number REDEEMED
 // cards were resold to Magic Carden for exactly 1,000 GP, regardless of
 // market purchase price. This is NOT proof of a 1,000 GP resale for all
@@ -558,8 +562,8 @@ const inferredShopResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/
 const shopResaleQuote=card=>profile.serialRedeemed.includes(card?.id)
  ?{gp:1000,source:'original-2003-serial-redemption-1000gp',
    label:'원작 2003년 시리얼 등록 카드 재판매 1,000 GP'}
- :{gp:inferredShopResaleGP(card),source:'inferred-web-price-not-original',
-   label:'임시 판매가 '+inferredShopResaleGP(card).toLocaleString()+' GP (일반 카드 원작 재판매 가격 규칙 미확인)'};
+ :{gp:historicalOrdinaryResaleGP(card),source:'historical-pc-secondary-resale-25-percent',
+   label:'판매가 '+historicalOrdinaryResaleGP(card).toLocaleString()+' GP (당시 회고 자료: 25%, 계산 기준·절사 방식 추정)'};
 // An inventory/GP change must not become visible until it is durable.
 // On localStorage quota/permission failure, restore exactly the previous
 // in-memory balances; a later page reload must not silently undo a purchase
@@ -1592,7 +1596,7 @@ async function applyItem(index,steps=null){
    const n=Math.max(itemId==='wing'?1:-4,Math.min(itemId==='wing'?12:4,Number(steps)||0));
    if(n===0)return;
    consume(index);advance(p,n);appendMove(p.name+' · '+item.name+' '+n+'칸 이동');
-   if(n>0)await resolveTile(p);
+   await resolveTile(p);
    drawGame();return;
  }
  consume(index);
@@ -1602,7 +1606,10 @@ async function applyItem(index,steps=null){
  case 'dove':p.effects.dove=5;break;
  case 'valkyrie':p.effects.valkyrie=2;break;
  case 'ring':p.effects.ring=(p.effects.ring||0)+1;break;
- case 'armageddon':p.effects.armageddon=2;break;
+ case 'armageddon':
+   // Historical PC rule: all participants, caster 3 turns / others 2.
+   for(const q of match.players)q.effects.armageddon=q===p?3:2;
+   break;
  case 'charge':p.ability=Math.min(100,p.ability+50);break;
  case 'charge25':p.ability=Math.min(100,p.ability+25);break;
  case 'drain25':case 'drain50':{
@@ -1618,7 +1625,7 @@ async function applyItem(index,steps=null){
  appendMove(p.name+' · '+item.name+' 사용');drawGame();
 }
 function consume(index){const p=activePlayer();p.items.splice(index,1);p.usedItem=true;persist()}
-function advance(user,distance){user.position=Math.min(match.tiles.length-1,Math.max(0,user.position+distance));user.ability=Math.min(100,user.ability+Math.max(0,distance)*4)}
+function advance(user,distance,gainPerTile=4){const origin=user.position;user.position=Math.min(match.tiles.length-1,Math.max(0,user.position+distance));user.ability=Math.min(100,user.ability+Math.max(0,user.position-origin)*gainPerTile)}
 async function useAbility(){
  if(!withUserTurn())return;
  
@@ -1909,10 +1916,10 @@ function combat(attacker,defender,keeper=false){
  return new Promise(resolve=>{
  const aStat=teamStats(attacker.team),bStat=keeper?{def:defender.def||2,int:0}:{...teamStats(defender.team)};
  const reducedA=attacker.effects?.armageddon>0,reducedB=defender.effects?.armageddon>0;
- const isSoloA=attacker.team?.length===1,isSoloB=defender.team?.length===1;
- const isDuoA=attacker.team?.length===2,isDuoB=defender.team?.length===2;
- const aCount=Math.max(1,(reducedA?Math.max(1,Math.floor(aStat.atk/2)):aStat.atk)+(isSoloA&&attacker.effects?.ring>0?1:0));
- const bCount=Math.max(1,(reducedB?Math.max(1,Math.floor(bStat.def/2)):bStat.def)+(isDuoB&&defender.effects?.ring>0?1:0));
+ const fieldSize=p=>(p.team||[]).slice(0,3).filter(Boolean).length;
+ const fieldA=fieldSize(attacker),fieldB=fieldSize(defender);
+ const aCount=Math.max(1,(reducedA?Math.floor(aStat.atk/2):aStat.atk)+(fieldA<=2?(attacker.effects?.ring||0):0));
+ const bCount=Math.max(1,(reducedB?Math.floor(bStat.def/2):bStat.def)+(fieldB<=2?(defender.effects?.ring||0):0));
  let attack,defense,aValue,bValue,rerolls=0;
  // Source: actual final-service 2004 screenshot and commentary archived by
  // 4LEAF Memorial (https://4leafmemorial.tistory.com/1577 ,
@@ -1923,8 +1930,8 @@ function combat(attacker,defender,keeper=false){
  let neutralizedFixed=false;
  for(let attempt=0;attempt<100;attempt++){
    attack=diceN(aCount,6);defense=diceN(bCount,6);
-   aValue=attack.total+(aStat.int||0)+(attacker.team?.length>=3?(attacker.effects?.ring||0):0)+(attacker.effects?.teamInt>0?3:0)+elementalModifier(attacker.team,'attack')+elementalModifier(attacker.team,'support');
-   bValue=defense.total+(bStat.int||0)+(defender.team?.length>=3?(defender.effects?.ring||0):0)+(defender.effects?.teamInt>0?3:0)+(keeper?0:elementalModifier(defender.team,'defense')+elementalModifier(defender.team,'support'));
+   aValue=attack.total+(aStat.int||0)+(fieldA>=3?(attacker.effects?.ring||0):0)+(attacker.effects?.teamInt>0?3:0)+elementalModifier(attacker.team,'attack')+elementalModifier(attacker.team,'support');
+   bValue=defense.total+(bStat.int||0)+(fieldB>=3?(defender.effects?.ring||0):0)+(defender.effects?.teamInt>0?3:0)+(keeper?0:elementalModifier(defender.team,'defense')+elementalModifier(defender.team,'support'));
    if(attacker.effects?.scar>0)aValue=Math.max(1,aValue-attacker.effects.scar);
    if(defender.effects?.scar>0)bValue=Math.max(1,bValue-defender.effects.scar);
    if(attacker.effects?.ultimate>0)aValue=30;
@@ -1973,7 +1980,8 @@ function combat(attacker,defender,keeper=false){
    options.unshift({label:'체인지 카드',run:()=>{player.items.splice(player.items.indexOf('change'),1);player.usedItem=true;finish({attacker:bValue,defender:aValue,changed:true})}});
  }
  if(selfInvolved&&player.items.includes('bomb')&&!player.usedItem){options.unshift({label:'자폭',run:()=>{player.items.splice(player.items.indexOf('bomb'),1);player.usedItem=true;attacker.position=0;if(Number.isInteger(defender.position))defender.position=0;finish({...results,negated:true,mutualReset:true})}})}
- if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem){
+ if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem&&
+    (attacker.id===player.id?aValue<bValue:bValue<aValue)){
    options.unshift({label:'오리발 카드',run:()=>{player.items.splice(player.items.indexOf('flipper'),1);player.usedItem=true;finish({...results,negated:true})}});
  }
 
@@ -2054,15 +2062,16 @@ async function resolveBattle(attacker,defender,keeper){
  if(loser?.team?.length)
    window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(loser.id,'hurt',650);
 }
-function grantItem(user){if(user.items.length<5){const itemId=ITEMS[rand(ITEMS.length)].id;user.items.push(itemId);appendMove(user.name+'이(가) 보물상자에서 '+ITEM_MAP[itemId].name+' 획득!')}else appendMove(user.name+'은 아이템이 가득 찼습니다.')}
-async function resolveTile(p,depth=0){
+function randomPlayableItem(){const pool=ITEMS.filter(i=>!i.disabled);return pool[rand(pool.length)].id}
+function grantItem(user){if(user.items.length<5){const itemId=randomPlayableItem();user.items.push(itemId);appendMove(user.name+'이(가) 보물상자에서 '+ITEM_MAP[itemId].name+' 획득!')}else appendMove(user.name+'은 아이템이 가득 찼습니다.')}
+async function resolveTile(p,depth=0,arrivedByWarp=false){
  if(!match||match.finished||depth>5)return;
  const pos=p.position,type=match.tiles[pos];
  if(type==='goal'||pos>=match.tiles.length-1){finishGame(p);return}
  let landed=false;
  if(type==='boost'||type==='boost4'){
-   const n=type==='boost4'?4:3;advance(p,n);appendMove(p.name+' +'+n+' 전진!');landed=true;
- }else if(type==='warp'){
+   const n=type==='boost4'?4:3;advance(p,n,3);appendMove(p.name+' +'+n+' 전진!');landed=true;
+ }else if(type==='warp'&&!arrivedByWarp){
    const row=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[pos];
    const group=originalTileAt(match.map,pos)?.warpGroup;
    let target=(row?.[3]===10&&Number.isInteger(row[5]))?row[5]:-1;
@@ -2070,13 +2079,20 @@ async function resolveTile(p,depth=0){
      const candidate=match.tiles.map((type,i)=>({type,i})).filter(o=>o.type==='warp'&&o.i!==pos&&(!group||originalTileAt(match.map,o.i)?.warpGroup===group)).map(o=>o.i);
      target=candidate.length?candidate[rand(candidate.length)]:pos;
    }
-   if(target!==pos){p.position=target;appendMove(p.name+' 워프: '+(pos+1)+' → '+(target+1)+' 칸');landed=true}
+   if(target!==pos){
+     p.position=target;appendMove(p.name+' 워프: '+(pos+1)+' → '+(target+1)+' 칸');
+     // The 2002 DMP has 60 reciprocal links. The destination warp is an
+     // arrival, not a new roll; otherwise A->B->A loops six times and
+     // incorrectly lands back on the origin. Non-warp destinations still
+     // receive their actual landing effect, and PvP still resolves.
+     await resolveTile(p,depth+1,true);return;
+   }
  }else if(type==='chest'){grantItem(p)}
- else if(type==='blessing'){while(p.items.length<5)p.items.push(ITEMS[rand(ITEMS.length)].id);appendMove(p.name+' 신의 축복: 아이템 가득 충전')}
+ else if(type==='blessing'){while(p.items.length<5)p.items.push(randomPlayableItem());appendMove(p.name+' 신의 축복: 아이템 가득 충전')}
  else if(type==='curse'){p.items=[];appendMove(p.name+' 신의 저주: 모든 아이템 소실')}
  else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.');window.__LEAF_NATIVE_EVENTS__?.show('jail',p.name)}
  else if(type==='kingbomb'){p.position=0;appendMove(p.name+' 왕폭탄 폭발! START 복귀');match.tiles[pos]='normal'}
- else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
+ else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:rand(2)?6:4,keeperB:3,keeperC:2};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
  else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%');if(p.ability===100)window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
  else if(type==='ability100'){
    const ts=teamStats(p.team),count=Math.max(1,Math.min(4,p.team?.length>=3?ts.int:(p.team?.length===2?ts.def:ts.atk)));
@@ -2214,7 +2230,11 @@ function finishGame(winner){
 }
 function moveValues(p){
  const stats=teamStats(p.team),extra=p.effects.shoe>0?1:0,values=[];
- const sides=stats.move===2?4:6,n=Math.min(4,(stats.move===2?2:1)+extra);
+ const sides=stats.move===2?4:6;
+ const normalCount=stats.move===2?2:1;
+ // Armaggedon halves movement count without converting D4 to D6.
+ const baseCount=p.effects.armageddon>0?Math.max(1,Math.floor(normalCount/2)):normalCount;
+ const n=Math.min(4,baseCount+extra);
  for(let i=0;i<n;i++){
    let v=d(sides);
    if(p.effects.clover)v=(sides===4?3:4)+rand(sides===4?2:3);
@@ -2463,7 +2483,7 @@ function init(){installBoardControls();installNativeDiceMenu();
    if(chosenCard===c.id)chosenCard=profile.owned[0]||BASE_CARDS[0]?.id;
    profileUI();drawShop();drawTeam();
    chat('매직카덴',c.name+' 카드 판매 · '+gp.toLocaleString()+' GP ('+
-    (quote.source==='original-2003-serial-redemption-1000gp'?'2003년 시리얼 카드 공식 규칙':'임시 웹 판매 규칙')+').','system');
+    (quote.source==='original-2003-serial-redemption-1000gp'?'2003년 시리얼 카드 공식 규칙':'당시 회고 자료 25% 판매 규칙')+').','system');
    sfx(600);
   }},{label:'취소'}]);
 };$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if($('rog-real-user'))$('rog-real-user').textContent='♧ '+profile.name+' (내 기기)';if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);};const list=$('online-list');list.replaceChildren();const selfUser=document.createElement('div');selfUser.id='rog-real-user';selfUser.textContent='♧ '+profile.name+' (내 기기)';list.append(selfUser);setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI/로컬 대전 · 브라우저 간 직접 연결. 원작 중앙 서버는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
