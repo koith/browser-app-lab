@@ -31,6 +31,12 @@ MAGIC=b"INTIDX1"
 AAD=b"intersection-account-index-cold-start-v1"
 MAX_RAW=8*1024*1024
 MAX_CIPHER=MAX_RAW+512
+# The immutable encrypted release is baked into the Docker image after
+# a build-time SHA256 check. Free Render discards local SQLite on sleep;
+# this bounded fallback needs no outbound requests on subsequent cold boots.
+BUNDLED_TAG="intersection-index-boot-20261109"
+BUNDLED_CIPHER_SHA="a3aafe2a9dfe1cf4e02488c8039a52723e925b1719310faf91fcb76e3e998650"
+BUNDLED_PATH=Path(__file__).resolve().parent/"account-index-boot.enc"
 RUN=re.compile(r"^[0-9]{6,30}$")
 SHA=re.compile(r"^[a-f0-9]{64}$")
 
@@ -188,12 +194,24 @@ def _direct_cipher(tag:str):
     return ciphertext
 
 
-def find_latest_cipher(bridge_key:bytes, now=None, *, lookback_days=7):
-    """Bounded direct immutable readback; SHA and AES verify authenticity.
+def bundled_cipher():
+    """Read only build-pinned AES ciphertext, not remote plaintext or code."""
+    with BUNDLED_PATH.open("rb") as stream:
+        raw=stream.read(MAX_CIPHER+1)
+    if (not 1<=len(raw)<=MAX_CIPHER
+            or not hmac.compare_digest(hashlib.sha256(raw).hexdigest(),
+                                       BUNDLED_CIPHER_SHA)):
+        raise ValueError("bundled encrypted index digest not verified")
+    return raw
 
-    Release metadata endpoints can fail or be delayed on unauthenticated
-    Render free instances even when the static encrypted asset exists.
-    Direct URL fetch is already used by the existing public ZIP reader.
+
+def find_latest_cipher(bridge_key:bytes, now=None, *, lookback_days=7):
+    """Prefer newest authenticated Release; recover from pinned offline copy.
+
+    Provider/GitHub CDN outages must not leave a sleeping free Render server
+    empty. Both routes require AES-GCM authentication and a second SQLite SHA
+    and integrity read before any database is installed. Invalid remote AES
+    bytes remain a hard failure, never silently accepted or overwritten.
     """
     date=(now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE direct_cipher_lookup",flush=True)
@@ -201,18 +219,35 @@ def find_latest_cipher(bridge_key:bytes, now=None, *, lookback_days=7):
         tag=tag_for_date(date-timedelta(days=offset))
         try:
             ciphertext=_direct_cipher(tag)
-        except HTTPError as e:
-            if e.code==404:
+        except HTTPError as error:
+            # 404 may indicate an absent new-day release; any other HTTP
+            # failure can be a transient CDN block. Only fixed categories.
+            if error.code==404:
                 continue
-            raise RuntimeError("private index encrypted asset unreachable") from None
+            print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE remote_http_unavailable",
+                  flush=True)
+            break
         except (URLError,OSError,TimeoutError):
-            raise RuntimeError("private index encrypted download unavailable") from None
+            print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE remote_network_unavailable",
+                  flush=True)
+            break
         print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE cipher_downloaded",flush=True)
         result=decrypt_snapshot(ciphertext,bridge_key)
         print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE aes_sqlite_verified",flush=True)
         result["age_days"]=offset
         return result
-    raise RuntimeError("no bounded encrypted private index checkpoint")
+
+    print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE build_pinned_fallback",flush=True)
+    try:
+        ciphertext=bundled_cipher()
+        result=decrypt_snapshot(ciphertext,bridge_key)
+        day=datetime.strptime(BUNDLED_TAG[-8:],"%Y%m%d").replace(tzinfo=timezone.utc)
+        result["age_days"]=max(0,(date.date()-day.date()).days)
+        print("ACCOUNT_INDEX_ENCRYPTED_BOOT_STAGE bundled_aes_sqlite_verified",
+              flush=True)
+        return result
+    except (OSError,ValueError,TypeError):
+        raise RuntimeError("no valid private encrypted cold boot snapshot") from None
 
 
 def publish_daily(ciphertext:bytes, bridge_key:bytes, *, today=None, token=None):
