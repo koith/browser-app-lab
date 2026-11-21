@@ -6,7 +6,7 @@ const fs=require("node:fs");
 const vm=require("node:vm");
 const html=fs.readFileSync(__dirname+"/index.html","utf8");
 const sw=fs.readFileSync(__dirname+"/intersection-sw.js","utf8");
-assert(sw.includes('const VERSION="intersection-public-shell-v1-20261116-yadanra-exclusion-v1"'));
+assert(sw.includes('const VERSION="intersection-public-shell-v1-20261121-server-queue-v3"'));
 assert(sw.includes('!html.includes("LIVE_HARD_EXCLUDED_PHRASES")'));
 assert(sw.includes('shell.includes("LIVE_HARD_EXCLUDED_PHRASES")'));
 assert(!sw.includes('const VERSION="intersection-public-shell-v1-20261115-native-view-fast-v1"'));
