@@ -1,0 +1,105 @@
+{
+  "at": "2026-11-21",
+  "environment": "Code-mode V8 with mocked DOM, FormData, Blob, localStorage, fetch and CacheStorage. Exact readback of committed branch scripts and current main data; approved manifest is test-only. No physical browser/device or real SW execution.",
+  "revision": "9ac7bf30c9314e6661aeaf2a29bf8ac9a0eedbf0",
+  "blobs": {
+    "index": "172631fc38db32006b9a1f79b4f3acce2ee9c043",
+    "gate": "da2fc8cb45504fdb123edf8a910436fc307c1017",
+    "sw": "95a461a60b8d9bc83eb1e1d92f45e4475889f140",
+    "curriculum": "6fb164f6eef6b1615448645db98da415bcf1dbcd",
+    "lessons": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0",
+    "manifest": "5eaa3360118d4f9331c9d69ffffb1ff8029b63e5"
+  },
+  "checks": [
+    {
+      "name": "current manifest locks all seven lessons",
+      "result": "pass"
+    },
+    {
+      "name": "locked lesson has no quiz or completion UI",
+      "result": "pass"
+    },
+    {
+      "name": "direct quiz/complete events blocked",
+      "result": "pass"
+    },
+    {
+      "name": "fixture approves 7 days",
+      "result": "pass"
+    },
+    {
+      "name": "first approved lesson renders quiz",
+      "result": "pass"
+    },
+    {
+      "name": "incomplete quiz cannot submit",
+      "result": "pass"
+    },
+    {
+      "name": "incorrect quiz records wrong answers",
+      "result": "pass"
+    },
+    {
+      "name": "low score cannot complete",
+      "result": "pass"
+    },
+    {
+      "name": "correct score completes day1",
+      "result": "pass"
+    },
+    {
+      "name": "SRS stage and due stored",
+      "result": "pass"
+    },
+    {
+      "name": "favorite preserved with SRS",
+      "result": "pass"
+    },
+    {
+      "name": "profiles independent",
+      "result": "pass"
+    },
+    {
+      "name": "export triggers download",
+      "result": "pass"
+    },
+    {
+      "name": "fresh profile has no records",
+      "result": "pass"
+    },
+    {
+      "name": "import restores A and leaves B independent",
+      "result": "pass"
+    },
+    {
+      "name": "reconnect restores localStorage",
+      "result": "pass"
+    },
+    {
+      "name": "coherent release snapshot fallback",
+      "result": "pass"
+    },
+    {
+      "name": "online revocation hides previously approved content",
+      "result": "pass"
+    },
+    {
+      "name": "offline after revocation stays locked",
+      "result": "pass"
+    },
+    {
+      "name": "HTTP manifest failure locks app",
+      "result": "pass"
+    },
+    {
+      "name": "failed live manifest invalidates offline snapshot",
+      "result": "pass"
+    }
+  ],
+  "syntax": "pass",
+  "failedPaths": [
+    "Initial simulated harness omitted Blob and failed on export; fixed mock and reran all checks.",
+    "Local shell DNS unable to resolve Pages, GitHub raw or API; no local clone.",
+    "External preview raw.githack renders interstitial; not used for deployment."
+  ]
+}
