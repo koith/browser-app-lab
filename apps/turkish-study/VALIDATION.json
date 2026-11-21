@@ -1,0 +1,44 @@
+{
+  "asOf": "2026-11-21",
+  "version": "0.1.0",
+  "scope": "GitHub readback, structural and simulated DOM/localStorage; not real Safari/Chrome or operational validation.",
+  "results": {
+    "outline_days": 120,
+    "unique_day_ids": 120,
+    "monthly_days": [
+      30,
+      60,
+      90,
+      120
+    ],
+    "draft_lessons": 7,
+    "word_entries": 56,
+    "objective_questions": 25,
+    "unique_question_ids": 25,
+    "all_correct_answers_in_choices": true,
+    "index_script_syntax": "pass",
+    "service_worker_script_syntax": "pass",
+    "simulated_dom_tests": {
+      "homeRendered": true,
+      "lesson1Rendered": true,
+      "rejectBeforeQuiz": true,
+      "score100": true,
+      "completed": true,
+      "nextDay": true,
+      "profileIndependent": true,
+      "dueCount": true,
+      "srs": true,
+      "unwrittenDayBlocked": true,
+      "normalization": true,
+      "persisted": true,
+      "ledgerReadback": true
+    }
+  },
+  "knownIssues": [
+    "Pages app path returned HTTP 404 while existing Pages site root and 4LEAF route loaded; publication not verified.",
+    "Two existing Supabase projects active; no changes to either; independent DB not deployed.",
+    "No native speaker or independent language review; TTS/STT physical device not verified.",
+    "No complete A1/A2 course content yet.",
+    "Only local profiles, no account auth or automatic synchronization."
+  ]
+}
