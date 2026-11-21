@@ -6,7 +6,7 @@ CEFR 2020 https://www.coe.int/en/web/common-european-framework-reference-languag
 Maarif 2025 https://turkiyemaarif.org/news/turkcenin-yabanci-dil-olarak-ogretimi-programinin-3-baskisi-tamamlandi ; 원문 https://turkiyemaarif.org/uploads/168b69b2349aed.pdf
 YEE https://yee.org.tr/tr/turkce-ogretimi/materyaller
 무료 강의 참고 https://turkish.yasar.edu.tr/kaynaklar/kaynaklar/?l=en ; https://www.duolingo.com/course/tr/en/Learn-Turkish
-분산학습 https://doi.org/10.1111/lang.12479 ; 어휘 인출 https://doi.org/10.1017/S0272263119000397 (후자는 DOI 재확인 필요; 자료 제목 A Review of Laboratory Studies of Adult Second Language Vocabulary Training)
+분산학습 https://doi.org/10.1111/lang.12479 ; 어휘 인출 https://www.cambridge.org/core/journals/studies-in-second-language-acquisition/article/abs/review-of-laboratory-studies-of-adult-second-language-vocabulary-training/18F0A5D1FFC829CE05931B2EEE83124A
 공식 교재 원문 복제 금지. 기준/문법적 사실만 참고. 한국어 모어 학습자의 편의상 SOV와 접미사 개념을 연결하되 한국어 조사/높임말과 일대일 대응시키지 않음. 터키어 발음/모음조화/격/명사문 → 현재 → 과거 → 미래 → 넓은시제/가능/연결 순서. 초기 관용 표현은 덩어리로 학습하고 문법 상세를 나중에 명시.
 ## 고정 교육 과정
 curriculum.json: 120일 초안, 주차별 17주와 마지막 평가. 매주 복습/시험, 30/60/90/120일 월간 평가. 63일에 A1 종합평가. 편집은 버전 분기와 검수 후 발행. 초안 공개 개발판은 정식 학습판 아님. 기존 발행 과정의 ID와 평가 정답은 덮어쓰지 않음.
