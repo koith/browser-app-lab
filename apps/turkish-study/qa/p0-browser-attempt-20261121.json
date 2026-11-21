@@ -1,0 +1,27 @@
+{
+  "entityId": "P0_PUBLIC_DEPLOYMENT",
+  "revision": "64ca6cfa805c12de77cc13911b3b2c1db404fa88",
+  "sourceRevision": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "reviewType": "public_browser_navigation",
+  "method": "Python Playwright headless system Chromium, real browser process; only attempted navigation",
+  "reviewer": "05",
+  "sourceEvidence": [
+    "https://koith.github.io/browser-app-lab/apps/turkish-study/"
+  ],
+  "at": "2026-11-21",
+  "evidencePath": "qa/p0-browser-attempt-20261121.json",
+  "environment": {
+    "chromium": "144.0.7559.96",
+    "os": "Linux container",
+    "viewport": "1280x800",
+    "physicalIPhone": false
+  },
+  "expected": "HTTP 200 and app rendering then release gating",
+  "actual": "Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR",
+  "result": "pending",
+  "findings": [
+    "System Chromium launched successfully; public navigation blocked by environment before HTTP response. Bundled Chromium and WebKit browser executables missing. No render, gate, E2E or physical device pass.",
+    "Portable smoke test authored; equivalent launch/navigation attempted separately, full script not executed. No real user data touched.",
+    "Other paths: curl DNS error exit 6; web fetch inaccessible; TinyFish run not started insufficient wallet. No new HTTP 404 claimed."
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "id": "05-P0-20261121-baseline",
+  "from": "05",
+  "to": [
+    "00",
+    "01",
+    "02",
+    "03",
+    "04"
+  ],
+  "createdAt": "2026-11-21T17:14:00+09:00",
+  "taskIds": [
+    "QA-01",
+    "QA-02",
+    "QA-03",
+    "QA-04",
+    "DEP-03",
+    "DEP-04",
+    "DEP-05"
+  ],
+  "baseRef": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "contractVersion": "1.0.0",
+  "status": "blocked",
+  "summary": "P0 NO-GO: all seven baseline drafts read; 56 words, 21 examples, 23 dialogue turns, 25 answer keys; 14 structural/static checks executed (10 pass, 4 failures incl attestation diagnostic); 0 approved. Public Chromium navigation blocked before HTTP, audio unverified, real iPhone not run. Keep release list empty.",
+  "changedFiles": [
+    "VALIDATION.json",
+    "tests/p0-baseline-audit.mjs",
+    "tests/public_smoke.py",
+    "qa/p0-baseline-20261121.json",
+    "qa/p0-language-and-runtime-20261121.md",
+    "qa/p0-browser-attempt-20261121.json",
+    "handoffs/05/20261121-QA-02-p0-baseline.json"
+  ],
+  "verification": [
+    {
+      "result": "pass",
+      "scope": "structural subset: 10/14, unique correct choices 25/25, NFC, IDs and mapping",
+      "evidence": "qa/p0-baseline-20261121.json",
+      "revision": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c"
+    },
+    {
+      "result": "fail",
+      "scope": "P0 static release requirements and content readiness",
+      "evidence": "qa/p0-baseline-20261121.json; qa/p0-language-and-runtime-20261121.md",
+      "revision": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c"
+    },
+    {
+      "result": "pending",
+      "scope": "independent AI text review completed first draft; final item-specific linguistic approval pending correction and review",
+      "evidence": "qa/p0-language-and-runtime-20261121.md",
+      "revision": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0"
+    },
+    {
+      "result": "pending",
+      "scope": "real PC Chromium process launched; navigation blocked; no HTTP/render/function pass",
+      "evidence": "qa/p0-browser-attempt-20261121.json",
+      "revision": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c"
+    },
+    {
+      "result": "pending",
+      "scope": "audio listening and physical iPhone Safari/PWA; no execution",
+      "evidence": "qa/p0-language-and-runtime-20261121.md",
+      "revision": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c"
+    }
+  ],
+  "requests": [
+    {
+      "to": "00",
+      "action": "Review and integrate only 05 evidence PR; keep publishedDayIds empty. Reconcile ledger without increasing total completion count. Schedule re-review when 01–04 revisions supplied.",
+      "acceptance": "P0 approved only with exact revisions and all required passes; no partial work counted as final."
+    },
+    {
+      "to": "01",
+      "action": "Supply first-week prerequisite/activity/rubric mapping; D002–D004 sound discrimination, 4-way harmony micro-prerequisite, D007 four skills.",
+      "acceptance": "Explicit objective IDs, time allocation, primary Maarif/YEE evidence, dependencies and acceptance per objective."
+    },
+    {
+      "to": "02",
+      "action": "Resolve D001–D007 findings in qa/p0-language-and-runtime-20261121.md; preserve original IDs and append new items only where compatible.",
+      "acceptance": "New exact revision with each correction mapped, all explanations and blind listening tasks, timed 60-minute plan, D007 rubric."
+    },
+    {
+      "to": "03",
+      "action": "Fix QA-R01–R04; supply public URL, served revision, fail-closed access evidence and testable isolated local profiles.",
+      "acceptance": "Real HTTPS browser, unapproved no lesson/quiz/completion; two profiles isolated across reopen and restore; corrupted backup rejected; offline/cache behavior tested."
+    },
+    {
+      "to": "04",
+      "action": "Supply tr-TR audio manifest/voice samples/license and recording integration, tagged to exact text revision.",
+      "acceptance": "Actual audible clips or verified tr-TR TTS, exact text references, playback/recording, independent listening evidence; no unauthorized costs."
+    }
+  ],
+  "ledgerProposals": [
+    {
+      "id": "QA-01",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "structure_pass_partial_p0",
+      "evidence": [
+        "qa/p0-baseline-20261121.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "QA-02",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "partial_review_blocked",
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "QA-03",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "partial_review_blocked",
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "QA-04",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "DEP-03",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "failed_path",
+      "evidence": [
+        "qa/p0-browser-attempt-20261121.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "DEP-04",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "evidence": [
+        "qa/p0-browser-attempt-20261121.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "DEP-05",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md"
+      ],
+      "proposedComplete": false
+    }
+  ],
+  "dependencies": [
+    "01 first-week mapping",
+    "02 revised lessons",
+    "03 deploy URL and release enforcement",
+    "04 audio evidence"
+  ],
+  "knownIssues": [
+    "Public navigation access failed in this environment; no new HTTP status measured.",
+    "No physical iPhone or audible pronunciation test performed; no native speaker review.",
+    "D004 choice-attestation failure is a diagnostic, not an incorrect key. Published days check is an expected unmet gate at baseline.",
+    "Initial main 2/44 complete; no new completion proposed."
+  ]
+}
