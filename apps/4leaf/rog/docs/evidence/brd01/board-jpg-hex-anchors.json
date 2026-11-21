@@ -280,9 +280,17 @@
     218.5,
     227.5
    ],
-   "implementation": "board-camera.js / single board-area bgtile layer; PR browser verification pending",
+   "implementation": "board-camera.js; native viewport/world texture surfaces phase-locked. Chromium and WebKit PASS at 67633a27, run 44860137997. Main/public verification pending.",
    "horizontal": "retains existing 1:1 movement; original horizontal response unverified",
-   "zoom": "web scaling, original MVE unverified"
+   "zoom": "web scaling, original MVE unverified",
+   "browserProof": {
+    "run": 44860137997,
+    "revision": "67633a273ed11976d46e32d4522ecce06e81ceb8",
+    "chromium": "success",
+    "webkit": "success",
+    "anchors": 14,
+    "distinctDMPCelIIds": 8
+   }
   }
  },
  "artMismatch": {
