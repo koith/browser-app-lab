@@ -671,3 +671,13 @@ def test_mastodon_public_history_request_does_not_exclude_reblogs_or_replies():
     assert params.get("exclude_reblogs")!=["true"]
     assert params.get("exclude_replies")!=["true"]
     assert "only_media" not in params
+
+
+def test_mastodon_public_bio_and_post_paragraphs_keep_visible_line_breaks():
+    # The source UI renders separate paragraphs and explicit <br> tags.
+    assert job.text_only("<p>First bio line<br>Next line</p><p>Third paragraph</p>") == (
+        "First bio line\nNext line\nThird paragraph")
+    assert job.text_only("<div>one</div><div>two</div>")=="one\ntwo"
+    assert job.text_only("<p>first</p><script>untrusted</script><p>last</p>")==(
+        "first\nlast")
+    assert job.text_only("<p>single</p>")=="single"
