@@ -36969,6 +36969,30 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 58,
+          "url": "stored-albums/djawa-pop-kitty-party/1f249e2438cf8a3fa2f5.jpg",
+          "sha256": "1f249e2438cf8a3fa2f5cd32987a049956b04fb160a0560c65494a5c11eeba43",
+          "bytes": 14738971,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 59,
+          "url": "stored-albums/djawa-pop-kitty-party/6a3d03f748b65ed66ea6.jpg",
+          "sha256": "6a3d03f748b65ed66ea6523992943fd66ed05b3b10cb19889bce801e3300cf3a",
+          "bytes": 14462156,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -37869,5 +37893,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3636
+  "physical_verified_image_count": 3638
 }
