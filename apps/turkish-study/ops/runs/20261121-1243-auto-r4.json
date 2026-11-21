@@ -1,0 +1,39 @@
+{
+  "runId": "auto-20261121-1243-r4",
+  "stage": "P0",
+  "before": {
+    "complete": 2,
+    "total": 44,
+    "publishedDays": 0
+  },
+  "after": {
+    "complete": 2,
+    "total": 44,
+    "publishedDays": 0
+  },
+  "actualChanges": [
+    "W01 candidate 10 listening and 10 reading items, 25-point writing rubric, 60-minute schedule"
+  ],
+  "activePR": [
+    1416,
+    1409
+  ],
+  "mergedPR": [],
+  "head": "300097483ef6e6a3fedf8fea98e5b0829571f0b5",
+  "readbackBlob": "5a1e0616c882ce8d0b5fc3d4fc05f25af3a54009",
+  "tests": {
+    "authorChecks": "7/7",
+    "audioTargetExact": "10/10",
+    "independent": "pending",
+    "blueprint": "partial, legacy food slots",
+    "deployment": "not verified"
+  },
+  "blockers": [
+    "PR mergeable false at readback; do not force merge",
+    "01 blueprint resolution and 05 independent review",
+    "F-06 native/neural quality and physical iPhone remain unverified"
+  ],
+  "nextAction": "01 resolve legacy food slots; 02 revise candidate; 05 independent review; 04 update audio targets; check PR mergeability",
+  "dueAt": "2026-11-21T13:41:00Z",
+  "outcome": "candidate implemented, PR open; no release"
+}
