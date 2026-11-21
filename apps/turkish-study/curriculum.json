@@ -1,0 +1,2059 @@
+{
+  "version": "0.1.0-draft",
+  "status": "curriculum-outline-not-published-course",
+  "target": {
+    "days": 120,
+    "minutesPerDay": 60,
+    "activeVocabulary": 1000,
+    "receptiveVocabulary": 500,
+    "departure": "2027-03-21",
+    "departureEstimated": true
+  },
+  "sources": {
+    "CEFR2020": "https://www.coe.int/en/web/common-european-framework-reference-languages/cefr-descriptors-search",
+    "MAARIF2025": "https://turkiyemaarif.org/news/turkcenin-yabanci-dil-olarak-ogretimi-programinin-3-baskisi-tamamlandi",
+    "YEE": "https://yee.org.tr/tr/turkce-ogretimi/materyaller"
+  },
+  "days": [
+    {
+      "id": "D001",
+      "day": 1,
+      "week": 1,
+      "level": "A1",
+      "theme": "소리와 첫인사",
+      "title": "알파벳 29자와 인사",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D002",
+      "day": 2,
+      "week": 1,
+      "level": "A1",
+      "theme": "소리와 첫인사",
+      "title": "모음 8개: ı/i, o/ö, u/ü",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D003",
+      "day": 3,
+      "week": 1,
+      "level": "A1",
+      "theme": "소리와 첫인사",
+      "title": "자음 c/ç, s/ş, ğ와 음절",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D004",
+      "day": 4,
+      "week": 1,
+      "level": "A1",
+      "theme": "소리와 첫인사",
+      "title": "나와 너: 인칭대명사·명사문",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D005",
+      "day": 5,
+      "week": 1,
+      "level": "A1",
+      "theme": "소리와 첫인사",
+      "title": "정중한 siz와 친근한 sen",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D006",
+      "day": 6,
+      "week": 1,
+      "level": "A1",
+      "theme": "소리와 첫인사",
+      "title": "이름 묻기·한국인 소개",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D007",
+      "day": 7,
+      "week": 1,
+      "level": "A1",
+      "theme": "소리와 첫인사",
+      "title": "1주차 종합 복습",
+      "minutes": 60,
+      "kind": "review",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D008",
+      "day": 8,
+      "week": 2,
+      "level": "A1",
+      "theme": "사람과 사물",
+      "title": "bu/şu/o 지시 표현",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D009",
+      "day": 9,
+      "week": 2,
+      "level": "A1",
+      "theme": "사람과 사물",
+      "title": "복수 -lar/-ler",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D010",
+      "day": 10,
+      "week": 2,
+      "level": "A1",
+      "theme": "사람과 사물",
+      "title": "명사문 부정 değil",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D011",
+      "day": 11,
+      "week": 2,
+      "level": "A1",
+      "theme": "사람과 사물",
+      "title": "의문사 kim/ne와 의문접사 mı",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D012",
+      "day": 12,
+      "week": 2,
+      "level": "A1",
+      "theme": "사람과 사물",
+      "title": "숫자 0~100",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D013",
+      "day": 13,
+      "week": 2,
+      "level": "A1",
+      "theme": "사람과 사물",
+      "title": "나이·국적·직업",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D014",
+      "day": 14,
+      "week": 2,
+      "level": "A1",
+      "theme": "사람과 사물",
+      "title": "2주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D015",
+      "day": 15,
+      "week": 3,
+      "level": "A1",
+      "theme": "소유와 관계",
+      "title": "가족·친구 호칭",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D016",
+      "day": 16,
+      "week": 3,
+      "level": "A1",
+      "theme": "소유와 관계",
+      "title": "소유접사: 내/네/그의",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D017",
+      "day": 17,
+      "week": 3,
+      "level": "A1",
+      "theme": "소유와 관계",
+      "title": "소유격과 소유구",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D018",
+      "day": 18,
+      "week": 3,
+      "level": "A1",
+      "theme": "소유와 관계",
+      "title": "var/yok 존재·소유",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D019",
+      "day": 19,
+      "week": 3,
+      "level": "A1",
+      "theme": "소유와 관계",
+      "title": "형용사와 명사 수식",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D020",
+      "day": 20,
+      "week": 3,
+      "level": "A1",
+      "theme": "소유와 관계",
+      "title": "사람 소개·가족에 질문",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D021",
+      "day": 21,
+      "week": 3,
+      "level": "A1",
+      "theme": "소유와 관계",
+      "title": "3주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D022",
+      "day": 22,
+      "week": 4,
+      "level": "A1",
+      "theme": "위치와 이동",
+      "title": "처소격 -DA",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D023",
+      "day": 23,
+      "week": 4,
+      "level": "A1",
+      "theme": "위치와 이동",
+      "title": "방향격 -(y)A",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D024",
+      "day": 24,
+      "week": 4,
+      "level": "A1",
+      "theme": "위치와 이동",
+      "title": "출발격 -DAn",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D025",
+      "day": 25,
+      "week": 4,
+      "level": "A1",
+      "theme": "위치와 이동",
+      "title": "자음 교체 기초",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D026",
+      "day": 26,
+      "week": 4,
+      "level": "A1",
+      "theme": "위치와 이동",
+      "title": "nerede/nereye/nereden",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D027",
+      "day": 27,
+      "week": 4,
+      "level": "A1",
+      "theme": "위치와 이동",
+      "title": "길 묻기·지도 읽기",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D028",
+      "day": 28,
+      "week": 4,
+      "level": "A1",
+      "theme": "위치와 이동",
+      "title": "4주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D029",
+      "day": 29,
+      "week": 5,
+      "level": "A1",
+      "theme": "일상의 행동",
+      "title": "동사 어간과 부정",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D030",
+      "day": 30,
+      "week": 5,
+      "level": "A1",
+      "theme": "일상의 행동",
+      "title": "월간 성취도 1: 기초 기능 점검",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D031",
+      "day": 31,
+      "week": 5,
+      "level": "A1",
+      "theme": "일상의 행동",
+      "title": "현재진행 -iyor 긍정",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D032",
+      "day": 32,
+      "week": 5,
+      "level": "A1",
+      "theme": "일상의 행동",
+      "title": "현재진행 부정·의문",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D033",
+      "day": 33,
+      "week": 5,
+      "level": "A1",
+      "theme": "일상의 행동",
+      "title": "목적격 -(y)I와 특정 목적어",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D034",
+      "day": 34,
+      "week": 5,
+      "level": "A1",
+      "theme": "일상의 행동",
+      "title": "하루 일과·지금 하는 일",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D035",
+      "day": 35,
+      "week": 5,
+      "level": "A1",
+      "theme": "일상의 행동",
+      "title": "5주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D036",
+      "day": 36,
+      "week": 6,
+      "level": "A1",
+      "theme": "카페와 식사",
+      "title": "음식·음료 어휘",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D037",
+      "day": 37,
+      "week": 6,
+      "level": "A1",
+      "theme": "카페와 식사",
+      "title": "istemek과 istemiyorum",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D038",
+      "day": 38,
+      "week": 6,
+      "level": "A1",
+      "theme": "카페와 식사",
+      "title": "부탁: lütfen·주세요 표현",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D039",
+      "day": 39,
+      "week": 6,
+      "level": "A1",
+      "theme": "카페와 식사",
+      "title": "가격·수량과 숫자 확장",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D040",
+      "day": 40,
+      "week": 6,
+      "level": "A1",
+      "theme": "카페와 식사",
+      "title": "주문·계산서·현금/카드",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D041",
+      "day": 41,
+      "week": 6,
+      "level": "A1",
+      "theme": "카페와 식사",
+      "title": "카페 주문 역할극",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D042",
+      "day": 42,
+      "week": 6,
+      "level": "A1",
+      "theme": "카페와 식사",
+      "title": "6주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D043",
+      "day": 43,
+      "week": 7,
+      "level": "A1",
+      "theme": "시간과 취향",
+      "title": "요일·달·날짜",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D044",
+      "day": 44,
+      "week": 7,
+      "level": "A1",
+      "theme": "시간과 취향",
+      "title": "시각 묻고 답하기",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D045",
+      "day": 45,
+      "week": 7,
+      "level": "A1",
+      "theme": "시간과 취향",
+      "title": "간단한 빈도 표현",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D046",
+      "day": 46,
+      "week": 7,
+      "level": "A1",
+      "theme": "시간과 취향",
+      "title": "좋아함과 싫어함: sevmek",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D047",
+      "day": 47,
+      "week": 7,
+      "level": "A1",
+      "theme": "시간과 취향",
+      "title": "취미·운동·음악",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D048",
+      "day": 48,
+      "week": 7,
+      "level": "A1",
+      "theme": "시간과 취향",
+      "title": "친구와 취향 나누기",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D049",
+      "day": 49,
+      "week": 7,
+      "level": "A1",
+      "theme": "시간과 취향",
+      "title": "7주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D050",
+      "day": 50,
+      "week": 8,
+      "level": "A1",
+      "theme": "여행과 과거",
+      "title": "과거 -DI 긍정",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D051",
+      "day": 51,
+      "week": 8,
+      "level": "A1",
+      "theme": "여행과 과거",
+      "title": "과거 부정·의문",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D052",
+      "day": 52,
+      "week": 8,
+      "level": "A1",
+      "theme": "여행과 과거",
+      "title": "시간 표현: dün·geçen",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D053",
+      "day": 53,
+      "week": 8,
+      "level": "A1",
+      "theme": "여행과 과거",
+      "title": "교통수단·표 구매",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D054",
+      "day": 54,
+      "week": 8,
+      "level": "A1",
+      "theme": "여행과 과거",
+      "title": "숙소 체크인·요청",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D055",
+      "day": 55,
+      "week": 8,
+      "level": "A1",
+      "theme": "여행과 과거",
+      "title": "지난 주말 이야기",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D056",
+      "day": 56,
+      "week": 8,
+      "level": "A1",
+      "theme": "여행과 과거",
+      "title": "8주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D057",
+      "day": 57,
+      "week": 9,
+      "level": "A1",
+      "theme": "만남과 약속",
+      "title": "미래 -(y)AcAk 기초",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D058",
+      "day": 58,
+      "week": 9,
+      "level": "A1",
+      "theme": "만남과 약속",
+      "title": "미래 부정·의문",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D059",
+      "day": 59,
+      "week": 9,
+      "level": "A1",
+      "theme": "만남과 약속",
+      "title": "만날 시간과 장소 정하기",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D060",
+      "day": 60,
+      "week": 9,
+      "level": "A1",
+      "theme": "만남과 약속",
+      "title": "월간 성취도 2: A1 수행평가",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D061",
+      "day": 61,
+      "week": 9,
+      "level": "A1",
+      "theme": "만남과 약속",
+      "title": "연락처 교환·수락/거절",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D062",
+      "day": 62,
+      "week": 9,
+      "level": "A1",
+      "theme": "만남과 약속",
+      "title": "A1 통합: 자기소개·주문·약속",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D063",
+      "day": 63,
+      "week": 9,
+      "level": "A1",
+      "theme": "만남과 약속",
+      "title": "A1 종합 평가",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D064",
+      "day": 64,
+      "week": 10,
+      "level": "A2",
+      "theme": "습관과 능력",
+      "title": "넓은시제 aorist 긍정",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D065",
+      "day": 65,
+      "week": 10,
+      "level": "A2",
+      "theme": "습관과 능력",
+      "title": "넓은시제 부정·의문",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D066",
+      "day": 66,
+      "week": 10,
+      "level": "A2",
+      "theme": "습관과 능력",
+      "title": "가능 -(y)Abil",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D067",
+      "day": 67,
+      "week": 10,
+      "level": "A2",
+      "theme": "습관과 능력",
+      "title": "불가능 -(y)Ama",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D068",
+      "day": 68,
+      "week": 10,
+      "level": "A2",
+      "theme": "습관과 능력",
+      "title": "정중한 부탁과 허락",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D069",
+      "day": 69,
+      "week": 10,
+      "level": "A2",
+      "theme": "습관과 능력",
+      "title": "부탁·의사소통 복구 역할극",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D070",
+      "day": 70,
+      "week": 10,
+      "level": "A2",
+      "theme": "습관과 능력",
+      "title": "10주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D071",
+      "day": 71,
+      "week": 11,
+      "level": "A2",
+      "theme": "경험과 비교",
+      "title": "비교 daha·최상 en",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D072",
+      "day": 72,
+      "week": 11,
+      "level": "A2",
+      "theme": "경험과 비교",
+      "title": "gibi·kadar 비교 표현",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D073",
+      "day": 73,
+      "week": 11,
+      "level": "A2",
+      "theme": "경험과 비교",
+      "title": "시간 순서 önce/sonra",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D074",
+      "day": 74,
+      "week": 11,
+      "level": "A2",
+      "theme": "경험과 비교",
+      "title": "동사명사 -mAk",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D075",
+      "day": 75,
+      "week": 11,
+      "level": "A2",
+      "theme": "경험과 비교",
+      "title": "이유 çünkü·결과 bu yüzden",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D076",
+      "day": 76,
+      "week": 11,
+      "level": "A2",
+      "theme": "경험과 비교",
+      "title": "한국과 튀르키예 비교",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D077",
+      "day": 77,
+      "week": 11,
+      "level": "A2",
+      "theme": "경험과 비교",
+      "title": "11주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D078",
+      "day": 78,
+      "week": 12,
+      "level": "A2",
+      "theme": "감정과 건강",
+      "title": "감정·상태 표현",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D079",
+      "day": 79,
+      "week": 12,
+      "level": "A2",
+      "theme": "감정과 건강",
+      "title": "필요 gerek/lazım",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D080",
+      "day": 80,
+      "week": 12,
+      "level": "A2",
+      "theme": "감정과 건강",
+      "title": "당위 -mAlI",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D081",
+      "day": 81,
+      "week": 12,
+      "level": "A2",
+      "theme": "감정과 건강",
+      "title": "건강·증상 전달",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D082",
+      "day": 82,
+      "week": 12,
+      "level": "A2",
+      "theme": "감정과 건강",
+      "title": "약국·도움 요청",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D083",
+      "day": 83,
+      "week": 12,
+      "level": "A2",
+      "theme": "감정과 건강",
+      "title": "상대 감정 확인·공감",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D084",
+      "day": 84,
+      "week": 12,
+      "level": "A2",
+      "theme": "감정과 건강",
+      "title": "12주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D085",
+      "day": 85,
+      "week": 13,
+      "level": "A2",
+      "theme": "사회적 교류",
+      "title": "제안: -(y)AlIm",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D086",
+      "day": 86,
+      "week": 13,
+      "level": "A2",
+      "theme": "사회적 교류",
+      "title": "희망·의도 표현",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D087",
+      "day": 87,
+      "week": 13,
+      "level": "A2",
+      "theme": "사회적 교류",
+      "title": "명령·권유와 정중도",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D088",
+      "day": 88,
+      "week": 13,
+      "level": "A2",
+      "theme": "사회적 교류",
+      "title": "칭찬·호감 표현",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D089",
+      "day": 89,
+      "week": 13,
+      "level": "A2",
+      "theme": "사회적 교류",
+      "title": "가벼운 농담과 반응",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D090",
+      "day": 90,
+      "week": 13,
+      "level": "A2",
+      "theme": "사회적 교류",
+      "title": "월간 성취도 3: 사회적 상호작용",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D091",
+      "day": 91,
+      "week": 13,
+      "level": "A2",
+      "theme": "사회적 교류",
+      "title": "13주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D092",
+      "day": 92,
+      "week": 14,
+      "level": "A2",
+      "theme": "메시지와 경험",
+      "title": "메시지 인사·마무리",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D093",
+      "day": 93,
+      "week": 14,
+      "level": "A2",
+      "theme": "메시지와 경험",
+      "title": "전화: 연결·다시 말하기",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D094",
+      "day": 94,
+      "week": 14,
+      "level": "A2",
+      "theme": "메시지와 경험",
+      "title": "전언과 추정 -mIş 기초",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D095",
+      "day": 95,
+      "week": 14,
+      "level": "A2",
+      "theme": "메시지와 경험",
+      "title": "직접 경험과 전해 들은 경험",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D096",
+      "day": 96,
+      "week": 14,
+      "level": "A2",
+      "theme": "메시지와 경험",
+      "title": "접속사 ama/ve/veya",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D097",
+      "day": 97,
+      "week": 14,
+      "level": "A2",
+      "theme": "메시지와 경험",
+      "title": "약속 변경과 연락 유지",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D098",
+      "day": 98,
+      "week": 14,
+      "level": "A2",
+      "theme": "메시지와 경험",
+      "title": "14주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D099",
+      "day": 99,
+      "week": 15,
+      "level": "A2",
+      "theme": "문장 연결과 문제 해결",
+      "title": "동사 연결 -(y)Ip",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D100",
+      "day": 100,
+      "week": 15,
+      "level": "A2",
+      "theme": "문장 연결과 문제 해결",
+      "title": "동시 방식 -(y)ArAk",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D101",
+      "day": 101,
+      "week": 15,
+      "level": "A2",
+      "theme": "문장 연결과 문제 해결",
+      "title": "시간 연결 -ken",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D102",
+      "day": 102,
+      "week": 15,
+      "level": "A2",
+      "theme": "문장 연결과 문제 해결",
+      "title": "조건 -sA 기초",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D103",
+      "day": 103,
+      "week": 15,
+      "level": "A2",
+      "theme": "문장 연결과 문제 해결",
+      "title": "문제 설명·대안 제시",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D104",
+      "day": 104,
+      "week": 15,
+      "level": "A2",
+      "theme": "문장 연결과 문제 해결",
+      "title": "분실·교통 변경 대응",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D105",
+      "day": 105,
+      "week": 15,
+      "level": "A2",
+      "theme": "문장 연결과 문제 해결",
+      "title": "15주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D106",
+      "day": 106,
+      "week": 16,
+      "level": "A2",
+      "theme": "에스키셰히르 생활",
+      "title": "현지 지명과 위치 표현",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D107",
+      "day": 107,
+      "week": 16,
+      "level": "A2",
+      "theme": "에스키셰히르 생활",
+      "title": "트램·기차 이동 회화",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D108",
+      "day": 108,
+      "week": 16,
+      "level": "A2",
+      "theme": "에스키셰히르 생활",
+      "title": "카페·모임에서 대화 시작",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D109",
+      "day": 109,
+      "week": 16,
+      "level": "A2",
+      "theme": "에스키셰히르 생활",
+      "title": "현지 음식과 문화 이야기",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D110",
+      "day": 110,
+      "week": 16,
+      "level": "A2",
+      "theme": "에스키셰히르 생활",
+      "title": "상대의 의사 존중·정중한 거절",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D111",
+      "day": 111,
+      "week": 16,
+      "level": "A2",
+      "theme": "에스키셰히르 생활",
+      "title": "저녁 약속·재회 역할극",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D112",
+      "day": 112,
+      "week": 16,
+      "level": "A2",
+      "theme": "에스키셰히르 생활",
+      "title": "16주차 종합 시험",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D113",
+      "day": 113,
+      "week": 17,
+      "level": "A2",
+      "theme": "출국 전 통합 훈련",
+      "title": "발음·듣기 약점 복구",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D114",
+      "day": 114,
+      "week": 17,
+      "level": "A2",
+      "theme": "출국 전 통합 훈련",
+      "title": "자기소개 90초 실전",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D115",
+      "day": 115,
+      "week": 17,
+      "level": "A2",
+      "theme": "출국 전 통합 훈련",
+      "title": "카페·교통·숙소 통합",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D116",
+      "day": 116,
+      "week": 17,
+      "level": "A2",
+      "theme": "출국 전 통합 훈련",
+      "title": "경험·계획·취향 대화",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D117",
+      "day": 117,
+      "week": 17,
+      "level": "A2",
+      "theme": "출국 전 통합 훈련",
+      "title": "친구와 약속·메시지",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D118",
+      "day": 118,
+      "week": 17,
+      "level": "A2",
+      "theme": "출국 전 통합 훈련",
+      "title": "예측하지 못한 답변 대응",
+      "minutes": 60,
+      "kind": "lesson",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D119",
+      "day": 119,
+      "week": 17,
+      "level": "A2",
+      "theme": "출국 전 통합 훈련",
+      "title": "A2 도전 모의 평가",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "id": "D120",
+      "day": 120,
+      "week": 18,
+      "level": "A2",
+      "theme": "출국 전 최종 평가",
+      "title": "월간 성취도 4: A1 유지·A2 도전 최종 수행평가",
+      "minutes": 60,
+      "kind": "assessment",
+      "contentStatus": "draft",
+      "reviewStatus": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    }
+  ]
+}
