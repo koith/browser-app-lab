@@ -10,6 +10,13 @@ on:
       - 'apps/4leaf/rog/original/tiles.js'
       - 'apps/4leaf/rog/tests/m04-all-native-top-face-pixel-visibility.cjs'
       - '.github/workflows/rog-m04-top-face-pixel-once-20261120.yml'
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'apps/4leaf/rog/board-camera.js'
+      - 'apps/4leaf/rog/dice-native-client-frame.css'
+      - 'apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs'
+      - '.github/workflows/rog-m04-top-face-pixel-once-20261120.yml'
   workflow_dispatch:
 permissions:
   contents: read
