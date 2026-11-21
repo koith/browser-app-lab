@@ -139,7 +139,7 @@
       "rank": 1,
       "state": "resume",
       "requires": [],
-      "action": "draft #1409와 최신 220개 P0 음성 대상 대조. 실제 mp3/검증된 기기 TTS 계획과 증거 갱신. 현재 샘플 1개; binary 전송 대안 조사 후 실제 저장.",
+      "action": "draft #1409와 최신 220개 P0 음성 대상 대조. 실제 mp3/검증된 기기 TTS 계획과 증거 갱신. 현재 샘플 1개; binary 전송 대안 조사 후 실제 저장. User rejects robotic preview; native/neural quality candidates only; independent hearing required.",
       "acceptance": "정확한 text/targetId/lessonRevision, 재배포 가능 license, 실제 asset SHA 및 재생. 220개 목표 및 평가 추가 대상에 대한 차이 기록.",
       "defects": [
         "F-06"
@@ -181,7 +181,7 @@
       ],
       "priority": "P0",
       "rank": 1,
-      "state": "ready",
+      "state": "resume",
       "requires": [],
       "action": "최신 lesson blob f6706f31...과 01 mapping/02 시험을 전수 독립 재검수; 이전 7일 baseline 결과를 최신 revision 승인으로 이전하지 않음.",
       "acceptance": "각 D001~D007 항목별 결함·출처·정답·선수학습·분량 evidence, W01 불일치 확인 및 최신수정 재검수.",
@@ -192,7 +192,11 @@
       "countedInLedger": false,
       "branch": null,
       "pr": null,
-      "checkpoint": null
+      "checkpoint": {
+        "pr": 1415,
+        "evidence": "qa/auto-20261121-1043.json",
+        "nextAction": "Full lexical audit and re-review corrected W01; structural 61 question checks and 5 audio refs pass."
+      }
     },
     {
       "id": "P0-05-02",
