@@ -1,7 +1,7 @@
 # 데이터 계약 v1.0.0 (현재 런타임 호환)
 상태: 승인 기준. SPEC.md의 정규화 모델은 미래 목표이며 현재 앱의 실제 v0.1 형식을 먼저 보존한다. 00만 계약 변경 승인.
 ## 현재 런타임
-index.html은 같은 디렉터리 curriculum.json 및 lessons.json을 fetch한다. 기존 key/타입 및 JSON 배열 순서를 깨지 않는다. 실제 앱은 아직 출고 목록을 적용하지 않으므로 03이 구현하고 05가 반드시 검증하기 전 정식 출시 금지.
+index.html v0.1.1 main은 curriculum.json, lessons.json, RELEASE_MANIFEST.json을 fetch하며 공개 일자 gate가 구현되어 있다. 실제 공개 버전 동기화·독립 검증 및 ADR-00-002 artifact binding은 아직 미완이다. 기존 key/타입 및 JSON 배열 순서를 깨지 않는다. 출시 전 05 검증 필수.
 - curriculum.json: version, status, target, sources(출처 ID→URL), days 배열. 각 day: id=D001..D120, day=1..120, week=1..18, level=A1/A2, theme/title, minutes=60, kind=lesson/review/assessment, contentStatus, reviewStatus, sources[]. 모든 ID 유일, day 오름차순, 월간 30/60/90/120, A1 종합 63. 현재 순서 유지. 상태는 원장/릴리스의 검증 증거를 대신하지 않는다.
 - lessons.json: version, status, license, lessons 배열. 각 lesson: id/day 일치, objective/grammar/note/task 문자열, alphabet(선택), words:[[tr,ko]], examples:[[tr,ko]], dialogue:[[role,tr,ko]], questions:[{id,type:"choice",prompt,answer,choices[]}], status/languageReview/audioReview/sources[]. lesson은 반드시 curriculum의 day에 매핑. examples와 dialogue/questions 최소 1개, 복습일 words 비어도 됨. 질문 ID Dxxx-Qn, 보기 중 정답 정확히 하나. NFC, 터키어 특수문자 보전.
 - 앱 기존 저장 키 turkce120-v1: a,b 프로필 객체에 done,attempts,cards,seconds,studyDates,departure. 단어 key Dxxx-Vn(배열 순서 기반), 문제 key Dxxx-Qn. **이미 공개된 단어 배열 삽입·정렬·삭제·기존 문제 ID 재사용 금지**. 추가는 끝에만, 내용 변경은 새 revision 및 필요한 마이그레이션. 학습 상태 백업/복원 및 향후 동기화 호환. 개인 기록은 git에 넣지 않는다.
@@ -16,3 +16,6 @@ index.html은 같은 디렉터리 curriculum.json 및 lessons.json을 fetch한�
 문법/철자/번역/자연스러움/정중도/선수학습/정답/중복/난이도/대상 어휘 범위. 항목별 공식 교육 목표와 사전·문법서·용례 연결. 단순 source ID 나열은 검수 증거 아님. 새 문법 또는 어휘가 먼저 등장할 경우 미리 관용표현으로 설명하고 평가 대상과 구분. 모든 새 ID 참조는 존재해야 하고 학습된 개념 범위 이내.
 검수 stage draft → structure_checked → linguistic_reviewed → audio_reviewed → release_ready → published. 각 상태는 검수 유형별 evidence와 정확한 revision에 연결. 오류 수정 시 관련 검수 무효화, 재검수 필요. 오디오 검수가 해당 없는 항목은 이유 적기. 콘텐츠를 독립 검수한 뒤에만 published.
 출고: 00만 RELEASE_MANIFEST.json 변경. release-ready day 범위, 정확한 데이터/오디오 revision/hash, 배포 기록 고정. 신규 학습 분량은 기존 진도를 건드리지 않는 minor release, 오타 수정 patch(의미/점수 불변), breaking change major + 이관 계획. appVersion/courseVersion/schemaVersion은 독립. 이미 발행된 점수와 ID 보존; 정답 변경 시 새 문제 revision, 기존 기록 유지 및 공지.
+
+## 평가 및 공개 artifact 확장
+ADR-00-001: 01 authoritative W01/W02 rubric과 02 assessment 데이터 정합. ADR-00-002: additive artifactDigests의 정확한 byte SHA-256 및 온라인/오프라인 검증, 필수 P0 release gate. 두 ADR 모두 main decisions/approved/에서 참조. 기존 format의 draft는 계속 호환; nonempty approval에는 추가 검증 필수. 적용 전 출고 금지.

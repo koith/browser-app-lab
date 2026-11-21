@@ -1,0 +1,119 @@
+{
+  "version": "1.0.0",
+  "asOf": "2026-11-21",
+  "defects": [
+    {
+      "id": "F-01",
+      "severity": "high",
+      "owner": "02",
+      "consult": [
+        "01",
+        "05",
+        "03"
+      ],
+      "state": "open",
+      "title": "주간 평가 규격 불일치",
+      "evidence": [
+        "curriculum-mapping/week01-assessment.json: L/R 10×2.5, writing 기준 및 5/15/10/10/15/5분",
+        "content/assessments.json: W01 L/R/W 각 5×5, 15/10/15/15/5분"
+      ],
+      "resolution": "ADR-00-001: 01 authoritative blueprint, expand candidate items, timing and grading; preserve original IDs/revisions. 05 re-review."
+    },
+    {
+      "id": "F-02",
+      "severity": "high",
+      "owner": "02",
+      "consult": [
+        "01",
+        "05"
+      ],
+      "state": "retest_required",
+      "title": "이전 05 교재 언어/선수·분량 결함 최신본 미검수",
+      "evidence": [
+        "qa/p0-language-and-runtime-20261121.md",
+        "lessons.json blob f6706f31... differs from reviewed d7ace3fb..."
+      ],
+      "resolution": "05 independent latest revision audit; 02 fixes mapped findings; do not inherit baseline approval."
+    },
+    {
+      "id": "F-03",
+      "severity": "critical",
+      "owner": "03",
+      "consult": [
+        "05",
+        "00"
+      ],
+      "state": "open",
+      "title": "공개 Pages가 main보다 이전 ungated v0.1.0 표시",
+      "evidence": [
+        "External rendered fetch root and cache-busted path: banner 0.1.0, 학습 시작; main index banner 0.1.1",
+        "app/release-gate.js fetch 503 in external extractor; not proof of host failure"
+      ],
+      "resolution": "verify latest published build and locked 0 days, investigate Pages build status or free isolated fallback; no app-wide site config edits."
+    },
+    {
+      "id": "F-04",
+      "severity": "high",
+      "owner": "03",
+      "consult": [
+        "02",
+        "05"
+      ],
+      "state": "open",
+      "title": "교재 해설/숨김 듣기/주간 4영역 평가 UI 미연결",
+      "evidence": [
+        "main index.html dictation uses examples[0]; quiz only choices",
+        "content/assessments.json separate draft"
+      ],
+      "resolution": "Implement validated activity and rubric UI/score with one exact content revision; no learner answer exposed during test."
+    },
+    {
+      "id": "F-05",
+      "severity": "critical",
+      "owner": "03",
+      "consult": [
+        "00",
+        "05"
+      ],
+      "state": "open",
+      "title": "공개 승인 revision과 제공 JSON byte 해시 미결합",
+      "evidence": [
+        "app/release-gate.js only checks metadata presence, loadRelease caches coherent response but no byte hash"
+      ],
+      "resolution": "ADR-00-002 exact SHA-256 raw UTF-8 payload and approved manifest binding; validate in online/cache fallback."
+    },
+    {
+      "id": "F-06",
+      "severity": "high",
+      "owner": "04",
+      "consult": [
+        "02",
+        "03",
+        "05"
+      ],
+      "state": "open",
+      "title": "음성 대상 100→220 불일치 및 실제 저장 부족",
+      "evidence": [
+        "draft PR #1409 old lesson blob d7ace3fb..., 1 committed binary",
+        "content/audio-targets-first-fortnight.json 220 P0, 402 total"
+      ],
+      "resolution": "resume draft using new exact targets; real assets or verified tr-TR local TTS with per-target evidence; independent hearing."
+    },
+    {
+      "id": "F-07",
+      "severity": "high",
+      "owner": "05",
+      "consult": [
+        "03",
+        "04"
+      ],
+      "state": "open",
+      "title": "물리 iPhone/실제 브라우저/음성/복원 독립 실검증 미완",
+      "evidence": [
+        "qa/p0-browser-attempt-20261121.json",
+        "03 simulated 21 checks, not real browser"
+      ],
+      "resolution": "run actual browser and physical iPhone; distinguish test fixture vs public build and hardware. Do not claim when inaccessible."
+    }
+  ]
+}

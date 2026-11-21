@@ -21,7 +21,9 @@
         "DEVELOPMENT_LEDGER.json",
         "SPEC.md",
         "BOOTSTRAP_PROMPTS.md",
-        "decisions/approved/**"
+        "decisions/approved/**",
+        "AUTO_DEVELOPMENT.md",
+        "ops/**"
       ],
       "taskIds": []
     },
@@ -138,6 +140,8 @@
     "externalProjectEditsForbidden": true,
     "independentVerificationRole": "05",
     "ledgerProposalsViaHandoffs": true,
-    "notes": "03 owns index.html incl existing TTS/recording; 04 proposes integration contract, does not edit index.html. 01 owns assessment rubric, 02 owns assessment questions. 05 reports defects, does not directly edit production files. DEP-05 full release verified by 05 and approved by 00."
+    "notes": "03 owns index.html incl existing TTS/recording; 04 proposes integration contract, does not edit index.html. 01 owns assessment rubric, 02 owns assessment questions. 05 reports defects, does not directly edit production files. DEP-05 full release verified by 05 and approved by 00.",
+    "coordinationException": "All roles may CAS update ops/LEASES.json only on main; all other ops paths 00 only. See AUTO_DEVELOPMENT.md.",
+    "autonomousSelection": "Every manual continuation and scheduled execution reads latest queue and acquires scoped lease. Scheduled role switching preserves per-role paths/PRs; independent QA is separate."
   }
 }

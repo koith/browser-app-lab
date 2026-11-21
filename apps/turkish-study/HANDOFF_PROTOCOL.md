@@ -10,3 +10,6 @@ schemas/handoff.schema.json 참고. 필수: id/from/to/createdAt/taskIds/baseRef
 ADR 제안은 decisions/proposals/NN/<id>.md로 자신 영역이 작성. 문제, 기존·새 규격, 영향을 받는 파일/학습 기록/릴리스, 대안, migration/rollback, 수용 테스트 포함. 00 승인 기록은 decisions/approved/<id>.md. 승인 전 타 영역 직접 수정 금지. 즉시 수정 필요한 회귀/보안 문제도 00 승인/핫픽스 후 재검증.
 ## 진행 보고
 이번 턴 실제 반영한 commit/PR, 본인이 맡은 항목의 상태, 테스트 수와 범위, 신규 최종 완료(00 검증 전 0), 전체 원장 완료/잔여(조회 시점), 다음 작업과 의존성. 미병합 PR 상태는 미병합으로 보고한다. 시스템이 다음 대화를 자동 실행하거나 인수인계를 자동 푸시한다는 가정 금지.
+
+## 자동 운영 연계
+모든 실행은 AUTO_DEVELOPMENT.md의 lease/CAS 절차를 먼저 지킨다. 00은 ops/WORK_QUEUE.json 및 ops/DEFECTS.json의 작업 단위와 상태/선행조건을 실제 handoff/PR/증거에 따라 갱신한다. workUnits는 기존 중앙 원장 parent ID의 세부 단계이며 별도 완료 통계에 가산하지 않는다. 01~05는 handoff와 자신 PR에 checkpoint/nextAction/관련 defect 및 workUnit ID를 남긴다. 다른 대화가 실제 실행되기 전 자동 전달·진행을 보장하지 않는다. 예약 실행 역할별 변경 파일/PR 분리. 과거 revision QA 결과는 새 revision 승인으로 자동 이전하지 않는다.
