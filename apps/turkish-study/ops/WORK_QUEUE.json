@@ -68,9 +68,9 @@
       ],
       "priority": "P0",
       "rank": 1,
-      "state": "ready",
+      "state": "resume",
       "requires": [],
-      "action": "공개 Pages 0.1.0→main 0.1.1 동기화 및 fail-closed 0일 상태 확인. 이전 캐시 회귀와 공용 설정 영향 조사.",
+      "action": "Verify exact live v0.1.1 bundle/manifest, physical and actual gate click regression; v0.1.1 shell already rendered.",
       "acceptance": "실제 URL 200/렌더 버전·gate script 응답 및 미승인 수업 차단, 공개 배포 SHA/시간. 타 앱/공용 Pages 설정 무단 수정 금지.",
       "defects": [
         "F-03"
@@ -78,7 +78,11 @@
       "countedInLedger": false,
       "branch": null,
       "pr": null,
-      "checkpoint": null
+      "checkpoint": {
+        "evidence": "ops/runs/20261121-00-integration-r2.json",
+        "observed": "Public v0.1.1, 0/120 and wait button rendered; direct manifest extract still old",
+        "nextAction": "Compare served exact manifest, verify public and actual UI gating/refresh; no shared-site change."
+      }
     },
     {
       "id": "P0-03-02",
@@ -253,7 +257,10 @@
       "countedInLedger": false,
       "branch": null,
       "pr": null,
-      "checkpoint": null
+      "checkpoint": {
+        "evidence": "ops/runs/20261121-00-integration-r2.json",
+        "nextAction": "Reconcile subsequent PRs and strict gate; auto handover ready"
+      }
     },
     {
       "id": "P0-00-02",
@@ -787,7 +794,12 @@
       "activePR": null,
       "complete": false,
       "requirement": "공개 URL 배포",
-      "acceptance": "실서비스 HTTP 200 및 렌더링"
+      "acceptance": "실서비스 HTTP 200 및 렌더링",
+      "checkpoint": {
+        "evidence": "ops/runs/20261121-00-integration-r2.json",
+        "observed": "Public v0.1.1, 0/120 and wait button rendered; direct manifest extract still old",
+        "nextAction": "Compare served exact manifest, verify public and actual UI gating/refresh; no shared-site change."
+      }
     },
     {
       "id": "DEP-03",
