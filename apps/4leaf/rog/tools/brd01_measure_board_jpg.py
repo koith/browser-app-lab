@@ -177,7 +177,7 @@ def verify_archive():
     consensus=max(([r for r in rows if max(abs(a-b) for a,b in zip(offset(anchor),offset(r))) <= 1] for anchor in rows),key=len,default=[])
     assert len(consensus)>=2, ('need two distinct additional DMP cells with same source translation',rows)
     payload=dict(capture='memorial-130D143A5142AFA11F',url=url,sha256=hashlib.sha256(data).hexdigest(),width=800,height=600,anchors=consensus)
-    Path('/tmp/brd01-archive.json').write_text(json.dumps(payload,indent=2)+'\\n')
+    Path('/tmp/brd01-archive.json').write_text(json.dumps(payload,indent=2)+'\n')
     print('BRD01 ARCHIVE DISTINCT CELLS PASS',json.dumps(payload),flush=True)
 
 if __name__ == '__main__':
