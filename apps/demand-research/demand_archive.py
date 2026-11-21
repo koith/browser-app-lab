@@ -39,7 +39,7 @@ _REMOTE_RCLONE_GATE = threading.Lock()
 MAX_REMOTE_LIST_BYTES = 12_000_000
 
 
-def _bounded_list_output(command, timeout=120, cap=MAX_REMOTE_LIST_BYTES):
+def _bounded_list_output(command, timeout=120, cap=MAX_REMOTE_LIST_BYTES, *, object_read=False):
     """Drain rclone's stdout and stderr without allocating an unlimited pipe.
 
     Large unofficial TeraBox directory listings previously grew entirely in
@@ -72,6 +72,8 @@ def _bounded_list_output(command, timeout=120, cap=MAX_REMOTE_LIST_BYTES):
                         if key.data=="out":
                             size+=len(block)
                             if size>cap:
+                                if object_read:
+                                    raise ValueError("private remote object exceeds cap")
                                 raise RuntimeError("private cloud listing exceeds memory bound")
                             chunks.append(block)
                         elif sum(map(len,errors))<65536:
@@ -177,6 +179,7 @@ class CloudArchive:
         if not re.fullmatch(r"archive:[A-Za-z0-9_/-]+", self.remote):
             raise ValueError("archive destination must be a private archive: prefix")
         self.runner = runner or self._run
+        self._default_runner = runner is None
         self.trace_queue = False
         self.quarantined_ids = set()
         self.repaired_entries = 0
@@ -188,18 +191,27 @@ class CloudArchive:
         self.recovery_flat_first = (os.getenv("DEMAND_RECOVERY_PREFER_FLAT") == "1")
 
     @staticmethod
-    def _run(args, data=None, timeout=150, allow_missing=False):
+    def _run(args, data=None, timeout=150, allow_missing=False, output_cap=None):
         if os.getenv("DEMAND_RCLONE_SERIALIZED","0")=="1":
             with _REMOTE_RCLONE_GATE:
                 return CloudArchive._run_unlocked(
-                    args,data=data,timeout=timeout,allow_missing=allow_missing)
+                    args,data=data,timeout=timeout,allow_missing=allow_missing,
+                    output_cap=output_cap)
         return CloudArchive._run_unlocked(
-            args,data=data,timeout=timeout,allow_missing=allow_missing)
+            args,data=data,timeout=timeout,allow_missing=allow_missing,
+            output_cap=output_cap)
 
     @staticmethod
-    def _run_unlocked(args, data=None, timeout=150, allow_missing=False):
+    def _run_unlocked(args, data=None, timeout=150, allow_missing=False, output_cap=None):
         try:
-            if (args and args[0]=="lsf" and data is None
+            if args and args[0]=="cat" and data is None and output_cap is not None:
+                # Stop oversized output BEFORE accumulating the full object.
+                # Never return truncated bytes or let a failed read count as saved.
+                if type(output_cap) is not int or output_cap < 0:
+                    raise ValueError("invalid remote object cap")
+                r = _bounded_list_output(["rclone",*args],timeout=timeout,
+                                         cap=output_cap,object_read=True)
+            elif (args and args[0]=="lsf" and data is None
                     and os.getenv("DEMAND_RCLONE_BOUNDED_LIST","0")=="1"):
                 r = _bounded_list_output(["rclone",*args],timeout=timeout)
             else:
@@ -246,12 +258,16 @@ class CloudArchive:
             raise error
         return r.stdout
 
-    def command(self, args, *, data=None, timeout=150, allow_missing=False):
+    def command(self, args, *, data=None, timeout=150, allow_missing=False, output_cap=None):
         started = time.monotonic()
         outcome = "error"
         http_status = provider_code = None
         try:
-            result = self.runner(args, data=data, timeout=timeout, allow_missing=allow_missing)
+            options = dict(data=data, timeout=timeout, allow_missing=allow_missing)
+            # Existing injected storage adapters keep their established interface.
+            if self._default_runner and output_cap is not None:
+                options["output_cap"] = output_cap
+            result = self.runner(args, **options)
             outcome = "missing" if result is None else "ok"
             return result
         except RuntimeError as error:
@@ -293,7 +309,7 @@ class CloudArchive:
             if domain!="https://nephobox.com":
                 raise ValueError("unapproved alternate cloud endpoint")
             args.extend(["--terabox-domain",domain])
-        data=self.command(args,timeout=120,allow_missing=optional)
+        data=self.command(args,timeout=120,allow_missing=optional,output_cap=cap)
         if data is None:
             return None
         if len(data)>cap:
