@@ -12,8 +12,9 @@
       "journal_sha256": "0dd943f0afa7c878ca4e77552ff7fef0032617563b3fc875e0a4de8448a2b8e1",
       "expected_collected_photos": 500,
       "baseline_owner_fingerprint": "0031f0a5e1909f46dd3fbf2ca39eda0e1c1884d7b091dad84325f1f93bceb8a7",
-      "official_publisher_sha_only": true
+      "official_publisher_sha_only": true,
+      "allow_live_append_only_baseline": true
     }
   },
-  "retry_reason": "Recover exact existing archived bytes only; no source recrawl or new media uploads; require independent recorded publisher SHA, byte length, dimensions, and exact remote original/preview verification."
+  "retry_reason": "Recover existing publisher-verified pairs against the live owner inventory; skip already present SHA, append only missing, preserve every published slot."
 }
