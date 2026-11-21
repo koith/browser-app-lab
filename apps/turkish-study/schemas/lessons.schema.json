@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:turkce120:lessons:1",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lessons": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 120,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^D(?:00[1-9]|0[1-9][0-9]|1[01][0-9]|120)$"
+          },
+          "day": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 120
+          },
+          "objective": {
+            "type": "string",
+            "minLength": 1
+          },
+          "grammar": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1
+          },
+          "task": {
+            "type": "string",
+            "minLength": 1
+          },
+          "alphabet": {
+            "type": "string",
+            "minLength": 1
+          },
+          "words": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 0
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ],
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "minItems": 1
+          },
+          "dialogue": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ],
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "minItems": 1
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^D[0-9]{3}-Q[1-9][0-9]*$"
+                },
+                "type": {
+                  "const": "choice"
+                },
+                "prompt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "answer": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "choices": {
+                  "type": "array",
+                  "minItems": 2,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "explanation": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "id",
+                "type",
+                "prompt",
+                "answer",
+                "choices"
+              ],
+              "additionalProperties": true
+            },
+            "minItems": 1
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "structure_checked",
+              "linguistic_reviewed",
+              "audio_reviewed",
+              "release_ready",
+              "published"
+            ]
+          },
+          "languageReview": {
+            "type": "string",
+            "minLength": 1
+          },
+          "audioReview": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "day",
+          "objective",
+          "grammar",
+          "note",
+          "task",
+          "words",
+          "examples",
+          "dialogue",
+          "questions",
+          "status",
+          "languageReview",
+          "audioReview",
+          "sources"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "version",
+    "status",
+    "license",
+    "lessons"
+  ],
+  "additionalProperties": true
+}
