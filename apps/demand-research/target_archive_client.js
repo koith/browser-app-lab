@@ -58,6 +58,10 @@
   let currentRun=null;
   let pendingJobs=[];
   const pollTimers=new Map(),polling=new Set();
+  const MAX_PARALLEL_STATUS_READS=2;
+  let activeStatusReads=0,queueSnapshot=null,queueSummaryRead=null;
+  let queueSummaryAt=0,queueSummaryGeneration=0;
+  const checkedReceiptStates=new Map();
   let submitSequence=Promise.resolve();
   let connectionAttempting=false;
   let inlineStatus=null;
@@ -98,7 +102,7 @@
     const all=[...rows.values()].slice(-MAX_HISTORY);
     try{localStorage.setItem(HISTORY_KEY,JSON.stringify(all))}catch{}
   }
-  const TERMINAL_STATES=new Set(["REMOTE_VERIFIED","PARTIAL_BACKUP","NEEDS_RETRY","FAILED"]);
+  const TERMINAL_STATES=new Set(["REMOTE_VERIFIED","PARTIAL_BACKUP","NEEDS_RETRY","FAILED","CANCELLED"]);
 
   function safeJob(job){
     return job&&Number.isSafeInteger(job.run_id)&&job.run_id>0&&
@@ -122,6 +126,7 @@
     if(finished){
       const id=finished.run_id;
       pendingJobs=pendingJobs.filter(job=>job.run_id!==id);
+      checkedReceiptStates.delete(id);
     }
     try{
       if(pendingJobs.length){
@@ -141,9 +146,70 @@
   queueInfo.hidden=true;
   jobStatus.after(queueInfo);
   function renderQueueInfo(){
-    queueInfo.hidden=!pendingJobs.length;
-    queueInfo.textContent=pendingJobs.length?
-      "접수된 미완료 백업 "+pendingJobs.length+"건 · 이전 작업도 유지하고 순서대로 진행 상태를 확인합니다.":"";
+    queueInfo.hidden=!gatewayReady;
+    if(!gatewayReady)return;
+    // Browser receipts are history, not the server queue. Never count them
+    // as unfinished jobs without a fresh authoritative status response.
+    const summary=queueSnapshot;
+    queueInfo.textContent=summary
+      ?"서버 실행 미배정 "+summary.queued+"건 · 누적 실행 배정 "+summary.dispatched+
+        "건 (완료 포함) · 저장 성공 여부는 별도 확인"
+      :receiptQueueSummary();
+  }
+  function receiptQueueSummary(){
+    // The public gateway intentionally denies the owner-wide ledger.
+    // Count ONLY states returned by authorized individual receipt reads
+    // during this page session; old stored lastState is not a live count.
+    let waiting=0,running=0,checking=0,retry=0,unknown=0;
+    const now=Date.now();
+    for(const job of pendingJobs){
+      const observed=checkedReceiptStates.get(job.run_id);
+      const state=observed&&now-observed.at<=120000?observed.state:"";
+      if(state==="QUEUED")waiting++;
+      else if(state==="RUNNING")running++;
+      else if(state==="VERIFYING_STORAGE")checking++;
+      else if(state==="RETRY_PENDING")retry++;
+      else unknown++;
+    }
+    return "이 브라우저 요청(서버 확인) · 실행 대기 "+waiting+"건 · 실행 중 "+running+
+      "건 · 저장 확인 중 "+checking+"건 · 재시도 대기 "+retry+"건"+
+      (unknown?" · 상태 미확인 "+unknown+"건":"")+
+      " · 전체 서버 대기열은 확인 불가";
+  }
+  async function refreshQueueSummary(force=false){
+    if(!gatewayReady)return;
+    if(force){queueSummaryGeneration++;queueSnapshot=null;renderQueueInfo();}
+    if(queueSummaryRead){
+      if(!force)return queueSummaryRead;
+      await queueSummaryRead;
+    }
+    if(!force&&Date.now()-queueSummaryAt<15000)return;
+    const generation=queueSummaryGeneration;
+    queueSummaryRead=(async()=>{
+      const controller=new AbortController();
+      const timer=window.setTimeout(()=>controller.abort(),10000);
+      try{
+        const response=await fetch("/api/target-archive/queue-summary",{
+          credentials:"same-origin",cache:"no-store",
+          headers:{Accept:"application/json"},signal:controller.signal});
+        if(!response.ok)throw Error("queue summary unavailable");
+        const data=await response.json();
+        const valid=data?.known===true&&
+          Number.isSafeInteger(data.queued)&&data.queued>=0&&
+          Number.isSafeInteger(data.dispatched)&&data.dispatched>=0&&
+          Number.isSafeInteger(data.total_requests)&&
+          data.total_requests===data.queued+data.dispatched;
+        if(generation===queueSummaryGeneration)queueSnapshot=valid?data:null;
+      }catch{
+        if(generation===queueSummaryGeneration)queueSnapshot=null;
+      }finally{
+        window.clearTimeout(timer);
+        queueSummaryAt=Date.now();
+        renderQueueInfo();
+      }
+    })();
+    const active=queueSummaryRead;
+    try{await active;}finally{if(queueSummaryRead===active)queueSummaryRead=null;}
   }
   function clearPoll(job){
     if(!job)return;
@@ -217,7 +283,17 @@
   // A later selected account never cancels or replaces an earlier job.
   async function pollJob(job=currentRun){
     if(!gatewayReady||!job||!pendingJobs.includes(job)||polling.has(job.run_id))return;
-    clearPoll(job);polling.add(job.run_id);
+    clearPoll(job);
+    if(activeStatusReads>=MAX_PARALLEL_STATUS_READS){
+      const timer=window.setTimeout(()=>{
+        pollTimers.delete(job.run_id);void pollJob(job);
+      },1000+Math.min(3000,Math.max(0,pendingJobs.indexOf(job))*100));
+      pollTimers.set(job.run_id,timer);
+      return;
+    }
+    activeStatusReads++;polling.add(job.run_id);
+    const controller=new AbortController();
+    const timeout=window.setTimeout(()=>controller.abort(),18000);
     const visible=(text,kind,accountKey)=>{
       job.state=kind;
       if(currentRun===job)showJob(text,kind,accountKey);
@@ -227,13 +303,16 @@
       const response=await fetch("/api/target-archive/jobs/"+
         encodeURIComponent(String(job.run_id)),{
           credentials:"same-origin",cache:"no-store",
-          headers:{Accept:"application/json","X-Archive-Receipt":job.receipt}
+          headers:{Accept:"application/json","X-Archive-Receipt":job.receipt},
+          signal:controller.signal
         });
       if(!response.ok)throw Error("Job status HTTP "+response.status);
       const result=await response.json();
       if(!pendingJobs.includes(job))return;
       job.lastState=String(result.state||"STATUS_UNAVAILABLE");
       job.lastCheckedAt=Date.now();
+      checkedReceiptStates.set(job.run_id,{state:job.lastState,at:job.lastCheckedAt});
+      writeHistory(job);
       const count=Number(result.posts||0);
       switch(result.state){
         case "QUEUED":
@@ -257,6 +336,7 @@
           visible("백업 실행 실패 · 동일 작업을 최대 2회 자동 재시도하도록 대기 중입니다.","queued");
           break;
         case "NEEDS_RETRY":
+        case "CANCELLED":
         case "FAILED":
           visible(result.state==="NEEDS_RETRY"?
             "기존 작업 대기 기록이 만료됐습니다. 보관함에서 저장 결과를 확인해 주세요.":
@@ -268,10 +348,18 @@
           visible("백업 상태 확인 중입니다.","running");
       }
     }catch{
-      if(pendingJobs.includes(job))
+      if(pendingJobs.includes(job)){
+        job.lastState="STATUS_UNAVAILABLE";
+        checkedReceiptStates.delete(job.run_id);
+        job.lastCheckedAt=Date.now();
+        writeHistory(job);
         visible("접수된 백업의 진행 상태를 다시 확인 중입니다.","verifying");
+      }
     }finally{
+      window.clearTimeout(timeout);
       polling.delete(job.run_id);
+      activeStatusReads=Math.max(0,activeStatusReads-1);
+      void refreshQueueSummary();
       if(pendingJobs.includes(job)){
         // The former 12-second per-account polling could overwhelm Render's
         // 512MiB instance when many old receipts were restored at once.
@@ -402,17 +490,18 @@
         ?"계정 이름 또는 주소를 입력하고 백업 시작을 누르세요. 이 화면에서 진행 상태를 표시합니다."
         :"비공개 보관함은 열 수 있지만 새 백업 요청 권한이 설정되지 않았습니다.";
       if(gatewayReady){
+        void refreshQueueSummary();
         void loadLibrary();
         const remembered=resumeReceipts();
         if(remembered.length){
           for(const job of remembered)
             if(!pendingJobs.some(j=>j.run_id===job.run_id))pendingJobs.push(job);
           currentRun=pendingJobs[pendingJobs.length-1];
-          showJob("기존 백업 "+pendingJobs.length+"건의 접수·진행 상태를 확인 중…","running");
+          showJob("기존 백업 요청의 서버 상태를 확인 중…","running");
           renderQueueInfo();
-          // The popup can inspect old receipts on demand. Avoid 17 parallel
-          // remote archive scans after a cold start.
-          for(const job of pendingJobs.slice(-3))void pollJob(job);
+          // Reconcile ALL remembered receipts fairly, but allow only two
+          // active status reads. The old last-three slice stranded older jobs.
+          for(const job of pendingJobs)void pollJob(job);
         }
       }
     }catch{
@@ -504,8 +593,8 @@
                   platform:platform.value,account:value,createdAt:Date.now()};
       saveReceipt(currentRun);
       message.textContent="새 계정 백업을 접수했습니다. 기존 백업도 계속 진행됩니다.";
-      showJob("백업 접수 완료 · 현재 미완료 요청 "+pendingJobs.length+
-        "건 · 저장 완료 여부는 별도 검증이 필요합니다.","queued");
+      showJob("백업 접수 완료 · 서버 대기 건수 확인 중 · 저장 완료 여부는 별도 검증이 필요합니다.","queued");
+      void refreshQueueSummary(true);
       void pollJob(currentRun);
       return {accepted:true,state:"QUEUED_NOT_VERIFIED",run_id:result.run_id};
     }catch(error){
