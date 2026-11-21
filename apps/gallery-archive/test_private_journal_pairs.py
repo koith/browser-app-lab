@@ -53,6 +53,25 @@ class JournalPairsTests(unittest.TestCase):
         self.assertFalse(report['sha_verified'])
         self.assertFalse(report['gallery_published'])
 
+    def test_private_recovery_indexes_only_verified_existing_originals(self):
+        from recover_private_journal_pairs import verify_existing_private_inventory
+        source,reviewed,reader,calls=self.source()
+        photo=source['catalog']['albums'][0]['images'][0]
+        def existing(args,limit):
+            if args[0]=='lsjson':
+                field,size=('key','bytes') if '/originals/' in args[1] else ('preview','preview_bytes')
+                return json.dumps([{'Name':photo[field].rsplit('/',1)[1],'Size':photo[size]}]).encode()
+            return reader(args,limit)
+        target=self.stage/'private-recovered'
+        result=verify_existing_private_inventory(source,self.owner,target,existing)
+        self.assertEqual(result['verified_originals'],1)
+        self.assertEqual(result['counts']['preview_verified'],1)
+        self.assertEqual(result['counts']['original_unavailable'],1)
+        self.assertEqual(result['albums'][0]['images'][0]['key'],photo['key'])
+        self.assertFalse(result['public_gallery_published'])
+        self.assertEqual(result['new_media_uploaded'],0)
+        self.assertEqual(result,json.loads((target/'metadata/private-recovered-index.json').read_text()))
+
     def test_storage_census_reports_failed_listing_as_unknown(self):
         from recover_private_journal_pairs import census_journal_storage
         source,reviewed,reader,calls=self.source()
