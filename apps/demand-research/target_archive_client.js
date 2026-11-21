@@ -61,6 +61,7 @@
   const MAX_PARALLEL_STATUS_READS=2;
   let activeStatusReads=0,queueSnapshot=null,queueSummaryRead=null;
   let queueSummaryAt=0,queueSummaryGeneration=0;
+  const checkedReceiptStates=new Map();
   let submitSequence=Promise.resolve();
   let connectionAttempting=false;
   let inlineStatus=null;
@@ -125,6 +126,7 @@
     if(finished){
       const id=finished.run_id;
       pendingJobs=pendingJobs.filter(job=>job.run_id!==id);
+      checkedReceiptStates.delete(id);
     }
     try{
       if(pendingJobs.length){
@@ -152,7 +154,27 @@
     queueInfo.textContent=summary
       ?"서버 실행 미배정 "+summary.queued+"건 · 누적 실행 배정 "+summary.dispatched+
         "건 (완료 포함) · 저장 성공 여부는 별도 확인"
-      :"서버 대기 건수 확인 중 또는 조회 불가";
+      :receiptQueueSummary();
+  }
+  function receiptQueueSummary(){
+    // The public gateway intentionally denies the owner-wide ledger.
+    // Count ONLY states returned by authorized individual receipt reads
+    // during this page session; old stored lastState is not a live count.
+    let waiting=0,running=0,checking=0,retry=0,unknown=0;
+    const now=Date.now();
+    for(const job of pendingJobs){
+      const observed=checkedReceiptStates.get(job.run_id);
+      const state=observed&&now-observed.at<=120000?observed.state:"";
+      if(state==="QUEUED")waiting++;
+      else if(state==="RUNNING")running++;
+      else if(state==="VERIFYING_STORAGE")checking++;
+      else if(state==="RETRY_PENDING")retry++;
+      else unknown++;
+    }
+    return "이 브라우저 요청(서버 확인) · 실행 대기 "+waiting+"건 · 실행 중 "+running+
+      "건 · 저장 확인 중 "+checking+"건 · 재시도 대기 "+retry+"건"+
+      (unknown?" · 상태 미확인 "+unknown+"건":"")+
+      " · 전체 서버 대기열은 확인 불가";
   }
   async function refreshQueueSummary(force=false){
     if(!gatewayReady)return;
@@ -289,6 +311,7 @@
       if(!pendingJobs.includes(job))return;
       job.lastState=String(result.state||"STATUS_UNAVAILABLE");
       job.lastCheckedAt=Date.now();
+      checkedReceiptStates.set(job.run_id,{state:job.lastState,at:job.lastCheckedAt});
       writeHistory(job);
       const count=Number(result.posts||0);
       switch(result.state){
@@ -327,6 +350,7 @@
     }catch{
       if(pendingJobs.includes(job)){
         job.lastState="STATUS_UNAVAILABLE";
+        checkedReceiptStates.delete(job.run_id);
         job.lastCheckedAt=Date.now();
         writeHistory(job);
         visible("접수된 백업의 진행 상태를 다시 확인 중입니다.","verifying");
