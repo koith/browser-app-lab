@@ -1,0 +1,122 @@
+{
+  "id": "20261121-02-W01-r2-1243",
+  "from": "02",
+  "to": [
+    "00",
+    "01",
+    "03",
+    "04",
+    "05"
+  ],
+  "createdAt": "2026-11-21T12:43:09Z",
+  "taskIds": [
+    "CON-01",
+    "CON-08",
+    "CON-09"
+  ],
+  "baseRef": "main",
+  "contractVersion": "1.0.0",
+  "status": "review_requested",
+  "summary": "W01 10+10, 25-point writing, timing; two legacy food slots need blueprint resolution. No release.",
+  "changedFiles": [
+    "content/assessments.json"
+  ],
+  "verification": [
+    {
+      "result": "pass",
+      "scope": "02 author check listening",
+      "evidence": "content/assessments.json",
+      "revision": "5a1e0616c882ce8d0b5fc3d4fc05f25af3a54009"
+    },
+    {
+      "result": "pass",
+      "scope": "02 author check reading",
+      "evidence": "content/assessments.json",
+      "revision": "5a1e0616c882ce8d0b5fc3d4fc05f25af3a54009"
+    },
+    {
+      "result": "pass",
+      "scope": "02 author check writing",
+      "evidence": "content/assessments.json",
+      "revision": "5a1e0616c882ce8d0b5fc3d4fc05f25af3a54009"
+    },
+    {
+      "result": "pass",
+      "scope": "02 author check timing",
+      "evidence": "content/assessments.json",
+      "revision": "5a1e0616c882ce8d0b5fc3d4fc05f25af3a54009"
+    },
+    {
+      "result": "pass",
+      "scope": "02 author check exactAudio",
+      "evidence": "content/assessments.json",
+      "revision": "5a1e0616c882ce8d0b5fc3d4fc05f25af3a54009"
+    },
+    {
+      "result": "pass",
+      "scope": "02 author check preserved",
+      "evidence": "content/assessments.json",
+      "revision": "5a1e0616c882ce8d0b5fc3d4fc05f25af3a54009"
+    },
+    {
+      "result": "pass",
+      "scope": "02 author check uniqueIds",
+      "evidence": "content/assessments.json",
+      "revision": "5a1e0616c882ce8d0b5fc3d4fc05f25af3a54009"
+    }
+  ],
+  "requests": [
+    {
+      "to": "01",
+      "action": "Resolve L3/R3 legacy coverage mismatch by explicit revision",
+      "acceptance": "Preserve historic ids and keys"
+    },
+    {
+      "to": "04",
+      "action": "Add new exact audio references to candidate inventory",
+      "acceptance": "No rejected robotic audio"
+    },
+    {
+      "to": "03",
+      "action": "Support r2 writingRubric and missing score",
+      "acceptance": "No legacy double scoring"
+    },
+    {
+      "to": "05",
+      "action": "Independent review of r2 after final changes",
+      "acceptance": "Exact revision evidence"
+    }
+  ],
+  "ledgerProposals": [
+    {
+      "id": "CON-01",
+      "implementation": "partial",
+      "content": "W01-r2-draft",
+      "verification": "author_check_only",
+      "evidence": [
+        "content/assessments.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-08",
+      "implementation": "partial",
+      "content": "W01-r2-draft",
+      "verification": "author_check_only",
+      "evidence": [
+        "content/assessments.json"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-09",
+      "implementation": "partial",
+      "content": "W01-r2-draft",
+      "verification": "author_check_only",
+      "evidence": [
+        "content/assessments.json"
+      ],
+      "proposedComplete": false
+    }
+  ]
+}

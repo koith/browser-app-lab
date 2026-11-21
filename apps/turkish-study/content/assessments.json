@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0-draft",
+  "version": "0.2.0-draft",
   "contractVersion": "1.0.0",
   "lessonBlob": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
   "license": "Original questions and scenarios; no copied textbook material.",
@@ -18,17 +18,20 @@
       ],
       "status": "draft",
       "minutes": {
+        "orientation": 5,
         "listening": 15,
         "reading": 10,
-        "writing": 15,
-        "speaking": 15,
+        "writing": 10,
+        "interaction": 15,
         "feedback": 5
       },
       "maxScore": 100,
       "provisionalPass": {
         "total": 80,
         "minimumPerSkill": 15,
-        "approval": "01/05 pending"
+        "approval": "01/05 pending",
+        "allSkillsRequired": true,
+        "missing": "not_assessed"
       },
       "listening": [
         {
@@ -40,14 +43,15 @@
           "prerequisiteDayIds": [
             "D001"
           ],
-          "points": 5,
+          "points": 2.5,
           "audioTarget": {
             "lessonId": "D001",
             "targetId": "D001-E3",
             "text": "Günaydın!",
             "lessonRevision": "r2-20261121a"
           },
-          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "greeting_or_introduction"
         },
         {
           "id": "W01-L2",
@@ -58,14 +62,15 @@
           "prerequisiteDayIds": [
             "D002"
           ],
-          "points": 5,
+          "points": 2.5,
           "audioTarget": {
             "lessonId": "D002",
             "targetId": "D002-E5",
             "text": "Süt.",
             "lessonRevision": "r2-20261121a"
           },
-          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "vowel"
         },
         {
           "id": "W01-L3",
@@ -76,14 +81,15 @@
           "prerequisiteDayIds": [
             "D003"
           ],
-          "points": 5,
+          "points": 2.5,
           "audioTarget": {
             "lessonId": "D003",
             "targetId": "D003-E10",
             "text": "Sıcak çay.",
             "lessonRevision": "r2-20261121a"
           },
-          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "food_expression_exception"
         },
         {
           "id": "W01-L4",
@@ -94,14 +100,15 @@
           "prerequisiteDayIds": [
             "D004"
           ],
-          "points": 5,
+          "points": 2.5,
           "audioTarget": {
             "lessonId": "D004",
             "targetId": "D004-E2",
             "text": "Ben turistim.",
             "lessonRevision": "r2-20261121a"
           },
-          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "greeting_or_introduction"
         },
         {
           "id": "W01-L5",
@@ -112,14 +119,110 @@
           "prerequisiteDayIds": [
             "D006"
           ],
-          "points": 5,
+          "points": 2.5,
           "audioTarget": {
             "lessonId": "D006",
             "targetId": "D006-E2",
             "text": "Adınız ne?",
             "lessonRevision": "r2-20261121a"
           },
-          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "greeting_or_introduction"
+        },
+        {
+          "id": "W01-L6",
+          "skill": "listening",
+          "prompt": "들은 단어를 고르세요: on / ön",
+          "answer": "ön",
+          "explanation": "ö와 o 구별.",
+          "prerequisiteDayIds": [
+            "D002"
+          ],
+          "points": 2.5,
+          "audioTarget": {
+            "lessonId": "D002",
+            "targetId": "D002-E7",
+            "text": "Ön.",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "vowel"
+        },
+        {
+          "id": "W01-L7",
+          "skill": "listening",
+          "prompt": "들은 단어를 고르세요: un / ün",
+          "answer": "un",
+          "explanation": "u와 ü 구별.",
+          "prerequisiteDayIds": [
+            "D002"
+          ],
+          "points": 2.5,
+          "audioTarget": {
+            "lessonId": "D002",
+            "targetId": "D002-E8",
+            "text": "Un.",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "vowel"
+        },
+        {
+          "id": "W01-L8",
+          "skill": "listening",
+          "prompt": "들은 단어를 고르세요: kır / kir",
+          "answer": "kır",
+          "explanation": "ı와 i 구별.",
+          "prerequisiteDayIds": [
+            "D002"
+          ],
+          "points": 2.5,
+          "audioTarget": {
+            "lessonId": "D002",
+            "targetId": "D002-E10",
+            "text": "Kır.",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "vowel"
+        },
+        {
+          "id": "W01-L9",
+          "skill": "listening",
+          "prompt": "들은 단어를 고르세요: cam / çam",
+          "answer": "çam",
+          "explanation": "c와 ç 구별.",
+          "prerequisiteDayIds": [
+            "D003"
+          ],
+          "points": 2.5,
+          "audioTarget": {
+            "lessonId": "D003",
+            "targetId": "D003-E5",
+            "text": "Çam.",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "consonant_or_ğ"
+        },
+        {
+          "id": "W01-L10",
+          "skill": "listening",
+          "prompt": "들은 단어를 고르세요: dağ / yağ",
+          "answer": "dağ",
+          "explanation": "ğ가 포함된 단어와 첫 자음 구별.",
+          "prerequisiteDayIds": [
+            "D003"
+          ],
+          "points": 2.5,
+          "audioTarget": {
+            "lessonId": "D003",
+            "targetId": "D003-E8",
+            "text": "Dağ.",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "검수 음원 최대 2회; 대본 숨김. 음원 없으면 미평가.",
+          "blueprintGroup": "consonant_or_ğ"
         }
       ],
       "reading": [
@@ -132,7 +235,8 @@
           "prerequisiteDayIds": [
             "D001"
           ],
-          "points": 5
+          "points": 2.5,
+          "blueprintGroup": "register"
         },
         {
           "id": "W01-R2",
@@ -143,7 +247,8 @@
           "prerequisiteDayIds": [
             "D002"
           ],
-          "points": 5
+          "points": 2.5,
+          "blueprintGroup": "special_letters"
         },
         {
           "id": "W01-R3",
@@ -155,7 +260,8 @@
             "D002",
             "D003"
           ],
-          "points": 5
+          "points": 2.5,
+          "blueprintGroup": "food_expression_exception"
         },
         {
           "id": "W01-R4",
@@ -166,7 +272,8 @@
           "prerequisiteDayIds": [
             "D004"
           ],
-          "points": 5
+          "points": 2.5,
+          "blueprintGroup": "introduction"
         },
         {
           "id": "W01-R5",
@@ -178,7 +285,68 @@
             "D004",
             "D006"
           ],
-          "points": 5
+          "points": 2.5,
+          "blueprintGroup": "introduction"
+        },
+        {
+          "id": "W01-R6",
+          "skill": "reading",
+          "prompt": "빛을 뜻하는 단어는 ışık / işik 중 무엇인가요?",
+          "answer": "ışık",
+          "explanation": "점 없는 ı와 ş.",
+          "prerequisiteDayIds": [
+            "D002"
+          ],
+          "points": 2.5,
+          "blueprintGroup": "special_letters"
+        },
+        {
+          "id": "W01-R7",
+          "skill": "reading",
+          "prompt": "산을 뜻하는 단어는 dağ / dag 중 무엇인가요?",
+          "answer": "dağ",
+          "explanation": "ğ는 독립 문자.",
+          "prerequisiteDayIds": [
+            "D003"
+          ],
+          "points": 2.5,
+          "blueprintGroup": "special_letters"
+        },
+        {
+          "id": "W01-R8",
+          "skill": "reading",
+          "prompt": "낯선 성인에게 안부를 묻는 표현은 Nasılsın? / Nasılsınız? 중 무엇인가요?",
+          "answer": "Nasılsınız?",
+          "explanation": "정중형.",
+          "prerequisiteDayIds": [
+            "D005"
+          ],
+          "points": 2.5,
+          "blueprintGroup": "register"
+        },
+        {
+          "id": "W01-R9",
+          "skill": "reading",
+          "prompt": "Adınız ne?는 친근한 질문인가요, 정중한 질문인가요?",
+          "answer": "정중한 질문",
+          "explanation": "-ınız 정중형.",
+          "prerequisiteDayIds": [
+            "D006"
+          ],
+          "points": 2.5,
+          "blueprintGroup": "register"
+        },
+        {
+          "id": "W01-R10",
+          "skill": "reading",
+          "prompt": "Ben öğrenciyim. 화자는 어떤 신분인가요?",
+          "answer": "학생",
+          "explanation": "öğrenci에 1인칭 접사.",
+          "prerequisiteDayIds": [
+            "D004"
+          ],
+          "points": 2.5,
+          "blueprintGroup": "introduction"
         }
       ],
       "writing": [
@@ -247,7 +415,7 @@
       "speaking": {
         "id": "W01-S1",
         "scenario": "에스키셰히르 카페에서 처음 만난 두 성인의 대화. 허구 이름/국적 카드로 서로 역할 교대.",
-        "instructions": "준비 3분, 1인당 1~2분씩 두 차례 대화, 녹음 비교 및 채점 나머지 시간. 대본 금지.",
+        "instructions": "친구 및 낯선 성인 두 장면, 각 학습자 총 약 6분, 준비/기록 3분, 역할 교대. 대본 금지.",
         "requiredActs": [
           "정중 인사/안부",
           "자기 이름 말하기 및 상대 이름 질문",
@@ -269,20 +437,147 @@
           "dimensions": [
             "과업 충족",
             "이해 가능성",
-            "문법·어휘 범위와 정확성",
-            "상호작용·응답"
+            "교육한 문법·어휘",
+            "상호작용·정중도"
           ],
           "levels": {
             "0": "미수행",
-            "1": "많은 도움 필요",
-            "2": "일부 도움 필요",
-            "3": "독립 수행"
+            "1": "정답 모델/지속 유도 필요",
+            "2": "부분 지원으로 수행",
+            "3": "정답 모델 없이 수행; 느린 반복 요청 1회 허용"
           },
-          "scoreFormula": "네 영역 점수 합계 × 25 / 12; 소수점 첫째 자리 반올림",
+          "scoreFormula": "25×합계/12; 반올림은 표시에서만",
           "note": "자동 STT 일치율과 동일하지 않음. 동행자 관찰 및 녹음 자가검토는 연습 지표, 독립 평가 미실시."
         }
       },
-      "grading": "듣기/읽기 각 문항 정답 5점 오답 0점. 쓰기 각 5점: 의미·요구 충족 2점, 형태·접사 2점, 철자 1점; 의미를 바꾸지 않는 말끝 구두점은 감점하지 않음. 모범답안 외 자연스럽고 학습 범위에 맞는 답을 채점자가 인정. 듣기 대본은 평가 후 공개. 개인정보는 허구 역할카드만 사용."
+      "grading": "r2: 듣기/읽기 각 10×2.5; 쓰기 writingRubric.items 25점; 상호작용 25×합계/12, 표시에서만 반올림. 총 80 및 각 15, 미응시 not_assessed. 기존 writing 배열은 이전 draft 보존용, r2 채점에 사용 금지. 의미를 바꾸지 않는 구두점 허용; NFC, I/ı와 İ/i 혼동 불허. 음원 미검수 시 듣기 미평가.",
+      "revision": "W01-r2-20261121",
+      "previousRevision": "0.1.0-draft",
+      "rubricId": "W01-RUBRIC-r1",
+      "writingRubric": {
+        "criteria": [
+          [
+            "익숙한 단어 철자 5개×2",
+            10
+          ],
+          [
+            "가명·국적·신분 3개×3",
+            9
+          ],
+          [
+            "인칭 접사·정중도 3개×2",
+            6
+          ]
+        ],
+        "rule": "의미 점수와 형태 슬롯 구분, 동일 오류 중복 차감 금지. NFC, I/ı와 İ/i 혼동 정답 처리 금지. 허용 가명·어순 인정.",
+        "items": [
+          {
+            "id": "W01-W6",
+            "prompt": "철자: 말",
+            "answer": "at",
+            "points": 2,
+            "prerequisiteDayIds": [
+              "D002"
+            ]
+          },
+          {
+            "id": "W01-W7",
+            "prompt": "철자: 우유",
+            "answer": "süt",
+            "points": 2,
+            "prerequisiteDayIds": [
+              "D002"
+            ]
+          },
+          {
+            "id": "W01-W2",
+            "prompt": "철자: 산",
+            "answer": "dağ",
+            "points": 2,
+            "prerequisiteDayIds": [
+              "D003"
+            ]
+          },
+          {
+            "id": "W01-W8",
+            "prompt": "철자: 차",
+            "answer": "çay",
+            "points": 2,
+            "prerequisiteDayIds": [
+              "D003"
+            ]
+          },
+          {
+            "id": "W01-W9",
+            "prompt": "철자: 빛",
+            "answer": "ışık",
+            "points": 2,
+            "prerequisiteDayIds": [
+              "D002"
+            ]
+          },
+          {
+            "id": "W01-W10",
+            "prompt": "제 이름은 메르트입니다.",
+            "answer": "Adım Mert.",
+            "points": 3,
+            "prerequisiteDayIds": [
+              "D006"
+            ]
+          },
+          {
+            "id": "W01-W3",
+            "prompt": "나는 한국인입니다.",
+            "answer": "Ben Koreliyim.",
+            "points": 3,
+            "prerequisiteDayIds": [
+              "D004"
+            ]
+          },
+          {
+            "id": "W01-W11",
+            "prompt": "나는 관광객입니다.",
+            "answer": "Ben turistim.",
+            "points": 3,
+            "prerequisiteDayIds": [
+              "D004"
+            ]
+          },
+          {
+            "id": "W01-W12",
+            "prompt": "너는 학생이야.",
+            "answer": "Sen öğrencisin.",
+            "points": 2,
+            "prerequisiteDayIds": [
+              "D004"
+            ]
+          },
+          {
+            "id": "W01-W4",
+            "prompt": "낯선 성인에게 안부를 물으세요.",
+            "answer": "Nasılsınız?",
+            "points": 2,
+            "prerequisiteDayIds": [
+              "D005"
+            ]
+          },
+          {
+            "id": "W01-W13",
+            "prompt": "낯선 성인에게 이름을 물으세요.",
+            "answer": "Adınız ne?",
+            "points": 2,
+            "prerequisiteDayIds": [
+              "D006"
+            ]
+          }
+        ],
+        "legacyItems": "writing array preserved for compatibility; use writingRubric.items for r2 only after 03/05 review"
+      },
+      "alignmentRemaining": [
+        "기존 L3/R3 음식 문항은 ID와 정답을 보존하기 위해 유지: blueprint 인사/소개 슬롯과 불일치. R의 소개 정보 1개 부족. 01과 교체 revision 승인 필요.",
+        "쓰기 신규 문항/배점 및 상호작용 05 독립 검수 필요.",
+        "W02 별도 정합 필요."
+      ]
     },
     {
       "id": "W02",
