@@ -147,6 +147,34 @@ class JournalPairsTests(unittest.TestCase):
         with patch.dict('os.environ',{'GH_TOKEN':'unit-test-only'}),patch('recover_private_journal_pairs.github',side_effect=[run,jobs]),patch('recover_private_journal_pairs.requests.get',return_value=response):
             with self.assertRaisesRegex(ValueError,'producer log digest'):producer_proof(request)
 
+    def test_live_baseline_accepts_appends_but_rejects_lost_or_changed_slots(self):
+        from recover_private_journal_pairs import require_live_published_inventory
+        owner=copy.deepcopy(self.owner)
+        owner['storage']='owner-private-terabox-sha-verified-bytes'
+        owner['albums'][0]['images']=[{**self.photo,'number':10,'sha256':'a'*64}]
+        published=clean_catalog(owner,'mimmi')
+        grown=copy.deepcopy(owner)
+        grown['albums'][0]['images'].append({**self.photo,'number':11,'sha256':'b'*64})
+        require_live_published_inventory(grown,'mimmi',published)
+        with self.assertRaisesRegex(ValueError,'lose or change'):
+            require_live_published_inventory(grown,'mimmi',clean_catalog(
+                {**owner,'albums':[{**owner['albums'][0],'images':[
+                    {**self.photo,'number':10,'sha256':'c'*64}]}]},'mimmi'))
+        with self.assertRaisesRegex(ValueError,'lose or change'):
+            require_live_published_inventory(owner,'mimmi',clean_catalog(grown,'mimmi'))
+
+    def test_already_recovered_sha_is_skipped_and_new_slots_follow_live_inventory(self):
+        source,reviewed,reader,calls=self.source()
+        row=source['catalog']['albums'][0]['images'][0]
+        self.owner['albums'][0]['images'].append({**row,'number':99})
+        result=recover(source,self.owner,reviewed,self.stage/'already-recovered',reader)
+        self.assertEqual((result['photos'],result['held'],result['skipped']),(0,1,1))
+        self.assertEqual(len(calls),1)
+        self.owner['albums'][0]['images'][-1]['sha256']='c'*64
+        result=recover(source,self.owner,reviewed,self.stage/'append-after-99',reader)
+        saved=json.loads((self.stage/'append-after-99'/'metadata/catalog.json').read_text())
+        self.assertEqual(saved['albums'][0]['images'][0]['number'],100)
+
     def test_a_changed_inventory_fails_before_reading_any_private_journal_or_image(self):
         import sys
         from recover_private_journal_pairs import main
