@@ -1,0 +1,27 @@
+{
+  "id": "auto-20261121-1043-r2",
+  "stage": "P0",
+  "before": {
+    "complete": 2,
+    "total": 44,
+    "publishedDays": 0
+  },
+  "after": {
+    "complete": 2,
+    "total": 44,
+    "publishedDays": 0
+  },
+  "pr": 1415,
+  "merge": "f26f0ebf8965ad76faad652b88d07cc990bb3369",
+  "mainReadbackBlob": "eac0db8e62418b897366337c4b88f53dfa276837",
+  "tests": {
+    "questionKeysAndExplanations": 61,
+    "audioReferences": 5,
+    "taskTimings": 6,
+    "weeklyRubric": "FAIL"
+  },
+  "outcome": "partial QA evidence merged, no release",
+  "nextAction": "02 align W01; 04 resume draft with native/neural candidates; 03 exact artifact binding; 05 remaining independent checks",
+  "limitations": "No physical device, actual audio hearing, production deployment, or full lexical verification this run.",
+  "dueAt": "2026-11-21T11:41:00Z"
+}
