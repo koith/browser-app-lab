@@ -116,6 +116,15 @@ jobs:
           python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/pair-recovery/metadata/collection-audit.json" "$target" --ignore-existing --timeout 60s --retries 1
           python apps/gallery-archive/safe_rclone.py cat "$target" --timeout 60s --retries 1 > "$RUNNER_TEMP/recovery-audit-readback.json"
           cmp "$RUNNER_TEMP/pair-recovery/metadata/collection-audit.json" "$RUNNER_TEMP/recovery-audit-readback.json"
+      - name: Save authenticated owner-only recovery index and verify remote readback
+        if: steps.restore.outputs.private_recovery == 'true'
+        run: |
+          set -euo pipefail
+          target="$ARCHIVE_REMOTE/metadata/private-recovery/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${MODEL}.json"
+          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/pair-recovery/metadata/private-recovered-index.json" "$target" --ignore-existing --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py cat "$target" --timeout 60s --retries 1 > "$RUNNER_TEMP/private-recovered-readback.json"
+          cmp "$RUNNER_TEMP/pair-recovery/metadata/private-recovered-index.json" "$RUNNER_TEMP/private-recovered-readback.json"
+          python -c 'import json,sys; d=json.load(open(sys.argv[1])); print("PRIVATE_RECOVERY_INDEX_STORED",d["verified_originals"],"PUBLIC_GALLERY",False)' "$RUNNER_TEMP/private-recovered-readback.json"
       - name: Keep the source failure visible when any original or preview remains held
         if: steps.restore.outcome == 'success' && steps.restore.outputs.held != '0'
         run: |

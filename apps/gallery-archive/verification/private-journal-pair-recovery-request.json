@@ -14,8 +14,9 @@
       "baseline_owner_fingerprint": "0031f0a5e1909f46dd3fbf2ca39eda0e1c1884d7b091dad84325f1f93bceb8a7",
       "official_publisher_sha_only": true,
       "allow_live_append_only_baseline": true,
-      "storage_census_only": true
+      "storage_census_only": true,
+      "verify_existing_private_files": true
     }
   },
-  "retry_reason": "Reconcile the interrupted 500-row journal with private storage by exact object paths and byte sizes, independently of publisher/source membership. Audit only, not admission or public deployment."
+  "retry_reason": "Preserve exact existing originals in an independently verified owner-private recovery index; no public catalog publication or new source requests."
 }
