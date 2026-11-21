@@ -464,7 +464,9 @@ def create_router(auth):
                     if verified is not None:
                         return JSONResponse({"run_id":run_id,**verified},
                              headers={"Cache-Control":"private, no-store"})
-                if queued is None or age>=1200:
+                # A durable, still-present request is not lost just because
+                # its worker has not accepted it within 20 minutes.
+                if queued is None or (age>=1200 and not backup_queue.durable_enabled()):
                     return JSONResponse({"run_id":run_id,"state":"NEEDS_RETRY",
                          "queued_seconds":age,"remote_verified":False,
                          "account_key":None,
@@ -495,13 +497,26 @@ def create_router(auth):
                                         headers={"Cache-Control":"private, no-store"})
                 state="VERIFYING_STORAGE"
             else:
+                # Reconcile only existing independently verified storage for
+                # this exact authorized receipt. Never dispatch a new job here.
+                if github_temp_bundle.enabled():
+                    try:
+                        existing=await asyncio.wait_for(asyncio.to_thread(
+                            read_matching_recent_verified_archive,
+                            item["platform"],item["account"],item["at"]),timeout=8)
+                    except (RuntimeError,ValueError,TypeError,KeyError,asyncio.TimeoutError):
+                        existing=None
+                    if existing and existing.get("remote_verified") is True:
+                        return JSONResponse({"run_id":run_id,**existing},
+                            headers={"Cache-Control":"private, no-store"})
                 # Trusted bridge can rerun a failed workflow twice with its
                 # ORIGINAL run ID, keeping the signed request receipt valid.
                 attempt=run.get("run_attempt")
                 retryable=(backup_queue.enabled() and
                            run.get("conclusion") in ("failure","timed_out") and
                            type(attempt) is int and 1<=attempt<3)
-                state="RETRY_PENDING" if retryable else "FAILED"
+                state=("RETRY_PENDING" if retryable else
+                       "CANCELLED" if run.get("conclusion")=="cancelled" else "FAILED")
         return JSONResponse({"run_id":run_id,"state":state,
                              "run_attempt":run.get("run_attempt"),
                              "remote_verified":False,
