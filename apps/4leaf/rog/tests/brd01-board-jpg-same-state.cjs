@@ -86,6 +86,20 @@ assert.ok(consistent>=451&&exceptions.length<=1,'DMP routes are an odd-q hex gri
    for(const r of rows)assert.ok(Math.abs(r.errorPx[0])<=1&&Math.abs(r.errorPx[1])<=1,
     capture+' cell '+r.cell+' matches the original centre: '+JSON.stringify(r));
   }
+  if(process.env.BRD01_EXTRA_ARCHIVE){
+   const extra=JSON.parse(fs.readFileSync(process.env.BRD01_EXTRA_ARCHIVE,'utf8'));
+   const ref=extra.anchors[0],wref=byCell.get(ref.cell);
+   const independent=new Set([...evidence.anchors,...extra.anchors].map(a=>a.cell));
+   assert.ok(independent.size>=10,'ten distinct archived DMP cells');
+   for(const a of extra.anchors){
+    const w=byCell.get(a.cell);
+    assert.ok(w&&wref,'live original archived cell');
+    assert.equal(w.x,a.dmp[0]);assert.equal(w.y,a.dmp[1]);
+    assert.ok(Math.abs((w.cx-wref.cx)-(a.center[0]-ref.center[0]))<=1);
+    assert.ok(Math.abs((w.cy-wref.cy)-(a.center[1]-ref.center[1]))<=1);
+   }
+   report.distinctArchive={source:extra.url,sha256:extra.sha256,cells:[...independent],extra:extra.anchors};
+  }
   // 4. Original two-capture terrain shift (35px tile / 17px landmark).
   // Read actual computed background style and actual live tile centre.
   // A static board background or a world layer with a different phase

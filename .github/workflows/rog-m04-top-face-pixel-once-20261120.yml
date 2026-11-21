@@ -1,7 +1,7 @@
 name: 4LEAF M04 original pixel top-face exposure acceptance
 on:
   push:
-    branches: ['main']
+    branches: ['main', '4leaf/brd01-distinct-source-proof-20261121']
     paths:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/board-camera.js'
@@ -35,6 +35,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify additional distinct original DMP cells
+        if: github.ref == 'refs/heads/4leaf/brd01-distinct-source-proof-20261121'
+        run: |
+          python3 -m pip install opencv-python-headless numpy
+          python3 apps/4leaf/rog/tools/brd01_measure_board_jpg.py --verify-archive
+          echo "BRD01_EXTRA_ARCHIVE=/tmp/brd01-archive.json" >> "$GITHUB_ENV"
       - name: Run original source alpha browser
         run: |
           npm install --no-save playwright
@@ -52,5 +58,14 @@ jobs:
           python3 apps/4leaf/rog/tools/brd01_measure_board_jpg.py --verify-masked
       - name: M04 original battle board historical anchors
         run: node apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs
+      - name: Verify same public beta.100 live board source and camera
+        if: github.ref == 'refs/heads/4leaf/brd01-distinct-source-proof-20261121'
+        run: |
+          base=https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+          for f in app-version.json board-camera.js dice-native-client-frame.css game.js original/maps.js original/tiles.js; do
+            curl -fsSL --max-time 30 "${base}${f}?brdproof=$GITHUB_SHA" -o /tmp/brd01-public
+            cmp "apps/4leaf/rog/$f" /tmp/brd01-public
+          done
+          FOURLEAF_TEST_URL="$base" node apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs
       - name: M04 all 26 maps source grid and depth audit
         run: node apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs

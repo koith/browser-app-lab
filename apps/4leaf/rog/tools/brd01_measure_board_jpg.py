@@ -133,7 +133,57 @@ def verify_masked():
     print('BRD-01 ORIGINAL MASKED ANCHORS PASS ' + json.dumps(rows))
 
 
+def verify_archive():
+    """Measure distinct 0172 DMP cells from the original last-night match capture."""
+    import hashlib
+    from urllib.request import Request, urlopen
+    url = 'https://t1.daumcdn.net/cfile/tistory/130D143A5142AFA11F'
+    request = Request(url, headers={'User-Agent': 'Mozilla/5.0', 'Referer': 'https://4leafmemorial.geld.kr/'})
+    with urlopen(request, timeout=25) as response:
+        data = response.read()
+    frame = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_GRAYSCALE)
+    assert frame is not None and frame.shape == (600,800), 'archive must contain the actual 800x600 image'
+    yy, xx = np.mgrid[:97, :145]
+    # Approximate image windows chosen from the screenshot's actual visible
+    # gray tile silhouettes, not the DMP positions. Exclude overlay dice,
+    # podium, items, neighboring platform, and fixed right HUD.
+    cases = [
+        (10, '0015', (166.5,237.5), (xx >= 67) & (xx <= 115) & (yy >= 16) & (yy <= 66)),
+        (6, '0015', (586.5,317.5), (xx >= 61) & (xx <= 104) & (yy >= 12) & (yy <= 53)),
+        (5, '0015', (691.5,357.5), (xx >= 15) & (xx <= 76) & (yy >= 17) & (yy <= 66)),
+        (9, '0007', (271.5,197.5), (xx >= 20) & (xx <= 89) & (yy >= 30) & (yy <= 62)),
+    ]
+    route = load_maps(None)['0172']
+    rows = []
+    for cell, art, approx, region in cases:
+        rgb = cv2.imread(str(TILES / (art + '.png')), cv2.IMREAD_UNCHANGED)[::-1]
+        lum = cv2.cvtColor(rgb, cv2.COLOR_BGRA2GRAY).astype(np.float32)
+        mask = (region & (rgb[:,:,3] > 200) & (xx%2==0) & (yy%2==0)).astype(np.uint8)
+        left, top = int(approx[0]-72.5), int(approx[1]-48.5)
+        x0, y0 = max(0,left-18), max(0,top-18)
+        x1, y1 = min(800,left+145+18), min(600,top+97+18)
+        scores = np.nan_to_num(cv2.matchTemplate(frame[y0:y1,x0:x1].astype(np.float32),lum,cv2.TM_CCOEFF_NORMED,mask=mask),nan=-1,posinf=-1,neginf=-1)
+        _, peak, _, (x,y) = cv2.minMaxLoc(scores)
+        gy,gx = np.mgrid[:scores.shape[0],:scores.shape[1]]
+        alt = float(scores[(gx-x)**2+(gy-y)**2>16].max())
+        row = dict(cell=cell,art=art,dmp=route[cell][:2],center=[x0+x+72.5,y0+y+48.5],score=round(peak,4),alternative=round(alt,4),pixels=int(mask.sum()))
+        print('BRD01 ARCHIVE CANDIDATE',json.dumps(row),flush=True)
+        if peak >= .58 and peak-alt >= .09:
+            rows.append(row)
+    # Consensus on the SAME independently measured DMP translation.
+    def offset(row):
+        x,y=row['dmp']; cx,cy=row['center']
+        return (cx-105*x,cy-80*y-40*(x%2))
+    consensus=max(([r for r in rows if max(abs(a-b) for a,b in zip(offset(anchor),offset(r))) <= 1] for anchor in rows),key=len,default=[])
+    assert len(consensus)>=2, ('need two distinct additional DMP cells with same source translation',rows)
+    payload=dict(capture='memorial-130D143A5142AFA11F',url=url,sha256=hashlib.sha256(data).hexdigest(),width=800,height=600,anchors=consensus)
+    Path('/tmp/brd01-archive.json').write_text(json.dumps(payload,indent=2)+'\\n')
+    print('BRD01 ARCHIVE DISTINCT CELLS PASS',json.dumps(payload),flush=True)
+
 if __name__ == '__main__':
+    if '--verify-archive' in sys.argv:
+        verify_archive()
+        sys.exit(0)
     if '--verify-masked' in sys.argv:
         verify_masked()
         sys.exit(0)
