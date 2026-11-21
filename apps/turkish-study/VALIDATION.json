@@ -40,5 +40,40 @@
     "No native speaker or independent language review; TTS/STT physical device not verified.",
     "No complete A1/A2 course content yet.",
     "Only local profiles, no account auth or automatic synchronization."
-  ]
+  ],
+  "independentP0Review": {
+    "baseCommit": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+    "asOf": "2026-11-21",
+    "decision": "NO_GO",
+    "scope": "pinned first week structural execution, independent AI text review with selected sources, source inspection and attempted public browser navigation; no real device pass",
+    "structuralChecks": {
+      "total": 14,
+      "pass": 10,
+      "fail": 4
+    },
+    "textItems": {
+      "days": 7,
+      "words": 56,
+      "examples": 21,
+      "dialogueTurns": 23,
+      "questions": 25,
+      "questionKeysAcceptable": 25,
+      "explanationsPresent": 0,
+      "finalLanguageApprovedDays": 0
+    },
+    "approvedDays": 0,
+    "browser": "navigation_blocked_by_environment",
+    "audio": "not_verified",
+    "physicalIPhone": "not_run",
+    "evidence": [
+      "qa/p0-baseline-20261121.json",
+      "qa/p0-language-and-runtime-20261121.md",
+      "qa/p0-browser-attempt-20261121.json"
+    ],
+    "tests": [
+      "tests/p0-baseline-audit.mjs",
+      "tests/public_smoke.py"
+    ],
+    "priorResultsNote": "Original results and simulated status preserved; not reclassified as independent runtime verification."
+  }
 }
