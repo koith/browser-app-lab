@@ -61,6 +61,9 @@ assert.ok(consistent>=451&&exceptions.length<=1,'DMP routes are an odd-q hex gri
      cx:r.left+r.width/2,cy:r.top+r.height/2,w:parseFloat(c.width),h:parseFloat(c.height),tf:c.transform}});
    return {tiles,camera:window.__LEAF_CAMERA__.getState().hexProjection}});
   assert.deepEqual(live.camera,{pitchX:105,pitchY:80,oddColumnDrop:40},'camera exposes the measured projection');
+  assert.ok(evidence.anchors.length>=10,'at least ten independently measured historical capture/cell anchors');
+  assert.equal(new Set(evidence.anchors.map(a=>a.capture+':'+a.cell)).size,evidence.anchors.length,'no duplicated historical measurements');
+  assert.ok(evidence.anchors.filter(a=>a.mask).length>=5,'five independently recovered partially occluded historical anchors');
   const byCell=new Map(live.tiles.map(t=>[t.i,t]));
   assert.equal(live.tiles.length,104,'DMP 0172 has 104 live cells');
   // 2. projection of every cell against cell 0, and native size/upright
