@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:turkce120:handoff:1",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "from": {
+      "enum": [
+        "00",
+        "01",
+        "02",
+        "03",
+        "04",
+        "05"
+      ]
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "00",
+          "01",
+          "02",
+          "03",
+          "04",
+          "05"
+        ]
+      },
+      "minItems": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "taskIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "baseRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contractVersion": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "enum": [
+        "in_progress",
+        "review_requested",
+        "ready_for_merge",
+        "blocked",
+        "completed",
+        "failed"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "changedFiles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "enum": [
+              "pass",
+              "fail",
+              "pending"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "result",
+          "scope",
+          "evidence",
+          "revision"
+        ],
+        "additionalProperties": true
+      },
+      "minItems": 0
+    },
+    "requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "enum": [
+              "00",
+              "01",
+              "02",
+              "03",
+              "04",
+              "05"
+            ]
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "acceptance": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "to",
+          "action",
+          "acceptance"
+        ],
+        "additionalProperties": true
+      },
+      "minItems": 0
+    },
+    "ledgerProposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "implementation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 0
+          },
+          "proposedComplete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "implementation",
+          "content",
+          "verification",
+          "evidence",
+          "proposedComplete"
+        ],
+        "additionalProperties": true
+      },
+      "minItems": 0
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "knownIssues": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 0
+    },
+    "newTaskRequests": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "minItems": 0
+    },
+    "pr": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "id",
+    "from",
+    "to",
+    "createdAt",
+    "taskIds",
+    "baseRef",
+    "contractVersion",
+    "status",
+    "summary",
+    "changedFiles",
+    "verification",
+    "requests",
+    "ledgerProposals"
+  ],
+  "additionalProperties": true
+}

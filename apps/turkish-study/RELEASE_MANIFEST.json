@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0.0",
+  "courseVersion": "0.1.0-draft",
+  "appVersion": "0.1.0",
+  "releaseId": null,
+  "stage": "development",
+  "publishedDayIds": [],
+  "candidateDayIds": [
+    "D001",
+    "D002",
+    "D003",
+    "D004",
+    "D005",
+    "D006",
+    "D007"
+  ],
+  "contentRevision": null,
+  "audioRevision": null,
+  "deploymentUrl": null,
+  "verifiedAt": null,
+  "evidence": [],
+  "limitations": [
+    "No independently reviewed lessons yet",
+    "Public Pages route previously 404",
+    "Runtime manifest enforcement not implemented",
+    "Local storage only; no verified cloud synchronization"
+  ],
+  "nextMilestone": "P0_FIRST_WEEK",
+  "runtimeEnforcement": "pending"
+}

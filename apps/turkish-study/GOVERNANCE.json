@@ -1,0 +1,143 @@
+{
+  "version": "1.0.0",
+  "root": "apps/turkish-study/",
+  "repository": "koith/browser-app-lab",
+  "integrationBranch": "main",
+  "branchPattern": "turkish/NN-<task>-<unique>",
+  "mergeAuthority": "00",
+  "ledgerAuthority": "00",
+  "releaseAuthority": "00",
+  "roles": {
+    "00": {
+      "name": "총괄 설계 및 개발 관리",
+      "owns": [
+        "AGENTS.md",
+        "GOVERNANCE.json",
+        "DATA_CONTRACT.md",
+        "schemas/**",
+        "HANDOFF_PROTOCOL.md",
+        "RELEASE_GATES.md",
+        "RELEASE_MANIFEST.json",
+        "DEVELOPMENT_LEDGER.json",
+        "SPEC.md",
+        "BOOTSTRAP_PROMPTS.md",
+        "decisions/approved/**"
+      ],
+      "taskIds": []
+    },
+    "01": {
+      "name": "교육과정 설계",
+      "owns": [
+        "curriculum.json",
+        "curriculum-mapping/**"
+      ],
+      "taskIds": [
+        "RES-01",
+        "RES-02",
+        "RES-03",
+        "CUR-01",
+        "CUR-02",
+        "CUR-03",
+        "CON-10"
+      ]
+    },
+    "02": {
+      "name": "교육 콘텐츠 제작",
+      "owns": [
+        "lessons.json",
+        "content/**"
+      ],
+      "taskIds": [
+        "CON-01",
+        "CON-02",
+        "CON-03",
+        "CON-04",
+        "CON-05",
+        "CON-06",
+        "CON-07",
+        "CON-08",
+        "CON-09"
+      ]
+    },
+    "03": {
+      "name": "웹앱 개발",
+      "owns": [
+        "index.html",
+        "manifest.webmanifest",
+        "sw.js",
+        "icon.svg",
+        "app/**",
+        "assets/ui/**",
+        "schema-proposal.sql",
+        "db/**",
+        "deploy/**"
+      ],
+      "taskIds": [
+        "APP-01",
+        "APP-02",
+        "APP-03",
+        "APP-04",
+        "APP-05",
+        "APP-06",
+        "APP-07",
+        "APP-08",
+        "DB-01",
+        "DB-02",
+        "DB-03",
+        "DB-04",
+        "DB-05",
+        "DEP-01",
+        "DEP-02"
+      ]
+    },
+    "04": {
+      "name": "음성 및 회화 시스템",
+      "owns": [
+        "audio/**",
+        "conversation/**",
+        "assets/audio/**"
+      ],
+      "taskIds": [
+        "AUD-01",
+        "AUD-02",
+        "AUD-03",
+        "AUD-04",
+        "AI-01",
+        "AI-02"
+      ]
+    },
+    "05": {
+      "name": "통합 검증",
+      "owns": [
+        "VALIDATION.json",
+        "qa/**",
+        "tests/**"
+      ],
+      "taskIds": [
+        "QA-01",
+        "QA-02",
+        "QA-03",
+        "QA-04",
+        "DEP-03",
+        "DEP-04",
+        "DEP-05"
+      ]
+    }
+  },
+  "commonPerRole": [
+    "handoffs/<role>/**",
+    "decisions/proposals/<role>/**"
+  ],
+  "rules": {
+    "readAll": true,
+    "writeOnlyOwned": true,
+    "unlistedPathRequires00Approval": true,
+    "only00Merge": true,
+    "noForcePush": true,
+    "oneOpenWritingPRPerFile": true,
+    "externalProjectEditsForbidden": true,
+    "independentVerificationRole": "05",
+    "ledgerProposalsViaHandoffs": true,
+    "notes": "03 owns index.html incl existing TTS/recording; 04 proposes integration contract, does not edit index.html. 01 owns assessment rubric, 02 owns assessment questions. 05 reports defects, does not directly edit production files. DEP-05 full release verified by 05 and approved by 00."
+  }
+}
