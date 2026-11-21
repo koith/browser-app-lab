@@ -1,6 +1,23 @@
 {
   "version": "1.0.0",
-  "generation": 8,
-  "leases": {},
+  "generation": 9,
+  "leases": {
+    "orchestrator:auto": {
+      "token": "20261121-2241-auto-r11",
+      "actor": "auto",
+      "role": "00",
+      "taskIds": [
+        "P0-00-01"
+      ],
+      "branch": "main",
+      "baseCommit": null,
+      "paths": [
+        "apps/turkish-study/ops/runs/"
+      ],
+      "acquiredAt": "2026-11-21T22:41:35Z",
+      "heartbeatAt": "2026-11-21T22:41:35Z",
+      "expiresAt": "2026-11-21T23:41:35Z"
+    }
+  },
   "note": "CAS via GitHub update_file using latest blob SHA; coordination-only exception to 00 merge rule; no secret/user data."
 }
