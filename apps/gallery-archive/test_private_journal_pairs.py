@@ -36,6 +36,29 @@ class JournalPairsTests(unittest.TestCase):
             return preview if '/previews/' in args[1] else self.original_bytes
         return source,reviewed,reader,calls
 
+    def test_storage_census_ignores_source_and_never_reads_media_or_publishes(self):
+        from recover_private_journal_pairs import census_journal_storage
+        source,reviewed,reader,calls=self.source()
+        photo=source['catalog']['albums'][0]['images'][0]
+        def list_only(args,limit):
+            calls.append(args)
+            self.assertEqual(args[0],'lsjson')
+            field,size=('key','bytes') if '/originals/' in args[1] else ('preview','preview_bytes')
+            return json.dumps([{'Name':photo[field].rsplit('/',1)[1],'Size':photo[size]}]).encode()
+        report=census_journal_storage(source,self.owner,self.stage/'census',list_only)
+        self.assertEqual(len(calls),2)
+        self.assertEqual(report['not_indexed'],2)
+        self.assertEqual(report['counts']['pairs_size_match'],1)
+        self.assertEqual(report['counts']['pairs_incomplete'],1)
+        self.assertFalse(report['sha_verified'])
+        self.assertFalse(report['gallery_published'])
+
+    def test_storage_census_reports_failed_listing_as_unknown(self):
+        from recover_private_journal_pairs import census_journal_storage
+        source,reviewed,reader,calls=self.source()
+        result=census_journal_storage(source,self.owner,self.stage/'unknown',lambda args,limit:None)
+        self.assertEqual(result['counts']['pairs_unknown'],2)
+
     def test_exact_publisher_manifest_recovery_never_reads_unknown_photo(self):
         source,reviewed,reader,calls=self.source()
         row=source['catalog']['albums'][0]['images'][0]

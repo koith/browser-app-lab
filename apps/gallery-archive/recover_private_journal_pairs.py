@@ -294,6 +294,69 @@ def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None
     return {'photos':count,'held':len(held),'skipped':skipped}
 
 
+def census_journal_storage(snapshot,owner,stage,reader=storage):
+    """Check exact stored object names and sizes without source filtering or media reads.
+
+    Storage existence is diagnostic only; it is not proof of rights, byte
+    integrity, correct album identity or publication eligibility.
+    """
+    from collections import Counter
+    model=owner['model'];remote=REMOTES[model]
+    catalog=snapshot['catalog']
+    if catalog.get('model')!=model or catalog.get('schema_version')!=1:
+        raise ValueError('Wrong model for journal inventory')
+    seen={p['sha256'] for a in owner['albums'] for p in a['images']}
+    counts=Counter()
+    details=[]
+    for album in catalog['albums']:
+        aid=album['id']
+        missing=[p for p in album['images'] if p['sha256'] not in seen]
+        counts['already_indexed']+=len(album['images'])-len(missing)
+        if not missing:continue
+        # Validate all journal paths before any storage operation.
+        for photo in missing:
+            checked_row(model,aid,photo)
+            for field,prefix,ext in [('key','originals','jpg|jpeg|png|webp'),('preview','previews','webp')]:
+                if not re.fullmatch(re.escape(prefix+'/'+aid+'/')+r'[a-z0-9-]+\.(?:'+ext+r')',photo[field]):
+                    raise ValueError('Unsafe journal key')
+        sizes={}
+        for prefix in ('originals','previews'):
+            try:
+                raw=reader(['lsjson',remote+'/'+prefix+'/'+aid,'--files-only','--max-depth','1'],limit=2_000_000)
+                entries=json.loads(raw) if raw is not None else None
+                if not isinstance(entries,list):raise ValueError('Listing unavailable')
+                listing={}
+                for item in entries:
+                    name=item.get('Name',item.get('Path'));size=item.get('Size')
+                    if not isinstance(name,str) or not re.fullmatch(r'[a-zA-Z0-9._-]+',name) or type(size) is not int or size<0 or name in listing:
+                        raise ValueError('Invalid listing entry')
+                    listing[name]=size
+                sizes[prefix]=listing
+            except (ValueError,TypeError,AttributeError,OSError,TimeoutError):
+                sizes[prefix]=None
+        for photo in missing:
+            statuses=[]
+            for field,prefix,size_field in [('key','originals','bytes'),('preview','previews','preview_bytes')]:
+                listing=sizes[prefix]
+                name=photo[field].rsplit('/',1)[1]
+                status=('unknown' if listing is None else 'missing' if name not in listing
+                        else 'size_match' if listing[name]==photo[size_field] else 'size_mismatch')
+                counts[prefix+'_'+status]+=1
+                statuses.append(status)
+            counts['pairs_size_match' if statuses==['size_match','size_match']
+                   else 'pairs_unknown' if 'unknown' in statuses else 'pairs_incomplete']+=1
+            details.append({'work':aid,'archive_collection_number':photo['number'],
+                            'original_status':statuses[0],'preview_status':statuses[1]})
+    count=sum(len(a['images']) for a in catalog['albums'])
+    report={'model':model,'journal_rows':count,'not_indexed':len(details),
+            'counts':dict(counts),'media_read':False,'sha_verified':False,
+            'gallery_published':False,'details':details}
+    target=stage/'metadata';target.mkdir(parents=True,exist_ok=True)
+    (target/'collection-audit.json').write_bytes(serialize(report))
+    print('JOURNAL_STORAGE_CENSUS',model,json.dumps({k:v for k,v in report.items() if k!='details'},sort_keys=True),flush=True)
+    return report
+
+
 def require_live_published_inventory(owner, model, published):
     """Permit appended photos, but never discard or overwrite a published slot."""
     current=clean_catalog(owner,model)
@@ -351,6 +414,11 @@ def main():
     data=json.loads(raw)
     if sum(len(x['images']) for x in data['catalog']['albums'])!=request['expected_collected_photos']:
         raise ValueError('Private producer photo count changed')
+    if request.get('storage_census_only') is True:
+        census_journal_storage(data,owner,a.stage)
+        with a.github_output.open('a') as output:
+            output.write('changed=false\nheld=0\ncensus_only=true\n')
+        return
     hold_audit=None
     if request.get('preview_only_hold_from') is not None:
         prior=request['preview_only_hold_from'];prior_recovery_proof(prior,a.model)
