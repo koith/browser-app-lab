@@ -388,6 +388,49 @@ def test_failed_queued_job_exposes_retry_pending_until_third_attempt(client,monk
     assert final.json()["state"]=="FAILED"
 
 
+def test_durable_request_is_not_expired_while_still_registered(client,monkeypatch):
+    import time
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_STORE","supabase")
+    monkeypatch.setattr(target_archive_api.backup_queue,"create_request",
+                        lambda *_:1234567895)
+    monkeypatch.setattr(target_archive_api.backup_queue,"state",
+                        lambda *_:{"request":{"job_id":1234567895},"accepted":None})
+    monkeypatch.setattr(target_archive_api,"read_matching_recent_verified_archive",
+                        lambda *_:None)
+    monkeypatch.setattr(target_archive_api,"read_receipt",lambda *_:{
+        "platform":"bluesky","account":"sample.bsky.social","at":int(time.time())-3600})
+    result=client.get("/api/target-archive/jobs/1234567895",
+                    headers={"X-Archive-Receipt":"a"*90})
+    assert result.status_code==200
+    assert result.json()["state"]=="QUEUED"
+    assert result.json()["remote_verified"] is False
+
+
+def test_existing_verified_storage_reconciles_failed_receipt_without_dispatch(client,monkeypatch):
+    monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
+    monkeypatch.setenv("DEMAND_ACCOUNT_TEMP_STORAGE","github_release")
+    monkeypatch.setattr(target_archive_api.backup_queue,"state",
+        lambda *_:{"request":{"job_id":1234567896},
+                   "accepted":{"workflow_run_id":42660000002}})
+    monkeypatch.setattr(target_archive_api,"read_receipt",lambda *_:{
+        "platform":"bluesky","account":"sample.bsky.social","at":1700000000})
+    monkeypatch.setattr(target_archive_api,"get_workflow_run",lambda *_:{
+        "status":"completed","conclusion":"failure","run_attempt":3})
+    monkeypatch.setattr(target_archive_api,"dispatch",
+        lambda *_:pytest.fail("Status reconciliation must never initiate backup"))
+    monkeypatch.setattr(target_archive_api,"read_matching_recent_verified_archive",
+        lambda *_:{"state":"PARTIAL_BACKUP","remote_verified":True,"posts":2,
+                   "objects":9,"account_key":"bluesky-"+"a"*40,
+                   "restored_from_verified_backup":True})
+    result=client.get("/api/target-archive/jobs/1234567896",
+                    headers={"X-Archive-Receipt":"a"*90})
+    assert result.status_code==200
+    assert result.json()["state"]=="PARTIAL_BACKUP"
+    assert result.json()["remote_verified"] is True
+    assert result.json()["restored_from_verified_backup"] is True
+
+
 def test_queue_detail_owner_only_and_real_phase_not_fabricated_percent(client,monkeypatch):
     monkeypatch.setenv("DEMAND_ARCHIVE_QUEUE_MODE","1")
     data=[
