@@ -121,7 +121,7 @@
       ],
       "priority": "P0",
       "rank": 4,
-      "state": "ready",
+      "state": "resume",
       "requires": [],
       "action": "승인 artifact의 정확한 해시와 수업 revision을 검증하는 fail-closed 규격 구현; offline에도 승인 snapshot 동일성 확인. ADR-00-002 적용.",
       "acceptance": "위변조·혼합 버전·해시 없음·오프라인 캐시 테스트. 미승인 목록은 항상 차단.",
@@ -129,9 +129,12 @@
         "F-05"
       ],
       "countedInLedger": false,
-      "branch": null,
-      "pr": null,
-      "checkpoint": null
+      "branch": "turkish/03-artifact-binding-2241",
+      "pr": 1417,
+      "checkpoint": {
+        "head": "3bb911a42743ab091b2acf11f319571eb0448bc8",
+        "nextAction": "Test byte digest and offline failures, distinguish HTTP failure from offline rejection, verify semantic revision linkage; independent QA pending."
+      }
     },
     {
       "id": "P0-04-01",
