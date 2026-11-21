@@ -91,7 +91,52 @@ def load_maps(arg):
     return json.JSONDecoder().raw_decode(text, start)[0]
 
 
+def verify_masked():
+    """Independent source-only luma correlation through visible duel fragments."""
+    evidence = json.loads((ROG / 'docs/evidence/brd01/board-jpg-hex-anchors.json').read_text())
+    yy, xx = np.mgrid[:97, :145]
+    masks = {
+        'right-purple': (xx >= 100) & (yy >= 12) & (yy <= 57),
+        'top-clover': (yy <= 30) & (xx >= 40) & (xx <= 105),
+        'right-bottom-keeper': ((xx >= 109) & (yy <= 44)) | ((xx >= 42) & (xx <= 103) & (yy >= 79)),
+        'battle-right-purple': (xx >= 100) & (yy <= 52),
+        'left-bottom-clover': ((xx <= 35) & (yy >= 30) & (yy <= 70)) | ((xx >= 30) & (xx <= 90) & (yy >= 75)),
+    }
+    rows = []
+    for anchor in evidence['anchors']:
+        if 'mask' not in anchor:
+            continue
+        capture = anchor['capture']
+        img = cv2.imread(str(ASSETS / capture), cv2.IMREAD_GRAYSCALE).astype(np.float32)
+        tile = cv2.imread(str(TILES / (anchor['art'] + '.png')), cv2.IMREAD_UNCHANGED)[::-1]
+        lum = (tile[:, :, 0] * .114 + tile[:, :, 1] * .587 + tile[:, :, 2] * .299).astype(np.float32)
+        mask = (masks[anchor['mask']] & (tile[:, :, 3] > 200) & (xx % 2 == 0) & (yy % 2 == 0)).astype(np.uint8)
+        assert int(mask.sum()) == anchor['sampleCount']
+        # Use the prior cell 17 observation plus source DMP coordinate
+        # to define the search region, not the newly measured center.
+        px, py = predict(capture.removesuffix('.jpg'), anchor['dmp'])
+        left, top = int(px - 72.5), int(py - 48.5)
+        x0, y0 = max(0, left - 45), max(0, top - 45)
+        x1, y1 = min(img.shape[1], left + 45 + 145), min(img.shape[0], top + 45 + 97)
+        scores = np.nan_to_num(cv2.matchTemplate(img[y0:y1, x0:x1], lum, cv2.TM_CCOEFF_NORMED, mask=mask),
+                               nan=-1, posinf=-1, neginf=-1)
+        _, peak, _, (x, y) = cv2.minMaxLoc(scores)
+        center = [x0 + x + 72.5, y0 + y + 48.5]
+        gy, gx = np.mgrid[:scores.shape[0], :scores.shape[1]]
+        alternative = float(scores[(gx - x)**2 + (gy - y)**2 > 16].max())
+        assert center == anchor['center'], (anchor, center, peak)
+        assert peak > .5 and peak - alternative > .1, (anchor, peak, alternative)
+        assert abs(peak - anchor['score']) < .035, (anchor, peak)
+        rows.append(dict(capture=capture, cell=anchor['cell'], center=center,
+                         score=round(peak, 4), alternative=round(alternative, 4), pixels=int(mask.sum())))
+    assert len(rows) == 5 and len(evidence['anchors']) >= 10
+    print('BRD-01 ORIGINAL MASKED ANCHORS PASS ' + json.dumps(rows))
+
+
 if __name__ == '__main__':
+    if '--verify-masked' in sys.argv:
+        verify_masked()
+        sys.exit(0)
     result = dict(projection=HEX, anchors=measure(),
                   routes=route_structure(load_maps(sys.argv[1] if len(sys.argv) > 1 else None)))
     print(json.dumps(result, ensure_ascii=False, indent=1))
