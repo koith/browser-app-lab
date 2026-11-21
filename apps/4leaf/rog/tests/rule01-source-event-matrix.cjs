@@ -34,7 +34,7 @@ const {chromium,webkit}=require('playwright');
     // Isolate non-warp landing effects in this routing fixture; reciprocal
     // endpoints remain real warps to exercise the actual loop bug.
     if(originalDest!=='warp')m.tiles[target]='normal';
-    p.position=i;p.tileArrivalPosition=-1;m.players.slice(1).forEach(q=>q.position=-1);m.history=[];p.ability=10;
+    p.position=i;p.tileArrivalPosition=-1;m.players.slice(1).forEach(q=>q.position=target===0?1:0);m.history=[];p.ability=10;
     await fixed(.51,()=>T.resolveTile(p));
     eq(p.position,target,'original source link '+id+':'+i);
     eq(m.history.filter(x=>x.includes(' 워프: ')).length,i===target?0:1,'single teleport '+id+':'+i);
@@ -76,7 +76,7 @@ const {chromium,webkit}=require('playwright');
  await page.waitForFunction(()=>document.querySelector('#modal-content')?.textContent.includes('FIRST')&&document.querySelector('#modal-content')?.textContent.includes('방어합니다'),null,{timeout:15000});
  await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();await page.evaluate(()=>window.__arenaPromise);
  const goal=await page.evaluate(async()=>{const T=window.__ROG_TEST__,m=T.getMatch(),p=m.players[0];m.players.slice(1).forEach(q=>q.position=0);m.finished=false;p.position=m.tiles.length-1;m.tiles[p.position]='goal';m.startedAt=Date.now()-300000;await T.resolveTile(p);return {finished:m.finished,winner:m.winner};});assert.deepEqual(goal,{finished:true,winner:0});
- proof.cases.goal=1;proof.cases.arena++;assert.equal(Object.keys(proof.seen).length,18);assert.equal(Object.keys(proof.cases).length+1,18);assert.deepEqual(errors,[]);
+ proof.cases.goal=1;proof.cases.arena++;assert.equal(Object.keys(proof.seen).length,19);assert.equal(Object.keys(proof.cases).length+1,19);assert.deepEqual(errors,[]);
  await page.screenshot({path:'rule01-original-event-result-'+engine.name()+'.png'});console.log('RULE-01 ORIGINAL TILE SOURCE MATRIX PASS '+JSON.stringify(proof));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
