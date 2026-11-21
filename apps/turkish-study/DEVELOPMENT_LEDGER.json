@@ -218,9 +218,9 @@
       "requirement": "홈 및 120일 수업 화면",
       "implementation": "done",
       "content": "draft",
-      "verification": "syntax_pass",
+      "verification": "simulated_runtime_pass",
       "acceptance": "실제 렌더링·모바일 동작",
-      "result": "소스 구현, 브라우저 미검증",
+      "result": "소스 구현, 브라우저 미검증; simulated DOM/localStorage tests pass (VALIDATION.json), real browser pending",
       "complete": false
     },
     {
@@ -238,9 +238,9 @@
       "requirement": "객관식 확인시험·오답·순차 완료",
       "implementation": "done",
       "content": "draft",
-      "verification": "syntax_pass",
+      "verification": "simulated_runtime_pass",
       "acceptance": "실제 시험 및 점수, 재접속 검증",
-      "result": "소스만 검증",
+      "result": "소스만 검증; simulated DOM/localStorage tests pass (VALIDATION.json), real browser pending",
       "complete": false
     },
     {
@@ -248,9 +248,9 @@
       "requirement": "SRS 복습",
       "implementation": "done",
       "content": "draft",
-      "verification": "syntax_pass",
+      "verification": "simulated_runtime_pass",
       "acceptance": "간격 계산·복습 기록 지속",
-      "result": "기본 1/3/7/14/30일 구현",
+      "result": "기본 1/3/7/14/30일 구현; simulated DOM/localStorage tests pass (VALIDATION.json), real browser pending",
       "complete": false
     },
     {
@@ -358,9 +358,9 @@
       "requirement": "두 로컬 프로필 및 백업/복원",
       "implementation": "done",
       "content": "draft",
-      "verification": "syntax_pass",
+      "verification": "simulated_runtime_pass",
       "acceptance": "각 프로필 독립, 백업 후 복원 시험",
-      "result": "localStorage/JSON 코드",
+      "result": "localStorage/JSON 코드; simulated DOM/localStorage tests pass (VALIDATION.json), real browser pending",
       "complete": false
     },
     {
