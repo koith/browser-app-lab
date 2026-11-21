@@ -4,7 +4,7 @@
  * account records, API JSON, uploaded media, authentication or private bytes.
  */
 "use strict";
-const VERSION="intersection-public-shell-v1-20261116-yadanra-exclusion-v1";
+const VERSION="intersection-public-shell-v1-20261121-server-queue-v3";
 const PREFIX="intersection-public-shell-v1-";
 const FILES=[
   "/",
@@ -12,7 +12,7 @@ const FILES=[
   "/bsky_search_fallback.js?v=20261114-public-source-hydration-v1",
   "/post_activity_ranking.js",
   "/public_video_trends.js",
-  "/target_archive_client.js?v=20261115-backup-history-v2",
+  "/target_archive_client.js?v=20261121-server-queue-v3",
   "/free_discovery.js",
   "/account_watch.js?v=20261110-first-tab",
   "/archive_tab.js?v=20261115-native-view-fast-v1",
