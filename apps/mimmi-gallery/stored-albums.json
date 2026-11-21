@@ -3243,6 +3243,18 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 88,
+          "url": "stored-albums/djawa-asuna-the-maid/a602a8e74d213868d8ee.jpg",
+          "sha256": "a602a8e74d213868d8eef0cf73a2fd24edbf904868fa4007d9307485c459052f",
+          "bytes": 289041,
+          "width": 2048,
+          "height": 1365,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -36993,6 +37005,30 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 60,
+          "url": "stored-albums/djawa-pop-kitty-party/35ebe7fb3fe1b23e5e65.jpg",
+          "sha256": "35ebe7fb3fe1b23e5e657bd3b13821d68190309277077a4ecde43d4fceced17d",
+          "bytes": 13791496,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 61,
+          "url": "stored-albums/djawa-pop-kitty-party/241ecb2576a283ca7315.jpg",
+          "sha256": "241ecb2576a283ca7315440b5753c0a990b49af58fd54f19df3ccf11605e92ce",
+          "bytes": 12190044,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -37893,5 +37929,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3638
+  "physical_verified_image_count": 3641
 }
