@@ -43,13 +43,14 @@
         "05",
         "00"
       ],
-      "state": "open",
-      "title": "공개 Pages가 main보다 이전 ungated v0.1.0 표시",
+      "state": "retest_required",
+      "title": "공개 v0.1.1 렌더 확인, 공개 manifest 배포 일치 및 실제 접근 차단 재검증",
       "evidence": [
         "External rendered fetch root and cache-busted path: banner 0.1.0, 학습 시작; main index banner 0.1.1",
-        "app/release-gate.js fetch 503 in external extractor; not proof of host failure"
+        "app/release-gate.js fetch 503 in external extractor; not proof of host failure",
+        "Latest root and query render show 0.1.1 and 0/120; separately fetched manifest still 0.1.0, lesson JSON 0.2.0-draft. ops/runs/20261121-00-integration-r2.json"
       ],
-      "resolution": "verify latest published build and locked 0 days, investigate Pages build status or free isolated fallback; no app-wide site config edits."
+      "resolution": "confirm exact manifest propagation/byte binding and independent real click/refresh gate; keep 0 approved"
     },
     {
       "id": "F-04",
