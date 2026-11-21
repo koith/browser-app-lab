@@ -1,0 +1,242 @@
+{
+  "dayId": "D002",
+  "day": 2,
+  "title": "모음 8개: ı/i, o/ö, u/ü",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "author_defined_review_requested",
+  "objectiveIds": [
+    "D002-O1",
+    "D002-O2",
+    "D002-O3"
+  ],
+  "objectives": [
+    {
+      "id": "D002-O1",
+      "skill": "listening",
+      "target": "8모음 대비 10개 중 8개",
+      "cefrDescriptorIds": [
+        "C-PH"
+      ],
+      "maarifCodes": [
+        "A1.DY.3.",
+        "A1.DY.4."
+      ]
+    },
+    {
+      "id": "D002-O2",
+      "skill": "speaking",
+      "target": "모델 8개 중 6개 식별 가능한 발음",
+      "cefrDescriptorIds": [
+        "C-PH"
+      ],
+      "maarifCodes": [
+        "A1.DY.4."
+      ]
+    },
+    {
+      "id": "D002-O3",
+      "skill": "writing",
+      "target": "8모음 문자와 4단어 중 3개 복사",
+      "cefrDescriptorIds": [
+        "C-OR"
+      ],
+      "maarifCodes": [
+        "A1.DY.6."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-PH",
+      "level": "A1",
+      "scale": "Phonological control: sound articulation",
+      "location": "135"
+    },
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    }
+  ],
+  "grammarIds": [
+    "G-VOW"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-VOW",
+      "firstDayId": "D002",
+      "scope": "a e ı i o ö u ü, 전후설·원순; ı와 한국어 ㅡ는 동일하지 않음, 모음조화 관찰"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D002-CV01",
+      "term": "at",
+      "ko": "말",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V1"
+    },
+    {
+      "id": "D002-CV02",
+      "term": "et",
+      "ko": "고기",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V2"
+    },
+    {
+      "id": "D002-CV03",
+      "term": "ışık",
+      "ko": "빛",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V3"
+    },
+    {
+      "id": "D002-CV04",
+      "term": "iki",
+      "ko": "둘",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V4"
+    },
+    {
+      "id": "D002-CV05",
+      "term": "on",
+      "ko": "열",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V5"
+    },
+    {
+      "id": "D002-CV06",
+      "term": "ön",
+      "ko": "앞",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V6"
+    },
+    {
+      "id": "D002-CV07",
+      "term": "su",
+      "ko": "물",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V7"
+    },
+    {
+      "id": "D002-CV08",
+      "term": "süt",
+      "ko": "우유",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V8"
+    },
+    {
+      "id": "D002-CV09",
+      "term": "gül",
+      "ko": "장미",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V9"
+    },
+    {
+      "id": "D002-CV10",
+      "term": "göl",
+      "ko": "호수",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D002-V10"
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D001"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-PH",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "135 / Phonological control: sound articulation",
+      "basis": "모델 지원을 받아 익숙한 소리를 이해 가능하게 발화"
+    },
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "A1.DY.3.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "모델 음성 반복"
+    },
+    {
+      "id": "A1.DY.4.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "지원하에 소리 발화"
+    },
+    {
+      "id": "A1.DY.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "모델 철자 복사"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.13 Alfabe Öğreniyorum (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "29자·인사 인출"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "그림/음성과 10단어 매칭"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "혀·입술 위치 및 ı/i, o/ö, u/ü"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "균형 대비 10개 및 녹음 비교"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "su/süt/et 가리켜 말하고 인사"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "모음 4대조 및 복사"
+    }
+  },
+  "masteryCheck": "8모음 대비 10개 중 8개 / 모델 8개 중 6개 식별 가능한 발음 / 8모음 문자와 4단어 중 3개 복사",
+  "scopeLimits": "iki/on은 개별 수 표현 선노출; D012 중복 계수 금지. gül=장미, at=말. 조화 규칙 능동 평가 D004."
+}

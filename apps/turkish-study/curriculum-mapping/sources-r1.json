@@ -1,0 +1,209 @@
+{
+  "accessedAt": "2026-11-21",
+  "CEFR2020": {
+    "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+    "catalog": {
+      "CON": [
+        "A1",
+        "Conversation",
+        "74",
+        "기초 인사·소개·안부·작별"
+      ],
+      "PH": [
+        "A1",
+        "Phonological control: sound articulation",
+        "135",
+        "모델 지원을 받아 익숙한 소리를 이해 가능하게 발화"
+      ],
+      "OR": [
+        "A1",
+        "Orthographic control",
+        "136",
+        "익숙한 표현 철자 및 베껴 쓰기"
+      ],
+      "IN": [
+        "A1",
+        "Information exchange",
+        "79",
+        "친숙한 정보의 기초 질문·응답; 수량"
+      ],
+      "WR": [
+        "A1",
+        "Creative writing",
+        "67",
+        "자기·사물의 짧은 기술"
+      ],
+      "RD": [
+        "A1",
+        "Overall reading comprehension",
+        "Chapter 3 / reception",
+        "짧은 글의 익숙한 정보를 파악"
+      ],
+      "PRE": [
+        "Pre-A1",
+        "Conversation",
+        "74",
+        "인사·이름·고정구"
+      ],
+      "PI": [
+        "Pre-A1",
+        "Information exchange",
+        "79",
+        "이름·나이·수·사물 질문"
+      ],
+      "AC": [
+        "A2",
+        "Conversation",
+        "74",
+        "일상 사회적 교류·짧은 대화"
+      ],
+      "AI": [
+        "A2",
+        "Information exchange",
+        "79",
+        "일상 정보·일과·계획·경험"
+      ],
+      "AW": [
+        "A2",
+        "Creative writing",
+        "67",
+        "일상 주제 연결 문장"
+      ]
+    },
+    "visualPages": [
+      74,
+      135
+    ],
+    "textPages": [
+      67,
+      79,
+      136
+    ],
+    "scope": "A1/Pre-A1 및 A2. 숫자 목표는 지역 설계, 공식 점수 아님."
+  },
+  "MAARIF2025": {
+    "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+    "edition": "3. baskı",
+    "announcement": "https://turkiyemaarif.org/news/turkcenin-yabanci-dil-olarak-ogretimi-programinin-3-baskisi-tamamlandi",
+    "originalPdf": "https://turkiyemaarif.org/uploads/editions/files/168c7bcc93c524.pdf",
+    "catalog": {
+      "DY.1": [
+        72,
+        "기본 어휘·구문"
+      ],
+      "DY.2": [
+        72,
+        "기초 문법 문장"
+      ],
+      "DY.3": [
+        72,
+        "모델 음성 반복"
+      ],
+      "DY.4": [
+        72,
+        "지원하에 소리 발화"
+      ],
+      "DY.5": [
+        72,
+        "기초 억양·리듬"
+      ],
+      "DY.6": [
+        72,
+        "모델 철자 복사"
+      ],
+      "DY.7": [
+        72,
+        "기초 문장부호"
+      ],
+      "SE.1": [
+        69,
+        "느리게 반복된 일상 표현"
+      ],
+      "SE.2": [
+        69,
+        "짧은 질문 응답"
+      ],
+      "SE.4": [
+        69,
+        "예측 가능한 대화"
+      ],
+      "SE.5": [
+        69,
+        "소개·인사·작별"
+      ],
+      "SE.6": [
+        69,
+        "안부"
+      ],
+      "SE.13": [
+        69,
+        "숫자"
+      ],
+      "SE.15": [
+        69,
+        "간단한 질문 응답"
+      ],
+      "SE.18": [
+        69,
+        "자기·타인 소개"
+      ],
+      "SE.24": [
+        69,
+        "개인 정보 응답"
+      ],
+      "SÜ.1": [
+        68,
+        "자기소개"
+      ],
+      "SÜ.6": [
+        68,
+        "사물 기술"
+      ],
+      "O.6": [
+        66,
+        "짧은 소개 글"
+      ],
+      "O.7": [
+        66,
+        "그림과 사람·사물 정보"
+      ],
+      "YÜ.1": [
+        68,
+        "자기·지인 소개 글"
+      ],
+      "YÜ.5": [
+        68,
+        "사물 기술"
+      ],
+      "TDY.1": [
+        72,
+        "상황에 맞는 표현"
+      ],
+      "TDY.2": [
+        72,
+        "소개 적절성"
+      ],
+      "TDY.3": [
+        72,
+        "예의 표현"
+      ]
+    },
+    "scope": "A1 원문 성취 목록 pp.66–72. A2.SÜ.1/2/3은 A2 생산 목록에서 계획·가능·사람/사물 기술 확인. A2+와 구분; 학교별 부록과 번호 혼용하지 않음.",
+    "limitations": "원본 직접 fetch 10MB 제한, 공식 대체 PDF 색인 본문 확인 및 표지 3판 확인, 화면 캡처 14MB 제한; 로컬 DNS 실패. 05 원문 시각 대조 필요."
+  },
+  "YEE": {
+    "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+    "pages": {
+      "10": "Merhaba",
+      "11": "Tanışalım",
+      "13": "Alfabe Öğreniyorum",
+      "17": "Milletler",
+      "26": "İyi Günler",
+      "27": "Sayılar",
+      "28": "Kişisel Bilgilerim",
+      "34": "Ben Kimim"
+    },
+    "scope": "공식 음원 목록상 교재 면수와 주제만 확인, 전체 교재 본문 검토 아님; 원문/음원 복제 금지."
+  },
+  "method": "각 objective의 CEFR·Maarif 식별자와 출처를 매핑하고 YEE 주제 비교. 한국인용 발음·접미사·고정구 제한은 별도의 설계 판단. A2 일일 매핑 추후."
+}

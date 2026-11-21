@@ -1,0 +1,286 @@
+{
+  "dayId": "D005",
+  "day": 5,
+  "title": "정중한 siz와 친근한 sen",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "author_defined_review_requested",
+  "objectiveIds": [
+    "D005-O1",
+    "D005-O2",
+    "D005-O3"
+  ],
+  "objectives": [
+    {
+      "id": "D005-O1",
+      "skill": "interaction",
+      "target": "친구/낯선 성인 각 3턴 안부·감사",
+      "cefrDescriptorIds": [
+        "C-CON"
+      ],
+      "maarifCodes": [
+        "A1.SE.6.",
+        "A1.TDY.1.",
+        "A1.TDY.3."
+      ]
+    },
+    {
+      "id": "D005-O2",
+      "skill": "listening",
+      "target": "정중·친근 6개 중 5개 구분",
+      "cefrDescriptorIds": [
+        "C-CON",
+        "C-PH"
+      ],
+      "maarifCodes": [
+        "A1.SE.1.",
+        "A1.SE.6."
+      ]
+    },
+    {
+      "id": "D005-O3",
+      "skill": "writing",
+      "target": "정중 접사·표현 5개 중 4개",
+      "cefrDescriptorIds": [
+        "C-OR"
+      ],
+      "maarifCodes": [
+        "A1.DY.2.",
+        "A1.DY.6."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-CON",
+      "level": "A1",
+      "scale": "Conversation",
+      "location": "74"
+    },
+    {
+      "id": "C-PH",
+      "level": "A1",
+      "scale": "Phonological control: sound articulation",
+      "location": "135"
+    },
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    }
+  ],
+  "grammarIds": [
+    "G-REG",
+    "G-NOM"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-REG",
+      "firstDayId": "D005",
+      "scope": "sen 친근 단수, siz 정중 단수·복수; -sınız/siniz/sunuz/sünüz; 낯선 성인 siz 기본"
+    },
+    {
+      "id": "G-NOM",
+      "firstDayId": "D004",
+      "scope": "ben/sen/o, 명사·형용사 서술 1인칭 -(y)ım/im/um/üm, 2인칭 -sın/sin/sun/sün, 3인칭 무접사; 주어 생략·4형 모음조화"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D005-CV01",
+      "term": "Nasılsın?",
+      "ko": "어떻게 지내?",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D005-V1"
+    },
+    {
+      "id": "D005-CV02",
+      "term": "Nasılsınız?",
+      "ko": "어떻게 지내세요?",
+      "mode": "active",
+      "unit": "variant",
+      "countEligible": false,
+      "existingWordId": "D005-V2"
+    },
+    {
+      "id": "D005-CV03",
+      "term": "İyiyim.",
+      "ko": "잘 지내요.",
+      "mode": "active",
+      "unit": "variant",
+      "countEligible": false,
+      "existingWordId": "D005-V3"
+    },
+    {
+      "id": "D005-CV04",
+      "term": "İyi",
+      "ko": "좋은/잘",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D005-V4"
+    },
+    {
+      "id": "D005-CV05",
+      "term": "Kötü",
+      "ko": "나쁜",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D005-V5"
+    },
+    {
+      "id": "D005-CV06",
+      "term": "Fena değil.",
+      "ko": "나쁘지 않아요.",
+      "mode": "receptive",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D005-V6"
+    },
+    {
+      "id": "D005-CV07",
+      "term": "Sağ ol.",
+      "ko": "고마워.",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D005-V7"
+    },
+    {
+      "id": "D005-CV08",
+      "term": "Sağ olun.",
+      "ko": "감사합니다.",
+      "mode": "active",
+      "unit": "variant",
+      "countEligible": false,
+      "existingWordId": "D005-V8"
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D001",
+    "D004"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-CON",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "74 / Conversation",
+      "basis": "기초 인사·소개·안부·작별"
+    },
+    {
+      "id": "C-PH",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "135 / Phonological control: sound articulation",
+      "basis": "모델 지원을 받아 익숙한 소리를 이해 가능하게 발화"
+    },
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "A1.SE.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "안부"
+    },
+    {
+      "id": "A1.TDY.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "상황에 맞는 표현"
+    },
+    {
+      "id": "A1.TDY.3.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "예의 표현"
+    },
+    {
+      "id": "A1.SE.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "느리게 반복된 일상 표현"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "id": "A1.DY.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "모델 철자 복사"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.10 Merhaba (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.11 Tanışalım (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.26 İyi Günler (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [
+    "Fena değil.: 고정구, 부정 규칙 D010",
+    "Sağ ol./Sağ olun.: 친근/정중 감사, 명령 D087",
+    "Hoşça kalın: D001 작별의 정중 변형, 신규 계수 불가",
+    "Nasılsın?/Nasılsınız?: 안부 고정구, 질문 규칙 D011"
+  ],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "D004 4형 어미 인출"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "안부·감사·상태"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "sen/siz와 정중 어미"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "대조 6개 듣고 모방"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "친구/낯선 상대 교대로 안부"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "정중도와 접사 5개"
+    }
+  },
+  "masteryCheck": "친구/낯선 성인 각 3턴 안부·감사 / 정중·친근 6개 중 5개 구분 / 정중 접사·표현 5개 중 4개",
+  "scopeLimits": "İyiyim은 iyi 활용, 의미를 먼저 설명. Fena değil의 부정 일반화 금지."
+}

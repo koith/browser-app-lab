@@ -1,0 +1,299 @@
+{
+  "dayId": "D001",
+  "day": 1,
+  "title": "알파벳 29자와 인사",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "author_defined_review_requested",
+  "objectiveIds": [
+    "D001-O1",
+    "D001-O2",
+    "D001-O3"
+  ],
+  "objectives": [
+    {
+      "id": "D001-O1",
+      "skill": "reading",
+      "target": "29자 중 대소문자 24/29 연결; I/ı, İ/i 4/4",
+      "cefrDescriptorIds": [
+        "C-OR",
+        "C-PH"
+      ],
+      "maarifCodes": [
+        "A1.DY.6.",
+        "A1.DY.3."
+      ]
+    },
+    {
+      "id": "D001-O2",
+      "skill": "listening",
+      "target": "인사·작별 6개 중 상황 5개 식별",
+      "cefrDescriptorIds": [
+        "C-PRE",
+        "C-CON"
+      ],
+      "maarifCodes": [
+        "A1.SE.1.",
+        "A1.SE.5."
+      ]
+    },
+    {
+      "id": "D001-O3",
+      "skill": "interaction",
+      "target": "모델 지원하에 인사·감사·작별 3기능",
+      "cefrDescriptorIds": [
+        "C-CON"
+      ],
+      "maarifCodes": [
+        "A1.SE.5.",
+        "A1.TDY.3."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    },
+    {
+      "id": "C-PH",
+      "level": "A1",
+      "scale": "Phonological control: sound articulation",
+      "location": "135"
+    },
+    {
+      "id": "C-PRE",
+      "level": "Pre-A1",
+      "scale": "Conversation",
+      "location": "74"
+    },
+    {
+      "id": "C-CON",
+      "level": "A1",
+      "scale": "Conversation",
+      "location": "74"
+    }
+  ],
+  "grammarIds": [
+    "G-ALPH"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-ALPH",
+      "firstDayId": "D001",
+      "scope": "29자와 대소문자; I–ı, İ–i; q/w/x 비포함; 문자 이름/소리 구분"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D001-CV01",
+      "term": "Merhaba",
+      "ko": "안녕하세요",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D001-V1"
+    },
+    {
+      "id": "D001-CV02",
+      "term": "Günaydın",
+      "ko": "좋은 아침이에요",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D001-V2"
+    },
+    {
+      "id": "D001-CV03",
+      "term": "İyi akşamlar",
+      "ko": "좋은 저녁이에요",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D001-V3"
+    },
+    {
+      "id": "D001-CV04",
+      "term": "İyi geceler",
+      "ko": "안녕히 주무세요",
+      "mode": "receptive",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D001-V4"
+    },
+    {
+      "id": "D001-CV05",
+      "term": "Teşekkürler",
+      "ko": "고마워요",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D001-V5"
+    },
+    {
+      "id": "D001-CV06",
+      "term": "Lütfen",
+      "ko": "부탁합니다",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D001-V6"
+    },
+    {
+      "id": "D001-CV07",
+      "term": "Evet",
+      "ko": "네",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D001-V7"
+    },
+    {
+      "id": "D001-CV08",
+      "term": "Hayır",
+      "ko": "아니요",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D001-V8"
+    },
+    {
+      "id": "D001-CV09",
+      "term": "Hoşça kal",
+      "ko": "잘 있어",
+      "mode": "receptive",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D001-V9"
+    },
+    {
+      "id": "D001-CV10",
+      "term": "Güle güle",
+      "ko": "잘 가",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D001-V10"
+    }
+  ],
+  "prerequisiteDayIds": [],
+  "sourceEvidence": [
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "C-PH",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "135 / Phonological control: sound articulation",
+      "basis": "모델 지원을 받아 익숙한 소리를 이해 가능하게 발화"
+    },
+    {
+      "id": "C-PRE",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "74 / Conversation",
+      "basis": "인사·이름·고정구"
+    },
+    {
+      "id": "C-CON",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "74 / Conversation",
+      "basis": "기초 인사·소개·안부·작별"
+    },
+    {
+      "id": "A1.DY.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "모델 철자 복사"
+    },
+    {
+      "id": "A1.DY.3.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "모델 음성 반복"
+    },
+    {
+      "id": "A1.SE.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "느리게 반복된 일상 표현"
+    },
+    {
+      "id": "A1.SE.5.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "소개·인사·작별"
+    },
+    {
+      "id": "A1.TDY.3.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "예의 표현"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.10 Merhaba (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.13 Alfabe Öğreniyorum (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.26 İyi Günler (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [
+    "Hoşça kal: 떠나는 사람이 남는 사람에게 친근하게; Güle güle: 남는 사람이 떠나는 사람에게",
+    "İyi geceler: 잠들기 전 또는 늦은 밤 작별"
+  ],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "문자 진단·터키어 키보드"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "인사 표현과 상황 매칭"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "29자·대소문자 구분"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "모델 음성→글자 선택→인사 3회 모방"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "첫 만남·작별 역할 교대"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "글자 5/인사 3문항"
+    }
+  },
+  "masteryCheck": "29자 중 대소문자 24/29 연결; I/ı, İ/i 4/4 / 인사·작별 6개 중 상황 5개 식별 / 모델 지원하에 인사·감사·작별 3기능",
+  "scopeLimits": "알파벳 완전 암송·새 문법 불요; 낯선 성인에게 친근 Hoşça kal 강요 금지. D002 전수 복습."
+}

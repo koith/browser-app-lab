@@ -1,0 +1,308 @@
+{
+  "dayId": "D013",
+  "day": 13,
+  "title": "나이·국적·직업",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "prepared_draft_review_requested",
+  "objectiveIds": [
+    "D013-O1",
+    "D013-O2",
+    "D013-O3"
+  ],
+  "objectives": [
+    {
+      "id": "D013-O1",
+      "skill": "interaction",
+      "target": "정중하게 나이·국적·직업 가상 정보 3개 교환",
+      "cefrDescriptorIds": [
+        "C-IN",
+        "C-CON"
+      ],
+      "maarifCodes": [
+        "A1.SE.18.",
+        "A1.SE.24.",
+        "A1.SE.2."
+      ]
+    },
+    {
+      "id": "D013-O2",
+      "skill": "writing",
+      "target": "가상 프로필 3문장",
+      "cefrDescriptorIds": [
+        "C-WR",
+        "C-OR"
+      ],
+      "maarifCodes": [
+        "A1.YÜ.1.",
+        "A1.DY.2."
+      ]
+    },
+    {
+      "id": "D013-O3",
+      "skill": "reading",
+      "target": "소개 카드 정보 5/6",
+      "cefrDescriptorIds": [
+        "C-RD"
+      ],
+      "maarifCodes": [
+        "A1.O.6."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-CON",
+      "level": "A1",
+      "scale": "Conversation",
+      "location": "74"
+    },
+    {
+      "id": "C-WR",
+      "level": "A1",
+      "scale": "Creative writing",
+      "location": "67"
+    },
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    },
+    {
+      "id": "C-RD",
+      "level": "A1",
+      "scale": "Overall reading comprehension",
+      "location": "Chapter 3 / reception"
+    }
+  ],
+  "grammarIds": [
+    "G-AGE",
+    "G-Q",
+    "G-NOM",
+    "G-REG"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-AGE",
+      "firstDayId": "D013",
+      "scope": "… yaşındayım, Kaç yaşındasınız? 고정구; 소유/처소 분석 D016/D022; 직업·국적 기존 명사문"
+    },
+    {
+      "id": "G-Q",
+      "firstDayId": "D011",
+      "scope": "kim/ne, 독립 표기 mı/mi/mu/mü 뒤 인칭어미, 의문사 질문에는 일반적으로 의문접사 불필요"
+    },
+    {
+      "id": "G-NOM",
+      "firstDayId": "D004",
+      "scope": "ben/sen/o, 명사·형용사 서술 1인칭 -(y)ım/im/um/üm, 2인칭 -sın/sin/sun/sün, 3인칭 무접사; 주어 생략·4형 모음조화"
+    },
+    {
+      "id": "G-REG",
+      "firstDayId": "D005",
+      "scope": "sen 친근 단수, siz 정중 단수·복수; -sınız/siniz/sunuz/sünüz; 낯선 성인 siz 기본"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D013-CV01",
+      "term": "kaç",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D013-CV02",
+      "term": "yaş",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D013-CV03",
+      "term": "Kaç yaşındasınız?",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true
+    },
+    {
+      "id": "D013-CV04",
+      "term": "… yaşındayım.",
+      "mode": "active",
+      "unit": "variant_or_grammar",
+      "countEligible": false
+    },
+    {
+      "id": "D013-CV05",
+      "term": "Nerelisiniz?",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true
+    },
+    {
+      "id": "D013-CV06",
+      "term": "meslek",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D013-CV07",
+      "term": "emekli",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D013-CV08",
+      "term": "çiftçi",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D006",
+    "D010",
+    "D011",
+    "D012"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "C-CON",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "74 / Conversation",
+      "basis": "기초 인사·소개·안부·작별"
+    },
+    {
+      "id": "C-WR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "67 / Creative writing",
+      "basis": "자기·사물의 짧은 기술"
+    },
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "C-RD",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "Chapter 3 / reception / Overall reading comprehension",
+      "basis": "짧은 글의 익숙한 정보를 파악"
+    },
+    {
+      "id": "A1.SE.18.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "자기·타인 소개"
+    },
+    {
+      "id": "A1.SE.24.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "개인 정보 응답"
+    },
+    {
+      "id": "A1.SE.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "짧은 질문 응답"
+    },
+    {
+      "id": "A1.YÜ.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "자기·지인 소개 글"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "id": "A1.O.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.66 / A1 kazanım listesi",
+      "basis": "짧은 소개 글"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.17 Milletler (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.28 Kişisel Bilgilerim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.34 Ben Kimim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [
+    "Kaç yaşındasınız? / … yaşındayım.: 고정구; 소유/처소 D016/D022",
+    "Nerelisiniz?: 출신지 고정구; 위치 의문 D026"
+  ],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "숫자·질문 인출"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "나이·직업"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "고정구와 명사문"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "가상 소개 정보 3개"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "가상 프로필 교환"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "3문장+숫자 5개"
+    }
+  },
+  "masteryCheck": "정중하게 나이·국적·직업 가상 정보 3개 교환 / 가상 프로필 3문장 / 소개 카드 정보 5/6",
+  "scopeLimits": "실제 개인정보 강요 금지. 새 직업 질문은 모델로 먼저 설명, 미학습 구조 평가 제외."
+}

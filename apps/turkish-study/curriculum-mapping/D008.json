@@ -1,0 +1,222 @@
+{
+  "dayId": "D008",
+  "day": 8,
+  "title": "bu/şu/o 지시 표현",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "prepared_draft_review_requested",
+  "objectiveIds": [
+    "D008-O1",
+    "D008-O2"
+  ],
+  "objectives": [
+    {
+      "id": "D008-O1",
+      "skill": "speaking",
+      "target": "그림 속 사물 3개 bu/şu/o 지시",
+      "cefrDescriptorIds": [
+        "C-IN"
+      ],
+      "maarifCodes": [
+        "A1.SÜ.6.",
+        "A1.DY.1."
+      ]
+    },
+    {
+      "id": "D008-O2",
+      "skill": "reading",
+      "target": "지시표현·사물 8개 중 6개",
+      "cefrDescriptorIds": [
+        "C-RD"
+      ],
+      "maarifCodes": [
+        "A1.O.7.",
+        "A1.DY.2."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-RD",
+      "level": "A1",
+      "scale": "Overall reading comprehension",
+      "location": "Chapter 3 / reception"
+    }
+  ],
+  "grammarIds": [
+    "G-DEM"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-DEM",
+      "firstDayId": "D008",
+      "scope": "bu/şu/o 지시 거리·공동주의; o 인칭과 구별; şu를 절대 중거리로 정의하지 않음"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D008-CV01",
+      "term": "bu",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D008-CV02",
+      "term": "şu",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D008-CV03",
+      "term": "o",
+      "mode": "active",
+      "unit": "variant_or_grammar",
+      "countEligible": false
+    },
+    {
+      "id": "D008-CV04",
+      "term": "kitap",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D008-CV05",
+      "term": "kalem",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D008-CV06",
+      "term": "telefon",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D008-CV07",
+      "term": "çanta",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D008-CV08",
+      "term": "masa",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D008-CV09",
+      "term": "sandalye",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D008-CV10",
+      "term": "bardak",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D004",
+    "D006",
+    "D007"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "C-RD",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "Chapter 3 / reception / Overall reading comprehension",
+      "basis": "짧은 글의 익숙한 정보를 파악"
+    },
+    {
+      "id": "A1.SÜ.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "사물 기술"
+    },
+    {
+      "id": "A1.DY.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기본 어휘·구문"
+    },
+    {
+      "id": "A1.O.7.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.66 / A1 kazanım listesi",
+      "basis": "그림과 사람·사물 정보"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.34 Ben Kimim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [
+    "Bu ne?: D011 전 모델 고정구만"
+  ],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "D007 약점과 o"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "사물·지시어"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "거리와 주의 전환"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "그림과 음성 8개"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "테이블 사물 3개 지시"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "6개 선택, 3개 발화"
+    }
+  },
+  "masteryCheck": "그림 속 사물 3개 bu/şu/o 지시 / 지시표현·사물 8개 중 6개",
+  "scopeLimits": "Bu ne? 일반 생성 평가는 D011부터."
+}

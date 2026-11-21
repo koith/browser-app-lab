@@ -1,0 +1,71 @@
+{
+  "id": "W02-RUBRIC-r1",
+  "dayId": "D014",
+  "scope": "D001–D013 누적, 2주차 중심",
+  "status": "prepared_draft",
+  "minutes": {
+    "orientation": 5,
+    "listening": 15,
+    "reading": 10,
+    "writing": 10,
+    "interaction": 15,
+    "feedback": 5
+  },
+  "scores": {
+    "listening": {
+      "max": 25,
+      "items": 10,
+      "pointsPerItem": 2.5,
+      "blueprint": "숫자 4, 사물/복수 2, 긍부정 2, 질문/신분 2"
+    },
+    "reading": {
+      "max": 25,
+      "items": 10,
+      "pointsPerItem": 2.5,
+      "blueprint": "지시/복수 3, 부정/의문 3, 프로필 4"
+    },
+    "writing": {
+      "max": 25,
+      "criteria": [
+        [
+          "복수·부정 5개×2",
+          10
+        ],
+        [
+          "의문접사 3개×2",
+          6
+        ],
+        [
+          "프로필 3개×3",
+          9
+        ]
+      ],
+      "rule": "의미 점수와 형태 슬롯 구분, 동일 오류 중복 차감 금지. NFC, I/ı와 İ/i 혼동 정답 처리 금지. 허용 가명·어순 인정."
+    },
+    "interaction": {
+      "max": 25,
+      "criteria": [
+        "과업 충족",
+        "이해 가능성",
+        "교육한 문법·어휘",
+        "상호작용·정중도"
+      ],
+      "scale": {
+        "0": "미수행",
+        "1": "정답 모델/지속 유도 필요",
+        "2": "부분 지원으로 수행",
+        "3": "정답 모델 없이 수행; 느린 반복 요청 1회 허용"
+      },
+      "formula": "25×합계/12; 반올림은 표시에서만",
+      "scenario": "사물 지시/명명·가상 프로필(나이/국적/직업) 교환"
+    }
+  },
+  "passRule": {
+    "totalMinimum": 80,
+    "eachSkillMinimum": 15,
+    "allSkillsRequired": true,
+    "missing": "not_assessed",
+    "qualification": "내부 학습 기준, CEFR 인증 아님"
+  },
+  "administration": "개별 기록·정답 미노출. 청취 느리고 명료한 검수 음원 최대 2회, 자막 금지; 음원 없으면 청취 미평가. 역할극 15분 내 각 학습자 두 장면 총 약 6분, 준비/기록 3분; 서로 역할 교대. STT 일치율은 발음 점수 아님. 약점 Dxxx 복습 후 24~48시간 동형 재시험, 원점수 보존. 02 문항/정답·04 음성·05 독립검수 및 파일럿 필요."
+}

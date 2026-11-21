@@ -1,0 +1,325 @@
+{
+  "dayId": "D006",
+  "day": 6,
+  "title": "이름 묻기·한국인 소개",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "author_defined_review_requested",
+  "objectiveIds": [
+    "D006-O1",
+    "D006-O2",
+    "D006-O3"
+  ],
+  "objectives": [
+    {
+      "id": "D006-O1",
+      "skill": "interaction",
+      "target": "5턴에서 인사·이름 질문/답·국적·반가움",
+      "cefrDescriptorIds": [
+        "C-CON",
+        "C-PI"
+      ],
+      "maarifCodes": [
+        "A1.SE.5.",
+        "A1.SE.18.",
+        "A1.TDY.2."
+      ]
+    },
+    {
+      "id": "D006-O2",
+      "skill": "listening",
+      "target": "짧은 소개 이름/국적 정보 4/5",
+      "cefrDescriptorIds": [
+        "C-IN"
+      ],
+      "maarifCodes": [
+        "A1.SE.2.",
+        "A1.SE.4."
+      ]
+    },
+    {
+      "id": "D006-O3",
+      "skill": "writing",
+      "target": "가명·국적 소개 2~3문장",
+      "cefrDescriptorIds": [
+        "C-WR",
+        "C-OR"
+      ],
+      "maarifCodes": [
+        "A1.YÜ.1.",
+        "A1.DY.7."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-CON",
+      "level": "A1",
+      "scale": "Conversation",
+      "location": "74"
+    },
+    {
+      "id": "C-PI",
+      "level": "Pre-A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-WR",
+      "level": "A1",
+      "scale": "Creative writing",
+      "location": "67"
+    },
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    }
+  ],
+  "grammarIds": [
+    "G-NAME",
+    "G-NOM",
+    "G-REG"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-NAME",
+      "firstDayId": "D006",
+      "scope": "Adım…, Adınız ne?, Adın ne? 고정구; 소유 D016, 의문 D011, 과거 D050에 일반화"
+    },
+    {
+      "id": "G-NOM",
+      "firstDayId": "D004",
+      "scope": "ben/sen/o, 명사·형용사 서술 1인칭 -(y)ım/im/um/üm, 2인칭 -sın/sin/sun/sün, 3인칭 무접사; 주어 생략·4형 모음조화"
+    },
+    {
+      "id": "G-REG",
+      "firstDayId": "D005",
+      "scope": "sen 친근 단수, siz 정중 단수·복수; -sınız/siniz/sunuz/sünüz; 낯선 성인 siz 기본"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D006-CV01",
+      "term": "ad",
+      "ko": "이름",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D006-V1"
+    },
+    {
+      "id": "D006-CV02",
+      "term": "Adım",
+      "ko": "내 이름은",
+      "mode": "active",
+      "unit": "variant",
+      "countEligible": false,
+      "existingWordId": "D006-V2"
+    },
+    {
+      "id": "D006-CV03",
+      "term": "Adınız ne?",
+      "ko": "성함이 어떻게 되세요?",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D006-V3"
+    },
+    {
+      "id": "D006-CV04",
+      "term": "Adın ne?",
+      "ko": "이름이 뭐야?",
+      "mode": "active",
+      "unit": "variant",
+      "countEligible": false,
+      "existingWordId": "D006-V4"
+    },
+    {
+      "id": "D006-CV05",
+      "term": "Memnun oldum.",
+      "ko": "만나서 반갑습니다.",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D006-V5"
+    },
+    {
+      "id": "D006-CV06",
+      "term": "Ben de.",
+      "ko": "저도요.",
+      "mode": "active",
+      "unit": "formula",
+      "countEligible": true,
+      "existingWordId": "D006-V6"
+    },
+    {
+      "id": "D006-CV07",
+      "term": "Kore",
+      "ko": "한국",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D006-V7"
+    },
+    {
+      "id": "D006-CV08",
+      "term": "Türkiye",
+      "ko": "튀르키예",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D006-V8"
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D004",
+    "D005"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-CON",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "74 / Conversation",
+      "basis": "기초 인사·소개·안부·작별"
+    },
+    {
+      "id": "C-PI",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "이름·나이·수·사물 질문"
+    },
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "C-WR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "67 / Creative writing",
+      "basis": "자기·사물의 짧은 기술"
+    },
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "A1.SE.5.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "소개·인사·작별"
+    },
+    {
+      "id": "A1.SE.18.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "자기·타인 소개"
+    },
+    {
+      "id": "A1.TDY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "소개 적절성"
+    },
+    {
+      "id": "A1.SE.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "짧은 질문 응답"
+    },
+    {
+      "id": "A1.SE.4.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "예측 가능한 대화"
+    },
+    {
+      "id": "A1.YÜ.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "자기·지인 소개 글"
+    },
+    {
+      "id": "A1.DY.7.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문장부호"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.11 Tanışalım (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.17 Milletler (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.28 Kişisel Bilgilerim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [
+    "Adım… / Adınız ne? / Adın ne?: 고정구, 소유 D016, ne D011",
+    "Memnun oldum.: 과거 분석 D050",
+    "Ben de.: 통째로, de 분리 표기"
+  ],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "정중·친근 인출"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "이름·국가/국적·반가움"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "고정구와 명사문 조합"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "가상 소개 3개 듣고 정보 찾기"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "에스키셰히르 카페 첫 만남 5턴 교대"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "가명 소개와 5기능 확인"
+    }
+  },
+  "masteryCheck": "5턴에서 인사·이름 질문/답·국적·반가움 / 짧은 소개 이름/국적 정보 4/5 / 가명·국적 소개 2~3문장",
+  "scopeLimits": "개인정보 필요 없음. 소유·과거·de 일반화 금지. 나이·직업 D013."
+}
