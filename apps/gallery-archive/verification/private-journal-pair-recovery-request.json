@@ -1,29 +1,19 @@
 {
   "schema_version": 1,
   "scope": "existing_private_photos_only",
-  "completed_baseline_native_QA_run": 41202443783,
   "originals_and_previews_are_readonly": true,
   "no_private_metadata_handoff_to_github": true,
   "models": {
     "mimmi": {
       "model": "mimmi",
-      "producer_run": 41195409851,
+      "producer_run": 44779438809,
       "producer_attempt": 1,
-      "producer_head": "d1a83a082dc6f321853b520e8daf10ad5f74f0b5",
-      "journal_sha256": "2883816e50d572782188bb214837e237182cc42081fc1ac8fc9eac9d11ffb76b",
-      "expected_collected_photos": 408,
-      "baseline_owner_fingerprint": "866be2330006906cf6283cc84141f55c6cc9be26bf07717c2b856b8999fd9694"
-    },
-    "yui": {
-      "model": "yui",
-      "producer_run": 41196666551,
-      "producer_attempt": 1,
-      "producer_head": "967640c95bd31e6d5ad174c4f8e644322586afdc",
-      "journal_sha256": "c4261a778f7af9dc6ea3ccd75e34a4c3549a0f30c1d37246acd3f0be6de6d7e6",
-      "expected_collected_photos": 4,
-      "baseline_owner_fingerprint": "0c3298e9ba3b2e7503a4a014dae258054a58b8b7513aeea2b5c127393c33e33b"
+      "producer_head": "48a6271b32361dac81aa818c0b469af78fbe6c57",
+      "journal_sha256": "0dd943f0afa7c878ca4e77552ff7fef0032617563b3fc875e0a4de8448a2b8e1",
+      "expected_collected_photos": 500,
+      "baseline_owner_fingerprint": "0031f0a5e1909f46dd3fbf2ca39eda0e1c1884d7b091dad84325f1f93bceb8a7",
+      "official_publisher_sha_only": true
     }
   },
-  "completed_owner_index_commit": "c6f2a2cf634ec3c7d58acd6054b6eaab15073023",
-  "retry_reason": "same producer journals; exact-SHA verified original/preview 400141 reads may use same-account normal copyto client"
+  "retry_reason": "Recover exact existing archived bytes only; no source recrawl or new media uploads; require independent recorded publisher SHA, byte length, dimensions, and exact remote original/preview verification."
 }
