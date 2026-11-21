@@ -1,0 +1,48 @@
+{
+  "id": "00-integration-20261121-r1",
+  "milestone": "P0_FIRST_WEEK",
+  "merged": [
+    1407,
+    1410,
+    1408,
+    1406
+  ],
+  "draft": [
+    1409
+  ],
+  "integrationCommit": "6d6906d009f81fd0f0d7cfe2ad4efb53a9fd594f",
+  "checks": {
+    "lessonDays": 14,
+    "sequence": true,
+    "originalWordAndQuestionIdPreservation": true,
+    "questionChoicesAndExplanations": true,
+    "audioTargetExactMatch": 402,
+    "assessmentLessonBlobMatch": true,
+    "releaseGateEmpty": true,
+    "approvedFixtureOnly": true,
+    "htmlScriptSyntax": true,
+    "scope": "00 structural and fixture checks; not independent linguistic, physical, or live browser interaction"
+  },
+  "live": {
+    "url": "https://koith.github.io/browser-app-lab/apps/turkish-study/",
+    "renderedVersion": "0.1.0",
+    "mainVersion": "0.1.1",
+    "publishedDays": 0,
+    "checker": "external rendered extraction; root and cache-busted URL",
+    "limitation": "HTTP status not independently captured; gate JS fetch 503 from extractor. Later build may propagate; no v0.1.1 live proof."
+  },
+  "finalComplete": 2,
+  "newlyComplete": 0,
+  "remaining": 42,
+  "lessonDraftDays": 14,
+  "finalReviewedDays": 0,
+  "decision": "NO-GO",
+  "next": [
+    "P0-03-01",
+    "P0-05-01",
+    "P0-04-01",
+    "P0-02-01",
+    "P0-01-01"
+  ],
+  "notifications": []
+}
