@@ -3,6 +3,7 @@ on:
   push:
     branches: ['main', '4leaf/brd01-distinct-source-proof-20261121']
     paths:
+      - 'apps/4leaf/rog/tools/brd01_measure_board_jpg.py'
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/board-camera.js'
       - 'apps/4leaf/rog/dice-native-tis-alpha.js'
