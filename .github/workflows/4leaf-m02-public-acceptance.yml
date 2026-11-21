@@ -1,0 +1,49 @@
+name: 4LEAF M02 public release acceptance
+
+on:
+  pull_request:
+    paths: [.github/workflows/4leaf-m02-public-acceptance.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publicly-deployed-original-shop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Match public 2004 M02 content and cache with merged main
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://koith.github.io/browser-app-lab/apps/4leaf/rog"
+          expected_ver="$(python3 -c 'import json;print(json.load(open("apps/4leaf/rog/app-version.json"))["version"])')"
+          expected_cache="$(python3 -c 'import json;print(json.load(open("apps/4leaf/rog/app-version.json"))["pwaCache"])')"
+          echo "Expected M02 release: $expected_ver / $expected_cache"
+          ok=0
+          for try in $(seq 1 18); do
+            bust="$GITHUB_SHA-$try"
+            if curl -fsSL --max-time 15 "$base/app-version.json?verify=$bust" -o /tmp/public-version.json; then
+              read -r got_ver got_cache < <(python3 -c 'import json;x=json.load(open("/tmp/public-version.json"));print(x.get("version","missing"),x.get("pwaCache","missing"))')
+              echo "Attempt $try: Pages=$got_ver / $got_cache"
+              if [[ "$got_ver" == "$expected_ver" && "$got_cache" == "$expected_cache" ]]; then
+                if curl -fsSL --max-time 15 "$base/shop-era-2004.js?verify=$bust" -o /tmp/era.js &&
+                   curl -fsSL --max-time 15 "$base/shop-era-2004.css?verify=$bust" -o /tmp/era.css &&
+                   curl -fsSL --max-time 15 "$base/street-world.js?verify=$bust" -o /tmp/street.js &&
+                   cmp -s apps/4leaf/rog/shop-era-2004.js /tmp/era.js &&
+                   cmp -s apps/4leaf/rog/shop-era-2004.css /tmp/era.css &&
+                   cmp -s apps/4leaf/rog/street-world.js /tmp/street.js &&
+                   grep -Fq "let era='2004'" /tmp/era.js &&
+                   curl -fsSL --max-time 15 "$base/../assets/shop_ref.png?verify=$bust" -o /tmp/m02-reference.png; then
+                   ok=1
+                   echo "M02_PUBLIC_PAGES_ACCEPTED: byte-identical 2004 shop JS/CSS, source street door JS, beta and reference"
+                   break
+                fi
+                echo "::warning::Pages version updated, but original M02 source files still differ."
+              fi
+            fi
+            sleep 10
+          done
+          [[ "$ok" == 1 ]] || { echo "::error::M02 not yet publicly deployed, do not mark original task done"; exit 1; }
