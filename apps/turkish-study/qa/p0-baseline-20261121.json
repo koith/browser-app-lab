@@ -1,0 +1,206 @@
+{
+  "entityId": "P0_FIRST_WEEK",
+  "revision": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0",
+  "sourceRevision": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "reviewType": "structure_and_static_audit",
+  "method": "Executed exact audit() function in connector JavaScript V8 on UTF-8 GitHub pinned inputs. Node CLI wrapper not executed. No browser DOM or audio executed.",
+  "reviewer": "05 independent AI QA",
+  "sourceEvidence": {
+    "curriculum": "6fb164f6eef6b1615448645db98da415bcf1dbcd",
+    "lessons": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0",
+    "releaseManifest": "5eaa3360118d4f9331c9d69ffffb1ff8029b63e5",
+    "index": "64ca6cfa805c12de77cc13911b3b2c1db404fa88"
+  },
+  "findings": {
+    "checks": [
+      {
+        "id": "curriculum-sequence",
+        "result": "pass",
+        "expected": 120,
+        "actual": 120
+      },
+      {
+        "id": "first-week",
+        "result": "pass",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "id": "mapped-ids",
+        "result": "pass",
+        "expected": true,
+        "actual": [
+          "D001",
+          "D002",
+          "D003",
+          "D004",
+          "D005",
+          "D006",
+          "D007"
+        ]
+      },
+      {
+        "id": "unique-question-ids",
+        "result": "pass",
+        "expected": true,
+        "actual": 25
+      },
+      {
+        "id": "question-id-sequence",
+        "result": "pass",
+        "expected": true,
+        "actual": 25
+      },
+      {
+        "id": "answer-unique",
+        "result": "pass",
+        "expected": true,
+        "actual": 25
+      },
+      {
+        "id": "nfc",
+        "result": "pass",
+        "expected": true,
+        "actual": true
+      },
+      {
+        "id": "required-content",
+        "result": "pass",
+        "expected": true,
+        "actual": 7
+      },
+      {
+        "id": "source-ids",
+        "result": "pass",
+        "expected": true,
+        "actual": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "id": "monthly-assessments",
+        "result": "pass",
+        "expected": [
+          30,
+          60,
+          90,
+          120
+        ],
+        "actual": [
+          [
+            30,
+            "assessment"
+          ],
+          [
+            60,
+            "assessment"
+          ],
+          [
+            90,
+            "assessment"
+          ],
+          [
+            120,
+            "assessment"
+          ]
+        ]
+      },
+      {
+        "id": "choice-prior-attestation",
+        "result": "fail",
+        "expected": [],
+        "actual": [
+          {
+            "question": "D004-Q1",
+            "choice": "Sen Korelisin."
+          }
+        ]
+      },
+      {
+        "id": "manifest-reference-static",
+        "result": "fail",
+        "expected": true,
+        "actual": false
+      },
+      {
+        "id": "answer-explanations",
+        "result": "fail",
+        "expected": true,
+        "actual": 0
+      },
+      {
+        "id": "approved-days",
+        "result": "fail",
+        "expected": 7,
+        "actual": 0
+      }
+    ],
+    "counts": [
+      {
+        "id": "D001",
+        "words": 10,
+        "examples": 3,
+        "turns": 4,
+        "questions": 4
+      },
+      {
+        "id": "D002",
+        "words": 10,
+        "examples": 3,
+        "turns": 3,
+        "questions": 3
+      },
+      {
+        "id": "D003",
+        "words": 10,
+        "examples": 3,
+        "turns": 3,
+        "questions": 3
+      },
+      {
+        "id": "D004",
+        "words": 10,
+        "examples": 3,
+        "turns": 2,
+        "questions": 3
+      },
+      {
+        "id": "D005",
+        "words": 8,
+        "examples": 3,
+        "turns": 3,
+        "questions": 3
+      },
+      {
+        "id": "D006",
+        "words": 8,
+        "examples": 3,
+        "turns": 3,
+        "questions": 3
+      },
+      {
+        "id": "D007",
+        "words": 0,
+        "examples": 3,
+        "turns": 5,
+        "questions": 6
+      }
+    ],
+    "totals": {
+      "words": 56,
+      "examples": 21,
+      "turns": 23,
+      "questions": 25
+    }
+  },
+  "result": "fail",
+  "at": "2026-11-21",
+  "evidencePath": "qa/p0-baseline-20261121.json",
+  "audioManifest": "NOT_FOUND: Error code: NOT_FOUND; Error: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/contents#get-repository-content\",\"status\":\"404\"}"
+}
