@@ -1,0 +1,24 @@
+{
+  "task": "RULE-01",
+  "source": {
+    "data": "original/maps.js 26 DMP paths, original/tiles.js 25 named DMO event tables; unnamed 0170 metadata stays unverified",
+    "historicRules": "https://seore.org/w/%EC%A3%BC%EC%82%AC%EC%9C%84%EC%9D%98%20%EC%9E%94%EC%98%81?rev=63#s-3.3",
+    "originalOfficialNon": "https://4leafmemorial.geld.kr/m/908",
+    "archivedTileReference": "https://4leafmemorial.geld.kr/category",
+    "primaryTileLinks": "4leaf.pe.kr individual 2000s/2013 archived tiles unavailable (timeout); do not treat retrospective rules as original server code"
+  },
+  "fixes": [
+    "all encoded warp links honor source targets, no reciprocal re-trigger or randomized self-link",
+    "bonus advance counts actual moved tiles at normal +3 gauge per step",
+    "treasure and blessing exclude unpublished items",
+    "Soulful uniformly selects unique eyes based on active party slots without ring",
+    "arena selects earliest actual recorded arrival, old saves use stable order",
+    "joker restores tile even if triggered effect errors"
+  ],
+  "unknowns": [
+    "Original server exact RNG algorithm and random/Joker probability table absent; deterministic seeded web fixture verifies documented effects, not old server bitwise sequence.",
+    "Unnamed 0170 has 13 verified DMP type10 target links, other event metadata absent, no fabricated events.",
+    "Historical special tiles that never shipped have unknown effects and are excluded.",
+    "Full 2004 historical battle/item/round exceptions remain RULE-02."
+  ]
+}
