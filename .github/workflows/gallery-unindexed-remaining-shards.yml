@@ -1,0 +1,75 @@
+name: Gallery Unindexed Mimmi Remaining Physical SHA Probe - One Shot
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-unindexed-remaining-shards.yml'
+permissions:
+  contents: read
+jobs:
+  inspect-mimmi-unindexed-shard:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
+    env:
+      SHARD: ${{ matrix.shard }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/gallery-archive/inspect_unindexed_owner_files.py
+            apps/gallery-archive/qa_existing_owner_exact_file.py
+            apps/mimmi-gallery/cloud/gateway/cookie_format.py
+            apps/mimmi-gallery/stored-albums.json
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'Pillow==11.3.0'
+      - name: Install checksum-pinned read-only TeraBox client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Read only each distinct unindexed Mimmi physical-file shard
+        shell: bash
+        run: |
+          set -euo pipefail
+          export RCLONE_CONFIG_ARCHIVE_COOKIE="$MIMMI_COOKIE"
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          rclone cat 'archive:MimmiArchive/metadata/catalog.json' --timeout 75s --retries 2 > "$RUNNER_TEMP/catalog.json" 2> "$RUNNER_TEMP/private-errors"
+          timeout 660 rclone lsjson 'archive:MimmiArchive' -R --files-only --timeout 75s --retries 2 > "$RUNNER_TEMP/listing.json" 2> "$RUNNER_TEMP/listing-errors"
+          python - <<'PY'
+          import json,os,sys
+          from pathlib import Path
+          sys.path.insert(0,'apps/gallery-archive')
+          from inspect_unindexed_owner_files import candidates
+          root=Path(os.environ['RUNNER_TEMP'])
+          listing=json.loads((root/'listing.json').read_text())
+          catalog=json.loads((root/'catalog.json').read_text())
+          all_rows,total=candidates(listing,catalog,700)
+          start=90*int(os.environ['SHARD'])
+          subset={item[0] for item in all_rows[start:start+90]}
+          shard=[row for row in listing if row.get('Path') in subset]
+          (root/'shard.json').write_text(json.dumps(shard))
+          print('OWNER_UNINDEXED_SHARD_METADATA_ONLY',
+                json.dumps({'shard':int(os.environ['SHARD']),'total_eligible':total,
+                            'range_start':start,'selected':len(shard)}))
+          PY
+          python apps/gallery-archive/inspect_unindexed_owner_files.py \
+            --model mimmi --listing "$RUNNER_TEMP/shard.json" \
+            --catalog "$RUNNER_TEMP/catalog.json" \
+            --saved apps/mimmi-gallery/stored-albums.json --max 90
+          echo 'Read-only scan of existing owner originals; no storage writes, new uploads or published photos.' >> "$GITHUB_STEP_SUMMARY"
