@@ -742,9 +742,9 @@
       "requirement": "공개 URL 배포",
       "implementation": "partial",
       "content": "draft",
-      "verification": "partial",
+      "verification": "public_rendered_partial",
       "acceptance": "실서비스 HTTP 200 및 렌더링",
-      "result": "통합된 인수인계 20261121-03-P0-GATE-01 / PR #1407; 최종 검증 대기",
+      "result": "Live v0.1.1 and approval-wait rendering observed; separate manifest revision old, exact artifact and actual independent workflow pending",
       "complete": false,
       "owner": "03",
       "verificationOwner": "05",
@@ -756,7 +756,8 @@
       "activePR": null,
       "evidence": [
         "app/verification/p0-simulated-20261121.json",
-        "app/verification/p0-browser.mjs"
+        "app/verification/p0-browser.mjs",
+        "ops/runs/20261121-00-integration-r2.json"
       ]
     },
     {
@@ -892,8 +893,10 @@
     "authoredDraftDays": 14,
     "independentFinalApprovedDays": 0,
     "sourceRevision": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
-    "liveObservedVersion": "0.1.0",
+    "liveObservedVersion": "0.1.1",
     "mainAppVersion": "0.1.1",
-    "newlyComplete": 0
+    "newlyComplete": 0,
+    "publicEvidence": "ops/runs/20261121-00-integration-r2.json",
+    "governancePR": 1411
   }
 }
