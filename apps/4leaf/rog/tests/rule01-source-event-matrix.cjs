@@ -62,7 +62,7 @@ const {chromium,webkit}=require('playwright');
    reset(type);p.team=['c_0078'];await land(p);const stats=T.teamStats(p.team);const dice=await fixed(.99,()=>T.moveValues(p));const lo=stats.move===2?(type==='clover'?3:1):range[0],hi=stats.move===2?(type==='clover'?4:2):range[1];if(!dice.every(x=>x>=lo&&x<=hi))throw Error(type+' range '+dice);eq([p.effects.clover,p.effects.spade],[0,0],type+' consumed');cases[type]=1;
   }
   for(const [first,second,expected]of [[1,1,20],[3,2,17],[4,2,14],[6,1,0]]){
-   reset('doa');const seq=[(first-.5)/6,(second-.5)/first];Math.random=()=>seq.length?seq.shift():.6;try{await T.resolveTile(p)}finally{Math.random=random}eq(p.position,expected,'DOA '+first+':'+second);cases.doa=(cases.doa||0)+1;
+   reset('doa');m.players.slice(1).forEach(q=>q.position=1);const seq=[(first-.5)/6,(second-.5)/first];Math.random=()=>seq.length?seq.shift():.6;try{await T.resolveTile(p)}finally{Math.random=random}eq(p.position,expected,'DOA '+first+':'+second);cases.doa=(cases.doa||0)+1;
   }
   reset('random');await fixed(0,()=>land(p));eq(m.tiles[20],'chest','question tile persists');eq(p.items.length,1,'question resolves effect');cases.random=1;
   reset('joker');await fixed(0,()=>land(p));eq(m.tiles[20],'joker','joker restores visual');await fixed(.99,()=>land(p));eq(m.tiles[20],'joker','joker rerolls');eq(p.items.length,0,'joker second effect differs');cases.joker=2;
