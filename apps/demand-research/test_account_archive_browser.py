@@ -152,6 +152,27 @@ def run(browser_type,name,width,height):
           document.querySelector('#coverImage')?.naturalWidth > 0 &&
           document.querySelector('#avatarImage')?.naturalWidth > 0
         """,timeout=10000)
+        page.wait_for_function("""() =>
+          document.getElementById('profileStatus').textContent.includes('헤더 보관(')
+        """,timeout=10000)
+        assert page.locator("#coverImage").is_visible()
+        # A genuinely failed header decode must never retain the positive
+        # 'archived/verified' UI state despite having a snapshot link.
+        page.locator("#coverImage").evaluate(
+            "(img) => img.dispatchEvent(new Event('error'))")
+        page.wait_for_function("""() =>
+          document.getElementById('profileStatus').textContent.includes('헤더 표시 실패')
+        """,timeout=10000)
+        assert page.locator("#coverImage").is_hidden()
+        assert "헤더 보관(" not in page.locator("#profileStatus").inner_text()
+        # Reload reads only the authorized archived image and restores the
+        # actual image after successful browser decoding.
+        page.reload(wait_until="domcontentloaded",timeout=30000)
+        page.wait_for_function("""() =>
+          document.getElementById('profileStatus').textContent.includes('헤더 보관(')
+          && document.getElementById('coverImage').naturalWidth>0
+          && !document.getElementById('coverImage').hidden
+        """,timeout=12000)
         for provider in ("bluesky","mastodon"):
             page.evaluate("(p) => document.documentElement.dataset.platform=p",provider)
             metrics=page.evaluate("""() => {

@@ -8,7 +8,8 @@ const accountSelect=$("accountSelect"),status=$("loadStatus"),results=$("results
 const detail=$("postDetail"),detailBody=$("detailBody");
 const state={account:"",section:"posts",offset:0,more:false,loading:false,
              profile:null,records:[],accounts:[],viewVersion:0,
-             firstPageRetries:0,retryTimer:null};
+             firstPageRetries:0,retryTimer:null,
+             profileArt:{avatar:"missing",banner:"missing"}};
 let detailRequestSeq=0;
 const base=()=>"/api/account-archives/"+encodeURIComponent(state.account);
 const sectionLabels={posts:"게시글·답글",followers:"팔로워",following:"팔로잉"};
@@ -141,6 +142,7 @@ async function get(path){
 function showMessage(message){results.replaceChildren(node("p","placeholder",message));}
 function setStatus(message){status.textContent=message;}
 function resetProfile(){
+  state.profileArt={avatar:"missing",banner:"missing"};
   $("displayName").textContent="보관된 프로필을 불러오는 중…";
   $("handle").textContent="";$("biography").textContent="";
   $("postCount").textContent="—";$("followerCount").textContent="—";
@@ -189,6 +191,9 @@ function profileArtLabel(profile,kind,available){
     if((detail.state||detail.status)==="not_set")return label+" 미설정(현재 공개 기록)";
     return label+" 미보관(공개 원본 접근/저장 검증 필요)";
   }
+  const rendered=state.profileArt[kind];
+  if(rendered==="error")return label+" 표시 실패(보관 파일 조회 오류)";
+  if(rendered!=="loaded")return label+" 파일 표시 확인 중";
   const tier=detail.source_tier==="original_pds_blob"?"원본 PDS":
              detail.source_tier==="public_bluesky_cdn_rendition"?"공개 CDN 변환본":
              detail.source_tier==="mastodon_public_profile_image"?"공개 SNS 이미지":
@@ -197,6 +202,14 @@ function profileArtLabel(profile,kind,available){
     return label+" 이전 백업본 보존("+tier+" · 현재 이미지 확인 불가)";
   }
   return label+" 보관("+tier+" · SHA-256 검증)";
+}
+function refreshProfileArtStatus(){
+  const profile=state.profile;
+  if(!profile?.available)return;
+  const assets=["avatar","banner"].map(kind=>
+    profileArtLabel(profile,kind,Boolean(validArchivedProfileImage(profile.assets?.[kind],kind))));
+  $("profileStatus").textContent="PROFILE SNAPSHOT · "+date(profile.captured_at)+
+    " · "+assets.join(" · ")+" · 관계 목록/게시글 완전성 별도 확인 필요";
 }
 function validArchivedProfileImage(path,kind){
   if(typeof path!=="string"||path.length>300)return "";
@@ -212,25 +225,26 @@ function applyArchivedProfileImage(kind,path){
   const image=$(kind==="banner"?"coverImage":"avatarImage");
   const fallback=$("avatarFallback");
   const account=state.account;
+  const snapshot=state.profile;
   const valid=validArchivedProfileImage(path,kind);
+  state.profileArt[kind]=valid?"pending":"missing";
   image.onload=null;image.onerror=null;
   image.hidden=true;image.removeAttribute("src");
   frame.classList.remove("has-image");
   if(kind==="avatar")fallback.hidden=false;
   if(!valid)return;
   image.onload=()=>{
-    if(state.account!==account||image.getAttribute("src")!==valid)return;
+    if(state.account!==account||state.profile!==snapshot||image.getAttribute("src")!==valid)return;
     if(!image.naturalWidth||!image.naturalHeight){image.onerror();return;}
     image.hidden=false;frame.classList.add("has-image");
     if(kind==="avatar")fallback.hidden=true;
+    state.profileArt[kind]="loaded";refreshProfileArtStatus();
   };
   image.onerror=()=>{
-    if(state.account!==account||image.getAttribute("src")!==valid)return;
+    if(state.account!==account||state.profile!==snapshot||image.getAttribute("src")!==valid)return;
     image.hidden=true;frame.classList.remove("has-image");
     if(kind==="avatar")fallback.hidden=false;
-    const msg=kind==="banner"?"헤더 이미지 파일을 실제로 읽지 못했습니다.":"프로필 이미지 파일을 실제로 읽지 못했습니다.";
-    const notice=$("profileStatus");
-    if(!notice.textContent.includes(msg))notice.textContent+=" · "+msg;
+    state.profileArt[kind]="error";refreshProfileArtStatus();
   };
   image.src=valid;
 }
@@ -269,10 +283,7 @@ function renderProfile(profile){
   $("avatarFallback").textContent=($("displayName").textContent||"?").charAt(0).toUpperCase();
   applyArchivedProfileImage("avatar",avatar);
   applyArchivedProfileImage("banner",banner);
-  const assets=[profileArtLabel(profile,"avatar",Boolean(avatar)),
-                profileArtLabel(profile,"banner",Boolean(banner))];
-  $("profileStatus").textContent="PROFILE SNAPSHOT · "+date(profile.captured_at)+
-     " · "+assets.join(" · ")+" · 관계 목록/게시글 완전성 별도 확인 필요";
+  refreshProfileArtStatus();
   syncVisiblePostIdentity();
 }
 function safeMediaPath(value){
