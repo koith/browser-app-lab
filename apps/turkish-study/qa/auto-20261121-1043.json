@@ -1,0 +1,157 @@
+{
+  "id": "auto-20261121-1043",
+  "reviewer": "05",
+  "reviewType": "independent structural and targeted text review of existing 02 artifact",
+  "sourceRevision": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
+  "assessmentBlob": "584a4b82cf4c01445e0a07ec92a7ac86f6082a87",
+  "rubricBlob": "2e4a330957cb4f75667c8edf7fab2bb3d3bbb269",
+  "audioTargetsBlob": "6cf861269b8f563309fddf46feb94a732c8c1ebe",
+  "checks": [
+    {
+      "day": "D001",
+      "words": 15,
+      "examples": 9,
+      "dialogue": 10,
+      "questions": 9,
+      "uniqueKeys": true,
+      "exactlyOneAnswer": true,
+      "explanations": true,
+      "timedTask": 60
+    },
+    {
+      "day": "D002",
+      "words": 16,
+      "examples": 11,
+      "dialogue": 7,
+      "questions": 8,
+      "uniqueKeys": true,
+      "exactlyOneAnswer": true,
+      "explanations": true,
+      "timedTask": 60
+    },
+    {
+      "day": "D003",
+      "words": 16,
+      "examples": 12,
+      "dialogue": 8,
+      "questions": 8,
+      "uniqueKeys": true,
+      "exactlyOneAnswer": true,
+      "explanations": true,
+      "timedTask": 60
+    },
+    {
+      "day": "D004",
+      "words": 16,
+      "examples": 11,
+      "dialogue": 6,
+      "questions": 8,
+      "uniqueKeys": true,
+      "exactlyOneAnswer": true,
+      "explanations": true,
+      "timedTask": 60
+    },
+    {
+      "day": "D005",
+      "words": 14,
+      "examples": 11,
+      "dialogue": 8,
+      "questions": 8,
+      "uniqueKeys": true,
+      "exactlyOneAnswer": true,
+      "explanations": true,
+      "timedTask": 60
+    },
+    {
+      "day": "D006",
+      "words": 14,
+      "examples": 9,
+      "dialogue": 9,
+      "questions": 8,
+      "uniqueKeys": true,
+      "exactlyOneAnswer": true,
+      "explanations": true,
+      "timedTask": 60
+    },
+    {
+      "day": "D007",
+      "words": 0,
+      "examples": 9,
+      "dialogue": 9,
+      "questions": 12,
+      "uniqueKeys": true,
+      "exactlyOneAnswer": true,
+      "explanations": true,
+      "timedTask": null
+    }
+  ],
+  "listen": [
+    {
+      "id": "W01-L1",
+      "exact": true,
+      "revision": true
+    },
+    {
+      "id": "W01-L2",
+      "exact": true,
+      "revision": true
+    },
+    {
+      "id": "W01-L3",
+      "exact": true,
+      "revision": true
+    },
+    {
+      "id": "W01-L4",
+      "exact": true,
+      "revision": true
+    },
+    {
+      "id": "W01-L5",
+      "exact": true,
+      "revision": true
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "result": "fail",
+      "observed": {
+        "listening": 5,
+        "reading": 5,
+        "minutes": {
+          "listening": 15,
+          "reading": 10,
+          "writing": 15,
+          "speaking": 15,
+          "feedback": 5
+        }
+      },
+      "expected": {
+        "orientation": 5,
+        "listening": 15,
+        "reading": 10,
+        "writing": 10,
+        "interaction": 15,
+        "feedback": 5
+      },
+      "expectedItems": 10,
+      "detail": "D007 grammar/task likewise still specifies 5 listening/5 reading and 15-minute writing; align all three artifacts before re-review."
+    },
+    {
+      "id": "F-02",
+      "result": "partial",
+      "detail": "D001–D006 revised task timings and answer explanations are present; D003 has syllable examples but no explicit stress exercise, and D001 Q4 remains context-light. Full item-level lexical review and actual time trial pending."
+    },
+    {
+      "id": "F-06",
+      "result": "fail",
+      "detail": "User rejected robotic preview MP3; no quality approval may derive from eSpeak decode/asset count. Native or neural candidate and independent hearing required."
+    }
+  ],
+  "limits": [
+    "No physical iPhone, listening, native-speaker review, or runtime release verification performed.",
+    "Structural checks do not establish educational correctness."
+  ],
+  "result": "NO-GO"
+}
