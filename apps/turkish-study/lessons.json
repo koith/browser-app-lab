@@ -1,0 +1,873 @@
+{
+  "version": "0.1.0",
+  "status": "unreviewed-draft",
+  "license": "Original educational draft; referenced standards not copied",
+  "lessons": [
+    {
+      "day": 1,
+      "objective": "터키어 철자를 인식하고 처음 만난 사람에게 인사한다.",
+      "grammar": "터키어는 29개 라틴 문자를 사용합니다. 대문자 I의 소문자는 ı, İ의 소문자는 i입니다. 처음에는 소리를 듣고 따라 하며 글자를 구분하세요. 한국어식 표기는 정확한 발음을 대신하지 않습니다.",
+      "alphabet": "A B C Ç D E F G Ğ H I İ J K L M N O Ö P R S Ş T U Ü V Y Z",
+      "words": [
+        [
+          "Merhaba",
+          "안녕하세요"
+        ],
+        [
+          "Günaydın",
+          "좋은 아침이에요"
+        ],
+        [
+          "İyi akşamlar",
+          "좋은 저녁이에요"
+        ],
+        [
+          "İyi geceler",
+          "안녕히 주무세요"
+        ],
+        [
+          "Teşekkürler",
+          "고마워요"
+        ],
+        [
+          "Lütfen",
+          "부탁합니다"
+        ],
+        [
+          "Evet",
+          "네"
+        ],
+        [
+          "Hayır",
+          "아니요"
+        ],
+        [
+          "Hoşça kal",
+          "잘 있어"
+        ],
+        [
+          "Güle güle",
+          "잘 가"
+        ]
+      ],
+      "examples": [
+        [
+          "Merhaba!",
+          "안녕하세요!"
+        ],
+        [
+          "Teşekkürler.",
+          "고마워요."
+        ],
+        [
+          "Günaydın!",
+          "좋은 아침이에요!"
+        ]
+      ],
+      "dialogue": [
+        [
+          "A",
+          "Merhaba!",
+          "안녕하세요!"
+        ],
+        [
+          "B",
+          "Merhaba!",
+          "안녕하세요!"
+        ],
+        [
+          "A",
+          "Hoşça kal!",
+          "잘 있어!"
+        ],
+        [
+          "B",
+          "Güle güle!",
+          "잘 가!"
+        ]
+      ],
+      "note": "떠나는 사람이 남는 사람에게 Hoşça kal, 남는 사람이 떠나는 사람에게 Güle güle라고 말할 수 있습니다. Hoşça kalın은 정중하거나 여러 사람에게 쓰는 형태입니다.",
+      "questions": [
+        {
+          "id": "D001-Q1",
+          "type": "choice",
+          "prompt": "안녕하세요",
+          "answer": "Merhaba",
+          "choices": [
+            "Merhaba",
+            "Hayır",
+            "Lütfen"
+          ]
+        },
+        {
+          "id": "D001-Q2",
+          "type": "choice",
+          "prompt": "네",
+          "answer": "Evet",
+          "choices": [
+            "Hayır",
+            "Evet",
+            "Teşekkürler"
+          ]
+        },
+        {
+          "id": "D001-Q3",
+          "type": "choice",
+          "prompt": "부탁합니다",
+          "answer": "Lütfen",
+          "choices": [
+            "Günaydın",
+            "Lütfen",
+            "Güle güle"
+          ]
+        },
+        {
+          "id": "D001-Q4",
+          "type": "choice",
+          "prompt": "잘 가",
+          "answer": "Güle güle",
+          "choices": [
+            "Hoşça kal",
+            "Güle güle",
+            "İyi geceler"
+          ]
+        }
+      ],
+      "task": "동행자에게 인사하고 헤어지는 역할을 서로 바꿔 연습하세요.",
+      "id": "D001",
+      "status": "draft",
+      "languageReview": "pending",
+      "audioReview": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "day": 2,
+      "objective": "8개 모음을 구별하고 모음이 다른 단어를 듣는다.",
+      "grammar": "터키어의 모음은 a, e, ı, i, o, ö, u, ü입니다. ı는 한국어 ㅡ와 유사하지만 완전히 같지는 않습니다. ö와 ü는 각각 e와 i에 가까운 혀 위치에서 입술을 둥글게 합니다. 한글 표기보다 소리를 우선하세요.",
+      "words": [
+        [
+          "at",
+          "말"
+        ],
+        [
+          "et",
+          "고기"
+        ],
+        [
+          "ışık",
+          "빛"
+        ],
+        [
+          "iki",
+          "둘"
+        ],
+        [
+          "on",
+          "열"
+        ],
+        [
+          "ön",
+          "앞"
+        ],
+        [
+          "su",
+          "물"
+        ],
+        [
+          "süt",
+          "우유"
+        ],
+        [
+          "gül",
+          "장미"
+        ],
+        [
+          "göl",
+          "호수"
+        ]
+      ],
+      "examples": [
+        [
+          "at — et",
+          "말 — 고기"
+        ],
+        [
+          "on — ön",
+          "열 — 앞"
+        ],
+        [
+          "su — süt",
+          "물 — 우유"
+        ]
+      ],
+      "dialogue": [
+        [
+          "A",
+          "Su, lütfen.",
+          "물 부탁합니다."
+        ],
+        [
+          "B",
+          "Evet.",
+          "네."
+        ],
+        [
+          "A",
+          "Teşekkürler.",
+          "고마워요."
+        ]
+      ],
+      "note": "모음조화는 이후 접사를 배울 때 다룹니다. 오늘은 소리 구분에 집중합니다.",
+      "questions": [
+        {
+          "id": "D002-Q1",
+          "type": "choice",
+          "prompt": "물",
+          "answer": "su",
+          "choices": [
+            "su",
+            "süt",
+            "et"
+          ]
+        },
+        {
+          "id": "D002-Q2",
+          "type": "choice",
+          "prompt": "앞",
+          "answer": "ön",
+          "choices": [
+            "on",
+            "ön",
+            "göl"
+          ]
+        },
+        {
+          "id": "D002-Q3",
+          "type": "choice",
+          "prompt": "둘",
+          "answer": "iki",
+          "choices": [
+            "iki",
+            "ışık",
+            "at"
+          ]
+        }
+      ],
+      "task": "on/ön과 gül/göl을 각각 5회 듣고 녹음해서 비교하세요.",
+      "id": "D002",
+      "status": "draft",
+      "languageReview": "pending",
+      "audioReview": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "day": 3,
+      "objective": "c/ç, s/ş 및 ğ가 있는 단어를 구별한다.",
+      "grammar": "c는 영어 judge의 끝소리와 유사하고 ç는 church의 첫소리와 유사합니다. ş는 영어 sh에 가깝습니다. ğ는 표준 터키어에서 보통 독립적인 강한 자음으로 발음하지 않으며 주변 모음에 따라 길이·연결에 영향을 줍니다.",
+      "words": [
+        [
+          "cam",
+          "유리"
+        ],
+        [
+          "çam",
+          "소나무"
+        ],
+        [
+          "saç",
+          "머리카락"
+        ],
+        [
+          "şiş",
+          "꼬치"
+        ],
+        [
+          "çay",
+          "차"
+        ],
+        [
+          "kahve",
+          "커피"
+        ],
+        [
+          "dağ",
+          "산"
+        ],
+        [
+          "yağ",
+          "기름"
+        ],
+        [
+          "soğuk",
+          "차가운"
+        ],
+        [
+          "sıcak",
+          "뜨거운"
+        ]
+      ],
+      "examples": [
+        [
+          "cam — çam",
+          "유리 — 소나무"
+        ],
+        [
+          "çay — kahve",
+          "차 — 커피"
+        ],
+        [
+          "soğuk — sıcak",
+          "차가운 — 뜨거운"
+        ]
+      ],
+      "dialogue": [
+        [
+          "A",
+          "Çay, lütfen.",
+          "차 부탁합니다."
+        ],
+        [
+          "B",
+          "Evet.",
+          "네."
+        ],
+        [
+          "A",
+          "Teşekkürler.",
+          "고마워요."
+        ]
+      ],
+      "note": "받침처럼 ğ를 강하게 읽지 않도록 주의합니다.",
+      "questions": [
+        {
+          "id": "D003-Q1",
+          "type": "choice",
+          "prompt": "차",
+          "answer": "çay",
+          "choices": [
+            "çam",
+            "çay",
+            "cam"
+          ]
+        },
+        {
+          "id": "D003-Q2",
+          "type": "choice",
+          "prompt": "산",
+          "answer": "dağ",
+          "choices": [
+            "yağ",
+            "dağ",
+            "saç"
+          ]
+        },
+        {
+          "id": "D003-Q3",
+          "type": "choice",
+          "prompt": "뜨거운",
+          "answer": "sıcak",
+          "choices": [
+            "soğuk",
+            "sıcak",
+            "şiş"
+          ]
+        }
+      ],
+      "task": "단어를 음성으로 듣고 c/ç, s/ş를 구분해 말하세요.",
+      "id": "D003",
+      "status": "draft",
+      "languageReview": "pending",
+      "audioReview": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "day": 4,
+      "objective": "나와 상대의 정체를 간단한 명사문으로 설명한다.",
+      "grammar": "터키어는 명사·형용사에 인칭 접사가 붙어 한국어의 ‘~이다’ 역할을 할 수 있습니다. Koreliyim = Koreli + -(y)im, öğrenciyim = öğrenci + -(y)im. 2인칭 단수는 -sın/-sin/-sun/-sün, 1인칭 단수는 -(y)ım/-(y)im/-(y)um/-(y)üm입니다. 접사 형태는 마지막 모음에 따라 달라집니다. 주어는 문맥상 생략 가능합니다.",
+      "words": [
+        [
+          "ben",
+          "나"
+        ],
+        [
+          "sen",
+          "너"
+        ],
+        [
+          "o",
+          "그/그녀/그것"
+        ],
+        [
+          "biz",
+          "우리"
+        ],
+        [
+          "siz",
+          "당신/여러분"
+        ],
+        [
+          "onlar",
+          "그들"
+        ],
+        [
+          "Koreli",
+          "한국인"
+        ],
+        [
+          "Türk",
+          "튀르키예인"
+        ],
+        [
+          "öğrenci",
+          "학생"
+        ],
+        [
+          "turist",
+          "관광객"
+        ]
+      ],
+      "examples": [
+        [
+          "Ben Koreliyim.",
+          "저는 한국인입니다."
+        ],
+        [
+          "Ben turistim.",
+          "저는 관광객입니다."
+        ],
+        [
+          "Sen öğrencisin.",
+          "너는 학생이야."
+        ]
+      ],
+      "dialogue": [
+        [
+          "A",
+          "Merhaba! Ben Koreliyim.",
+          "안녕하세요! 저는 한국인입니다."
+        ],
+        [
+          "B",
+          "Merhaba! Ben Türküm.",
+          "안녕하세요! 저는 튀르키예인입니다."
+        ]
+      ],
+      "note": "o는 성별을 구분하지 않습니다. 낯선 성인에게는 보통 siz를 우선합니다.",
+      "questions": [
+        {
+          "id": "D004-Q1",
+          "type": "choice",
+          "prompt": "나는 한국인입니다.",
+          "answer": "Ben Koreliyim.",
+          "choices": [
+            "Ben Koreliyim.",
+            "Sen Korelisin.",
+            "Ben turistim."
+          ]
+        },
+        {
+          "id": "D004-Q2",
+          "type": "choice",
+          "prompt": "너",
+          "answer": "sen",
+          "choices": [
+            "biz",
+            "sen",
+            "o"
+          ]
+        },
+        {
+          "id": "D004-Q3",
+          "type": "choice",
+          "prompt": "관광객",
+          "answer": "turist",
+          "choices": [
+            "öğrenci",
+            "turist",
+            "Türk"
+          ]
+        }
+      ],
+      "task": "자신이 한국인이고 관광객이라고 말해 보세요.",
+      "id": "D004",
+      "status": "draft",
+      "languageReview": "pending",
+      "audioReview": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "day": 5,
+      "objective": "정중한 인사와 친근한 인사를 구분한다.",
+      "grammar": "친근한 단수에는 sen, 낯선 상대나 여러 사람에게는 siz를 씁니다. Nasılsın?은 친근한 단수, Nasılsınız?는 정중하거나 여러 사람에게 쓰는 표현입니다. -sınız/-siniz/-sunuz/-sünüz가 2인칭 복수·정중형입니다. 오늘은 인사 문형을 익히고 의문문의 상세 규칙은 다음 주에 다룹니다.",
+      "words": [
+        [
+          "Nasılsın?",
+          "어떻게 지내?"
+        ],
+        [
+          "Nasılsınız?",
+          "어떻게 지내세요?"
+        ],
+        [
+          "İyiyim.",
+          "잘 지내요."
+        ],
+        [
+          "İyi",
+          "좋은/잘"
+        ],
+        [
+          "Kötü",
+          "나쁜"
+        ],
+        [
+          "Fena değil.",
+          "나쁘지 않아요."
+        ],
+        [
+          "Sağ ol.",
+          "고마워."
+        ],
+        [
+          "Sağ olun.",
+          "감사합니다."
+        ]
+      ],
+      "examples": [
+        [
+          "Merhaba, nasılsınız?",
+          "안녕하세요, 어떻게 지내세요?"
+        ],
+        [
+          "İyiyim, teşekkürler.",
+          "잘 지내요, 감사합니다."
+        ],
+        [
+          "Fena değil.",
+          "나쁘지 않아요."
+        ]
+      ],
+      "dialogue": [
+        [
+          "A",
+          "Merhaba, nasılsınız?",
+          "안녕하세요, 어떻게 지내세요?"
+        ],
+        [
+          "B",
+          "İyiyim, teşekkürler. Siz?",
+          "잘 지내요, 감사합니다. 당신은요?"
+        ],
+        [
+          "A",
+          "İyiyim.",
+          "잘 지내요."
+        ]
+      ],
+      "note": "친해진 뒤 상대가 sen 사용을 자연스럽게 제안하거나 먼저 사용할 수 있습니다.",
+      "questions": [
+        {
+          "id": "D005-Q1",
+          "type": "choice",
+          "prompt": "정중하게 어떻게 지내세요?",
+          "answer": "Nasılsınız?",
+          "choices": [
+            "Nasılsın?",
+            "Nasılsınız?",
+            "İyiyim."
+          ]
+        },
+        {
+          "id": "D005-Q2",
+          "type": "choice",
+          "prompt": "나쁘지 않아요.",
+          "answer": "Fena değil.",
+          "choices": [
+            "Sağ ol.",
+            "Fena değil.",
+            "İyi"
+          ]
+        },
+        {
+          "id": "D005-Q3",
+          "type": "choice",
+          "prompt": "잘 지내요.",
+          "answer": "İyiyim.",
+          "choices": [
+            "İyiyim.",
+            "Kötü",
+            "Sağ olun."
+          ]
+        }
+      ],
+      "task": "친구와 낯선 사람 역할을 바꿔 인사하세요.",
+      "id": "D005",
+      "status": "draft",
+      "languageReview": "pending",
+      "audioReview": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "day": 6,
+      "objective": "자기 이름을 소개하고 상대 이름을 묻는다.",
+      "grammar": "Adım ...은 ‘내 이름은 ...’이라는 관용적인 자기소개입니다. Adınız ne?는 정중하게 이름을 묻고, Adın ne?는 친근한 표현입니다. 소유접사는 3주차에서 체계적으로 배웁니다. Memnun oldum은 처음 만났을 때 쓰는 인사 표현입니다.",
+      "words": [
+        [
+          "ad",
+          "이름"
+        ],
+        [
+          "Adım",
+          "내 이름은"
+        ],
+        [
+          "Adınız ne?",
+          "성함이 어떻게 되세요?"
+        ],
+        [
+          "Adın ne?",
+          "이름이 뭐야?"
+        ],
+        [
+          "Memnun oldum.",
+          "만나서 반갑습니다."
+        ],
+        [
+          "Ben de.",
+          "저도요."
+        ],
+        [
+          "Kore",
+          "한국"
+        ],
+        [
+          "Türkiye",
+          "튀르키예"
+        ]
+      ],
+      "examples": [
+        [
+          "Adım Mert.",
+          "제 이름은 메르트입니다."
+        ],
+        [
+          "Adınız ne?",
+          "성함이 어떻게 되세요?"
+        ],
+        [
+          "Memnun oldum.",
+          "만나서 반갑습니다."
+        ]
+      ],
+      "dialogue": [
+        [
+          "A",
+          "Merhaba! Adım Mert. Adınız ne?",
+          "안녕하세요! 저는 메르트입니다. 성함이 어떻게 되세요?"
+        ],
+        [
+          "B",
+          "Adım Deniz. Memnun oldum.",
+          "제 이름은 데니즈입니다. 반갑습니다."
+        ],
+        [
+          "A",
+          "Ben de.",
+          "저도요."
+        ]
+      ],
+      "note": "예문의 이름을 실제 자신의 이름으로 바꿔 말하세요.",
+      "questions": [
+        {
+          "id": "D006-Q1",
+          "type": "choice",
+          "prompt": "정중하게 성함 질문",
+          "answer": "Adınız ne?",
+          "choices": [
+            "Adın ne?",
+            "Adınız ne?",
+            "Adım"
+          ]
+        },
+        {
+          "id": "D006-Q2",
+          "type": "choice",
+          "prompt": "만나서 반갑습니다.",
+          "answer": "Memnun oldum.",
+          "choices": [
+            "Ben de.",
+            "Memnun oldum.",
+            "İyiyim."
+          ]
+        },
+        {
+          "id": "D006-Q3",
+          "type": "choice",
+          "prompt": "저도요.",
+          "answer": "Ben de.",
+          "choices": [
+            "Ben de.",
+            "Adım",
+            "Sağ ol."
+          ]
+        }
+      ],
+      "task": "인사→이름 질문→한국인 소개→반가움 표현을 30초 동안 연습하세요.",
+      "id": "D006",
+      "status": "draft",
+      "languageReview": "pending",
+      "audioReview": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    },
+    {
+      "day": 7,
+      "objective": "첫 주 핵심 표현과 발음 구분을 종합 확인한다.",
+      "grammar": "D1~D6의 인사, 모음, 자음, 명사문, 정중도, 이름 소개를 다시 확인합니다. 새 문법은 도입하지 않습니다.",
+      "words": [],
+      "examples": [
+        [
+          "Ben Koreliyim.",
+          "저는 한국인입니다."
+        ],
+        [
+          "Adınız ne?",
+          "성함이 어떻게 되세요?"
+        ],
+        [
+          "Memnun oldum.",
+          "반갑습니다."
+        ]
+      ],
+      "dialogue": [
+        [
+          "A",
+          "Merhaba! Nasılsınız?",
+          "안녕하세요, 어떻게 지내세요?"
+        ],
+        [
+          "B",
+          "İyiyim, teşekkürler.",
+          "잘 지내요, 감사해요."
+        ],
+        [
+          "A",
+          "Adınız ne?",
+          "성함이 어떻게 되세요?"
+        ],
+        [
+          "B",
+          "Adım Deniz.",
+          "제 이름은 데니즈입니다."
+        ],
+        [
+          "A",
+          "Memnun oldum.",
+          "반갑습니다."
+        ]
+      ],
+      "note": "오늘의 점수는 연습 지표입니다. 말하기는 직접 녹음하여 확인하고 자동으로 CEFR 수준을 판정하지 않습니다.",
+      "questions": [
+        {
+          "id": "D007-Q1",
+          "type": "choice",
+          "prompt": "좋은 아침이에요",
+          "answer": "Günaydın",
+          "choices": [
+            "Günaydın",
+            "İyi geceler",
+            "Hayır"
+          ]
+        },
+        {
+          "id": "D007-Q2",
+          "type": "choice",
+          "prompt": "우유",
+          "answer": "süt",
+          "choices": [
+            "su",
+            "süt",
+            "et"
+          ]
+        },
+        {
+          "id": "D007-Q3",
+          "type": "choice",
+          "prompt": "차",
+          "answer": "çay",
+          "choices": [
+            "cam",
+            "çay",
+            "çam"
+          ]
+        },
+        {
+          "id": "D007-Q4",
+          "type": "choice",
+          "prompt": "저는 한국인입니다.",
+          "answer": "Ben Koreliyim.",
+          "choices": [
+            "Ben Koreliyim.",
+            "Ben turistim.",
+            "Sen öğrencisin."
+          ]
+        },
+        {
+          "id": "D007-Q5",
+          "type": "choice",
+          "prompt": "정중한 안부 묻기",
+          "answer": "Nasılsınız?",
+          "choices": [
+            "Nasılsın?",
+            "Nasılsınız?",
+            "İyiyim."
+          ]
+        },
+        {
+          "id": "D007-Q6",
+          "type": "choice",
+          "prompt": "반갑습니다.",
+          "answer": "Memnun oldum.",
+          "choices": [
+            "Adım",
+            "Ben de.",
+            "Memnun oldum."
+          ]
+        }
+      ],
+      "task": "대본을 보지 않고 동행자와 1분간 첫 만남 역할극을 하세요.",
+      "id": "D007",
+      "status": "draft",
+      "languageReview": "pending",
+      "audioReview": "pending",
+      "sources": [
+        "CEFR2020",
+        "MAARIF2025",
+        "YEE"
+      ]
+    }
+  ]
+}
