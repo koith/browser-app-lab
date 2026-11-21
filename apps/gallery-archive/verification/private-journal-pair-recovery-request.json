@@ -13,8 +13,9 @@
       "expected_collected_photos": 500,
       "baseline_owner_fingerprint": "0031f0a5e1909f46dd3fbf2ca39eda0e1c1884d7b091dad84325f1f93bceb8a7",
       "official_publisher_sha_only": true,
-      "allow_live_append_only_baseline": true
+      "allow_live_append_only_baseline": true,
+      "storage_census_only": true
     }
   },
-  "retry_reason": "Recover existing publisher-verified pairs against the live owner inventory; skip already present SHA, append only missing, preserve every published slot."
+  "retry_reason": "Reconcile the interrupted 500-row journal with private storage by exact object paths and byte sizes, independently of publisher/source membership. Audit only, not admission or public deployment."
 }
