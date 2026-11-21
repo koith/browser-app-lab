@@ -1,0 +1,26 @@
+# Türkçe 120 — 자동 개발 실행 지침 v1.0.0
+실행 대상: 별도 ChatGPT 예약 작업. 이 파일 작성은 예약 등록/실행을 의미하지 않는다.
+repo koith/browser-app-lab, apps/turkish-study/, main. 사용자의 최신 명령, AGENTS.md/GOVERNANCE.json/DATA_CONTRACT.md/HANDOFF_PROTOCOL.md/RELEASE_GATES.md의 권한과 완료 기준이 우선한다. 이 규칙은 실행/조정만 확장하며 생산 영역 권한·출고 gate를 완화하지 않는다.
+## 실행 개시 및 주기
+1. 매 실행 시 GitHub main의 모든 공통 문서, DEVELOPMENT_LEDGER.json, RELEASE_MANIFEST.json, ops/WORK_QUEUE.json, ops/DEFECTS.json, ops/LEASES.json, 최근 ops/runs, 관련 handoffs/PR/브랜치를 직접 읽는다. tool 권한/기능 상태 확인. 이전 실행의 대화 기억에 의존 금지.
+2. 단계: P0 첫 7일 출고 전 매 1시간. D001~D007 실제 공개 운영 검증 및 00 승인 후 매 3시간. 예약 작업 등록은 별도 대화에서만 수행; 중복 생성 금지. 실행 중 원래 예약 ID·업데이트 권한 확인 가능하면 기존 예약 주기만 변경; 불가능하면 1시간 트리거에서 마지막 정상 실행 시각과 dueAt 기준으로 3시간 미만 실행은 작업/알림 없이 종료하고 예약 주기 변경 필요를 기록. 실제 3시간 예약 변경과 내부 throttling을 구분. 완료 후 스케줄 중지(권한 없으면 매 실행 no-op 및 사용자 중단 요청 1회). 이용자가 중지 지시하면 모든 자동 실행 즉시 중단.
+3. ops/LEASES.json의 CAS 규칙으로 orchestration lease(자동 실행 간 중복 방지)와 각 영역별 write lease 획득. 수동 영역 대화도 같은 규칙. 다른 역할이 작업 중이면 건너뛰고 독립 일감 선택. 실행 종료까지 누락 없이 checkpoint/lease 해제.
+## 충돌 방지: 00/01~05 공통
+ops/LEASES.json은 모든 역할이 main의 read-modify-write CAS를 수행할 수 있는 유일한 coordination 파일. 이 예외는 생산 코드/원장/출고 권한을 주지 않는다. lease key: orchestrator:auto, role:00..05. 각 객체 {token,actor,role,taskIds,branch,baseCommit,paths,acquiredAt,heartbeatAt,expiresAt}. token=유일 runId; actor=manual 또는 auto. acquiredAt/heartbeatAt/expiresAt UTC, max 90분 lease, 20분 내 heartbeat 권장(실행이 짧으면 주요 write 직전). generation은 모든 수정마다 +1. 
+- 획득: 최신 main 파일 + blob SHA 읽기 → 유효 동일 role/겹치는 path/다른 auto orchestrator 확인 → 빈/만료 상태 및 해당 branch/PR 실제 상태 확인 → 기대 SHA로 update_file. 충돌하면 re-read 후 안전한 재시도, 강제 overwrite 금지. 겹치는 경로는 같은 파일 및 상위 디렉터리까지 검사. 이름만 다른 PR도 같은 파일 병행 불가. 기존 작성 PR은 owner가 resume하거나 그 PR 종료 전 동일 파일 새 PR 금지. 04 draft #1409는 resume 우선.
+- 만료만으로 진행 중인 PR을 무시하지 않는다. 만료 lease takeover 전에 최근 커밋/PR activity 확인, 불명확하면 해당 범위 건너뛰고 다른 진행 가능 작업 수행. takeover는 새 token/증거와 이전 token 기록. write/merge/배포 직전 main lease 재조회(token, 만료, branch, path, head 확인); token 불일치 또는 만료면 즉시 쓰기 중단 및 새 lease 획득 후 재검토. CAS 성공만으로 다른 도구의 쓰기를 물리 차단할 수 없음: 모든 참여자가 규칙 준수 및 branch head/current blob SHA/merge expected_head_sha 확인 필수. 강제 push, 덮어쓰기, 타 프로젝트 리소스 변경 금지.
+- release: 동일 token인 경우만 최신 blob SHA로 제거 및 generation+1. 종료 전 checkpoint/PR/검증/다음 할 일 저장, 다른 lease 삭제 금지; 오류 시 TTL recovery. lease 변경은 운영 기록으로만 사용하고 개발 완료로 집계하지 않는다.
+## 일감 선택 및 실작업 루프
+작업 선택 기준: 1) 학습을 차단하는 결함 P0/공개 회귀 2) 첫주 실제 출시 작업 3) 최소 7일/목표 14일 검수된 연속 수업 버퍼 4) cloud persistence 및 진행 가능 P1 5) P2. 공개 수업은 contiguous D001부터, 실제 승인 일수와 학습자 aggregate progress 이용; 진도 알 수 없으면 보수적으로 공급 우선 및 개인 기록 접근 금지. 큐의 하위 workUnits는 기존 44개 ID의 작업 분할로 집계하지 않는다. parent queue에서 complete=false, 선행 조건 충족, 작업 소유권, 겹치는 PR을 확인. broad parent가 미완이어도 독립 가능 범위를 수행한다. blocked는 필요한 정확한 artifact/증거가 없을 때만, dependency 통과하면 ready. 작업자가 00에 요청하는 작업은 handoff; 00만 중앙 원장/queue/defect/release 상태 업데이트. 
+매 실행 최소 한 가지 실제 산출물 또는 구체적인 실행검증에 따른 수정 작업을 수행: 코드/교재/오디오 개선, 결함 재현/해결, 독립 테스트, 근거 있는 통합. 단순 조사, 회의, 원장 반복 업데이트, 이전 검사 재실행만으로 정상 개발 성과를 주장하지 않는다. 실패 시 FAILED_PATH·대체 실행 방법·재현 증거를 남기고 동일 실패 반복 금지. output은 실제 commit+PR/evidence, 체크포인트(현재 branch, head, 작업 상태, nextAction, dependencies, blockedReason, tests). 시간이 부족하면 안전한 작은 PR/커밋으로 남기고 다음 실행에 resume. 예외적으로 모든 작업이 진정 차단되면 구체적 원인과 대체 방법을 기록하고 사용자 판단이 필요한 때만 알림.
+## 역할 전환 및 독립 QA
+예약 실행기는 00 orchestration role로 시작, 각 작업에 대해 01~05의 소유 브랜치와 lease를 사용하여 명시적으로 역할을 전환. 다른 영역의 파일을 한 PR에서 수정 금지. 01 목표, 02 교재, 03 앱·DB·배포, 04 음성·대화, 05 QA. 단일 실행에서 서로 독립 범위를 여러 개 처리 가능하나, 05 검증은 저자 작업과 분리된 실행/컨텍스트에서 고정 HEAD를 읽고 독립 테스트/출처를 사용한다. 동일 실행자가 새로 작성한 콘텐츠 자체 검토는 author check. 한 예약 실행기만으로 실제 원어민 평가 또는 물리 iPhone 검증을 대신할 수 없다; 검수 가능한 외부 자료/브라우저/WebKit 등의 대체 경로 활용, 필요한 실제 hardware 증거가 없으면 unverified 유지. 검증하지 않은 제품 완료 금지.
+PR 병합은 00 역할(lease/소유권/diff/branch SHA/검증·기존 데이터 호환/PR 상태/expected head/merge 후 main readback). 미검수 후보는 main에 격리 가능, 공개 UI에서는 차단. PR merge와 운영 검증은 별개. 출고는 05 exact revision evidence 및 RELEASE_GATES 모든 필수 조건 충족 후 00만 manifest를 변경. 새 학습 공개분은 이미 발행된 데이터와 학습 기록 보존. 공개 직후 actual URL·버전·렌더/테스트를 확인; 실패시 이전 승인 snapshot으로 rollback, 기록 삭제 금지. 이미 운영 중인 다른 앱/DB/공용 설정 변경 및 승인 없는 유료 서비스 금지.
+## 수동 대화
+사용자 "개발 계속해" 또는 같은 의도: 해당 대화 역할로 이 파일과 최신 GitHub 상태 확인 → role lease → ready/resume 일감 선택 → 실제 작업/검증/PR/인수인계 → checkpoint → release. 사용자가 영역 간 지시/결과를 복사해 줄 필요 없음. 00은 후속 일감 선행조건/담당자와 PR 통합을 수행. 예약 작업이 시작되지 않았을 때 다른 대화가 자동으로 실행되는 것은 아니다.
+## 저장 및 알림
+ops/runs/<UTC>-<runId>.json(00 only) 또는 handoffs/NN/에 실행 결과 기록. runId, stage, before/after ledger counts, actual changes, exact test evidence, active/merged PR, remaining, blockers, nextAction, schedule dueAt/observed cadence, outcome 포함. 일반 진행은 저장소에만 기록; 예약 실행에서 매번 일반 보고를 보내지 않는다(호스트가 silent를 지원하지 않으면 최소 결과 형식, 무알림 보장은 호스트 설정 의존). 사용자 알림은 ① D001~D007 실제 학습 개시 가능 ② 운영 중단·데이터 위험·학습 지속에 영향 주는 중대한 결함 ③ 비용/접근권한/실기기 시험 등 사용자 판단 필요 ④ 전체 개발 완료만. 최초 발생 또는 중대한 상태 변화 시 한 번, 이벤트 ID와 lastNotified를 ops/runs에 기록, 같은 이유 반복 금지. 개인정보/키를 보고에 포함 금지. 오류 자체와 실제 달성 불가능을 구별.
+## 최초 실행
+ops/WORK_QUEUE.json과 ops/DEFECTS.json을 확인. P0-03-01 (공개 v0.1.1 및 차단), P0-05-01 (최신 14일 중 첫주 독립 재검수), P0-04-01 (draft #1409 최신 220 targets), P0-02-01/P0-01-01 (평가 불일치 해소) 우선, 동시에 독립 가능한 P1 작업. 새 PR/커밋/실제 검증 없이 보고만 반복 금지.
+## 종료
+44개 기존 parent 완료 + 이후 00 승인 신규 parent 전체 완료 + 120일 승인 분량 및 실제 서비스/기록 복원/운영 검증 + 알려진 blocker 없음일 때 전체 완료. 완료 후 신규 기능·변경·정기 실행 중단. 승인하지 않은 비용을 이유로 완료 처리 금지.
