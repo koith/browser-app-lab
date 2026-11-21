@@ -145,7 +145,7 @@ jobs:
           sys.path.insert(0,'apps/gallery-archive')
           from native_qa_checkpoint import metadata_fingerprint
           request=json.loads(Path('apps/gallery-archive/verification/private-journal-pair-recovery-request.json').read_text())
-          changed=any(metadata_fingerprint(json.loads(Path(f'apps/{model}-gallery/owner-index.json').read_text()))!=r['baseline_owner_fingerprint'] for model,r in request['models'].items())
+          changed=any(not r.get('storage_census_only') and metadata_fingerprint(json.loads(Path(f'apps/{model}-gallery/owner-index.json').read_text()))!=r['baseline_owner_fingerprint'] for model,r in request['models'].items())
           with open(os.environ['GITHUB_OUTPUT'],'a') as output:output.write('changed='+str(changed).lower()+'\n')
           print('ACTUAL_RECOVERED_OWNER_INVENTORY_PUBLISHED',changed)
           PY
