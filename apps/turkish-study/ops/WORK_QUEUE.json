@@ -45,7 +45,7 @@
       ],
       "priority": "P0",
       "rank": 2,
-      "state": "ready",
+      "state": "resume",
       "requires": [],
       "action": "W01 평가를 01 기준에 맞춰 10 듣기+10 읽기와 25점 쓰기·25점 상호작용으로 수정. 기존 수업 ID/정답/순서 보전. QA baseline 결함도 최신 revision 기준 확인.",
       "acceptance": "assessment와 lesson audio 참조 재검증, 기존 ID/점수 변경은 별도 revision, 01·05 확인 요청; 듣기 문항 음성 목록 확정.",
@@ -54,9 +54,14 @@
         "F-02"
       ],
       "countedInLedger": false,
-      "branch": null,
-      "pr": null,
-      "checkpoint": null
+      "branch": "turkish/02-w01-alignment-1243",
+      "pr": 1416,
+      "checkpoint": {
+        "head": "300097483ef6e6a3fedf8fea98e5b0829571f0b5",
+        "evidence": "handoffs/02/20261121-W01-r2-1243.json",
+        "nextAction": "01 resolve legacy food slots; 02 revise candidate; 05 independent review; 04 update audio targets; check PR mergeability",
+        "tests": "7/7 author checks; blueprint coverage not passed"
+      }
     },
     {
       "id": "P0-03-01",
