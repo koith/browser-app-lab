@@ -88,8 +88,8 @@ assert.ok(consistent>=451&&exceptions.length<=1,'DMP routes are an odd-q hex gri
   }
   // 4. Original two-capture terrain shift (35px tile / 17px landmark).
   // Read actual computed background style and actual live tile centre.
-  // A static board background or the former duplicate world background
-  // cannot pass this measurement.
+  // A static board background or a world layer with a different phase
+  // cannot pass this measurement. Wait for the actual eased camera.
   const terrainSample=()=>page.evaluate(()=>{
    const area=document.getElementById('board-area'),world=document.getElementById('board-world'),
     app=document.getElementById('app'),tile=document.querySelector('#board-world .tile[data-tile="17"]');
@@ -100,18 +100,23 @@ assert.ok(consistent>=451&&exceptions.length<=1,'DMP routes are an odd-q hex gri
     tileX:(t.left+t.width/2-r.left)/sx,tileY:(t.top+t.height/2-r.top)/sy,
     originX:parseFloat(style.backgroundPositionX)+(a.left-r.left)/sx+area.clientLeft,
     originY:parseFloat(style.backgroundPositionY)+(a.top-r.top)/sy+area.clientTop,
-    size:style.backgroundSize,image:style.backgroundImage,worldImage:getComputedStyle(world).backgroundImage
+    size:style.backgroundSize,image:style.backgroundImage,worldImage:getComputedStyle(world).backgroundImage,
+    worldOriginX:(world.getBoundingClientRect().left-r.left)/sx+parseFloat(getComputedStyle(world).backgroundPositionX),
+    worldOriginY:(world.getBoundingClientRect().top-r.top)/sy+parseFloat(getComputedStyle(world).backgroundPositionY)
    };
   });
   await page.evaluate(()=>{
    const c=window.__LEAF_CAMERA__,a=c.getState().path[17];
    c.focusRatio(a.x/100,a.y/100);
   });
+  await page.waitForTimeout(250);
   const terrain0=await terrainSample();
   await page.evaluate(()=>window.__LEAF_CAMERA__.panBy(0,35));
+  await page.waitForTimeout(250);
   let terrain1=await terrainSample();
   if(Math.abs(terrain1.tileY-terrain0.tileY)<34){
    await page.evaluate(()=>window.__LEAF_CAMERA__.panBy(0,-70));
+   await page.waitForTimeout(250);
    terrain1=await terrainSample();
   }
   const dy=terrain1.tileY-terrain0.tileY,bgdy=terrain1.originY-terrain0.originY;
@@ -120,7 +125,8 @@ assert.ok(consistent>=451&&exceptions.length<=1,'DMP routes are an odd-q hex gri
   for(const s of [terrain0,terrain1]){
    assert.equal(s.size,'725px 485px','native terrain bitmap size at 1x');
    assert.ok(s.image.includes('bgtile.png'),'original image only');
-   assert.equal(s.worldImage,'none','no second copy moving at the wrong speed');
+   assert.ok(s.worldImage.includes('bgtile.png'),'actual world source bitmap retained');
+   assert.ok(Math.abs(s.worldOriginX-s.originX)<1&&Math.abs(s.worldOriginY-s.originY)<1,'world and viewport have one continuous terrain phase '+JSON.stringify(s));
    assert.ok(Math.abs(s.originX-s.tileX-602.5)<1,'original horizontal phase');
    assert.ok(Math.abs(s.originY-(290+(s.tileY-227.5)*17/35))<1,'original vertical phase');
   }
