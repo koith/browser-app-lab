@@ -130,7 +130,10 @@ async function audit(browser,mobile){
   assert.equal(results.maps.length,26,'All 26 genuine source DMP maps must be tested');
   assert.equal(results.allCells,1920,'All 1,920 source cells must be present');
   assert.equal(results.reached,1920,'Every original TIS cell must be reachable');
-  assert.ok(results.pitch.x>=145&&results.pitch.y>=97);
+  // Original 145×97 raised platforms interlock on a measured odd-q grid.
+  // Rectangular non-overlap was a superseded web-only guess; keep the
+  // full 1,920 source/reachability assertions above and use original pitch.
+  assert.deepEqual(results.pitch,{x:105,y:80,oddColumnDrop:40});
   assert.equal(results.restoredGame,'4LEAF');
   assert.deepEqual(errors,[],'No source render/actor errors while changing all maps');
   await page.screenshot({path:mobile?'leaf-all-26-dmp-mobile.png':'leaf-all-26-dmp-desktop.png'});

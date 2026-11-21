@@ -143,7 +143,39 @@
        width:clamp(width/(SIZE.width*scale),0,1),
        height:clamp(height/(SIZE.height*scale),0,1)
      };
-     world.style.transform='translate3d('+x.toFixed(2)+'px,'+y.toFixed(2)+'px,0) scale('+scale+')';
+     // Original board.jpg -> battle.jpg: DMP cell 17 moves +35px while
+   // the same terrain landmark moves +17px. Keep the native 725x485
+   // repeating bitmap in phase across the viewport and world layers.
+   // Horizontal camera response is not observed: retain 1:1 movement.
+   // The measured vertical sample supports the 17/35 interpolation;
+   // exact original MVE depth/zoom physics are not recovered.
+   const nativeMap=window.ORIGINAL_LEAF_MAP_INFO?.['0172'];
+   const ref=state.path[(nativeMap&&state.game?.map===nativeMap.title)?17:0];
+   if(ref){
+     const app=$('app'),a=area.getBoundingClientRect(),root=app?.getBoundingClientRect();
+     const outerX=a.width/area.offsetWidth||1,outerY=a.height/area.offsetHeight||1;
+     const stageLeft=root?(a.left-root.left)/outerX+area.clientLeft:0;
+     const stageTop=root?(a.top-root.top)/outerY+area.clientTop:0;
+     const [ox,oy]=getComputedStyle(world).transformOrigin.split(' ').map(parseFloat);
+     const left=insetL+x+(Number.isFinite(ox)?ox:0)*(1-scale);
+     const top=insetT+y+(Number.isFinite(oy)?oy:0)*(1-scale);
+     const tileX=stageLeft+left+ref.x/100*SIZE.width*scale;
+     const tileY=stageTop+top+ref.y/100*SIZE.height*scale;
+     const terrainX=821*scale+(tileX-218.5*scale)-stageLeft;
+     const terrainY=290*scale+(tileY-227.5*scale)*17/35-stageTop;
+     const px=n=>n.toFixed(2)+'px';
+     area.style.setProperty('--leaf-terrain-x',px(terrainX));
+     area.style.setProperty('--leaf-terrain-y',px(terrainY));
+     area.style.setProperty('--leaf-terrain-width',px(725*scale));
+     area.style.setProperty('--leaf-terrain-height',px(485*scale));
+     // Keep the actual native world bitmap (legacy screenshot/source gates)
+     // in the exact same phase as the surrounding viewport. The world
+     // transform contributes its movement only once; the complementary
+     // background offset cancels the excess vertical movement.
+     world.style.setProperty('--leaf-terrain-world-x',px((terrainX-left)/scale));
+     world.style.setProperty('--leaf-terrain-world-y',px((terrainY-top)/scale));
+   }
+   world.style.transform='translate3d('+x.toFixed(2)+'px,'+y.toFixed(2)+'px,0) scale('+scale+')';
      world.style.setProperty('--leaf-camera-scale',scale);
      if($('board-zoom-reset'))$('board-zoom-reset').title='원본 게임 카메라 · '+Math.round(scale*100)+'% · 현재 체스맨 중심';
      const tileLayer=$('board-nodes');

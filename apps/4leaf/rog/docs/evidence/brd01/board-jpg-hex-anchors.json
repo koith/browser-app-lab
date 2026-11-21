@@ -1,32 +1,302 @@
 {
  "task": "BRD-01 / M04",
  "date": "2026-11-19",
- "map": {"id": "0172", "evidence": "board.jpg and battle.jpg minimap show the four-loop clover route with a centre cell; only DMP 0172 (104 cells) has that shape among the 26 source maps", "level": "VERIFIED"},
- "method": "OpenCV TM_CCOEFF_NORMED with the native 145x97 TIS alpha mask (alpha>200), sprite rows reversed (the PNG export is stored bottom-up), scale 1:1. 'global' = best match over the whole 800x600 capture; 'local' = best match within +-60 px of the hex formula prediction. tools/brd01_measure_board_jpg.py reproduces every number.",
+ "map": {
+  "id": "0172",
+  "evidence": "board.jpg and battle.jpg minimap show the four-loop clover route with a centre cell; only DMP 0172 (104 cells) has that shape among the 26 source maps",
+  "level": "VERIFIED"
+ },
+ "method": "OpenCV TM_CCOEFF_NORMED with the native 145x97 TIS alpha mask (alpha>200), sprite rows reversed (the PNG export is stored bottom-up), scale 1:1. 'global' = best match over the whole 800x600 capture; 'local' = best match within +-60 px of the hex formula prediction. tools/brd01_measure_board_jpg.py reproduces every number. On 2026-11-21 the original JPEG luminance and original bottom-up RGBA tile luminance were decoded independently; integer translation search ±45 pixels around the prior anchor prediction, Pearson correlation over even x/y source pixels with alpha>200 and source-space masks excluding the visible duel overlay. Each selected local maximum independently landed at the stated center; alternativeScore is the best candidate more than 4 pixels from that maximum. Python tool reproduces these five masked peaks. Scores may differ slightly by JPEG IDCT decoder.",
  "projection": {
   "grid": "odd-q flat-top hex: odd DMP columns sit half a row lower",
-  "pitchX": 105, "pitchY": 80, "oddColumnDrop": 40, "scale": 1,
+  "pitchX": 105,
+  "pitchY": 80,
+  "oddColumnDrop": 40,
+  "scale": 1,
   "level": "VERIFIED (screenshot anchors + route structure + sprite tessellation)",
   "routeStructure": "451 of 452 diagonal route steps in all 26 DMP maps go down from odd columns / up from even columns (only exception: 0193 step 24, a jump); even-q would contradict 450 of them",
   "tessellation": "at 105x80 with a 40 px odd-column drop the 145x97 TIS top faces meet edge to edge; nearer cells cover only the 17 px side faces"
  },
  "anchors": [
-  {"capture": "board.jpg",  "cell": 17, "dmp": [0,6], "art": "0017", "center": [218.5,227.5], "score": 0.800, "search": "global"},
-  {"capture": "board.jpg",  "cell": 21, "dmp": [4,8], "art": "0020", "center": [638.5,387.5], "score": 0.883, "search": "global"},
-  {"capture": "board.jpg",  "cell": 15, "dmp": [0,4], "art": "0015", "center": [218.5,67.5],  "score": 0.426, "search": "local"},
-  {"capture": "board.jpg",  "cell": 16, "dmp": [0,5], "art": "0001", "center": [218.5,147.5], "score": 0.334, "search": "local"},
-  {"capture": "battle.jpg", "cell": 16, "dmp": [0,5], "art": "0001", "center": [218.5,182.5], "score": 0.509, "search": "global"},
-  {"capture": "battle.jpg", "cell": 21, "dmp": [4,8], "art": "0020", "center": [638.5,422.5], "score": 0.632, "search": "global"},
-  {"capture": "battle.jpg", "cell": 14, "dmp": [0,3], "art": "0010", "center": [218.5,22.5],  "score": 0.256, "search": "local"},
-  {"capture": "battle.jpg", "cell": 17, "dmp": [0,6], "art": "0017", "center": [218.5,262.5], "score": 0.281, "search": "local"},
-  {"capture": "battle.jpg", "cell": 20, "dmp": [3,7], "art": "0025", "center": [533.5,382.5], "score": 0.435, "search": "local (odd column, +40)"}
+  {
+   "capture": "board.jpg",
+   "cell": 17,
+   "dmp": [
+    0,
+    6
+   ],
+   "art": "0017",
+   "center": [
+    218.5,
+    227.5
+   ],
+   "score": 0.8,
+   "search": "global"
+  },
+  {
+   "capture": "board.jpg",
+   "cell": 21,
+   "dmp": [
+    4,
+    8
+   ],
+   "art": "0020",
+   "center": [
+    638.5,
+    387.5
+   ],
+   "score": 0.883,
+   "search": "global"
+  },
+  {
+   "capture": "board.jpg",
+   "cell": 15,
+   "dmp": [
+    0,
+    4
+   ],
+   "art": "0015",
+   "center": [
+    218.5,
+    67.5
+   ],
+   "score": 0.426,
+   "search": "local"
+  },
+  {
+   "capture": "board.jpg",
+   "cell": 16,
+   "dmp": [
+    0,
+    5
+   ],
+   "art": "0001",
+   "center": [
+    218.5,
+    147.5
+   ],
+   "score": 0.334,
+   "search": "local"
+  },
+  {
+   "capture": "battle.jpg",
+   "cell": 16,
+   "dmp": [
+    0,
+    5
+   ],
+   "art": "0001",
+   "center": [
+    218.5,
+    182.5
+   ],
+   "score": 0.509,
+   "search": "global"
+  },
+  {
+   "capture": "battle.jpg",
+   "cell": 21,
+   "dmp": [
+    4,
+    8
+   ],
+   "art": "0020",
+   "center": [
+    638.5,
+    422.5
+   ],
+   "score": 0.632,
+   "search": "global"
+  },
+  {
+   "capture": "battle.jpg",
+   "cell": 14,
+   "dmp": [
+    0,
+    3
+   ],
+   "art": "0010",
+   "center": [
+    218.5,
+    22.5
+   ],
+   "score": 0.256,
+   "search": "local"
+  },
+  {
+   "capture": "battle.jpg",
+   "cell": 17,
+   "dmp": [
+    0,
+    6
+   ],
+   "art": "0017",
+   "center": [
+    218.5,
+    262.5
+   ],
+   "score": 0.281,
+   "search": "local"
+  },
+  {
+   "capture": "battle.jpg",
+   "cell": 20,
+   "dmp": [
+    3,
+    7
+   ],
+   "art": "0025",
+   "center": [
+    533.5,
+    382.5
+   ],
+   "score": 0.435,
+   "search": "local (odd column, +40)"
+  },
+  {
+   "capture": "board.jpg",
+   "cell": 18,
+   "dmp": [
+    1,
+    6
+   ],
+   "art": "0028",
+   "center": [
+    323.5,
+    267.5
+   ],
+   "score": 0.6492,
+   "search": "local luma visible right crop",
+   "mask": "right-purple",
+   "sampleCount": 418,
+   "alternativeScore": 0.3249
+  },
+  {
+   "capture": "board.jpg",
+   "cell": 19,
+   "dmp": [
+    2,
+    7
+   ],
+   "art": "0006",
+   "center": [
+    428.5,
+    307.5
+   ],
+   "score": 0.8392,
+   "search": "local luma visible top crop",
+   "mask": "top-clover",
+   "sampleCount": 499,
+   "alternativeScore": 0.6213
+  },
+  {
+   "capture": "board.jpg",
+   "cell": 20,
+   "dmp": [
+    3,
+    7
+   ],
+   "art": "0025",
+   "center": [
+    533.5,
+    347.5
+   ],
+   "score": 0.9822,
+   "search": "local luma visible right/bottom crop",
+   "mask": "right-bottom-keeper",
+   "sampleCount": 483,
+   "alternativeScore": 0.7777
+  },
+  {
+   "capture": "battle.jpg",
+   "cell": 18,
+   "dmp": [
+    1,
+    6
+   ],
+   "art": "0028",
+   "center": [
+    323.5,
+    302.5
+   ],
+   "score": 0.7198,
+   "search": "local luma visible right crop",
+   "mask": "battle-right-purple",
+   "sampleCount": 408,
+   "alternativeScore": 0.3266
+  },
+  {
+   "capture": "battle.jpg",
+   "cell": 19,
+   "dmp": [
+    2,
+    7
+   ],
+   "art": "0006",
+   "center": [
+    428.5,
+    342.5
+   ],
+   "score": 0.8024,
+   "search": "local luma visible left/bottom crop",
+   "mask": "left-bottom-clover",
+   "sampleCount": 642,
+   "alternativeScore": 0.4334
+  }
  ],
- "occluded": "cells 18, 19, 22 and the rest of the view are covered by the BATTLE overlay, podiums, dice and the right UI column in both captures; no other board-state capture exists in the repository (dice_ref*.png are lobby backgrounds)",
+ "occluded": "Duel overlay obscures much of cells 18–20, but five disjoint capture/cell pairs retain independently matchable source fragments; cell 22 and the remainder are too occluded. 14 measured capture/cell anchors total, including odd-column tiles. No other board-state capture is known in this repository.",
  "terrain": {
   "layer": "original/IMG/bgtile.png 725x485, repeated",
-  "originRelativeToCell17": {"board.jpg": [602.5,62.5], "battle.jpg": [602.5,44.5]},
+  "originRelativeToCell17": {
+   "board.jpg": [
+    602.5,
+    62.5
+   ],
+   "battle.jpg": [
+    602.5,
+    44.5
+   ]
+  },
   "observation": "between the two captures the tiles move +35 px and the terrain +17 px: the terrain scrolls at about half the camera speed (one vertical sample; horizontal not observed) - INFERRED, not implemented",
-  "webAtBoardJpgState": {"main fe94d750": [262.5,107.5], "this patch": [582.5,57.5]}
+  "webAtBoardJpgState": {
+   "main fe94d750": [
+    262.5,
+    107.5
+   ],
+   "this patch": [
+    582.5,
+    57.5
+   ]
+  },
+  "webRestoration20261121": {
+   "sourceVerticalDelta": 17,
+   "sourceTileVerticalDelta": 35,
+   "verticalFactor": 0.4857142857142857,
+   "sourceBoardOrigin": [
+    821,
+    290
+   ],
+   "sourceTile17Center": [
+    218.5,
+    227.5
+   ],
+   "implementation": "board-camera.js; native viewport/world texture surfaces phase-locked. Chromium and WebKit PASS at 67633a27, run 44860137997. Main/public verification pending.",
+   "horizontal": "retains existing 1:1 movement; original horizontal response unverified",
+   "zoom": "web scaling, original MVE unverified",
+   "browserProof": {
+    "run": 44860137997,
+    "revision": "67633a273ed11976d46e32d4522ecce06e81ceb8",
+    "chromium": "success",
+    "webkit": "success",
+    "anchors": 14,
+    "distinctDMPCelIIds": 8
+   }
+  }
  },
- "artMismatch": {"cell": 17, "original": "0017 (싸움/arena art)", "web": "0035 (랜덤한번/random art from tiles.js)", "note": "the 2002 DMP event label decodes to random; the 2004 capture shows the arena art. Data left unchanged; UNVERIFIED whether the 2004 map revision changed this cell"}
+ "artMismatch": {
+  "cell": 17,
+  "original": "0017 (싸움/arena art)",
+  "web": "0035 (랜덤한번/random art from tiles.js)",
+  "note": "the 2002 DMP event label decodes to random; the 2004 capture shows the arena art. Data left unchanged; UNVERIFIED whether the 2004 map revision changed this cell"
+ }
 }

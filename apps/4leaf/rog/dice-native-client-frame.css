@@ -24,16 +24,18 @@
    battlefield with the central cylindrical silo in board.jpg and battle.jpg.
    Prior revival wrongly removed it and installed a featureless navy field.
    The real original map's independent DMP-path/TIS tiles/pawns remain above
-   this scenery, and all pan/zoom operations move world+scenery together. */
+   this scenery. The two source bitmap surfaces share one measured terrain phase. */
 #app.app-classic-dice #game .board-area{
- background:#294b30 url('./original/IMG/bgtile.png') center center/725px 485px repeat!important;
+ background:#294b30 url('./original/IMG/bgtile.png') var(--leaf-terrain-x,50%) var(--leaf-terrain-y,50%)/var(--leaf-terrain-width,725px) var(--leaf-terrain-height,485px) repeat!important;
+ transition:background-position .13s ease-out,background-size .13s ease-out;
 }
 #app.app-classic-dice #game #board-world{
  background-color:#294b30!important;
  background-image:url('./original/IMG/bgtile.png')!important;
  background-size:725px 485px!important;
  background-repeat:repeat!important;
- background-position:center center!important;
+ background-position:var(--leaf-terrain-world-x,50%) var(--leaf-terrain-world-y,50%)!important;
+ transition:transform .13s ease-out,background-position .13s ease-out;
 }
 /* The original terrain already has rocks, cliffs, shading and cast shadows;
    overlaying a revival grid, center badge or synthetic blue wash breaks it. */

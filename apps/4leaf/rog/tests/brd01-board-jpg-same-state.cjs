@@ -10,8 +10,8 @@
  *    above, never inverted; no two cells share a position;
  *  - each tile keeps its upright storage-flip undo (no inverted art).
  * Errors are written to LEAF_AUDIT_OUT when set.
- * Evidence levels: projection VERIFIED (screenshot anchors, route
- * structure, sprite tessellation). Terrain parallax is only recorded. */
+ * The observed vertical terrain shift is checked in the actual live DOM;
+ * horizontal terrain movement and historic MVE remain unverified. */
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
@@ -61,6 +61,9 @@ assert.ok(consistent>=451&&exceptions.length<=1,'DMP routes are an odd-q hex gri
      cx:r.left+r.width/2,cy:r.top+r.height/2,w:parseFloat(c.width),h:parseFloat(c.height),tf:c.transform}});
    return {tiles,camera:window.__LEAF_CAMERA__.getState().hexProjection}});
   assert.deepEqual(live.camera,{pitchX:105,pitchY:80,oddColumnDrop:40},'camera exposes the measured projection');
+  assert.ok(evidence.anchors.length>=10,'at least ten independently measured historical capture/cell anchors');
+  assert.equal(new Set(evidence.anchors.map(a=>a.capture+':'+a.cell)).size,evidence.anchors.length,'no duplicated historical measurements');
+  assert.ok(evidence.anchors.filter(a=>a.mask).length>=5,'five independently recovered partially occluded historical anchors');
   const byCell=new Map(live.tiles.map(t=>[t.i,t]));
   assert.equal(live.tiles.length,104,'DMP 0172 has 104 live cells');
   // 2. projection of every cell against cell 0, and native size/upright
@@ -83,7 +86,52 @@ assert.ok(consistent>=451&&exceptions.length<=1,'DMP routes are an odd-q hex gri
    for(const r of rows)assert.ok(Math.abs(r.errorPx[0])<=1&&Math.abs(r.errorPx[1])<=1,
     capture+' cell '+r.cell+' matches the original centre: '+JSON.stringify(r));
   }
-  // 4. painter order and duplicates
+  // 4. Original two-capture terrain shift (35px tile / 17px landmark).
+  // Read actual computed background style and actual live tile centre.
+  // A static board background or a world layer with a different phase
+  // cannot pass this measurement. Wait for the actual eased camera.
+  const terrainSample=()=>page.evaluate(()=>{
+   const area=document.getElementById('board-area'),world=document.getElementById('board-world'),
+    app=document.getElementById('app'),tile=document.querySelector('#board-world .tile[data-tile="17"]');
+   const a=area.getBoundingClientRect(),t=tile.getBoundingClientRect(),r=app.getBoundingClientRect(),
+    sy=a.height/area.offsetHeight,sx=a.width/area.offsetWidth,
+    style=getComputedStyle(area);
+   return {
+    tileX:(t.left+t.width/2-r.left)/sx,tileY:(t.top+t.height/2-r.top)/sy,
+    originX:parseFloat(style.backgroundPositionX)+(a.left-r.left)/sx+area.clientLeft,
+    originY:parseFloat(style.backgroundPositionY)+(a.top-r.top)/sy+area.clientTop,
+    size:style.backgroundSize,image:style.backgroundImage,worldImage:getComputedStyle(world).backgroundImage,
+    worldOriginX:(world.getBoundingClientRect().left-r.left)/sx+parseFloat(getComputedStyle(world).backgroundPositionX),
+    worldOriginY:(world.getBoundingClientRect().top-r.top)/sy+parseFloat(getComputedStyle(world).backgroundPositionY)
+   };
+  });
+  await page.evaluate(()=>{
+   const c=window.__LEAF_CAMERA__,a=c.getState().path[17];
+   c.focusRatio(a.x/100,a.y/100);
+  });
+  await page.waitForTimeout(250);
+  const terrain0=await terrainSample();
+  await page.evaluate(()=>window.__LEAF_CAMERA__.panBy(0,35));
+  await page.waitForTimeout(250);
+  let terrain1=await terrainSample();
+  if(Math.abs(terrain1.tileY-terrain0.tileY)<34){
+   await page.evaluate(()=>window.__LEAF_CAMERA__.panBy(0,-70));
+   await page.waitForTimeout(250);
+   terrain1=await terrainSample();
+  }
+  const dy=terrain1.tileY-terrain0.tileY,bgdy=terrain1.originY-terrain0.originY;
+  assert.ok(Math.abs(dy)>=34,'terrain comparison needs a real camera pan');
+  assert.ok(Math.abs(bgdy-dy*17/35)<1,'source vertical movement ratio '+JSON.stringify({dy,bgdy}));
+  for(const s of [terrain0,terrain1]){
+   assert.equal(s.size,'725px 485px','native terrain bitmap size at 1x');
+   assert.ok(s.image.includes('bgtile.png'),'original image only');
+   assert.ok(s.worldImage.includes('bgtile.png'),'actual world source bitmap retained');
+   assert.ok(Math.abs(s.worldOriginX-s.originX)<1&&Math.abs(s.worldOriginY-s.originY)<1,'world and viewport have one continuous terrain phase '+JSON.stringify(s));
+   assert.ok(Math.abs(s.originX-s.tileX-602.5)<1,'original horizontal phase');
+   assert.ok(Math.abs(s.originY-(290+(s.tileY-227.5)*17/35))<1,'original vertical phase');
+  }
+  report.terrain={before:terrain0,after:terrain1,tileDeltaY:dy,terrainDeltaY:bgdy,sourceSample:{tileDeltaY:35,terrainDeltaY:17}};
+  // 5. painter order and duplicates
   let overlaps=0,inverted=0,dupes=0;
   for(let i=0;i<live.tiles.length;i++)for(let j=i+1;j<live.tiles.length;j++){
    const a=live.tiles[i],b=live.tiles[j];
