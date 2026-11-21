@@ -168,7 +168,7 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
     # a backup of bytes; this quarantine survives until runner cleanup only.
     # Never publish these files without independent remote SHA verification.
     for local in held_local:
-        held = stage / 'held-upload-files' / local.relative_to(stage)
+        held = stage / 'held-upload-files' / local.relative_to(stage.resolve())
         held.parent.mkdir(parents=True, exist_ok=True)
         if held.exists():
             if held.read_bytes() != local.read_bytes():
