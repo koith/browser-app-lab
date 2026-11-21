@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "sourceOfTruth": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "warning": "Derived index only. Never treat this file as an independent task ledger.",
-  "sourceUpdatedAt": "2026-11-20",
+  "sourceUpdatedAt": "2026-11-21",
   "counts": {
     "total": 60,
-    "done": 46,
-    "in_progress": 13,
+    "done": 47,
+    "in_progress": 12,
     "todo": 1,
     "blocked": 0,
-    "active": 14
+    "active": 13
   },
-  "historicalEventsNotDuplicated": 488,
+  "historicalEventsNotDuplicated": 489,
   "active": [
     {
       "id": "M05",
@@ -131,21 +131,6 @@
         "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
       ],
       "lastReviewed": "2026-11-02"
-    },
-    {
-      "id": "BRD-01",
-      "priority": "P0",
-      "title": "카메라 투영·발판 크기 원본 시점 맞춤",
-      "status": "in_progress",
-      "acceptance": [
-        "동일 상태 캡처에서 최소 10개 기준 타일 중심·사이즈·상하 방향·배경 지형 오차를 기록하고 역전/비정상 중첩 0건"
-      ],
-      "currentTail": "…소실점/배경 시야를 추적해 실제 카메라 수치 결정; 2026-10-20 board.jpg 및 battle.jpg 원본 800x600 실제 열람 비교: 두 자료는 VS/두 금속 발판/주사위가 있는 전투 씬임. 일반 26 DMP 맵과 동일 시점·주사위/맵 상태가 아니므로 가짜 1:1 원작 카메라 값 산출 불가. WEB 진짜 TIS 145x97/150x100 non-overlap/32 소스 픽셀 검사 보존, 추가 원본 일반 게임 영상/클라이언트 MVE camera 찾는 중. 소스 3D 투영 완료 아님.",
-      "evidence": [
-        "apps/4leaf/assets/battle.jpg",
-        "apps/4leaf/rog/docs/OBS_640_STRIDE_SOURCE_RESTORATION_2026-10-20.md"
-      ],
-      "lastReviewed": "2026-10-20"
     },
     {
       "id": "BTL-04",
