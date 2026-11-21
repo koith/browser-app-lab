@@ -20,11 +20,12 @@
   "verifiedAt": null,
   "evidence": [
     "ops/runs/20261121-00-integration-r1.json",
-    "qa/p0-baseline-20261121.json"
+    "qa/p0-baseline-20261121.json",
+    "ops/runs/20261121-00-integration-r2.json"
   ],
   "limitations": [
     "14 authored candidate days; 0 independently approved current-revision days",
-    "Public Pages rendered previous 0.1.0; main 0.1.1 not verified live",
+    "Public Pages v0.1.1 and 0/120 approval rendered; separate public manifest extraction still old 0.1.0, exact bundle and interaction pending",
     "Weekly assessment rubric mismatch; actual assessment/dictation UI not integrated",
     "Draft audio PR old revision; 1 committed candidate asset only",
     "Exact approved payload digest binding pending",
@@ -32,9 +33,9 @@
     "Local storage only; no verified cloud synchronization"
   ],
   "nextMilestone": "P0_FIRST_WEEK",
-  "runtimeEnforcement": "main_implemented_fixture_pass_public_pending",
+  "runtimeEnforcement": "public_closed_gate_rendered; independent_interaction_pending",
   "candidateContentRevision": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
-  "deployedObservedVersion": "0.1.0",
-  "deploymentVerification": "public_preview_rendered_previous_version; current main not verified",
+  "deployedObservedVersion": "0.1.1",
+  "deploymentVerification": "public_v0.1.1_and_0_approved_rendered; separate_public_manifest_old; full_runtime_and_exact_digest_pending",
   "artifactDigests": null
 }
