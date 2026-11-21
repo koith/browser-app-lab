@@ -3,7 +3,7 @@
   "sourceLevel": "RETROSPECTIVE-SECONDARY; original DMP source warp target directly verified",
   "officialSerial": "https://4leafmemorial.geld.kr/959",
   "changes": [
-    "60 reciprocal original warp entries stop after one hop",
+    "58 reciprocal original DMP warp entries stop after one hop, 2 explicit self-targets remain at source; all 60 tested in extracted runtime functions",
     "bonus +3/+4 tile uses normal 3 per tile gauge increment",
     "unreleased items excluded from treasure/blessing",
     "keeper A/B/C strength ordering corrected",
@@ -15,5 +15,21 @@
     "Original 2004 random tile distribution and exact remaining ability/card rules not exhaustively established",
     "25% retrospective; original purchase-base rounding unknown",
     "No historical-equivalence completion claimed before acceptance"
-  ]
+  ],
+  "directExecution": {
+    "revision": "b316ce0594806560a9a430d2c67a96f7acce23b5",
+    "sourceWarpEntriesPassed": 60,
+    "reciprocal": 58,
+    "self": 2,
+    "boostPositionAndGauge": [
+      6,
+      19
+    ],
+    "ordinaryPrice1400Refund": 350,
+    "serialRefund": 1000,
+    "armageddonD4Eyes": [
+      4
+    ],
+    "level": "Direct execution of the production rule function bodies with original maps/tiles and isolated game state; not live browser deployment."
+  }
 }
