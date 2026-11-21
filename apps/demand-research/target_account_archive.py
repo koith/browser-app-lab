@@ -616,16 +616,23 @@ def normalize_record(profile, raw):
     refs=[]
     if not isinstance(attachments,list):
         return None
-    for item in attachments:
-        if not isinstance(item,dict):
-            continue
-        src=item.get("url")
-        if isinstance(src,str) and item.get("type") in ("image","video","gifv","audio"):
-            try:
-                require_public_https(src)
-            except ValueError:
-                continue
-            refs.append((src,None))
+    # Preserve every provider-returned attachment POSITION, including
+    # public types not yet playable, URLs missing from a federated mirror and
+    # unresolvable attachments. Previously those silently disappeared from
+    # media_expected and the post was falsely marked 100% complete.
+    # Missing/unsupported bytes remain a retryable incomplete public record.
+    for attachment in attachments:
+        source_url=None
+        if isinstance(attachment,dict):
+            for candidate in ("url","remote_url"):
+                src=attachment.get(candidate)
+                if isinstance(src,str):
+                    try:
+                        source_url=require_public_https(src)
+                        break
+                    except ValueError:
+                        continue
+        refs.append((source_url,None))
     return {"id":post_key(platform,profile["identity"]+":"+sid),
             "original_id":profile["identity"]+":"+sid,
             "source_url":uri,"posted_at":raw.get("created_at"),
@@ -676,6 +683,10 @@ def save_public_record(cloud, profile, item, api):
     payloads=[]
     for index,(ref,mime) in enumerate(blobs,1):
         source_url=ref
+        # A provider-declared slot with no public, source-validated media URL
+        # MUST remain in 'media_expected'; no arbitrary replacement is valid.
+        if profile["platform"]!="bluesky" and not source_url:
+            continue
         try:
             if profile["platform"]=="bluesky":
                 assert mime in MIMES
