@@ -1,0 +1,447 @@
+{
+  "version": "0.1.0",
+  "asOf": "2026-11-21",
+  "completionRule": "An item is complete only when requirements, implementation, content if applicable, and actual required verification all pass. Draft/syntax/structure checks are not operational completion.",
+  "items": [
+    {
+      "id": "RES-01",
+      "requirement": "CEFR 2020 및 Maarif 2025·YEE 공식 기준 조사",
+      "implementation": "done",
+      "content": "done",
+      "verification": "verified",
+      "acceptance": "공식 출처 및 수준 기준 확인",
+      "result": "공식 페이지 확인; Maarif PDF 캡처는 용량 제한",
+      "complete": true
+    },
+    {
+      "id": "RES-02",
+      "requirement": "기존 학습 서비스와 교수방법 조사",
+      "implementation": "done",
+      "content": "done",
+      "verification": "verified",
+      "acceptance": "무료 서비스 및 분산학습 자료 비교",
+      "result": "공식/학술 출처 확인",
+      "complete": true
+    },
+    {
+      "id": "RES-03",
+      "requirement": "한국인용 대조문법 학습 순서 설계",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "partial",
+      "acceptance": "단계 및 선수학습 근거 문서화",
+      "result": "설계 초안, 전문가 검토 대기",
+      "complete": false
+    },
+    {
+      "id": "CUR-01",
+      "requirement": "120일 목차 및 월간 평가일",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "structure_pass",
+      "acceptance": "120 unique IDs, day1-120, day30/60/90/120",
+      "result": "GitHub readback pass",
+      "complete": false
+    },
+    {
+      "id": "CUR-02",
+      "requirement": "CEFR·Maarif 세부 성취기준 매핑",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "일일 목표별 descriptor 및 원문 위치",
+      "result": "미완료",
+      "complete": false
+    },
+    {
+      "id": "CUR-03",
+      "requirement": "어휘 선정/중복 제거",
+      "implementation": "pending",
+      "content": "draft",
+      "verification": "partial",
+      "acceptance": "1000 활용+500 이해 목표, 표제어/구문 검수",
+      "result": "56개 초안 항목",
+      "complete": false
+    },
+    {
+      "id": "CON-01",
+      "requirement": "D001~D007 콘텐츠",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "structure_pass",
+      "acceptance": "7일 본문·단어·예문·회화·문제와 독립 언어/음성 검수",
+      "result": "7일·56개·25문항, 언어 미검수",
+      "complete": false
+    },
+    {
+      "id": "CON-02",
+      "requirement": "D008~D063 A1 본문 콘텐츠",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "56일 완전 수업 및 검수",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "CON-03",
+      "requirement": "D064~D120 A2 본문 콘텐츠",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "57일 완전 수업 및 검수",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "CON-04",
+      "requirement": "문법 교재/활용형/모음조화",
+      "implementation": "pending",
+      "content": "draft",
+      "verification": "pending",
+      "acceptance": "검색·규칙·예외·독립 검수",
+      "result": "1주차 설명만",
+      "complete": false
+    },
+    {
+      "id": "CON-05",
+      "requirement": "실전 회화 및 분기형 시나리오",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "pending",
+      "acceptance": "상황별 자연스러운 분기와 한국어 설명",
+      "result": "1주차 선형 예문",
+      "complete": false
+    },
+    {
+      "id": "CON-06",
+      "requirement": "에스키셰히르 현지 생활/교류 자료",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "지역 정보 출처와 표현 검수",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "CON-07",
+      "requirement": "듣기/말하기/받아쓰기 문제 풀",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "pending",
+      "acceptance": "일일 모든 수업에 독립 듣기 및 말하기 과업",
+      "result": "첫 주 예문 기반",
+      "complete": false
+    },
+    {
+      "id": "CON-08",
+      "requirement": "일일 평가 문제와 해설",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "structure_pass",
+      "acceptance": "120일 모든 필수 문제, 정답 및 선수학습 감사",
+      "result": "25개 객관식",
+      "complete": false
+    },
+    {
+      "id": "CON-09",
+      "requirement": "주간 평가",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "pending",
+      "acceptance": "17주 4기능 평가",
+      "result": "1주차 객관식만",
+      "complete": false
+    },
+    {
+      "id": "CON-10",
+      "requirement": "월간 평가/수행 평가 루브릭",
+      "implementation": "draft",
+      "content": "draft",
+      "verification": "pending",
+      "acceptance": "D30/60/90/120 평가 구현 및 전문가 검토",
+      "result": "루브릭 설계 초안",
+      "complete": false
+    },
+    {
+      "id": "QA-01",
+      "requirement": "구조 검증 및 콘텐츠 ID 검사",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "structure_pass",
+      "acceptance": "현재 목차/퀴즈 정답/IDs 검사",
+      "result": "readback 검사 pass",
+      "complete": false
+    },
+    {
+      "id": "QA-02",
+      "requirement": "언어 정확성·번역·구어 자연스러움 검수",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "모든 콘텐츠 독립 검토 기록 및 출처",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "QA-03",
+      "requirement": "난이도·선수학습·중복·누락 감사",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "고정 코스 전체 의존성 검증",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "QA-04",
+      "requirement": "음성 청취/발음 검증",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "음성별 음질·발음·라이선스 확인",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "APP-01",
+      "requirement": "정보 구조 및 모바일 기능 명세",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "partial",
+      "acceptance": "탭 구조, 상태, UI 명세 저장",
+      "result": "SPEC.md",
+      "complete": false
+    },
+    {
+      "id": "APP-02",
+      "requirement": "홈 및 120일 수업 화면",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "실제 렌더링·모바일 동작",
+      "result": "소스 구현, 브라우저 미검증",
+      "complete": false
+    },
+    {
+      "id": "APP-03",
+      "requirement": "단어장 검색·상세·즐겨찾기",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "검색·활용·즐겨찾기 저장",
+      "result": "검색만 구현",
+      "complete": false
+    },
+    {
+      "id": "APP-04",
+      "requirement": "객관식 확인시험·오답·순차 완료",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "실제 시험 및 점수, 재접속 검증",
+      "result": "소스만 검증",
+      "complete": false
+    },
+    {
+      "id": "APP-05",
+      "requirement": "SRS 복습",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "간격 계산·복습 기록 지속",
+      "result": "기본 1/3/7/14/30일 구현",
+      "complete": false
+    },
+    {
+      "id": "APP-06",
+      "requirement": "학습 시간·통계·연속일",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "실제 활동 시간과 영역별 통계 검증",
+      "result": "수업 화면 시간, 학습일, 완료수",
+      "complete": false
+    },
+    {
+      "id": "APP-07",
+      "requirement": "출퇴근 간편 모드·반복 재생",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "오디오 중심 최소 조작 학습",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "APP-08",
+      "requirement": "다양한 시험 유형·문법 검색",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "pending",
+      "acceptance": "문장 배열·주관식·번역·평가 기능",
+      "result": "객관식, 받아쓰기 초안",
+      "complete": false
+    },
+    {
+      "id": "AUD-01",
+      "requirement": "브라우저 TTS와 속도",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "tr-TR 음성 존재 및 iPhone 청취",
+      "result": "코드만 구현",
+      "complete": false
+    },
+    {
+      "id": "AUD-02",
+      "requirement": "녹음·재생",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "iPhone 권한 및 녹음 재생",
+      "result": "코드만 구현",
+      "complete": false
+    },
+    {
+      "id": "AUD-03",
+      "requirement": "무료 음성 파일 생성/검수",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "라이선스 및 음성 파일·청취 검증",
+      "result": "Piper 후보 조사",
+      "complete": false
+    },
+    {
+      "id": "AUD-04",
+      "requirement": "STT와 발음 평가 타당성",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "tr-TR 실제 인식, 오류율·보안 테스트",
+      "result": "API 조사",
+      "complete": false
+    },
+    {
+      "id": "AI-01",
+      "requirement": "고정 분기 회화 엔진",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "문맥 분기와 교정·수준 제한",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "AI-02",
+      "requirement": "AI 자유 대화 비용·보안·정확성",
+      "implementation": "draft",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "옵션 환경, 비밀키·과금 차단·교정 검증",
+      "result": "Gemini 후보, 기본 기능 무과금",
+      "complete": false
+    },
+    {
+      "id": "DB-01",
+      "requirement": "데이터 모델 및 RLS 설계",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "partial",
+      "acceptance": "버전·이벤트·RLS 스키마 검토 및 실제 적용",
+      "result": "SQL 초안, 미적용",
+      "complete": false
+    },
+    {
+      "id": "DB-02",
+      "requirement": "두 로컬 프로필 및 백업/복원",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "각 프로필 독립, 백업 후 복원 시험",
+      "result": "localStorage/JSON 코드",
+      "complete": false
+    },
+    {
+      "id": "DB-03",
+      "requirement": "독립 클라우드 Auth/DB 및 RLS 검증",
+      "implementation": "blocked",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "독립 프로젝트, 2계정 교차 접근 차단",
+      "result": "기존 2개 활성 유지, 무료 슬롯 미확정",
+      "complete": false
+    },
+    {
+      "id": "DB-04",
+      "requirement": "오프라인 큐·동기화·충돌 처리",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "기기 변경 및 장애 복구 검증",
+      "result": "미착수",
+      "complete": false
+    },
+    {
+      "id": "DB-05",
+      "requirement": "운영 백업·복구·인수인계",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "실제 복원 1회와 문서",
+      "result": "로컬 export/import만",
+      "complete": false
+    },
+    {
+      "id": "DEP-01",
+      "requirement": "PWA 자산과 캐시",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "syntax_pass",
+      "acceptance": "실제 HTTPS 설치 및 오프라인 동작",
+      "result": "manifest/sw/icon 코드",
+      "complete": false
+    },
+    {
+      "id": "DEP-02",
+      "requirement": "공개 URL 배포",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "failed_path",
+      "acceptance": "실서비스 HTTP 200 및 렌더링",
+      "result": "GitHub 커밋 성공, Pages 404",
+      "complete": false
+    },
+    {
+      "id": "DEP-03",
+      "requirement": "PC 브라우저 기능 테스트",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "수업/시험/복습/백업 E2E",
+      "result": "미검증",
+      "complete": false
+    },
+    {
+      "id": "DEP-04",
+      "requirement": "iPhone Safari/PWA 실기기 테스트",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "실기기 화면·음성·녹음·설치",
+      "result": "미검증",
+      "complete": false
+    },
+    {
+      "id": "DEP-05",
+      "requirement": "2명 운영 출시",
+      "implementation": "pending",
+      "content": "pending",
+      "verification": "pending",
+      "acceptance": "전체 코스 및 클라우드 데이터, 운영 검수",
+      "result": "미완료",
+      "complete": false
+    }
+  ]
+}
