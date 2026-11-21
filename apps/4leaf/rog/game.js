@@ -2075,13 +2075,14 @@ async function resolveTile(p,depth=0,arrivedByWarp=false){
    const row=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[pos];
    const group=originalTileAt(match.map,pos)?.warpGroup;
    let target=(row?.[3]===10&&Number.isInteger(row[5]))?row[5]:-1;
-   if(target<0||target>=match.tiles.length||target===pos){
+   // A valid original self-link is a no-op, not a random destination.
+   if(target<0||target>=match.tiles.length){
      const candidate=match.tiles.map((type,i)=>({type,i})).filter(o=>o.type==='warp'&&o.i!==pos&&(!group||originalTileAt(match.map,o.i)?.warpGroup===group)).map(o=>o.i);
      target=candidate.length?candidate[rand(candidate.length)]:pos;
    }
    if(target!==pos){
      p.position=target;appendMove(p.name+' 워프: '+(pos+1)+' → '+(target+1)+' 칸');
-     // The 2002 DMP has 60 reciprocal links. The destination warp is an
+     // The 2002 DMP has 58 reciprocal links and two self-targets. The destination warp is an
      // arrival, not a new roll; otherwise A->B->A loops six times and
      // incorrectly lands back on the origin. Non-warp destinations still
      // receive their actual landing effect, and PvP still resolves.
