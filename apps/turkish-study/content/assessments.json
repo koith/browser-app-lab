@@ -1,0 +1,565 @@
+{
+  "version": "0.1.0-draft",
+  "contractVersion": "1.0.0",
+  "lessonBlob": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
+  "license": "Original questions and scenarios; no copied textbook material.",
+  "runtimeIntegration": "Separate authored file. App rendering and scoring not implemented by 02; 03/05 approval required.",
+  "assessments": [
+    {
+      "id": "W01",
+      "dayId": "D007",
+      "prerequisiteDayIds": [
+        "D001",
+        "D002",
+        "D003",
+        "D004",
+        "D005",
+        "D006"
+      ],
+      "status": "draft",
+      "minutes": {
+        "listening": 15,
+        "reading": 10,
+        "writing": 15,
+        "speaking": 15,
+        "feedback": 5
+      },
+      "maxScore": 100,
+      "provisionalPass": {
+        "total": 80,
+        "minimumPerSkill": 15,
+        "approval": "01/05 pending"
+      },
+      "listening": [
+        {
+          "id": "W01-L1",
+          "skill": "listening",
+          "prompt": "들은 인사를 한국어로 쓰세요.",
+          "answer": "좋은 아침(인사)",
+          "explanation": "Günaydın은 아침 인사.",
+          "prerequisiteDayIds": [
+            "D001"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D001",
+            "targetId": "D001-E3",
+            "text": "Günaydın!",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        },
+        {
+          "id": "W01-L2",
+          "skill": "listening",
+          "prompt": "물/우유 중 들은 것은?",
+          "answer": "우유",
+          "explanation": "süt의 ü와 끝 t를 확인.",
+          "prerequisiteDayIds": [
+            "D002"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D002",
+            "targetId": "D002-E5",
+            "text": "Süt.",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        },
+        {
+          "id": "W01-L3",
+          "skill": "listening",
+          "prompt": "들은 음식·음료 표현을 한국어로 쓰세요.",
+          "answer": "따뜻한 차",
+          "explanation": "sıcak+çay.",
+          "prerequisiteDayIds": [
+            "D003"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D003",
+            "targetId": "D003-E10",
+            "text": "Sıcak çay.",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        },
+        {
+          "id": "W01-L4",
+          "skill": "listening",
+          "prompt": "화자의 국적·신분 중 들은 정보를 쓰세요.",
+          "answer": "관광객",
+          "explanation": "turistim은 관광객이라는 1인칭 명사문.",
+          "prerequisiteDayIds": [
+            "D004"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D004",
+            "targetId": "D004-E2",
+            "text": "Ben turistim.",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        },
+        {
+          "id": "W01-L5",
+          "skill": "listening",
+          "prompt": "듣고 친근/정중 중 하나를 고르세요.",
+          "answer": "정중",
+          "explanation": "Adınız는 정중한 상대의 이름.",
+          "prerequisiteDayIds": [
+            "D006"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D006",
+            "targetId": "D006-E2",
+            "text": "Adınız ne?",
+            "lessonRevision": "r2-20261121a"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        }
+      ],
+      "reading": [
+        {
+          "id": "W01-R1",
+          "skill": "reading",
+          "prompt": "Güle güle!를 말하는 쪽은 떠나는 사람인가, 남는 사람인가?",
+          "answer": "남는 사람",
+          "explanation": "떠나는 상대에게 작별.",
+          "prerequisiteDayIds": [
+            "D001"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W01-R2",
+          "skill": "reading",
+          "prompt": "on / ön 중 ‘앞’에 해당하는 단어를 쓰세요.",
+          "answer": "ön",
+          "explanation": "ö와 o 구분.",
+          "prerequisiteDayIds": [
+            "D002"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W01-R3",
+          "skill": "reading",
+          "prompt": "Soğuk su.의 뜻은?",
+          "answer": "차가운 물",
+          "explanation": "soğuk은 차가운, su는 물.",
+          "prerequisiteDayIds": [
+            "D002",
+            "D003"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W01-R4",
+          "skill": "reading",
+          "prompt": "Ben doktorum. 화자의 직업은?",
+          "answer": "의사",
+          "explanation": "doktor에 -um.",
+          "prerequisiteDayIds": [
+            "D004"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W01-R5",
+          "skill": "reading",
+          "prompt": "Adım Deniz. Ben Koreliyim. 화자의 이름과 국적은?",
+          "answer": "데니즈, 한국인",
+          "explanation": "Adım 뒤 이름, Koreliyim은 한국인.",
+          "prerequisiteDayIds": [
+            "D004",
+            "D006"
+          ],
+          "points": 5
+        }
+      ],
+      "writing": [
+        {
+          "id": "W01-W1",
+          "skill": "writing",
+          "prompt": "저녁 인사를 터키어로 쓰세요.",
+          "answer": "İyi akşamlar!",
+          "explanation": "저녁 인사.",
+          "prerequisiteDayIds": [
+            "D001"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W01-W2",
+          "skill": "writing",
+          "prompt": "‘산’을 터키어로 쓰세요.",
+          "answer": "dağ",
+          "explanation": "ğ를 보존.",
+          "prerequisiteDayIds": [
+            "D003"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W01-W3",
+          "skill": "writing",
+          "prompt": "나는 한국인입니다. (Ben 생략 가능)",
+          "answer": "Ben Koreliyim.",
+          "explanation": "모음 끝 Koreli+-yim.",
+          "prerequisiteDayIds": [
+            "D004"
+          ],
+          "points": 5,
+          "accepted": [
+            "Koreliyim."
+          ]
+        },
+        {
+          "id": "W01-W4",
+          "skill": "writing",
+          "prompt": "낯선 성인에게 안부를 물으세요.",
+          "answer": "Nasılsınız?",
+          "explanation": "정중 복수형 -sınız.",
+          "prerequisiteDayIds": [
+            "D005"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W01-W5",
+          "skill": "writing",
+          "prompt": "제 이름은 데니즈입니다. 이어서 반갑습니다라고 쓰세요.",
+          "answer": "Adım Deniz. Memnun oldum.",
+          "explanation": "Adım+이름; 고정 인사.",
+          "prerequisiteDayIds": [
+            "D006"
+          ],
+          "points": 5,
+          "accepted": [
+            "Benim adım Deniz. Memnun oldum."
+          ]
+        }
+      ],
+      "speaking": {
+        "id": "W01-S1",
+        "scenario": "에스키셰히르 카페에서 처음 만난 두 성인의 대화. 허구 이름/국적 카드로 서로 역할 교대.",
+        "instructions": "준비 3분, 1인당 1~2분씩 두 차례 대화, 녹음 비교 및 채점 나머지 시간. 대본 금지.",
+        "requiredActs": [
+          "정중 인사/안부",
+          "자기 이름 말하기 및 상대 이름 질문",
+          "국적 또는 직업 소개",
+          "반가움 응답과 정중 작별"
+        ],
+        "model": [
+          "Merhaba, nasılsınız?",
+          "İyiyim, teşekkürler. Ya siz?",
+          "Adım Deniz. Adınız ne?",
+          "Adım Mert. Ben Koreliyim.",
+          "Memnun oldum.",
+          "Ben de memnun oldum.",
+          "Hoşça kalın!",
+          "Güle güle!"
+        ],
+        "points": 25,
+        "rubric": {
+          "dimensions": [
+            "과업 충족",
+            "이해 가능성",
+            "문법·어휘 범위와 정확성",
+            "상호작용·응답"
+          ],
+          "levels": {
+            "0": "미수행",
+            "1": "많은 도움 필요",
+            "2": "일부 도움 필요",
+            "3": "독립 수행"
+          },
+          "scoreFormula": "네 영역 점수 합계 × 25 / 12; 소수점 첫째 자리 반올림",
+          "note": "자동 STT 일치율과 동일하지 않음. 동행자 관찰 및 녹음 자가검토는 연습 지표, 독립 평가 미실시."
+        }
+      },
+      "grading": "듣기/읽기 각 문항 정답 5점 오답 0점. 쓰기 각 5점: 의미·요구 충족 2점, 형태·접사 2점, 철자 1점; 의미를 바꾸지 않는 말끝 구두점은 감점하지 않음. 모범답안 외 자연스럽고 학습 범위에 맞는 답을 채점자가 인정. 듣기 대본은 평가 후 공개. 개인정보는 허구 역할카드만 사용."
+    },
+    {
+      "id": "W02",
+      "dayId": "D014",
+      "prerequisiteDayIds": [
+        "D008",
+        "D009",
+        "D010",
+        "D011",
+        "D012",
+        "D013"
+      ],
+      "status": "draft",
+      "minutes": {
+        "listening": 15,
+        "reading": 10,
+        "writing": 15,
+        "speaking": 15,
+        "feedback": 5
+      },
+      "maxScore": 100,
+      "provisionalPass": {
+        "total": 80,
+        "minimumPerSkill": 15,
+        "approval": "01/05 pending"
+      },
+      "listening": [
+        {
+          "id": "W02-L1",
+          "skill": "listening",
+          "prompt": "어떤 물건인지 쓰세요.",
+          "answer": "공책",
+          "explanation": "defter는 공책.",
+          "prerequisiteDayIds": [
+            "D008"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D008",
+            "targetId": "D008-E5",
+            "text": "Bu defter.",
+            "lessonRevision": "r1-20261121"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        },
+        {
+          "id": "W02-L2",
+          "skill": "listening",
+          "prompt": "물건 종류와 수량은?",
+          "answer": "책 두 권",
+          "explanation": "iki kitabı가 아니라 iki kitap 기본 명사구.",
+          "prerequisiteDayIds": [
+            "D009"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D009",
+            "targetId": "D009-E4",
+            "text": "İki kitap.",
+            "lessonRevision": "r1-20261121a"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        },
+        {
+          "id": "W02-L3",
+          "skill": "listening",
+          "prompt": "직업 부정 내용을 쓰세요.",
+          "answer": "학생이 아니다",
+          "explanation": "öğrenci değilim.",
+          "prerequisiteDayIds": [
+            "D010"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D010",
+            "targetId": "D010-E2",
+            "text": "Ben öğrenci değilim.",
+            "lessonRevision": "r1-20261121"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        },
+        {
+          "id": "W02-L4",
+          "skill": "listening",
+          "prompt": "무슨 물건인지 예/아니요 질문을 들었습니다. 물건은?",
+          "answer": "전화기",
+          "explanation": "telefon mu?",
+          "prerequisiteDayIds": [
+            "D011"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D011",
+            "targetId": "D011-E4",
+            "text": "Bu telefon mu?",
+            "lessonRevision": "r1-20261121"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        },
+        {
+          "id": "W02-L5",
+          "skill": "listening",
+          "prompt": "들은 숫자를 숫자로 쓰세요.",
+          "answer": "65",
+          "explanation": "altmış beş.",
+          "prerequisiteDayIds": [
+            "D012"
+          ],
+          "points": 5,
+          "audioTarget": {
+            "lessonId": "D012",
+            "targetId": "D012-E4",
+            "text": "Altmış beş.",
+            "lessonRevision": "r1-20261121a"
+          },
+          "delivery": "응시자에게 대본 숨김. 검수 음성 또는 동행자가 자연스러운 속도로 2회 읽기."
+        }
+      ],
+      "reading": [
+        {
+          "id": "W02-R1",
+          "skill": "reading",
+          "prompt": "Bu çanta.의 뜻은?",
+          "answer": "이것은 가방입니다.",
+          "explanation": "bu와 çanta.",
+          "prerequisiteDayIds": [
+            "D008"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W02-R2",
+          "skill": "reading",
+          "prompt": "kalem과 kalemler 중 여러 펜은?",
+          "answer": "kalemler",
+          "explanation": "-ler 복수.",
+          "prerequisiteDayIds": [
+            "D009"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W02-R3",
+          "skill": "reading",
+          "prompt": "O öğretmen değil.의 뜻은?",
+          "answer": "그 사람은 교사가 아닙니다.",
+          "explanation": "3인칭 부정.",
+          "prerequisiteDayIds": [
+            "D010"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W02-R4",
+          "skill": "reading",
+          "prompt": "Türk müsünüz?는 무엇을 묻나요?",
+          "answer": "튀르키예인인지",
+          "explanation": "mü+sünüz 정중 질문.",
+          "prerequisiteDayIds": [
+            "D011"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W02-R5",
+          "skill": "reading",
+          "prompt": "Kırk iki yaşındayım. 나이는?",
+          "answer": "42",
+          "explanation": "kırk iki.",
+          "prerequisiteDayIds": [
+            "D012",
+            "D013"
+          ],
+          "points": 5
+        }
+      ],
+      "writing": [
+        {
+          "id": "W02-W1",
+          "skill": "writing",
+          "prompt": "이것은 열쇠입니다.",
+          "answer": "Bu anahtar.",
+          "explanation": "bu+열쇠.",
+          "prerequisiteDayIds": [
+            "D008"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W02-W2",
+          "skill": "writing",
+          "prompt": "가방 두 개.",
+          "answer": "İki çanta.",
+          "explanation": "수 뒤 명사 단수.",
+          "prerequisiteDayIds": [
+            "D009"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W02-W3",
+          "skill": "writing",
+          "prompt": "나는 관광객이 아닙니다.",
+          "answer": "Ben turist değilim.",
+          "explanation": "부정 인칭.",
+          "prerequisiteDayIds": [
+            "D010"
+          ],
+          "points": 5,
+          "accepted": [
+            "Turist değilim."
+          ]
+        },
+        {
+          "id": "W02-W4",
+          "skill": "writing",
+          "prompt": "이것은 전화기인가요?",
+          "answer": "Bu telefon mu?",
+          "explanation": "mu 띄어쓰기.",
+          "prerequisiteDayIds": [
+            "D011"
+          ],
+          "points": 5
+        },
+        {
+          "id": "W02-W5",
+          "skill": "writing",
+          "prompt": "나는 36살입니다.",
+          "answer": "Otuz altı yaşındayım.",
+          "explanation": "숫자+나이 고정 표현.",
+          "prerequisiteDayIds": [
+            "D012",
+            "D013"
+          ],
+          "points": 5
+        }
+      ],
+      "speaking": {
+        "id": "W02-S1",
+        "scenario": "문구점에서 물건을 확인하고 수량을 요청한 뒤 처음 만난 상대와 자기소개. 허구 직업과 국적 사용.",
+        "instructions": "3분 준비, 두 역할을 교대. 사물 2개와 수량 1~10을 실제 물체 또는 그림으로 보여 준다.",
+        "requiredActs": [
+          "bu/şu 또는 bunlar로 물건 질문",
+          "예/아니요와 değil 정정",
+          "수량 요청",
+          "정중 국적/직업 질문과 답변"
+        ],
+        "model": [
+          "Merhaba! Bu kitap mı?",
+          "Hayır, bu defter.",
+          "Kaç defter?",
+          "Üç defter, lütfen.",
+          "Nerelisiniz?",
+          "Koreliyim.",
+          "Ne iş yapıyorsunuz?",
+          "Mühendisim.",
+          "Teşekkür ederim."
+        ],
+        "points": 25,
+        "rubric": {
+          "dimensions": [
+            "과업 충족",
+            "이해 가능성",
+            "문법·어휘 범위와 정확성",
+            "상호작용·응답"
+          ],
+          "levels": {
+            "0": "미수행",
+            "1": "많은 도움 필요",
+            "2": "일부 도움 필요",
+            "3": "독립 수행"
+          },
+          "scoreFormula": "네 영역 점수 합계 × 25 / 12; 소수점 첫째 자리 반올림",
+          "note": "자동 STT 일치율과 동일하지 않음. 동행자 관찰 및 녹음 자가검토는 연습 지표, 독립 평가 미실시."
+        }
+      },
+      "grading": "듣기/읽기 각 문항 정답 5점 오답 0점. 쓰기 각 5점: 의미·요구 충족 2점, 형태·접사 2점, 철자 1점; 의미를 바꾸지 않는 말끝 구두점은 감점하지 않음. 모범답안 외 자연스럽고 학습 범위에 맞는 답을 채점자가 인정. 듣기 대본은 평가 후 공개. 개인정보는 허구 역할카드만 사용."
+    }
+  ]
+}

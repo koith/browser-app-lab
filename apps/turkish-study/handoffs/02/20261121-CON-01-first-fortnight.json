@@ -1,0 +1,184 @@
+{
+  "id": "H02-20261121-first-fortnight-r1",
+  "from": "02",
+  "to": [
+    "00",
+    "01",
+    "03",
+    "04",
+    "05"
+  ],
+  "createdAt": "2026-11-21T17:12:00+09:00",
+  "taskIds": [
+    "CON-01",
+    "CON-02",
+    "CON-04",
+    "CON-05",
+    "CON-07",
+    "CON-08",
+    "CON-09"
+  ],
+  "baseRef": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "contractVersion": "1.0.0",
+  "status": "review_requested",
+  "summary": "D001-D007 expanded and D008-D014 authored. W01/W02 4-skill assessments, per-item author audit, and exact NFC audio candidate list committed. No final release claim.",
+  "changedFiles": [
+    "apps/turkish-study/lessons.json",
+    "apps/turkish-study/content/assessments.json",
+    "apps/turkish-study/content/review-first-fortnight.json",
+    "apps/turkish-study/content/audio-targets-first-fortnight.json",
+    "apps/turkish-study/handoffs/02/20261121-CON-01-first-fortnight.json"
+  ],
+  "verification": [
+    {
+      "result": "pass",
+      "scope": "Schema keywords and cross-file/legacy ID checks (author)",
+      "evidence": "content/review-first-fortnight.json; 6923 assertions",
+      "revision": "f6706f31c2ae34af67ccf55076e55da1724ba16c"
+    },
+    {
+      "result": "pass",
+      "scope": "Assessment scoring and exact lesson audio target references",
+      "evidence": "content/assessments.json",
+      "revision": "584a4b82cf4c01445e0a07ec92a7ac86f6082a87"
+    },
+    {
+      "result": "pending",
+      "scope": "Independent language/prerequisite/reference audit and real audio",
+      "evidence": "05 independent review and 04 audio required",
+      "revision": "f6706f31c2ae34af67ccf55076e55da1724ba16c"
+    }
+  ],
+  "requests": [
+    {
+      "to": "01",
+      "action": "Compare pending D001-D014 mapping and rubric to this candidate; report conflicts and required revisions.",
+      "acceptance": "Each day, prerequisites, fixed expressions and 4-skill evaluation ranges match approved curriculum."
+    },
+    {
+      "to": "04",
+      "action": "Consume content/audio-targets-first-fortnight.json (candidate frozen exact text), P0 first; produce audio manifest in own branch.",
+      "acceptance": "Exact target ID, text, locale, revision, provider/licensing and actual playback, first week prioritized; repeat changed targets."
+    },
+    {
+      "to": "05",
+      "action": "Independently review every D001-D007 item and W01, then D008-D014 and W02; verify grammar, spelling, Korean gloss, naturalness, politeness, prerequisite scope, answer keys, audio and 60-minute feasibility.",
+      "acceptance": "Evidence bound to exact lesson blob f6706f31c2ae34af67ccf55076e55da1724ba16c; defects in own handoff, no self-check treated as independent. Confirm W01/W02 scoring and audio target links."
+    },
+    {
+      "to": "03",
+      "action": "Consume compatible lessons.json; support optional explanations and separate assessment file with hidden listening scripts, scoring and review.",
+      "acceptance": "No existing storage key changes; assessment UI distinguishes objective review from four-skill score, gates respect manifest."
+    },
+    {
+      "to": "00",
+      "action": "Review branch/PR, reconcile 01 and 05 evidence, update central ledger only after approval.",
+      "acceptance": "No publish or final task completion until release gates satisfied."
+    }
+  ],
+  "dependencies": [
+    "01 mapping and rubric pending",
+    "04 audio generation and listening review",
+    "05 independent review",
+    "03 assessment UI"
+  ],
+  "knownIssues": [
+    "01 branch discovered but identical to main at lookup; no available 01 handoff. Reconcile with eventual mapping, do not treat as approved.",
+    "03 must support separate four-skill assessment UI; question explanations are optional schema field and may not render in current runtime.",
+    "60-minute timing is designed, not tested with actual learners.",
+    "All source examples and explanations are original; external source evidence does not certify individual lexical usage. 05 native/independent cross-check required."
+  ],
+  "ledgerProposals": [
+    {
+      "id": "CON-01",
+      "implementation": "partial",
+      "content": "review_candidate_d001_d007",
+      "verification": "structure_pass_author_only",
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-02",
+      "implementation": "partial",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-04",
+      "implementation": "partial",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-05",
+      "implementation": "partial",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-07",
+      "implementation": "partial",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-08",
+      "implementation": "partial",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "CON-09",
+      "implementation": "partial",
+      "content": "partial_d001_d014",
+      "verification": "structure_pass_author_only",
+      "evidence": [
+        "content/review-first-fortnight.json",
+        "content/assessments.json",
+        "content/audio-targets-first-fortnight.json",
+        "lessons.json blob f6706f31c2ae34af67ccf55076e55da1724ba16c"
+      ],
+      "proposedComplete": false
+    }
+  ]
+}

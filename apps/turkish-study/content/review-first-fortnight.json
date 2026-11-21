@@ -1,0 +1,3672 @@
+{
+  "version": "0.1.0",
+  "lessonBlob": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
+  "assessmentBlob": "584a4b82cf4c01445e0a07ec92a7ac86f6082a87",
+  "baseCommit": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "reviewType": "author_self_check_not_independent",
+  "reviewer": "02 content author (AI)",
+  "at": "2026-11-21T17:12:00+09:00",
+  "method": "JSON parse; recursive check of all keywords used in actual lessons.schema.json; existing array prefixes and question object stability; per-day grammar reasoning; assessment cross-reference and point totals. Not native speaker review, not pronunciation playback, not full dictionary lookup. Author-created material, not copied.",
+  "sources": [
+    {
+      "id": "TDK_ALPHABET",
+      "url": "https://tdk.gov.tr/icerik/yazim-kurallari/ses-harf-ve-alfabe/",
+      "locator": "29 harf; alphabet table",
+      "observed": "공식 29자 및 문자 대응 근거"
+    },
+    {
+      "id": "TDK_QUESTION",
+      "url": "https://tdk.gov.tr/icerik/yazim-kurallari/soru-eki-mi-mi-mu-munun-yazilisi/",
+      "locator": "Soru Eki mı, mi, mu, mü’nün Yazılışı",
+      "observed": "질문 입자의 띄어쓰기와 모음조화, 뒤 접사 결합"
+    },
+    {
+      "id": "TDK_CAPITAL",
+      "url": "https://tdk.gov.tr/icerik/yazim-kurallari/buyuk-harflerin-kullanildigi-yerler/",
+      "locator": "Büyük Harflerin Kullanıldığı Yerler",
+      "observed": "고유명사와 국적 표기의 철자 근거"
+    },
+    {
+      "id": "GOKSEL_KERSLAKE",
+      "url": "https://www.routledge.com/Turkish-A-Comprehensive-Grammar/Goksel-Kerslake/p/book/9781138350533",
+      "locator": "2025 2nd edition, vowel harmony / phonology / morphology",
+      "observed": "출판사 목차·서지 확인; 본문 전수 대조 미실시"
+    },
+    {
+      "id": "ESSENTIAL",
+      "url": "https://www.routledge.com/Turkish-An-Essential-Grammar/Kerslake-Goksel/p/book/9780415462686",
+      "locator": "Nominal sentences, basic sentence structure",
+      "observed": "출판사 목차 확인; 본문 전수 대조 미실시"
+    },
+    {
+      "id": "TDK_DICT",
+      "url": "https://sozluk.gov.tr/",
+      "locator": "Güncel Türkçe Sözlük",
+      "observed": "독립 표제어·의미 확인 요청 대상; 전체 단어 검색 미완료"
+    },
+    {
+      "id": "CEFR2020",
+      "url": "https://www.coe.int/en/web/common-european-framework-reference-languages/cefr-descriptors-search",
+      "locator": "A1 oral interaction / understanding / production",
+      "observed": "공통 과정 출처; 01 세부 매핑 대기"
+    },
+    {
+      "id": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/news/turkcenin-yabanci-dil-olarak-ogretimi-programinin-3-baskisi-tamamlandi",
+      "locator": "A1 scope",
+      "observed": "공통 과정 출처; 01 세부 매핑 대기"
+    },
+    {
+      "id": "YEE",
+      "url": "https://yee.org.tr/tr/turkce-ogretimi/materyaller",
+      "locator": "교육 자료",
+      "observed": "공통 과정 출처, 원문 복제하지 않음"
+    }
+  ],
+  "structure": {
+    "result": "pass",
+    "assertions": 6923,
+    "lessonCount": 14
+  },
+  "days": [
+    {
+      "dayId": "D001",
+      "revision": "r2-20261121a",
+      "prerequisiteDayIds": [],
+      "sourceEvidence": [
+        "TDK_ALPHABET"
+      ],
+      "grammarAndOrthography": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현.",
+      "registerAndNaturalness": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D001-V1",
+          "tr": "Merhaba",
+          "ko": "안녕하세요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V2",
+          "tr": "Günaydın",
+          "ko": "좋은 아침이에요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V3",
+          "tr": "İyi akşamlar",
+          "ko": "좋은 저녁이에요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V4",
+          "tr": "İyi geceler",
+          "ko": "안녕히 주무세요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V5",
+          "tr": "Teşekkürler",
+          "ko": "고마워요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V6",
+          "tr": "Lütfen",
+          "ko": "부탁합니다",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V7",
+          "tr": "Evet",
+          "ko": "네",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V8",
+          "tr": "Hayır",
+          "ko": "아니요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V9",
+          "tr": "Hoşça kal",
+          "ko": "잘 있어",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V10",
+          "tr": "Güle güle",
+          "ko": "잘 가",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V11",
+          "tr": "Hoşça kalın",
+          "ko": "안녕히 계세요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V12",
+          "tr": "Teşekkür ederim",
+          "ko": "감사합니다",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V13",
+          "tr": "Pardon",
+          "ko": "실례합니다",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V14",
+          "tr": "Affedersiniz",
+          "ko": "실례합니다(정중)",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D001-V15",
+          "tr": "Rica ederim",
+          "ko": "천만에요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D001-E1",
+          "tr": "Merhaba!",
+          "ko": "안녕하세요!",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        },
+        {
+          "id": "D001-E2",
+          "tr": "Teşekkürler.",
+          "ko": "고마워요.",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        },
+        {
+          "id": "D001-E3",
+          "tr": "Günaydın!",
+          "ko": "좋은 아침이에요!",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        },
+        {
+          "id": "D001-E4",
+          "tr": "İyi akşamlar!",
+          "ko": "좋은 저녁입니다!",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        },
+        {
+          "id": "D001-E5",
+          "tr": "Pardon.",
+          "ko": "실례합니다.",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        },
+        {
+          "id": "D001-E6",
+          "tr": "Teşekkür ederim.",
+          "ko": "감사합니다.",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        },
+        {
+          "id": "D001-E7",
+          "tr": "Rica ederim.",
+          "ko": "천만에요.",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        },
+        {
+          "id": "D001-E8",
+          "tr": "Hoşça kalın!",
+          "ko": "안녕히 계세요!",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        },
+        {
+          "id": "D001-E9",
+          "tr": "Güle güle!",
+          "ko": "안녕히 가세요!",
+          "evidence": "I/ı와 İ/i 독립 문자; 시간대별 인사, 떠나는/남는 사람의 작별. 정중 kalın과 감사 응답은 고정 표현."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D001-T1",
+          "role": "A",
+          "tr": "Merhaba!",
+          "ko": "안녕하세요!",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T2",
+          "role": "B",
+          "tr": "Merhaba!",
+          "ko": "안녕하세요!",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T3",
+          "role": "A",
+          "tr": "Hoşça kal!",
+          "ko": "잘 있어!",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T4",
+          "role": "B",
+          "tr": "Güle güle!",
+          "ko": "잘 가!",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T5",
+          "role": "A",
+          "tr": "Günaydın!",
+          "ko": "좋은 아침입니다!",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T6",
+          "role": "B",
+          "tr": "Günaydın!",
+          "ko": "좋은 아침입니다!",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T7",
+          "role": "A",
+          "tr": "Teşekkür ederim.",
+          "ko": "감사합니다.",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T8",
+          "role": "B",
+          "tr": "Rica ederim.",
+          "ko": "천만에요.",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T9",
+          "role": "A",
+          "tr": "Hoşça kalın!",
+          "ko": "안녕히 계세요!",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        },
+        {
+          "id": "D001-T10",
+          "role": "B",
+          "tr": "Güle güle!",
+          "ko": "안녕히 가세요!",
+          "evidence": "낯선 상대와 친구 대화 분리. 작별 화자 역할 확인."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D001-Q1",
+          "answer": "Merhaba",
+          "evidence": "첫 만남의 일반 인사는 Merhaba입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D001-Q2",
+          "answer": "Evet",
+          "evidence": "긍정 응답 Evet, 부정 응답 Hayır입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D001-Q3",
+          "answer": "Lütfen",
+          "evidence": "요청의 정중한 표현 Lütfen입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D001-Q4",
+          "answer": "Güle güle",
+          "evidence": "남아 있는 사람이 떠나는 사람에게 Güle güle라고 말합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D001-Q5",
+          "answer": "i",
+          "evidence": "점 있는 İ는 i와 짝입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D001-Q6",
+          "answer": "ı",
+          "evidence": "점 없는 I는 ı와 짝입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D001-Q7",
+          "answer": "Hoşça kalın",
+          "evidence": "떠나는 쪽의 정중한 작별입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D001-Q8",
+          "answer": "Rica ederim",
+          "evidence": "감사에 천만에요라고 대응합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D001-Q9",
+          "answer": "İyi akşamlar",
+          "evidence": "저녁에는 İyi akşamlar입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D002",
+      "revision": "r2-20261121a",
+      "prerequisiteDayIds": [
+        "D001"
+      ],
+      "sourceEvidence": [
+        "GOKSEL_KERSLAKE",
+        "TDK_ALPHABET"
+      ],
+      "grammarAndOrthography": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님.",
+      "registerAndNaturalness": "발음의 실제 음가와 al의 문어적 용례는 05/04 재검수.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D002-V1",
+          "tr": "at",
+          "ko": "말",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V2",
+          "tr": "et",
+          "ko": "고기",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V3",
+          "tr": "ışık",
+          "ko": "빛",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V4",
+          "tr": "iki",
+          "ko": "둘",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V5",
+          "tr": "on",
+          "ko": "열",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V6",
+          "tr": "ön",
+          "ko": "앞",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V7",
+          "tr": "su",
+          "ko": "물",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V8",
+          "tr": "süt",
+          "ko": "우유",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V9",
+          "tr": "gül",
+          "ko": "장미",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V10",
+          "tr": "göl",
+          "ko": "호수",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V11",
+          "tr": "un",
+          "ko": "밀가루",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V12",
+          "tr": "ün",
+          "ko": "명성",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V13",
+          "tr": "kır",
+          "ko": "들판",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V14",
+          "tr": "kir",
+          "ko": "때, 오염",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V15",
+          "tr": "el",
+          "ko": "손",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D002-V16",
+          "tr": "al",
+          "ko": "빨간색(문어적)",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D002-E1",
+          "tr": "at — et",
+          "ko": "말 — 고기",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E2",
+          "tr": "on — ön",
+          "ko": "열 — 앞",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E3",
+          "tr": "su — süt",
+          "ko": "물 — 우유",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E4",
+          "tr": "Su.",
+          "ko": "물.",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E5",
+          "tr": "Süt.",
+          "ko": "우유.",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E6",
+          "tr": "On.",
+          "ko": "열.",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E7",
+          "tr": "Ön.",
+          "ko": "앞.",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E8",
+          "tr": "Un.",
+          "ko": "밀가루.",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E9",
+          "tr": "Ün.",
+          "ko": "명성.",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E10",
+          "tr": "Kır.",
+          "ko": "들판.",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        },
+        {
+          "id": "D002-E11",
+          "tr": "Kir.",
+          "ko": "때, 오염.",
+          "evidence": "8모음 앞/뒤·원순 분류; on/ön, un/ün, kır/kir 대조. su/süt은 최소 모음쌍 아님."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D002-T1",
+          "role": "A",
+          "tr": "Su, lütfen.",
+          "ko": "물 부탁합니다.",
+          "evidence": "발음의 실제 음가와 al의 문어적 용례는 05/04 재검수."
+        },
+        {
+          "id": "D002-T2",
+          "role": "B",
+          "tr": "Evet.",
+          "ko": "네.",
+          "evidence": "발음의 실제 음가와 al의 문어적 용례는 05/04 재검수."
+        },
+        {
+          "id": "D002-T3",
+          "role": "A",
+          "tr": "Teşekkürler.",
+          "ko": "고마워요.",
+          "evidence": "발음의 실제 음가와 al의 문어적 용례는 05/04 재검수."
+        },
+        {
+          "id": "D002-T4",
+          "role": "A",
+          "tr": "Pardon. Süt, lütfen.",
+          "ko": "실례합니다. 우유 부탁합니다.",
+          "evidence": "발음의 실제 음가와 al의 문어적 용례는 05/04 재검수."
+        },
+        {
+          "id": "D002-T5",
+          "role": "B",
+          "tr": "Süt.",
+          "ko": "우유요.",
+          "evidence": "발음의 실제 음가와 al의 문어적 용례는 05/04 재검수."
+        },
+        {
+          "id": "D002-T6",
+          "role": "A",
+          "tr": "Teşekkür ederim.",
+          "ko": "감사합니다.",
+          "evidence": "발음의 실제 음가와 al의 문어적 용례는 05/04 재검수."
+        },
+        {
+          "id": "D002-T7",
+          "role": "B",
+          "tr": "Rica ederim.",
+          "ko": "천만에요.",
+          "evidence": "발음의 실제 음가와 al의 문어적 용례는 05/04 재검수."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D002-Q1",
+          "answer": "su",
+          "evidence": "su는 물, süt은 우유입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D002-Q2",
+          "answer": "ön",
+          "evidence": "ön은 앞, on은 열입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D002-Q3",
+          "answer": "iki",
+          "evidence": "iki는 둘입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D002-Q4",
+          "answer": "ü",
+          "evidence": "ü는 앞쪽 혀와 둥근 입술을 사용합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D002-Q5",
+          "answer": "un",
+          "evidence": "un은 밀가루, ün은 명성입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D002-Q6",
+          "answer": "ün",
+          "evidence": "ü와 u를 구별합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D002-Q7",
+          "answer": "kir",
+          "evidence": "i가 들어간 kir입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D002-Q8",
+          "answer": "ö, ü",
+          "evidence": "ö와 ü는 앞모음입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D003",
+      "revision": "r2-20261121a",
+      "prerequisiteDayIds": [
+        "D001",
+        "D002"
+      ],
+      "sourceEvidence": [
+        "GOKSEL_KERSLAKE",
+        "TDK_ALPHABET"
+      ],
+      "grammarAndOrthography": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사.",
+      "registerAndNaturalness": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D003-V1",
+          "tr": "cam",
+          "ko": "유리",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V2",
+          "tr": "çam",
+          "ko": "소나무",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V3",
+          "tr": "saç",
+          "ko": "머리카락",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V4",
+          "tr": "şiş",
+          "ko": "꼬치",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V5",
+          "tr": "çay",
+          "ko": "차",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V6",
+          "tr": "kahve",
+          "ko": "커피",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V7",
+          "tr": "dağ",
+          "ko": "산",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V8",
+          "tr": "yağ",
+          "ko": "기름",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V9",
+          "tr": "soğuk",
+          "ko": "차가운",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V10",
+          "tr": "sıcak",
+          "ko": "뜨거운",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V11",
+          "tr": "can",
+          "ko": "생명",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V12",
+          "tr": "şal",
+          "ko": "숄",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V13",
+          "tr": "ses",
+          "ko": "소리",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V14",
+          "tr": "şeker",
+          "ko": "설탕",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V15",
+          "tr": "çorba",
+          "ko": "수프",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D003-V16",
+          "tr": "ekmek",
+          "ko": "빵",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D003-E1",
+          "tr": "cam — çam",
+          "ko": "유리 — 소나무",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E2",
+          "tr": "çay — kahve",
+          "ko": "차 — 커피",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E3",
+          "tr": "soğuk — sıcak",
+          "ko": "차가운 — 뜨거운",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E4",
+          "tr": "Can.",
+          "ko": "생명.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E5",
+          "tr": "Çam.",
+          "ko": "소나무.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E6",
+          "tr": "Ses.",
+          "ko": "소리.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E7",
+          "tr": "Şal.",
+          "ko": "숄.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E8",
+          "tr": "Dağ.",
+          "ko": "산.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E9",
+          "tr": "Yağ.",
+          "ko": "기름.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E10",
+          "tr": "Sıcak çay.",
+          "ko": "따뜻한 차.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E11",
+          "tr": "Soğuk su.",
+          "ko": "차가운 물.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        },
+        {
+          "id": "D003-E12",
+          "tr": "Şeker, lütfen.",
+          "ko": "설탕 부탁합니다.",
+          "evidence": "c/ç, s/ş와 ğ 음가 및 모음당 음절 하나, kah-ve. sıcak/soğuk+명사."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D003-T1",
+          "role": "A",
+          "tr": "Çay, lütfen.",
+          "ko": "차 부탁합니다.",
+          "evidence": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인."
+        },
+        {
+          "id": "D003-T2",
+          "role": "B",
+          "tr": "Evet.",
+          "ko": "네.",
+          "evidence": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인."
+        },
+        {
+          "id": "D003-T3",
+          "role": "A",
+          "tr": "Teşekkürler.",
+          "ko": "고마워요.",
+          "evidence": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인."
+        },
+        {
+          "id": "D003-T4",
+          "role": "A",
+          "tr": "Merhaba. Sıcak çay, lütfen.",
+          "ko": "안녕하세요. 따뜻한 차 부탁합니다.",
+          "evidence": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인."
+        },
+        {
+          "id": "D003-T5",
+          "role": "B",
+          "tr": "Pardon. Kahve?",
+          "ko": "실례합니다. 커피요?",
+          "evidence": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인."
+        },
+        {
+          "id": "D003-T6",
+          "role": "A",
+          "tr": "Hayır. Çay, lütfen.",
+          "ko": "아니요. 차 부탁합니다.",
+          "evidence": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인."
+        },
+        {
+          "id": "D003-T7",
+          "role": "B",
+          "tr": "Evet.",
+          "ko": "네.",
+          "evidence": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인."
+        },
+        {
+          "id": "D003-T8",
+          "role": "A",
+          "tr": "Teşekkürler.",
+          "ko": "감사합니다.",
+          "evidence": "ğ 실제 청취 및 조음, 카페 주문 자연스러움 독립 확인."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D003-Q1",
+          "answer": "çay",
+          "evidence": "차(음료)는 çay입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D003-Q2",
+          "answer": "dağ",
+          "evidence": "산은 dağ, 기름은 yağ입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D003-Q3",
+          "answer": "sıcak",
+          "evidence": "뜨거운/따뜻한은 sıcak입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D003-Q4",
+          "answer": "cam",
+          "evidence": "c와 ç의 차이입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D003-Q5",
+          "answer": "şeker",
+          "evidence": "şeker는 설탕입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D003-Q6",
+          "answer": "sıcak çay",
+          "evidence": "형용사 sıcak 뒤에 차 çay를 놓습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D003-Q7",
+          "answer": "kah-ve",
+          "evidence": "각 음절에는 모음 하나가 있습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D003-Q8",
+          "answer": "주변 모음에 따라 길이·연결에 영향을 준다",
+          "evidence": "표준 발음에서 독립 강한 g로 읽지 않습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D004",
+      "revision": "r2-20261121a",
+      "prerequisiteDayIds": [
+        "D001",
+        "D002",
+        "D003"
+      ],
+      "sourceEvidence": [
+        "ESSENTIAL",
+        "GOKSEL_KERSLAKE",
+        "TDK_CAPITAL"
+      ],
+      "grammarAndOrthography": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지.",
+      "registerAndNaturalness": "2인칭 친근, 3인칭 단수만 교육; 나머지 대명사는 인식.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D004-V1",
+          "tr": "ben",
+          "ko": "나",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V2",
+          "tr": "sen",
+          "ko": "너",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V3",
+          "tr": "o",
+          "ko": "그/그녀/그것",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V4",
+          "tr": "biz",
+          "ko": "우리",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V5",
+          "tr": "siz",
+          "ko": "당신/여러분",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V6",
+          "tr": "onlar",
+          "ko": "그들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V7",
+          "tr": "Koreli",
+          "ko": "한국인",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V8",
+          "tr": "Türk",
+          "ko": "튀르키예인",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V9",
+          "tr": "öğrenci",
+          "ko": "학생",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V10",
+          "tr": "turist",
+          "ko": "관광객",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V11",
+          "tr": "doktor",
+          "ko": "의사",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V12",
+          "tr": "yorgun",
+          "ko": "피곤한",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V13",
+          "tr": "mutlu",
+          "ko": "행복한",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V14",
+          "tr": "hazır",
+          "ko": "준비된",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V15",
+          "tr": "yabancı",
+          "ko": "외국인",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D004-V16",
+          "tr": "arkadaş",
+          "ko": "친구",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D004-E1",
+          "tr": "Ben Koreliyim.",
+          "ko": "저는 한국인입니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E2",
+          "tr": "Ben turistim.",
+          "ko": "저는 관광객입니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E3",
+          "tr": "Sen öğrencisin.",
+          "ko": "너는 학생이야.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E4",
+          "tr": "Koreliyim.",
+          "ko": "저는 한국인입니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E5",
+          "tr": "Ben öğrenciyim.",
+          "ko": "저는 학생입니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E6",
+          "tr": "Ben doktorum.",
+          "ko": "저는 의사입니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E7",
+          "tr": "Ben yorgunum.",
+          "ko": "저는 피곤합니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E8",
+          "tr": "Ben mutluyum.",
+          "ko": "저는 행복합니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E9",
+          "tr": "Ben hazırım.",
+          "ko": "저는 준비됐습니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E10",
+          "tr": "O turist.",
+          "ko": "그 사람은 관광객입니다.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        },
+        {
+          "id": "D004-E11",
+          "tr": "Sen Türksün.",
+          "ko": "너는 튀르키예인이야.",
+          "evidence": "마지막 모음 기준 4방향 조화; turistim/doktorum/hazırım; Koreliyim/mutluyum 연결 y; O turist 무표지."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D004-T1",
+          "role": "A",
+          "tr": "Merhaba! Ben Koreliyim.",
+          "ko": "안녕하세요! 저는 한국인입니다.",
+          "evidence": "2인칭 친근, 3인칭 단수만 교육; 나머지 대명사는 인식."
+        },
+        {
+          "id": "D004-T2",
+          "role": "B",
+          "tr": "Merhaba! Ben Türküm.",
+          "ko": "안녕하세요! 저는 튀르키예인입니다.",
+          "evidence": "2인칭 친근, 3인칭 단수만 교육; 나머지 대명사는 인식."
+        },
+        {
+          "id": "D004-T3",
+          "role": "A",
+          "tr": "Merhaba! Ben turistim.",
+          "ko": "안녕하세요! 저는 관광객입니다.",
+          "evidence": "2인칭 친근, 3인칭 단수만 교육; 나머지 대명사는 인식."
+        },
+        {
+          "id": "D004-T4",
+          "role": "B",
+          "tr": "Merhaba! Ben öğrenciyim.",
+          "ko": "안녕하세요! 저는 학생입니다.",
+          "evidence": "2인칭 친근, 3인칭 단수만 교육; 나머지 대명사는 인식."
+        },
+        {
+          "id": "D004-T5",
+          "role": "A",
+          "tr": "Koreliyim.",
+          "ko": "저는 한국인입니다.",
+          "evidence": "2인칭 친근, 3인칭 단수만 교육; 나머지 대명사는 인식."
+        },
+        {
+          "id": "D004-T6",
+          "role": "B",
+          "tr": "Teşekkürler.",
+          "ko": "감사합니다.",
+          "evidence": "2인칭 친근, 3인칭 단수만 교육; 나머지 대명사는 인식."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D004-Q1",
+          "answer": "Ben Koreliyim.",
+          "evidence": "Ben은 1인칭, Koreli 뒤에 -yim이 붙습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D004-Q2",
+          "answer": "sen",
+          "evidence": "sen은 친근한 단수 2인칭입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D004-Q3",
+          "answer": "turist",
+          "evidence": "turist는 관광객입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D004-Q4",
+          "answer": "Ben doktorum.",
+          "evidence": "doktor의 마지막 모음 o 때문에 -um을 붙입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D004-Q5",
+          "answer": "Ben mutluyum.",
+          "evidence": "mutlu는 모음 끝이고 u라서 -yum입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D004-Q6",
+          "answer": "Ben hazırım.",
+          "evidence": "마지막 ı에 맞춰 -ım입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D004-Q7",
+          "answer": "O turist.",
+          "evidence": "3인칭 단수 기본 명사문은 별도 인칭 접사 없이 씁니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D004-Q8",
+          "answer": "Koreliyim.",
+          "evidence": "-yim이 1인칭 단수를 나타냅니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D005",
+      "revision": "r2-20261121a",
+      "prerequisiteDayIds": [
+        "D001",
+        "D004"
+      ],
+      "sourceEvidence": [
+        "ESSENTIAL",
+        "GOKSEL_KERSLAKE"
+      ],
+      "grammarAndOrthography": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현.",
+      "registerAndNaturalness": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D005-V1",
+          "tr": "Nasılsın?",
+          "ko": "어떻게 지내?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V2",
+          "tr": "Nasılsınız?",
+          "ko": "어떻게 지내세요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V3",
+          "tr": "İyiyim.",
+          "ko": "잘 지내요.",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V4",
+          "tr": "İyi",
+          "ko": "좋은/잘",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V5",
+          "tr": "Kötü",
+          "ko": "나쁜",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V6",
+          "tr": "Fena değil.",
+          "ko": "나쁘지 않아요.",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V7",
+          "tr": "Sağ ol.",
+          "ko": "고마워.",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V8",
+          "tr": "Sağ olun.",
+          "ko": "감사합니다.",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V9",
+          "tr": "Ya siz?",
+          "ko": "그럼 당신은요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V10",
+          "tr": "Ya sen?",
+          "ko": "그럼 너는?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V11",
+          "tr": "Çok iyi.",
+          "ko": "아주 좋아요.",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V12",
+          "tr": "Çok",
+          "ko": "매우",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V13",
+          "tr": "İdare eder.",
+          "ko": "그럭저럭이에요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D005-V14",
+          "tr": "İyisin.",
+          "ko": "너는 잘 지내",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D005-E1",
+          "tr": "Merhaba, nasılsınız?",
+          "ko": "안녕하세요, 어떻게 지내세요?",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E2",
+          "tr": "İyiyim, teşekkürler.",
+          "ko": "잘 지내요, 감사합니다.",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E3",
+          "tr": "Fena değil.",
+          "ko": "나쁘지 않아요.",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E4",
+          "tr": "Nasılsın?",
+          "ko": "어떻게 지내?",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E5",
+          "tr": "Nasılsınız?",
+          "ko": "어떻게 지내세요?",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E6",
+          "tr": "Sağ ol.",
+          "ko": "고마워.",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E7",
+          "tr": "Sağ olun.",
+          "ko": "감사합니다.",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E8",
+          "tr": "Siz Korelisiniz.",
+          "ko": "당신은 한국인이세요.",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E9",
+          "tr": "Siz Türksünüz.",
+          "ko": "당신은 튀르키예인이세요.",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E10",
+          "tr": "Çok iyiyim.",
+          "ko": "아주 잘 지내요.",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        },
+        {
+          "id": "D005-E11",
+          "tr": "İdare eder.",
+          "ko": "그럭저럭이에요.",
+          "evidence": "sen/siz와 -sınız 계열, Nasılsın/Nasılsınız, Sağ ol/Sağ olun; Fena değil 고정 표현."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D005-T1",
+          "role": "A",
+          "tr": "Merhaba, nasılsınız?",
+          "ko": "안녕하세요, 어떻게 지내세요?",
+          "evidence": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수."
+        },
+        {
+          "id": "D005-T2",
+          "role": "B",
+          "tr": "İyiyim, teşekkürler. Siz?",
+          "ko": "잘 지내요, 감사합니다. 당신은요?",
+          "evidence": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수."
+        },
+        {
+          "id": "D005-T3",
+          "role": "A",
+          "tr": "İyiyim.",
+          "ko": "잘 지내요.",
+          "evidence": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수."
+        },
+        {
+          "id": "D005-T4",
+          "role": "A",
+          "tr": "Günaydın, nasılsınız?",
+          "ko": "좋은 아침입니다, 잘 지내세요?",
+          "evidence": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수."
+        },
+        {
+          "id": "D005-T5",
+          "role": "B",
+          "tr": "Fena değil, teşekkürler. Ya siz?",
+          "ko": "나쁘지 않아요, 감사합니다. 그쪽은요?",
+          "evidence": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수."
+        },
+        {
+          "id": "D005-T6",
+          "role": "A",
+          "tr": "Çok iyiyim, sağ olun.",
+          "ko": "아주 잘 지냅니다, 감사합니다.",
+          "evidence": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수."
+        },
+        {
+          "id": "D005-T7",
+          "role": "B",
+          "tr": "Hoşça kalın!",
+          "ko": "안녕히 계세요!",
+          "evidence": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수."
+        },
+        {
+          "id": "D005-T8",
+          "role": "A",
+          "tr": "Güle güle!",
+          "ko": "안녕히 가세요!",
+          "evidence": "değil을 D010 전 생산 규칙으로 평가하지 않음. 정중도 독립 검수."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D005-Q1",
+          "answer": "Nasılsınız?",
+          "evidence": "-sınız가 정중한 단수 또는 복수입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D005-Q2",
+          "answer": "Fena değil.",
+          "evidence": "Fena değil은 나쁘지 않다는 고정 응답입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D005-Q3",
+          "answer": "İyiyim.",
+          "evidence": "İyiyim은 iyi에 1인칭 -yim을 붙인 형태입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D005-Q4",
+          "answer": "Sağ ol.",
+          "evidence": "Sağ ol은 친근한 단수 표현입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D005-Q5",
+          "answer": "Sağ olun.",
+          "evidence": "정중형 Sağ olun을 사용합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D005-Q6",
+          "answer": "Siz Korelisiniz.",
+          "evidence": "정중한 2인칭 -siniz입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D005-Q7",
+          "answer": "Ya siz?",
+          "evidence": "siz를 사용해 상대에게 되묻습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D005-Q8",
+          "answer": "Çok iyiyim.",
+          "evidence": "çok는 정도를 강조합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D006",
+      "revision": "r2-20261121a",
+      "prerequisiteDayIds": [
+        "D001",
+        "D004",
+        "D005"
+      ],
+      "sourceEvidence": [
+        "ESSENTIAL"
+      ],
+      "grammarAndOrthography": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가.",
+      "registerAndNaturalness": "Benim adım, ne는 고정 표현; 이름 대체 가능.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D006-V1",
+          "tr": "ad",
+          "ko": "이름",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V2",
+          "tr": "Adım",
+          "ko": "내 이름은",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V3",
+          "tr": "Adınız ne?",
+          "ko": "성함이 어떻게 되세요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V4",
+          "tr": "Adın ne?",
+          "ko": "이름이 뭐야?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V5",
+          "tr": "Memnun oldum.",
+          "ko": "만나서 반갑습니다.",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V6",
+          "tr": "Ben de.",
+          "ko": "저도요.",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V7",
+          "tr": "Kore",
+          "ko": "한국",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V8",
+          "tr": "Türkiye",
+          "ko": "튀르키예",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V9",
+          "tr": "Ben de memnun oldum.",
+          "ko": "저도 반갑습니다.",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V10",
+          "tr": "Benim adım",
+          "ko": "제 이름은",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V11",
+          "tr": "İsim",
+          "ko": "이름",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V12",
+          "tr": "Deniz",
+          "ko": "데니즈(이름)",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V13",
+          "tr": "Mert",
+          "ko": "메르트(이름)",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D006-V14",
+          "tr": "Eskişehir",
+          "ko": "에스키셰히르",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D006-E1",
+          "tr": "Adım Mert.",
+          "ko": "제 이름은 메르트입니다.",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        },
+        {
+          "id": "D006-E2",
+          "tr": "Adınız ne?",
+          "ko": "성함이 어떻게 되세요?",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        },
+        {
+          "id": "D006-E3",
+          "tr": "Memnun oldum.",
+          "ko": "만나서 반갑습니다.",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        },
+        {
+          "id": "D006-E4",
+          "tr": "Adım Deniz.",
+          "ko": "제 이름은 데니즈입니다.",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        },
+        {
+          "id": "D006-E5",
+          "tr": "Adın ne?",
+          "ko": "이름이 뭐야?",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        },
+        {
+          "id": "D006-E6",
+          "tr": "Benim adım Mert.",
+          "ko": "제 이름은 메르트입니다.",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        },
+        {
+          "id": "D006-E7",
+          "tr": "Ben de memnun oldum.",
+          "ko": "저도 반갑습니다.",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        },
+        {
+          "id": "D006-E8",
+          "tr": "Ben Koreliyim.",
+          "ko": "저는 한국인입니다.",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        },
+        {
+          "id": "D006-E9",
+          "tr": "Ben turistim.",
+          "ko": "저는 관광객입니다.",
+          "evidence": "Adım/Adınız ne/Adın ne와 Memnun oldum/Ben de; 소유접사 미평가."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D006-T1",
+          "role": "A",
+          "tr": "Merhaba! Adım Mert. Adınız ne?",
+          "ko": "안녕하세요! 저는 메르트입니다. 성함이 어떻게 되세요?",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        },
+        {
+          "id": "D006-T2",
+          "role": "B",
+          "tr": "Adım Deniz. Memnun oldum.",
+          "ko": "제 이름은 데니즈입니다. 반갑습니다.",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        },
+        {
+          "id": "D006-T3",
+          "role": "A",
+          "tr": "Ben de.",
+          "ko": "저도요.",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        },
+        {
+          "id": "D006-T4",
+          "role": "A",
+          "tr": "Merhaba, nasılsınız?",
+          "ko": "안녕하세요, 잘 지내세요?",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        },
+        {
+          "id": "D006-T5",
+          "role": "B",
+          "tr": "İyiyim, teşekkürler. Ya siz?",
+          "ko": "잘 지내요, 감사합니다. 그쪽은요?",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        },
+        {
+          "id": "D006-T6",
+          "role": "A",
+          "tr": "İyiyim. Adım Deniz. Adınız ne?",
+          "ko": "잘 지냅니다. 제 이름은 데니즈입니다. 성함이 어떻게 되세요?",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        },
+        {
+          "id": "D006-T7",
+          "role": "B",
+          "tr": "Adım Mert. Ben Türküm.",
+          "ko": "제 이름은 메르트입니다. 저는 튀르키예인입니다.",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        },
+        {
+          "id": "D006-T8",
+          "role": "A",
+          "tr": "Memnun oldum.",
+          "ko": "반갑습니다.",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        },
+        {
+          "id": "D006-T9",
+          "role": "B",
+          "tr": "Ben de memnun oldum.",
+          "ko": "저도 반갑습니다.",
+          "evidence": "Benim adım, ne는 고정 표현; 이름 대체 가능."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D006-Q1",
+          "answer": "Adınız ne?",
+          "evidence": "낯선 상대에게 Adınız ne?라고 묻습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D006-Q2",
+          "answer": "Memnun oldum.",
+          "evidence": "처음 만날 때 Memnun oldum.이라고 합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D006-Q3",
+          "answer": "Ben de.",
+          "evidence": "Ben de는 저도요라는 뜻입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D006-Q4",
+          "answer": "Adın ne?",
+          "evidence": "친근한 단수 Adın ne?입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D006-Q5",
+          "answer": "Adım Deniz.",
+          "evidence": "Adım 뒤에 이름을 놓습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D006-Q6",
+          "answer": "Ben de memnun oldum.",
+          "evidence": "Ben de로 상대 말에 동의합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D006-Q7",
+          "answer": "Ben Koreliyim.",
+          "evidence": "1인칭 명사문으로 말합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D006-Q8",
+          "answer": "이름",
+          "evidence": "ad는 이름이라는 명사입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D007",
+      "revision": "r2-20261121a",
+      "prerequisiteDayIds": [
+        "D001",
+        "D002",
+        "D003",
+        "D004",
+        "D005",
+        "D006"
+      ],
+      "sourceEvidence": [
+        "CEFR2020"
+      ],
+      "grammarAndOrthography": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도.",
+      "registerAndNaturalness": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [],
+      "examples": [
+        {
+          "id": "D007-E1",
+          "tr": "Ben Koreliyim.",
+          "ko": "저는 한국인입니다.",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        },
+        {
+          "id": "D007-E2",
+          "tr": "Adınız ne?",
+          "ko": "성함이 어떻게 되세요?",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        },
+        {
+          "id": "D007-E3",
+          "tr": "Memnun oldum.",
+          "ko": "반갑습니다.",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        },
+        {
+          "id": "D007-E4",
+          "tr": "Hoşça kalın!",
+          "ko": "안녕히 계세요!",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        },
+        {
+          "id": "D007-E5",
+          "tr": "Güle güle!",
+          "ko": "안녕히 가세요!",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        },
+        {
+          "id": "D007-E6",
+          "tr": "Ben turistim.",
+          "ko": "저는 관광객입니다.",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        },
+        {
+          "id": "D007-E7",
+          "tr": "Ben doktorum.",
+          "ko": "저는 의사입니다.",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        },
+        {
+          "id": "D007-E8",
+          "tr": "Siz Korelisiniz.",
+          "ko": "당신은 한국인이세요.",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        },
+        {
+          "id": "D007-E9",
+          "tr": "Ben de memnun oldum.",
+          "ko": "저도 반갑습니다.",
+          "evidence": "새 문법 없음. W01 듣기/읽기/쓰기/말하기 각 25점; 객관식 별도."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D007-T1",
+          "role": "A",
+          "tr": "Merhaba! Nasılsınız?",
+          "ko": "안녕하세요, 어떻게 지내세요?",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        },
+        {
+          "id": "D007-T2",
+          "role": "B",
+          "tr": "İyiyim, teşekkürler.",
+          "ko": "잘 지내요, 감사해요.",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        },
+        {
+          "id": "D007-T3",
+          "role": "A",
+          "tr": "Adınız ne?",
+          "ko": "성함이 어떻게 되세요?",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        },
+        {
+          "id": "D007-T4",
+          "role": "B",
+          "tr": "Adım Deniz.",
+          "ko": "제 이름은 데니즈입니다.",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        },
+        {
+          "id": "D007-T5",
+          "role": "A",
+          "tr": "Memnun oldum.",
+          "ko": "반갑습니다.",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        },
+        {
+          "id": "D007-T6",
+          "role": "B",
+          "tr": "Ben de memnun oldum.",
+          "ko": "저도 반갑습니다.",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        },
+        {
+          "id": "D007-T7",
+          "role": "A",
+          "tr": "Ben Koreliyim. Ben turistim.",
+          "ko": "저는 한국인입니다. 관광객입니다.",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        },
+        {
+          "id": "D007-T8",
+          "role": "A",
+          "tr": "Hoşça kalın!",
+          "ko": "안녕히 계세요!",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        },
+        {
+          "id": "D007-T9",
+          "role": "B",
+          "tr": "Güle güle!",
+          "ko": "안녕히 가세요!",
+          "evidence": "평가 루브릭 01 승인 및 05 독립 채점 검수 대기."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D007-Q1",
+          "answer": "Günaydın",
+          "evidence": "아침 인사는 Günaydın입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q2",
+          "answer": "süt",
+          "evidence": "süt은 우유입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q3",
+          "answer": "çay",
+          "evidence": "차는 çay입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q4",
+          "answer": "Ben Koreliyim.",
+          "evidence": "Koreli 뒤에 1인칭 -yim을 붙입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q5",
+          "answer": "Nasılsınız?",
+          "evidence": "정중한 안부는 Nasılsınız?입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q6",
+          "answer": "Memnun oldum.",
+          "evidence": "첫 만남은 Memnun oldum.입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q7",
+          "answer": "Hoşça kalın!",
+          "evidence": "떠나는 쪽에서 Hoşça kalın을 사용합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q8",
+          "answer": "Ben doktorum.",
+          "evidence": "마지막 모음 o에 -um을 사용합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q9",
+          "answer": "Adınız ne?",
+          "evidence": "정중한 당신의 이름을 묻습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q10",
+          "answer": "su, süt",
+          "evidence": "su는 물, süt은 우유입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q11",
+          "answer": "Nasılsın?",
+          "evidence": "-sın 친근한 단수입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D007-Q12",
+          "answer": "Ben de memnun oldum.",
+          "evidence": "저도 반갑습니다라는 자연스러운 대답입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D008",
+      "revision": "r1-20261121",
+      "prerequisiteDayIds": [
+        "D004",
+        "D006"
+      ],
+      "sourceEvidence": [
+        "ESSENTIAL"
+      ],
+      "grammarAndOrthography": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현.",
+      "registerAndNaturalness": "지시어 번역은 상황 의존, 거리만으로 고정하지 않음.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D008-V1",
+          "tr": "bu",
+          "ko": "이것, 이",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V2",
+          "tr": "şu",
+          "ko": "저것, 그",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V3",
+          "tr": "o",
+          "ko": "그것, 저것",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V4",
+          "tr": "kitap",
+          "ko": "책",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V5",
+          "tr": "kalem",
+          "ko": "펜",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V6",
+          "tr": "defter",
+          "ko": "공책",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V7",
+          "tr": "masa",
+          "ko": "테이블",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V8",
+          "tr": "sandalye",
+          "ko": "의자",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V9",
+          "tr": "çanta",
+          "ko": "가방",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V10",
+          "tr": "telefon",
+          "ko": "전화기",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V11",
+          "tr": "kapı",
+          "ko": "문",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V12",
+          "tr": "bardak",
+          "ko": "잔",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V13",
+          "tr": "anahtar",
+          "ko": "열쇠",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D008-V14",
+          "tr": "Bu ne?",
+          "ko": "이것은 뭐예요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D008-E1",
+          "tr": "Bu kitap.",
+          "ko": "이것은 책입니다.",
+          "evidence": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현."
+        },
+        {
+          "id": "D008-E2",
+          "tr": "Şu kalem.",
+          "ko": "저것은 펜입니다.",
+          "evidence": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현."
+        },
+        {
+          "id": "D008-E3",
+          "tr": "O masa.",
+          "ko": "저것은 테이블입니다.",
+          "evidence": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현."
+        },
+        {
+          "id": "D008-E4",
+          "tr": "Bu ne?",
+          "ko": "이것은 뭐예요?",
+          "evidence": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현."
+        },
+        {
+          "id": "D008-E5",
+          "tr": "Bu defter.",
+          "ko": "이것은 공책입니다.",
+          "evidence": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현."
+        },
+        {
+          "id": "D008-E6",
+          "tr": "Şu çanta.",
+          "ko": "저것은 가방입니다.",
+          "evidence": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현."
+        },
+        {
+          "id": "D008-E7",
+          "tr": "O kapı.",
+          "ko": "저것은 문입니다.",
+          "evidence": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현."
+        },
+        {
+          "id": "D008-E8",
+          "tr": "Bu anahtar.",
+          "ko": "이것은 열쇠입니다.",
+          "evidence": "bu/şu/o 지시 표현, 주의 유도와 거리; Bu ne? 고정 표현."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D008-T1",
+          "role": "A",
+          "tr": "Merhaba!",
+          "ko": "안녕하세요!",
+          "evidence": "지시어 번역은 상황 의존, 거리만으로 고정하지 않음."
+        },
+        {
+          "id": "D008-T2",
+          "role": "B",
+          "tr": "Merhaba!",
+          "ko": "안녕하세요!",
+          "evidence": "지시어 번역은 상황 의존, 거리만으로 고정하지 않음."
+        },
+        {
+          "id": "D008-T3",
+          "role": "A",
+          "tr": "Bu ne?",
+          "ko": "이것은 뭐예요?",
+          "evidence": "지시어 번역은 상황 의존, 거리만으로 고정하지 않음."
+        },
+        {
+          "id": "D008-T4",
+          "role": "B",
+          "tr": "Bu defter.",
+          "ko": "이것은 공책입니다.",
+          "evidence": "지시어 번역은 상황 의존, 거리만으로 고정하지 않음."
+        },
+        {
+          "id": "D008-T5",
+          "role": "A",
+          "tr": "Şu ne?",
+          "ko": "저것은 뭐예요?",
+          "evidence": "지시어 번역은 상황 의존, 거리만으로 고정하지 않음."
+        },
+        {
+          "id": "D008-T6",
+          "role": "B",
+          "tr": "Şu kalem.",
+          "ko": "저것은 펜입니다.",
+          "evidence": "지시어 번역은 상황 의존, 거리만으로 고정하지 않음."
+        },
+        {
+          "id": "D008-T7",
+          "role": "A",
+          "tr": "Teşekkürler.",
+          "ko": "감사합니다.",
+          "evidence": "지시어 번역은 상황 의존, 거리만으로 고정하지 않음."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D008-Q1",
+          "answer": "bu",
+          "evidence": "가까이 있는 물건은 bu가 기본입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D008-Q2",
+          "answer": "kitap",
+          "evidence": "kitap은 책입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D008-Q3",
+          "answer": "Şu kalem.",
+          "evidence": "şu로 특정 대상을 가리킵니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D008-Q4",
+          "answer": "Bu ne?",
+          "evidence": "오늘은 고정 질문으로 익힙니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D008-Q5",
+          "answer": "anahtar",
+          "evidence": "anahtar는 열쇠입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D008-Q6",
+          "answer": "Bu defter.",
+          "evidence": "bu와 defter를 결합합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D009",
+      "revision": "r1-20261121a",
+      "prerequisiteDayIds": [
+        "D002",
+        "D008"
+      ],
+      "sourceEvidence": [
+        "GOKSEL_KERSLAKE",
+        "ESSENTIAL"
+      ],
+      "grammarAndOrthography": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사.",
+      "registerAndNaturalness": "두 개의 iki만 사용; 수 일반화는 D012.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D009-V1",
+          "tr": "kitaplar",
+          "ko": "책들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V2",
+          "tr": "kalemler",
+          "ko": "펜들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V3",
+          "tr": "masalar",
+          "ko": "테이블들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V4",
+          "tr": "sandalyeler",
+          "ko": "의자들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V5",
+          "tr": "çocuk",
+          "ko": "아이",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V6",
+          "tr": "çocuklar",
+          "ko": "아이들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V7",
+          "tr": "öğrenciler",
+          "ko": "학생들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V8",
+          "tr": "arkadaşlar",
+          "ko": "친구들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V9",
+          "tr": "bunlar",
+          "ko": "이것들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V10",
+          "tr": "şunlar",
+          "ko": "저것들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V11",
+          "tr": "onlar",
+          "ko": "그것들, 그들",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D009-V12",
+          "tr": "iki kitap",
+          "ko": "책 두 권",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D009-E1",
+          "tr": "Bunlar kitap.",
+          "ko": "이것들은 책입니다.",
+          "evidence": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사."
+        },
+        {
+          "id": "D009-E2",
+          "tr": "Şunlar kalem.",
+          "ko": "저것들은 펜입니다.",
+          "evidence": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사."
+        },
+        {
+          "id": "D009-E3",
+          "tr": "Bu masalar.",
+          "ko": "이 테이블들.",
+          "evidence": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사."
+        },
+        {
+          "id": "D009-E4",
+          "tr": "İki kitap.",
+          "ko": "책 두 권.",
+          "evidence": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사."
+        },
+        {
+          "id": "D009-E5",
+          "tr": "O çocuklar.",
+          "ko": "저 아이들.",
+          "evidence": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사."
+        },
+        {
+          "id": "D009-E6",
+          "tr": "Onlar öğrenci.",
+          "ko": "그들은 학생입니다.",
+          "evidence": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사."
+        },
+        {
+          "id": "D009-E7",
+          "tr": "Bunlar defter.",
+          "ko": "이것들은 공책입니다.",
+          "evidence": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사."
+        },
+        {
+          "id": "D009-E8",
+          "tr": "Kalemler.",
+          "ko": "펜들.",
+          "evidence": "-lar/-ler와 지시대명사 복수; 숫자+단수 명사."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D009-T1",
+          "role": "A",
+          "tr": "Bu ne?",
+          "ko": "이것은 뭐예요?",
+          "evidence": "두 개의 iki만 사용; 수 일반화는 D012."
+        },
+        {
+          "id": "D009-T2",
+          "role": "B",
+          "tr": "Bu kitap.",
+          "ko": "이것은 책입니다.",
+          "evidence": "두 개의 iki만 사용; 수 일반화는 D012."
+        },
+        {
+          "id": "D009-T3",
+          "role": "A",
+          "tr": "Bunlar ne?",
+          "ko": "이것들은 뭐예요?",
+          "evidence": "두 개의 iki만 사용; 수 일반화는 D012."
+        },
+        {
+          "id": "D009-T4",
+          "role": "B",
+          "tr": "Bunlar defter.",
+          "ko": "이것들은 공책입니다.",
+          "evidence": "두 개의 iki만 사용; 수 일반화는 D012."
+        },
+        {
+          "id": "D009-T5",
+          "role": "A",
+          "tr": "İki kalem, lütfen.",
+          "ko": "펜 두 개 부탁합니다.",
+          "evidence": "두 개의 iki만 사용; 수 일반화는 D012."
+        },
+        {
+          "id": "D009-T6",
+          "role": "B",
+          "tr": "İki kalem.",
+          "ko": "펜 두 개요.",
+          "evidence": "두 개의 iki만 사용; 수 일반화는 D012."
+        },
+        {
+          "id": "D009-T7",
+          "role": "A",
+          "tr": "Teşekkür ederim.",
+          "ko": "감사합니다.",
+          "evidence": "두 개의 iki만 사용; 수 일반화는 D012."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D009-Q1",
+          "answer": "kitaplar",
+          "evidence": "마지막 모음 a 때문에 -lar입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D009-Q2",
+          "answer": "kalemler",
+          "evidence": "마지막 e 때문에 -ler입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D009-Q3",
+          "answer": "iki kitap",
+          "evidence": "숫자가 명사를 꾸미면 보통 단수형입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D009-Q4",
+          "answer": "bunlar",
+          "evidence": "bunlar는 이 물건들입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D009-Q5",
+          "answer": "bu kitaplar",
+          "evidence": "명사 앞 지시어 bu는 변하지 않습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D009-Q6",
+          "answer": "öğrenciler",
+          "evidence": "마지막 i는 -ler를 고릅니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D010",
+      "revision": "r1-20261121",
+      "prerequisiteDayIds": [
+        "D004",
+        "D005",
+        "D009"
+      ],
+      "sourceEvidence": [
+        "ESSENTIAL"
+      ],
+      "grammarAndOrthography": "değil로 명사문 부정, 인칭 접사를 değil에 붙임.",
+      "registerAndNaturalness": "동사 부정은 평가하지 않음.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D010-V1",
+          "tr": "değil",
+          "ko": "아니다",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V2",
+          "tr": "değilim",
+          "ko": "나는 아니다",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V3",
+          "tr": "değilsin",
+          "ko": "너는 아니다",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V4",
+          "tr": "değilsiniz",
+          "ko": "당신은 아니다",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V5",
+          "tr": "öğretmen",
+          "ko": "교사",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V6",
+          "tr": "hemşire",
+          "ko": "간호사",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V7",
+          "tr": "aşçı",
+          "ko": "요리사",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V8",
+          "tr": "mühendis",
+          "ko": "엔지니어",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V9",
+          "tr": "polis",
+          "ko": "경찰",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V10",
+          "tr": "mutlu değilim",
+          "ko": "행복하지 않아요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D010-V11",
+          "tr": "hazır değilim",
+          "ko": "준비되지 않았어요",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D010-E1",
+          "tr": "Ben turist değilim.",
+          "ko": "저는 관광객이 아닙니다.",
+          "evidence": "değil로 명사문 부정, 인칭 접사를 değil에 붙임."
+        },
+        {
+          "id": "D010-E2",
+          "tr": "Ben öğrenci değilim.",
+          "ko": "저는 학생이 아닙니다.",
+          "evidence": "değil로 명사문 부정, 인칭 접사를 değil에 붙임."
+        },
+        {
+          "id": "D010-E3",
+          "tr": "Sen doktor değilsin.",
+          "ko": "너는 의사가 아니야.",
+          "evidence": "değil로 명사문 부정, 인칭 접사를 değil에 붙임."
+        },
+        {
+          "id": "D010-E4",
+          "tr": "Siz Türk değilsiniz.",
+          "ko": "당신은 튀르키예인이 아니세요.",
+          "evidence": "değil로 명사문 부정, 인칭 접사를 değil에 붙임."
+        },
+        {
+          "id": "D010-E5",
+          "tr": "O öğretmen değil.",
+          "ko": "그 사람은 교사가 아닙니다.",
+          "evidence": "değil로 명사문 부정, 인칭 접사를 değil에 붙임."
+        },
+        {
+          "id": "D010-E6",
+          "tr": "Bu kalem değil.",
+          "ko": "이것은 펜이 아닙니다.",
+          "evidence": "değil로 명사문 부정, 인칭 접사를 değil에 붙임."
+        },
+        {
+          "id": "D010-E7",
+          "tr": "Hazır değilim.",
+          "ko": "준비되지 않았어요.",
+          "evidence": "değil로 명사문 부정, 인칭 접사를 değil에 붙임."
+        },
+        {
+          "id": "D010-E8",
+          "tr": "Hayır, bu çanta değil.",
+          "ko": "아니요, 이것은 가방이 아닙니다.",
+          "evidence": "değil로 명사문 부정, 인칭 접사를 değil에 붙임."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D010-T1",
+          "role": "A",
+          "tr": "Merhaba! Ben doktorum.",
+          "ko": "안녕하세요! 저는 의사입니다.",
+          "evidence": "동사 부정은 평가하지 않음."
+        },
+        {
+          "id": "D010-T2",
+          "role": "B",
+          "tr": "Ben doktor değilim. Öğretmenim.",
+          "ko": "저는 의사가 아닙니다. 교사입니다.",
+          "evidence": "동사 부정은 평가하지 않음."
+        },
+        {
+          "id": "D010-T3",
+          "role": "A",
+          "tr": "Bu kitap.",
+          "ko": "이것은 책입니다.",
+          "evidence": "동사 부정은 평가하지 않음."
+        },
+        {
+          "id": "D010-T4",
+          "role": "B",
+          "tr": "Hayır, bu kitap değil. Bu defter.",
+          "ko": "아니요, 책이 아니라 공책입니다.",
+          "evidence": "동사 부정은 평가하지 않음."
+        },
+        {
+          "id": "D010-T5",
+          "role": "A",
+          "tr": "Teşekkürler.",
+          "ko": "감사합니다.",
+          "evidence": "동사 부정은 평가하지 않음."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D010-Q1",
+          "answer": "Ben öğrenci değilim.",
+          "evidence": "1인칭 접사가 değil에 붙습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D010-Q2",
+          "answer": "O doktor değil.",
+          "evidence": "3인칭 단수에는 기본 부정 değil을 씁니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D010-Q3",
+          "answer": "Siz Koreli değilsiniz.",
+          "evidence": "정중 2인칭 접사는 değilsiniz입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D010-Q4",
+          "answer": "Bu kalem değil.",
+          "evidence": "부정할 명사 뒤에 değil을 씁니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D010-Q5",
+          "answer": "öğretmen",
+          "evidence": "öğretmen은 교사입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D010-Q6",
+          "answer": "Hazır değilim.",
+          "evidence": "değilim은 1인칭 부정입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D011",
+      "revision": "r1-20261121",
+      "prerequisiteDayIds": [
+        "D004",
+        "D005",
+        "D008",
+        "D010"
+      ],
+      "sourceEvidence": [
+        "TDK_QUESTION",
+        "ESSENTIAL"
+      ],
+      "grammarAndOrthography": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤.",
+      "registerAndNaturalness": "의문사 질문과 예/아니요 질문 구분.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D011-V1",
+          "tr": "kim",
+          "ko": "누구",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V2",
+          "tr": "ne",
+          "ko": "무엇",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V3",
+          "tr": "mı",
+          "ko": "예/아니요 의문 입자 a/ı",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V4",
+          "tr": "mi",
+          "ko": "예/아니요 의문 입자 e/i",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V5",
+          "tr": "mu",
+          "ko": "예/아니요 의문 입자 o/u",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V6",
+          "tr": "mü",
+          "ko": "예/아니요 의문 입자 ö/ü",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V7",
+          "tr": "Bu kim?",
+          "ko": "이 사람은 누구예요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V8",
+          "tr": "Türk müsünüz?",
+          "ko": "튀르키예인이세요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V9",
+          "tr": "Turist misiniz?",
+          "ko": "관광객이세요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D011-V10",
+          "tr": "Hazır mısın?",
+          "ko": "준비됐어?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D011-E1",
+          "tr": "Bu kim?",
+          "ko": "이 사람은 누구예요?",
+          "evidence": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤."
+        },
+        {
+          "id": "D011-E2",
+          "tr": "Bu ne?",
+          "ko": "이것은 무엇이에요?",
+          "evidence": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤."
+        },
+        {
+          "id": "D011-E3",
+          "tr": "Bu kitap mı?",
+          "ko": "이것은 책이에요?",
+          "evidence": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤."
+        },
+        {
+          "id": "D011-E4",
+          "tr": "Bu telefon mu?",
+          "ko": "이것은 전화기예요?",
+          "evidence": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤."
+        },
+        {
+          "id": "D011-E5",
+          "tr": "Türk müsünüz?",
+          "ko": "튀르키예인이세요?",
+          "evidence": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤."
+        },
+        {
+          "id": "D011-E6",
+          "tr": "Turist misiniz?",
+          "ko": "관광객이세요?",
+          "evidence": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤."
+        },
+        {
+          "id": "D011-E7",
+          "tr": "Hazır mısın?",
+          "ko": "준비됐어?",
+          "evidence": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤."
+        },
+        {
+          "id": "D011-E8",
+          "tr": "Öğrenci miyim?",
+          "ko": "제가 학생인가요?",
+          "evidence": "kim/ne와 mı/mi/mu/mü; 띄어쓰기; 인칭 접사는 질문 입자 뒤."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D011-T1",
+          "role": "A",
+          "tr": "Merhaba! Türk müsünüz?",
+          "ko": "안녕하세요! 튀르키예인이세요?",
+          "evidence": "의문사 질문과 예/아니요 질문 구분."
+        },
+        {
+          "id": "D011-T2",
+          "role": "B",
+          "tr": "Hayır, Türk değilim. Koreliyim.",
+          "ko": "아니요, 튀르키예인이 아닙니다. 한국인입니다.",
+          "evidence": "의문사 질문과 예/아니요 질문 구분."
+        },
+        {
+          "id": "D011-T3",
+          "role": "A",
+          "tr": "Turist misiniz?",
+          "ko": "관광객이세요?",
+          "evidence": "의문사 질문과 예/아니요 질문 구분."
+        },
+        {
+          "id": "D011-T4",
+          "role": "B",
+          "tr": "Evet, turistim.",
+          "ko": "네, 관광객입니다.",
+          "evidence": "의문사 질문과 예/아니요 질문 구분."
+        },
+        {
+          "id": "D011-T5",
+          "role": "A",
+          "tr": "Bu kitap mı?",
+          "ko": "이것은 책인가요?",
+          "evidence": "의문사 질문과 예/아니요 질문 구분."
+        },
+        {
+          "id": "D011-T6",
+          "role": "B",
+          "tr": "Hayır, bu defter.",
+          "ko": "아니요, 공책입니다.",
+          "evidence": "의문사 질문과 예/아니요 질문 구분."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D011-Q1",
+          "answer": "Bu kim?",
+          "evidence": "kim은 사람의 정체를 묻습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D011-Q2",
+          "answer": "Bu kitap mı?",
+          "evidence": "mı는 앞말과 띄고 a와 조화합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D011-Q3",
+          "answer": "Bu telefon mu?",
+          "evidence": "마지막 o에 mu를 씁니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D011-Q4",
+          "answer": "Turist misiniz?",
+          "evidence": "마지막 i에 mi, 정중 접사 -siniz입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D011-Q5",
+          "answer": "Türk müsünüz?",
+          "evidence": "ü와 mü, 정중형 -sünüz가 결합합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D011-Q6",
+          "answer": "Bu ne?",
+          "evidence": "ne는 무엇인지 묻습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D012",
+      "revision": "r1-20261121a",
+      "prerequisiteDayIds": [
+        "D002",
+        "D009"
+      ],
+      "sourceEvidence": [
+        "ESSENTIAL"
+      ],
+      "grammarAndOrthography": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수.",
+      "registerAndNaturalness": "Kaç kalem? 수량 질문; 가상 숫자만 사용.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D012-V1",
+          "tr": "sıfır",
+          "ko": "0",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V2",
+          "tr": "bir",
+          "ko": "1",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V3",
+          "tr": "iki",
+          "ko": "2",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V4",
+          "tr": "üç",
+          "ko": "3",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V5",
+          "tr": "dört",
+          "ko": "4",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V6",
+          "tr": "beş",
+          "ko": "5",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V7",
+          "tr": "altı",
+          "ko": "6",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V8",
+          "tr": "yedi",
+          "ko": "7",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V9",
+          "tr": "sekiz",
+          "ko": "8",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V10",
+          "tr": "dokuz",
+          "ko": "9",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V11",
+          "tr": "on",
+          "ko": "10",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V12",
+          "tr": "yirmi",
+          "ko": "20",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V13",
+          "tr": "otuz",
+          "ko": "30",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V14",
+          "tr": "kırk",
+          "ko": "40",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V15",
+          "tr": "elli",
+          "ko": "50",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V16",
+          "tr": "altmış",
+          "ko": "60",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V17",
+          "tr": "yetmiş",
+          "ko": "70",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V18",
+          "tr": "seksen",
+          "ko": "80",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V19",
+          "tr": "doksan",
+          "ko": "90",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V20",
+          "tr": "yüz",
+          "ko": "100",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D012-V21",
+          "tr": "kaç",
+          "ko": "몇",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D012-E1",
+          "tr": "On bir.",
+          "ko": "11.",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        },
+        {
+          "id": "D012-E2",
+          "tr": "Yirmi üç.",
+          "ko": "23.",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        },
+        {
+          "id": "D012-E3",
+          "tr": "Kırk dört.",
+          "ko": "44.",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        },
+        {
+          "id": "D012-E4",
+          "tr": "Altmış beş.",
+          "ko": "65.",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        },
+        {
+          "id": "D012-E5",
+          "tr": "Doksan dokuz.",
+          "ko": "99.",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        },
+        {
+          "id": "D012-E6",
+          "tr": "Yüz.",
+          "ko": "100.",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        },
+        {
+          "id": "D012-E7",
+          "tr": "Üç kitap.",
+          "ko": "책 세 권.",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        },
+        {
+          "id": "D012-E8",
+          "tr": "Beş bardak.",
+          "ko": "잔 다섯 개.",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        },
+        {
+          "id": "D012-E9",
+          "tr": "Kaç kalem?",
+          "ko": "펜 몇 개?",
+          "evidence": "0~100, 십 단위+일 단위 순서, 숫자+명사 단수."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D012-T1",
+          "role": "A",
+          "tr": "Merhaba! Kaç kalem?",
+          "ko": "안녕하세요! 펜 몇 개요?",
+          "evidence": "Kaç kalem? 수량 질문; 가상 숫자만 사용."
+        },
+        {
+          "id": "D012-T2",
+          "role": "B",
+          "tr": "Üç kalem, lütfen.",
+          "ko": "펜 세 개 부탁합니다.",
+          "evidence": "Kaç kalem? 수량 질문; 가상 숫자만 사용."
+        },
+        {
+          "id": "D012-T3",
+          "role": "A",
+          "tr": "Üç kalem.",
+          "ko": "펜 세 개요.",
+          "evidence": "Kaç kalem? 수량 질문; 가상 숫자만 사용."
+        },
+        {
+          "id": "D012-T4",
+          "role": "B",
+          "tr": "Evet, teşekkürler.",
+          "ko": "네, 감사합니다.",
+          "evidence": "Kaç kalem? 수량 질문; 가상 숫자만 사용."
+        },
+        {
+          "id": "D012-T5",
+          "role": "A",
+          "tr": "Rica ederim.",
+          "ko": "천만에요.",
+          "evidence": "Kaç kalem? 수량 질문; 가상 숫자만 사용."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D012-Q1",
+          "answer": "yirmi üç",
+          "evidence": "20 뒤에 3을 씁니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D012-Q2",
+          "answer": "kırk dört",
+          "evidence": "40과 4를 순서대로 씁니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D012-Q3",
+          "answer": "altmış beş",
+          "evidence": "60은 altmış입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D012-Q4",
+          "answer": "doksan dokuz",
+          "evidence": "90 뒤에 9를 놓습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D012-Q5",
+          "answer": "yüz",
+          "evidence": "100은 yüz입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D012-Q6",
+          "answer": "üç kitap",
+          "evidence": "숫자+단수 명사입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D012-Q7",
+          "answer": "sıfır",
+          "evidence": "0은 sıfır입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D013",
+      "revision": "r1-20261121",
+      "prerequisiteDayIds": [
+        "D004",
+        "D005",
+        "D011",
+        "D012"
+      ],
+      "sourceEvidence": [
+        "ESSENTIAL"
+      ],
+      "grammarAndOrthography": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가.",
+      "registerAndNaturalness": "나이 질문 선택적. 역할카드는 허구, 국적/직업 명사문 활용.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [
+        {
+          "id": "D013-V1",
+          "tr": "yaş",
+          "ko": "나이",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V2",
+          "tr": "Kaç yaşındasınız?",
+          "ko": "몇 살이세요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V3",
+          "tr": "Kaç yaşındasın?",
+          "ko": "몇 살이야?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V4",
+          "tr": "yaşındayım",
+          "ko": "~살입니다",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V5",
+          "tr": "Nerelisiniz?",
+          "ko": "어느 나라·지역 출신이세요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V6",
+          "tr": "Ne iş yapıyorsunuz?",
+          "ko": "무슨 일을 하세요?",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V7",
+          "tr": "Japon",
+          "ko": "일본인",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V8",
+          "tr": "Alman",
+          "ko": "독일인",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V9",
+          "tr": "İngiliz",
+          "ko": "영국인",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V10",
+          "tr": "memur",
+          "ko": "공무원, 사무직 직원",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V11",
+          "tr": "emekli",
+          "ko": "은퇴자",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        },
+        {
+          "id": "D013-V12",
+          "tr": "çalışan",
+          "ko": "일하는 사람, 직원",
+          "evidence": "author contextual gloss; TDK_DICT entry independent check pending"
+        }
+      ],
+      "examples": [
+        {
+          "id": "D013-E1",
+          "tr": "Otuz yaşındayım.",
+          "ko": "저는 서른 살입니다.",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        },
+        {
+          "id": "D013-E2",
+          "tr": "Kırk iki yaşındayım.",
+          "ko": "저는 마흔두 살입니다.",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        },
+        {
+          "id": "D013-E3",
+          "tr": "Kaç yaşındasınız?",
+          "ko": "몇 살이세요?",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        },
+        {
+          "id": "D013-E4",
+          "tr": "Nerelisiniz?",
+          "ko": "어디 출신이세요?",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        },
+        {
+          "id": "D013-E5",
+          "tr": "Koreliyim.",
+          "ko": "저는 한국인입니다.",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        },
+        {
+          "id": "D013-E6",
+          "tr": "Ne iş yapıyorsunuz?",
+          "ko": "무슨 일을 하세요?",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        },
+        {
+          "id": "D013-E7",
+          "tr": "Mühendisim.",
+          "ko": "저는 엔지니어입니다.",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        },
+        {
+          "id": "D013-E8",
+          "tr": "Öğretmenim.",
+          "ko": "저는 교사입니다.",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        },
+        {
+          "id": "D013-E9",
+          "tr": "Emekliyim.",
+          "ko": "저는 은퇴자입니다.",
+          "evidence": "고정 yaşındayım/Kaç yaşındasınız/Nerelisiniz/Ne iş yapıyorsunuz; 일반 활용 미평가."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D013-T1",
+          "role": "A",
+          "tr": "Merhaba! Adım Deniz. Nerelisiniz?",
+          "ko": "안녕하세요! 저는 데니즈입니다. 어디 출신이세요?",
+          "evidence": "나이 질문 선택적. 역할카드는 허구, 국적/직업 명사문 활용."
+        },
+        {
+          "id": "D013-T2",
+          "role": "B",
+          "tr": "Koreliyim. Adım Mert.",
+          "ko": "저는 한국인입니다. 이름은 메르트입니다.",
+          "evidence": "나이 질문 선택적. 역할카드는 허구, 국적/직업 명사문 활용."
+        },
+        {
+          "id": "D013-T3",
+          "role": "A",
+          "tr": "Ne iş yapıyorsunuz?",
+          "ko": "무슨 일을 하세요?",
+          "evidence": "나이 질문 선택적. 역할카드는 허구, 국적/직업 명사문 활용."
+        },
+        {
+          "id": "D013-T4",
+          "role": "B",
+          "tr": "Mühendisim. Ya siz?",
+          "ko": "저는 엔지니어입니다. 그쪽은요?",
+          "evidence": "나이 질문 선택적. 역할카드는 허구, 국적/직업 명사문 활용."
+        },
+        {
+          "id": "D013-T5",
+          "role": "A",
+          "tr": "Öğretmenim. Memnun oldum.",
+          "ko": "저는 교사입니다. 반갑습니다.",
+          "evidence": "나이 질문 선택적. 역할카드는 허구, 국적/직업 명사문 활용."
+        },
+        {
+          "id": "D013-T6",
+          "role": "B",
+          "tr": "Ben de memnun oldum.",
+          "ko": "저도 반갑습니다.",
+          "evidence": "나이 질문 선택적. 역할카드는 허구, 국적/직업 명사문 활용."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D013-Q1",
+          "answer": "Kaç yaşındasınız?",
+          "evidence": "정중한 나이 질문입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D013-Q2",
+          "answer": "Kırk iki yaşındayım.",
+          "evidence": "kırk iki는 42, yaşındayım은 나의 나이입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D013-Q3",
+          "answer": "Nerelisiniz?",
+          "evidence": "Nerelisiniz는 출신을 묻습니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D013-Q4",
+          "answer": "Ne iş yapıyorsunuz?",
+          "evidence": "직업 질문을 통째로 익힙니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D013-Q5",
+          "answer": "Mühendisim.",
+          "evidence": "mühendis의 마지막 i에 -im을 붙입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D013-Q6",
+          "answer": "Emekliyim.",
+          "evidence": "모음 끝 emekli에 -yim입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    },
+    {
+      "dayId": "D014",
+      "revision": "r1-20261121",
+      "prerequisiteDayIds": [
+        "D008",
+        "D009",
+        "D010",
+        "D011",
+        "D012",
+        "D013"
+      ],
+      "sourceEvidence": [
+        "CEFR2020"
+      ],
+      "grammarAndOrthography": "W02 4기능 평가; D008~D013 범위.",
+      "registerAndNaturalness": "01 평가 승인, 05 독립 검수 필요.",
+      "translationCheck": "KO gloss reviewed by author in context; external native verification pending.",
+      "vocabulary": [],
+      "examples": [
+        {
+          "id": "D014-E1",
+          "tr": "Bu ne?",
+          "ko": "이것은 뭐예요?",
+          "evidence": "W02 4기능 평가; D008~D013 범위."
+        },
+        {
+          "id": "D014-E2",
+          "tr": "Bunlar kitap.",
+          "ko": "이것들은 책입니다.",
+          "evidence": "W02 4기능 평가; D008~D013 범위."
+        },
+        {
+          "id": "D014-E3",
+          "tr": "Bu telefon mu?",
+          "ko": "이것은 전화기예요?",
+          "evidence": "W02 4기능 평가; D008~D013 범위."
+        },
+        {
+          "id": "D014-E4",
+          "tr": "Ben doktor değilim.",
+          "ko": "저는 의사가 아닙니다.",
+          "evidence": "W02 4기능 평가; D008~D013 범위."
+        },
+        {
+          "id": "D014-E5",
+          "tr": "Yirmi sekiz.",
+          "ko": "28.",
+          "evidence": "W02 4기능 평가; D008~D013 범위."
+        },
+        {
+          "id": "D014-E6",
+          "tr": "Otuz yaşındayım.",
+          "ko": "저는 서른 살입니다.",
+          "evidence": "W02 4기능 평가; D008~D013 범위."
+        },
+        {
+          "id": "D014-E7",
+          "tr": "Nerelisiniz?",
+          "ko": "어디 출신이세요?",
+          "evidence": "W02 4기능 평가; D008~D013 범위."
+        },
+        {
+          "id": "D014-E8",
+          "tr": "Ne iş yapıyorsunuz?",
+          "ko": "무슨 일을 하세요?",
+          "evidence": "W02 4기능 평가; D008~D013 범위."
+        }
+      ],
+      "dialogue": [
+        {
+          "id": "D014-T1",
+          "role": "A",
+          "tr": "Merhaba! Bu kitap mı?",
+          "ko": "안녕하세요! 이것은 책인가요?",
+          "evidence": "01 평가 승인, 05 독립 검수 필요."
+        },
+        {
+          "id": "D014-T2",
+          "role": "B",
+          "tr": "Hayır, bu defter.",
+          "ko": "아니요, 공책입니다.",
+          "evidence": "01 평가 승인, 05 독립 검수 필요."
+        },
+        {
+          "id": "D014-T3",
+          "role": "A",
+          "tr": "Kaç defter?",
+          "ko": "공책 몇 권이요?",
+          "evidence": "01 평가 승인, 05 독립 검수 필요."
+        },
+        {
+          "id": "D014-T4",
+          "role": "B",
+          "tr": "İki defter, lütfen.",
+          "ko": "공책 두 권 부탁합니다.",
+          "evidence": "01 평가 승인, 05 독립 검수 필요."
+        },
+        {
+          "id": "D014-T5",
+          "role": "A",
+          "tr": "Nerelisiniz?",
+          "ko": "어디 출신이세요?",
+          "evidence": "01 평가 승인, 05 독립 검수 필요."
+        },
+        {
+          "id": "D014-T6",
+          "role": "B",
+          "tr": "Koreliyim. Turistim.",
+          "ko": "저는 한국인입니다. 관광객입니다.",
+          "evidence": "01 평가 승인, 05 독립 검수 필요."
+        },
+        {
+          "id": "D014-T7",
+          "role": "A",
+          "tr": "Memnun oldum.",
+          "ko": "반갑습니다.",
+          "evidence": "01 평가 승인, 05 독립 검수 필요."
+        },
+        {
+          "id": "D014-T8",
+          "role": "B",
+          "tr": "Ben de.",
+          "ko": "저도요.",
+          "evidence": "01 평가 승인, 05 독립 검수 필요."
+        }
+      ],
+      "questions": [
+        {
+          "id": "D014-Q1",
+          "answer": "bunlar",
+          "evidence": "복수 대명사는 bunlar입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D014-Q2",
+          "answer": "sandalyeler",
+          "evidence": "마지막 e 뒤에 -ler입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D014-Q3",
+          "answer": "Ben doktor değilim.",
+          "evidence": "1인칭 부정은 değilim입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D014-Q4",
+          "answer": "Bu telefon mu?",
+          "evidence": "o와 조화하는 mu는 앞말과 띕니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D014-Q5",
+          "answer": "yirmi sekiz",
+          "evidence": "20에 8을 더합니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D014-Q6",
+          "answer": "beş kitap",
+          "evidence": "숫자 뒤 단수 명사입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D014-Q7",
+          "answer": "Nerelisiniz?",
+          "evidence": "출신 질문입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        },
+        {
+          "id": "D014-Q8",
+          "answer": "Otuz yaşındayım.",
+          "evidence": "otuz는 30이고 1인칭 고정 표현입니다.",
+          "answerUniqueness": "pass",
+          "independentAccuracy": "pending"
+        }
+      ],
+      "result": "structure_checked; independent language/audio pending"
+    }
+  ],
+  "knownIssues": [
+    "01 branch discovered but identical to main at lookup; no available 01 handoff. Reconcile with eventual mapping, do not treat as approved.",
+    "03 must support separate four-skill assessment UI; question explanations are optional schema field and may not render in current runtime.",
+    "60-minute timing is designed, not tested with actual learners.",
+    "All source examples and explanations are original; external source evidence does not certify individual lexical usage. 05 native/independent cross-check required."
+  ]
+}
