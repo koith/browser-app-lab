@@ -1,0 +1,42 @@
+{
+  "runId": "20261121-2241-auto-r11",
+  "stage": "P0",
+  "before": {
+    "total": 44,
+    "complete": 2
+  },
+  "after": {
+    "total": 44,
+    "complete": 2
+  },
+  "actualChanges": [
+    {
+      "pr": 1417,
+      "head": "3bb911a42743ab091b2acf11f319571eb0448bc8",
+      "files": [
+        "app/release-gate.js",
+        "index.html",
+        "handoffs/03/20261121-artifact-2241.json"
+      ]
+    }
+  ],
+  "tests": [
+    "Remote blob readback verified; browser tests not performed"
+  ],
+  "activePR": [
+    1409,
+    1416,
+    1417
+  ],
+  "mergedPR": [],
+  "remaining": 42,
+  "blockers": [
+    "Independent QA and semantic linkage pending; robotic audio rejected; no release"
+  ],
+  "nextAction": "Resume #1417 runtime test and semantic validation; #1416 mergeability changed on repeat query, inspect for isolated draft integration.",
+  "outcome": "partial implementation, no final completion",
+  "schedule": {
+    "stage": "hourly"
+  },
+  "publishedDays": 0
+}
