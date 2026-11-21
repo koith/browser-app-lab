@@ -51,7 +51,7 @@
       "acceptance": [
         "D4/D6 결과별 하늘 낙하/튕김/정지 원본 시퀀스를 리소스 근거로 구현하고 실제 결과와 일치"
       ],
-      "currentTail": "… D6 1171.obs and D4 1223.obs extra 63 PNG frames deployed. Source slot20 tumble -> slot12 impact -> confirmed engine final pips. Pixel/frame keys VERIFIED by source hashes and Chromium/WebKit. Fall/impact role, original timing, effect event 2125, slot13/3D native mesh unverified.",
+      "currentTail": "…fect event 2125, slot13/3D native mesh unverified. | 2026-11-20: DIE-02 native 2D source animation/ten outcomes accepted separately; M07 remains OPEN for authentic original 3D mesh, source-defined fall/rebound trajectory, native EXE tick ms, and verified slot-to-action semantics.",
       "evidence": [
         "apps/4leaf/rog/tests/chr-19-recovered-real-game.cjs",
         "apps/4leaf/rog/tests/dice-original-roll-tables.cjs"
