@@ -299,6 +299,7 @@ function validArchivedProfileImage(path,kind){
   if(typeof path!=="string"||path.length>420||!ACCOUNT_KEY.test(state.account))return "";
   const prefix="/api/account-archives/"+state.account+"/profile-asset/"+kind;
   if(path===prefix)return path;
+  if(!path.startsWith(prefix))return "";
   const suffix=path.slice(prefix.length);
   return /^\?snapshot=snap-[0-9]{20}-[a-f0-9]{16}\.json$/.test(suffix)?path:"";
 }
@@ -308,6 +309,7 @@ function applyArchivedProfileImage(kind,path){
   const image=$(kind==="banner"?"coverImage":"avatarImage");
   const fallback=$("avatarFallback");
   const account=state.account;
+  const selected=state.profile;
   const valid=validArchivedProfileImage(path,kind);
   image.onload=null;image.onerror=null;
   image.hidden=true;image.removeAttribute("src");
@@ -315,13 +317,13 @@ function applyArchivedProfileImage(kind,path){
   if(kind==="avatar")fallback.hidden=false;
   if(!valid)return;
   image.onload=()=>{
-    if(state.account!==account||image.getAttribute("src")!==valid)return;
+    if(state.account!==account||state.profile!==selected||image.getAttribute("src")!==valid)return;
     if(!image.naturalWidth||!image.naturalHeight){image.onerror();return;}
     image.hidden=false;frame.classList.add("has-image");
     if(kind==="avatar")fallback.hidden=true;
   };
   image.onerror=()=>{
-    if(state.account!==account||image.getAttribute("src")!==valid)return;
+    if(state.account!==account||state.profile!==selected||image.getAttribute("src")!==valid)return;
     image.hidden=true;frame.classList.remove("has-image");
     if(kind==="avatar")fallback.hidden=false;
     const msg=kind==="banner"?"헤더 이미지 파일을 읽지 못했습니다.":"프로필 사진 파일을 읽지 못했습니다.";
