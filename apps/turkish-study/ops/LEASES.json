@@ -1,6 +1,57 @@
 {
   "version": "1.0.0",
-  "generation": 4,
-  "leases": {},
+  "generation": 5,
+  "leases": {
+    "orchestrator:auto": {
+      "token": "auto-20261121-1043-r2",
+      "actor": "auto",
+      "role": "00",
+      "taskIds": [
+        "P0-05-01",
+        "P0-05-02"
+      ],
+      "branch": "main",
+      "baseCommit": null,
+      "paths": [],
+      "acquiredAt": "2026-11-21T10:43:00Z",
+      "heartbeatAt": "2026-11-21T10:43:00Z",
+      "expiresAt": "2026-11-21T12:13:00Z"
+    },
+    "role:00": {
+      "token": "auto-20261121-1043-r2",
+      "actor": "auto",
+      "role": "00",
+      "taskIds": [
+        "P0-05-01",
+        "P0-05-02"
+      ],
+      "branch": "main",
+      "baseCommit": null,
+      "paths": [
+        "ops/"
+      ],
+      "acquiredAt": "2026-11-21T10:43:00Z",
+      "heartbeatAt": "2026-11-21T10:43:00Z",
+      "expiresAt": "2026-11-21T12:13:00Z"
+    },
+    "role:05": {
+      "token": "auto-20261121-1043-r2",
+      "actor": "auto",
+      "role": "05",
+      "taskIds": [
+        "P0-05-01",
+        "P0-05-02"
+      ],
+      "branch": "turkish/05-p0-audit-1043",
+      "baseCommit": null,
+      "paths": [
+        "qa/auto-20261121-1043.json",
+        "handoffs/05/auto-20261121-1043.json"
+      ],
+      "acquiredAt": "2026-11-21T10:43:00Z",
+      "heartbeatAt": "2026-11-21T10:43:00Z",
+      "expiresAt": "2026-11-21T12:13:00Z"
+    }
+  },
   "note": "CAS via GitHub update_file using latest blob SHA; coordination-only exception to 00 merge rule; no secret/user data."
 }
