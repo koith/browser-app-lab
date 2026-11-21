@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generation": 9,
+  "generation": 10,
   "leases": {
     "orchestrator:auto": {
       "token": "20261121-2241-auto-r11",
@@ -13,6 +13,24 @@
       "baseCommit": null,
       "paths": [
         "apps/turkish-study/ops/runs/"
+      ],
+      "acquiredAt": "2026-11-21T22:41:35Z",
+      "heartbeatAt": "2026-11-21T22:41:35Z",
+      "expiresAt": "2026-11-21T23:41:35Z"
+    },
+    "role:03": {
+      "token": "20261121-2241-auto-r11",
+      "actor": "auto",
+      "role": "03",
+      "taskIds": [
+        "P0-03-03"
+      ],
+      "branch": "turkish/03-artifact-binding-2241",
+      "baseCommit": "84afecfcf42942773e87098a799348f1a5e10216",
+      "paths": [
+        "apps/turkish-study/app/release-gate.js",
+        "apps/turkish-study/index.html",
+        "apps/turkish-study/handoffs/03/"
       ],
       "acquiredAt": "2026-11-21T22:41:35Z",
       "heartbeatAt": "2026-11-21T22:41:35Z",
