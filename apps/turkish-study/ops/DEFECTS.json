@@ -96,9 +96,10 @@
       "title": "음성 대상 100→220 불일치 및 실제 저장 부족",
       "evidence": [
         "draft PR #1409 old lesson blob d7ace3fb..., 1 committed binary",
-        "content/audio-targets-first-fortnight.json 220 P0, 402 total"
+        "content/audio-targets-first-fortnight.json 220 P0, 402 total",
+        "2026-11-21 user listening feedback: robotic preview MP3 rejected; qa/auto-20261121-1043.json"
       ],
-      "resolution": "resume draft using new exact targets; real assets or verified tr-TR local TTS with per-target evidence; independent hearing."
+      "resolution": "Stop robotic eSpeak learning playback; resume #1409 with licensed native recordings first, modern neural tr-TR fallback only within free/approved scope. Verify exact target/revision/license, real playback and independent hearing, including pronunciation, prosody, rhythm, letter names/phonemes, silence/clipping. Decode/count alone never PASS."
     },
     {
       "id": "F-07",
