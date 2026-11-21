@@ -1,0 +1,845 @@
+{
+  "version": "1.0.0",
+  "asOf": "2026-11-21",
+  "authority": "DEVELOPMENT_LEDGER.json is sole counted work ledger",
+  "selection": "own role; ready/resume first; P0 blockers before P1 runway before P2; satisfied work-unit prerequisites from exact evidence, not broad parent task completion; skip busy paths",
+  "milestone": "P0_FIRST_WEEK",
+  "buffer": {
+    "minimumDays": 7,
+    "targetDays": 14,
+    "approvedDays": 0,
+    "learnerProgressUnknown": true,
+    "privacy": "Do not read or store private learner data in GitHub; use aggregate progress only if available."
+  },
+  "workUnits": [
+    {
+      "id": "P0-01-01",
+      "owner": "01",
+      "parentIds": [
+        "CUR-01",
+        "CUR-02",
+        "CON-10"
+      ],
+      "priority": "P0",
+      "rank": 1,
+      "state": "ready",
+      "requires": [],
+      "action": "D001~D014 교재 revision과 상세 매핑/선수 범위 대조, W01/W02 루브릭 불일치 정리. D015~D021은 독립 가능.",
+      "acceptance": "curriculum-mapping 최신 교재 대조표와 W01/W02 acceptance 연결; 승인 루브릭 10+10, 쓰기 기준 및 시간표 유지. 02/05에 인수인계.",
+      "defects": [
+        "F-01",
+        "F-02"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-02-01",
+      "owner": "02",
+      "parentIds": [
+        "CON-01",
+        "CON-08",
+        "CON-09"
+      ],
+      "priority": "P0",
+      "rank": 2,
+      "state": "ready",
+      "requires": [],
+      "action": "W01 평가를 01 기준에 맞춰 10 듣기+10 읽기와 25점 쓰기·25점 상호작용으로 수정. 기존 수업 ID/정답/순서 보전. QA baseline 결함도 최신 revision 기준 확인.",
+      "acceptance": "assessment와 lesson audio 참조 재검증, 기존 ID/점수 변경은 별도 revision, 01·05 확인 요청; 듣기 문항 음성 목록 확정.",
+      "defects": [
+        "F-01",
+        "F-02"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-03-01",
+      "owner": "03",
+      "parentIds": [
+        "DEP-02",
+        "APP-02",
+        "DEP-01"
+      ],
+      "priority": "P0",
+      "rank": 1,
+      "state": "ready",
+      "requires": [],
+      "action": "공개 Pages 0.1.0→main 0.1.1 동기화 및 fail-closed 0일 상태 확인. 이전 캐시 회귀와 공용 설정 영향 조사.",
+      "acceptance": "실제 URL 200/렌더 버전·gate script 응답 및 미승인 수업 차단, 공개 배포 SHA/시간. 타 앱/공용 Pages 설정 무단 수정 금지.",
+      "defects": [
+        "F-03"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-03-02",
+      "owner": "03",
+      "parentIds": [
+        "APP-04",
+        "APP-08",
+        "CON-09"
+      ],
+      "priority": "P0",
+      "rank": 3,
+      "state": "ready",
+      "requires": [],
+      "action": "확정 교재 설명·60분 활동·숨김 듣기 및 W01 4영역 시험 UI 준비. 기존 choice 채점/백업 호환. 파일 겹치면 P0-03-01 병합 후 진행.",
+      "acceptance": "독립 기능 테스트, 영역별 25점/80 및 각 15점, 미응시 상태/오디오 차단, 실제 결과 보존.",
+      "defects": [
+        "F-04",
+        "F-01"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-03-03",
+      "owner": "03",
+      "parentIds": [
+        "APP-02",
+        "DEP-01"
+      ],
+      "priority": "P0",
+      "rank": 4,
+      "state": "ready",
+      "requires": [],
+      "action": "승인 artifact의 정확한 해시와 수업 revision을 검증하는 fail-closed 규격 구현; offline에도 승인 snapshot 동일성 확인. ADR-00-002 적용.",
+      "acceptance": "위변조·혼합 버전·해시 없음·오프라인 캐시 테스트. 미승인 목록은 항상 차단.",
+      "defects": [
+        "F-05"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-04-01",
+      "owner": "04",
+      "parentIds": [
+        "AUD-01",
+        "AUD-03"
+      ],
+      "priority": "P0",
+      "rank": 1,
+      "state": "resume",
+      "requires": [],
+      "action": "draft #1409와 최신 220개 P0 음성 대상 대조. 실제 mp3/검증된 기기 TTS 계획과 증거 갱신. 현재 샘플 1개; binary 전송 대안 조사 후 실제 저장.",
+      "acceptance": "정확한 text/targetId/lessonRevision, 재배포 가능 license, 실제 asset SHA 및 재생. 220개 목표 및 평가 추가 대상에 대한 차이 기록.",
+      "defects": [
+        "F-06"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-04-02",
+      "owner": "04",
+      "parentIds": [
+        "AUD-02",
+        "AUD-01"
+      ],
+      "priority": "P0",
+      "rank": 2,
+      "state": "ready",
+      "requires": [],
+      "action": "ADR-04-001 조건부 통합 검토, 실제 기기 음성/녹음 시험 준비, 03에 session interface/manifest 전달.",
+      "acceptance": "권한거부/재생속도/반복·녹음 삭제·외부 전송 없음, 테스트 환경 명시.",
+      "defects": [
+        "F-06",
+        "F-07"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-05-01",
+      "owner": "05",
+      "parentIds": [
+        "QA-01",
+        "QA-02",
+        "QA-03"
+      ],
+      "priority": "P0",
+      "rank": 1,
+      "state": "ready",
+      "requires": [],
+      "action": "최신 lesson blob f6706f31...과 01 mapping/02 시험을 전수 독립 재검수; 이전 7일 baseline 결과를 최신 revision 승인으로 이전하지 않음.",
+      "acceptance": "각 D001~D007 항목별 결함·출처·정답·선수학습·분량 evidence, W01 불일치 확인 및 최신수정 재검수.",
+      "defects": [
+        "F-02",
+        "F-01"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-05-02",
+      "owner": "05",
+      "parentIds": [
+        "DEP-03",
+        "DEP-04",
+        "DB-02"
+      ],
+      "priority": "P0",
+      "rank": 2,
+      "state": "ready",
+      "requires": [],
+      "action": "main v0.1.1 실제 Chromium/WebKit 및 공개 Pages, 기기 기록 분리/재접속/백업과 gate 검증. 로컬 fixture와 운영 구분.",
+      "acceptance": "실제 브라우저 결과 및 정확한 artifact revision; 물리 iPhone 검증 못하면 명시. 기기·음성 결과 없이 P0 승인 금지.",
+      "defects": [
+        "F-03",
+        "F-07"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-05-03",
+      "owner": "05",
+      "parentIds": [
+        "QA-04"
+      ],
+      "priority": "P0",
+      "rank": 3,
+      "state": "blocked",
+      "requires": [
+        "P0-04-01"
+      ],
+      "action": "최신 오디오 문장 전수 청취 및 라이선스·발음·실제 재생 검수.",
+      "acceptance": "220개+추가 평가 targets, 독립 청취, iPhone/PC 비교 증거.",
+      "defects": [
+        "F-06",
+        "F-07"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-00-01",
+      "owner": "00",
+      "parentIds": [],
+      "priority": "P0",
+      "rank": 1,
+      "state": "ready",
+      "requires": [],
+      "action": "네 영역 병합 후 공개 버전·안전 gate·최신 PR·후속 큐 재확인; 충돌 조정 및 증거 병합.",
+      "acceptance": "main readback·정확한 공개 version 및 P0 no-go 유지/승인 근거.",
+      "defects": [
+        "F-03",
+        "F-05"
+      ],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P0-00-02",
+      "owner": "00",
+      "parentIds": [],
+      "priority": "P0",
+      "rank": 2,
+      "state": "blocked",
+      "requires": [
+        "P0-01-01",
+        "P0-02-01",
+        "P0-03-01",
+        "P0-03-02",
+        "P0-03-03",
+        "P0-04-01",
+        "P0-04-02",
+        "P0-05-01",
+        "P0-05-02",
+        "P0-05-03"
+      ],
+      "action": "D001-D007 출시 후보 exact revision 승인 및 manifest 업데이트.",
+      "acceptance": "RELEASE_GATES.md P0 모두 pass, 실제 공개 후 검증. 이후 P1 전환 및 알림 1회.",
+      "defects": [],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P1-01-01",
+      "owner": "01",
+      "parentIds": [
+        "CUR-02",
+        "CUR-03"
+      ],
+      "priority": "P1",
+      "rank": 2,
+      "state": "ready",
+      "requires": [],
+      "action": "D015-D021 목표 및 선수학습 작성; 14일 버퍼 확보용.",
+      "acceptance": "매핑 7일, 출처·목표·평가 및 02 전달.",
+      "defects": [],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P1-02-01",
+      "owner": "02",
+      "parentIds": [
+        "CON-02"
+      ],
+      "priority": "P1",
+      "rank": 2,
+      "state": "ready",
+      "requires": [],
+      "action": "D008-D014 교재 보정 및 D015-D021 선행 제작; 첫주 lesson 파일 PR과 충돌 피함.",
+      "acceptance": "7일 후속 후보+해설+수업 계획; 05/04 handoff.",
+      "defects": [],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P1-03-01",
+      "owner": "03",
+      "parentIds": [
+        "DB-01",
+        "DB-03",
+        "DB-04",
+        "DB-05"
+      ],
+      "priority": "P1",
+      "rank": 2,
+      "state": "ready",
+      "requires": [],
+      "action": "독립 무료 DB/Auth 후보, local→cloud 이관 계획·테스트; 기존 운영 DB 변경 금지.",
+      "acceptance": "무료 한도/보안 확인, 2계정 RLS 실운영 및 복구 검증. 유료 승인은 사용자에게.",
+      "defects": [],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P1-04-01",
+      "owner": "04",
+      "parentIds": [
+        "AUD-01",
+        "AUD-03"
+      ],
+      "priority": "P1",
+      "rank": 2,
+      "state": "ready",
+      "requires": [],
+      "action": "D008-D014 182개 목표 음성 선행 준비(동일 파일 작업은 P0 branch와 조율).",
+      "acceptance": "P0 방식의 실제 음성·라이선스 증거.",
+      "defects": [],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    },
+    {
+      "id": "P1-05-01",
+      "owner": "05",
+      "parentIds": [
+        "QA-02",
+        "QA-03"
+      ],
+      "priority": "P1",
+      "rank": 2,
+      "state": "ready",
+      "requires": [],
+      "action": "D008-D014 최신 draft 독립 검수, P0와 작성 파일 분리.",
+      "acceptance": "revision 및 day별 증거, 수정 요청.",
+      "defects": [],
+      "countedInLedger": false,
+      "branch": null,
+      "pr": null,
+      "checkpoint": null
+    }
+  ],
+  "remainingParentQueue": [
+    {
+      "id": "RES-03",
+      "owner": "01",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "한국인용 대조문법 학습 순서 설계",
+      "acceptance": "단계 및 선수학습 근거 문서화"
+    },
+    {
+      "id": "CUR-01",
+      "owner": "01",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "120일 목차 및 월간 평가일",
+      "acceptance": "120 unique IDs, day1-120, day30/60/90/120"
+    },
+    {
+      "id": "CUR-02",
+      "owner": "01",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "CEFR·Maarif 세부 성취기준 매핑",
+      "acceptance": "일일 목표별 descriptor 및 원문 위치"
+    },
+    {
+      "id": "CUR-03",
+      "owner": "01",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "어휘 선정/중복 제거",
+      "acceptance": "1000 활용+500 이해 목표, 표제어/구문 검수"
+    },
+    {
+      "id": "CON-01",
+      "owner": "02",
+      "priority": "P0",
+      "dependencies": [
+        "CUR-01",
+        "CUR-02"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "D001~D007 콘텐츠",
+      "acceptance": "7일 본문·단어·예문·회화·문제와 독립 언어/음성 검수"
+    },
+    {
+      "id": "CON-02",
+      "owner": "02",
+      "priority": "P1",
+      "dependencies": [
+        "CUR-02"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "D008~D063 A1 본문 콘텐츠",
+      "acceptance": "56일 완전 수업 및 검수"
+    },
+    {
+      "id": "CON-03",
+      "owner": "02",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "D064~D120 A2 본문 콘텐츠",
+      "acceptance": "57일 완전 수업 및 검수"
+    },
+    {
+      "id": "CON-04",
+      "owner": "02",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "문법 교재/활용형/모음조화",
+      "acceptance": "검색·규칙·예외·독립 검수"
+    },
+    {
+      "id": "CON-05",
+      "owner": "02",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "실전 회화 및 분기형 시나리오",
+      "acceptance": "상황별 자연스러운 분기와 한국어 설명"
+    },
+    {
+      "id": "CON-06",
+      "owner": "02",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "에스키셰히르 현지 생활/교류 자료",
+      "acceptance": "지역 정보 출처와 표현 검수"
+    },
+    {
+      "id": "CON-07",
+      "owner": "02",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "듣기/말하기/받아쓰기 문제 풀",
+      "acceptance": "일일 모든 수업에 독립 듣기 및 말하기 과업"
+    },
+    {
+      "id": "CON-08",
+      "owner": "02",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "일일 평가 문제와 해설",
+      "acceptance": "120일 모든 필수 문제, 정답 및 선수학습 감사"
+    },
+    {
+      "id": "CON-09",
+      "owner": "02",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "주간 평가",
+      "acceptance": "17주 4기능 평가"
+    },
+    {
+      "id": "CON-10",
+      "owner": "01",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "월간 평가/수행 평가 루브릭",
+      "acceptance": "D30/60/90/120 평가 구현 및 전문가 검토"
+    },
+    {
+      "id": "QA-01",
+      "owner": "05",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "구조 검증 및 콘텐츠 ID 검사",
+      "acceptance": "현재 목차/퀴즈 정답/IDs 검사"
+    },
+    {
+      "id": "QA-02",
+      "owner": "05",
+      "priority": "P0",
+      "dependencies": [
+        "CON-01"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "언어 정확성·번역·구어 자연스러움 검수",
+      "acceptance": "모든 콘텐츠 독립 검토 기록 및 출처"
+    },
+    {
+      "id": "QA-03",
+      "owner": "05",
+      "priority": "P0",
+      "dependencies": [
+        "CUR-02",
+        "CON-01"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "난이도·선수학습·중복·누락 감사",
+      "acceptance": "고정 코스 전체 의존성 검증"
+    },
+    {
+      "id": "QA-04",
+      "owner": "05",
+      "priority": "P0",
+      "dependencies": [
+        "AUD-01"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "음성 청취/발음 검증",
+      "acceptance": "음성별 음질·발음·라이선스 확인"
+    },
+    {
+      "id": "APP-01",
+      "owner": "03",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "정보 구조 및 모바일 기능 명세",
+      "acceptance": "탭 구조, 상태, UI 명세 저장"
+    },
+    {
+      "id": "APP-02",
+      "owner": "03",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "홈 및 120일 수업 화면",
+      "acceptance": "실제 렌더링·모바일 동작"
+    },
+    {
+      "id": "APP-03",
+      "owner": "03",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "단어장 검색·상세·즐겨찾기",
+      "acceptance": "검색·활용·즐겨찾기 저장"
+    },
+    {
+      "id": "APP-04",
+      "owner": "03",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "객관식 확인시험·오답·순차 완료",
+      "acceptance": "실제 시험 및 점수, 재접속 검증"
+    },
+    {
+      "id": "APP-05",
+      "owner": "03",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "SRS 복습",
+      "acceptance": "간격 계산·복습 기록 지속"
+    },
+    {
+      "id": "APP-06",
+      "owner": "03",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "학습 시간·통계·연속일",
+      "acceptance": "실제 활동 시간과 영역별 통계 검증"
+    },
+    {
+      "id": "APP-07",
+      "owner": "03",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "출퇴근 간편 모드·반복 재생",
+      "acceptance": "오디오 중심 최소 조작 학습"
+    },
+    {
+      "id": "APP-08",
+      "owner": "03",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "다양한 시험 유형·문법 검색",
+      "acceptance": "문장 배열·주관식·번역·평가 기능"
+    },
+    {
+      "id": "AUD-01",
+      "owner": "04",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": 1409,
+      "complete": false,
+      "requirement": "브라우저 TTS와 속도",
+      "acceptance": "tr-TR 음성 존재 및 iPhone 청취"
+    },
+    {
+      "id": "AUD-02",
+      "owner": "04",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": 1409,
+      "complete": false,
+      "requirement": "녹음·재생",
+      "acceptance": "iPhone 권한 및 녹음 재생"
+    },
+    {
+      "id": "AUD-03",
+      "owner": "04",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": 1409,
+      "complete": false,
+      "requirement": "무료 음성 파일 생성/검수",
+      "acceptance": "라이선스 및 음성 파일·청취 검증"
+    },
+    {
+      "id": "AUD-04",
+      "owner": "04",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "STT와 발음 평가 타당성",
+      "acceptance": "tr-TR 실제 인식, 오류율·보안 테스트"
+    },
+    {
+      "id": "AI-01",
+      "owner": "04",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "고정 분기 회화 엔진",
+      "acceptance": "문맥 분기와 교정·수준 제한"
+    },
+    {
+      "id": "AI-02",
+      "owner": "04",
+      "priority": "P2",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "AI 자유 대화 비용·보안·정확성",
+      "acceptance": "옵션 환경, 비밀키·과금 차단·교정 검증"
+    },
+    {
+      "id": "DB-01",
+      "owner": "03",
+      "priority": "P1",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "데이터 모델 및 RLS 설계",
+      "acceptance": "버전·이벤트·RLS 스키마 검토 및 실제 적용"
+    },
+    {
+      "id": "DB-02",
+      "owner": "03",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "두 로컬 프로필 및 백업/복원",
+      "acceptance": "각 프로필 독립, 백업 후 복원 시험"
+    },
+    {
+      "id": "DB-03",
+      "owner": "03",
+      "priority": "P1",
+      "dependencies": [
+        "DB-01"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "독립 클라우드 Auth/DB 및 RLS 검증",
+      "acceptance": "독립 프로젝트, 2계정 교차 접근 차단"
+    },
+    {
+      "id": "DB-04",
+      "owner": "03",
+      "priority": "P1",
+      "dependencies": [
+        "DB-03"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "오프라인 큐·동기화·충돌 처리",
+      "acceptance": "기기 변경 및 장애 복구 검증"
+    },
+    {
+      "id": "DB-05",
+      "owner": "03",
+      "priority": "P1",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "운영 백업·복구·인수인계",
+      "acceptance": "실제 복원 1회와 문서"
+    },
+    {
+      "id": "DEP-01",
+      "owner": "03",
+      "priority": "P0",
+      "dependencies": [],
+      "activePR": null,
+      "complete": false,
+      "requirement": "PWA 자산과 캐시",
+      "acceptance": "실제 HTTPS 설치 및 오프라인 동작"
+    },
+    {
+      "id": "DEP-02",
+      "owner": "03",
+      "priority": "P0",
+      "dependencies": [
+        "APP-02",
+        "DEP-01"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "공개 URL 배포",
+      "acceptance": "실서비스 HTTP 200 및 렌더링"
+    },
+    {
+      "id": "DEP-03",
+      "owner": "05",
+      "priority": "P0",
+      "dependencies": [
+        "DEP-02"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "PC 브라우저 기능 테스트",
+      "acceptance": "수업/시험/복습/백업 E2E"
+    },
+    {
+      "id": "DEP-04",
+      "owner": "05",
+      "priority": "P0",
+      "dependencies": [
+        "DEP-02"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "iPhone Safari/PWA 실기기 테스트",
+      "acceptance": "실기기 화면·음성·녹음·설치"
+    },
+    {
+      "id": "DEP-05",
+      "owner": "05",
+      "priority": "P2",
+      "dependencies": [
+        "CON-02",
+        "CON-03",
+        "DB-03",
+        "DB-04",
+        "DEP-03",
+        "DEP-04",
+        "QA-02",
+        "QA-04"
+      ],
+      "activePR": null,
+      "complete": false,
+      "requirement": "2명 운영 출시",
+      "acceptance": "전체 코스 및 클라우드 데이터, 운영 검수"
+    }
+  ],
+  "draftPRs": [
+    {
+      "number": 1409,
+      "owner": "04",
+      "branch": "turkish/04-first-week-audio-20261121",
+      "resume": "P0-04-01",
+      "reason": "previous content revision and only 1 committed sample; must refresh and validate"
+    }
+  ]
+}
