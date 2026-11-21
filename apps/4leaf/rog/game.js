@@ -707,7 +707,7 @@ function generateTiles(map){
  for(let i=0;i<config.length;i++){
    const entry=sourceRoute?.[i];
    let type=(i===0?'start':i===config.length-1?'goal':'normal');
-   if(entry?.[3]===10&&entry[5]<config.length&&entry[5]!==i)type='warp';
+   if(entry?.[3]===10&&entry[5]>=0&&entry[5]<config.length)type='warp';
    types.push(type);
  }
  return types;
@@ -2054,33 +2054,56 @@ async function resolveBattle(attacker,defender,keeper){
  if(loser?.team?.length)
    window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(loser.id,'hurt',650);
 }
-function grantItem(user){if(user.items.length<5){const itemId=ITEMS[rand(ITEMS.length)].id;user.items.push(itemId);appendMove(user.name+'이(가) 보물상자에서 '+ITEM_MAP[itemId].name+' 획득!')}else appendMove(user.name+'은 아이템이 가득 찼습니다.')}
-async function resolveTile(p,depth=0){
+function randomReleasedTileReward(){const pool=ITEMS.filter(item=>!item.disabled);return pool[rand(pool.length)].id}
+function grantItem(user){if(user.items.length<5){const itemId=randomReleasedTileReward();user.items.push(itemId);appendMove(user.name+'이(가) 보물상자에서 '+ITEM_MAP[itemId].name+' 획득!')}else appendMove(user.name+'은 아이템이 가득 찼습니다.')}
+// Source rule: the first team on an arena is its incumbent. Record actual
+// arrivals, not player-array order; old saves without arrivals use stable order.
+function recordTileArrival(p){
+ if(p.tileArrivalPosition!==p.position){
+  match.tileArrivalSequence=Math.max(0,Number(match.tileArrivalSequence)||0,...match.players.map(q=>Number(q.tileArrivalOrder)||0))+1;
+  p.tileArrivalPosition=p.position;p.tileArrivalOrder=match.tileArrivalSequence;
+ }
+}
+function arenaIncumbent(p,pos){return match.players.filter(q=>q!==p&&q.position===pos).sort((a,b)=>(a.tileArrivalPosition===pos?Number(a.tileArrivalOrder)||0:0)-(b.tileArrivalPosition===pos?Number(b.tileArrivalOrder)||0:0))[0]}
+async function resolveTile(p,depth=0,arrivalFromWarp=false){
  if(!match||match.finished||depth>5)return;
  const pos=p.position,type=match.tiles[pos];
+ recordTileArrival(p);
  if(type==='goal'||pos>=match.tiles.length-1){finishGame(p);return}
  let landed=false;
  if(type==='boost'||type==='boost4'){
-   const n=type==='boost4'?4:3;advance(p,n);appendMove(p.name+' +'+n+' 전진!');landed=true;
- }else if(type==='warp'){
+   const n=type==='boost4'?4:3;const origin=p.position;
+   p.position=Math.min(match.tiles.length-1,origin+n);
+   p.ability=Math.min(100,p.ability+(p.position-origin)*3);appendMove(p.name+' +'+n+' 전진!');landed=true;
+ }else if(type==='warp'&&!arrivalFromWarp){
    const row=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[pos];
    const group=originalTileAt(match.map,pos)?.warpGroup;
    let target=(row?.[3]===10&&Number.isInteger(row[5]))?row[5]:-1;
-   if(target<0||target>=match.tiles.length||target===pos){
+   // Encoded self-targets are real no-ops, never random teleports.
+   if(target<0||target>=match.tiles.length){
      const candidate=match.tiles.map((type,i)=>({type,i})).filter(o=>o.type==='warp'&&o.i!==pos&&(!group||originalTileAt(match.map,o.i)?.warpGroup===group)).map(o=>o.i);
      target=candidate.length?candidate[rand(candidate.length)]:pos;
    }
-   if(target!==pos){p.position=target;appendMove(p.name+' 워프: '+(pos+1)+' → '+(target+1)+' 칸');landed=true}
+   if(target!==pos){
+     p.position=target;appendMove(p.name+' 워프: '+(pos+1)+' → '+(target+1)+' 칸');
+     // Reciprocal warp endpoints are arrivals, not another trigger. For
+     // one-way links the actual destination's non-warp effect still runs.
+     await resolveTile(p,depth+1,true);return;
+   }
  }else if(type==='chest'){grantItem(p)}
- else if(type==='blessing'){while(p.items.length<5)p.items.push(ITEMS[rand(ITEMS.length)].id);appendMove(p.name+' 신의 축복: 아이템 가득 충전')}
+ else if(type==='blessing'){while(p.items.length<5)p.items.push(randomReleasedTileReward());appendMove(p.name+' 신의 축복: 아이템 가득 충전')}
  else if(type==='curse'){p.items=[];appendMove(p.name+' 신의 저주: 모든 아이템 소실')}
  else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.');window.__LEAF_NATIVE_EVENTS__?.show('jail',p.name)}
  else if(type==='kingbomb'){p.position=0;appendMove(p.name+' 왕폭탄 폭발! START 복귀');match.tiles[pos]='normal'}
  else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
  else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%');if(p.ability===100)window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
  else if(type==='ability100'){
-   const ts=teamStats(p.team),count=Math.max(1,Math.min(4,p.team?.length>=3?ts.int:(p.team?.length===2?ts.def:ts.atk)));
-   const targets=Array.from({length:6},(_,i)=>i+1).sort(()=>Math.random()-.5).slice(0,count);
+   const ts=teamStats(p.team),field=(p.team||[]).slice(0,3).filter(Boolean).length,count=Math.max(1,Math.min(4,field>=3?ts.int:(field===2?ts.def:ts.atk)));
+   // The original target count is documented; exact historical RNG is not.
+   // Uniform sampling without replacement avoids biased random sort while
+   // retaining unique preselected eyes and ignoring Wisdom Ring bonuses.
+   const eyes=[1,2,3,4,5,6],targets=[];
+   for(let i=0;i<count;i++)targets.push(eyes.splice(rand(eyes.length),1)[0]);
    const eye=d(6);
    if(targets.includes(eye)){p.ability=100;appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 어빌리티 100%!');window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
    else appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 실패');
@@ -2096,7 +2119,7 @@ async function resolveTile(p,depth=0){
    window.__LEAF_NATIVE_EVENTS__?.show('doa',p.name);
  }else if(type==='keeper'||type==='arena'){
    if(type==='arena'){
-     const incumbent=match.players.find(x=>x!==p&&x.position===pos);
+     const incumbent=arenaIncumbent(p,pos);
      if(incumbent&&!MAPS[match.map].non&&p.effects.dove<=0&&incumbent.effects.dove<=0)await resolveBattle(p,incumbent,false);
    }else{
      const monsters=[['말벌',1],['박쥐',1],['슬라임',1],['가이아버그',2],['해골',2],['좀비',2],['고렘',3],['아지다하카',3],['카르마타',4],['크루거',4],['마장기',6]];
@@ -2108,8 +2131,8 @@ async function resolveTile(p,depth=0){
    const next=choices[rand(choices.length)];
    if(type==='random')match.tiles[pos]=next;
    appendMove(p.name+' '+(type==='random'?'물음표(고정)':'조커')+' → '+next);
-   match.tiles[pos]=next;await resolveTile(p,depth+1);
-   if(type==='joker')match.tiles[pos]='joker';
+   match.tiles[pos]=next;
+   try{await resolveTile(p,depth+1)}finally{if(type==='joker')match.tiles[pos]='joker';}
    return;
  }
  if(match.tiles[p.position]==='goal'||p.position>=match.tiles.length-1){finishGame(p);return}
@@ -2334,6 +2357,7 @@ async function takeTurn(){
  if(move){
    appendMove(p.name+' 이동 주사위 '+values.join('+')+(attributeMoveBonus>0?' +2':attributeMoveBonus<0?' −2':'')+' = '+move+'칸 ('+match.attribute+')');
    const target=Math.min(match.tiles.length-1,p.position+move),steps=target-p.position;
+   if(steps>0)p.tileArrivalPosition=-1;
    for(let i=0;i<steps;i++){
      p.position++;
      if(i===steps-1||i%2===0)drawGame();

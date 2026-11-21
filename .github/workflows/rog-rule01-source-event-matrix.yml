@@ -1,0 +1,32 @@
+name: 4LEAF RULE-01 original event data acceptance
+on:
+  push:
+    branches: ['4leaf/rule01-completion-20261121']
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/rule01-source-event-matrix.cjs'
+      - '.github/workflows/rog-rule01-source-event-matrix.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-event:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    env:
+      FOURLEAF_BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install "$FOURLEAF_BROWSER" --with-deps
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/rule01.log 2>&1 &
+          sleep 2
+      - run: node apps/4leaf/rog/tests/rule01-source-event-matrix.cjs
