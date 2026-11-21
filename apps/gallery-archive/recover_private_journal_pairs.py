@@ -294,6 +294,29 @@ def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None
     return {'photos':count,'held':len(held),'skipped':skipped}
 
 
+def require_live_published_inventory(owner, model, published):
+    """Permit appended photos, but never discard or overwrite a published slot."""
+    current=clean_catalog(owner,model)
+    if (published.get('schema_version')!=1 or published.get('model')!=model
+            or published.get('storage')!='sha-verified-owner-metadata-only'):
+        raise ValueError('Invalid current published inventory')
+    def slot_map(doc):
+        rows={}
+        for album in doc['albums']:
+            for photo in album['images']:
+                key=(album['id'],photo['number'])
+                if key in rows:raise ValueError('Duplicated published position')
+                rows[key]=photo
+        if len(rows)!=doc['physical_originals_indexed'] or not rows:
+            raise ValueError('Published inventory count mismatch')
+        return rows
+    before=slot_map(published);after=slot_map(current)
+    if any(after.get(key)!=row for key,row in before.items()):
+        raise ValueError('Current private inventory would lose or change a published photo')
+    print('LIVE_RECOVERY_BASELINE_VERIFIED',model,'PUBLISHED',len(before),
+          'PRIVATE',len(after),'EXTRA',len(after)-len(before),flush=True)
+
+
 def main():
     p=argparse.ArgumentParser();p.add_argument('--request',type=Path,required=True)
     p.add_argument('--model',choices=REMOTES,required=True);p.add_argument('--owner',type=Path,required=True)
@@ -312,7 +335,12 @@ def main():
         raise ValueError('Invalid exact producer request')
     producer_proof(request)
     owner=json.loads(a.owner.read_text())
-    if metadata_fingerprint(clean_catalog(owner,a.model))!=request['baseline_owner_fingerprint']:
+    if request.get('allow_live_append_only_baseline') is True:
+        if request.get('official_publisher_sha_only') is not True or request.get('preview_only_hold_from') is not None:
+            raise ValueError('Live baseline is only allowed for exact publisher sample append recovery')
+        from native_qa_checkpoint import github_fetch
+        require_live_published_inventory(owner,a.model,github_fetch(f'raw:main:{a.model}'))
+    elif metadata_fingerprint(clean_catalog(owner,a.model))!=request['baseline_owner_fingerprint']:
         raise ValueError('Current inventory differs from the explicitly QA-completed publication baseline')
     if request.get('preview_only_hold_from') is not None:
         completed_baseline_proof(document)
