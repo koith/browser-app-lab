@@ -46,6 +46,10 @@ jobs:
           curl -fSsI http://127.0.0.1:8765/index.html
       - name: M04 all 26 maps 1920 original native RGBA pixel top-face exposure
         run: node apps/4leaf/rog/tests/m04-all-native-top-face-pixel-visibility.cjs
+      - name: BRD-01 reproduce source-only visible fragment measurements
+        run: |
+          python3 -m pip install opencv-python-headless numpy
+          python3 apps/4leaf/rog/tools/brd01_measure_board_jpg.py --verify-masked
       - name: M04 original battle board historical anchors
         run: node apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs
       - name: M04 all 26 maps source grid and depth audit
