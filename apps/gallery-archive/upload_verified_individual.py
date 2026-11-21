@@ -163,10 +163,19 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
                     consecutive_provider_rejections+=1
                 else:
                     consecutive_provider_rejections=0
-    # Exclude failed local files from the subsequent strict --only-staged read.
-    # They were fully validated locally, but still CANNOT reach the owner index.
+    # Keep failed, locally validated bytes out of the live staging manifest
+    # without deleting them. The existing private metadata journal is not
+    # a backup of bytes; this quarantine survives until runner cleanup only.
+    # Never publish these files without independent remote SHA verification.
     for local in held_local:
-        local.unlink(missing_ok=True)
+        held = stage / 'held-upload-files' / local.relative_to(stage)
+        held.parent.mkdir(parents=True, exist_ok=True)
+        if held.exists():
+            if held.read_bytes() != local.read_bytes():
+                raise ValueError('Held upload path collision')
+            local.unlink()
+        else:
+            local.replace(held)
     before=sum(len(a['images']) for a in old['albums'])
     additions=sum(1 for row in accepted if row['number'] not in {
         p['number'] for p in existing.get(row['id'],{}).get('images',[])})
