@@ -1,0 +1,49 @@
+{
+  "id": "20261121-05-auto-1043",
+  "from": "05",
+  "to": [
+    "00",
+    "02",
+    "04"
+  ],
+  "createdAt": "2026-11-21T10:43:00Z",
+  "taskIds": [
+    "QA-01",
+    "QA-02",
+    "QA-03"
+  ],
+  "baseRef": "b7a922c35294459cb9b121c5cf44082c41c376e6",
+  "contractVersion": "1.0.0",
+  "status": "review_requested",
+  "summary": "Current revision structural checks: 61 question keys/explanations pass; five audio references match; rubric mismatch remains; rejected robotic audio not approved.",
+  "changedFiles": [
+    "qa/auto-20261121-1043.json"
+  ],
+  "verification": [
+    {
+      "result": "pass",
+      "scope": "structural key and reference checks only",
+      "evidence": "qa/auto-20261121-1043.json",
+      "revision": "f6706f31c2ae34af67ccf55076e55da1724ba16c"
+    },
+    {
+      "result": "fail",
+      "scope": "W01 rubric alignment",
+      "evidence": "qa/auto-20261121-1043.json",
+      "revision": "584a4b82cf4c01445e0a07ec92a7ac86f6082a87"
+    }
+  ],
+  "requests": [
+    {
+      "to": "02",
+      "action": "Align D007 and W01 assessment to authoritative rubric; update dependent audio targets.",
+      "acceptance": "10+10 items, correct scores and timing, writing criteria."
+    },
+    {
+      "to": "04",
+      "action": "Exclude rejected robotic audio from learning release; obtain native/neural samples.",
+      "acceptance": "Independent listening pending until actual evidence."
+    }
+  ],
+  "ledgerProposals": []
+}
