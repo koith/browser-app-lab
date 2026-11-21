@@ -123,6 +123,14 @@ def read_remote(path,max_bytes,optional=False,*,max_seconds=None):
 def _parse_manifest(raw):
     info=json.loads(raw)
     if not isinstance(info,dict) or not SNAP_RE.fullmatch(str(info.get("file",""))) or not re.fullmatch(r"[0-9a-f]{64}",str(info.get("sha256",""))):
+        print("LATEST_POINTER_FORMAT_DIAGNOSTIC",json.dumps({
+            "json_type":type(info).__name__,
+            "fields":sorted(str(k) for k in info.keys())[:20] if isinstance(info,dict) else [],
+            "file_length":len(str(info.get("file",""))) if isinstance(info,dict) else 0,
+            "file_matches_rule":bool(SNAP_RE.fullmatch(str(info.get("file","")))) if isinstance(info,dict) else False,
+            "digest_length":len(str(info.get("sha256",""))) if isinstance(info,dict) else 0,
+            "digest_matches_rule":bool(re.fullmatch(r"[0-9a-f]{64}",str(info.get("sha256","")))) if isinstance(info,dict) else False
+        }),flush=True)
         raise ValueError("unsafe latest manifest")
     return info
 
