@@ -1,7 +1,7 @@
 // Owner 03 reproducible browser verification, NOT executed yet.
 // From a clone: npm install --no-save playwright; npx playwright install chromium webkit
 // node apps/turkish-study/app/verification/p0-browser.mjs
-// No tracked data/manifest edits. Approved manifest is routed only in an isolated localhost test context.
+// No tracked data/manifest edits. Approved manifest is served only on isolated localhost in memory.
 import { chromium, webkit } from "playwright";
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
@@ -12,11 +12,12 @@ const root=resolve(dirname(fileURLToPath(import.meta.url)),"../..");
 const m=JSON.parse(await readFile(resolve(root,"RELEASE_MANIFEST.json"),"utf8"));
 const lessons=JSON.parse(await readFile(resolve(root,"lessons.json"),"utf8")).lessons;
 const approved={...m,stage:"published",releaseId:"TEST-ONLY",contentRevision:"fixture-only",verifiedAt:new Date().toISOString(),publishedDayIds:m.candidateDayIds};
+let fixture=false;
 const srv=createServer(async (req,res)=>{
  try{
   const u=new URL(req.url,"http://localhost"), path=resolve(root,"."+ (u.pathname==="/" ? "/index.html":u.pathname));
   if(!path.startsWith(root+sep)){res.writeHead(403).end();return;}
-  const data=await readFile(path);
+  const data=u.pathname==="/RELEASE_MANIFEST.json"&&fixture?JSON.stringify(approved):await readFile(path);
   const type={".html":"text/html; charset=utf-8",".json":"application/json",".js":"text/javascript",".webmanifest":"application/manifest+json",".svg":"image/svg+xml"}[extname(path)]||"application/octet-stream";
   res.writeHead(200,{"Content-Type":type,"Cache-Control":"no-store"}).end(data);
  }catch{res.writeHead(404).end();}
@@ -30,11 +31,7 @@ for(const [name,engine] of Object.entries({chromium,webkit})){
  try{
   browser=await engine.launch();
   const context=await browser.newContext({viewport:{width:390,height:844},acceptDownloads:true});
-  let fixture=false;
-  await context.route("**/RELEASE_MANIFEST.json?*",async route=>{
-   if(fixture)await route.fulfill({contentType:"application/json",body:JSON.stringify(approved)});
-   else await route.continue();
-  });
+  fixture=false;
   const page=await context.newPage(),errors=[];
   page.on("pageerror",e=>errors.push(e.message));page.on("dialog",d=>d.accept());
   const key="turkce120-v1";
