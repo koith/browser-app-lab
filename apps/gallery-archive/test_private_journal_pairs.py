@@ -36,6 +36,28 @@ class JournalPairsTests(unittest.TestCase):
             return preview if '/previews/' in args[1] else self.original_bytes
         return source,reviewed,reader,calls
 
+    def test_exact_publisher_manifest_recovery_never_reads_unknown_photo(self):
+        source,reviewed,reader,calls=self.source()
+        row=source['catalog']['albums'][0]['images'][0]
+        proof={'saved-work':{(row['sha256'],row['bytes'],row['width'],row['height'])}}
+        result=recover(source,self.owner,reviewed,self.stage/'official-exact',reader,
+                       publisher_samples=proof)
+        self.assertEqual((result['photos'],result['held'],len(calls)),(1,1,2))
+        audit=json.loads((self.stage/'official-exact/metadata/collection-audit.json').read_text())
+        self.assertEqual(audit['held_photos'][0]['cause'],'no_exact_publisher_manifest_photo')
+
+    def test_new_producer_log_readback_method_format_is_accepted(self):
+        request={'model':'mimmi','producer_run':123,'producer_attempt':1,'producer_head':'a'*40,
+                 'expected_collected_photos':500,'journal_sha256':'b'*64}
+        run={'head_sha':'a'*40,'head_branch':'main','head_repository':{'full_name':'koith/browser-app-lab'},
+             'path':'.github/workflows/gallery-direct-individual-archive.yml'}
+        jobs={'total_count':1,'jobs':[{'id':1,'name':'collect-store-readback (mimmi)','steps':[{
+            'name':'Preserve unverified source correspondence privately before any original transfer','conclusion':'success'}]}]}
+        line='PRIVATE_UNVERIFIED_SOURCE_JOURNAL_PRESERVED mimmi 500 READBACK_METHOD remote_cat METADATA_SHA '+'b'*64
+        response=type('Response',(),{'content':line.encode(),'text':line,'raise_for_status':lambda self:None})()
+        with patch.dict('os.environ',{'GH_TOKEN':'unit-test-only'}),patch('recover_private_journal_pairs.github',side_effect=[run,jobs]),patch('recover_private_journal_pairs.requests.get',return_value=response):
+            producer_proof(request)
+
     def test_one_denied_original_keeps_only_the_other_complete_pair_and_exact_bytes(self):
         source,reviewed,reader,calls=self.source();before=copy.deepcopy(self.owner)
         target=self.stage/'recovery'
