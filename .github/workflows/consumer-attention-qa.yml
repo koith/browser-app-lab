@@ -1,0 +1,72 @@
+name: Current Wikimedia Product Attention Evidence QA
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/consumer_attention.py"
+      - "apps/demand-research/test_consumer_attention.py"
+      - "apps/demand-research/consumer/attention-report.json"
+      - "apps/demand-research/consumer/attention_view.js"
+      - "apps/demand-research/consumer/index.html"
+      - "apps/demand-research/consumer/test_dashboard.mjs"
+      - ".github/workflows/consumer-attention-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/consumer_attention.py"
+      - "apps/demand-research/test_consumer_attention.py"
+      - "apps/demand-research/consumer/attention-report.json"
+      - "apps/demand-research/consumer/attention_view.js"
+      - "apps/demand-research/consumer/index.html"
+      - "apps/demand-research/consumer/test_dashboard.mjs"
+      - ".github/workflows/consumer-attention-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: intersection-attention-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+jobs:
+  wiki-pageview-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research/consumer_attention.py
+            apps/demand-research/test_consumer_attention.py
+            apps/demand-research/consumer/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install pytest==8.3.5
+      - name: Pure aggregate and bad-API regression
+        working-directory: apps/demand-research
+        run: |
+          python -m py_compile consumer_attention.py test_consumer_attention.py
+          python -m pytest -q test_consumer_attention.py
+      - name: Official public Wikimedia CC0 current article data
+        working-directory: apps/demand-research
+        run: |
+          python consumer_attention.py --as-of 2026-11-03 --output /tmp/wikimedia-attention.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('/tmp/wikimedia-attention.json').read_text())
+          assert report['dataset']['is_purchases'] is False
+          assert report['dataset']['is_demand'] is False
+          assert report['dataset']['license']=='CC0 1.0'
+          assert len(report['topics'])==6
+          print('ATTENTION_REPORT_JSON='+json.dumps(report,ensure_ascii=True,separators=(',',':')))
+          checked=Path('consumer/attention-report.json')
+          if checked.exists():
+              assert json.loads(checked.read_text())==report,'Live source snapshot differs'
+              print('ATTENTION_CHECKED_IN_REPORT_MATCHED')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-2026-wikimedia-article-attention
+          path: /tmp/wikimedia-attention.json
+          retention-days: 7

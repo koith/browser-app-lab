@@ -211,3 +211,18 @@ def test_readonly_historical_session_aggregate_api():
     assert out["summary"]["sessions"] == 12330
     assert out["summary"]["purchases"] == 1908
     assert c.post("/api/consumer/sessions").status_code == 405
+
+
+def test_readonly_current_wikimedia_attention_api():
+    import consumer_report_api
+    from fastapi.testclient import TestClient
+    c = TestClient(consumer_report_api.app)
+    response = c.get("/api/consumer/attention")
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    body = response.json()
+    assert body["dataset"]["license"] == "CC0 1.0"
+    assert body["dataset"]["is_demand"] is False
+    assert body["dataset"]["is_purchases"] is False
+    assert len(body["topics"]) == 6
+    assert c.post("/api/consumer/attention").status_code == 405
