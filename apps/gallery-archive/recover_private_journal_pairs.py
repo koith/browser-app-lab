@@ -62,7 +62,7 @@ def producer_proof(request):
         raise ValueError('Exact producer log retrieval failed HTTP '+str(
             getattr(error.response,'status_code',None))) from None
     if len(response.content)>5_000_000:raise ValueError('Producer logs exceed bound')
-    pattern=r'PRIVATE_UNVERIFIED_SOURCE_JOURNAL_PRESERVED '+request['model']+r' (\d+) METADATA_SHA ([a-f0-9]{64})'
+    pattern=r'PRIVATE_UNVERIFIED_SOURCE_JOURNAL_PRESERVED '+request['model']+r' (\d+)(?: READBACK_METHOD [a-z_]+)? METADATA_SHA ([a-f0-9]{64})'
     evidence=re.findall(pattern,response.text)
     if evidence!=[(str(request['expected_collected_photos']),request['journal_sha256'])]:
         raise ValueError('Private journal differs from the actual producer log digest/count')
@@ -162,7 +162,24 @@ def exact_image(photo,field,remote,reader,copyto=None):
     return raw
 
 
-def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None,copyto=None):
+def publisher_exact_samples(document, reviewed):
+    """Only previously recorded official publisher bytes, never an arbitrary URL."""
+    from official_sample_recovery import _publisher_page, _publisher_photo
+    result={}
+    for a in document.get('albums',[]):
+        aid=a.get('id')
+        book=reviewed.get(aid,{})
+        if (a.get('publisher')!='DJAWA' or a.get('source')!=book.get('source')
+                or not _publisher_page(a.get('source'))):
+            continue
+        result[aid]={(p.get('sha256'),p.get('bytes'),p.get('width'),p.get('height'))
+            for p in a.get('samples',[]) if _publisher_photo(p.get('url'))
+            and isinstance(p.get('sha256'),str) and HEX.fullmatch(p['sha256'])}
+    return result
+
+
+def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None,copyto=None,
+            publisher_samples=None):
     model=owner['model'];remote=REMOTES[model]
     preview_holds=None if preview_hold_audit is None else preview_hold_selection(preview_hold_audit,model)
     if (snapshot.get('schema_version')!=1 or snapshot.get('model')!=model
@@ -184,8 +201,15 @@ def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None
             'COMPLETE_PHOTOS',sum(len(a['images']) for a in accepted)+len(rows),'HELD',len(held),flush=True)
     for album in catalog['albums']:
         aid=album['id'];book=reviewed.get(aid);context=evidence.get(aid,{})
+        if publisher_samples is not None and (aid not in existing or not book or aid not in publisher_samples):
+            for photo in album['images']:
+                if photo['sha256'] in seen:skipped+=1;continue
+                held.append({'work':aid,'archive_collection_number':photo['number'],
+                             'source_file_number':photo.get('source_photo_number'),
+                             'cause':'no_exact_publisher_manifest_work'})
+            continue
         if aid not in existing or not book:raise ValueError('Recovery only supplements reviewed existing works')
-        visual=book.get('visual_reference_required') is True
+        visual=book.get('visual_reference_required') is True and publisher_samples is None
         if visual:
             if context.get('source')!=book['source'] or context.get('saved_reference_anchors',0)<3:
                 raise ValueError('Visual work has no trusted saved-cut source context')
@@ -193,7 +217,7 @@ def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None
             anchors={p['owner_sha256'] for p in context.get('saved_cut_correspondence',[])
                 if old.get(p['owner_archive_number'])==p['owner_sha256'] and 0<=p.get('whole_frame_visual_error',999)<=4}
             if len(anchors)<3:raise ValueError('Saved-cut identity anchors changed')
-        elif book.get('source')!=CREATORS[model] or context.get('engine')!='requests_scoped_public_pagination':
+        elif publisher_samples is None and (book.get('source')!=CREATORS[model] or context.get('engine')!='requests_scoped_public_pagination'):
             raise ValueError('Nonvisual recovery requires the reviewed professional creator feed')
         rows=[];next_number=max(p['number'] for p in existing[aid]['images'])+1
         for photo in album['images']:
@@ -203,6 +227,11 @@ def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None
                 if not re.fullmatch(re.escape(prefix+'/'+aid+'/')+r'[a-z0-9-]+\.(?:'+extensions+r')',photo[field]):
                     raise ValueError('Unsafe exact existing private object key')
             if photo['sha256'] in seen:skipped+=1;continue
+            if publisher_samples is not None and (photo['sha256'],photo['bytes'],photo['width'],photo['height']) not in publisher_samples[aid]:
+                held.append({'work':aid,'archive_collection_number':photo['number'],
+                             'source_file_number':photo.get('source_photo_number'),
+                             'cause':'no_exact_publisher_manifest_photo'})
+                progress();continue
             if photo.get('higher_resolution_replacement'):
                 held.append({'work':aid,'archive_collection_number':photo['number'],'cause':'replacement_outside_append_only_recovery'});continue
             if visual and (photo.get('work_identity_saved_cut_anchors',0)<3
@@ -302,7 +331,12 @@ def main():
         if raw is None:raise ValueError('Prior private hold audit unavailable; no image requested')
         hold_audit=json.loads(raw);preview_hold_selection(hold_audit,a.model)
     reviewed={b['id']:b for b in json.loads((ROOT/f'apps/{a.model}-gallery/public-work-pages.json').read_text())['albums']}
-    result=recover(data,owner,reviewed,a.stage,preview_hold_audit=hold_audit,copyto=copyto_bytes)
+    publisher_samples=None
+    if request.get('official_publisher_sha_only') is True:
+        if a.model!='mimmi' or hold_audit is not None:
+            raise ValueError('Invalid exact-publisher journal recovery scope')
+        publisher_samples=publisher_exact_samples(json.loads((ROOT/'apps/mimmi-gallery/official-previews.json').read_text()),reviewed)
+    result=recover(data,owner,reviewed,a.stage,preview_hold_audit=hold_audit,copyto=copyto_bytes,publisher_samples=publisher_samples)
     with a.github_output.open('a') as output:
         output.write('changed='+str(bool(result['photos'])).lower()+'\nheld='+str(result['held'])+'\n')
 
