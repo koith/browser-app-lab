@@ -1,0 +1,4036 @@
+{
+  "version": "0.1.0",
+  "lessonBlob": "f6706f31c2ae34af67ccf55076e55da1724ba16c",
+  "assessmentBlob": "584a4b82cf4c01445e0a07ec92a7ac86f6082a87",
+  "contractVersion": "1.0.0",
+  "status": "candidate_text_for_04_not_audio_manifest",
+  "instructions": "Generate/review exact NFC text only; existing target order retained. No provider/voice/license/path/hash asserted by 02. If content changes, invalidate affected assets by revision. Prioritize D001–D007; W01 listening reuses existing target IDs. Questions are Korean prompts with choices and not audio-required unless specifically requested by 05. Assessment reading/writing/model sentences are not required audio assets.",
+  "targets": [
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V1",
+      "text": "Merhaba",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V2",
+      "text": "Günaydın",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V3",
+      "text": "İyi akşamlar",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V4",
+      "text": "İyi geceler",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V5",
+      "text": "Teşekkürler",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V6",
+      "text": "Lütfen",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V7",
+      "text": "Evet",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V8",
+      "text": "Hayır",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V9",
+      "text": "Hoşça kal",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V10",
+      "text": "Güle güle",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V11",
+      "text": "Hoşça kalın",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V12",
+      "text": "Teşekkür ederim",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V13",
+      "text": "Pardon",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V14",
+      "text": "Affedersiniz",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D001-V15",
+      "text": "Rica ederim",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E1",
+      "text": "Merhaba!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E2",
+      "text": "Teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E3",
+      "text": "Günaydın!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E4",
+      "text": "İyi akşamlar!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E5",
+      "text": "Pardon.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E6",
+      "text": "Teşekkür ederim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E7",
+      "text": "Rica ederim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E8",
+      "text": "Hoşça kalın!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D001-E9",
+      "text": "Güle güle!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T1",
+      "text": "Merhaba!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T2",
+      "text": "Merhaba!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T3",
+      "text": "Hoşça kal!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T4",
+      "text": "Güle güle!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T5",
+      "text": "Günaydın!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T6",
+      "text": "Günaydın!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T7",
+      "text": "Teşekkür ederim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T8",
+      "text": "Rica ederim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T9",
+      "text": "Hoşça kalın!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D001",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D001-T10",
+      "text": "Güle güle!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V1",
+      "text": "at",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V2",
+      "text": "et",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V3",
+      "text": "ışık",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V4",
+      "text": "iki",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V5",
+      "text": "on",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V6",
+      "text": "ön",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V7",
+      "text": "su",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V8",
+      "text": "süt",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V9",
+      "text": "gül",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V10",
+      "text": "göl",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V11",
+      "text": "un",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V12",
+      "text": "ün",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V13",
+      "text": "kır",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V14",
+      "text": "kir",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V15",
+      "text": "el",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D002-V16",
+      "text": "al",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E1",
+      "text": "at — et",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release",
+      "note": "기존 대조 단어쌍. 대시 앞뒤에 자연스러운 쉼, 원본 문자열 변경 없이 따로 발음. E4 이후 개별 음성 우선."
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E2",
+      "text": "on — ön",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release",
+      "note": "기존 대조 단어쌍. 대시 앞뒤에 자연스러운 쉼, 원본 문자열 변경 없이 따로 발음. E4 이후 개별 음성 우선."
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E3",
+      "text": "su — süt",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release",
+      "note": "기존 대조 단어쌍. 대시 앞뒤에 자연스러운 쉼, 원본 문자열 변경 없이 따로 발음. E4 이후 개별 음성 우선."
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E4",
+      "text": "Su.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E5",
+      "text": "Süt.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E6",
+      "text": "On.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E7",
+      "text": "Ön.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E8",
+      "text": "Un.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E9",
+      "text": "Ün.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E10",
+      "text": "Kır.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D002-E11",
+      "text": "Kir.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D002-T1",
+      "text": "Su, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D002-T2",
+      "text": "Evet.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D002-T3",
+      "text": "Teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D002-T4",
+      "text": "Pardon. Süt, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D002-T5",
+      "text": "Süt.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D002-T6",
+      "text": "Teşekkür ederim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D002",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D002-T7",
+      "text": "Rica ederim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V1",
+      "text": "cam",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V2",
+      "text": "çam",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V3",
+      "text": "saç",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V4",
+      "text": "şiş",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V5",
+      "text": "çay",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V6",
+      "text": "kahve",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V7",
+      "text": "dağ",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V8",
+      "text": "yağ",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V9",
+      "text": "soğuk",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V10",
+      "text": "sıcak",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V11",
+      "text": "can",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V12",
+      "text": "şal",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V13",
+      "text": "ses",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V14",
+      "text": "şeker",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V15",
+      "text": "çorba",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D003-V16",
+      "text": "ekmek",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E1",
+      "text": "cam — çam",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release",
+      "note": "기존 대조 단어쌍. 대시 앞뒤에 자연스러운 쉼, 원본 문자열 변경 없이 따로 발음. E4 이후 개별 음성 우선."
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E2",
+      "text": "çay — kahve",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release",
+      "note": "기존 대조 단어쌍. 대시 앞뒤에 자연스러운 쉼, 원본 문자열 변경 없이 따로 발음. E4 이후 개별 음성 우선."
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E3",
+      "text": "soğuk — sıcak",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release",
+      "note": "기존 대조 단어쌍. 대시 앞뒤에 자연스러운 쉼, 원본 문자열 변경 없이 따로 발음. E4 이후 개별 음성 우선."
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E4",
+      "text": "Can.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E5",
+      "text": "Çam.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E6",
+      "text": "Ses.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E7",
+      "text": "Şal.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E8",
+      "text": "Dağ.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E9",
+      "text": "Yağ.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E10",
+      "text": "Sıcak çay.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E11",
+      "text": "Soğuk su.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D003-E12",
+      "text": "Şeker, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D003-T1",
+      "text": "Çay, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D003-T2",
+      "text": "Evet.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D003-T3",
+      "text": "Teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D003-T4",
+      "text": "Merhaba. Sıcak çay, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D003-T5",
+      "text": "Pardon. Kahve?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D003-T6",
+      "text": "Hayır. Çay, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D003-T7",
+      "text": "Evet.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D003",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D003-T8",
+      "text": "Teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V1",
+      "text": "ben",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V2",
+      "text": "sen",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V3",
+      "text": "o",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V4",
+      "text": "biz",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V5",
+      "text": "siz",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V6",
+      "text": "onlar",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V7",
+      "text": "Koreli",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V8",
+      "text": "Türk",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V9",
+      "text": "öğrenci",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V10",
+      "text": "turist",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V11",
+      "text": "doktor",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V12",
+      "text": "yorgun",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V13",
+      "text": "mutlu",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V14",
+      "text": "hazır",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V15",
+      "text": "yabancı",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D004-V16",
+      "text": "arkadaş",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E1",
+      "text": "Ben Koreliyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E2",
+      "text": "Ben turistim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E3",
+      "text": "Sen öğrencisin.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E4",
+      "text": "Koreliyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E5",
+      "text": "Ben öğrenciyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E6",
+      "text": "Ben doktorum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E7",
+      "text": "Ben yorgunum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E8",
+      "text": "Ben mutluyum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E9",
+      "text": "Ben hazırım.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E10",
+      "text": "O turist.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D004-E11",
+      "text": "Sen Türksün.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D004-T1",
+      "text": "Merhaba! Ben Koreliyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D004-T2",
+      "text": "Merhaba! Ben Türküm.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D004-T3",
+      "text": "Merhaba! Ben turistim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D004-T4",
+      "text": "Merhaba! Ben öğrenciyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D004-T5",
+      "text": "Koreliyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D004",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D004-T6",
+      "text": "Teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V1",
+      "text": "Nasılsın?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V2",
+      "text": "Nasılsınız?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V3",
+      "text": "İyiyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V4",
+      "text": "İyi",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V5",
+      "text": "Kötü",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V6",
+      "text": "Fena değil.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V7",
+      "text": "Sağ ol.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V8",
+      "text": "Sağ olun.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V9",
+      "text": "Ya siz?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V10",
+      "text": "Ya sen?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V11",
+      "text": "Çok iyi.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V12",
+      "text": "Çok",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V13",
+      "text": "İdare eder.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D005-V14",
+      "text": "İyisin.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E1",
+      "text": "Merhaba, nasılsınız?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E2",
+      "text": "İyiyim, teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E3",
+      "text": "Fena değil.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E4",
+      "text": "Nasılsın?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E5",
+      "text": "Nasılsınız?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E6",
+      "text": "Sağ ol.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E7",
+      "text": "Sağ olun.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E8",
+      "text": "Siz Korelisiniz.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E9",
+      "text": "Siz Türksünüz.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E10",
+      "text": "Çok iyiyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D005-E11",
+      "text": "İdare eder.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D005-T1",
+      "text": "Merhaba, nasılsınız?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D005-T2",
+      "text": "İyiyim, teşekkürler. Siz?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D005-T3",
+      "text": "İyiyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D005-T4",
+      "text": "Günaydın, nasılsınız?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D005-T5",
+      "text": "Fena değil, teşekkürler. Ya siz?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D005-T6",
+      "text": "Çok iyiyim, sağ olun.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D005-T7",
+      "text": "Hoşça kalın!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D005",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D005-T8",
+      "text": "Güle güle!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V1",
+      "text": "ad",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V2",
+      "text": "Adım",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V3",
+      "text": "Adınız ne?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V4",
+      "text": "Adın ne?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V5",
+      "text": "Memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V6",
+      "text": "Ben de.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V7",
+      "text": "Kore",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V8",
+      "text": "Türkiye",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V9",
+      "text": "Ben de memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V10",
+      "text": "Benim adım",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V11",
+      "text": "İsim",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V12",
+      "text": "Deniz",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V13",
+      "text": "Mert",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "word",
+      "targetId": "D006-V14",
+      "text": "Eskişehir",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E1",
+      "text": "Adım Mert.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E2",
+      "text": "Adınız ne?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E3",
+      "text": "Memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E4",
+      "text": "Adım Deniz.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E5",
+      "text": "Adın ne?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E6",
+      "text": "Benim adım Mert.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E7",
+      "text": "Ben de memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E8",
+      "text": "Ben Koreliyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D006-E9",
+      "text": "Ben turistim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T1",
+      "text": "Merhaba! Adım Mert. Adınız ne?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T2",
+      "text": "Adım Deniz. Memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T3",
+      "text": "Ben de.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T4",
+      "text": "Merhaba, nasılsınız?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T5",
+      "text": "İyiyim, teşekkürler. Ya siz?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T6",
+      "text": "İyiyim. Adım Deniz. Adınız ne?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T7",
+      "text": "Adım Mert. Ben Türküm.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T8",
+      "text": "Memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D006",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D006-T9",
+      "text": "Ben de memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E1",
+      "text": "Ben Koreliyim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E2",
+      "text": "Adınız ne?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E3",
+      "text": "Memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E4",
+      "text": "Hoşça kalın!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E5",
+      "text": "Güle güle!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E6",
+      "text": "Ben turistim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E7",
+      "text": "Ben doktorum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E8",
+      "text": "Siz Korelisiniz.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "example",
+      "targetId": "D007-E9",
+      "text": "Ben de memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T1",
+      "text": "Merhaba! Nasılsınız?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T2",
+      "text": "İyiyim, teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T3",
+      "text": "Adınız ne?",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T4",
+      "text": "Adım Deniz.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T5",
+      "text": "Memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T6",
+      "text": "Ben de memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T7",
+      "text": "Ben Koreliyim. Ben turistim.",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T8",
+      "text": "Hoşça kalın!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D007",
+      "lessonRevision": "r2-20261121a",
+      "kind": "dialogue",
+      "targetId": "D007-T9",
+      "text": "Güle güle!",
+      "locale": "tr-TR",
+      "priority": "P0",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V1",
+      "text": "bu",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V2",
+      "text": "şu",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V3",
+      "text": "o",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V4",
+      "text": "kitap",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V5",
+      "text": "kalem",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V6",
+      "text": "defter",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V7",
+      "text": "masa",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V8",
+      "text": "sandalye",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V9",
+      "text": "çanta",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V10",
+      "text": "telefon",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V11",
+      "text": "kapı",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V12",
+      "text": "bardak",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V13",
+      "text": "anahtar",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D008-V14",
+      "text": "Bu ne?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D008-E1",
+      "text": "Bu kitap.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D008-E2",
+      "text": "Şu kalem.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D008-E3",
+      "text": "O masa.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D008-E4",
+      "text": "Bu ne?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D008-E5",
+      "text": "Bu defter.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D008-E6",
+      "text": "Şu çanta.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D008-E7",
+      "text": "O kapı.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D008-E8",
+      "text": "Bu anahtar.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D008-T1",
+      "text": "Merhaba!",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D008-T2",
+      "text": "Merhaba!",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D008-T3",
+      "text": "Bu ne?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D008-T4",
+      "text": "Bu defter.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D008-T5",
+      "text": "Şu ne?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D008-T6",
+      "text": "Şu kalem.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D008",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D008-T7",
+      "text": "Teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V1",
+      "text": "kitaplar",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V2",
+      "text": "kalemler",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V3",
+      "text": "masalar",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V4",
+      "text": "sandalyeler",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V5",
+      "text": "çocuk",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V6",
+      "text": "çocuklar",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V7",
+      "text": "öğrenciler",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V8",
+      "text": "arkadaşlar",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V9",
+      "text": "bunlar",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V10",
+      "text": "şunlar",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V11",
+      "text": "onlar",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D009-V12",
+      "text": "iki kitap",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D009-E1",
+      "text": "Bunlar kitap.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D009-E2",
+      "text": "Şunlar kalem.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D009-E3",
+      "text": "Bu masalar.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D009-E4",
+      "text": "İki kitap.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D009-E5",
+      "text": "O çocuklar.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D009-E6",
+      "text": "Onlar öğrenci.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D009-E7",
+      "text": "Bunlar defter.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D009-E8",
+      "text": "Kalemler.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D009-T1",
+      "text": "Bu ne?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D009-T2",
+      "text": "Bu kitap.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D009-T3",
+      "text": "Bunlar ne?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D009-T4",
+      "text": "Bunlar defter.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D009-T5",
+      "text": "İki kalem, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D009-T6",
+      "text": "İki kalem.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D009",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D009-T7",
+      "text": "Teşekkür ederim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V1",
+      "text": "değil",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V2",
+      "text": "değilim",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V3",
+      "text": "değilsin",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V4",
+      "text": "değilsiniz",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V5",
+      "text": "öğretmen",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V6",
+      "text": "hemşire",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V7",
+      "text": "aşçı",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V8",
+      "text": "mühendis",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V9",
+      "text": "polis",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V10",
+      "text": "mutlu değilim",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D010-V11",
+      "text": "hazır değilim",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D010-E1",
+      "text": "Ben turist değilim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D010-E2",
+      "text": "Ben öğrenci değilim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D010-E3",
+      "text": "Sen doktor değilsin.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D010-E4",
+      "text": "Siz Türk değilsiniz.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D010-E5",
+      "text": "O öğretmen değil.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D010-E6",
+      "text": "Bu kalem değil.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D010-E7",
+      "text": "Hazır değilim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D010-E8",
+      "text": "Hayır, bu çanta değil.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D010-T1",
+      "text": "Merhaba! Ben doktorum.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D010-T2",
+      "text": "Ben doktor değilim. Öğretmenim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D010-T3",
+      "text": "Bu kitap.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D010-T4",
+      "text": "Hayır, bu kitap değil. Bu defter.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D010",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D010-T5",
+      "text": "Teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V1",
+      "text": "kim",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V2",
+      "text": "ne",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V3",
+      "text": "mı",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V4",
+      "text": "mi",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V5",
+      "text": "mu",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V6",
+      "text": "mü",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V7",
+      "text": "Bu kim?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V8",
+      "text": "Türk müsünüz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V9",
+      "text": "Turist misiniz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D011-V10",
+      "text": "Hazır mısın?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D011-E1",
+      "text": "Bu kim?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D011-E2",
+      "text": "Bu ne?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D011-E3",
+      "text": "Bu kitap mı?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D011-E4",
+      "text": "Bu telefon mu?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D011-E5",
+      "text": "Türk müsünüz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D011-E6",
+      "text": "Turist misiniz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D011-E7",
+      "text": "Hazır mısın?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D011-E8",
+      "text": "Öğrenci miyim?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D011-T1",
+      "text": "Merhaba! Türk müsünüz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D011-T2",
+      "text": "Hayır, Türk değilim. Koreliyim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D011-T3",
+      "text": "Turist misiniz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D011-T4",
+      "text": "Evet, turistim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D011-T5",
+      "text": "Bu kitap mı?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D011",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D011-T6",
+      "text": "Hayır, bu defter.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V1",
+      "text": "sıfır",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V2",
+      "text": "bir",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V3",
+      "text": "iki",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V4",
+      "text": "üç",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V5",
+      "text": "dört",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V6",
+      "text": "beş",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V7",
+      "text": "altı",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V8",
+      "text": "yedi",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V9",
+      "text": "sekiz",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V10",
+      "text": "dokuz",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V11",
+      "text": "on",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V12",
+      "text": "yirmi",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V13",
+      "text": "otuz",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V14",
+      "text": "kırk",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V15",
+      "text": "elli",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V16",
+      "text": "altmış",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V17",
+      "text": "yetmiş",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V18",
+      "text": "seksen",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V19",
+      "text": "doksan",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V20",
+      "text": "yüz",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "word",
+      "targetId": "D012-V21",
+      "text": "kaç",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E1",
+      "text": "On bir.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E2",
+      "text": "Yirmi üç.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E3",
+      "text": "Kırk dört.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E4",
+      "text": "Altmış beş.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E5",
+      "text": "Doksan dokuz.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E6",
+      "text": "Yüz.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E7",
+      "text": "Üç kitap.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E8",
+      "text": "Beş bardak.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "example",
+      "targetId": "D012-E9",
+      "text": "Kaç kalem?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D012-T1",
+      "text": "Merhaba! Kaç kalem?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D012-T2",
+      "text": "Üç kalem, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D012-T3",
+      "text": "Üç kalem.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D012-T4",
+      "text": "Evet, teşekkürler.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D012",
+      "lessonRevision": "r1-20261121a",
+      "kind": "dialogue",
+      "targetId": "D012-T5",
+      "text": "Rica ederim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V1",
+      "text": "yaş",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V2",
+      "text": "Kaç yaşındasınız?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V3",
+      "text": "Kaç yaşındasın?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V4",
+      "text": "yaşındayım",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V5",
+      "text": "Nerelisiniz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V6",
+      "text": "Ne iş yapıyorsunuz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V7",
+      "text": "Japon",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V8",
+      "text": "Alman",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V9",
+      "text": "İngiliz",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V10",
+      "text": "memur",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V11",
+      "text": "emekli",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "word",
+      "targetId": "D013-V12",
+      "text": "çalışan",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E1",
+      "text": "Otuz yaşındayım.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E2",
+      "text": "Kırk iki yaşındayım.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E3",
+      "text": "Kaç yaşındasınız?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E4",
+      "text": "Nerelisiniz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E5",
+      "text": "Koreliyim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E6",
+      "text": "Ne iş yapıyorsunuz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E7",
+      "text": "Mühendisim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E8",
+      "text": "Öğretmenim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D013-E9",
+      "text": "Emekliyim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D013-T1",
+      "text": "Merhaba! Adım Deniz. Nerelisiniz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D013-T2",
+      "text": "Koreliyim. Adım Mert.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D013-T3",
+      "text": "Ne iş yapıyorsunuz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D013-T4",
+      "text": "Mühendisim. Ya siz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D013-T5",
+      "text": "Öğretmenim. Memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D013",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D013-T6",
+      "text": "Ben de memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D014-E1",
+      "text": "Bu ne?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D014-E2",
+      "text": "Bunlar kitap.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D014-E3",
+      "text": "Bu telefon mu?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D014-E4",
+      "text": "Ben doktor değilim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D014-E5",
+      "text": "Yirmi sekiz.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D014-E6",
+      "text": "Otuz yaşındayım.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D014-E7",
+      "text": "Nerelisiniz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "example",
+      "targetId": "D014-E8",
+      "text": "Ne iş yapıyorsunuz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D014-T1",
+      "text": "Merhaba! Bu kitap mı?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D014-T2",
+      "text": "Hayır, bu defter.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D014-T3",
+      "text": "Kaç defter?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D014-T4",
+      "text": "İki defter, lütfen.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D014-T5",
+      "text": "Nerelisiniz?",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D014-T6",
+      "text": "Koreliyim. Turistim.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D014-T7",
+      "text": "Memnun oldum.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    },
+    {
+      "lessonId": "D014",
+      "lessonRevision": "r1-20261121",
+      "kind": "dialogue",
+      "targetId": "D014-T8",
+      "text": "Ben de.",
+      "locale": "tr-TR",
+      "priority": "P1",
+      "status": "author_text_frozen_for_candidate_not_release"
+    }
+  ]
+}
