@@ -1,0 +1,84 @@
+{
+  "baseRef": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "sourceLessonsBlob": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0",
+  "targets": 100,
+  "word": 56,
+  "example": 21,
+  "dialogue": 23,
+  "localMP3": 100,
+  "localBytes": 574405,
+  "localDecodePass": 100,
+  "localFormatPass": 100,
+  "repositoryMP3": 1,
+  "repositorySampleBlob": "6e9ed4faaf0950dfbc3588821374bcf4d179ed80",
+  "scope": "local eSpeak 1.48.15/FFmpeg with copied exact text snapshot; no real listening. Repository generator same commands but not executed from remote file.",
+  "mock": [
+    {
+      "name": "100 unique NFC targets",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "sample exact source",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "draft hidden production",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "draft visible preview",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "mismatched text rejected",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "remote rejected",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "other language rejected",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "local tr selected",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "unsafe file rejected",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "mock fixed playback",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "production unapproved unavailable",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    },
+    {
+      "name": "unsupported recording rejected",
+      "result": "pass",
+      "scope": "isolated JavaScript mocks; not browser"
+    }
+  ],
+  "pending": [
+    "Upload full binary set; text-base64 connector transfer only one sample succeeded.",
+    "Independent listening and native naturalness; especially ı/ö/ü/ğ, stress and questions.",
+    "Physical iPhone Safari, PC microphone/permissions and actual integration.",
+    "Piper/Okur/zerre download blocked by local DNS; no neural synthesis executed.",
+    "02 final revision may change targets."
+  ]
+}
