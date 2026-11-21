@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0.0",
+  "assets": [
+    {
+      "id": "D004-V3-espeak-trim-v1",
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V3",
+      "text": "o",
+      "locale": "tr-TR",
+      "provider": "eSpeak 1.48.15",
+      "voice": "tr; 145 wpm; trim v1",
+      "license": "eSpeak upstream author states no restriction on output; original draft text; final review pending",
+      "sourceUrl": "https://sourceforge.net/p/espeak/discussion/538920/thread/58c2e481/",
+      "path": "assets/audio/D004/D004-V3-espeak-trim-v1.mp3",
+      "sha256": "c538e43fe659ce3fa0e8c9234b1a933dce02c4e8297ede9a147d4d68a98e2690",
+      "reviewStatus": "draft"
+    }
+  ]
+}

@@ -1,0 +1,605 @@
+{
+  "sourceLessonsBlob": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0",
+  "targets": [
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V1",
+      "text": "Merhaba"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V2",
+      "text": "Günaydın"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V3",
+      "text": "İyi akşamlar"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V4",
+      "text": "İyi geceler"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V5",
+      "text": "Teşekkürler"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V6",
+      "text": "Lütfen"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V7",
+      "text": "Evet"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V8",
+      "text": "Hayır"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V9",
+      "text": "Hoşça kal"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "word",
+      "targetId": "D001-V10",
+      "text": "Güle güle"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "example",
+      "targetId": "D001-E1",
+      "text": "Merhaba!"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "example",
+      "targetId": "D001-E2",
+      "text": "Teşekkürler."
+    },
+    {
+      "lessonId": "D001",
+      "kind": "example",
+      "targetId": "D001-E3",
+      "text": "Günaydın!"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "dialogue",
+      "targetId": "D001-T1",
+      "text": "Merhaba!"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "dialogue",
+      "targetId": "D001-T2",
+      "text": "Merhaba!"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "dialogue",
+      "targetId": "D001-T3",
+      "text": "Hoşça kal!"
+    },
+    {
+      "lessonId": "D001",
+      "kind": "dialogue",
+      "targetId": "D001-T4",
+      "text": "Güle güle!"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V1",
+      "text": "at"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V2",
+      "text": "et"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V3",
+      "text": "ışık"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V4",
+      "text": "iki"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V5",
+      "text": "on"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V6",
+      "text": "ön"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V7",
+      "text": "su"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V8",
+      "text": "süt"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V9",
+      "text": "gül"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "word",
+      "targetId": "D002-V10",
+      "text": "göl"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "example",
+      "targetId": "D002-E1",
+      "text": "at — et"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "example",
+      "targetId": "D002-E2",
+      "text": "on — ön"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "example",
+      "targetId": "D002-E3",
+      "text": "su — süt"
+    },
+    {
+      "lessonId": "D002",
+      "kind": "dialogue",
+      "targetId": "D002-T1",
+      "text": "Su, lütfen."
+    },
+    {
+      "lessonId": "D002",
+      "kind": "dialogue",
+      "targetId": "D002-T2",
+      "text": "Evet."
+    },
+    {
+      "lessonId": "D002",
+      "kind": "dialogue",
+      "targetId": "D002-T3",
+      "text": "Teşekkürler."
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V1",
+      "text": "cam"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V2",
+      "text": "çam"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V3",
+      "text": "saç"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V4",
+      "text": "şiş"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V5",
+      "text": "çay"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V6",
+      "text": "kahve"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V7",
+      "text": "dağ"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V8",
+      "text": "yağ"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V9",
+      "text": "soğuk"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "word",
+      "targetId": "D003-V10",
+      "text": "sıcak"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "example",
+      "targetId": "D003-E1",
+      "text": "cam — çam"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "example",
+      "targetId": "D003-E2",
+      "text": "çay — kahve"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "example",
+      "targetId": "D003-E3",
+      "text": "soğuk — sıcak"
+    },
+    {
+      "lessonId": "D003",
+      "kind": "dialogue",
+      "targetId": "D003-T1",
+      "text": "Çay, lütfen."
+    },
+    {
+      "lessonId": "D003",
+      "kind": "dialogue",
+      "targetId": "D003-T2",
+      "text": "Evet."
+    },
+    {
+      "lessonId": "D003",
+      "kind": "dialogue",
+      "targetId": "D003-T3",
+      "text": "Teşekkürler."
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V1",
+      "text": "ben"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V2",
+      "text": "sen"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V3",
+      "text": "o"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V4",
+      "text": "biz"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V5",
+      "text": "siz"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V6",
+      "text": "onlar"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V7",
+      "text": "Koreli"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V8",
+      "text": "Türk"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V9",
+      "text": "öğrenci"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "word",
+      "targetId": "D004-V10",
+      "text": "turist"
+    },
+    {
+      "lessonId": "D004",
+      "kind": "example",
+      "targetId": "D004-E1",
+      "text": "Ben Koreliyim."
+    },
+    {
+      "lessonId": "D004",
+      "kind": "example",
+      "targetId": "D004-E2",
+      "text": "Ben turistim."
+    },
+    {
+      "lessonId": "D004",
+      "kind": "example",
+      "targetId": "D004-E3",
+      "text": "Sen öğrencisin."
+    },
+    {
+      "lessonId": "D004",
+      "kind": "dialogue",
+      "targetId": "D004-T1",
+      "text": "Merhaba! Ben Koreliyim."
+    },
+    {
+      "lessonId": "D004",
+      "kind": "dialogue",
+      "targetId": "D004-T2",
+      "text": "Merhaba! Ben Türküm."
+    },
+    {
+      "lessonId": "D005",
+      "kind": "word",
+      "targetId": "D005-V1",
+      "text": "Nasılsın?"
+    },
+    {
+      "lessonId": "D005",
+      "kind": "word",
+      "targetId": "D005-V2",
+      "text": "Nasılsınız?"
+    },
+    {
+      "lessonId": "D005",
+      "kind": "word",
+      "targetId": "D005-V3",
+      "text": "İyiyim."
+    },
+    {
+      "lessonId": "D005",
+      "kind": "word",
+      "targetId": "D005-V4",
+      "text": "İyi"
+    },
+    {
+      "lessonId": "D005",
+      "kind": "word",
+      "targetId": "D005-V5",
+      "text": "Kötü"
+    },
+    {
+      "lessonId": "D005",
+      "kind": "word",
+      "targetId": "D005-V6",
+      "text": "Fena değil."
+    },
+    {
+      "lessonId": "D005",
+      "kind": "word",
+      "targetId": "D005-V7",
+      "text": "Sağ ol."
+    },
+    {
+      "lessonId": "D005",
+      "kind": "word",
+      "targetId": "D005-V8",
+      "text": "Sağ olun."
+    },
+    {
+      "lessonId": "D005",
+      "kind": "example",
+      "targetId": "D005-E1",
+      "text": "Merhaba, nasılsınız?"
+    },
+    {
+      "lessonId": "D005",
+      "kind": "example",
+      "targetId": "D005-E2",
+      "text": "İyiyim, teşekkürler."
+    },
+    {
+      "lessonId": "D005",
+      "kind": "example",
+      "targetId": "D005-E3",
+      "text": "Fena değil."
+    },
+    {
+      "lessonId": "D005",
+      "kind": "dialogue",
+      "targetId": "D005-T1",
+      "text": "Merhaba, nasılsınız?"
+    },
+    {
+      "lessonId": "D005",
+      "kind": "dialogue",
+      "targetId": "D005-T2",
+      "text": "İyiyim, teşekkürler. Siz?"
+    },
+    {
+      "lessonId": "D005",
+      "kind": "dialogue",
+      "targetId": "D005-T3",
+      "text": "İyiyim."
+    },
+    {
+      "lessonId": "D006",
+      "kind": "word",
+      "targetId": "D006-V1",
+      "text": "ad"
+    },
+    {
+      "lessonId": "D006",
+      "kind": "word",
+      "targetId": "D006-V2",
+      "text": "Adım"
+    },
+    {
+      "lessonId": "D006",
+      "kind": "word",
+      "targetId": "D006-V3",
+      "text": "Adınız ne?"
+    },
+    {
+      "lessonId": "D006",
+      "kind": "word",
+      "targetId": "D006-V4",
+      "text": "Adın ne?"
+    },
+    {
+      "lessonId": "D006",
+      "kind": "word",
+      "targetId": "D006-V5",
+      "text": "Memnun oldum."
+    },
+    {
+      "lessonId": "D006",
+      "kind": "word",
+      "targetId": "D006-V6",
+      "text": "Ben de."
+    },
+    {
+      "lessonId": "D006",
+      "kind": "word",
+      "targetId": "D006-V7",
+      "text": "Kore"
+    },
+    {
+      "lessonId": "D006",
+      "kind": "word",
+      "targetId": "D006-V8",
+      "text": "Türkiye"
+    },
+    {
+      "lessonId": "D006",
+      "kind": "example",
+      "targetId": "D006-E1",
+      "text": "Adım Mert."
+    },
+    {
+      "lessonId": "D006",
+      "kind": "example",
+      "targetId": "D006-E2",
+      "text": "Adınız ne?"
+    },
+    {
+      "lessonId": "D006",
+      "kind": "example",
+      "targetId": "D006-E3",
+      "text": "Memnun oldum."
+    },
+    {
+      "lessonId": "D006",
+      "kind": "dialogue",
+      "targetId": "D006-T1",
+      "text": "Merhaba! Adım Mert. Adınız ne?"
+    },
+    {
+      "lessonId": "D006",
+      "kind": "dialogue",
+      "targetId": "D006-T2",
+      "text": "Adım Deniz. Memnun oldum."
+    },
+    {
+      "lessonId": "D006",
+      "kind": "dialogue",
+      "targetId": "D006-T3",
+      "text": "Ben de."
+    },
+    {
+      "lessonId": "D007",
+      "kind": "example",
+      "targetId": "D007-E1",
+      "text": "Ben Koreliyim."
+    },
+    {
+      "lessonId": "D007",
+      "kind": "example",
+      "targetId": "D007-E2",
+      "text": "Adınız ne?"
+    },
+    {
+      "lessonId": "D007",
+      "kind": "example",
+      "targetId": "D007-E3",
+      "text": "Memnun oldum."
+    },
+    {
+      "lessonId": "D007",
+      "kind": "dialogue",
+      "targetId": "D007-T1",
+      "text": "Merhaba! Nasılsınız?"
+    },
+    {
+      "lessonId": "D007",
+      "kind": "dialogue",
+      "targetId": "D007-T2",
+      "text": "İyiyim, teşekkürler."
+    },
+    {
+      "lessonId": "D007",
+      "kind": "dialogue",
+      "targetId": "D007-T3",
+      "text": "Adınız ne?"
+    },
+    {
+      "lessonId": "D007",
+      "kind": "dialogue",
+      "targetId": "D007-T4",
+      "text": "Adım Deniz."
+    },
+    {
+      "lessonId": "D007",
+      "kind": "dialogue",
+      "targetId": "D007-T5",
+      "text": "Memnun oldum."
+    }
+  ]
+}
