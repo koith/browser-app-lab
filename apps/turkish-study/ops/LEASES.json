@@ -1,23 +1,6 @@
 {
   "version": "1.0.0",
-  "generation": 1,
-  "leases": {
-    "role:00": {
-      "token": "00-integration-cas-proof-1411",
-      "actor": "manual",
-      "role": "00",
-      "taskIds": [
-        "P0-00-01"
-      ],
-      "branch": "main",
-      "baseCommit": "2d965e677858314319b6aa5eb12d685e9bd59f38",
-      "paths": [
-        "ops/LEASES.json"
-      ],
-      "acquiredAt": "2026-11-21T08:34:58Z",
-      "heartbeatAt": "2026-11-21T08:34:58Z",
-      "expiresAt": "2026-11-21T10:04:58.000Z"
-    }
-  },
+  "generation": 2,
+  "leases": {},
   "note": "CAS via GitHub update_file using latest blob SHA; coordination-only exception to 00 merge rule; no secret/user data."
 }
