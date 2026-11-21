@@ -357,6 +357,60 @@ def census_journal_storage(snapshot,owner,stage,reader=storage):
     return report
 
 
+def verify_existing_private_inventory(snapshot, owner, stage, reader=storage):
+    """Save a private index of files already held by the owner.
+
+    No source requests, media uploads, public catalog changes, or admission
+    decisions. A size match alone is not enough for an indexed original.
+    """
+    from collections import Counter
+    census=census_journal_storage(snapshot,owner,stage,reader)
+    states={(p['work'],p['archive_collection_number']):p for p in census['details']}
+    counts=Counter()
+    albums=[]
+    seen={p['sha256'] for a in owner['albums'] for p in a['images']}
+    remote=REMOTES[owner['model']]
+    for album in snapshot['catalog']['albums']:
+        aid=album['id'];rows=[]
+        for photo in album['images']:
+            if photo['sha256'] in seen:
+                counts['already_indexed']+=1;continue
+            state=states.get((aid,photo['number']))
+            if not state or state['original_status']!='size_match':
+                counts['original_unavailable']+=1;continue
+            try:
+                # No alternate account, provider endpoint or challenge retry.
+                exact_image(photo,'key',remote,reader,copyto=None)
+            except Exception as exc:
+                counts['original_verification_failed']+=1
+                continue
+            row={k:photo[k] for k in ('number','key','sha256','bytes','width','height')}
+            if state['preview_status']=='size_match':
+                try:
+                    exact_image(photo,'preview',remote,reader,copyto=None)
+                    row.update({k:photo[k] for k in ('preview','preview_bytes','preview_sha256')})
+                    counts['preview_verified']+=1
+                except Exception:
+                    counts['preview_verification_failed']+=1
+            if 'preview' not in row:
+                row['preview_status']='unverified_or_missing'
+            rows.append(row);seen.add(photo['sha256']);counts['original_verified']+=1
+            if counts['original_verified']%10==0:
+                print('PRIVATE_RECOVERY_ORIGINALS_VERIFIED',counts['original_verified'],flush=True)
+        if rows:albums.append({'id':aid,'title':album.get('title',aid),'images':rows})
+    manifest={'schema_version':1,'model':owner['model'],
+              'scope':'private_existing_object_inventory_not_publication',
+              'source_journal_rows':census['journal_rows'],
+              'verified_originals':counts['original_verified'],
+              'albums':albums,'counts':dict(counts),
+              'new_media_uploaded':0,'public_gallery_published':False}
+    (stage/'metadata/private-recovered-index.json').write_bytes(serialize(manifest))
+    report={**census,'private_verified_counts':dict(counts),'media_read':True}
+    (stage/'metadata/collection-audit.json').write_bytes(serialize(report))
+    print('PRIVATE_RECOVERY_MANIFEST_READY',owner['model'],json.dumps(dict(counts),sort_keys=True),flush=True)
+    return manifest
+
+
 def require_live_published_inventory(owner, model, published):
     """Permit appended photos, but never discard or overwrite a published slot."""
     current=clean_catalog(owner,model)
@@ -415,9 +469,14 @@ def main():
     if sum(len(x['images']) for x in data['catalog']['albums'])!=request['expected_collected_photos']:
         raise ValueError('Private producer photo count changed')
     if request.get('storage_census_only') is True:
-        census_journal_storage(data,owner,a.stage)
+        verified=request.get('verify_existing_private_files') is True
+        if verified:
+            verify_existing_private_inventory(data,owner,a.stage)
+        else:
+            census_journal_storage(data,owner,a.stage)
         with a.github_output.open('a') as output:
             output.write('changed=false\nheld=0\ncensus_only=true\n')
+            output.write('private_recovery='+str(verified).lower()+'\n')
         return
     hold_audit=None
     if request.get('preview_only_hold_from') is not None:
