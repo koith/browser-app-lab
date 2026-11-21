@@ -1,0 +1,47 @@
+{
+  "id": "00-integration-20261121-r2",
+  "previous": "ops/runs/20261121-00-integration-r1.json",
+  "mergedGovernancePR": 1411,
+  "mergeCommit": "2d965e677858314319b6aa5eb12d685e9bd59f38",
+  "checked": {
+    "scope": "Public external rendered extraction, not individual learner actions or physical Safari",
+    "url": "https://koith.github.io/browser-app-lab/apps/turkish-study/",
+    "publicBanner": "앱 0.1.1 · 개발판 / 공개 승인 대기",
+    "publicVisibleDays": "학습 가능 0/120일",
+    "publicCTA": "공개 승인 대기",
+    "publicLessonsVersion": "0.2.0-draft",
+    "separatePublicManifestObservedVersion": "0.1.0",
+    "separatePublicManifestPublishedDayIds": [],
+    "conclusion": "v0.1.1 shell and closed gate rendering now externally observed. Direct manifest extraction still previous revision; exact bundle digest/interaction, independent full test not confirmed."
+  },
+  "leaseVerification": {
+    "acquireCommit": "9d9d5e2c0f37fa47584bb9f062dd36d41395fed7",
+    "staleWriteRejectedHTTP409": true,
+    "releaseCommit": "3c658d177dbea4180adb4f231252f3176952ed1b",
+    "readbackActiveLeases": 0,
+    "scope": "Real GitHub contents API optimistic locking; not distributed execution/physical server permission enforcement"
+  },
+  "opsChecks": {
+    "passed": 17,
+    "total": 17,
+    "workUnits": 17,
+    "defects": 7
+  },
+  "stats": {
+    "total": 44,
+    "complete": 2,
+    "remaining": 42,
+    "newlyComplete": 0,
+    "candidateLessonDays": 14,
+    "independentFinalReviewedDays": 0,
+    "publishedDays": 0
+  },
+  "p0": "NO-GO",
+  "scheduleRegistration": "not requested here; not registered",
+  "next": [
+    "P0-03-01 finish exact live bundle and gate test",
+    "P0-05-01 current revision independent language audit",
+    "P0-04-01 resume draft #1409",
+    "P0-01-01 and P0-02-01 align W01/W02 rubric"
+  ]
+}
