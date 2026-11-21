@@ -1,0 +1,26 @@
+{
+  "target": {
+    "active": 1000,
+    "receptiveOnly": 500
+  },
+  "firstWeek": {
+    "active": 34,
+    "receptiveOnly": 17,
+    "total": 51
+  },
+  "first14": {
+    "active": 75,
+    "receptiveOnly": 26,
+    "total": 101
+  },
+  "remainingLessonDays": 87,
+  "averageRemainingPerLesson": 16.080459770114942,
+  "rules": [
+    "여행/관계 과업의 고효용 표제어·독립 구문 우선. 활용형·변형·조합 수는 별도 계수하지 않음. 이해→활용 승격은 이동, 중복 계수 금지.",
+    "NFC와 터키어 대소문자 적용; I/ı와 İ/i 별개. 다른 의미는 검수된 sense만 별도.",
+    "CV 목표 ID는 런타임 V ID 아님. 기존 words 배열/순서/ID 유지. D001~D006 목표는 실데이터 원문 순서 그대로 연결.",
+    "당일·D+1/3/7/14/30 분산 인출, 실패 항목 우선. 활용=재인출 및 문장 사용; 이해=청취/읽기 의미 식별.",
+    "Nasılsın/Nasılsınız, Sağ ol/Sağ olun, Adınız ne/Adın ne는 변형으로 중복 제외. Adım/İyiyim 활용형 제외. D012 iki/on 재사용.",
+    "초기 발음 주차 생산 부담 완화; 일반 학습일 생산 8~12+이해 4~6 권장, D012 십 단위 표 지원. 총량은 도전 목표이며 실제 숙달 검증 전 달성 주장 금지."
+  ]
+}

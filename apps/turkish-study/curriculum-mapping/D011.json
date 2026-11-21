@@ -1,0 +1,241 @@
+{
+  "dayId": "D011",
+  "day": 11,
+  "title": "의문사 kim/ne와 의문접사 mı",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "prepared_draft_review_requested",
+  "objectiveIds": [
+    "D011-O1",
+    "D011-O2"
+  ],
+  "objectives": [
+    {
+      "id": "D011-O1",
+      "skill": "interaction",
+      "target": "사람/사물·yes/no 질문 5개 중 4개 교환",
+      "cefrDescriptorIds": [
+        "C-IN",
+        "C-PI"
+      ],
+      "maarifCodes": [
+        "A1.SE.2.",
+        "A1.SE.15."
+      ]
+    },
+    {
+      "id": "D011-O2",
+      "skill": "writing",
+      "target": "의문접사 6개 중 5개 형태·띄어쓰기",
+      "cefrDescriptorIds": [
+        "C-OR",
+        "C-WR"
+      ],
+      "maarifCodes": [
+        "A1.DY.2.",
+        "A1.DY.7."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-PI",
+      "level": "Pre-A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    },
+    {
+      "id": "C-WR",
+      "level": "A1",
+      "scale": "Creative writing",
+      "location": "67"
+    }
+  ],
+  "grammarIds": [
+    "G-Q",
+    "G-NEG",
+    "G-DEM"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-Q",
+      "firstDayId": "D011",
+      "scope": "kim/ne, 독립 표기 mı/mi/mu/mü 뒤 인칭어미, 의문사 질문에는 일반적으로 의문접사 불필요"
+    },
+    {
+      "id": "G-NEG",
+      "firstDayId": "D010",
+      "scope": "değil+인칭: değilim, değilsin, değil, değilsiniz. 동사 부정 D029"
+    },
+    {
+      "id": "G-DEM",
+      "firstDayId": "D008",
+      "scope": "bu/şu/o 지시 거리·공동주의; o 인칭과 구별; şu를 절대 중거리로 정의하지 않음"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D011-CV01",
+      "term": "kim",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D011-CV02",
+      "term": "ne",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D011-CV03",
+      "term": "mı/mi/mu/mü",
+      "mode": "active",
+      "unit": "variant_or_grammar",
+      "countEligible": false
+    },
+    {
+      "id": "D011-CV04",
+      "term": "arkadaş",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D011-CV05",
+      "term": "insan",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D011-CV06",
+      "term": "kişi",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D004",
+    "D008",
+    "D010"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "C-PI",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "이름·나이·수·사물 질문"
+    },
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "C-WR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "67 / Creative writing",
+      "basis": "자기·사물의 짧은 기술"
+    },
+    {
+      "id": "A1.SE.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "짧은 질문 응답"
+    },
+    {
+      "id": "A1.SE.15.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "간단한 질문 응답"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "id": "A1.DY.7.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문장부호"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.11 Tanışalım (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.34 Ben Kimim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [
+    "Bu ne? / O kim?: 오늘부터 생성",
+    "Türk müsünüz?: 의문접사 뒤 인칭"
+  ],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "지시/부정 인출"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "kim/ne와 사람 명사"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "4형 의문접사와 띄어쓰기"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "질문·응답 대조"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "사람/사물 찾기"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "6개 질문 철자"
+    }
+  },
+  "masteryCheck": "사람/사물·yes/no 질문 5개 중 4개 교환 / 의문접사 6개 중 5개 형태·띄어쓰기",
+  "scopeLimits": "동사 의문 D032, 특수 어순·강조 보류."
+}

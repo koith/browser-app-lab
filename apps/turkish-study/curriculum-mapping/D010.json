@@ -1,0 +1,204 @@
+{
+  "dayId": "D010",
+  "day": 10,
+  "title": "명사문 부정 değil",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "prepared_draft_review_requested",
+  "objectiveIds": [
+    "D010-O1",
+    "D010-O2"
+  ],
+  "objectives": [
+    {
+      "id": "D010-O1",
+      "skill": "speaking",
+      "target": "신분 긍/부정 5개 중 4개",
+      "cefrDescriptorIds": [
+        "C-CON",
+        "C-IN"
+      ],
+      "maarifCodes": [
+        "A1.DY.2.",
+        "A1.SE.18."
+      ]
+    },
+    {
+      "id": "D010-O2",
+      "skill": "reading",
+      "target": "긍부정 8개 중 6개",
+      "cefrDescriptorIds": [
+        "C-RD"
+      ],
+      "maarifCodes": [
+        "A1.O.6.",
+        "A1.DY.2."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-CON",
+      "level": "A1",
+      "scale": "Conversation",
+      "location": "74"
+    },
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-RD",
+      "level": "A1",
+      "scale": "Overall reading comprehension",
+      "location": "Chapter 3 / reception"
+    }
+  ],
+  "grammarIds": [
+    "G-NEG",
+    "G-NOM",
+    "G-REG"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-NEG",
+      "firstDayId": "D010",
+      "scope": "değil+인칭: değilim, değilsin, değil, değilsiniz. 동사 부정 D029"
+    },
+    {
+      "id": "G-NOM",
+      "firstDayId": "D004",
+      "scope": "ben/sen/o, 명사·형용사 서술 1인칭 -(y)ım/im/um/üm, 2인칭 -sın/sin/sun/sün, 3인칭 무접사; 주어 생략·4형 모음조화"
+    },
+    {
+      "id": "G-REG",
+      "firstDayId": "D005",
+      "scope": "sen 친근 단수, siz 정중 단수·복수; -sınız/siniz/sunuz/sünüz; 낯선 성인 siz 기본"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D010-CV01",
+      "term": "değil",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D010-CV02",
+      "term": "doktor",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D010-CV03",
+      "term": "öğretmen",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D010-CV04",
+      "term": "mühendis",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D010-CV05",
+      "term": "garson",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D004",
+    "D005",
+    "D008"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-CON",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "74 / Conversation",
+      "basis": "기초 인사·소개·안부·작별"
+    },
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "C-RD",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "Chapter 3 / reception / Overall reading comprehension",
+      "basis": "짧은 글의 익숙한 정보를 파악"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "id": "A1.SE.18.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "자기·타인 소개"
+    },
+    {
+      "id": "A1.O.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.66 / A1 kazanım listesi",
+      "basis": "짧은 소개 글"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.34 Ben Kimim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "인칭어미"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "değil·직업"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "değil에 인칭 접사"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "긍/부정 직업 듣기"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "가상 직업 정정"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "5개 변환"
+    }
+  },
+  "masteryCheck": "신분 긍/부정 5개 중 4개 / 긍부정 8개 중 6개",
+  "scopeLimits": "Fena değil 재분석; 동사부정 D029. değil은 D005 고정구 내 선노출과 별개로 표제어로 최초 계수."
+}

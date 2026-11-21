@@ -1,0 +1,71 @@
+{
+  "id": "W01-RUBRIC-r1",
+  "dayId": "D007",
+  "scope": "D001–D006",
+  "status": "author_defined_review_requested",
+  "minutes": {
+    "orientation": 5,
+    "listening": 15,
+    "reading": 10,
+    "writing": 10,
+    "interaction": 15,
+    "feedback": 5
+  },
+  "scores": {
+    "listening": {
+      "max": 25,
+      "items": 10,
+      "pointsPerItem": 2.5,
+      "blueprint": "모음 4, 자음/ğ 2, 인사/소개 4"
+    },
+    "reading": {
+      "max": 25,
+      "items": 10,
+      "pointsPerItem": 2.5,
+      "blueprint": "특수 문자 3, 상황/정중도 3, 소개 정보 4"
+    },
+    "writing": {
+      "max": 25,
+      "criteria": [
+        [
+          "익숙한 단어 철자 5개×2",
+          10
+        ],
+        [
+          "가명·국적·신분 3개×3",
+          9
+        ],
+        [
+          "인칭 접사·정중도 3개×2",
+          6
+        ]
+      ],
+      "rule": "의미 점수와 형태 슬롯 구분, 동일 오류 중복 차감 금지. NFC, I/ı와 İ/i 혼동 정답 처리 금지. 허용 가명·어순 인정."
+    },
+    "interaction": {
+      "max": 25,
+      "criteria": [
+        "과업 충족",
+        "이해 가능성",
+        "교육한 문법·어휘",
+        "상호작용·정중도"
+      ],
+      "scale": {
+        "0": "미수행",
+        "1": "정답 모델/지속 유도 필요",
+        "2": "부분 지원으로 수행",
+        "3": "정답 모델 없이 수행; 느린 반복 요청 1회 허용"
+      },
+      "formula": "25×합계/12; 반올림은 표시에서만",
+      "scenario": "친구 및 낯선 성인 첫 만남: 인사·안부·이름 질문/답·국적·반가움·작별"
+    }
+  },
+  "passRule": {
+    "totalMinimum": 80,
+    "eachSkillMinimum": 15,
+    "allSkillsRequired": true,
+    "missing": "not_assessed",
+    "qualification": "내부 학습 기준, CEFR 인증 아님"
+  },
+  "administration": "개별 기록·정답 미노출. 청취 느리고 명료한 검수 음원 최대 2회, 자막 금지; 음원 없으면 청취 미평가. 역할극 15분 내 각 학습자 두 장면 총 약 6분, 준비/기록 3분; 서로 역할 교대. STT 일치율은 발음 점수 아님. 약점 Dxxx 복습 후 24~48시간 동형 재시험, 원점수 보존. 02 문항/정답·04 음성·05 독립검수 및 파일럿 필요."
+}

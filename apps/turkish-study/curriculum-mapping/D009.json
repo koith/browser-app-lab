@@ -1,0 +1,206 @@
+{
+  "dayId": "D009",
+  "day": 9,
+  "title": "복수 -lar/-ler",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "prepared_draft_review_requested",
+  "objectiveIds": [
+    "D009-O1",
+    "D009-O2"
+  ],
+  "objectives": [
+    {
+      "id": "D009-O1",
+      "skill": "writing",
+      "target": "명사 8개 중 6개 복수 접사",
+      "cefrDescriptorIds": [
+        "C-OR",
+        "C-WR"
+      ],
+      "maarifCodes": [
+        "A1.DY.2.",
+        "A1.YÜ.5."
+      ]
+    },
+    {
+      "id": "D009-O2",
+      "skill": "speaking",
+      "target": "단/복수 사진 5개 중 4개",
+      "cefrDescriptorIds": [
+        "C-IN"
+      ],
+      "maarifCodes": [
+        "A1.SÜ.6.",
+        "A1.DY.1."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    },
+    {
+      "id": "C-WR",
+      "level": "A1",
+      "scale": "Creative writing",
+      "location": "67"
+    },
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    }
+  ],
+  "grammarIds": [
+    "G-PL"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-PL",
+      "firstDayId": "D009",
+      "scope": "-lar/-ler 2형 조화, 마지막 모음; 수사 뒤 단수는 D012"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D009-CV01",
+      "term": "defter",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D009-CV02",
+      "term": "anahtar",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D009-CV03",
+      "term": "bilet",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D009-CV04",
+      "term": "kapı",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D009-CV05",
+      "term": "pencere",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D009-CV06",
+      "term": "oda",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D002",
+    "D004",
+    "D008"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "C-WR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "67 / Creative writing",
+      "basis": "자기·사물의 짧은 기술"
+    },
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "id": "A1.YÜ.5.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "사물 기술"
+    },
+    {
+      "id": "A1.SÜ.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "사물 기술"
+    },
+    {
+      "id": "A1.DY.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기본 어휘·구문"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.34 Ben Kimim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "지시어 유도 인출"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "6개 사물"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "2형 조화"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "복수 10개 청취"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "단/복수 그림 설명"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "6개 복수 생성"
+    }
+  },
+  "masteryCheck": "명사 8개 중 6개 복수 접사 / 단/복수 사진 5개 중 4개",
+  "scopeLimits": "복수형은 새 표제어 아님; 예외는 보류."
+}

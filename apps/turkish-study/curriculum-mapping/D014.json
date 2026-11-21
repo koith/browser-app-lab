@@ -1,0 +1,325 @@
+{
+  "dayId": "D014",
+  "day": 14,
+  "title": "2주차 종합 시험",
+  "level": "A1",
+  "kind": "assessment",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "prepared_draft_review_requested",
+  "objectiveIds": [
+    "D014-O1",
+    "D014-O2",
+    "D014-O3",
+    "D014-O4"
+  ],
+  "objectives": [
+    {
+      "id": "D014-O1",
+      "skill": "listening",
+      "target": "숫자·신분·질문 10개",
+      "cefrDescriptorIds": [
+        "C-IN",
+        "C-CON"
+      ],
+      "maarifCodes": [
+        "A1.SE.2.",
+        "A1.SE.13."
+      ]
+    },
+    {
+      "id": "D014-O2",
+      "skill": "reading",
+      "target": "사물·가상 프로필 정보 10개",
+      "cefrDescriptorIds": [
+        "C-RD"
+      ],
+      "maarifCodes": [
+        "A1.O.6.",
+        "A1.O.7."
+      ]
+    },
+    {
+      "id": "D014-O3",
+      "skill": "writing",
+      "target": "복수·부정·의문·개인정보",
+      "cefrDescriptorIds": [
+        "C-WR",
+        "C-OR"
+      ],
+      "maarifCodes": [
+        "A1.YÜ.1.",
+        "A1.YÜ.5.",
+        "A1.DY.2."
+      ]
+    },
+    {
+      "id": "D014-O4",
+      "skill": "interaction",
+      "target": "사물 및 가상 프로필 교환",
+      "cefrDescriptorIds": [
+        "C-IN",
+        "C-CON"
+      ],
+      "maarifCodes": [
+        "A1.SE.15.",
+        "A1.SE.18.",
+        "A1.SE.24."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-CON",
+      "level": "A1",
+      "scale": "Conversation",
+      "location": "74"
+    },
+    {
+      "id": "C-RD",
+      "level": "A1",
+      "scale": "Overall reading comprehension",
+      "location": "Chapter 3 / reception"
+    },
+    {
+      "id": "C-WR",
+      "level": "A1",
+      "scale": "Creative writing",
+      "location": "67"
+    },
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    }
+  ],
+  "grammarIds": [
+    "G-DEM",
+    "G-PL",
+    "G-NEG",
+    "G-Q",
+    "G-NUM",
+    "G-AGE",
+    "G-NOM",
+    "G-REG"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-DEM",
+      "firstDayId": "D008",
+      "scope": "bu/şu/o 지시 거리·공동주의; o 인칭과 구별; şu를 절대 중거리로 정의하지 않음"
+    },
+    {
+      "id": "G-PL",
+      "firstDayId": "D009",
+      "scope": "-lar/-ler 2형 조화, 마지막 모음; 수사 뒤 단수는 D012"
+    },
+    {
+      "id": "G-NEG",
+      "firstDayId": "D010",
+      "scope": "değil+인칭: değilim, değilsin, değil, değilsiniz. 동사 부정 D029"
+    },
+    {
+      "id": "G-Q",
+      "firstDayId": "D011",
+      "scope": "kim/ne, 독립 표기 mı/mi/mu/mü 뒤 인칭어미, 의문사 질문에는 일반적으로 의문접사 불필요"
+    },
+    {
+      "id": "G-NUM",
+      "firstDayId": "D012",
+      "scope": "0–100 합성 수: 십+일, 100 yüz; 수사 뒤 명사 단수"
+    },
+    {
+      "id": "G-AGE",
+      "firstDayId": "D013",
+      "scope": "… yaşındayım, Kaç yaşındasınız? 고정구; 소유/처소 분석 D016/D022; 직업·국적 기존 명사문"
+    },
+    {
+      "id": "G-NOM",
+      "firstDayId": "D004",
+      "scope": "ben/sen/o, 명사·형용사 서술 1인칭 -(y)ım/im/um/üm, 2인칭 -sın/sin/sun/sün, 3인칭 무접사; 주어 생략·4형 모음조화"
+    },
+    {
+      "id": "G-REG",
+      "firstDayId": "D005",
+      "scope": "sen 친근 단수, siz 정중 단수·복수; -sınız/siniz/sunuz/sünüz; 낯선 성인 siz 기본"
+    }
+  ],
+  "vocabTargets": [],
+  "prerequisiteDayIds": [
+    "D007",
+    "D008",
+    "D009",
+    "D010",
+    "D011",
+    "D012",
+    "D013"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "C-CON",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "74 / Conversation",
+      "basis": "기초 인사·소개·안부·작별"
+    },
+    {
+      "id": "C-RD",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "Chapter 3 / reception / Overall reading comprehension",
+      "basis": "짧은 글의 익숙한 정보를 파악"
+    },
+    {
+      "id": "C-WR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "67 / Creative writing",
+      "basis": "자기·사물의 짧은 기술"
+    },
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "A1.SE.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "짧은 질문 응답"
+    },
+    {
+      "id": "A1.SE.13.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "숫자"
+    },
+    {
+      "id": "A1.O.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.66 / A1 kazanım listesi",
+      "basis": "짧은 소개 글"
+    },
+    {
+      "id": "A1.O.7.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.66 / A1 kazanım listesi",
+      "basis": "그림과 사람·사물 정보"
+    },
+    {
+      "id": "A1.YÜ.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "자기·지인 소개 글"
+    },
+    {
+      "id": "A1.YÜ.5.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "사물 기술"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "id": "A1.SE.15.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "간단한 질문 응답"
+    },
+    {
+      "id": "A1.SE.18.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "자기·타인 소개"
+    },
+    {
+      "id": "A1.SE.24.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "개인 정보 응답"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.11 Tanışalım (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.27 Sayılar (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.28 Kişisel Bilgilerim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.34 Ben Kimim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [],
+  "minutePlan": {
+    "review": {
+      "minutes": 5,
+      "activity": "기기·안내 5분"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "읽기 10분"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "쓰기 10분"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "듣기 15분"
+    },
+    "roleplay": {
+      "minutes": 15,
+      "activity": "말하기 15분"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "피드백 5분"
+    }
+  },
+  "masteryCheck": "숫자·신분·질문 10개 / 사물·가상 프로필 정보 10개 / 복수·부정·의문·개인정보 / 사물 및 가상 프로필 교환",
+  "scopeLimits": "새 내용 없음; 주간 2 초안, 검수 전 확정 아님."
+}

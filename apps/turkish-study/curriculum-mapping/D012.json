@@ -1,0 +1,314 @@
+{
+  "dayId": "D012",
+  "day": 12,
+  "title": "숫자 0~100",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "prepared_draft_review_requested",
+  "objectiveIds": [
+    "D012-O1",
+    "D012-O2",
+    "D012-O3"
+  ],
+  "objectives": [
+    {
+      "id": "D012-O1",
+      "skill": "listening",
+      "target": "0~100 청취 10개 중 8개",
+      "cefrDescriptorIds": [
+        "C-IN",
+        "C-PI"
+      ],
+      "maarifCodes": [
+        "A1.SE.13."
+      ]
+    },
+    {
+      "id": "D012-O2",
+      "skill": "speaking",
+      "target": "0~10 9/11 무표, 합성 수 5개 중 4개 표 지원",
+      "cefrDescriptorIds": [
+        "C-IN"
+      ],
+      "maarifCodes": [
+        "A1.SE.13.",
+        "A1.DY.1."
+      ]
+    },
+    {
+      "id": "D012-O3",
+      "skill": "writing",
+      "target": "수사+단수 명사 5개 중 4개",
+      "cefrDescriptorIds": [
+        "C-WR"
+      ],
+      "maarifCodes": [
+        "A1.DY.2."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-PI",
+      "level": "Pre-A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-WR",
+      "level": "A1",
+      "scale": "Creative writing",
+      "location": "67"
+    }
+  ],
+  "grammarIds": [
+    "G-NUM",
+    "G-PL"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-NUM",
+      "firstDayId": "D012",
+      "scope": "0–100 합성 수: 십+일, 100 yüz; 수사 뒤 명사 단수"
+    },
+    {
+      "id": "G-PL",
+      "firstDayId": "D009",
+      "scope": "-lar/-ler 2형 조화, 마지막 모음; 수사 뒤 단수는 D012"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D012-CV01",
+      "term": "sıfır",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV02",
+      "term": "bir",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV03",
+      "term": "iki",
+      "mode": "active",
+      "unit": "variant_or_grammar",
+      "countEligible": false
+    },
+    {
+      "id": "D012-CV04",
+      "term": "üç",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV05",
+      "term": "dört",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV06",
+      "term": "beş",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV07",
+      "term": "altı",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV08",
+      "term": "yedi",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV09",
+      "term": "sekiz",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV10",
+      "term": "dokuz",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV11",
+      "term": "on",
+      "mode": "active",
+      "unit": "variant_or_grammar",
+      "countEligible": false
+    },
+    {
+      "id": "D012-CV12",
+      "term": "yirmi",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV13",
+      "term": "otuz",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV14",
+      "term": "kırk",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV15",
+      "term": "elli",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV16",
+      "term": "altmış",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV17",
+      "term": "yetmiş",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV18",
+      "term": "seksen",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV19",
+      "term": "doksan",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    },
+    {
+      "id": "D012-CV20",
+      "term": "yüz",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D002",
+    "D009",
+    "D011"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "C-PI",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "이름·나이·수·사물 질문"
+    },
+    {
+      "id": "C-WR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "67 / Creative writing",
+      "basis": "자기·사물의 짧은 기술"
+    },
+    {
+      "id": "A1.SE.13.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "숫자"
+    },
+    {
+      "id": "A1.DY.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기본 어휘·구문"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.27 Sayılar (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "iki/on 인출"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "0~10 및 십단위 표"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "십+일 합성과 수사 뒤 단수"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "숫자 10개 듣기와 모방"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "가상 번호·개수 교환"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "0~10 인출과 합성 3개"
+    }
+  },
+  "masteryCheck": "0~100 청취 10개 중 8개 / 0~10 9/11 무표, 합성 수 5개 중 4개 표 지원 / 수사+단수 명사 5개 중 4개",
+  "scopeLimits": "101개 독립 암기 금지; iki/on 중복 제외. 기본 수사 18개 신규 부담: 십단위 표 허용, D013/14 재인출."
+}

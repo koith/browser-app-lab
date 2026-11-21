@@ -1,0 +1,306 @@
+{
+  "dayId": "D004",
+  "day": 4,
+  "title": "나와 너: 인칭대명사·명사문",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "author_defined_review_requested",
+  "objectiveIds": [
+    "D004-O1",
+    "D004-O2",
+    "D004-O3"
+  ],
+  "objectives": [
+    {
+      "id": "D004-O1",
+      "skill": "speaking",
+      "target": "국적·신분 자기소개 2문장과 상대 서술 1문장",
+      "cefrDescriptorIds": [
+        "C-CON",
+        "C-IN"
+      ],
+      "maarifCodes": [
+        "A1.SÜ.1.",
+        "A1.DY.2.",
+        "A1.SE.18."
+      ]
+    },
+    {
+      "id": "D004-O2",
+      "skill": "writing",
+      "target": "가르친 인칭 접사 6개 중 5개",
+      "cefrDescriptorIds": [
+        "C-WR",
+        "C-OR"
+      ],
+      "maarifCodes": [
+        "A1.YÜ.1.",
+        "A1.DY.2."
+      ]
+    },
+    {
+      "id": "D004-O3",
+      "skill": "reading",
+      "target": "소개 카드 3개에서 정보 5/6",
+      "cefrDescriptorIds": [
+        "C-RD"
+      ],
+      "maarifCodes": [
+        "A1.O.6."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-CON",
+      "level": "A1",
+      "scale": "Conversation",
+      "location": "74"
+    },
+    {
+      "id": "C-IN",
+      "level": "A1",
+      "scale": "Information exchange",
+      "location": "79"
+    },
+    {
+      "id": "C-WR",
+      "level": "A1",
+      "scale": "Creative writing",
+      "location": "67"
+    },
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    },
+    {
+      "id": "C-RD",
+      "level": "A1",
+      "scale": "Overall reading comprehension",
+      "location": "Chapter 3 / reception"
+    }
+  ],
+  "grammarIds": [
+    "G-NOM"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-NOM",
+      "firstDayId": "D004",
+      "scope": "ben/sen/o, 명사·형용사 서술 1인칭 -(y)ım/im/um/üm, 2인칭 -sın/sin/sun/sün, 3인칭 무접사; 주어 생략·4형 모음조화"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D004-CV01",
+      "term": "ben",
+      "ko": "나",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V1"
+    },
+    {
+      "id": "D004-CV02",
+      "term": "sen",
+      "ko": "너",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V2"
+    },
+    {
+      "id": "D004-CV03",
+      "term": "o",
+      "ko": "그/그녀/그것",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V3"
+    },
+    {
+      "id": "D004-CV04",
+      "term": "biz",
+      "ko": "우리",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V4"
+    },
+    {
+      "id": "D004-CV05",
+      "term": "siz",
+      "ko": "당신/여러분",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V5"
+    },
+    {
+      "id": "D004-CV06",
+      "term": "onlar",
+      "ko": "그들",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V6"
+    },
+    {
+      "id": "D004-CV07",
+      "term": "Koreli",
+      "ko": "한국인",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V7"
+    },
+    {
+      "id": "D004-CV08",
+      "term": "Türk",
+      "ko": "튀르키예인",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V8"
+    },
+    {
+      "id": "D004-CV09",
+      "term": "öğrenci",
+      "ko": "학생",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V9"
+    },
+    {
+      "id": "D004-CV10",
+      "term": "turist",
+      "ko": "관광객",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D004-V10"
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D002",
+    "D003"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-CON",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "74 / Conversation",
+      "basis": "기초 인사·소개·안부·작별"
+    },
+    {
+      "id": "C-IN",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "79 / Information exchange",
+      "basis": "친숙한 정보의 기초 질문·응답; 수량"
+    },
+    {
+      "id": "C-WR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "67 / Creative writing",
+      "basis": "자기·사물의 짧은 기술"
+    },
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "C-RD",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "Chapter 3 / reception / Overall reading comprehension",
+      "basis": "짧은 글의 익숙한 정보를 파악"
+    },
+    {
+      "id": "A1.SÜ.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "자기소개"
+    },
+    {
+      "id": "A1.DY.2.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 문법 문장"
+    },
+    {
+      "id": "A1.SE.18.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.69 / A1 kazanım listesi",
+      "basis": "자기·타인 소개"
+    },
+    {
+      "id": "A1.YÜ.1.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.68 / A1 kazanım listesi",
+      "basis": "자기·지인 소개 글"
+    },
+    {
+      "id": "A1.O.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.66 / A1 kazanım listesi",
+      "basis": "짧은 소개 글"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.17 Milletler (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.34 Ben Kimim (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "마지막 모음 인출"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "대명사·신분 어휘"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "1/2/3인칭 명사문, 4형 조화, y"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "Koreliyim/Türküm/öğrenciyim/turistim 따라 말하기"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "가상 인물 카드로 소개"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "인칭 접사 확인+소개 2문장"
+    }
+  },
+  "masteryCheck": "국적·신분 자기소개 2문장과 상대 서술 1문장 / 가르친 인칭 접사 6개 중 5개 / 소개 카드 3개에서 정보 5/6",
+  "scopeLimits": "biz/onlar는 인식만, siz 접사 D005; değil D010, mı D011. 한국어 조사와 1:1 대응 금지."
+}

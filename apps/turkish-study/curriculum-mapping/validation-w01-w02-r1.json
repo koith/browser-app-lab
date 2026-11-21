@@ -1,0 +1,71 @@
+{
+  "kind": "author_self_check",
+  "at": "2026-11-21T17:12:00+09:00",
+  "baseRef": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "curriculumBlob": "6fb164f6eef6b1615448645db98da415bcf1dbcd",
+  "lessonsBlob": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0",
+  "tests": [
+    {
+      "name": "120 IDs sequential & level & week & minutes",
+      "pass": true
+    },
+    {
+      "name": "monthly and A1 days preserved",
+      "pass": true
+    },
+    {
+      "name": "14 IDs titles kind preserved",
+      "pass": true
+    },
+    {
+      "name": "contract required mapping properties",
+      "pass": true
+    },
+    {
+      "name": "prerequisites before day",
+      "pass": true
+    },
+    {
+      "name": "grammar refs defined & prior",
+      "pass": true
+    },
+    {
+      "name": "source coverage",
+      "pass": true
+    },
+    {
+      "name": "unique objective IDs",
+      "pass": true
+    },
+    {
+      "name": "unique vocab goal IDs",
+      "pass": true
+    },
+    {
+      "name": "countable vocab exact NFC Turkish case-fold dedup",
+      "pass": true
+    },
+    {
+      "name": "existing word exact order & casing",
+      "pass": true
+    },
+    {
+      "name": "14 days 60 min",
+      "pass": true
+    },
+    {
+      "name": "no new review vocab",
+      "pass": true
+    },
+    {
+      "name": "rubric time/score/threshold",
+      "pass": true
+    },
+    {
+      "name": "JSON NFC roundtrip",
+      "pass": true
+    }
+  ],
+  "failedPath": "initial exact-order check failed because manually normalized capitalization; replaced with exact source words and IDs, verified again",
+  "limitations": "No independent language/native speaker review, no full external schema validation, timing estimates not measured. 05 must check exact commit."
+}

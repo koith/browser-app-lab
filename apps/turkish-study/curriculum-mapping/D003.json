@@ -1,0 +1,250 @@
+{
+  "dayId": "D003",
+  "day": 3,
+  "title": "자음 c/ç, s/ş, ğ와 음절",
+  "level": "A1",
+  "kind": "lesson",
+  "contractVersion": "1.0.0",
+  "revision": "r1",
+  "designStatus": "author_defined_review_requested",
+  "objectiveIds": [
+    "D003-O1",
+    "D003-O2",
+    "D003-O3"
+  ],
+  "objectives": [
+    {
+      "id": "D003-O1",
+      "skill": "listening",
+      "target": "c/ç,s/ş,ğ 10개 중 8개",
+      "cefrDescriptorIds": [
+        "C-PH"
+      ],
+      "maarifCodes": [
+        "A1.DY.3."
+      ]
+    },
+    {
+      "id": "D003-O2",
+      "skill": "speaking",
+      "target": "8개 모방 중 6개 의미 식별",
+      "cefrDescriptorIds": [
+        "C-PH"
+      ],
+      "maarifCodes": [
+        "A1.DY.4.",
+        "A1.DY.5."
+      ]
+    },
+    {
+      "id": "D003-O3",
+      "skill": "writing",
+      "target": "특수 문자 포함 5단어 중 4개 정확히 복사",
+      "cefrDescriptorIds": [
+        "C-OR"
+      ],
+      "maarifCodes": [
+        "A1.DY.6."
+      ]
+    }
+  ],
+  "cefrDescriptors": [
+    {
+      "id": "C-PH",
+      "level": "A1",
+      "scale": "Phonological control: sound articulation",
+      "location": "135"
+    },
+    {
+      "id": "C-OR",
+      "level": "A1",
+      "scale": "Orthographic control",
+      "location": "136"
+    }
+  ],
+  "grammarIds": [
+    "G-CON"
+  ],
+  "grammarScope": [
+    {
+      "id": "G-CON",
+      "firstDayId": "D003",
+      "scope": "c/ç, s/ş, ğ와 음절; ğ는 ㄱ으로 대응하지 않음; 모음 길이·연결"
+    }
+  ],
+  "vocabTargets": [
+    {
+      "id": "D003-CV01",
+      "term": "cam",
+      "ko": "유리",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V1"
+    },
+    {
+      "id": "D003-CV02",
+      "term": "çam",
+      "ko": "소나무",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V2"
+    },
+    {
+      "id": "D003-CV03",
+      "term": "saç",
+      "ko": "머리카락",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V3"
+    },
+    {
+      "id": "D003-CV04",
+      "term": "şiş",
+      "ko": "꼬치",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V4"
+    },
+    {
+      "id": "D003-CV05",
+      "term": "çay",
+      "ko": "차",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V5"
+    },
+    {
+      "id": "D003-CV06",
+      "term": "kahve",
+      "ko": "커피",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V6"
+    },
+    {
+      "id": "D003-CV07",
+      "term": "dağ",
+      "ko": "산",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V7"
+    },
+    {
+      "id": "D003-CV08",
+      "term": "yağ",
+      "ko": "기름",
+      "mode": "receptive",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V8"
+    },
+    {
+      "id": "D003-CV09",
+      "term": "soğuk",
+      "ko": "차가운",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V9"
+    },
+    {
+      "id": "D003-CV10",
+      "term": "sıcak",
+      "ko": "뜨거운",
+      "mode": "active",
+      "unit": "lemma",
+      "countEligible": true,
+      "existingWordId": "D003-V10"
+    }
+  ],
+  "prerequisiteDayIds": [
+    "D001",
+    "D002"
+  ],
+  "sourceEvidence": [
+    {
+      "id": "C-PH",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "135 / Phonological control: sound articulation",
+      "basis": "모델 지원을 받아 익숙한 소리를 이해 가능하게 발화"
+    },
+    {
+      "id": "C-OR",
+      "sourceId": "CEFR2020",
+      "url": "https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2020/16809ea0d4",
+      "location": "136 / Orthographic control",
+      "basis": "익숙한 표현 철자 및 베껴 쓰기"
+    },
+    {
+      "id": "A1.DY.3.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "모델 음성 반복"
+    },
+    {
+      "id": "A1.DY.4.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "지원하에 소리 발화"
+    },
+    {
+      "id": "A1.DY.5.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "기초 억양·리듬"
+    },
+    {
+      "id": "A1.DY.6.",
+      "sourceId": "MAARIF2025",
+      "url": "https://turkiyemaarif.org/uploads/168b69b2349aed.pdf",
+      "location": "printed p.72 / A1 kazanım listesi",
+      "basis": "모델 철자 복사"
+    },
+    {
+      "sourceId": "YEE",
+      "url": "https://yee.org.tr/api/yayinlar/yedi-iklim-turkce-a1-ders-kitabi",
+      "location": "교재 p.13 Alfabe Öğreniyorum (공식 음원목록)",
+      "basis": "주제 비교, 원문 재사용 금지"
+    }
+  ],
+  "formulaicExpressions": [],
+  "minutePlan": {
+    "review": {
+      "minutes": 10,
+      "activity": "모음 혼동 5개"
+    },
+    "vocabulary": {
+      "minutes": 10,
+      "activity": "10단어 중 차·커피·온도 생산"
+    },
+    "grammar": {
+      "minutes": 10,
+      "activity": "자음 대조와 ğ 주변 환경"
+    },
+    "listeningShadowing": {
+      "minutes": 15,
+      "activity": "cam/çam 및 별도 s/ş 자음대조; ğ 음성"
+    },
+    "roleplay": {
+      "minutes": 10,
+      "activity": "카페 그림 차·커피·온도 명명"
+    },
+    "exitCheck": {
+      "minutes": 5,
+      "activity": "철자 5개, 발화 2개"
+    }
+  },
+  "masteryCheck": "c/ç,s/ş,ğ 10개 중 8개 / 8개 모방 중 6개 의미 식별 / 특수 문자 포함 5단어 중 4개 정확히 복사",
+  "scopeLimits": "saç/şiş는 최소대립쌍 아님. ğ 실현형 전체 평가 금지. 주문 문형 D037~41."
+}
