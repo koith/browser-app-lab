@@ -325,7 +325,7 @@ def profile_view(archive,account,entry,*,snapshot=""):
         if isinstance(source_fields,list):
             for field in source_fields[:40]:
                 if not isinstance(field,dict):continue
-                name=str(field.get("name") or "")[:250]
+                field_name=str(field.get("name") or "")[:250]
                 value=field.get("value") or ""
                 parser=_PublicHtmlParts()
                 if isinstance(value,str):
@@ -334,8 +334,8 @@ def profile_view(archive,account,entry,*,snapshot=""):
                 pieces=[{"text":str(part.get("text") or "")[:1200],
                          "href":sanitize_safe_link(part.get("href"))}
                         for part in parser.parts[:50] if isinstance(part,dict)]
-                if name or pieces:
-                    safe_fields.append({"name":name,"parts":pieces,
+                if field_name or pieces:
+                    safe_fields.append({"name":field_name,"parts":pieces,
                         "verified_at":field.get("verified_at")
                             if isinstance(field.get("verified_at"),str) else None})
         view["fields_rendered"]=safe_fields
