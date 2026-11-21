@@ -1,0 +1,164 @@
+{
+  "id": "20261121-03-P0-GATE-01",
+  "from": "03",
+  "to": [
+    "00",
+    "04",
+    "05"
+  ],
+  "createdAt": "2026-11-21T08:18:00Z",
+  "taskIds": [
+    "APP-02",
+    "APP-03",
+    "APP-04",
+    "APP-05",
+    "DB-02",
+    "DEP-01",
+    "DEP-02"
+  ],
+  "baseRef": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "contractVersion": "1.0.0",
+  "status": "review_requested",
+  "summary": "Existing public Pages v0.1.0 renders (previous 404 no longer reproduced via external content fetch). v0.1.1 branch gates lesson/quiz/completion and review/words using approved manifest. Existing 7 candidate days are LOCKED until 00 approval. Local two-profile backup, scoring, SRS and favorite tested using exact committed scripts in simulated browser. Shell/offline coherent snapshot implemented. No paid hosting or existing DB touched.",
+  "changedFiles": [
+    "index.html",
+    "app/release-gate.js",
+    "sw.js",
+    "app/verification/p0-simulated-20261121.json",
+    "app/verification/p0-browser.mjs",
+    "handoffs/03/20261121-APP-02-p0-gate.json"
+  ],
+  "verification": [
+    {
+      "result": "pass",
+      "scope": "Public Pages: external rendered extraction of existing v0.1.0, not branch/new version",
+      "evidence": "https://koith.github.io/browser-app-lab/apps/turkish-study/ ; external extractor returned title Türkçe 120 · 터키어 독학 and rendered 0/120, DAY 01, 학습 시작, home/lesson/words/review/settings; 2026-11-21. Direct shell DNS failed; exact upstream HTTP status not separately captured.",
+      "revision": "public v0.1.0"
+    },
+    {
+      "result": "pass",
+      "scope": "Simulated DOM/CacheStorage/localStorage; 21 checks plus JS syntax",
+      "evidence": "app/verification/p0-simulated-20261121.json",
+      "revision": "9ac7bf30c9314e6661aeaf2a29bf8ac9a0eedbf0"
+    },
+    {
+      "result": "pending",
+      "scope": "Actual Chromium/WebKit on branch; physical iPhone Safari; public v0.1.1 after 00 merge; real offline/service-worker; mic/audio",
+      "evidence": "app/verification/p0-browser.mjs",
+      "revision": "e48c8450f564c231642bf7ebb449e0e0ac0a113c"
+    }
+  ],
+  "requests": [
+    {
+      "to": "00",
+      "action": "Review PR ownership/diff, merge when suitable, keep publishedDayIds empty until 05 approves. Approve initial development build without releasing content. Confirm manifest metadata requirements releaseId, contentRevision, verifiedAt when nonempty; existing app v0.1.0 remains publicly ungated until merge and refresh.",
+      "acceptance": "main contains v0.1.1; public app locks 0 approved days; no unauthorized change to release list, shared Pages settings or other projects."
+    },
+    {
+      "to": "04",
+      "action": "Provide approved audio runtime interface and manifest, including stable target IDs, reviewed local assets, source/licensing, fallback and recording test evidence. Existing local tr-TR TTS selected only if localService not false; no cloud audio.",
+      "acceptance": "03 can integrate audio paths with contract v1; actual Turkish audio and mic validated by 05."
+    },
+    {
+      "to": "05",
+      "action": "Run app/verification/p0-browser.mjs in isolated clone for Chromium and WebKit; verify live Pages after 00 merge, actual iPhone Safari, PWA install/cache/reload, offline, backup/restore, cross-profile independence and lock after revoke. Separate test-only manifest from release.",
+      "acceptance": "Record exact production SHA and data revisions, HTTP 200, browser-rendered version, actual devices, expected/actual per test. Independently verify first-week approval only after language/audio checks."
+    }
+  ],
+  "ledgerProposals": [
+    {
+      "id": "APP-02",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "simulated_runtime_pass",
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "APP-03",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "simulated_runtime_pass",
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "APP-04",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "simulated_runtime_pass",
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "APP-05",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "simulated_runtime_pass",
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "DB-02",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "simulated_runtime_pass",
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "DEP-01",
+      "implementation": "done",
+      "content": "draft",
+      "verification": "simulated_runtime_pass",
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "DEP-02",
+      "implementation": "partial",
+      "content": "draft",
+      "verification": "partial",
+      "evidence": [
+        "app/verification/p0-simulated-20261121.json",
+        "app/verification/p0-browser.mjs"
+      ],
+      "proposedComplete": false
+    }
+  ],
+  "dependencies": [
+    "CON-01",
+    "AUD-01",
+    "QA-01",
+    "DEP-03",
+    "DEP-04",
+    "00 release approval"
+  ],
+  "knownIssues": [
+    "Physical device and public v0.1.1 not verified; no direct main merge per governance.",
+    "Current Pages v0.1.0 is still a draft and ungated until merge/refresh. Static public raw JSON is not confidential; UI approval gate is not DRM.",
+    "Release metadata presence validated; contentRevision is not yet cryptographically bound to fetched JSON because revision/hash representation is not defined in the contract. 00/05 must verify the actual artifact revision and consider hash contract before release.",
+    "A prior legacy service worker can continue to serve v0.1.0 offline until next online update; no guarantee of remote revocation while offline. Snapshot can only reflect last confirmed online approval.",
+    "No authenticated cloud; shared-device profiles isolate records but anyone with device access can switch; local storage can be deleted. Existing DBs untouched.",
+    "Old draft records preserved, new completion requires current release's scored exam. Full vocabulary inflections, multi-type tests, fixed audio, cloud sync remain pending.",
+    "Alternative preview raw.githack returned warning interstitial, not a verified hosting solution. No new hosted resources created."
+  ]
+}
