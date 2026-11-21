@@ -1,25 +1,6 @@
 {
   "version": "1.0.0",
-  "generation": 3,
-  "leases": {
-    "role:00": {
-      "token": "00-record-live-1411-r2",
-      "actor": "manual",
-      "role": "00",
-      "taskIds": [
-        "P0-00-01"
-      ],
-      "branch": "main",
-      "baseCommit": "3c658d177dbea4180adb4f231252f3176952ed1b",
-      "paths": [
-        "ops/",
-        "DEVELOPMENT_LEDGER.json",
-        "RELEASE_MANIFEST.json"
-      ],
-      "acquiredAt": "2026-11-21T08:34:58Z",
-      "heartbeatAt": "2026-11-21T08:34:58Z",
-      "expiresAt": "2026-11-21T10:04:58.000Z"
-    }
-  },
+  "generation": 4,
+  "leases": {},
   "note": "CAS via GitHub update_file using latest blob SHA; coordination-only exception to 00 merge rule; no secret/user data."
 }
