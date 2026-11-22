@@ -1,6 +1,8 @@
 """Fail-closed Cloudflare delta manifest tests: no old photo read or reupload."""
 import base64
 import hashlib
+import io
+from PIL import Image
 import json
 import tempfile
 import unittest
@@ -13,8 +15,13 @@ from cloudflare_incremental_upload import (
 )
 
 VERSION = '11111111-2222-3333-4444-555555555555'
-SRC = b'new-image-bytes'
-OLD = b'old-image-bytes'
+def jpeg(color):
+    buf = io.BytesIO()
+    Image.new('RGB', (12, 10), color).save(buf, format='JPEG')
+    return buf.getvalue()
+
+SRC = jpeg('blue')
+OLD = jpeg('red')
 
 
 def photo(n, raw, model):
@@ -109,6 +116,39 @@ class IncrementalAssetUploadTests(unittest.TestCase):
         cf = FakeCF([asset_hash(OLD, 'jpg')])
         with self.assertRaisesRegex(ValueError, 'REFUSE_MISSING_EXISTING'):
             upload_incremental(cf, self.src, self.assets, self.catalogs)
+        self.assertNotIn(('workers/scripts/gallery-archive-free', 'PUT'), cf.calls)
+
+    def test_provider_requested_retained_original_is_readback_verified_and_reuploaded(self):
+        old_hash, new_hash = asset_hash(OLD, 'jpg'), asset_hash(SRC, 'jpg')
+        cf = FakeCF([old_hash, new_hash])
+        with patch('cloudflare_incremental_upload._upload_bucket', return_value='fake-completion-jwt') as upload:
+            reads = []
+            def reader(model, album, p):
+                reads.append((model, album, p['sha256']))
+                return OLD
+            previous = upload_incremental(cf, self.src, self.assets, self.catalogs, reader)
+        self.assertEqual(previous, VERSION)
+        self.assertEqual(len(reads), 1)
+        self.assertEqual(reads[0][:2], ('mimmi', 'known-album'))
+        self.assertEqual(upload.call_args.args[3][old_hash][1], OLD)
+        self.assertIn(('workers/scripts/gallery-archive-free', 'PUT'), cf.calls)
+
+    def test_corrupted_retained_bytes_prevent_upload_and_deployment(self):
+        cf = FakeCF([asset_hash(OLD, 'jpg')])
+        with patch('cloudflare_incremental_upload._upload_bucket') as upload:
+            with self.assertRaisesRegex(ValueError, 'PHOTO_EXACT_INTEGRITY_FAILED'):
+                upload_incremental(cf, self.src, self.assets, self.catalogs, lambda *args: SRC)
+        upload.assert_not_called()
+        self.assertNotIn(('workers/scripts/gallery-archive-free', 'PUT'), cf.calls)
+
+    def test_unknown_provider_hash_cannot_trigger_any_original_read(self):
+        cf = FakeCF(['c'*32])
+        with patch('cloudflare_incremental_upload._upload_bucket') as upload:
+            reader = unittest.mock.Mock()
+            with self.assertRaisesRegex(ValueError, 'UNRECOGNIZED_REQUESTED_ASSET_HASH'):
+                upload_incremental(cf, self.src, self.assets, self.catalogs, reader)
+        reader.assert_not_called()
+        upload.assert_not_called()
         self.assertNotIn(('workers/scripts/gallery-archive-free', 'PUT'), cf.calls)
 
     def test_missing_or_corrupted_existing_hash_fails_closed(self):
