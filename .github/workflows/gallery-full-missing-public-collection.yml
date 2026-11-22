@@ -9,20 +9,7 @@ on:
         type: string
   schedule:
     - cron: '27 0,8,16 * * *'
-  # This file's main push trigger starts one bounded new first pass when
-  # a repaired search revision is deployed. Revision 4 permits previously rejected
-  # safe public domains previously dropped by the hardcoded source allowlist;
-  # every SHA is re-examined once, then checkpointed across later runs.
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/gallery-full-missing-public-collection.yml'
-      # An exact registered source gate change must start a real collection
-      # on the newly approved sites; waiting for the next cron wastes recall.
-      - 'apps/gallery-archive/direct_photo_pipeline.py'
-      - 'apps/gallery-archive/publish_new_public_photos_to_pages.py'
-      - 'apps/gallery-archive/photo_quality_evidence.py'
-      - 'apps/yui-gallery/photo_quality_policy.py'
+  # Collector code maintenance does not implicitly start another archive writer.
   pull_request:
     paths:
       - '.github/workflows/gallery-full-missing-public-collection.yml'
