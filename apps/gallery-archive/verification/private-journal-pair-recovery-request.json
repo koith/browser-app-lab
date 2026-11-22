@@ -12,11 +12,13 @@
       "journal_sha256": "0dd943f0afa7c878ca4e77552ff7fef0032617563b3fc875e0a4de8448a2b8e1",
       "expected_collected_photos": 500,
       "baseline_owner_fingerprint": "0031f0a5e1909f46dd3fbf2ca39eda0e1c1884d7b091dad84325f1f93bceb8a7",
-      "official_publisher_sha_only": true,
       "allow_live_append_only_baseline": true,
-      "storage_census_only": true,
-      "verify_existing_private_files": true
+      "trusted_article_recovery": {
+        "run": 44888685318,
+        "attempt": 1,
+        "head": "c5bc7b2deb50f27c3e8b94389fbfee1c0fdb282a"
+      }
     }
   },
-  "retry_reason": "Preserve exact existing originals in an independently verified owner-private recovery index; no public catalog publication or new source requests."
+  "retry_reason": "Continue only the exact reviewed-source-only producer transaction: intersect its immutable 500-row journal with the 135 independently verified existing originals, freshly recheck bytes and append absent owner SHA. Preserve 341 unavailable rows as held, use the exact original for the one absent preview, then replicate and run actual gallery QA. Zero newly collected photos."
 }

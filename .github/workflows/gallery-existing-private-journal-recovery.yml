@@ -54,6 +54,7 @@ jobs:
     concurrency:
       group: gallery-terabox-private-mass-upload-${{ matrix.model }}
       cancel-in-progress: false
+      queue: max
     env:
       GH_TOKEN: ${{ github.token }}
       MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
@@ -149,18 +150,22 @@ jobs:
         id: changes
         run: |
           python - <<'PY'
-          import json,os,sys
-          from pathlib import Path
+          import os,sys
           sys.path.insert(0,'apps/gallery-archive')
-          from native_qa_checkpoint import metadata_fingerprint
-          request=json.loads(Path('apps/gallery-archive/verification/private-journal-pair-recovery-request.json').read_text())
-          changed=any(not r.get('storage_census_only') and metadata_fingerprint(json.loads(Path(f'apps/{model}-gallery/owner-index.json').read_text()))!=r['baseline_owner_fingerprint'] for model,r in request['models'].items())
+          from native_qa_checkpoint import github_fetch as github
+          jobs=github('/actions/runs/'+os.environ['GITHUB_RUN_ID']+'/attempts/'+os.environ['GITHUB_RUN_ATTEMPT']+'/jobs?per_page=100')
+          if jobs.get('total_count',101)>100:raise ValueError('Recovery job bound exceeded')
+          required={'Commit private catalog metadata and independently compare the exact catalog readback',
+                    'Publish sanitized verified inventory without any original bytes or private provenance'}
+          changed=any(required<={s['name'] for s in job.get('steps',[]) if s.get('conclusion')=='success'}
+                      for job in jobs['jobs'] if job['name'].startswith('recover-already-stored-pairs ('))
           with open(os.environ['GITHUB_OUTPUT'],'a') as output:output.write('changed='+str(changed).lower()+'\n')
           print('ACTUAL_RECOVERED_OWNER_INVENTORY_PUBLISHED',changed)
           PY
       - name: Deploy current verified indices and request actual Chromium WebKit checks
         if: steps.changes.outputs.changed == 'true'
         run: |
+          gh workflow run gallery-cloudflare-free-assets.yml --ref main -f max_new_per_model=0
           gh workflow run static.yml --ref main
           gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
           gh workflow run gallery-newly-stored-photo-qa.yml --ref main

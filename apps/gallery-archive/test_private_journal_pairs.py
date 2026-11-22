@@ -303,4 +303,151 @@ class JournalPairsTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'has not completed'):completed_baseline_proof(document)
 
 
+class ExactArticleContinuationTests(unittest.TestCase):
+    setUp=fixtures.DeferredBatchTests.setUp
+    write=fixtures.DeferredBatchTests.write
+    source=JournalPairsTests.source
+
+    def setup_transaction(self,preview=True):
+        import recover_private_journal_pairs as recovery
+        source,reviewed,reader,calls=self.source()
+        source['collection_audit']['results'][0].update(engine=recovery.ARTICLE_ENGINE,
+            individual_files_saved=2,new_staged_files_from_alternative_engines=2)
+        photo=source['catalog']['albums'][0]['images'][0]
+        row={k:photo[k] for k in ('number','key','sha256','bytes','width','height')}
+        if preview:row.update({k:photo[k] for k in ('preview','preview_bytes','preview_sha256')})
+        else:row['preview_status']='unverified_or_missing'
+        counts={'already_indexed':0,'original_unavailable':1,'original_verified':1,'preview_verified':int(preview)}
+        self.enterContext(patch.dict(recovery.ARTICLE_COUNTS,counts,clear=True))
+        self.enterContext(patch.dict(recovery.ARTICLE_WORK_COUNTS,{'saved-work':2},clear=True))
+        inventory={'schema_version':1,'model':'mimmi','scope':'private_existing_object_inventory_not_publication',
+            'source_journal_rows':2,'verified_originals':1,'counts':counts,
+            'new_media_uploaded':0,'public_gallery_published':False,
+            'albums':[{'id':'saved-work','images':[row]}]}
+        audit={'model':'mimmi','private_verified_counts':counts,'media_read':True,'gallery_published':False,
+            'details':[{'work':'saved-work','archive_collection_number':11,'original_status':'size_match'},
+                       {'work':'saved-work','archive_collection_number':12,'original_status':'missing'}]}
+        return source,inventory,audit,copy.deepcopy(self.owner),reviewed,reader,calls
+
+    def run_recovery(self,parts,**kwargs):
+        from recover_private_journal_pairs import recover_trusted_article
+        source,inventory,audit,producer_owner,reviewed,reader,calls=parts
+        return recover_trusted_article(source,inventory,audit,self.owner,producer_owner,reviewed,
+            kwargs.get('exclusions',{}),self.stage/kwargs.get('name','continued'),kwargs.get('reader',reader))
+
+    def test_only_exact_reviewed_producer_command_work_counts_and_recovery_can_continue(self):
+        from recover_private_journal_pairs import ARTICLE_PRODUCER,ARTICLE_RECOVERY,ARTICLE_WORK_COUNTS,trusted_article_producer
+        request={**ARTICLE_PRODUCER,'trusted_article_recovery':ARTICLE_RECOVERY}
+        command='python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --max-new 500 --max-pages 60 --alternative-engines --reviewed-source-only'
+        log=command+'\n'+'\n'.join('DIRECT_WORK_SOURCE_EVIDENCE mimmi '+aid+' '+json.dumps({
+            'individual_files_saved':count,'new_staged_files_from_alternative_engines':count}) for aid,count in ARTICLE_WORK_COUNTS.items())
+        proof={'job':{'id':136439087942,'steps':[{
+            'name':'Collect all observed public pages into individually verified files, without photo ZIPs','conclusion':'success'}]},'log':log}
+        trusted_article_producer(request,proof)
+        for field,value in [('producer_run',44779438810),('producer_attempt',2),('producer_head','a'*40),
+                            ('journal_sha256','a'*64),('trusted_article_recovery',{**ARTICLE_RECOVERY,'attempt':2}),
+                            ('storage_census_only',True),('official_publisher_sha_only',True)]:
+            with self.subTest(field=field),self.assertRaises(ValueError):trusted_article_producer({**request,field:value},proof)
+        for changed in [log.replace('--reviewed-source-only',''),log.replace('--max-new 500','--max-new 501'),
+                        log.replace('"individual_files_saved": 120','"individual_files_saved": 119')]:
+            with self.subTest(log=changed[:100]),self.assertRaises(ValueError):trusted_article_producer(request,{**proof,'log':changed})
+
+    def test_exact_intersection_fresh_readback_and_append_preserve_original_keys(self):
+        parts=self.setup_transaction();before=copy.deepcopy(self.owner)
+        result=self.run_recovery(parts)
+        self.assertEqual(result,{'photos':1,'held':1,'skipped':0})
+        self.assertEqual(self.owner,before)
+        photo=parts[0]['catalog']['albums'][0]['images'][0]
+        saved=json.loads((self.stage/'continued/metadata/catalog.json').read_text())['albums'][0]['images'][0]
+        self.assertEqual((saved['key'],saved['sha256']),(photo['key'],photo['sha256']))
+        self.assertEqual((self.stage/'continued'/saved['key']).read_bytes(),self.original_bytes)
+        self.assertEqual(len(parts[-1]),2)
+        audit=json.loads((self.stage/'continued/metadata/collection-audit.json').read_text())
+        self.assertEqual((audit['new_local_individual_files'],audit['new_unique_cuts_claimed'],audit['gallery_open_verified_files']),(0,0,0))
+        self.assertEqual(audit['held_photos'][0]['archive_collection_number'],12)
+
+    def test_changed_signature_or_recovery_inventory_rejected_before_remote_request(self):
+        parts=self.setup_transaction()
+        for field,value in [('sha256','b'*64),('bytes',999),('width',700),('key','originals/saved-work/other.jpg'),
+                            ('preview_sha256','e'*64)]:
+            changed=copy.deepcopy(parts[:5])+parts[5:]
+            changed[1]['albums'][0]['images'][0][field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):self.run_recovery(changed)
+        self.assertEqual(parts[-1],[])
+        parts[2]['details'][0]['original_status']='missing'
+        with self.assertRaises(ValueError):self.run_recovery(parts)
+        self.assertEqual(parts[-1],[])
+
+    def test_unregistered_producer_or_current_work_and_wrong_engine_are_rejected(self):
+        parts=self.setup_transaction()
+        old=copy.deepcopy(parts[3]);parts[3]['albums']=[]
+        with self.assertRaisesRegex(ValueError,'registered existing'):self.run_recovery(parts)
+        parts[3].update(old);self.owner['albums']=[]
+        with self.assertRaisesRegex(ValueError,'registered existing'):self.run_recovery(parts)
+        self.owner=copy.deepcopy(old)
+        parts[0]['collection_audit']['results'][0]['engine']='arbitrary_article'
+        with self.assertRaisesRegex(ValueError,'engine or work counts'):self.run_recovery(parts)
+        self.assertEqual(parts[-1],[])
+
+    def test_missing_or_corrupted_bytes_stay_held_without_fallback_or_source_retry(self):
+        parts=self.setup_transaction()
+        for name,raw in [('missing',None),('changed',self.original_bytes[:-1]+b'!')]:
+            calls=[]
+            def reader(args,limit):calls.append(args);return raw
+            result=self.run_recovery(parts,reader=reader,name=name)
+            self.assertEqual(result,{'photos':0,'held':2,'skipped':0})
+            self.assertEqual(len(calls),1)
+
+    def test_owner_duplicate_sha_is_skipped_without_remote_read_even_at_another_slot(self):
+        parts=self.setup_transaction();photo=parts[0]['catalog']['albums'][0]['images'][0]
+        self.owner['albums'][0]['images'].append({**photo,'number':99})
+        self.assertEqual(self.run_recovery(parts),{'photos':0,'held':1,'skipped':1})
+        self.assertEqual(parts[-1],[])
+
+    def test_new_slot_follows_latest_owner_and_merge_keeps_old_bytes_metadata(self):
+        parts=self.setup_transaction()
+        old={**self.photo,'number':99,'key':'originals/saved-work/old.jpg',
+             'preview':'previews/saved-work/old.webp','sha256':'a'*64}
+        self.owner['albums'][0]['images']=[old]
+        before=self.stage/'live-before.json';before.write_text(json.dumps(self.owner))
+        self.run_recovery(parts)
+        merged=merge(self.stage/'continued',before,'mimmi')
+        rows=json.loads((self.stage/'continued/metadata/catalog.json').read_text())['albums'][0]['images']
+        self.assertEqual(merged['new_photos'],1)
+        self.assertEqual(rows[0],old)
+        self.assertEqual(rows[1]['number'],100)
+        self.assertEqual(rows[1]['key'],self.photo['key'])
+
+    def test_matching_sha_does_not_override_wrong_decoded_dimensions(self):
+        parts=self.setup_transaction()
+        parts[0]['catalog']['albums'][0]['images'][0]['width']=401
+        parts[1]['albums'][0]['images'][0]['width']=401
+        result=self.run_recovery(parts)
+        self.assertEqual(result['photos'],0)
+        held=json.loads((self.stage/'continued/metadata/collection-audit.json').read_text())['held_photos']
+        self.assertEqual(held[0]['cause'],'original_decoded_dimensions_or_format_changed')
+
+    def test_only_prior_missing_preview_uses_exact_original_without_requesting_preview(self):
+        parts=self.setup_transaction(preview=False)
+        self.assertEqual(self.run_recovery(parts)['photos'],1)
+        self.assertEqual(len(parts[-1]),1)
+        row=json.loads((self.stage/'continued/metadata/catalog.json').read_text())['albums'][0]['images'][0]
+        self.assertEqual(row['preview_fallback'],'verified-original')
+        self.assertTrue(all(k not in row for k in ('preview','preview_bytes','preview_sha256')))
+        checked_row('mimmi','saved-work',row)
+        self.assertEqual((self.stage/'continued'/row['key']).read_bytes(),self.original_bytes)
+
+    def test_new_preview_failure_does_not_expand_prior_one_original_fallback(self):
+        parts=self.setup_transaction()
+        result=self.run_recovery(parts,reader=lambda args,limit:None if '/previews/' in args[1] else self.original_bytes)
+        self.assertEqual(result['photos'],0)
+        held=json.loads((self.stage/'continued/metadata/collection-audit.json').read_text())['held_photos']
+        self.assertEqual(held[0]['role'],'preview')
+
+    def test_current_identity_exclusion_preserved_without_reading_selected_object(self):
+        parts=self.setup_transaction()
+        result=self.run_recovery(parts,exclusions={'excluded_album_ids':['saved-work']})
+        self.assertEqual(result,{'photos':0,'held':2,'skipped':0});self.assertEqual(parts[-1],[])
+
+
 if __name__=='__main__':unittest.main(verbosity=2)
