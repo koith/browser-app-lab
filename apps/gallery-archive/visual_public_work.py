@@ -117,7 +117,8 @@ def visual_error(left,right):
         return max(ImageStat.Stat(ImageChops.difference(a,b)).mean)
 
 
-def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader=None,reference_paths=None):
+def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader=None,reference_paths=None,stop_before=None):
+    stop_before=stop_before or (lambda:False)
     from direct_photo_pipeline import page_images,inspect,atomic_bytes,safe_page,public_failure
     aid=book['id'];claimed=book['public_web_edition_photos']
     if type(claimed) is not int or not 3<=claimed<=500:raise ValueError('Bounded verified public work size required')
@@ -156,6 +157,9 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
     active_reference=None
     try:
         for photo in ref_photos:
+            if stop_before():
+                info['collection_time_budget_exhausted']=True
+                return None,info
             # Old ledgers sometimes assign one exact SHA to two numbers. Those
             # are one reference cut, not competing visual matches.
             if photo['sha256'] in reference_hashes:continue
@@ -205,7 +209,7 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
         info.setdefault('request_failures',[]).append({'stage':'owner_reference',**public_failure(e)})
         return None,info
     queue=[book['source']];visited=set();urls=[]
-    while queue and len(visited)<45:
+    while queue and len(visited)<45 and not stop_before():
         page=queue.pop(0)
         if page in visited:continue
         visited.add(page)
@@ -235,6 +239,9 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
     info['unobserved_source_numbers']=sorted(set(range(1,claimed+1))-set(numbered))
     anchors=set();pending=[];pending_bytes=0;uncertain=[];decoded=set();failed=set();prior_by_sha={p['sha256']:p for p in previous}
     for source_number,url in sorted(numbered.items()):
+        if stop_before():
+            info['collection_time_budget_exhausted']=True
+            break
         try:
             raw=client.get(url).content;meta,preview,_=inspect(raw);decoded.add(source_number)
             pending_bytes+=len(raw)+len(preview)
@@ -261,7 +268,7 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
         if source_number%20==0:
             print('PUBLIC_EDITION_ACTUAL_DECODE_PROGRESS',aid,source_number,'/',claimed,'saved_cut_anchors',len(anchors),flush=True)
     info['saved_reference_anchors']=len(anchors);info['uncertain_source_numbers']=uncertain
-    info['unresolved_source_numbers']=sorted(set(info['unobserved_source_numbers'])|set(uncertain)|failed)
+    info['unresolved_source_numbers']=sorted(set(info['unobserved_source_numbers'])|set(uncertain)|failed|(set(numbered)-decoded))
     if len(anchors)<3:
         info['failures'].append('Work withheld: fewer than 3 clear saved-cut anchors')
         return None,info
