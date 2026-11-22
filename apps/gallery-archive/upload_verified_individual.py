@@ -12,6 +12,8 @@ from collections import Counter
 from copy import deepcopy
 import hashlib
 import json
+import os
+import re
 from pathlib import Path
 import time
 
@@ -64,8 +66,39 @@ def _upload_one(src, row, remote, uploader, readback, sleep):
     return 'remote_byte_readback_unavailable'
 
 
+def durable_pair_checkpoint(stage, remote, model, run_key, album, row,
+                            uploader=run, reader=None):
+    """Persist a verified pair receipt in the existing private owner storage.
+
+    This records a successful transfer, not permission to publish a photo.
+    Original and preview bytes must already have passed independent SHA reads.
+    Each receipt is immutable, so a runner death cannot erase earlier receipts.
+    """
+    if remote!=REMOTES.get(model) or not re.fullmatch(r'[1-9][0-9]{0,19}-[1-9][0-9]{0,5}',run_key):
+        raise ValueError('Invalid private upload checkpoint scope')
+    checked_row(model,album['id'],row)
+    document={'schema_version':1,'model':model,'run':run_key,
+              'scope':'verified_existing_pair_receipt_not_admission',
+              'album':album['id'],'title':album.get('title') or album['id'],
+              'photo':row,'remote_original_and_preview_sha_verified':True}
+    raw=(json.dumps(document,ensure_ascii=False,sort_keys=True,separators=(',',':'))+'\n').encode()
+    digest=hashlib.sha256(raw).hexdigest()
+    path=stage/'metadata'/'verified-pair-checkpoints'/(digest+'.json')
+    path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_bytes(raw)
+    target=remote+'/metadata/verified-pair-checkpoints/'+run_key+'-'+model+'/'+digest+'.json'
+    if reader is None:
+        from private_collection_snapshot import exact_journal_readback
+        reader=exact_journal_readback
+    rc=uploader(['copyto',str(path),target,'--ignore-existing','--timeout=45s','--retries=1'])
+    reader(stage,target,raw)
+    print('PRIVATE_VERIFIED_PAIR_CHECKPOINT_STORED',model,'write_exit',rc,flush=True)
+    return digest
+
+
 def persist_new_photos(stage, previous, remote, model, uploader=run,
-                       readback=read_remote_with_recovery, sleep=time.sleep):
+                       readback=read_remote_with_recovery, sleep=time.sleep,
+                       checkpoint=None, stop_before=None):
     stage,previous=Path(stage),Path(previous)
     if model not in REMOTES or remote!=REMOTES[model]:
         raise ValueError('Wrong owner archive remote')
@@ -87,6 +120,8 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
         from owner_upload_web_token import update_current_process
         refresh_owner_state=update_current_process
     held_local=[]
+    checkpointed=0
+    stopped_for_budget=False
     consecutive_provider_rejections=0
     for album in current['albums']:
         aid=album['id']
@@ -125,6 +160,11 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
             preview=_verified_local(stage,photo['preview'],photo['preview_sha256'],
                                     photo['preview_bytes'],ext='webp')
             outcomes=[]
+            if stopped_for_budget or (stop_before is not None and stop_before()):
+                stopped_for_budget=True
+                failed.append({'id':aid,'number':photo['number'],'reason':'time_budget_reserved_for_commit'})
+                held_local.extend([original,preview])
+                continue
             if consecutive_provider_rejections>=3:
                 failed.append({'id':aid,'number':photo['number'],
                                'reason':'provider_writes_paused_after_three_rejections'})
@@ -154,6 +194,15 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
                 current_album['images'].sort(key=lambda p:p['number'])
                 accepted.append({'id':aid,'number':row['number'],
                                  'sha256':row['sha256']})
+                # A completed pair is checkpointed before starting another.
+                # If this cannot be saved, stop rather than accumulate orphaned work.
+                if checkpoint is not None:
+                    try:
+                        checkpoint(album,row)
+                        checkpointed+=1
+                    except (ValueError,OSError,TimeoutError) as error:
+                        print('PRIVATE_PAIR_CHECKPOINT_FAILED',type(error).__name__,flush=True)
+                        stopped_for_budget=True
                 consecutive_provider_rejections=0
             else:
                 failed.append({'id':aid,'number':photo['number'],
@@ -192,6 +241,8 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
     report={'model':model,'new_photo_candidates':attempts,
             'new_photo_pairs_sha_verified':len(accepted),
             'failed_photo_pairs':len(failed),
+            'durable_pair_checkpoints':checkpointed,
+            'stopped_to_preserve_commit_budget':stopped_for_budget,
             'new_photos':additions,'upgraded_photos':upgrades,
             'previous_photos':before,'total_photos':after,
             'per_file_statuses':dict(statuses),
@@ -227,4 +278,15 @@ if __name__=='__main__':
     p.add_argument('--remote',required=True)
     p.add_argument('--model',choices=sorted(REMOTES),required=True)
     a=p.parse_args()
-    persist_new_photos(a.stage,a.previous,a.remote,a.model)
+    run_id=os.environ.get('GITHUB_RUN_ID','')
+    attempt=os.environ.get('GITHUB_RUN_ATTEMPT','')
+    checkpoint=None
+    if run_id and attempt:
+        checkpoint=lambda album,row:durable_pair_checkpoint(
+            a.stage,a.remote,a.model,run_id+'-'+attempt,album,row)
+    stop_epoch=float(os.environ.get('GALLERY_UPLOAD_STOP_EPOCH','0'))
+    # 12 minutes are reserved for the next pair's bounded IO plus its receipt;
+    # the workflow reserves additional time for final verification/catalog.
+    stop_before=(lambda:time.time()+720>=stop_epoch) if stop_epoch else None
+    persist_new_photos(a.stage,a.previous,a.remote,a.model,
+                       checkpoint=checkpoint,stop_before=stop_before)
