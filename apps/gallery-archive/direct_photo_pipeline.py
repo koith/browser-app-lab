@@ -829,7 +829,9 @@ def atomic_bytes(path,data):
     tmp=path.with_name(path.name+'.pending');tmp.write_bytes(data);tmp.replace(path)
 
 
-def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8,reverse_evidence=None,reviewed_source_only=False):
+def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8,reverse_evidence=None,reviewed_source_only=False,deadline_epoch=None):
+    def stop_collecting():
+        return deadline_epoch is not None and time.time()>=deadline_epoch
     root=Path(root);out=Path(out)
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
@@ -1007,6 +1009,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     if set(resumed)-{a['id'] for a in books}:
         raise ValueError('Resumed work no longer in source scope; preserve staged files for review')
     for book in books:
+        if stop_collecting() and not resumed.get(book['id']):continue
         if new_total>=max_new and not resumed.get(book['id']):continue
         aid=book['id'];previous=old_albums.get(aid,{}).get('images',[]);occupied={p['number'] for p in previous};next_number=max(occupied,default=0)+1
         if book.get('storage_verification_hold') is True:
@@ -1017,7 +1020,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         if book.get('visual_reference_required'):
             if resumed.get(aid):raise ValueError('Visual-edition resume requires finalized work transaction')
             from visual_public_work import collect_work
-            work,info=collect_work(book,previous,client,out,max_new-new_total,seen_sha,model,reference_paths=reference_paths)
+            work,info=collect_work(book,previous,client,out,max_new-new_total,seen_sha,model,reference_paths=reference_paths,stop_before=stop_collecting)
             if work:
                 new_albums.append(work);new_total+=len(work['images']);downloaded_now+=len(work['images'])
             results.append(info)
@@ -1038,7 +1041,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_registered_public_page(u,model)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
         known_official_saved=0
         for gap in official_gaps.get(aid,[]):
-            if new_total>=max_new:
+            if new_total>=max_new or stop_collecting():
                 break
             url=gap['url']
             if url in seen_urls:
@@ -1102,7 +1105,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             creator_feed_candidates_added=len(cached)
             creator_feed_attached=True
             for url in cached:
-                if new_total>=max_new:break
+                if new_total>=max_new or stop_collecting():break
                 if url in seen_urls:continue
                 seen_urls.add(url);candidate_count+=1
                 if public_media_candidate_on_hold(client,url):
@@ -1133,7 +1136,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                             'source':url,'photo':row,'remote_verified':False})+'\n')
                 except Exception as exc:
                     errors.append({'url':url,'reason':type(exc).__name__,**public_failure(exc)})
-        while queue and len(visited)<max_pages and new_total<max_new:
+        while queue and len(visited)<max_pages and new_total<max_new and not stop_collecting():
             page=queue.pop(0)
             if page in visited:continue
             origin=urlsplit(page).scheme+'://'+urlsplit(page).netloc
@@ -1269,7 +1272,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             except Exception as e:
                 errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});continue
             for url in urls:
-                if new_total>=max_new:break
+                if new_total>=max_new or stop_collecting():break
                 if url in seen_urls:continue
                 # Previously processed original or held feed candidate is not
                 # a new media request and must not inflate pause counters.
@@ -1448,6 +1451,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             'new_photo_positions':sum(not p.get('higher_resolution_replacement') for a in new_albums for p in a['images']),
             'higher_resolution_replacements':sum(bool(p.get('higher_resolution_replacement')) for a in new_albums for p in a['images']),
             'remote_verified_files':0,'gallery_open_verified_files':0,'photo_bundles_created':0,
+            'collection_time_budget_exhausted':stop_collecting(),
             'owner_census_source_coverage':source_scope,
             'alternative_engines_enabled':bool(alternative_engines),
             'chromium_page_visits':rendered_pages,
@@ -1475,5 +1479,5 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);p.add_argument('--alternative-engines',action='store_true');p.add_argument('--render-budget',type=int,default=8);p.add_argument('--reverse-evidence',type=Path);p.add_argument('--reviewed-source-only',action='store_true');a=p.parse_args()
     if not 1<=a.max_new<=500 or not 1<=a.max_pages<=60:raise SystemExit('Bounded collection budget required')
-    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget,reverse_evidence=a.reverse_evidence,reviewed_source_only=a.reviewed_source_only)
+    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget,reverse_evidence=a.reverse_evidence,reviewed_source_only=a.reviewed_source_only,deadline_epoch=float(os.environ['GALLERY_COLLECT_STOP_EPOCH']) if os.environ.get('GALLERY_COLLECT_STOP_EPOCH') else None)
     print('DIRECT_FILE_COLLECTION_COMPLETE',report['model'],report['new_local_individual_files'],'REMOTE_VERIFIED',0,'GALLERY_VERIFIED',0)
