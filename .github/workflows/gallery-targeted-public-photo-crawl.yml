@@ -9,12 +9,7 @@ on:
       - 'apps/gallery-archive/visual_public_work.py'
       - 'apps/gallery-archive/test_visual_public_work.py'
       - 'apps/*-gallery/public-work-pages.json'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/gallery-targeted-public-photo-crawl.yml'
-      - 'apps/gallery-archive/visual_public_work.py'
-      - 'apps/gallery-archive/test_visual_public_work.py'
+  # Collector code maintenance does not implicitly start another archive writer.
 permissions:
   contents: read
 # Each matrix model has its own TeraBox write lock below. An unrelated
