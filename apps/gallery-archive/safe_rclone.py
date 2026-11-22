@@ -16,12 +16,16 @@ def diagnostic(raw):
     return '\n'.join(line for line in raw.splitlines() if 'error' in line.lower() or 'failed' in line.lower())[-2400:]
 
 
-def run(args):
+def run(args, deadline_seconds=None):
     if not args or args[0] not in ('cat','copy','copyto','about'):raise ValueError('Unsupported storage operation')
     # stdout remains the caller's byte stream, including catalog redirections.
     # Never relay raw stderr: rclone embeds signed download URLs in errors.
     with tempfile.TemporaryFile() as errors:
-        result=subprocess.run(['rclone',*args],stderr=errors)
+        try:
+            result=subprocess.run(['rclone',*args],stderr=errors,timeout=deadline_seconds)
+        except subprocess.TimeoutExpired:
+            print('OWNER_STORAGE_DEADLINE',args[0],flush=True,file=sys.stderr)
+            return 124
         if result.returncode:
             errors.seek(0);raw=errors.read(32000).decode('utf-8','replace');text=raw.lower()
             cause=next((label for needle,label in [('failed to login','storage_session'),('timeout','remote_timeout'),
