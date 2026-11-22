@@ -376,6 +376,7 @@ def main(args):
     public = snapshot.public_originals()
     print('BOUND_ASSET_PHASE', 'read_exact_existing_private_originals', flush=True)
     owner = {model: snapshot.existing_owner(model, args.max_new_per_model) for model in MODELS}
+    print('BOUND_ASSET_OWNER_READ_RESULTS', json.dumps(owner, sort_keys=True), flush=True)
     catalogs = snapshot.finish()
     if any(not catalogs[m]['albums'] for m in MODELS):
         raise ValueError('BOTH_MODELS_REQUIRE_ACTUAL_FILES')
@@ -387,7 +388,8 @@ def main(args):
     rollback_cleanup = None
     if incremental:
         print('BOUND_ASSET_PHASE', 'deploy_delta_only_preserving_all_old_manifest_entries', flush=True)
-        rollback_version = upload_incremental(cf, source, assets, catalogs)
+        rollback_version = upload_incremental(cf, source, assets, catalogs,
+            retained_reader=(lambda model, album, photo: media_bytes(base, model, album, photo)) if base else None)
         import atexit
         def rollback_cleanup():
             try:
@@ -554,5 +556,14 @@ if __name__ == '__main__':
         raise SystemExit(2) from None
     except Exception as error:
         # Unexpected exceptions may contain private paths/URLs. No traceback.
-        print('CLOUDFLARE_ASSET_OPERATION_FAILED', type(error).__name__, flush=True)
+        safe_codes = {
+            'ASSET_UPLOAD_SESSION_NOT_CONFIRMED', 'ASSET_UPLOAD_SESSION_BUCKETS_INVALID',
+            'DUPLICATE_ASSET_UPLOAD_BUCKET_HASH', 'UNRECOGNIZED_REQUESTED_ASSET_HASH',
+            'REFUSE_MISSING_EXISTING_CLOUDFLARE_ASSET_HASH', 'RETAINED_ASSET_UPLOAD_HASH_MISMATCH',
+            'ASSET_UPLOAD_COMPLETION_NOT_CONFIRMED', 'ASSET_UPLOAD_REJECTED',
+            'ASSET_UPLOAD_NETWORK_FAILED', 'ASSET_UPLOAD_NOT_CONFIRMED',
+            'PHOTO_EXACT_INTEGRITY_FAILED', 'PHOTO_DIMENSIONS_FAILED',
+            'REMOTE_PHOTO_READBACK_FAILED', 'ACTUAL_WORKER_RELEASE_NOT_OBSERVED'}
+        code = str(error) if type(error) is ValueError and str(error) in safe_codes else 'UNCLASSIFIED'
+        print('CLOUDFLARE_ASSET_OPERATION_FAILED', type(error).__name__, code, flush=True)
         raise SystemExit(2) from None

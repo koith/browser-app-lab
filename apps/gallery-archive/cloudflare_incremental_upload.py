@@ -16,7 +16,7 @@ from urllib.request import Request, build_opener
 from urllib.error import HTTPError, URLError
 
 from check_cloudflare_connection import NoRedirect
-from cloudflare_assets_snapshot import MODELS, KIND, signature
+from cloudflare_assets_snapshot import MODELS, KIND, signature, checked
 
 NAME = 'gallery-archive-free'
 API = 'https://api.cloudflare.com/client/v4'
@@ -151,7 +151,7 @@ def rollback_to(cf, version):
     print('CF_INCREMENTAL_ROLLBACK_SUBMITTED', flush=True)
 
 
-def upload_incremental(cf, source, directory, catalogs):
+def upload_incremental(cf, source, directory, catalogs, retained_reader=None):
     """One new full-path manifest; only truly missing new file bytes are uploaded.
 
     Returns prior active version ID for automatic rollback if postdeploy tests fail.
@@ -172,13 +172,37 @@ def upload_incremental(cf, source, directory, catalogs):
     requested = [h for group in groups for h in group]
     if len(requested) != len(set(requested)):
         raise ValueError('DUPLICATE_ASSET_UPLOAD_BUCKET_HASH')
-    if any(h not in local for h in requested):
-        # Critical: old Cloudflare bytes would be missing in the new version.
-        # Never deploy partial assets or try to download all originals.
+    # Reuse is guaranteed only for recently uploaded versions. The provider
+    # can request an older immutable file again. Recover exactly those hashes
+    # from the still-active verified replica, never omit their manifest rows.
+    known = {}
+    for model in MODELS:
+        for album in catalogs[model]['albums']:
+            for photo in album['images']:
+                known.setdefault(photo['asset_hash'], (model, album['id'], photo))
+    if any(not isinstance(h, str) or not HEX32.fullmatch(h) or h not in known for h in requested):
+        raise ValueError('UNRECOGNIZED_REQUESTED_ASSET_HASH')
+    missing = set(requested) - set(local)
+    print('CF_INCREMENTAL_UPLOAD_REQUEST', 'requested', len(requested),
+          'new_local', len(set(requested) & set(local)), 'retained_reupload', len(missing), flush=True)
+    if missing and retained_reader is None:
         raise ValueError('REFUSE_MISSING_EXISTING_CLOUDFLARE_ASSET_HASH')
     completion = start['jwt'] if not groups else None
     for group in groups:
-        token = _upload_bucket(cf.account, start['jwt'], group, local)
+        files = {h: local[h] for h in group if h in local}
+        for h in group:
+            if h in files:
+                continue
+            model, album, photo = known[h]
+            raw = retained_reader(model, album, photo)
+            checked(photo, raw)
+            extension = Path(photo['key']).suffix.lower()
+            if asset_hash(raw, extension.removeprefix('.')) != h:
+                raise ValueError('RETAINED_ASSET_UPLOAD_HASH_MISMATCH')
+            files[h] = (extension, raw)
+        # Readback failure above stops before this group or any script deploy.
+        # At most one provider-assigned bucket is retained in memory.
+        token = _upload_bucket(cf.account, start['jwt'], group, files)
         if token:
             completion = token
     if not completion:
@@ -208,6 +232,6 @@ def upload_incremental(cf, source, directory, catalogs):
                       else 'application/javascript+module', (source / name).read_bytes()))
     cf.call('workers/scripts/' + NAME, 'PUT', multipart=multipart(parts))
     print('CF_INCREMENTAL_MANIFEST_DEPLOYED',
-          'unchanged_photo_downloads', 0, 'uploaded_new_files', len(requested),
+          'retained_photo_readbacks', len(missing), 'uploaded_new_files', len(set(requested) & set(local)),
           'retained_photos', len(manifest)-len(local), flush=True)
     return old_version
