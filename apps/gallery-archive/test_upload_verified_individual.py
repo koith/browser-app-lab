@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from PIL import Image
-from upload_verified_individual import persist_new_photos
+from upload_verified_individual import persist_new_photos,durable_pair_checkpoint
 
 
 def picture(seed,fmt):
@@ -118,6 +118,64 @@ class SinglePhotoUploadTests(unittest.TestCase):
                                 uploader=uploader,readback=reader,sleep=lambda n:None)
         self.assertEqual((data['new_photos'],data['failed_photo_pairs']),(1,1))
         self.assertEqual(data['held_failure_reasons'],{'upload_rejected':1})
+
+    def test_budget_stop_keeps_verified_pair_and_durable_receipt(self):
+        remote_bytes={}
+        def upload(args):
+            remote_bytes[args[2]]=Path(args[1]).read_bytes()
+            return 0
+        def reader(row,remote):
+            key,size,sha=row
+            raw=remote_bytes[remote+'/'+key]
+            if len(raw)!=size or hashlib.sha256(raw).hexdigest()!=sha:
+                raise ValueError('wrong bytes')
+            return key
+        receipts=[]
+        def exact_receipt(stage,target,raw):
+            self.assertEqual(remote_bytes[target],raw)
+            receipts.append(json.loads(raw))
+        def checkpoint(album,row):
+            durable_pair_checkpoint(self.stage,self.remote,self.model,'123-1',
+                                    album,row,upload,exact_receipt)
+        report=persist_new_photos(self.stage,self.before,self.remote,self.model,
+            uploader=upload,readback=reader,sleep=lambda n:None,
+            checkpoint=checkpoint,stop_before=lambda:bool(receipts))
+        self.assertEqual(report['new_photos'],1)
+        self.assertEqual(report['durable_pair_checkpoints'],1)
+        self.assertTrue(report['stopped_to_preserve_commit_budget'])
+        self.assertEqual(len(receipts),1)
+        self.assertEqual(receipts[0]['photo']['sha256'],self.photos[0]['sha256'])
+        self.assertIn(self.remote+'/'+self.photos[0]['key'],remote_bytes)
+        self.assertNotIn(self.remote+'/'+self.photos[1]['key'],remote_bytes)
+        saved=json.loads((self.stage/'metadata/catalog.json').read_text())
+        self.assertEqual([p['number'] for p in saved['albums'][0]['images']],[1,2])
+
+    def test_runner_interruption_leaves_earlier_remote_pair_receipt(self):
+        remote_bytes={}
+        def upload(args):
+            if args[2]==self.remote+'/'+self.photos[1]['key']:
+                raise KeyboardInterrupt()
+            remote_bytes[args[2]]=Path(args[1]).read_bytes()
+            return 0
+        def reader(row,remote):
+            key,size,sha=row
+            raw=remote_bytes[remote+'/'+key]
+            self.assertEqual((len(raw),hashlib.sha256(raw).hexdigest()),(size,sha))
+            return key
+        def checkpoint(album,row):
+            def exact(stage,target,raw):
+                self.assertEqual(remote_bytes[target],raw)
+            durable_pair_checkpoint(self.stage,self.remote,self.model,'124-1',
+                                    album,row,upload,exact)
+        with self.assertRaises(KeyboardInterrupt):
+            persist_new_photos(self.stage,self.before,self.remote,self.model,
+                uploader=upload,readback=reader,sleep=lambda n:None,checkpoint=checkpoint)
+        saved=[json.loads(raw) for key,raw in remote_bytes.items()
+               if '/metadata/verified-pair-checkpoints/' in key]
+        self.assertEqual(len(saved),1)
+        self.assertEqual(saved[0]['photo']['sha256'],self.photos[0]['sha256'])
+        self.assertIn(self.remote+'/'+self.photos[0]['preview'],remote_bytes)
+        self.assertNotIn(self.remote+'/'+self.photos[1]['key'],remote_bytes)
 
     def test_wrong_remote_and_missing_local_pair_hard_fail(self):
         with self.assertRaisesRegex(ValueError,'Wrong owner archive'):
