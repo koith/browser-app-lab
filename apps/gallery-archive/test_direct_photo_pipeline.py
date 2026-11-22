@@ -39,6 +39,90 @@ class DirectTests(unittest.TestCase):
         self.assertFalse(reviewed_direct_source(
             'https://sexy.pixibb.com/mimmi-white-136-photos-sexy-girl/../something','mimmi'))
 
+    def test_verified_work_pagination_stages_page_two_and_rechecks_every_heading(self):
+        from unittest.mock import patch
+        for proof in ('owner_census', 'reverse_article'):
+            with self.subTest(proof=proof), tempfile.TemporaryDirectory() as directory:
+                root=Path(directory);base=root/'apps/yui-gallery'
+                base.mkdir(parents=True)
+                shared=root/'apps/gallery-archive';shared.mkdir()
+                (shared/'global_source_registry.json').write_text('{"sources":[]}')
+                (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+                page='https://public-gallery.example.org/yui-summer-edition/'
+                second=page+'?page=2';wrong=page+'?page=3'
+                media='https://cdn.public-gallery.example.org/summer/'
+                aid='yui-summer-edition';title='Yui Sim Summer Edition'
+                (base/'public-work-pages.json').write_text(json.dumps({'albums':[{
+                    'id':aid,'title':title,'source':page}]}))
+                owner={'model':'yui','schema_version':1,'albums':[{
+                    'id':aid,'title':title,'images':[{'number':1,'sha256':'a'*64}]}]}
+                rows=[{'kind':'work','model':'yui','id':aid,'urls':[page],
+                       'manifest_sources':['public-work-pages.json']}]
+                evidence=root/'reverse.json'
+                evidence.write_text(json.dumps({'schema_version':1,'model':'yui',
+                    'targets':[{'id':aid,'title':title,'urls':[page]}],
+                    'search_results':[{'id':aid,'urls':[page],'observations':[{
+                        'source':page,'album_id':aid,'model':'yui',
+                        'proof':'unique_named_work_page_model_and_edition'}]}]}))
+                first_bytes,second_bytes=photo(33),photo(77)
+                pages={
+                    page:(f'<h1>{title}</h1><article><img src="{media}one.jpg">'
+                          '<a rel="next" href="?page=2">Next</a>'
+                          '<a rel="next" href="/another-edition/?page=2">Next</a>'
+                          '<a rel="next" href="https://other-gallery.example.org/?page=2">Next</a>'
+                          '</article>').encode(),
+                    second:(f'<h1>{title}</h1><article><img src="{media}two.jpg">'
+                            '<a rel="next" href="?page=3">Next</a></article>').encode(),
+                    wrong:(f'<h1>Other Model Summer Edition</h1><article><img src="{media}wrong.jpg">'
+                           '<a rel="next" href="?page=4">Next</a></article>').encode(),
+                }
+                class Client:
+                    blocked_origins=set()
+                    def __init__(self): self.calls=[]
+                    def get(self,url):
+                        self.calls.append(url)
+                        if url in pages:content=pages[url]
+                        elif url==media+'one.jpg':content=first_bytes
+                        elif url==media+'two.jpg':content=second_bytes
+                        else:raise AssertionError('Unobserved or wrong-work URL '+url)
+                        return type('Response',(),{'content':content})()
+                client=Client()
+                with patch('collector_full_census.census',return_value={
+                        'targets':rows if proof=='owner_census' else []}):
+                    report=collect(root,'yui',owner,root/'stage',
+                        max_new=5,max_pages=6,client=client,
+                        reviewed_source_only=True,alternative_engines=False,
+                        reverse_evidence=evidence if proof=='reverse_article' else None)
+                self.assertEqual(report['new_local_individual_files'],2,report)
+                staged=json.loads((root/'stage/metadata/catalog.json').read_text())
+                photos=staged['albums'][0]['images']
+                self.assertEqual({(root/'stage'/p['key']).read_bytes() for p in photos},
+                                 {first_bytes,second_bytes})
+                self.assertEqual(set(client.calls),{
+                    page,second,wrong,media+'one.jpg',media+'two.jpg'})
+
+    def test_observed_pagination_preserves_login_and_exact_work_scope(self):
+        from direct_photo_pipeline import observed_same_work_pages
+        root='https://public-gallery.example.org/yui-summer-edition/'
+        links=('<article><a rel="next" href="?page=2">Next</a>'
+               '<a rel="next" href="/yui-summer-edition/page/3/">Next</a>'
+               '<a rel="next" href="/yui-summer-edition/page/10/">Next</a>'
+               '<a rel="next" href="/yui-summer-edition/page/1001/">Next</a>'
+               '<a rel="next" href="?page=2&work=other">Next</a>'
+               '<a rel="next" href="/other-work/?page=2">Next</a>'
+               '<a rel="next" href="https://other.example.org/?page=2">Next</a>'
+               '<a rel="next" href="http://public-gallery.example.org/yui-summer-edition/?page=2">Next</a>'
+               '<a rel="next" href="?page=4#login">Next</a></article>')
+        self.assertEqual(observed_same_work_pages(links,root,root,'yui'),
+                         [root+'?page=2',root+'page/3/',root+'page/10/'])
+        self.assertEqual(observed_same_work_pages(
+            '<p>Login to view more</p>'+links,root,root,'yui'),[])
+        self.assertEqual(observed_same_work_pages(
+            '<form><input type="password"></form>'+links,root,root,'yui'),[])
+        self.assertEqual(observed_same_work_pages(
+            links,'https://www.v2ph.com/album/yui/',
+            'https://www.v2ph.com/album/yui/','yui'),[])
+
     def test_official_djawa_8640_5760_jpeg_not_rejected_as_too_many_pixels(self):
         """The 49.8 MP publisher edition must be a collectable decoded photo."""
         im=Image.new('RGB',(8640,5760),(195,170,140))
