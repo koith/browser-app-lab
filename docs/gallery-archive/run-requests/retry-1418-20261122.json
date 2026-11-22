@@ -1,0 +1,6 @@
+{
+  "request": "one-time retry after PR 1418",
+  "scope": "existing reviewed-source collection and storage policy",
+  "code": "a74a1131b8a51006d20b486d7a6a34c1274cb61a",
+  "recurring": false
+}
