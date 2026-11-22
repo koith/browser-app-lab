@@ -364,6 +364,48 @@ def _work_token_matched_in_heading(raw,work_title,album_id,model):
                for t in distinct)
 
 
+def _pagination_access_gate(raw):
+    soup=BeautifulSoup(raw,'html.parser')
+    return bool(soup.select_one('input[type="password"]') or re.search(
+        r'need to log in to view more|login to view more|sign in to (?:view|continue)|'
+        r'members[- ]only|purchase to (?:view|continue)|请登录|ログインして',
+        soup.get_text(' ',strip=True),re.I))
+
+
+def observed_same_work_pages(raw,page,work_root,model):
+    """Public pagination links actually embedded in one proven work article.
+
+    Keep special-source login/volume extractors authoritative. A continuation
+    still has to prove its model+edition again before any image is accepted.
+    """
+    here,root=urlsplit(page),urlsplit(work_root)
+    if (here.hostname!=root.hostname or _pagination_access_gate(raw)
+            or here.hostname in X_PUBLIC_HOSTS | {
+                'www.v2ph.com','v2ph.com','showartx.net','www.nicesss.com','teapawt.net'}):
+        return []
+    root_path=root.path.rstrip('/')
+    root_query=[p for p in parse_qsl(root.query) if p[0]!='page']
+    found=[]
+    for link in BeautifulSoup(raw,'html.parser').select('a[href]'):
+        target=urljoin(page,link['href']);parts=urlsplit(target)
+        if (not safe_registered_public_page(target,model)
+                or parts.hostname!=root.hostname or target==page):continue
+        query=parse_qsl(parts.query)
+        if [p for p in query if p[0]!='page']!=root_query:continue
+        pages=[v for k,v in query if k=='page']
+        same=parts.path.rstrip('/')==root_path
+        suffix=re.fullmatch(re.escape(root_path)+r'/page/([1-9][0-9]{0,3})',parts.path.rstrip('/'))
+        suffix=bool(suffix and 2<=int(suffix[1])<=1000)
+        paged=len(pages)==1 and pages[0].isdigit() and 2<=int(pages[0])<=1000
+        label=link.get_text(' ',strip=True).casefold()
+        rel=link.get('rel') or []
+        if (same and paged or suffix and not pages) and (
+                'next' in rel or label.isdigit() or label in {
+                    'next','older','다음','下一页','次へ','›','»','→'}):
+            if target not in found:found.append(target)
+    return found
+
+
 def merge_owner_census_sources(books, owner, rows, model, safe_source=None):
     """Include every already-registered OWNER work with a public source.
 
@@ -1039,6 +1081,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         known_work_urls=[url for work_id,url in historic if work_id==aid]
 
         queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_registered_public_page(u,model)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
+        pagination_roots={page:page for page in queue};verified_pagination=set()
         known_official_saved=0
         for gap in official_gaps.get(aid,[]):
             if new_total>=max_new or stop_collecting():
@@ -1150,6 +1193,12 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             visited.add(page)
             try:
                 response=client.get(page);urls,more,status=page_images(response.content,page,model)
+                if page in verified_pagination and (
+                        _pagination_access_gate(response.content)
+                        or not PUBLIC_STRONG_MODEL[model].search(_source_page_heading(response.content))
+                        or not _work_token_matched_in_heading(response.content,book.get('title'),aid,model)):
+                    errors.append({'page':page,'reason':'pagination_access_or_work_not_proven'})
+                    continue
                 if (model=='yui' and aid=='public-yui-sns'
                         and not creator_feed_attached and status=='scoped_public_page'
                         and urlsplit(page).hostname=='teapawt.net'
@@ -1192,7 +1241,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         response.content,book.get('title'),aid,model))
                 if reviewed_source_only and (
                         page in book.get('verified_discovered_pages',[])
-                        or owner_edition_proven):
+                        or owner_edition_proven or page in verified_pagination):
                     from public_work_photo_extractor import ordinary_public_https_image
                     dynamic_scoped=article_scoped_images(
                         response.content,page,model,aid,book.get('title'),
@@ -1263,9 +1312,23 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         urls=list(dict.fromkeys(list(urls)+alternative))
                     except (ImportError,ValueError,TypeError) as e:
                         errors.append({'page':page,'reason':'alternative_engine_'+type(e).__name__})
+                # A reviewed first page is not the entire edition. Follow
+                # only its observed same-work pagination; propagate provenance,
+                # then recheck the next page before accepting photos from it.
+                scoped_pages=[]
+                if reviewed_source_only and (owner_edition_proven or
+                        page in book.get('verified_discovered_pages',[]) or
+                        page in verified_pagination):
+                    if (PUBLIC_STRONG_MODEL[model].search(_source_page_heading(response.content))
+                            and _work_token_matched_in_heading(response.content,book.get('title'),aid,model)):
+                        scoped_pages=observed_same_work_pages(
+                            response.content,page,pagination_roots.get(page,page),model)
+                        more=list(dict.fromkeys([*more,*scoped_pages]))
                 for p in more:
                     if reviewed_source_only and not reviewed_direct_source(p,model):
-                        continue
+                        if p not in scoped_pages:continue
+                        verified_pagination.add(p)
+                        pagination_roots[p]=pagination_roots.get(page,page)
                     if p not in visited and p not in queue:queue.append(p)
                 if status!='scoped_public_page' and not (eligible and urls) and not dynamic_scoped:
                     errors.append({'page':page,'reason':status});continue
