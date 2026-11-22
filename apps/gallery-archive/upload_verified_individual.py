@@ -53,7 +53,7 @@ def _upload_one(src, row, remote, uploader, readback, sleep):
     key,size,sha=row
     args=['copyto',str(src),remote+'/'+key,'--ignore-existing',
           '--timeout=15s','--retries=1','--low-level-retries=1']
-    rc=uploader(args)
+    rc=uploader(args,deadline_seconds=90) if uploader is run else uploader(args)
     if rc:
         # A partial response from the provider can occur after a successful
         # write. Exact readback is the only acceptable recovery evidence.
@@ -87,11 +87,15 @@ def durable_pair_checkpoint(stage, remote, model, run_key, album, row,
     path.parent.mkdir(parents=True,exist_ok=True)
     path.write_bytes(raw)
     target=remote+'/metadata/verified-pair-checkpoints/'+run_key+'-'+model+'/'+digest+'.json'
+    args=['copyto',str(path),target,'--ignore-existing','--timeout=45s','--retries=1']
+    rc=uploader(args,deadline_seconds=60) if uploader is run else uploader(args)
     if reader is None:
-        from private_collection_snapshot import exact_journal_readback
-        reader=exact_journal_readback
-    rc=uploader(['copyto',str(path),target,'--ignore-existing','--timeout=45s','--retries=1'])
-    reader(stage,target,raw)
+        from load_pending_individual import storage
+        # One exact authenticated read, under its existing 75-second limit.
+        if storage(['cat',target],limit=len(raw)+1)!=raw:
+            raise ValueError('Private pair receipt readback failed')
+    else:
+        reader(stage,target,raw)
     print('PRIVATE_VERIFIED_PAIR_CHECKPOINT_STORED',model,'write_exit',rc,flush=True)
     return digest
 
@@ -285,8 +289,8 @@ if __name__=='__main__':
         checkpoint=lambda album,row:durable_pair_checkpoint(
             a.stage,a.remote,a.model,run_id+'-'+attempt,album,row)
     stop_epoch=float(os.environ.get('GALLERY_UPLOAD_STOP_EPOCH','0'))
-    # 12 minutes are reserved for the next pair's bounded IO plus its receipt;
+    # 15 minutes are reserved for the next pair's bounded IO plus its receipt;
     # the workflow reserves additional time for final verification/catalog.
-    stop_before=(lambda:time.time()+720>=stop_epoch) if stop_epoch else None
+    stop_before=(lambda:time.time()+900>=stop_epoch) if stop_epoch else None
     persist_new_photos(a.stage,a.previous,a.remote,a.model,
                        checkpoint=checkpoint,stop_before=stop_before)
