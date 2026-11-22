@@ -1,6 +1,11 @@
 name: Gallery Direct Individual Photo Collection and Verified Storage
 on:
   workflow_dispatch:
+  # This exact marker is a single user-requested retry, not a recurring trigger.
+  push:
+    branches: [main]
+    paths:
+      - 'docs/gallery-archive/run-requests/retry-1418-20261122.json'
   # Collection remains explicit/manual; merging maintenance changes is not a
   # request to start another collector. No scheduled collection.
   pull_request:
@@ -125,7 +130,7 @@ jobs:
           python apps/mimmi-gallery/cloud/test_cover_cache.py
   collect-store-readback:
     needs: offline-regressions
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.GALLERY_COLLECTION_ENABLED == 'true'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && vars.GALLERY_COLLECTION_ENABLED == 'true'))
     runs-on: ubuntu-24.04
     timeout-minutes: 110
     permissions:
@@ -353,7 +358,7 @@ jobs:
     # Even if today's collector finds zero more, previously SHA-verified
     # newly saved photos must be mirrored and browsable via free Cloudflare.
     needs: collect-store-readback
-    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && needs.collect-store-readback.result == 'success'
+    if: always() && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && needs.collect-store-readback.result == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 6
     permissions:
