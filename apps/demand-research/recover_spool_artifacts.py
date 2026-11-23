@@ -33,6 +33,10 @@ MAX_RECORD_SECONDS=120
 # Leave time for a final sanitized summary before the 21-minute Actions kill.
 MAX_REPLAY_SECONDS=900
 MAX_BATCH_SECONDS=100
+# A single 48 MB ciphertext pack exceeded the emergency mirror budget and
+# prevented even smaller valid records from being mirrored. Use deterministic,
+# bounded packs; the reader already supports multiple independently hashed ZIPs.
+TARGET_CLOUD_PACK_BYTES=8_000_000
 MAX_CLOUD_PACKS=2
 MAX_CLOUD_PACK_FILES=120
 CLOUD_PACK_ITEM="__verified_remote_pack__"
@@ -102,6 +106,41 @@ def validate_source_run(source_run):
             or data.get("event") not in ("push","schedule","workflow_dispatch")
             or head.get("full_name")!=repo):
         raise RuntimeError("untrusted private recovery source run")
+
+
+def shard_encrypted_buffers(paths, *, limit=MAX_BUNDLE_BYTES, target=None):
+    """Partition ciphertext files into deterministic ZIP-safe upload groups.
+
+    This checks only encrypted file sizes and names, not private record content.
+    ZIP_STORED central-directory overhead is reserved conservatively so that
+    each pack remains independently decryptable and SHA-verifiable.
+    """
+    target = min(target if target is not None else TARGET_CLOUD_PACK_BYTES, limit)
+    if target <= 0 or limit <= 1024:
+        raise ValueError("invalid encrypted recovery pack limit")
+    groups = []
+    group = []
+    total = 22  # ZIP end-of-central-directory
+    names = set()
+    for source in paths:
+        path = Path(source)
+        if not FILE_PATTERN.fullmatch(path.name) or path.name in names:
+            raise ValueError("unsafe or duplicate encrypted recovery filename")
+        names.add(path.name)
+        # Local encrypted files are never truncated, modified, or deleted.
+        size = path.stat().st_size
+        item_bytes = size + 160 + 2 * len(path.name)
+        if not 34 < size <= MAX_BUFFER_BYTES + 2048 or item_bytes + 22 > limit:
+            raise ValueError("encrypted recovery file exceeds pack safety limit")
+        if group and total + item_bytes > target:
+            groups.append(group)
+            group = []
+            total = 22
+        group.append(path)
+        total += item_bytes
+    if group:
+        groups.append(group)
+    return groups
 
 
 def preserve_encrypted_batch(cloud,spool,paths):
@@ -340,6 +379,7 @@ def replay(cloud=None,local_directory=None):
              "artifact_download_failures":0,
              "deferred_buffers":0,
              "batch_sha_verified":0,"batch_ciphertext_count":0,
+             "batch_deferred_ciphertext_count":0,
              "batch_failures":0,"batch_error_categories":{},
              "deferred_artifacts":0,
              "remote_packs_sha_verified":0,"remote_pack_ciphertext_count":0,
@@ -436,15 +476,36 @@ def replay(cloud=None,local_directory=None):
             # overwrite them while restoring individual original posts.
             if not cloud_pack:
                 try:
-                    if with_cloud_budget(
-                            active,lambda:preserve_encrypted_batch(active,spool,encrypted),
-                            max_seconds=min(MAX_BATCH_SECONDS,max(1,
-                                deadline-time.monotonic()-MAX_RECORD_SECONDS))):
-                        summary["batch_sha_verified"]+=1
-                        summary["batch_ciphertext_count"]+=len(encrypted)
-                except (RuntimeError,ValueError,OSError,KeyError,TypeError,TimeoutError) as error:
+                    packs=shard_encrypted_buffers(encrypted)
+                except (RuntimeError,ValueError,OSError,KeyError,TypeError) as error:
                     summary["batch_failures"]+=1
                     count_safe_failure(summary,"batch_error_categories",error)
+                    packs=[]
+                # Rotate the starting pack across successive runs. Otherwise
+                # an unhealthy provider stalls the same first 8 MB forever.
+                if len(packs)>1:
+                    rotation=int(os.environ.get("GITHUB_RUN_ID","0") or "0")%len(packs)
+                    packs=packs[rotation:]+packs[:rotation]
+                pack_deadline=min(deadline-MAX_RECORD_SECONDS,
+                                  time.monotonic()+MAX_BATCH_SECONDS)
+                for pack_index,pack in enumerate(packs):
+                    remaining=pack_deadline-time.monotonic()
+                    if remaining<=1:
+                        summary["batch_deferred_ciphertext_count"]+=sum(
+                            len(group) for group in packs[pack_index:])
+                        break
+                    try:
+                        if with_cloud_budget(
+                                active,
+                                lambda group=pack:preserve_encrypted_batch(
+                                    active,spool,group),
+                                max_seconds=remaining):
+                            summary["batch_sha_verified"]+=1
+                            summary["batch_ciphertext_count"]+=len(pack)
+                    except (RuntimeError,ValueError,OSError,KeyError,TypeError,TimeoutError) as error:
+                        # A single bad batch must not hide the valid siblings.
+                        summary["batch_failures"]+=1
+                        count_safe_failure(summary,"batch_error_categories",error)
             # Retry different source IDs on later recovery runs rather than
             # forever failing on the same first three immutable keys.
             if len(encrypted)>1:
@@ -488,6 +549,7 @@ if __name__=="__main__":
     result=replay()
     if (result["buffer_failures"] or result["artifact_download_failures"]
             or result["deferred_buffers"] or result["deferred_artifacts"]
-            or result["batch_failures"] or result["remote_pack_list_failures"]
+            or result["batch_failures"] or result["batch_deferred_ciphertext_count"]
+            or result["remote_pack_list_failures"]
             or result["remote_pack_failures"]):
         raise RuntimeError("private archived recovery buffers still unverified")
