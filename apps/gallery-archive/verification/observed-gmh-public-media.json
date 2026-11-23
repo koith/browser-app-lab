@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_domain": "g-mh.com",
   "cdn_domain": "img.g-mh.com",
-  "observed_at": "2026-11-20",
+  "observed_at": "2026-11-23",
   "no_synthetic_urls": true,
   "source_page_robots_note": "g-mh.com disallows automated origin crawling; this frozen manifest contains URLs explicitly observed in user-requested review; runtime accesses only CDN images if allowed.",
   "works": [
@@ -1159,6 +1159,119 @@
         "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_057.webp",
         "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_058.webp",
         "https://img.g-mh.com/sweetbox-yui-yui-swtb-vol49-thru-thru-part2/g-mhcom_059.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "kuro-yui58",
+      "edition_identity": "Vol.1",
+      "source_page": "https://g-mh.com/gallery/yui-yui-vol1-kuro-yui/",
+      "observed_heading": "Yui 유이 Vol.1 – クロ ゆい",
+      "media_urls": [
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_001.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_002.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_003.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_004.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_005.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_006.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_007.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_008.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_009.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_010.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "kuro-yui58",
+      "edition_identity": "Vol.1",
+      "source_page": "https://g-mh.com/gallery/yui-yui-vol1-kuro-yui/page/2/",
+      "observed_heading": "Yui 유이 Vol.1 – クロ ゆい",
+      "media_urls": [
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_011.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_012.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_013.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_014.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_015.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_016.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_017.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_018.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_019.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_020.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "kuro-yui58",
+      "edition_identity": "Vol.1",
+      "source_page": "https://g-mh.com/gallery/yui-yui-vol1-kuro-yui/page/3/",
+      "observed_heading": "Yui 유이 Vol.1 – クロ ゆい",
+      "media_urls": [
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_021.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_022.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_023.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_024.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_025.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_026.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_027.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_028.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_029.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_030.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "kuro-yui58",
+      "edition_identity": "Vol.1",
+      "source_page": "https://g-mh.com/gallery/yui-yui-vol1-kuro-yui/page/4/",
+      "observed_heading": "Yui 유이 Vol.1 – クロ ゆい",
+      "media_urls": [
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_031.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_032.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_033.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_034.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_035.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_036.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_037.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_038.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_039.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_040.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "kuro-yui58",
+      "edition_identity": "Vol.1",
+      "source_page": "https://g-mh.com/gallery/yui-yui-vol1-kuro-yui/page/5/",
+      "observed_heading": "Yui 유이 Vol.1 – クロ ゆい",
+      "media_urls": [
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_041.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_042.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_043.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_044.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_045.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_046.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_047.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_048.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_049.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_050.webp"
+      ]
+    },
+    {
+      "model": "yui",
+      "work_id": "kuro-yui58",
+      "edition_identity": "Vol.1",
+      "source_page": "https://g-mh.com/gallery/yui-yui-vol1-kuro-yui/page/6/",
+      "observed_heading": "Yui 유이 Vol.1 – クロ ゆい",
+      "media_urls": [
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_051.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_052.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_053.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_054.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_055.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_056.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_057.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_058.webp",
+        "https://img.g-mh.com/yui-yui-vol1-kuro-yui/g-mhcom_059.webp"
       ]
     }
   ],

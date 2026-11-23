@@ -358,6 +358,15 @@
       "acquisition_mode": "observed_exact_image_cdn_only_site_origin_robots_block",
       "public_source_provenance": "User-requested original G-MH page reviewed; exact CDN URLs in observed-gmh-public-media.json",
       "allow_complete_edition_claim": false
+    },
+    {
+      "id": "kuro-yui58",
+      "title": "Yui — Kuro Yui Vol.1",
+      "source": "https://g-mh.com/gallery/yui-yui-vol1-kuro-yui/",
+      "priority": 1,
+      "acquisition_mode": "observed_exact_image_cdn_only_site_origin_robots_block",
+      "public_source_provenance": "Exact G-MH Vol.1 Kuro Yui public page and six visible pages confirmed 2026-11-23; exact URLs in observed-gmh-public-media.json",
+      "allow_complete_edition_claim": false
     }
   ]
 }
