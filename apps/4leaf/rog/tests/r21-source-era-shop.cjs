@@ -15,6 +15,10 @@ const assert=require('node:assert/strict'),{chromium,webkit}=require('playwright
   await page.locator('[data-route="shop"]').first().click();
   await page.waitForSelector('#shop:not(.hidden)');
   await page.waitForFunction(()=>window.__LEAF_SHOP_STAGE__.getState().scale>0.05);
+  // The archived 2004 layout is now the default on first visit (M02).
+  // Select the recovered 2002 atlas explicitly before checking its 3x3 grid.
+  await page.locator('#shop-era-toggle button[data-era="2002"]').click();
+  await page.waitForFunction(()=>window.__LEAF_SHOP_ERA__.getState().era==='2002');
   const source=await page.evaluate(()=>{
    const stage=document.querySelector('#shop-native-stage');
    return {era:window.__LEAF_SHOP_ERA__.getState(),grid:stage.querySelectorAll('.shop-card').length,
@@ -93,8 +97,8 @@ const assert=require('node:assert/strict'),{chromium,webkit}=require('playwright
   await page.locator('#modal-buttons button').filter({hasText:'판매'}).click();
   await page.waitForFunction(id=>!JSON.parse(localStorage.getItem('rog_profile')).owned.includes(id),card);
   const afterSell=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')));
-  assert.equal(afterSell.gp,afterBuy.gp+Math.floor(price/2),
-   'WEB-inferred sale policy stays independent of 2004 UI version');
+  assert.equal(afterSell.gp,afterBuy.gp+Math.floor(price/4),
+   'Historical secondary 25% sale rate stays independent of 2004 UI version');
   assert.deepEqual(afterSell.owned,firstOwned);
   assert.deepEqual(errors,[]);
   console.log('R21_2002_2004_REAL_SHOP_MODE_AND_GP_PASS',JSON.stringify({

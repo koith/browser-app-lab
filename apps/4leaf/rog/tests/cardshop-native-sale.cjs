@@ -1,13 +1,15 @@
 'use strict';
 /* Native 2002 CardShop actual buy/sell GUI and stateful GP transaction QA.
  * Source authenticity is limited to source atlas button pixels and 9
- * card backs. 50% resale is explicitly INFERRED WEB economy policy.
+ * card backs. Ordinary resale is 25% from SECONDARY period retrospective,
+ * not an original server code claim; serial 1000 GP is a separate official notice.
  */
-const {chromium}=require('playwright');
+const {chromium,webkit}=require('playwright');
 const assert=require('node:assert/strict');
 const path=require('node:path');
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const browserType=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
+ const browser=await browserType.launch({headless:true,args:browserType===chromium?['--no-sandbox']:[]});
  try{
   const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
   const errors=[];page.on('pageerror',e=>errors.push(e.stack||String(e)));
@@ -83,8 +85,8 @@ const path=require('node:path');
   }));
   assert.ok(afterBuy.p.owned.includes(cardId),'real chessman added to saved inventory');
   assert.equal(afterBuy.enabled,true,'newly purchased un-equipped card may be sold');
-  assert.equal(afterBuy.known,'inferred-web-price-not-original',
-   'never misrepresent 50% resale as confirmed original rule');
+  assert.equal(afterBuy.known,'historical-secondary-2002-2004-resale-25pct',
+   'historical secondary 25% is not an original server source table');
   assert.equal(afterBuy.pos,'0px -481px','genuine 판매하기 original first-frame atlas');
   assert.equal(afterBuy.clickTarget,'shop-sell',
    'source sale button must be physically clickable below open inventory');
@@ -93,7 +95,7 @@ const path=require('node:path');
   const beforeSaleRaw=await page.evaluate(()=>localStorage.getItem('rog_profile'));
   await page.evaluate(()=>sessionStorage.setItem('__leaf_shop_write_blocked','1'));
   await page.locator('#shop-sell').click();
-  assert.ok((await page.locator('#modal-content').textContent()).includes('원작 재판매 가격 규칙 미확인'));
+  assert.ok((await page.locator('#modal-content').textContent()).includes('원본 서버 계산식 미확인'));
   await page.locator('#modal-buttons button').filter({hasText:'판매'}).first().click();
   assert.equal((await page.locator('#modal-title').textContent()).trim(),'매직카덴 저장 실패');
   assert.equal(await page.evaluate(()=>localStorage.getItem('rog_profile')),beforeSaleRaw);
@@ -126,7 +128,7 @@ const path=require('node:path');
   assert.deepEqual(errors,[],'real shop resale causes no browser exceptions');
   console.log('ORIGINAL SOURCE CARDSHOP BUY/SELL PASS',JSON.stringify({
    source:'CardShop/cardshopbutton.png',grid:'3x3-native-atlas',
-   buyCard:cardId,protectedCard:protectedId,resalePolicy:'WEB-inferred-50-percent',
+   buyCard:cardId,protectedCard:protectedId,resalePolicy:'HISTORICAL-SECONDARY-25-percent',
    gpBefore:before.old,gpAfterBuy:afterBuy.p.gp,
    gpAfterSell:afterSell.gp,saleCredit:afterBuy.sellGp,
    sameInventoryAfterRoundtrip:true}));

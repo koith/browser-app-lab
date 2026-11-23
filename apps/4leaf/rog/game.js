@@ -546,10 +546,13 @@ window.__LEAF_DICE_ROSTER__={
   buttons[slot].click();return true;
  }
 };
-// Archived CardShop sprite atlas includes actual 판매하기 button art, but
-// surviving client has NOT verified its resale GP rule. 50% is a clearly
-// labeled WEB economic fallback, never represented as source historical data.
-const inferredShopResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/2));
+// Original CardShop 판매하기 art is source authentic. Later historical
+// player retrospectives record a 25% resale rate after stock limits;
+// this is SECONDARY historical evidence, not a recovered server sale table.
+// The GP quote uses the selected 2002/2004 dated market sale price, and
+// remains separately labelled from the official 2003 serial 1000 GP rule.
+// https://seore.org/w/주사위의%20잔영?rev=50
+const historicalShopResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/4));
 // Original 4LEAF operation notice, 2003-09-18: serial-number REDEEMED
 // cards were resold to Magic Carden for exactly 1,000 GP, regardless of
 // market purchase price. This is NOT proof of a 1,000 GP resale for all
@@ -558,8 +561,8 @@ const inferredShopResaleGP=card=>Math.max(0,Math.floor((Number(card?.price)||0)/
 const shopResaleQuote=card=>profile.serialRedeemed.includes(card?.id)
  ?{gp:1000,source:'original-2003-serial-redemption-1000gp',
    label:'원작 2003년 시리얼 등록 카드 재판매 1,000 GP'}
- :{gp:inferredShopResaleGP(card),source:'inferred-web-price-not-original',
-   label:'임시 판매가 '+inferredShopResaleGP(card).toLocaleString()+' GP (일반 카드 원작 재판매 가격 규칙 미확인)'};
+ :{gp:historicalShopResaleGP(card),source:'historical-secondary-2002-2004-resale-25pct',
+   label:'당시 회고자료 기준 판매가 '+historicalShopResaleGP(card).toLocaleString()+' GP (현 시세의 25%, 원본 서버 계산식 미확인)'};
 // An inventory/GP change must not become visible until it is durable.
 // On localStorage quota/permission failure, restore exactly the previous
 // in-memory balances; a later page reload must not silently undo a purchase
@@ -2487,7 +2490,7 @@ function init(){installBoardControls();installNativeDiceMenu();
    if(chosenCard===c.id)chosenCard=profile.owned[0]||BASE_CARDS[0]?.id;
    profileUI();drawShop();drawTeam();
    chat('매직카덴',c.name+' 카드 판매 · '+gp.toLocaleString()+' GP ('+
-    (quote.source==='original-2003-serial-redemption-1000gp'?'2003년 시리얼 카드 공식 규칙':'임시 웹 판매 규칙')+').','system');
+    (quote.source==='original-2003-serial-redemption-1000gp'?'2003년 시리얼 카드 공식 규칙':'원작 회고자료 25% (2차 자료)')+').','system');
    sfx(600);
   }},{label:'취소'}]);
 };$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if($('rog-real-user'))$('rog-real-user').textContent='♧ '+profile.name+' (내 기기)';if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);};const list=$('online-list');list.replaceChildren();const selfUser=document.createElement('div');selfUser.id='rog-real-user';selfUser.textContent='♧ '+profile.name+' (내 기기)';list.append(selfUser);setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI/로컬 대전 · 브라우저 간 직접 연결. 원작 중앙 서버는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
