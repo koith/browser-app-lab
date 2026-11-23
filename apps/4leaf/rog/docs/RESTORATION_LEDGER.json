@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-21",
+  "updatedAt": "2026-11-23",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -3710,9 +3710,9 @@
       "id": "RULE-01",
       "priority": "P0",
       "title": "원작 특수칸·이벤트 데이터 검증",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M08",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2003-02-21 4LEAF 공식 업데이트 공지에서 사용자간 전투 금지 맵은 접두어가 있는 [Non]Stadium/[Non]한반도/[Non]악마의 달팽이 3종으로 확정. 원본 2002 DMP 메타에는 일반 한반도/악마의 달팽이만 존재하므로 일반맵에 잘못 적용한 PvP 금지를 제거하고 arena PvP도 Non에 한정, 별도 원본 [Non] DMP는 미확보로 진위 분리. 경기 테스트 진행 중.; PR #142 Chromium verified user-PvP on normal archival 한반도 DMP, and strict [Non]Stadium in-memory variant suppressed arena PvP without inventing a source file; original later Non map sprites not yet recovered.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2003-02-21 4LEAF 공식 업데이트 공지에서 사용자간 전투 금지 맵은 접두어가 있는 [Non]Stadium/[Non]한반도/[Non]악마의 달팽이 3종으로 확정. 원본 2002 DMP 메타에는 일반 한반도/악마의 달팽이만 존재하므로 일반맵에 잘못 적용한 PvP 금지를 제거하고 arena PvP도 Non에 한정, 별도 원본 [Non] DMP는 미확보로 진위 분리. 경기 테스트 진행 중.; PR #142 Chromium verified user-PvP on normal archival 한반도 DMP, and strict [Non]Stadium in-memory variant suppressed arena PvP without inventing a source file; original later Non map sprites not yet recovered.; 2026-11-23 RULE-01 source-scoped acceptance: PR #1404 merged 441f2a57, original archived 26 DMP path maps / 1920 coords, 25 recovered typed DMO tables / 1785 event cells / 19 tile event categories, 129 original encoded warp targets (68 reciprocal, 2 self, 59 other). Real Chromium+WebKit Playwright engine fixed inputs for 19 categories, Arena incumbent battle and GOAL; main live Pages original game.js, maps.js, tiles.js, index.html, sw.js and app-version byte-verified; both public jobs PASS run 44871269637. 0170 source DMO absent (no invented event table); exact old server RNG, lost native event data, and original 2004 client-wide equality NOT claimed.",
       "acceptance": [
         "동일 seed·좌표 입력에 대해 모든 특수칸 이동/부활/보상 결과가 원본 근거 표와 일치"
       ],
@@ -3726,11 +3726,22 @@
         "apps/4leaf/rog/tests/dice-official-2003-non-pvp.cjs",
         "apps/4leaf/rog/game.js",
         "https://github.com/koith/browser-app-lab/actions/runs/39211031348",
-        "https://github.com/koith/browser-app-lab/pull/142"
+        "https://github.com/koith/browser-app-lab/pull/142",
+        "https://github.com/koith/browser-app-lab/pull/1404",
+        "https://github.com/koith/browser-app-lab/actions/runs/44871269637",
+        "apps/4leaf/rog/tests/rule01-source-event-matrix.cjs",
+        "apps/4leaf/rog/original/maps.js",
+        "apps/4leaf/rog/original/tiles.js",
+        "https://seore.org/raw/문서:주사위의%20잔영"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-2002-DMP-26-ROUTES-129-LINKS-2002-DMO-25-MAPS-1785-TILE-EVENTS-BROWSER-CHROMIUM-WEBKIT-PUBLIC-BETA101; ORIGINAL-0170-DMO-AND-HISTORICAL-RNG-UNRECOVERED",
+      "lastReviewed": "2026-11-23",
+      "verifiedAcceptance": {
+        "sourceComparison": "Archived 2002 original DMP route source has 26 maps/1920 positions, and 25 recovered DMO event maps contain exactly 1785 original source event cells and 19 source tile categories. Archived original 0170 DMO is missing; none fabricated. Source linked warp coordinates 129/129 match DMP fields (68 reciprocal, 2 self, 59 other), plus historical tile outcomes per retrospective 2002–2004 rule descriptions at https://seore.org/raw/문서:주사위의%20잔영; that rule text is secondary evidence, NOT original EXE/RNG byte proof.",
+        "implementation": "PR #1404 main merge 441f2a57161e25836956d87a558f13a05424f597, beta.101/PWA v189: resolveTile original source warp single arrival and valid self links, +3/+4 boost gauge, chest/blessing playable rewards, source Soulful 1–4 unique target eyes with correct 1/2/3-party selector, Arena earliest occupant and dove immunity, random/joker differentiated persistence. Existing native winDoa.spr and winAbility.spr remain connected.",
+        "runtimeTest": "https://github.com/koith/browser-app-lab/actions/runs/44871269637 completed success: local Chromium and WebKit plus public GitHub Pages both passed exact in-game deterministic tile fixture for all 19 original tile classes, original source map/route fields, 129 DMP warp links, 4 DOA distance outcomes, source attribute types, Arena real modal duel, finish/GOAL and no pageerror. Playwright exercised actual engine functions in real browsers; synthetic coordinate/seed setup is disclosed, physical iPhone not asserted.",
+        "deployment": "BOTH Chromium and WebKit same-source public Pages checks PASS: downloaded beta.101/PWA v189 exact-match with main app-version.json and game.js, original/maps.js, original/tiles.js, index.html, sw.js, then re-ran original tile E2E against https://koith.github.io/browser-app-lab/apps/4leaf/rog/ ; Actions https://github.com/koith/browser-app-lab/actions/runs/44871269637. Original server-side random-distribution equivalence and historical 0170 missing event table remain unverified outside the recovered source scope."
+      },
       "dependencies": [
         "BRD-04"
       ],
@@ -10540,6 +10551,21 @@
         "apps/4leaf/rog/docs/evidence/brd01/board-jpg-hex-anchors.json",
         "apps/4leaf/rog/tests/brd01-board-jpg-same-state.cjs",
         "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
+      ]
+    },
+    {
+      "seq": 490,
+      "date": "2026-11-23",
+      "type": "STATUS_CHANGED",
+      "taskId": "RULE-01",
+      "from": "in_progress",
+      "to": "done",
+      "details": "RULE-01 recovered original source-scoped special tile acceptance: source 26 DMP route tables, 25 recovered DMO event sets (1785 cells/19 tile categories), 129 exact warp target links; true Playwright Chromium+WebKit local and publicly deployed beta.101 after main #1404 merge PASS with Arena duel and GOAL. Missing 0170 event table, server RNG and historical EXE equivalence explicitly UNVERIFIED. Not a claim of full original game restoration.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/1404",
+        "https://github.com/koith/browser-app-lab/actions/runs/44871269637",
+        "apps/4leaf/rog/tests/rule01-source-event-matrix.cjs",
+        "apps/4leaf/rog/original/tiles.js"
       ]
     }
   ],

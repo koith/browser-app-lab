@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "sourceOfTruth": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "warning": "Derived index only. Never treat this file as an independent task ledger.",
-  "sourceUpdatedAt": "2026-11-21",
+  "sourceUpdatedAt": "2026-11-23",
   "counts": {
     "total": 60,
-    "done": 47,
-    "in_progress": 12,
+    "done": 48,
+    "in_progress": 11,
     "todo": 1,
     "blocked": 0,
-    "active": 13
+    "active": 12
   },
-  "historicalEventsNotDuplicated": 489,
+  "historicalEventsNotDuplicated": 490,
   "active": [
     {
       "id": "M05",
@@ -161,21 +161,6 @@
         "https://github.com/koith/browser-app-lab/actions/runs/44044382651"
       ],
       "lastReviewed": "2026-11-17"
-    },
-    {
-      "id": "RULE-01",
-      "priority": "P0",
-      "title": "원작 특수칸·이벤트 데이터 검증",
-      "status": "in_progress",
-      "acceptance": [
-        "동일 seed·좌표 입력에 대해 모든 특수칸 이동/부활/보상 결과가 원본 근거 표와 일치"
-      ],
-      "currentTail": "…금지를 제거하고 arena PvP도 Non에 한정, 별도 원본 [Non] DMP는 미확보로 진위 분리. 경기 테스트 진행 중.; PR #142 Chromium verified user-PvP on normal archival 한반도 DMP, and strict [Non]Stadium in-memory variant suppressed arena PvP without inventing a source file; original later Non map sprites not yet recovered.",
-      "evidence": [
-        "https://github.com/koith/browser-app-lab/actions/runs/39211031348",
-        "https://github.com/koith/browser-app-lab/pull/142"
-      ],
-      "lastReviewed": "2026-10-19"
     },
     {
       "id": "RULE-02",
