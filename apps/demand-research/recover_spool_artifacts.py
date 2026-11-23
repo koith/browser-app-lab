@@ -335,9 +335,14 @@ def safe_failure_category(error):
         chain.append(current)
         current=current.__cause__ or current.__context__
     for err in reversed(chain):
-        if isinstance(err,TimeoutError):
+        if isinstance(err,(TimeoutError,subprocess.TimeoutExpired)):
             return "timeout"
         message=str(err).lower()
+        if any(tag in message for tag in (
+                "private recovery batch exceeds bounded size",
+                "encrypted recovery batch exceeds size limit",
+                "encrypted recovery file exceeds pack safety limit")):
+            return "batch_size_limit"
         if any(tag in message for tag in ("(authorization)","authentication failed",
                                            "unauthorized","forbidden")):
             return "authorization"
