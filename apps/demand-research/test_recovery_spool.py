@@ -370,3 +370,14 @@ def test_oversized_single_ciphertext_rejected_without_remote_write(tmp_path):
     path=RecoverySpool(tmp_path).save(pid,first(pid))
     with pytest.raises(ValueError,match="exceeds pack safety limit"):
         mod.shard_encrypted_buffers([path],limit=path.stat().st_size+50)
+
+
+def test_recovery_failure_categories_distinguish_timeout_and_size_without_leaks():
+    import subprocess
+    import recover_spool_artifacts as mod
+    assert mod.safe_failure_category(
+        ValueError("encrypted recovery batch exceeds size limit"))=="batch_size_limit"
+    assert mod.safe_failure_category(
+        subprocess.TimeoutExpired(["rclone","cat","archive:synthetic"],timeout=4))=="timeout"
+    assert mod.safe_failure_category(
+        ValueError("untrusted private recovery record"))=="invalid_record"
