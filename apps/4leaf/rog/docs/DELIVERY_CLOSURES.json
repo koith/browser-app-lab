@@ -34,6 +34,17 @@
       "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44862586162",
       "publicVersion": "0.86.0-beta.100",
       "fullUserFlow": "Actual public WorldMap -> lobby -> CREATE -> hotseat -> select source map 0172 -> start match -> camera focus and pan on actual game. Both public Chromium and WebKit confirm same release byte-matched source and 12 distinct 18 reference observations, 145x97 upright orientation, zero inversion, 35:17 terrain movement."
+    },
+    "RULE-01": {
+      "originalSource": "2002 archived original/maps.js (26 DMP maps, 1920 source positions) plus original/tiles.js (25 typed DMO maps/1785 source event positions, 19 tile types). 0170 DMO genuinely unavailable; retrospective source rule description explicitly SECONDARY: https://seore.org/raw/문서:주사위의%20잔영",
+      "renewalSource": "Later mobile renewal is a separate game era; no 2004 MVE/2018 app server RNG or exact source program equivalence claimed. RULE-01 source-scoped recovered historical event behavior only.",
+      "referenceComparison": "Original route target 129/129 encoded links (68 reciprocal, 2 self and 59 other), 25 DMO typed maps/1785 tiles, 19 categories. Fixed seed and coordinate cases for 3/4 boost, prisons, chest/blessing, attribute types, clover/spade, DOA all four distances, Soulful, question/joker, actual Arena incumbent duel and GOAL. Source missing map 0170 event table not invented.",
+      "implementedCommit": "441f2a57161e25836956d87a558f13a05424f597",
+      "chromiumRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44871269637",
+      "webkitRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44871269637",
+      "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44871269637",
+      "publicVersion": "0.86.0-beta.101",
+      "fullUserFlow": "Real Chromium and WebKit each: lobby -> CREATE -> hotseat game -> real source route + event fixture using browser actual game engine, arena modal battle result confirm, GOAL; then production Pages version/source byte-match -> same browser flow against public URL. Deterministic fixture coordinates are test harness, not manual walking every tile. Physical iPhone not tested."
     }
   }
 }
