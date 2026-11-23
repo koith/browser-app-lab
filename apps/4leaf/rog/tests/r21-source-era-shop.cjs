@@ -61,7 +61,7 @@ const assert=require('node:assert/strict'),{chromium,webkit}=require('playwright
   assert.equal(rare.disabled,true);
   assert.ok(rare.status.includes('분류표'));
   assert.equal(rare.GP,current.money);assert.deepEqual(rare.inventory,firstOwned);
-  await page.locator('#shop .group-tab[data-group="all"]').click();
+  await page.locator('#shop-era-toggle .shop-era-show-all').click();
   assert.equal(await page.locator('#shop-grid .shop-card').count(),8);
   // Credit a local test profile only. Then verify a real purchase from
   // the 2004 reconstruction persists when reopening the genuine 2002 view.
