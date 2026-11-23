@@ -10,7 +10,7 @@ import unittest
 
 from PIL import Image
 sys.path.insert(0,str(Path(__file__).parent))
-from collect_observed_gmh_public_images import collect, verified_item
+from collect_observed_gmh_public_images import collect, verified_item, EVIDENCE, ROOT
 
 SLUG="djawa-mimmi-mimmi-your-panties-a"
 PAGE="https://g-mh.com/gallery/"+SLUG+"/"
@@ -72,6 +72,28 @@ class Tests(unittest.TestCase):
             raw=(stage/photo["key"]).read_bytes()
             self.assertEqual(photo["sha256"],hashlib.sha256(raw).hexdigest())
             self.assertEqual(photo["source_photo_number"],1)
+    def test_kuro_yui_observed_corpus_has_every_number_through_59(self):
+        evidence=json.loads(EVIDENCE.read_text(encoding="utf-8"))
+        rows=[w for w in evidence["works"]
+              if w["model"]=="yui" and w["work_id"]=="kuro-yui58"]
+        numbers=sorted(int(url.rsplit("g-mhcom_",1)[1].split(".webp")[0])
+                       for work in rows for url in work["media_urls"])
+        self.assertEqual(numbers,list(range(1,60)))
+        self.assertEqual(len(set(numbers)),59)
+
+    def test_bounded_per_work_budget_accepts_complete_59_photo_edition(self):
+        with TemporaryDirectory() as d:
+            root=Path(d);base=root/"apps/mimmi-gallery";base.mkdir(parents=True)
+            (base/"public-work-pages.json").write_text(json.dumps({"albums":list(REG.values())}))
+            (base/"owner-index.json").write_text(json.dumps({"albums":[]}))
+            (base/"stored-albums.json").write_text(json.dumps({"albums":[]}))
+            manifest=root/"observed.json"
+            manifest.write_text(json.dumps({"schema_version":1,"cdn_domain":"img.g-mh.com","works":[ITEM]}))
+            http=FakePublicHTTP(jpeg_bytes())
+            result=collect("mimmi",root/"stage",root,manifest,http,
+                           max_photos=80,max_per_work=80)
+            self.assertEqual(result["real_downloaded_files_staged"],1)
+
     def test_no_repeated_download_for_exact_saved_public_source_url(self):
         with TemporaryDirectory() as d:
             root=Path(d);base=root/"apps/mimmi-gallery";base.mkdir(parents=True)

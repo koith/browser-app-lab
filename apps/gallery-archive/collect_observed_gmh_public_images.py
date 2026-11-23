@@ -73,7 +73,7 @@ def verified_item(entry, model, registry):
 def collect(model, stage, root=ROOT, evidence=EVIDENCE, http=None,
             max_photos=80, max_per_work=12, bytes_budget=45_000_000,
             deadline_seconds=800):
-    if model not in MODEL_WORDS or not 1<=max_photos<=150 or not 1<=max_per_work<=50:
+    if model not in MODEL_WORDS or not 1<=max_photos<=150 or not 1<=max_per_work<=80:
         raise ValueError("bounded mode only")
     if not 10000<=bytes_budget<=100_000_000 or not 5<=deadline_seconds<=2400:
         raise ValueError("bounded budget/deadline")
