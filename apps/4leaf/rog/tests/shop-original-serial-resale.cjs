@@ -1,7 +1,8 @@
 'use strict';
 /* Official 4LEAF Sept 2003 notice: a card GRANTED by a historical serial
  * registration sells for exactly 1,000 GP. A shop-purchased card's resale
- * remains an explicitly labelled WEB fallback. No fake serial validation.
+ * uses the secondary historic 25% rule, not an invented original server table.
+ * No fake serial validation.
  * https://4leafmemorial.geld.kr/959
  */
 const assert=require('node:assert/strict');
@@ -87,10 +88,10 @@ const browserType=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
   const ordinary=await page.locator('#shop-sell').evaluate(el=>({
    gp:Number(el.dataset.resaleGp),source:el.dataset.resaleStatus,title:el.title
   }));
-  assert.equal(ordinary.source,'inferred-web-price-not-original',
-   'ordinary bought cards have no officially attested resale ratio');
-  assert.equal(ordinary.gp,Math.floor(price/2),'preserve existing WEB-only resale behavior');
-  assert.match(ordinary.title,/일반 카드 원작 재판매 가격 규칙 미확인/);
+  assert.equal(ordinary.source,'historical-secondary-2002-2004-resale-25pct',
+   'ordinary cards use documented retrospective 25%, not serial redemption');
+  assert.equal(ordinary.gp,Math.floor(price/4),'secondary historical ordinary resale rate');
+  assert.match(ordinary.title,/25%.*원본 서버 계산식 미확인/);
   await page.screenshot({path:'leaf-archival-serial-resale-real-shop-'+browserType.name()+'.png'});
   assert.deepEqual(errors,[]);
   console.log('4LEAF_OFFICIAL_2003_SERIAL_CARD_RESALE_PASS',JSON.stringify({

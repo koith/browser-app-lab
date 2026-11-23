@@ -93,8 +93,8 @@ const assert=require('node:assert/strict'),{chromium,webkit}=require('playwright
   await page.locator('#modal-buttons button').filter({hasText:'판매'}).click();
   await page.waitForFunction(id=>!JSON.parse(localStorage.getItem('rog_profile')).owned.includes(id),card);
   const afterSell=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')));
-  assert.equal(afterSell.gp,afterBuy.gp+Math.floor(price/2),
-   'WEB-inferred sale policy stays independent of 2004 UI version');
+  assert.equal(afterSell.gp,afterBuy.gp+Math.floor(price/4),
+   'Historical secondary 25% sale rate stays independent of 2004 UI version');
   assert.deepEqual(afterSell.owned,firstOwned);
   assert.deepEqual(errors,[]);
   console.log('R21_2002_2004_REAL_SHOP_MODE_AND_GP_PASS',JSON.stringify({
