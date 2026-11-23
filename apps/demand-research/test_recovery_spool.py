@@ -366,10 +366,11 @@ def test_one_failed_ciphertext_pack_does_not_discard_other_packs(
 
 def test_oversized_single_ciphertext_rejected_without_remote_write(tmp_path):
     import recover_spool_artifacts as mod
-    pid=synthetic_post()["id"]
-    path=RecoverySpool(tmp_path).save(pid,first(pid))
+    # A suitably named synthetic ciphertext; the partitioner never decrypts.
+    path=tmp_path/("a"*64+".enc")
+    path.write_bytes(b"x"*1500)
     with pytest.raises(ValueError,match="exceeds pack safety limit"):
-        mod.shard_encrypted_buffers([path],limit=path.stat().st_size+50)
+        mod.shard_encrypted_buffers([path],limit=1025)
 
 
 def test_recovery_failure_categories_distinguish_timeout_and_size_without_leaks():
