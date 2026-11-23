@@ -5,9 +5,9 @@
   "counts": {
     "total": 60,
     "done": 44,
-    "in_progress": 14,
+    "in_progress": 13,
     "todo": 1,
-    "review_required": 1,
+    "review_required": 2,
     "remaining": 16
   },
   "tasks": [
@@ -457,8 +457,8 @@
       "issue": 1242,
       "title": "원작 특수칸·이벤트 데이터 검증",
       "priority": "P0",
-      "status": "in_progress",
-      "acceptance": "open",
+      "status": "review_required",
+      "acceptance": "closed-without-acceptance",
       "url": "https://github.com/koith/browser-app-lab/issues/1242"
     },
     {
