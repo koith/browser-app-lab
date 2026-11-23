@@ -306,3 +306,67 @@ def test_replay_per_record_runner_budget_preserves_exact_original(tmp_path):
     assert cloud.calls and all(0<limit<=7 for limit in cloud.calls)
     assert cloud.runner==original_runner
     assert cloud.read_first_observation(pid)==canonical_json(first(pid))
+
+
+def test_oversized_ciphertext_batch_is_sharded_and_independently_verified(
+        tmp_path, monkeypatch):
+    """A large set of encrypted originals must not fail as one all-or-nothing pack."""
+    import recover_spool_artifacts as mod
+    spool=RecoverySpool(tmp_path)
+    for n in range(6):
+        pid=hashlib.sha1(f"shard-{n}".encode()).hexdigest()
+        spool.save(pid,first(pid))
+    paths=sorted(tmp_path.glob("*.enc"))
+    # Force the regression condition without 49 MB test fixtures.
+    per_file=max(path.stat().st_size for path in paths)
+    monkeypatch.setattr(mod,"TARGET_CLOUD_PACK_BYTES",per_file+256)
+    chunks=mod.shard_encrypted_buffers(paths)
+    assert len(chunks)>1
+    assert [p.name for chunk in chunks for p in chunk]==[p.name for p in paths]
+    assert all(sum(p.stat().st_size for p in chunk)<mod.MAX_BUNDLE_BYTES
+               for chunk in chunks)
+
+    cloud=FakeCloud()
+    summary=mod.replay(cloud=cloud,local_directory=tmp_path)
+    assert summary["batch_failures"]==0
+    assert summary["batch_sha_verified"]==len(chunks)
+    assert summary["batch_ciphertext_count"]==len(paths)
+    assert summary["batch_deferred_ciphertext_count"]==0
+    assert summary["first_observation_verified"]==len(paths)
+    assert len([key for key in cloud.objects if key.startswith("recovery-pack-")])==len(chunks)
+
+
+def test_one_failed_ciphertext_pack_does_not_discard_other_packs(
+        tmp_path, monkeypatch):
+    import recover_spool_artifacts as mod
+    spool=RecoverySpool(tmp_path)
+    for n in range(5):
+        pid=hashlib.sha1(f"isolated-{n}".encode()).hexdigest()
+        spool.save(pid,first(pid))
+    per_file=max(path.stat().st_size for path in tmp_path.glob("*.enc"))
+    monkeypatch.setattr(mod,"TARGET_CLOUD_PACK_BYTES",per_file+256)
+    cloud=FakeCloud()
+    original=cloud.write_immutable
+    attempts=[0]
+    def fail_first_pack(key,raw):
+        if key.startswith("recovery-pack-"):
+            attempts[0]+=1
+            if attempts[0]==1:
+                raise RuntimeError("synthetic remote pack failure")
+        return original(key,raw)
+    monkeypatch.setattr(cloud,"write_immutable",fail_first_pack)
+    summary=mod.replay(cloud=cloud,local_directory=tmp_path)
+    assert summary["batch_failures"]==1
+    assert summary["batch_sha_verified"]>=1
+    assert 0<summary["batch_ciphertext_count"]<5
+    assert summary["first_observation_verified"]==5
+    assert summary["buffer_failures"]==0
+    assert len(list(tmp_path.glob("*.enc")))==5
+
+
+def test_oversized_single_ciphertext_rejected_without_remote_write(tmp_path):
+    import recover_spool_artifacts as mod
+    pid=synthetic_post()["id"]
+    path=RecoverySpool(tmp_path).save(pid,first(pid))
+    with pytest.raises(ValueError,match="exceeds pack safety limit"):
+        mod.shard_encrypted_buffers([path],limit=path.stat().st_size+50)
