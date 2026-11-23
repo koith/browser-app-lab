@@ -40,7 +40,7 @@ const assert=require('node:assert/strict'),{chromium,webkit}=require('playwright
    const rarity=st.querySelector('.group-tab[data-group="rare"]');
    return {count:cards.length,cols:getComputedStyle(grid).gridTemplateColumns,
     rows:getComputedStyle(grid).gridTemplateRows,positions,
-    era:st.dataset.era,rareVisible:getComputedStyle(rarity).display,provenance:st.querySelector('#shop-era-provenance').textContent,
+    era:st.dataset.era,rareVisible:getComputedStyle(rarity).display,provenance:document.querySelector('#shop-era-provenance').textContent,
     money:document.querySelector('#shop-gp').textContent,inventory:JSON.parse(localStorage.getItem('rog_profile')).owned};
   });
   assert.equal(current.count,8);assert.equal(current.era,'2004');
