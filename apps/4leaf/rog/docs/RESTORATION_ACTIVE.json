@@ -2,16 +2,16 @@
   "schemaVersion": 1,
   "sourceOfTruth": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "warning": "Derived index only. Never treat this file as an independent task ledger.",
-  "sourceUpdatedAt": "2026-11-23",
+  "sourceUpdatedAt": "2026-11-25",
   "counts": {
     "total": 60,
-    "done": 48,
-    "in_progress": 11,
+    "done": 49,
+    "in_progress": 10,
     "todo": 1,
     "blocked": 0,
-    "active": 12
+    "active": 11
   },
-  "historicalEventsNotDuplicated": 490,
+  "historicalEventsNotDuplicated": 491,
   "active": [
     {
       "id": "M05",
@@ -146,21 +146,6 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39813521946"
       ],
       "lastReviewed": "2026-10-23"
-    },
-    {
-      "id": "SHOP-02",
-      "priority": "P1",
-      "title": "구매·판매·GP·장착 카드 원본 룰 검증",
-      "status": "in_progress",
-      "acceptance": [
-        "선택·구매·판매·장착·잔액·무능력 상태 원본 규칙 예제를 실시간 게임·상점 화면에서 통과"
-      ],
-      "currentTail": "…ton.png의 판매하기 원본 4상태 y=481 sprite를 실제 보유/GP 거래에 연결, 장착·현재 경기·마지막 카드 삭제 방지. 원작 재판매 금액 테이블 미확보이므로 50%은 웹 추정치임을 모달·DOM에 명시. 원작 경제 규칙 비교 미완료. | 2026-11-17 #1306/beta.94: 문자형 구 GP의 구매/판매 문자열 이어붙임 오류 방지, 비숫자·무한대·안전 정수 초과 GP 거래 거부 및 보유 카드 보존 Chromium/WebKit 통과. 원본 일반 카드 판매가 규칙은 여전히 미확인.",
-      "evidence": [
-        "https://github.com/koith/browser-app-lab/pull/1306",
-        "https://github.com/koith/browser-app-lab/actions/runs/44044382651"
-      ],
-      "lastReviewed": "2026-11-17"
     },
     {
       "id": "RULE-02",

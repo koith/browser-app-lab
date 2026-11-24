@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-23",
+  "updatedAt": "2026-11-25",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -3683,9 +3683,9 @@
       "id": "SHOP-02",
       "priority": "P1",
       "title": "구매·판매·GP·장착 카드 원본 룰 검증",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M02",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현 데모 보유 GP와 장착 목록/버튼은 있지만 원작 가격표·판매 시 GP·카드 종류 세부 규칙과 화면 조건 미입증 | 구현 목표: 원본 CardData 수치/GP 문구·등급 Normal Valuable Rare 및 실제 보유·구매/판매 UX 대응; 원본 CardShop/cardshopbutton.png의 판매하기 원본 4상태 y=481 sprite를 실제 보유/GP 거래에 연결, 장착·현재 경기·마지막 카드 삭제 방지. 원작 재판매 금액 테이블 미확보이므로 50%은 웹 추정치임을 모달·DOM에 명시. 원작 경제 규칙 비교 미완료. | 2026-11-17 #1306/beta.94: 문자형 구 GP의 구매/판매 문자열 이어붙임 오류 방지, 비숫자·무한대·안전 정수 초과 GP 거래 거부 및 보유 카드 보존 Chromium/WebKit 통과. 원본 일반 카드 판매가 규칙은 여전히 미확인.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현 데모 보유 GP와 장착 목록/버튼은 있지만 원작 가격표·판매 시 GP·카드 종류 세부 규칙과 화면 조건 미입증 | 구현 목표: 원본 CardData 수치/GP 문구·등급 Normal Valuable Rare 및 실제 보유·구매/판매 UX 대응; 원본 CardShop/cardshopbutton.png의 판매하기 원본 4상태 y=481 sprite를 실제 보유/GP 거래에 연결, 장착·현재 경기·마지막 카드 삭제 방지. 원작 재판매 금액 테이블 미확보이므로 50%은 웹 추정치임을 모달·DOM에 명시. 원작 경제 규칙 비교 미완료. | 2026-11-17 #1306/beta.94: 문자형 구 GP의 구매/판매 문자열 이어붙임 오류 방지, 비숫자·무한대·안전 정수 초과 GP 거래 거부 및 보유 카드 보존 Chromium/WebKit 통과. 원본 일반 카드 판매가 규칙은 여전히 미확인. | 2026-11-25 SHOP-02 recovered-source acceptance: PR #1427 beta.102/PWA v190; 25% ordinary sale rate documented in retrospective secondary source, official 2003 serial grant resale fixed 1000 GP. 2002/2004 shop selection, real purchase/sale, insufficient/absent stock/equipped protection, exact GP, save failure rollback, reload and era switch all tested. Local + byte-matched public Chromium/WebKit both pass all three final suites run 45510313962; unchanged roster selection function previously passed both engines run 44044382651. Original server sale rounding, stock limits and full historical economy not recovered; exact original CardData facial mappings remain ACT-05.",
       "acceptance": [
         "선택·구매·판매·장착·잔액·무능력 상태 원본 규칙 예제를 실시간 게임·상점 화면에서 통과"
       ],
@@ -3696,11 +3696,23 @@
         "apps/4leaf/rog/cardshop-native-controls.css",
         "apps/4leaf/rog/tests/cardshop-native-sale.cjs",
         "https://github.com/koith/browser-app-lab/pull/1306",
-        "https://github.com/koith/browser-app-lab/actions/runs/44044382651"
+        "https://github.com/koith/browser-app-lab/actions/runs/44044382651",
+        "https://github.com/koith/browser-app-lab/pull/1427",
+        "https://github.com/koith/browser-app-lab/actions/runs/45510313962",
+        "https://4leafmemorial.geld.kr/959",
+        "https://4leafmemorial.geld.kr/1451",
+        "https://seore.org/w/주사위의%20잔영?rev=50",
+        "apps/4leaf/rog/tests/shop-original-serial-resale.cjs",
+        "apps/4leaf/rog/tests/r21-source-era-shop.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-11-17",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-ARCHIVAL-2003-SERIAL-NOTICE/PRICE-SNAPSHOT/REAL-CHROMIUM-WEBKIT-PUBLIC; SECONDARY-25-PERCENT-ORDINARY-RESALE; ORIGINAL-SERVER-EXACT-ROUNDING-STOCK-UNVERIFIED",
+      "lastReviewed": "2026-11-25",
+      "verifiedAcceptance": {
+        "sourceComparison": "Original CardShop/cardshopback.png and cardshopbutton.png, original 2004 shop_ref.png, 2003-01-05 recorded market prices https://4leafmemorial.geld.kr/1451, official 2003-09-18 serial grant resale 1000 GP https://4leafmemorial.geld.kr/959, historical retrospective https://seore.org/w/주사위의%20잔영?rev=50 (secondary source reports reduced 25% resale; exact original purchase/current-price base, rounding and stock limits not established).",
+        "implementation": "Production #1427 82285635bf699e82348197f97470278e0aff7feb beta.102 replaces unsupported 50% fallback with source-labelled 25% of current dated price; floors integer GP as explicitly reconstructed web rule; preserves original official serial 1000 GP, no fake serial validation, owned/active/equipped/last-card guards, real purchase/sale and transactional rollback. Previous #1430 and final verified branch fix stale test selectors only.",
+        "runtimeTest": "https://github.com/koith/browser-app-lab/actions/runs/45510313962 both Chromium and WebKit SUCCESS local + live public: 3 actual UI suites in each environment. Serial 1000 GP credited, ordinary 1450 -> quoted 362, ordinary card c_0042 2700 GP purchase, 675 GP resale, inventory restored; storage-denied rollback/retry, reload, equipped sale disabled, empty RARE disabled, 2002/2004 transition and real purchases/sales across eras. Prior actual original Room equip and GP invalid-save regression https://github.com/koith/browser-app-lab/actions/runs/44044382651 both engines PASS; commitRosterSelection source unchanged. All local test profiles isolated.",
+        "deployment": "Both public engines verified app-version.json beta.102/PWA v190 and byte equality of game.js/index.html/sw.js/original/market-price-snapshots.js before live UI tests. Final focused branch runtime and main 9a73b3a8 same Git blobs. https://github.com/koith/browser-app-lab/actions/runs/45510313962. Physical iPhone not tested; original server exact economics not claimed."
+      },
       "dependencies": [
         "SHOP-01"
       ],
@@ -10566,6 +10578,23 @@
         "https://github.com/koith/browser-app-lab/actions/runs/44871269637",
         "apps/4leaf/rog/tests/rule01-source-event-matrix.cjs",
         "apps/4leaf/rog/original/tiles.js"
+      ]
+    },
+    {
+      "seq": 491,
+      "date": "2026-11-25",
+      "type": "STATUS_CHANGED",
+      "taskId": "SHOP-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "Recovered-source SHOP-02 acceptance: source-grounded 2003 serial 1000 GP; retrospective ordinary 25% not original EXE proof; 2002/2004 real buy/sell and saved GP/ownership, equipped protection, storage rollback, reload, no RARE stock, era switch all pass Chromium/WebKit on local and exact-runtime public beta.102, run 45510313962. Prior source Room equip dual browser run 44044382651. Original server exact price base/rounding/stock and full historical economy unverified.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/1427",
+        "https://github.com/koith/browser-app-lab/actions/runs/45510313962",
+        "https://github.com/koith/browser-app-lab/actions/runs/44044382651",
+        "https://4leafmemorial.geld.kr/959",
+        "https://4leafmemorial.geld.kr/1451",
+        "https://seore.org/w/주사위의%20잔영?rev=50"
       ]
     }
   ],
