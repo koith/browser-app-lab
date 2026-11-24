@@ -13,17 +13,21 @@
 // is discarded from the URL immediately and never sent as a query parameter.
 (function(){
   "use strict";
-  if(location.hostname!=="intersection-originals-free.onrender.com"){
-    window.INTERSECTION_AUTH_READY=Promise.resolve(false);return;
-  }
-  const key=new URLSearchParams(location.hash.slice(1)).get("access");
-  if(!key){window.INTERSECTION_AUTH_READY=Promise.resolve(false);return;}
-  history.replaceState(null,"",location.pathname+location.search);
+  window.INTERSECTION_AUTH_READY=Promise.resolve(false);
+  const params=new URLSearchParams(location.hash.slice(1));
+  if(!params.has("access"))return;
+  const keys=params.getAll("access");
+  params.delete("access");
+  const fragment=params.toString();
+  try{
+    history.replaceState(null,"",location.pathname+location.search+(fragment?"#"+fragment:""));
+  }catch{return;}
+  if(location.origin!=="https://intersection-originals-free.onrender.com"||keys.length!==1||!keys[0])return;
   window.INTERSECTION_AUTH_READY=(async()=>{
     try{
       const response=await fetch("/api/activate",{
         method:"POST",credentials:"same-origin",cache:"no-store",
-        headers:{"Content-Type":"application/json"},body:JSON.stringify({token:key})
+        headers:{"Content-Type":"application/json"},body:JSON.stringify({token:keys[0]})
       });
       if(!response.ok)return false;
       window.dispatchEvent(new Event("intersection:private-session-ready"));
