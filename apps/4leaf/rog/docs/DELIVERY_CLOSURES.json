@@ -45,6 +45,17 @@
       "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/44871269637",
       "publicVersion": "0.86.0-beta.101",
       "fullUserFlow": "Real Chromium and WebKit each: lobby -> CREATE -> hotseat game -> real source route + event fixture using browser actual game engine, arena modal battle result confirm, GOAL; then production Pages version/source byte-match -> same browser flow against public URL. Deterministic fixture coordinates are test harness, not manual walking every tile. Physical iPhone not tested."
+    },
+    "SHOP-02": {
+      "originalSource": "Original 2002 CardShop source atlas, 2004 archival shop_ref.png, 2003 market list https://4leafmemorial.geld.kr/1451, official serial 1000 GP https://4leafmemorial.geld.kr/959; ordinary 25% historical secondary https://seore.org/w/주사위의%20잔영?rev=50.",
+      "renewalSource": "Later mobile renewal is not the PC original; no mobile economy equivalence claimed. Historical 2004 reconstructed 4x2 layout and actual 2002 3x3 atlas compared separately.",
+      "referenceComparison": "Serial 1000 GP exact official source; ordinary secondary 25% with explicit floor/current-price reconstruction. 1450 GP -> 362, c_0042 2700 GP -> 675, owned/selected/equipped protection, rare empty, 2002/2004 3x3/4x2 view, saved GP + inventory. Exact original server rounding/stock constraints not recovered.",
+      "implementedCommit": "82285635bf699e82348197f97470278e0aff7feb",
+      "chromiumRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/45510313962",
+      "webkitRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/45510313962",
+      "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/45510313962",
+      "publicVersion": "0.86.0-beta.102",
+      "fullUserFlow": "Real Chromium and WebKit on local and byte-matched live Pages: shop -> select -> buy confirmation -> GP/owned persisted -> sell confirmation -> GP credited -> reload; serial sale 1000 and ordinary sale 25%; storage denied then retry; real era 2002/2004 switch, RARE disabled, equipped sale disabled. Previous original Room actual equip both engines https://github.com/koith/browser-app-lab/actions/runs/44044382651; unchanged selection function."
     }
   }
 }

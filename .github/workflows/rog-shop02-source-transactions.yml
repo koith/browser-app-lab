@@ -8,7 +8,7 @@ on:
       - 'apps/4leaf/rog/tests/r21-source-era-shop.cjs'
       - '.github/workflows/rog-shop02-source-transactions.yml'
   push:
-    branches: [main]
+    branches: [main, '4leaf/shop02-final-20261125']
     paths:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/tests/shop-original-serial-resale.cjs'
@@ -41,7 +41,7 @@ jobs:
       - run: node apps/4leaf/rog/tests/cardshop-native-sale.cjs
       - run: node apps/4leaf/rog/tests/r21-source-era-shop.cjs
       - name: Public same-version and identical game/source shop on main
-        if: github.ref == 'refs/heads/main'
+        if: github.event_name == 'push'
         run: |
           set -e
           base=https://koith.github.io/browser-app-lab/apps/4leaf/rog/
