@@ -8,9 +8,9 @@
   "counts": {
     "total": 60,
     "done": 44,
-    "in_progress": 13,
+    "in_progress": 12,
     "todo": 1,
-    "review_required": 2,
+    "review_required": 3,
     "remaining": 16
   },
   "openTasks": [
@@ -131,7 +131,7 @@
       "issue": 1241,
       "priority": "P1",
       "title": "구매·판매·GP·장착 카드 원본 룰 검증",
-      "status": "in_progress",
+      "status": "review_required",
       "url": "https://github.com/koith/browser-app-lab/issues/1241"
     },
     {
