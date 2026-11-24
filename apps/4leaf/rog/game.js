@@ -1595,8 +1595,8 @@ async function applyItem(index,steps=null){
    const n=Math.max(itemId==='wing'?1:-4,Math.min(itemId==='wing'?12:4,Number(steps)||0));
    if(n===0)return;
    consume(index);advance(p,n);appendMove(p.name+' · '+item.name+' '+n+'칸 이동');
-   if(n>0)await resolveTile(p);
-   drawGame();return;
+   await resolveTile(p);
+   drawGame();persist();return;
  }
  consume(index);
  if(!p.effects)p.effects={};
@@ -1605,7 +1605,10 @@ async function applyItem(index,steps=null){
  case 'dove':p.effects.dove=5;break;
  case 'valkyrie':p.effects.valkyrie=2;break;
  case 'ring':p.effects.ring=(p.effects.ring||0)+1;break;
- case 'armageddon':p.effects.armageddon=2;break;
+ case 'armageddon':
+   // Historical PC retrospective: caster 3 turns, every other team 2.
+   for(const q of match.players){q.effects??={};q.effects.armageddon=q===p?3:2}
+   break;
  case 'charge':p.ability=Math.min(100,p.ability+50);break;
  case 'charge25':p.ability=Math.min(100,p.ability+25);break;
  case 'drain25':case 'drain50':{
@@ -1618,10 +1621,10 @@ async function applyItem(index,steps=null){
  case 'keeperA':case 'keeperB':case 'keeperC':
    match.tiles[Math.min(match.tiles.length-2,p.position+6)]=itemId;break;
  }
- appendMove(p.name+' · '+item.name+' 사용');drawGame();
+ appendMove(p.name+' · '+item.name+' 사용');drawGame();persist();
 }
 function consume(index){const p=activePlayer();p.items.splice(index,1);p.usedItem=true;persist()}
-function advance(user,distance){user.position=Math.min(match.tiles.length-1,Math.max(0,user.position+distance));user.ability=Math.min(100,user.ability+Math.max(0,distance)*4)}
+function advance(user,distance){const old=user.position;user.position=Math.min(match.tiles.length-1,Math.max(0,old+distance));if(old!==user.position)user.tileArrivalPosition=-1;user.ability=Math.min(100,user.ability+Math.max(0,user.position-old)*4)}
 async function useAbility(){
  if(!withUserTurn())return;
  
@@ -1912,8 +1915,10 @@ function combat(attacker,defender,keeper=false){
  return new Promise(resolve=>{
  const aStat=teamStats(attacker.team),bStat=keeper?{def:defender.def||2,int:0}:{...teamStats(defender.team)};
  const reducedA=attacker.effects?.armageddon>0,reducedB=defender.effects?.armageddon>0;
- const isSoloA=attacker.team?.length===1,isSoloB=defender.team?.length===1;
- const isDuoA=attacker.team?.length===2,isDuoB=defender.team?.length===2;
+ // Fourth card is reserve, not a deployed fourth combatant.
+ const fieldSize=q=>(q.team||[]).slice(0,3).filter(Boolean).length;
+ const fieldA=fieldSize(attacker),fieldB=fieldSize(defender);
+ const isSoloA=fieldA===1,isDuoB=fieldB===2;
  const aCount=Math.max(1,(reducedA?Math.max(1,Math.floor(aStat.atk/2)):aStat.atk)+(isSoloA&&attacker.effects?.ring>0?1:0));
  const bCount=Math.max(1,(reducedB?Math.max(1,Math.floor(bStat.def/2)):bStat.def)+(isDuoB&&defender.effects?.ring>0?1:0));
  let attack,defense,aValue,bValue,rerolls=0;
@@ -1926,8 +1931,8 @@ function combat(attacker,defender,keeper=false){
  let neutralizedFixed=false;
  for(let attempt=0;attempt<100;attempt++){
    attack=diceN(aCount,6);defense=diceN(bCount,6);
-   aValue=attack.total+(aStat.int||0)+(attacker.team?.length>=3?(attacker.effects?.ring||0):0)+(attacker.effects?.teamInt>0?3:0)+elementalModifier(attacker.team,'attack')+elementalModifier(attacker.team,'support');
-   bValue=defense.total+(bStat.int||0)+(defender.team?.length>=3?(defender.effects?.ring||0):0)+(defender.effects?.teamInt>0?3:0)+(keeper?0:elementalModifier(defender.team,'defense')+elementalModifier(defender.team,'support'));
+   aValue=attack.total+(aStat.int||0)+(fieldA>=3?(attacker.effects?.ring||0):0)+(attacker.effects?.teamInt>0?3:0)+elementalModifier(attacker.team,'attack')+elementalModifier(attacker.team,'support');
+   bValue=defense.total+(bStat.int||0)+(fieldB>=3?(defender.effects?.ring||0):0)+(defender.effects?.teamInt>0?3:0)+(keeper?0:elementalModifier(defender.team,'defense')+elementalModifier(defender.team,'support'));
    if(attacker.effects?.scar>0)aValue=Math.max(1,aValue-attacker.effects.scar);
    if(defender.effects?.scar>0)bValue=Math.max(1,bValue-defender.effects.scar);
    if(attacker.effects?.ultimate>0)aValue=30;
@@ -1976,7 +1981,9 @@ function combat(attacker,defender,keeper=false){
    options.unshift({label:'체인지 카드',run:()=>{player.items.splice(player.items.indexOf('change'),1);player.usedItem=true;finish({attacker:bValue,defender:aValue,changed:true})}});
  }
  if(selfInvolved&&player.items.includes('bomb')&&!player.usedItem){options.unshift({label:'자폭',run:()=>{player.items.splice(player.items.indexOf('bomb'),1);player.usedItem=true;attacker.position=0;if(Number.isInteger(defender.position))defender.position=0;finish({...results,negated:true,mutualReset:true})}})}
- if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem){
+ // The historical flipper cancels a loss, never a win.
+ if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem&&
+    (attacker.id===player.id?aValue<bValue:bValue<aValue)){
    options.unshift({label:'오리발 카드',run:()=>{player.items.splice(player.items.indexOf('flipper'),1);player.usedItem=true;finish({...results,negated:true})}});
  }
 
@@ -2038,7 +2045,7 @@ async function resolveBattle(attacker,defender,keeper){
  // only the combat result below may choose the real losing participant.
  const result=await combat(attacker,defender,keeper);
  if(result.neutralizedFixed)appendMove('철가면 DESTROY 24 ↔ 데미안 BLOCK 24 · 능력 충돌 무효화 후 정상 주사위 재굴림');
- if(result.negated){appendMove(result.mutualReset?'자폭: 양측 START 복귀':'오리발 효과: 전투 무효화');return}
+ if(result.negated){appendMove(result.mutualReset?'자폭: 양측 START 복귀':'오리발 효과: 전투 무효화');drawGame();persist();return}
  const av=result.attacker,bv=result.defender;
  if(av===bv){appendMove('전투 판정이 무효입니다.');return}
  const winner=av>bv?attacker:defender;
@@ -2098,7 +2105,14 @@ async function resolveTile(p,depth=0,arrivalFromWarp=false){
  else if(type==='curse'){p.items=[];appendMove(p.name+' 신의 저주: 모든 아이템 소실')}
  else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.');window.__LEAF_NATIVE_EVENTS__?.show('jail',p.name)}
  else if(type==='kingbomb'){p.position=0;appendMove(p.name+' 왕폭탄 폭발! START 복귀');match.tiles[pos]='normal'}
- else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
+ else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){
+   // Historical item pool differs from the generic monster tier roster.
+   // Secondary period rule: A=Kruger/Majanggi, B=3 dice, C=2 dice.
+   // Exact server selection weights are unknown; no invented native model.
+   const pool={keeperA:[['크루거',4],['마장기',6]],keeperB:[['고렘',3],['아지다하카',3]],keeperC:[['가이아버그',2],['좀비',2],['해골',2]]}[type];
+   const [name,def]=pool[rand(pool.length)];
+   await resolveBattle(p,{id:-1,name,def},true);match.tiles[pos]='normal';persist();
+ }
  else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%');if(p.ability===100)window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
  else if(type==='ability100'){
    const ts=teamStats(p.team),field=(p.team||[]).slice(0,3).filter(Boolean).length,count=Math.max(1,Math.min(4,field>=3?ts.int:(field===2?ts.def:ts.atk)));
@@ -2240,7 +2254,7 @@ function finishGame(winner){
 }
 function moveValues(p){
  const stats=teamStats(p.team),extra=p.effects.shoe>0?1:0,values=[];
- const sides=stats.move===2?4:6,n=Math.min(4,(stats.move===2?2:1)+extra);
+ const sides=stats.move===2?4:6,n=Math.min(4,(stats.move===2&&!(p.effects.armageddon>0)?2:1)+extra);
  for(let i=0;i<n;i++){
    let v=d(sides);
    if(p.effects.clover)v=(sides===4?3:4)+rand(sides===4?2:3);
@@ -2331,6 +2345,8 @@ async function computerPrepareTurn(p){
  }
  drawGame();persist();
 }
+// A failed prison escape consumes a turn too; timed effects cannot freeze.
+function tickTurnEffects(p){for(const key of ['shoe','dove','armageddon','valkyrie','block','destroy','keeper','teamInt','ultimate'])if(p.effects[key]>0)p.effects[key]--}
 async function takeTurn(){
  if(!match||match.finished||busy)return;
  // Host-authoritative WebRTC: a disconnected peer, or a host acting during
@@ -2353,7 +2369,7 @@ async function takeTurn(){
  if(p.jail>0){
    const a=d(6),b=d(6);await window.__LEAF_DICE_FALL__?.roll([a,b],{sides:6});showDice([a,b]);
    if(a===b){p.jail=0;appendMove(p.name+' 감옥 탈출! 더블 '+a+'/'+b+' · 이동 턴 진행')}
-   else{p.jail--;appendMove(p.name+' 감옥 '+p.jail+'턴 남음 (주사위 '+a+'/'+b+')');await wait(p.bot?300:150);busy=false;nextTurn();return}
+   else{p.jail--;tickTurnEffects(p);appendMove(p.name+' 감옥 '+p.jail+'턴 남음 (주사위 '+a+'/'+b+')');await wait(p.bot?300:150);busy=false;nextTurn();return}
  }
  const values=moveValues(p),attributeMoveBonus=elementalModifier(p.team,'move'),move=Math.max(1,values.reduce((a,b)=>a+b,0)+attributeMoveBonus);await window.__LEAF_DICE_FALL__?.roll(values,{sides:teamStats(p.team).move===2?4:6});showDice(values);
  p.ability=Math.min(100,p.ability+move*3);
@@ -2369,16 +2385,7 @@ async function takeTurn(){
    await resolveTile(p);
  }
  drawGame();if(match.finished){busy=false;return}
- if(p.effects.shoe>0)p.effects.shoe--;
- if(p.effects.dove>0)p.effects.dove--;
- if(p.effects.armageddon>0)p.effects.armageddon--;
- if(p.effects.valkyrie>0)p.effects.valkyrie--;
- 
- if(p.effects.block>0)p.effects.block--;
- if(p.effects.destroy>0)p.effects.destroy--;
- if(p.effects.keeper>0)p.effects.keeper--;
- if(p.effects.teamInt>0)p.effects.teamInt--;
- if(p.effects.ultimate>0)p.effects.ultimate--;
+ tickTurnEffects(p);
  await wait(p.bot?180:100);busy=false;nextTurn();
  }catch(error){
   // A failed event/battle renderer must never lock the real roll control
