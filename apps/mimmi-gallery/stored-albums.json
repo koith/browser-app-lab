@@ -13628,6 +13628,18 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 131,
+          "url": "stored-albums/djawa-in-the-summer-sunshine-part-1/224d4a4e4cd65b5366b4.jpg",
+          "sha256": "224d4a4e4cd65b5366b4300e32d0bc2c8cf56d610602718d90e98e7c0e01de07",
+          "bytes": 41098,
+          "width": 320,
+          "height": 320,
+          "origin_page": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -37521,6 +37533,30 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 73,
+          "url": "stored-albums/djawa-pop-kitty-party/d8deae9a6aaaa5b85679.jpg",
+          "sha256": "d8deae9a6aaaa5b856790c8f23bbe2a9f8f4edbddd02588fc18301a51ef2505b",
+          "bytes": 14592517,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 74,
+          "url": "stored-albums/djawa-pop-kitty-party/bd839c9e5f84d8b7ec7f.jpg",
+          "sha256": "bd839c9e5f84d8b7ec7ffbed2888cae0c0532afbbd665b4bd35a79ac0e508147",
+          "bytes": 10773024,
+          "width": 8640,
+          "height": 5760,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -38421,5 +38457,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3682
+  "physical_verified_image_count": 3685
 }
