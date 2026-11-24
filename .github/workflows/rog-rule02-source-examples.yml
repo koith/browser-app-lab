@@ -1,0 +1,50 @@
+name: 4LEAF RULE-02 original documented battle and round examples
+on:
+  push:
+    branches: ['main','4leaf/rule02-completion-20261125']
+    paths:
+      - 'apps/4leaf/rog/tests/rule02-source-examples.cjs'
+      - '.github/workflows/rog-rule02-source-examples.yml'
+permissions:
+  contents: read
+jobs:
+  real-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium,webkit]
+    env:
+      FOURLEAF_BROWSER: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install "$FOURLEAF_BROWSER" --with-deps
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/rule02.log 2>&1 &
+          sleep 2
+      - run: node apps/4leaf/rog/tests/rule02-source-examples.cjs
+      - run: node apps/4leaf/rog/tests/r21-historic-battle-rule.cjs
+      - run: node apps/4leaf/rog/tests/r23-goal-idempotence.cjs
+      - name: Verify same deployed runtime and real public examples
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -e
+          base=https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+          found=0
+          for i in $(seq 1 60); do
+            if curl -fsSL --max-time 15 "${base}app-version.json?rule02=$GITHUB_SHA-$i" -o /tmp/version && cmp -s apps/4leaf/rog/app-version.json /tmp/version; then found=1; break; fi
+            sleep 8
+          done
+          test "$found" = 1
+          for f in game.js index.html sw.js original/chessmen.js; do
+            curl -fsSL --max-time 30 "${base}${f}?rule02=$GITHUB_SHA" -o /tmp/actual
+            cmp "apps/4leaf/rog/$f" /tmp/actual
+          done
+          FOURLEAF_TEST_URL="$base" node apps/4leaf/rog/tests/rule02-source-examples.cjs
+          FOURLEAF_TEST_URL="$base" node apps/4leaf/rog/tests/r21-historic-battle-rule.cjs
+          FOURLEAF_TEST_URL="$base" node apps/4leaf/rog/tests/r23-goal-idempotence.cjs

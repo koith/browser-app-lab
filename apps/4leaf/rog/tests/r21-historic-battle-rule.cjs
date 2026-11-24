@@ -71,7 +71,9 @@ const {chromium,webkit}=require('playwright');
   for(const [id,action,expected] of [['bomb','자폭',true],['flipper','오리발',false]]){
    await page.evaluate(id=>{
     const T=window.__ROG_TEST__,m=T.getMatch();
-    m.players[0].team=['c_0091'];m.players[1].team=['c_0127'];
+    m.players[0].team=id==='flipper'?['c_0096']:['c_0091'];m.players[1].team=['c_0127'];
+    m.attribute='NONE';
+    if(id==='flipper')Math.random=()=>.4; // losing-only original card, 6:12
     m.players[0].position=14;m.players[1].position=14;
     m.players[0].items=[id];m.players[0].usedItem=false;
     m.players[0].effects.destroy=0;m.players[1].effects.block=0;
