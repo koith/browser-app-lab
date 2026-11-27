@@ -37701,6 +37701,42 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 81,
+          "url": "stored-albums/djawa-pop-kitty-party/bcc9df887864f45ed863.jpg",
+          "sha256": "bcc9df887864f45ed8635ef3aec274601c1203ef0c33a8f6d606225567a0965c",
+          "bytes": 33052,
+          "width": 320,
+          "height": 320,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 82,
+          "url": "stored-albums/djawa-pop-kitty-party/9a35a8deb25ee57b128d.jpg",
+          "sha256": "9a35a8deb25ee57b128d64bd1ba48e8d7de5d8825b961b827e7b8f0e3d9cd22e",
+          "bytes": 12597136,
+          "width": 8640,
+          "height": 5760,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 83,
+          "url": "stored-albums/djawa-pop-kitty-party/36e379cc932cf08df8be.jpg",
+          "sha256": "36e379cc932cf08df8beec4acd2ee031a35387d5059f57d9ae4b080e21ad8c65",
+          "bytes": 15907366,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -38601,5 +38637,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3697
+  "physical_verified_image_count": 3700
 }
