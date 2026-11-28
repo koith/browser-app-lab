@@ -273,9 +273,31 @@ jobs:
               echo "::error::New-photo exact-byte reconciliation conflict"
               exit 1
             fi
+            # Compare the rebased tree to main, not the retry checkpoint or
+            # stale pre-rebase parent. Only real gallery changes need a publish.
+            gallery_changed=0
+            if ! git diff --quiet origin/main HEAD -- "apps/$MODEL-gallery/"; then
+              gallery_changed=1
+            fi
             if git push origin HEAD:refs/heads/main; then
               echo "MODEL=$MODEL NEW_VERIFIED_SHA_COMMITTED=yes" >> "$GITHUB_STEP_SUMMARY"
               echo "FULL_COLLECTION_NEW_PHOTO_COMMIT model=$MODEL sha=$(git rev-parse HEAD)"
+              if [ "$gallery_changed" = 1 ]; then
+                # GITHUB_TOKEN pushes do not trigger ordinary push workflows.
+                # Use the existing single-publisher workflow; its successful
+                # completion is the trigger for the deployed real-photo QA.
+                # Never report a successful handoff if dispatch actually failed.
+                for attempt in 1 2 3; do
+                  if gh workflow run static.yml --repo "$GITHUB_REPOSITORY" --ref main; then
+                    echo "GALLERY_PAGES_HANDOFF_REQUESTED model=$MODEL sha=$(git rev-parse HEAD)"
+                    exit 0
+                  fi
+                  sleep "$((attempt * 5))"
+                done
+                echo "::error::Gallery saved, but Pages handoff failed after three attempts"
+                exit 1
+              fi
+              echo "GALLERY_PAGES_HANDOFF_SKIPPED_CHECKPOINT_ONLY model=$MODEL"
               exit 0
             fi
             sleep 3
