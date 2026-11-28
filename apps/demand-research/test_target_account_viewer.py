@@ -183,6 +183,35 @@ def test_unknown_banner_does_not_invent_image_without_saved_bytes(populated):
     assert result==(None,False)
 
 
+def test_profile_image_pointer_requires_readable_sha_verified_bytes(populated, monkeypatch):
+    _client,_root,archive,_name=populated
+    doc=viewer.latest_snapshot(archive,"profile/snapshots",enrich.PROFILE_FILE_RE)
+    original=archive.read_verified
+    calls=[]
+    def missing(key,digest,**kwargs):
+        calls.append((key,digest))
+        return None
+    monkeypatch.setattr(archive,"read_verified",missing)
+    asset,historical=viewer.retained_profile_asset(
+        archive,doc,"banner",verify_bytes=True)
+    assert asset is None and historical is False
+    assert calls and all(key.startswith("profile/assets/") for key,_ in calls)
+    assert viewer.profile_asset_details(doc,asset,historical,"banner")["state"]=="unavailable"
+    monkeypatch.setattr(archive,"read_verified",original)
+    asset,historical=viewer.retained_profile_asset(
+        archive,doc,"banner",verify_bytes=True)
+    assert asset and asset["sha256"]==sha256(BANNER)
+    assert historical is False
+
+
+def test_profile_image_readback_rejects_wrong_length(populated, monkeypatch):
+    _client,_root,archive,_name=populated
+    doc=viewer.latest_snapshot(archive,"profile/snapshots",enrich.PROFILE_FILE_RE)
+    monkeypatch.setattr(archive,"read_verified",lambda *args,**kwargs:b"X")
+    assert viewer.retained_profile_asset(
+        archive,doc,"banner",verify_bytes=True)==(None,False)
+
+
 def test_source_verified_feed_exact_original_range_and_comment_thread(populated):
     client,root,archive,name=populated
     feed=client.get("/api/account-archives/"+name+"/feed?limit=20")
