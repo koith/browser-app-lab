@@ -1,0 +1,43 @@
+{
+  "id": "H03-20261121-artifact-2241",
+  "from": "03",
+  "to": [
+    "00",
+    "05"
+  ],
+  "createdAt": "2026-11-21T22:41:35Z",
+  "taskIds": [
+    "APP-02",
+    "DEP-01"
+  ],
+  "baseRef": "main",
+  "contractVersion": "1.0.0",
+  "status": "review_requested",
+  "summary": "ADR-00-002 raw-byte binding candidate; no release.",
+  "changedFiles": [
+    "app/release-gate.js",
+    "index.html"
+  ],
+  "verification": [
+    {
+      "result": "pass",
+      "scope": "remote readback only",
+      "evidence": "app/release-gate.js and index.html",
+      "revision": "9c958cf5ffe2b3751199d725c6314d830310c9ad / 6289ff32b269501865d08f9a148e8b317d5d5a50"
+    },
+    {
+      "result": "pending",
+      "scope": "runtime, offline, tampering and assessment/audio semantic linkage",
+      "evidence": "05 required",
+      "revision": "6289ff32b269501865d08f9a148e8b317d5d5a50"
+    }
+  ],
+  "requests": [
+    {
+      "to": "05",
+      "action": "Run browser online/offline and malformed digest tests; audit semantic linkage",
+      "acceptance": "Exact revisions; no public approval"
+    }
+  ],
+  "ledgerProposals": []
+}

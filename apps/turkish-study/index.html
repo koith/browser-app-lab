@@ -55,21 +55,28 @@ const SNAPSHOT="turkce120-approved-snapshot-v1", SNAPKEY=new URL("app/release-sn
 async function clearSnapshot(){try{await caches.delete(SNAPSHOT)}catch{}}
 async function loadRelease(){
  const files=["curriculum.json","lessons.json","RELEASE_MANIFEST.json"];
- // Unique request key also prevents the legacy v0.1.0 worker from returning older per-file caches.
  const requestKey=Date.now().toString(36)+Math.random().toString(36).slice(2);
- const responses=await Promise.allSettled(files.map(async f=>fetch(f+"?bundle="+requestKey,{cache:"no-store"})));
- let bundle;
+ const get=async f=>{const r=await fetch(f+"?bundle="+requestKey,{cache:"no-store"});if(!r.ok)throw Error("출고 자료 오류: "+f);return new Uint8Array(await r.arrayBuffer());};
+ const responses=await Promise.allSettled(files.map(get));
+ let raw={},bundle;
  if(responses.every(x=>x.status==="rejected")){
-   const cache=await caches.open(SNAPSHOT), cached=await cache.match(SNAPKEY);
+   const cache=await caches.open(SNAPSHOT),cached=await cache.match(SNAPKEY);
    if(!cached)throw Error("네트워크에 연결해 최신 승인 목록을 확인하세요.");
-   bundle=await cached.json();offlineSnapshot=true;
+   const saved=await cached.json();
+   if(saved.format!==2)throw Error("이전 캐시 승인 검증 불가");
+   for(const f of [...files,...Object.values(approvedArtifactPaths)])if(Array.isArray(saved.raw[f]))raw[f]=Uint8Array.from(saved.raw[f]);
+   offlineSnapshot=true;
  }else{
-   if(responses.some(x=>x.status!=="fulfilled"||!x.value.ok)){await clearSnapshot();throw Error("출고 자료를 확인하지 못했습니다.");}
-   try{bundle=await Promise.all(responses.map(x=>x.value.json()));releaseGate(bundle[2],bundle[0],bundle[1]);}
-   catch(e){await clearSnapshot();throw e;}
-   // Store a single coherent response, not independently refreshed JSON entries.
-   try{const cache=await caches.open(SNAPSHOT);await cache.put(SNAPKEY,new Response(JSON.stringify(bundle),{headers:{"Content-Type":"application/json"}}));}catch{await clearSnapshot();}
+   try{
+     if(responses.some(x=>x.status!=="fulfilled"))throw Error("출고 자료를 확인하지 못했습니다.");
+     files.forEach((f,i)=>raw[f]=responses[i].value);
+     const m=JSON.parse(new TextDecoder("utf-8",{fatal:true}).decode(raw[files[2]]));
+     if(m.publishedDayIds?.length)for(const f of Object.values(approvedArtifactPaths))if(!raw[f])raw[f]=await get(f);
+     bundle=await verifyReleaseBytes(raw[files[2]],raw);
+     try{const cache=await caches.open(SNAPSHOT);await cache.put(SNAPKEY,new Response(JSON.stringify({format:2,raw:Object.fromEntries(Object.entries(raw).map(([k,v])=>[k,Array.from(v)]))}),{headers:{"Content-Type":"application/json"}}));}catch{await clearSnapshot();}
+   }catch(e){await clearSnapshot();throw e;}
  }
+ bundle=bundle||await verifyReleaseBytes(raw[files[2]],raw);
  [curriculum,lessons,releaseManifest]=bundle;
  gate=releaseGate(releaseManifest,curriculum,lessons);ready=true;selected=next();render();
 }
