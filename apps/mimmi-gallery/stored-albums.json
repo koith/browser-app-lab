@@ -3531,6 +3531,18 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 87,
+          "url": "stored-albums/djawa-asuna-the-maid/1af96756cf39f1988b92.jpg",
+          "sha256": "1af96756cf39f1988b92cb39e700eef97285a60dded158e054e3f09d5b511e4c",
+          "bytes": 42109,
+          "width": 320,
+          "height": 320,
+          "origin_page": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -5659,6 +5671,18 @@
           "bytes": 368768,
           "width": 1300,
           "height": 1950,
+          "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 171,
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/ee2e83929dd3535d7d21.jpg",
+          "sha256": "ee2e83929dd3535d7d2148a881f60ad0f16e4d1c7888a1eac02131ff2f5ef375",
+          "bytes": 1045686,
+          "width": 1200,
+          "height": 1800,
           "origin_page": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
@@ -37773,6 +37797,42 @@
           "source_url": "",
           "quality": "direct_public_original_bytes_not_publisher_master_verified",
           "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 87,
+          "url": "stored-albums/djawa-pop-kitty-party/d886d372dffa1c6dff93.jpg",
+          "sha256": "d886d372dffa1c6dff93d2a26b1a9583b5e9c63dfeeddb2ee7a80e770a9a56ad",
+          "bytes": 14357263,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 88,
+          "url": "stored-albums/djawa-pop-kitty-party/76afdf65a539de3f32ca.jpg",
+          "sha256": "76afdf65a539de3f32ca536ec90adb25c77c34c463a775a99382f45635722e48",
+          "bytes": 10640487,
+          "width": 8640,
+          "height": 5760,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
+        },
+        {
+          "number": 89,
+          "url": "stored-albums/djawa-pop-kitty-party/6dbcfa591f9f5f5efb7c.jpg",
+          "sha256": "6dbcfa591f9f5f5efb7cd2beadbe5cba65c9afb05879c07329e46a2ee25ca6d0",
+          "bytes": 10490224,
+          "width": 5760,
+          "height": 8640,
+          "origin_page": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+          "source_url": "",
+          "quality": "direct_public_original_bytes_not_publisher_master_verified",
+          "numbering_provenance": "archive_append_order_not_publisher_number"
         }
       ]
     },
@@ -38673,5 +38733,5 @@
       ]
     }
   ],
-  "physical_verified_image_count": 3703
+  "physical_verified_image_count": 3708
 }
