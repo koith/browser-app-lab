@@ -671,3 +671,53 @@ def test_mastodon_public_history_request_does_not_exclude_reblogs_or_replies():
     assert params.get("exclude_reblogs")!=["true"]
     assert params.get("exclude_replies")!=["true"]
     assert "only_media" not in params
+
+
+def test_mastodon_every_public_media_slot_preserved_even_when_unknown_or_inaccessible():
+    profile={"platform":"mastodon","identity":"mastodon.example:123",
+             "actor":"123","pds":"https://mastodon.example",
+             "profile_url":"https://mastodon.example/@writer"}
+    item={"id":"1001","visibility":"public","sensitive":False,
+          "content":"<p>four declared source attachments</p>",
+          "created_at":"2026-11-16T00:00:00Z",
+          "url":"https://mastodon.example/@writer/1001",
+          "account":{"id":"123","acct":"writer"},
+          "media_attachments":[
+              {"type":"image","url":"https://cdn.example/one.png"},
+              {"type":"unknown","url":"https://cdn.example/two.avif"},
+              {"type":"video","remote_url":"https://cdn.example/three.mp4"},
+              {"type":"image","url":None},
+          ]}
+    record=job.normalize_record(profile,item)
+    assert record is not None
+    assert record["blobs"]==[
+        ("https://cdn.example/one.png",None),
+        ("https://cdn.example/two.avif",None),
+        ("https://cdn.example/three.mp4",None),
+        (None,None)]
+    # The fourth source asset remains explicitly incomplete, even if the
+    # first three bytes are verifiable in an independent archive.
+    class FakePublic:
+        def media(self,url,mime):
+            assert mime is None
+            return "image/png",b"verified-original-"+url.encode()
+    cloud=FakeCloud()
+    archive=job.account_cloud(cloud,profile)
+    saved=job.save_public_record(archive,profile,record,FakePublic())
+    assert saved is None
+    pid=record["id"]
+    assert archive.read("metadata/media-pending/"+pid+".json",optional=True)
+    assert not archive.read("metadata/entries/"+pid+".json",optional=True)
+    assert len(archive.names("metadata/media-parts/"+pid))==3
+
+
+def test_mastodon_nonpublic_attachments_do_not_override_public_source_eligibility():
+    profile={"platform":"mastodon","identity":"mastodon.example:123",
+             "actor":"123","pds":"https://mastodon.example",
+             "profile_url":"https://mastodon.example/@writer"}
+    source={"id":"1001","visibility":"private",
+            "content":"<p>protected</p>","created_at":"2026-11-16T00:00:00Z",
+            "url":"https://mastodon.example/@writer/1001",
+            "account":{"id":"123","acct":"writer"},
+            "media_attachments":[{"url":"https://cdn.example/file.png"}]}
+    assert job.normalize_record(profile,source) is None
