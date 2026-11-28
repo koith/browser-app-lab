@@ -7,11 +7,11 @@
   "activeFocus": "P0-CHAT",
   "counts": {
     "total": 60,
-    "done": 44,
-    "in_progress": 12,
+    "done": 45,
+    "in_progress": 11,
     "todo": 1,
     "review_required": 3,
-    "remaining": 16
+    "remaining": 15
   },
   "openTasks": [
     {
@@ -117,14 +117,6 @@
       "title": "원작 특수칸·이벤트 데이터 검증",
       "status": "review_required",
       "url": "https://github.com/koith/browser-app-lab/issues/1242"
-    },
-    {
-      "id": "RULE-02",
-      "issue": 1243,
-      "priority": "P1",
-      "title": "전투·능력·아이템·라운드 원본 예외처리",
-      "status": "in_progress",
-      "url": "https://github.com/koith/browser-app-lab/issues/1243"
     },
     {
       "id": "SHOP-02",

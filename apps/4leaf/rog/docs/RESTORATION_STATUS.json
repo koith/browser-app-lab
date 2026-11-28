@@ -4,11 +4,11 @@
   "legacyEvidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "counts": {
     "total": 60,
-    "done": 44,
-    "in_progress": 12,
+    "done": 45,
+    "in_progress": 11,
     "todo": 1,
     "review_required": 3,
-    "remaining": 16
+    "remaining": 15
   },
   "tasks": [
     {
@@ -466,8 +466,8 @@
       "issue": 1243,
       "title": "전투·능력·아이템·라운드 원본 예외처리",
       "priority": "P1",
-      "status": "in_progress",
-      "acceptance": "open",
+      "status": "done",
+      "acceptance": "accepted-with-evidence",
       "url": "https://github.com/koith/browser-app-lab/issues/1243"
     },
     {
