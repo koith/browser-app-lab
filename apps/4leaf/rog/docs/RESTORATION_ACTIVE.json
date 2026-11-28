@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "sourceOfTruth": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
   "warning": "Derived index only. Never treat this file as an independent task ledger.",
-  "sourceUpdatedAt": "2026-11-25",
+  "sourceUpdatedAt": "2026-11-28",
   "counts": {
     "total": 60,
-    "done": 49,
-    "in_progress": 10,
+    "done": 50,
+    "in_progress": 9,
     "todo": 1,
     "blocked": 0,
-    "active": 11
+    "active": 10
   },
   "historicalEventsNotDuplicated": 491,
   "active": [
@@ -146,21 +146,6 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39813521946"
       ],
       "lastReviewed": "2026-10-23"
-    },
-    {
-      "id": "RULE-02",
-      "priority": "P1",
-      "title": "전투·능력·아이템·라운드 원본 예외처리",
-      "status": "in_progress",
-      "acceptance": [
-        "샘플 전투 수치·아이템·무승부·중복 효과·탈출/종료 원본 기대값 fixture 전부 통과"
-      ],
-      "currentTail": "… real browser Chromium/WebKit acceptance pending PR #1113, other original 2004 battle/item exception semantics still unverified. | 2026-11-17 #1306/beta.94: 원본 Room CHESSMAN INFO 4칸 실클릭·저장 실패 후 기존 파티 보존·중복 장착 방지·새로고침 유지 Chromium/WebKit 통과. 웹 저장 안전성 보강이며 2004 원작 모든 전투/아이템 예외는 미입증.",
-      "evidence": [
-        "https://github.com/koith/browser-app-lab/pull/1306",
-        "https://github.com/koith/browser-app-lab/actions/runs/44044382651"
-      ],
-      "lastReviewed": "2026-11-17"
     },
     {
       "id": "ACT-05",

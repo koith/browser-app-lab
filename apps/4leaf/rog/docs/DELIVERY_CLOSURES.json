@@ -56,6 +56,17 @@
       "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/45510313962",
       "publicVersion": "0.86.0-beta.102",
       "fullUserFlow": "Real Chromium and WebKit on local and byte-matched live Pages: shop -> select -> buy confirmation -> GP/owned persisted -> sell confirmation -> GP credited -> reload; serial sale 1000 and ordinary sale 25%; storage denied then retry; real era 2002/2004 switch, RARE disabled, equipped sale disabled. Previous original Room actual equip both engines https://github.com/koith/browser-app-lab/actions/runs/44044382651; unchanged selection function."
+    },
+    "RULE-02": {
+      "originalSource": "Original 2004 Destroy 24/Block 24 screenshot https://4leafmemorial.geld.kr/1577; historical retrospective https://seore.org/w/주사위의%20잔영?rev=50 (secondary source).",
+      "renewalSource": "2018 mobile renewal is a distinct game era; no equivalence claimed. Unrecovered original server RNG and complete ability/card chains remain unverified.",
+      "referenceComparison": "Historical source-scoped examples: Destroy/Block 24 cancel, wins 15:3 and losses 6:12, six-step retreat, losing-only Flipper, Change and Bomb consume/save, tie reroll 2:12, global Armageddon and D4 decrement, A/B/C keepers, prison doubles/non-doubles and timed effects. GOAL duplicate award guard is web runtime safety, not a recovered server rule.",
+      "implementedCommit": "e7aef28e87c963a80b2ec9b3b2ebc6e584d01bb2",
+      "chromiumRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/45512870289",
+      "webkitRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/45512870289",
+      "publicRunUrl": "https://github.com/koith/browser-app-lab/actions/runs/45512870289",
+      "publicVersion": "0.86.0-beta.103",
+      "fullUserFlow": "Local and public Chromium + WebKit actual game creation, item selection/use, battle result buttons, prison ROLL, GOAL, saved state. All 3 suites per environment and engine passed in 2026-11-28 rerun, including public app-version.json and game.js/index.html/sw.js/original/chessmen.js byte match. Physical iPhone not tested; source-scoped examples only."
     }
   }
 }
