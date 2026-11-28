@@ -50,12 +50,18 @@ function readState(sel){
  const img=obs;
  const cs=null;
  const native=window.__LEAF_CHR_BODY_MAP__.resolve(card);
+ const rawImg=p.querySelector('img.leaf-chess-original-obs');
+ const held=rawImg?.dataset.obsHeldSource||'';
+ // A WebKit image may still decode while a real, already-decoded frame
+ // belonging to the SAME original CHR is visibly held as CSS background.
+ const heldOwned=Boolean(rawImg&&!rawImg.hidden&&held&&native?.frames?.some(f=>
+   f.url===held)&&getComputedStyle(rawImg).backgroundImage.includes('original/OBS/'));
  return {card,rig:p.dataset.actorRig||null,source:p.dataset.actorSource||null,
   table:p.dataset.sourceActionTable||null,slot:p.dataset.sourceNativeSlot||null,
   seq:(p.dataset.sourceFrameSequence||'').split(',').filter(Boolean).map(Number),
   frame:p.dataset.actorFrame||null,mirror:p.dataset.sourceMirror||null,
   provenance:p.dataset.sourceKeyframeProvenance||null,
-  img:obs,visibleImages:imgs,
+  img:obs,visibleImages:imgs,heldSource:held,heldOwnedOriginalFrame:heldOwned,
   member:native?.originalMember||null,frames:native?.frames?.length||0,
   fallbackNode:imgs.some(i=>/leaf-chess-original-card-fallback|leaf-chess-portrait/.test(i.cls)),
   expectedUrl:native&&Number.isFinite(Number(p.dataset.actorFrame))?(native.frames.find(f=>String(f.index)===p.dataset.actorFrame)?.url||'').replace(/^.*\/original\//,'original/'):null};
@@ -109,7 +115,7 @@ function readState(sel){
     if(ident.recovered){
      if(got.rig!=='original-obs-sprite')rec.defects.push(key+': rig '+got.rig+' although CHR body is recovered');
      if(got.fallbackNode)rec.defects.push(key+': portrait fallback node visible');
-     if(!got.img||!got.img.w)rec.defects.push(key+': no decoded original frame image');
+     if((!got.img||!got.img.w)&&!got.heldOwnedOriginalFrame)rec.defects.push(key+': no decoded or held own original OBS source frame');
      else if(got.expectedUrl&&got.img.src!==got.expectedUrl)rec.defects.push(key+': shows '+got.img.src+' not frame '+got.frame+' of own body');
      const num=m=>String(m||'').match(/(\d{4})\.obs/)?.[1];
      if(got.member&&num(got.member)!==num(ident.member))rec.defects.push(key+': other body '+got.member);
