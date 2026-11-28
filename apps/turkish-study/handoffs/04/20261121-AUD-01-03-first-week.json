@@ -1,0 +1,119 @@
+{
+  "id": "20261121-04-AUD-01-03-first-week",
+  "from": "04",
+  "to": [
+    "00",
+    "02",
+    "03",
+    "05"
+  ],
+  "createdAt": "2026-11-21T17:13:00+09:00",
+  "taskIds": [
+    "AUD-01",
+    "AUD-02",
+    "AUD-03"
+  ],
+  "baseRef": "c9fe8efde6d6e7fd02af8ea93253e1decf4ac01c",
+  "contractVersion": "1.0.0",
+  "status": "review_requested",
+  "summary": "100 local candidate MP3, 1 byte-verified committed sample, matching target snapshot, generator and runtime proposal. No final completion.",
+  "changedFiles": [
+    "audio/manifest.json",
+    "audio/targets-D001-D007.json",
+    "audio/generate.py",
+    "audio/session.mjs",
+    "audio/README.md",
+    "audio/evidence.json",
+    "assets/audio/D004/D004-V3-espeak-trim-v1.mp3",
+    "decisions/proposals/04/ADR-04-001.md",
+    "handoffs/04/20261121-AUD-01-03-first-week.json"
+  ],
+  "verification": [
+    {
+      "result": "pass",
+      "scope": "local format and decode 100/100",
+      "evidence": "audio/evidence.json",
+      "revision": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0"
+    },
+    {
+      "result": "pass",
+      "scope": "isolated JS mock 12/12",
+      "evidence": "audio/evidence.json",
+      "revision": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0"
+    },
+    {
+      "result": "pending",
+      "scope": "independent listening and physical iPhone/PC",
+      "evidence": "audio/README.md",
+      "revision": "d7ace3fb53dcf4c70482250478cf6909e5ee78f0"
+    }
+  ],
+  "requests": [
+    {
+      "to": "00",
+      "action": "Review ADR and partial evidence; keep unpublished; review PR.",
+      "acceptance": "No final completion before 05 and complete assets."
+    },
+    {
+      "to": "02",
+      "action": "Supply final D001-D007 revision; flag changed terms.",
+      "acceptance": "IDs and exact text match."
+    },
+    {
+      "to": "03",
+      "action": "Review proposed session API; integrate only after ADR approval.",
+      "acceptance": "No draft in learner mode; day gate and local recording UI."
+    },
+    {
+      "to": "05",
+      "action": "Regenerate and independently listen to final-source items; verify licensing, sample SHA256 and actual iPhone/PC.",
+      "acceptance": "Per-target correctness, rate/replay, microphone denial/disposal, no uploads."
+    }
+  ],
+  "ledgerProposals": [
+    {
+      "id": "AUD-01",
+      "implementation": "in_progress",
+      "content": "draft",
+      "verification": "partial_mock_and_format_only",
+      "evidence": [
+        "audio/evidence.json",
+        "audio/README.md"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "AUD-02",
+      "implementation": "in_progress",
+      "content": "draft",
+      "verification": "partial_mock_and_format_only",
+      "evidence": [
+        "audio/evidence.json",
+        "audio/README.md"
+      ],
+      "proposedComplete": false
+    },
+    {
+      "id": "AUD-03",
+      "implementation": "in_progress",
+      "content": "draft",
+      "verification": "partial_mock_and_format_only",
+      "evidence": [
+        "audio/evidence.json",
+        "audio/README.md"
+      ],
+      "proposedComplete": false
+    }
+  ],
+  "dependencies": [
+    "CON-01",
+    "APP-01"
+  ],
+  "knownIssues": [
+    "Upload full binary set; text-base64 connector transfer only one sample succeeded.",
+    "Independent listening and native naturalness; especially ı/ö/ü/ğ, stress and questions.",
+    "Physical iPhone Safari, PC microphone/permissions and actual integration.",
+    "Piper/Okur/zerre download blocked by local DNS; no neural synthesis executed.",
+    "02 final revision may change targets."
+  ]
+}
