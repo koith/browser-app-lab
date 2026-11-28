@@ -13,12 +13,18 @@
 // is discarded from the URL immediately and never sent as a query parameter.
 (function(){
   "use strict";
-  if(location.hostname!=="intersection-originals-free.onrender.com"){
+  const params=new URLSearchParams(location.hash.slice(1));
+  const key=params.get("access");
+  // Remove credentials even if a bookmark was opened on the wrong origin.
+  if(params.has("access")){
+    params.delete("access");
+    const rest=params.toString();
+    try{history.replaceState(null,"",location.pathname+location.search+(rest?"#"+rest:""));}
+    catch{window.INTERSECTION_AUTH_READY=Promise.resolve(false);return;}
+  }
+  if(location.origin!=="https://intersection-originals-free.onrender.com"||!key){
     window.INTERSECTION_AUTH_READY=Promise.resolve(false);return;
   }
-  const key=new URLSearchParams(location.hash.slice(1)).get("access");
-  if(!key){window.INTERSECTION_AUTH_READY=Promise.resolve(false);return;}
-  history.replaceState(null,"",location.pathname+location.search);
   window.INTERSECTION_AUTH_READY=(async()=>{
     try{
       const response=await fetch("/api/activate",{
